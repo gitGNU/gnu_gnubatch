@@ -1,0 +1,97 @@
+#! /bin/sh
+#
+#   Copyright 2009 Free Software Foundation, Inc.
+#
+#  This program is free software: you can redistribute it and/or modify
+#  it under the terms of the GNU General Public License as published by
+#  the Free Software Foundation, either version 3 of the License, or
+#  (at your option) any later version.
+#
+#  This program is distributed in the hope that it will be useful,
+#  but WITHOUT ANY WARRANTY; without even the implied warranty of
+#  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#  GNU General Public License for more details.
+#
+#   You should have received a copy of the GNU General Public License
+#  along with this program.  If not, see <http://www.gnu.org/licenses/>.
+#
+# Insert system start for GNU/Linux
+
+. ./Startdirs
+
+if [ ! -d /etc/rc.d ] || [ ! -d /etc/rc.d/init.d ]
+then
+    cat <<EOF
+You do not seem to have a normal startup directory set for GNU/Linux.
+Sorry, but I do not know how to proceed.
+Please can you suggest a fix.
+It may be different on your distribution
+EOF
+else
+    Scriptfile=/etc/rc.d/init.d/gnubatch
+    if [ "$forceme" = "Y" ] || [ ! -f $Scriptfile ]
+    then
+	chkconfig --del gnubatch >/dev/null 2>&1
+
+	cat <<EOF >$Scriptfile
+#!/bin/sh
+#
+# chkconfig: 2345 80 01
+# description: btsched is the scheduler process for GNUbatch
+# processname: btsched
+#
+
+# Source function library.
+. /etc/rc.d/init.d/functions
+
+RETVAL=0
+
+case "\$1" in
+  start)
+	echo -n "Starting $Prodname: "
+	# Delete previous memory-mapped stuff which might have got left behind
+
+	rm -f $BATCHDIR/btmm*	
+
+	# This allocates space for amaximum of 200 jobs and 500 variables
+	# but please adjust as needed
+
+	$USERPATH/gbch-start -j 200 -v 500
+	RETVAL=\$?
+	if [ \$? -eq 0 ]
+	then echo_success
+	else echo_failure
+	fi
+
+	echo
+	;;
+  stop)
+        echo -n "Shutting down $Prodname: "
+	$USERPATH/gbch-quit -y
+	RETVAL=\$?
+	if [ \$? -eq 0 ]
+	then echo_success
+	else echo_failure
+	fi
+	echo
+	;;
+  status)
+	status $Chkconfproc
+	RETVAL=\$?
+	;;
+  restart|reload)
+	\$0 stop
+	\$0 start
+	RETVAL=\$?
+	;;
+*)
+	echo usage: \$0 '{start|stop|restart|reload|status}'
+	;;
+esac
+
+exit \$RETVAL
+EOF
+	chmod 744 $Scriptfile
+	chkconfig --add gnubatch
+    fi
+fi

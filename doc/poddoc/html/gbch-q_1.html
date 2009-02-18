@@ -1,0 +1,280 @@
+<?xml version="1.0" ?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<title>gbch-q - view batch jobs and variables interactively</title>
+<meta http-equiv="content-type" content="text/html; charset=utf-8" />
+<link rev="made" href="mailto:root@localhost" />
+</head>
+
+<body style="background-color: white">
+
+<p><a name="__index__"></a></p>
+<!-- INDEX BEGIN -->
+<!--
+
+<ul>
+
+	<li><a href="#name">NAME</a></li>
+	<li><a href="#synopsis">SYNOPSIS</a></li>
+	<li><a href="#description">DESCRIPTION</a></li>
+	<li><a href="#options">OPTIONS</a></li>
+	<li><a href="#files">FILES</a></li>
+	<li><a href="#environment">ENVIRONMENT</a></li>
+	<li><a href="#see_also">SEE ALSO</a></li>
+	<li><a href="#diagnostics">DIAGNOSTICS</a></li>
+	<li><a href="#copyright">COPYRIGHT</a></li>
+	<li><a href="#author">AUTHOR</a></li>
+</ul>
+-->
+<!-- INDEX END -->
+
+<p>
+</p>
+<h1><a name="name">NAME</a></h1>
+<p>gbch-q - view batch jobs and variables interactively</p>
+<p>
+</p>
+<hr />
+<h1><a name="synopsis">SYNOPSIS</a></h1>
+<p><strong>gbch-q</strong>
+[ <em>-options</em> ]</p>
+<p>
+</p>
+<hr />
+<h1><a name="description">DESCRIPTION</a></h1>
+<p><strong>gbch-q</strong> is an interactive program that allows the user to display in
+real-time state and details of <strong>GNUbatch</strong> jobs and variables on local
+or remote machines, refreshing the screen automatically as the queue
+changes or variables are updated, and allowing the status of jobs and
+variables on the queue to be altered according to each user's
+permissions and privileges.</p>
+<p>For more information about the details of the interactive commands,
+please see the on-line help information, obtained by pressing ?
+(although this may be changed on your site). This section focuses on
+the command-line options which may be used to control the initial
+display.</p>
+<p>
+</p>
+<hr />
+<h1><a name="options">OPTIONS</a></h1>
+<p>Note that the order of treatment, letters and keywords described below
+may be modified by editing the file <em>btrest.help</em> -
+see btsyntax(5).</p>
+<p>The environment variable on which options are supplied is <a href="#item_gbch_q"><code>GBCH_Q</code></a> and the
+environment variable to specify the help file is <a href="#item_btqconf"><code>BTQCONF</code></a>.</p>
+<p>Certain commands available on-screen enable many of these options to
+be changed and saved in configuration files.</p>
+<dl>
+<dt><strong><a name="item__2d_3f_or__2bexplain">-? or +explain</a></strong>
+
+<dd>
+<p>Causes a summary of the other options to be displayed without taking
+further action or entering the interactive display.</p>
+</dd>
+</li>
+<dt><strong><a name="item__2da_or__2bno_2dconfirm_2ddelete">-A or +no-confirm-delete</a></strong>
+
+<dd>
+<p>Suppress confirmation request for delete operations.</p>
+</dd>
+</li>
+<dt><strong><a name="item__2da_or__2bconfirm_2ddelete">-a or +confirm-delete</a></strong>
+
+<dd>
+<p>Ask confirmation of delete operations (this is the default).</p>
+</dd>
+</li>
+<dt><strong><a name="item__2db_or__2bno_2dhelp_2dbox">-B or +no-help-box</a></strong>
+
+<dd>
+<p>Put help messages in inverse video rather than in a box (this is the default).</p>
+</dd>
+</li>
+<dt><strong><a name="item__2db_or__2bhelp_2dbox">-b or +help-box</a></strong>
+
+<dd>
+<p>Put help messages in a box rather than displaying inverse video.</p>
+</dd>
+</li>
+<dt><strong><a name="item__2de_or__2bno_2derror_2dbox">-E or +no-error-box</a></strong>
+
+<dd>
+<p>Put error messages in inverse video rather than in a box.</p>
+</dd>
+</li>
+<dt><strong><a name="item__2de_or__2berror_2dbox">-e or +error-box</a></strong>
+
+<dd>
+<p>Put error messages in a box rather than displaying inverse video.</p>
+</dd>
+</li>
+<dt><strong><a name="item__2dg_group_or__2bjust_2dgroup_group">-g <em>group</em> or +just-group <em>group</em></a></strong>
+
+<dd>
+<p>Restrict the output to jobs owned by the <em>group</em> specified. Cancel
+this argument by giving a single <code>-</code> sign as an argument. The group
+name may be a pattern with shell-like wild cards.</p>
+</dd>
+<dd>
+<p>The wild card options are as described in the documentation of gbch-jlist(1).</p>
+</dd>
+</li>
+<dt><strong><a name="item__2dh_or__2bkeep_2dchar_2dhelp">-H or +keep-char-help</a></strong>
+
+<dd>
+<p>When displaying a help screen, interpret the next key press as a
+command as well as clearing the help screen. This is the default.</p>
+</dd>
+</li>
+<dt><strong><a name="item__2dh_or__2blose_2dchar_2dhelp">-h or +lose-char-help</a></strong>
+
+<dd>
+<p>Discard whatever key press is made to clear a help screen.</p>
+</dd>
+</li>
+<dt><strong><a name="item__2dj_or__2bjobs_2dscreen">-j or +jobs-screen</a></strong>
+
+<dd>
+<p>Commence display in jobs screen. This is the default unless there are
+no jobs to be viewed.</p>
+</dd>
+</li>
+<dt><strong><a name="item__2dl_or__2blocal_2donly">-l or +local-only</a></strong>
+
+<dd>
+<p>Only display jobs local to the machine.</p>
+</dd>
+</li>
+<dt><strong><a name="item__2dn_or__2bfollow_2djob">-N or +follow-job</a></strong>
+
+<dd>
+<p>If a job or variable moves on the screen, try to follow it and do not
+try to retain relative screen positions.</p>
+</dd>
+</li>
+<dt><strong><a name="item__2dq_name_or__2bjob_2dqueue_name">-q <em>name</em> or +job-queue <em>name</em></a></strong>
+
+<dd>
+<p>Restricts attention to jobs with the queue prefix <em>name</em>. Cancel
+this argument by giving a single <code>-</code> sign as an argument. The queue
+name may be a pattern with shell-like wild cards.</p>
+</dd>
+<dd>
+<p>The wild card options are as described in the documentation of gbch-jlist(1).</p>
+</dd>
+<dd>
+<p>The queue prefix is deleted from the titles of jobs which are
+displayed.</p>
+</dd>
+</li>
+<dt><strong><a name="item__2dr_or__2bnetwork_2dwide">-r or +network-wide</a></strong>
+
+<dd>
+<p>Display jobs on all connected hosts.</p>
+</dd>
+</li>
+<dt><strong><a name="item__2ds_or__2bkeep_2dcursor">-s or +keep-cursor</a></strong>
+
+<dd>
+<p>If a job or variable moves on the screen, try to preserve the relative
+position of the cursor on the screen rather than following the job or
+variable.</p>
+</dd>
+</li>
+<dt><strong><a name="item__2du_user_or__2bjust_2duser_user">-u <em>user</em> or +just-user <em>user</em></a></strong>
+
+<dd>
+<p>Restrict the output to jobs owned by the <em>user</em> specified. Cancel
+this argument by giving a <code>-</code> parameter.</p>
+</dd>
+<dd>
+<p>The user name may be a pattern with shell-like wild cards.</p>
+</dd>
+<dd>
+<p>The wild card options are as described in the documentation of gbch-jlist(1).</p>
+</dd>
+</li>
+<dt><strong><a name="item__2dv_or__2bvars_2dscreen">-v or +vars-screen</a></strong>
+
+<dd>
+<p>Commence display in variables screen.</p>
+</dd>
+</li>
+<dt><strong><a name="item__2dz_or__2bno_2dnull_2dqueues">-Z or +no-null-queues</a></strong>
+
+<dd>
+<p>In conjunction with the <strong>-q</strong> parameter, do not include jobs with no
+queue prefix in the list.</p>
+</dd>
+</li>
+<dt><strong><a name="item__2dz_or__2bnull_2dqueues">-z or +null-queues</a></strong>
+
+<dd>
+<p>In conjunction with the <strong>-q</strong> parameter, include jobs with no queue
+prefix in the list.</p>
+</dd>
+</li>
+</dl>
+<p>
+</p>
+<hr />
+<h1><a name="files">FILES</a></h1>
+<p><em>~/.gnubatch</em>
+configuration file (home directory)</p>
+<p><em>.gnubatch</em>
+configuration file (current directory)</p>
+<p><em>btq.help</em>
+message file</p>
+<p>
+</p>
+<hr />
+<h1><a name="environment">ENVIRONMENT</a></h1>
+<dl>
+<dt><strong><a name="item_gbch_q">GBCH_Q</a></strong>
+
+<dd>
+<p>space-separated options to override defaults.</p>
+</dd>
+</li>
+<dt><strong><a name="item_btqconf">BTQCONF</a></strong>
+
+<dd>
+<p>location of alternative help file.</p>
+</dd>
+</li>
+</dl>
+<p>
+</p>
+<hr />
+<h1><a name="see_also">SEE ALSO</a></h1>
+<p>gbch-jlist(1),
+gbch-vlist(1),
+btsyntax(5),</p>
+<p>
+</p>
+<hr />
+<h1><a name="diagnostics">DIAGNOSTICS</a></h1>
+<p>Various diagnostics are read and printed as required from the message
+file  <em>btqq.help</em>.</p>
+<p>Messages about key conflicts are probably because entries in your
+<em>terminfo</em> file contain duplications. Please see the <em>GNUbatch
+Administration Guide</em>.</p>
+<p>
+</p>
+<hr />
+<h1><a name="copyright">COPYRIGHT</a></h1>
+<p>Copyright (c) 2009 Free Software Foundation, Inc.
+This is free software. You may redistribute copies of it under the
+terms of the GNU General Public License
+&lt;http://www.gnu.org/licenses/gpl.html&gt;.
+There is NO WARRANTY, to the extent permitted by law.</p>
+<p>
+</p>
+<hr />
+<h1><a name="author">AUTHOR</a></h1>
+<p>John M Collins, Xi Software Ltd.</p>
+
+</body>
+
+</html>

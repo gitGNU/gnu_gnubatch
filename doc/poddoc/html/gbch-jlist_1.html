@@ -1,0 +1,652 @@
+<?xml version="1.0" ?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<title>gbch-jlist - display lists of batch jobs</title>
+<meta http-equiv="content-type" content="text/html; charset=utf-8" />
+<link rev="made" href="mailto:root@localhost" />
+</head>
+
+<body style="background-color: white">
+
+<p><a name="__index__"></a></p>
+<!-- INDEX BEGIN -->
+<!--
+
+<ul>
+
+	<li><a href="#name">NAME</a></li>
+	<li><a href="#synopsis">SYNOPSIS</a></li>
+	<li><a href="#description">DESCRIPTION</a></li>
+	<li><a href="#options">OPTIONS</a></li>
+	<ul>
+
+		<li><a href="#wild_cards">Wild cards</a></li>
+		<li><a href="#format_codes">Format codes</a></li>
+	</ul>
+
+	<li><a href="#examples">EXAMPLES</a></li>
+	<li><a href="#files">FILES</a></li>
+	<li><a href="#environment">ENVIRONMENT</a></li>
+	<li><a href="#see_also">SEE ALSO</a></li>
+	<li><a href="#diagnostics">DIAGNOSTICS</a></li>
+	<li><a href="#copyright">COPYRIGHT</a></li>
+	<li><a href="#author">AUTHOR</a></li>
+</ul>
+-->
+<!-- INDEX END -->
+
+<p>
+</p>
+<h1><a name="name">NAME</a></h1>
+<p>gbch-jlist - display lists of batch jobs</p>
+<p>
+</p>
+<hr />
+<h1><a name="synopsis">SYNOPSIS</a></h1>
+<p><strong>gbch-jlist</strong>
+[ <em>-options</em> ]
+[ job numbers ]</p>
+<p>
+</p>
+<hr />
+<h1><a name="description">DESCRIPTION</a></h1>
+<p><strong>gbch-jlist</strong> is a program to display a summary of the jobs (or to be
+precise the jobs visible to the user) on the standard output.</p>
+<p>Each line of the output corresponds to a single job, and by default
+the output is generally similar to the default format of the jobs
+screen of the gbch-q(1) command. The first field on each line (unless
+varied as below) is the numeric <em>job number</em> of the job, prefixed by
+a machine name and colon if the job is on a machine other than the one
+<strong>gbch-jlist</strong> is run on, job thus:</p>
+<pre>
+        3493
+        macha:9239
+        machb:19387</pre>
+<p>This is the required format of the job number which should be
+passed to gbch-jdel(1) and gbch-jchange(1).</p>
+<p>Various options allow the user to control the output in various ways
+as described below. The user can limit the output to specific jobs by
+giving the job numbers as additional arguments.</p>
+<p>
+</p>
+<hr />
+<h1><a name="options">OPTIONS</a></h1>
+<p>Note that the order of treatment, letters and keywords described below
+may be modified by editing the file <em>btrest.help</em> -
+see btsyntax(5).</p>
+<p>The environment variable on which options are supplied is <a href="#item_gbch_jlist"><code>GBCH_JLIST</code></a> and the
+environment variable to specify the help file is <a href="#item_btrestconf"><code>BTRESTCONF</code></a>.</p>
+<dl>
+<dt><strong><a name="item__2d_3f_or__2bexplain">-? or +explain</a></strong>
+
+<dd>
+<p>causes a summary of the other options to be displayed without taking
+further action.</p>
+</dd>
+</li>
+<dt><strong><a name="item__2db_or__2bbypass_2dmodes">-B or +bypass-modes</a></strong>
+
+<dd>
+<p>Disregard all modes etc and print full details. This is provided for
+dump/restore scripts. It is only available to users with <em>Write Admin
+File</em> permission, otherwise it is silently ignored. This option is now
+deprecated as gbch-cjlist(8) is now provided for the purpose for which this
+option was implemented.</p>
+</dd>
+</li>
+<dt><strong><a name="item__2dd_or__2bdefault_2dformat">-D or +default-format</a></strong>
+
+<dd>
+<p>Revert the output format to the default format.</p>
+</dd>
+</li>
+<dt><strong><a name="item__2df_format_string_or__2bformat_format_string">-F <em>format string</em> or +format <em>format string</em></a></strong>
+
+<dd>
+<p>Changes the output format to conform to the pattern given by the
+<em>format string</em>. This is further described below.</p>
+</dd>
+</li>
+<dt><strong><a name="item__2dg_group_or__2bjust_2dgroup_group">-g <em>group</em> or +just-group <em>group</em></a></strong>
+
+<dd>
+<p>Restrict the output to jobs owned by the <em>group</em> specified, or groups
+specified with shell-like wild cards as described below. To cancel
+this argument, give a single <strong>-</strong> sign as a group name.</p>
+</dd>
+</li>
+<dt><strong><a name="item__2dh_or__2bheader">-H or +header</a></strong>
+
+<dd>
+<p>Generate a header for each column in the output.</p>
+</dd>
+</li>
+<dt><strong><a name="item__2dl_or__2blocal_2donly">-L or +local-only</a></strong>
+
+<dd>
+<p>Display only jobs local to the current host.</p>
+</dd>
+</li>
+<dt><strong><a name="item__2dl_or__2bno_2dview_2djobs">-l or +no-view-jobs</a></strong>
+
+<dd>
+<p>Cancel the <strong>-V</strong> option and view job parameters rather than job scripts.</p>
+</dd>
+</li>
+<dt><strong><a name="item__2dn_or__2bno_2dheader">-N or +no-header</a></strong>
+
+<dd>
+<p>Cancel the <strong>-H</strong> option. Do not print a header.</p>
+</dd>
+</li>
+<dt><strong><a name="item__2dn_or__2bno_2dsort">-n or +no-sort</a></strong>
+
+<dd>
+<p>Cancel the <strong>-s</strong> option. Do not sort the jobs into the order in which
+they will run.</p>
+</dd>
+</li>
+<dt><strong><a name="item__2dq_name_or__2bjob_2dqueue_name">-q <em>name</em> or +job-queue <em>name</em></a></strong>
+
+<dd>
+<p>Restricts attention to jobs with the queue prefix <em>name</em>. The queue
+may be specified as a pattern with shell-like wild cards as described
+below. To cancel this argument, give a single <strong>-</strong> sign as a queue name.</p>
+</dd>
+<dd>
+<p>The queue prefix is deleted from the titles of jobs which are
+displayed.</p>
+</dd>
+</li>
+<dt><strong><a name="item__2dr_or__2binclude_2dall_2dremotes">-R or +include-all-remotes</a></strong>
+
+<dd>
+<p>displays jobs local to the current host and exported jobs on remote
+machines.</p>
+</dd>
+</li>
+<dt><strong><a name="item__2dr_or__2binclude_2dexec_2dremotes">-r or +include-exec-remotes</a></strong>
+
+<dd>
+<p>displays jobs local to the current host and jobs on remote machines
+which are remote-executable, i.e. which might <em>possibly</em> be executed
+by the current machine.</p>
+</dd>
+</li>
+<dt><strong><a name="item__2ds_or__2bshort_2dtimes">-S or +short-times</a></strong>
+
+<dd>
+<p>Displays times and dates in abbreviated form, i.e. times within the
+next 24 hours as times, otherwise dates. This option is ignored if the
+<strong>-F</strong> option is specified.</p>
+</dd>
+</li>
+<dt><strong><a name="item__2ds_or__2bsort">-s or +sort</a></strong>
+
+<dd>
+<p>causes the output to be sorted so that the jobs whose next execution time
+is soonest comes at the top of the list.</p>
+</dd>
+</li>
+<dt><strong><a name="item__2dt_or__2bfull_2dtimes">-T or +full-times</a></strong>
+
+<dd>
+<p>Displays times and dates in full. This option is ignored if the
+<strong>-F</strong> option is specified.</p>
+</dd>
+</li>
+<dt><strong><a name="item__2du_user__2bjust_2duser_user">-u <em>user</em> +just-user <em>user</em></a></strong>
+
+<dd>
+<p>Restrict the output to jobs owned by the <em>user</em> specified. The user
+name may be a pattern with shell-like wild cards as described
+below. To cancel this argument, give a single <strong>-</strong> sign as a user
+name.</p>
+</dd>
+</li>
+<dt><strong><a name="item__2dv_or__2bview_2djobs">-V or +view-jobs</a></strong>
+
+<dd>
+<p>Do not display job details at all, output the scripts (input to the
+command interpreter) on standard output.</p>
+</dd>
+</li>
+<dt><strong><a name="item__2dz_or__2bno_2dnull_2dqueues">-Z or +no-null-queues</a></strong>
+
+<dd>
+<p>In conjunction with the <strong>-q</strong> parameter, do not include jobs with no
+queue prefix in the list.</p>
+</dd>
+</li>
+<dt><strong><a name="item__2dz_or__2bnull_2dqueues">-z or +null-queues</a></strong>
+
+<dd>
+<p>In conjunction with the <strong>-q</strong> parameter, include jobs with no queue
+prefix in the list.</p>
+</dd>
+</li>
+<dt><strong><a name="item__2bfreeze_2dcurrent">+freeze-current</a></strong>
+
+<dd>
+<p>Save all the current options in a <em>.gnubatch</em> file in the current
+directory with keyword <code>BTJLIST</code>. There is no output if this is
+specified, the options are just saved.</p>
+</dd>
+</li>
+<dt><strong><a name="item__2bfreeze_2dhome">+freeze-home</a></strong>
+
+<dd>
+<p>Save all the current options in a <em>.gnubatch</em> file in the user's home
+directory with keyword <code>BTJLIST</code>. There is no output if this is
+specified, the options are just saved.</p>
+</dd>
+</li>
+</dl>
+<p>
+</p>
+<h2><a name="wild_cards">Wild cards</a></h2>
+<p>Wild cards in queue, user and group name arguments take a format
+similar to the shell.</p>
+<a name="Selection_wild_cards"></a>
+<div style="margin-left:1.0in;">
+<table border=0 cellspacing=1 cellpadding=1 summary="Btjlist matches">
+<tr>
+<td><span class=FileName>*</span></td>
+<td>matches anything</td>
+</tr>
+<tr>
+<td><span class=FileName>?</span></td>
+<td>matches a single character</td>
+</tr>
+<tr>
+<td><span class=FileName>[a-mp-ru]</span></td>
+<td>matches any one character in the range of characters given</td>
+</tr>
+<tr>
+<td><span class=FileName>[!n-z9]</span></td>
+<td>matches any one character not in the range of characters given</td>
+</tr>
+</table>
+</div><p>Alternatives may be included, separated by commas. For example</p>
+<pre>
+        -q 'a*'</pre>
+<p>displays jobs with queue prefixes starting with <code>a</code></p>
+<pre>
+        -q '[p-t]*,*[!h-m]'</pre>
+<p>displays jobs with queue prefixes starting with <code>p</code> to <code>t</code> or ending
+with anything other than <code>h</code> to <code>m</code>.</p>
+<pre>
+        -u jmc,tony</pre>
+<p>displays jobs owned by <code>jmc</code> or <code>tony</code></p>
+<pre>
+        -g 's*'</pre>
+<p>displays jobs owned by groups with names starting <code>s</code>.</p>
+<p>You should always put quotes around arguments containing the wildcard
+characters, to avoid misinterpretation by the shell.</p>
+<p>
+</p>
+<h2><a name="format_codes">Format codes</a></h2>
+<p>The format string consists of a string containing the following
+character sequences, which are replaced by the corresponding job
+parameters. The string may contain various other printing characters
+or spaces as required.</p>
+<p>Each column is padded on the right to the length of the longest
+entry. If a header is requested, the appropriate abbreviation is
+obtained from the message file and inserted.</p>
+<dl>
+<dt><strong><a name="item___">%%</a></strong>
+
+<dd>
+<p>Insert a single <code>%</code> character.</p>
+</dd>
+</li>
+<dt><strong><a name="item__a">%A</a></strong>
+
+<dd>
+<p>Insert the argument list for job separated by commas.</p>
+</dd>
+</li>
+<dt><strong><a name="item__a">%a</a></strong>
+
+<dd>
+<p>Insert the ``days to avoid'' separated by commas.</p>
+</dd>
+</li>
+<dt><strong><a name="item__b">%b</a></strong>
+
+<dd>
+<p>Display job start time or time job last started.</p>
+</dd>
+</li>
+<dt><strong><a name="item__c">%C</a></strong>
+
+<dd>
+<p>Display conditions for job in full, showing operations and constants.</p>
+</dd>
+</li>
+<dt><strong><a name="item__c">%c</a></strong>
+
+<dd>
+<p>Display conditions for job with variable names only.</p>
+</dd>
+</li>
+<dt><strong><a name="item__d">%D</a></strong>
+
+<dd>
+<p>Working directory for job.</p>
+</dd>
+</li>
+<dt><strong><a name="item__d">%d</a></strong>
+
+<dd>
+<p>Delete time for job (in hours).</p>
+</dd>
+</li>
+<dt><strong><a name="item__e">%E</a></strong>
+
+<dd>
+<p>Environment variables for job. Note that this may make the output
+lines extremely long.</p>
+</dd>
+</li>
+<dt><strong><a name="item__e">%e</a></strong>
+
+<dd>
+<p><strong>Export</strong> or <strong>Rem-runnable</strong> for exported jobs.</p>
+</dd>
+</li>
+<dt><strong><a name="item__f">%f</a></strong>
+
+<dd>
+<p>Last time job finished, or blank if it has not run yet.</p>
+</dd>
+</li>
+<dt><strong><a name="item__g">%G</a></strong>
+
+<dd>
+<p>Group owner of job.</p>
+</dd>
+</li>
+<dt><strong><a name="item__g">%g</a></strong>
+
+<dd>
+<p>Grace time for job (time after maximum run time to allow job to finish
+before final kill) in minutes and seconds.</p>
+</dd>
+</li>
+<dt><strong><a name="item__h">%H</a></strong>
+
+<dd>
+<p>Title of job including queue name (unless queue name restricted with
+<strong>-q</strong> option).</p>
+</dd>
+</li>
+<dt><strong><a name="item__h">%h</a></strong>
+
+<dd>
+<p>Title of job excluding queue name.</p>
+</dd>
+</li>
+<dt><strong><a name="item__i">%I</a></strong>
+
+<dd>
+<p>Command interpreter.</p>
+</dd>
+</li>
+<dt><strong><a name="item__i">%i</a></strong>
+
+<dd>
+<p>Process identifier if job running, otherwise blank. This is the
+process identifier on whichever processor is running the job.</p>
+</dd>
+</li>
+<dt><strong><a name="item__k">%k</a></strong>
+
+<dd>
+<p>Kill signal number at end of maximum run time.</p>
+</dd>
+</li>
+<dt><strong><a name="item__l">%L</a></strong>
+
+<dd>
+<p>Load level</p>
+</dd>
+</li>
+<dt><strong><a name="item__l">%l</a></strong>
+
+<dd>
+<p>Maximum run time for job, blank if not set.</p>
+</dd>
+</li>
+<dt><strong><a name="item__m">%M</a></strong>
+
+<dd>
+<p>Mode as a string of letters with <code>U:</code>, <code>G:</code> or <code>O:</code> prefixes as in
+<code>U:RWSMPUVGHDK,G:RSMG,O:SM</code>.</p>
+</dd>
+</li>
+<dt><strong><a name="item__m">%m</a></strong>
+
+<dd>
+<p>Umask as 3 octal digits.</p>
+</dd>
+</li>
+<dt><strong><a name="item__n">%N</a></strong>
+
+<dd>
+<p>Job number, prefixed by host name if remote.</p>
+</dd>
+</li>
+<dt><strong><a name="item__o">%O</a></strong>
+
+<dd>
+<p>Originating host name, possibly different if submitted via gbch-rr(1) or
+the API.</p>
+</dd>
+</li>
+<dt><strong><a name="item__o">%o</a></strong>
+
+<dd>
+<p>Original date or time job submitted.</p>
+</dd>
+</li>
+<dt><strong><a name="item__p">%P</a></strong>
+
+<dd>
+<p>Job progress code, <code>Run</code>, <code>Done</code> etc.</p>
+</dd>
+</li>
+<dt><strong><a name="item__p">%p</a></strong>
+
+<dd>
+<p>Priority.</p>
+</dd>
+</li>
+<dt><strong><a name="item__q">%q</a></strong>
+
+<dd>
+<p>Job queue name.</p>
+</dd>
+</li>
+<dt><strong><a name="item__r">%R</a></strong>
+
+<dd>
+<p>Redirections.</p>
+</dd>
+</li>
+<dt><strong><a name="item__r">%r</a></strong>
+
+<dd>
+<p>Repeat specification.</p>
+</dd>
+</li>
+<dt><strong><a name="item__s">%S</a></strong>
+
+<dd>
+<p>Assignments in full with operator and constant.</p>
+</dd>
+</li>
+<dt><strong><a name="item__s">%s</a></strong>
+
+<dd>
+<p>Assignments (variable names only).</p>
+</dd>
+</li>
+<dt><strong><a name="item__t">%T</a></strong>
+
+<dd>
+<p>Date and time of next execution.</p>
+</dd>
+</li>
+<dt><strong><a name="item__t">%t</a></strong>
+
+<dd>
+<p>Abbreviated date or time if in next 24 hours.</p>
+</dd>
+</li>
+<dt><strong><a name="item__u">%U</a></strong>
+
+<dd>
+<p>User name of owner.</p>
+</dd>
+</li>
+<dt><strong><a name="item__u">%u</a></strong>
+
+<dd>
+<p>Ulimit (hexadecimal).</p>
+</dd>
+</li>
+<dt><strong><a name="item__w">%W</a></strong>
+
+<dd>
+<p>Start time if running, end time if just finished, otherwise next time
+to run.</p>
+</dd>
+</li>
+<dt><strong><a name="item__x">%X</a></strong>
+
+<dd>
+<p>Exit code ranges</p>
+</dd>
+</li>
+<dt><strong><a name="item__x">%x</a></strong>
+
+<dd>
+<p>Last exit code for job.</p>
+</dd>
+</li>
+<dt><strong><a name="item__y">%Y</a></strong>
+
+<dd>
+<p>If ``avoiding holidays'' is set, display holiday dates for the next year.</p>
+</dd>
+</li>
+<dt><strong><a name="item__y">%y</a></strong>
+
+<dd>
+<p>Last signal number for job.</p>
+</dd>
+</li>
+</dl>
+<p>Note that the various strings such as <strong>export</strong> etc are read from the
+message file also, so it is possible to modify them as required by the
+user.</p>
+<p>Only the job number, user, group, originating host and progress fields
+will be non-blank if the user may not read the relevant job. The mode
+field will be blank if the user cannot read the modes.</p>
+<p>The default format is</p>
+<pre>
+        %N %U %H %I %p %L %t %c %P</pre>
+<p>with the (default) <strong>-S</strong> option and</p>
+<pre>
+        %N %U %H %I %p %L %T %c %P</pre>
+<p>with the <strong>-T</strong> option.</p>
+<p>
+</p>
+<hr />
+<h1><a name="examples">EXAMPLES</a></h1>
+<p>The default output might look like this:</p>
+<pre>
+ 15367 jmc  Go-to-optician  memo 150 100  10/08
+ 25874 uucp dba:Admin       sh   150 1000 11:48      Done
+ 25890 uucp dba:Uuclean     sh   150 1000 23:45
+ 25884 uucp dba:Half-hourly sh   150 1000 10:26 Lock
+ 26874 adm</pre>
+<p>If the user does not have <em>read</em> permission on a job, then only
+limited information is displayed.</p>
+<p>This might be limited to a different format with only jobs in queue
+<code>dba</code> as follows:</p>
+<pre>
+        $ gbch-jlist -q dba -Z -H -F &quot;%N %H %P&quot;
+        Jobno Title       Progress
+        25874 Admin       Done
+        25890 Uuclean
+        25884 Half-hourly</pre>
+<p>
+</p>
+<hr />
+<h1><a name="files">FILES</a></h1>
+<p><em>~/.gnubatch</em>
+configuration file (home directory)</p>
+<p><em>.gnubatch</em>
+configuration file (current directory)</p>
+<p><em>btrest.help</em>
+message file</p>
+<p>
+</p>
+<hr />
+<h1><a name="environment">ENVIRONMENT</a></h1>
+<dl>
+<dt><strong><a name="item_gbch_jlist">GBCH_JLIST</a></strong>
+
+<dd>
+<p>space-separated options to override defaults.</p>
+</dd>
+</li>
+<dt><strong><a name="item_btrestconf">BTRESTCONF</a></strong>
+
+<dd>
+<p>location of alternative help file.</p>
+</dd>
+</li>
+</dl>
+<p>
+</p>
+<hr />
+<h1><a name="see_also">SEE ALSO</a></h1>
+<p>btsyntax(5),
+gnubatch.conf(5),
+gnubatch.hosts(5),
+gbch-r(1),
+gbch-rr(1),
+gbch-jchange(1),
+gbch-jdel(1),
+gbch-jstat(1),
+gbch-vlist(1),
+gbch-cjlist(8),
+gbch-cvlist(8).</p>
+<p>
+</p>
+<hr />
+<h1><a name="diagnostics">DIAGNOSTICS</a></h1>
+<p>Various diagnostics are read and printed as required from the message
+file <em>btrest.help</em>.</p>
+<p>
+</p>
+<hr />
+<h1><a name="copyright">COPYRIGHT</a></h1>
+<p>Copyright (c) 2009 Free Software Foundation, Inc.
+This is free software. You may redistribute copies of it under the
+terms of the GNU General Public License
+&lt;http://www.gnu.org/licenses/gpl.html&gt;.
+There is NO WARRANTY, to the extent permitted by law.</p>
+<p>
+</p>
+<hr />
+<h1><a name="author">AUTHOR</a></h1>
+<p>John M Collins, Xi Software Ltd.</p>
+
+</body>
+
+</html>

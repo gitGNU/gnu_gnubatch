@@ -1,0 +1,67 @@
+=head1 NAME
+
+gbatch_holread - read the holiday file
+
+=head1 SYNOPSIS
+
+=for man
+\&\fB#include <gbatch.h>\fR
+.PP
+
+=for html
+<STRONG>#include &lt;gbatch.h&gt;</STRONG>
+<br>
+
+B<int gbatch_holread(const int>
+I<fd>B<, const unsigned>
+I<flags>B<, int>
+I<year>B<, unsigned char *>I<bitmap>B<)>
+
+=head1 DESCRIPTION
+
+The function B<gbatch_holread> is used to read the holiday file for the
+specified year.
+
+I<fd> is a file descriptor which was previously returned by a
+successful call to gbatch_open(3).
+
+I<flags> is currently unused but is reserved for future extensions.
+
+I<year> is the year for which the holiday file is required.  This
+should be the actual number of the year or an offset from 1990.  For
+example the year 1994 could be given as 1994 or 94.  Note: The offset
+value should be less than 200.
+
+I<bitmap> is an array of characters representing the bitmap.  Bits are
+set if the days is a holiday. To test the bitmap use the following
+formula:
+
+ if (bitmap[day >> 3] & (1 << (day & 7)))
+   /*day is holiday*/
+
+=head1 RETURN VALUES
+
+The function returns 0 if successful, otherwise an error code as
+defined in the include file \fBgbatch.h\fR.
+
+=head1 SEE ALSO
+
+gbatch_holupd(3).
+
+=head1 COPYRIGHT
+
+Copyright (c) 2009 Free Software Foundation, Inc.
+This is free software. You may redistribute copies of it under the
+terms of the GNU General Public License
+<http://www.gnu.org/licenses/gpl.html>.
+There is NO WARRANTY, to the extent permitted by law.
+
+=head1 AUTHOR
+
+John M Collins, Xi Software Ltd.
+
+=cut
+
+## Local Variables:
+## mode: nroff
+## End:

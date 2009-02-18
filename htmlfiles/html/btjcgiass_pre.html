@@ -1,0 +1,28 @@
+<!--
+   Copyright 2009 Free Software Foundation, Inc.
+
+  This program is free software: you can redistribute it and/or modify
+  it under the terms of the GNU General Public License as published by
+  the Free Software Foundation, either version 3 of the License, or
+  (at your option) any later version.
+
+  This program is distributed in the hope that it will be useful,
+  but WITHOUT ANY WARRANTY; without even the implied warranty of
+  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+  GNU General Public License for more details.
+
+   You should have received a copy of the GNU General Public License
+  along with this program.  If not, see <http://www.gnu.org/licenses/>.
+  -->	
+<html>
+<head>
+<title>GNUbatch Assignments</title>
+</head>
+<body>
+<h1>Job $Y Assignments</h1>
+<script src="/gbjsfunc.js"></script>
+<form name=js_func_form method=get onSubmit="return gbj_step3(false);">
+<input type=submit name=Clearem value="Clear existing" onClick="return gbj_step3(true);">
+<input type=hidden name=js_itemlist value="$Y">
+<table>
+<script language="JavaScript">

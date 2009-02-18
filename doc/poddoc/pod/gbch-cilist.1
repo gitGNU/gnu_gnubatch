@@ -1,0 +1,103 @@
+=head1 NAME
+
+gbch-cilist - list details of command interpreters
+
+=head1 SYNOPSIS
+
+B<gbch-cilist>
+[ I<-options> ]
+
+=head1 DESCRIPTION
+
+B<gbch-cilist> causes a list of command interpreters, optionally for a
+remote host, to be output on standard output.
+
+=head1 OPTIONS
+
+Note that the order of treatment, letters and keywords described below
+may be modified by editing the file F<btrest.help> - see btsyntax(5).
+
+The environment variable on which options are supplied is C<GBCH_CILIST> and the
+environment variable to specify the help file is C<BTRESTCONF>.
+
+=over 4
+
+=item -? or +explain
+
+causes a summary of the other options to be displayed without taking
+further action.
+
+=item -Q I<host> or +host I<host>
+
+specifies the host name, defaulting to the host being run, for which
+the listing is required.
+
+To cancel a previously-specified host name, use a single minus sign as
+an argument, or the local host name.
+
+=item +freeze-current
+
+Save all the current options in a F<.gnubatch> file in the current
+directory using the keyword C<GBCH_CILIST>. No output will take place is
+this is specified.
+
+=item +freeze-home
+
+Save all the current options in a F<.gnubatch> file in the user's home
+directory using the keyword C<GBCH_CILIST>. No output will take place is
+this is specified.
+
+=back
+
+=head1 FILES
+
+F<~/.gnubatch>
+configuration file (home directory)
+F<.gnubatch>
+configureation file (current directory)
+F<btrest.help>
+message file
+
+=head1 ENVIRONMENT
+
+=over 4
+
+=item GBCH_CILIST
+
+space-separated options to override defaults.
+
+=item BTRESTCONF
+
+location of alternative help file.
+
+=back
+
+=head1 SEE ALSO
+
+btsyntax(5),
+gbch-cichange(1),
+gnubatch.conf(5),
+gnubatch.hosts(5).
+
+=head1 DIAGNOSTICS
+
+Various diagnostics are read and printed as required from the message
+file, by F<btrest.help>.
+
+=head1 COPYRIGHT
+
+Copyright (c) 2009 Free Software Foundation, Inc.
+This is free software. You may redistribute copies of it under the
+terms of the GNU General Public License
+<http://www.gnu.org/licenses/gpl.html>.
+There is NO WARRANTY, to the extent permitted by law.
+
+=head1 AUTHOR
+
+John M Collins, Xi Software Ltd.
+
+=cut
+
+## Local Variables:
+## mode: nroff
+## End:

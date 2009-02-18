@@ -1,0 +1,19 @@
+  Copyright 2009 Free Software Foundation, Inc.
+
+  Copying and distribution of this file, with or without modification,
+  are permitted in any medium without royalty provided the copyright
+  notice and this notice are preserved.
+
+----------------------------------------------------------------------
+
+Manual pages in POD format
+==========================
+
+The manuals are written in Perl POD format and may be converted to
+"man" format or HTML. Use the "pman.sh" script to do this.
+
+Please note many need updating, in many cases to reflect the GNU
+directory standards.
+
+John Collins
+February 2009.

@@ -1,0 +1,28 @@
+GNUbatch Release 0.2
+====================
+
+  Copyright 2009 Free Software Foundation, Inc.
+
+  Copying and distribution of this file, with or without modification,
+  are permitted in any medium without royalty provided the copyright
+  notice and this notice are preserved.
+
+----------------------------------------------------------------------
+
+Startup routine shell scripts.
+
+These shell scripts are intended to aid the insertion of startup
+routines for GNUbatch into the /etc/rc* files for various types of
+machine.
+
+Please choose the script closest to what you want to do.
+
+"configure" sets up "Startdirs" which is "."-ed to give the directories.
+
+If it gets stuck it will just stop.
+
+Please help us by adding and correcting these files as various people
+change their startup files. Thanks!
+
+John Collins
+February 2009

@@ -1,0 +1,63 @@
+MS Windows Sources
+==================
+
+  Copyright 2009 Free Software Foundation, Inc.
+
+  This program is free software: you can redistribute it and/or modify
+  it under the terms of the GNU General Public License as published by
+  the Free Software Foundation, either version 3 of the License, or
+  (at your option) any later version.
+
+  This program is distributed in the hope that it will be useful,
+  but WITHOUT ANY WARRANTY; without even the implied warranty of
+  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+  GNU General Public License for more details.
+
+   You should have received a copy of the GNU General Public License
+  along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+----------------------------------------------------------------------
+
+		Additional notice on Copyrights
+		===============================
+
+Many of these sources were originally produced using MS Visual Studio
+and have to have fixed formats, including those of the comments, as
+the files are semi-automatically generated. Many contain a specific
+injunction not to edit them outside of MS Visual Studio. For this
+reason copyright notices have not been included where there is any
+doubt.
+
+For the avoidance of doubt all the provisions of the above copyright
+notice and the terms of GNU GPL v3 apply to everything in this
+directory and to all subdirectories below it.
+
+----------------------------------------------------------------------
+
+These are actually a working set of programs, written originally for
+MS Visual C++ using MFC in around 1995 together with a version of the
+API library.
+
+MFC is hugely inferior to the standard C++ library in millions of ways
+for standard functions but we won't go into this here.
+
+The original idea is to have BTQW as the client interface to
+view/manage the spool queue, BTRSETW to configure parameters and
+BTRW to submit jobs and accept "dragged" saved jobs. Please see the
+MS Windows Interface manual for how it's supposed to work.
+
+Please can some nice kind person come and recode all this lot,
+preferably stealing the GTK+ code so the interfaces all look the same.
+
+Please note that the original Xi-Batch and xb_* nomenclature has not
+been touched so at the very least the API library needs hacking to
+look like the GNUbatch one.
+
+Also note the need to have special entries on the hosts file on the
+[LU]*x boxes. The gbch-hostedit program knows about this.
+
+Enjoy!
+
+John Collins February 2009
+----------------------------------------------------------------------
+$Id: README,v 1.1 2009/02/18 06:51:33 toadwarble Exp $

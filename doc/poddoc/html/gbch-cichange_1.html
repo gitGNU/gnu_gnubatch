@@ -1,0 +1,277 @@
+<?xml version="1.0" ?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<title>gbch-cichange - add/delete/change details of a command interpreter.</title>
+<meta http-equiv="content-type" content="text/html; charset=utf-8" />
+<link rev="made" href="mailto:root@localhost" />
+</head>
+
+<body style="background-color: white">
+
+<p><a name="__index__"></a></p>
+<!-- INDEX BEGIN -->
+<!--
+
+<ul>
+
+	<li><a href="#name">NAME</a></li>
+	<li><a href="#synopsis">SYNOPSIS</a></li>
+	<li><a href="#description">DESCRIPTION</a></li>
+	<li><a href="#options">OPTIONS</a></li>
+	<li><a href="#files">FILES</a></li>
+	<li><a href="#environment">ENVIRONMENT</a></li>
+	<li><a href="#examples">EXAMPLES</a></li>
+	<li><a href="#see_also">SEE ALSO</a></li>
+	<li><a href="#diagnostics">DIAGNOSTICS</a></li>
+	<li><a href="#copyright">COPYRIGHT</a></li>
+	<li><a href="#author">AUTHOR</a></li>
+</ul>
+-->
+<!-- INDEX END -->
+
+<p>
+</p>
+<h1><a name="name">NAME</a></h1>
+<p>gbch-cichange - add/delete/change details of a command interpreter.</p>
+<p>
+</p>
+<hr />
+<h1><a name="synopsis">SYNOPSIS</a></h1>
+<p><strong>gbch-cichange</strong>
+[ <em>-options</em> ]
+<em>name</em></p>
+<p>
+</p>
+<hr />
+<h1><a name="description">DESCRIPTION</a></h1>
+<p><strong>gbch-cichange</strong> is a shell-level command to create, delete or change
+details of a command interpreter according to the options
+specified. Only one command interpreter may be operated upon at a
+time.</p>
+<p>The command interpreter in question is that given by the final
+argument <em>name</em> to the command.</p>
+<p>The user must have <em>special create permission</em> to operate this
+command - see gbch-user(1).</p>
+<p>
+</p>
+<hr />
+<h1><a name="options">OPTIONS</a></h1>
+<p>Note that the order of treatment, letters and keywords described below
+may be modified by editing the file <em>btrest.help</em> -
+see btsyntax(5).</p>
+<p>The environment variable on which options are supplied is
+<a href="#item_gbch_cichange"><code>GBCH_CICHANGE</code></a> and the environment variable to specify the help file is
+<a href="#item_btrestconf"><code>BTRESTCONF</code></a>.</p>
+<dl>
+<dt><strong><a name="item__2d_3f_or__2bexplain">-? or +explain</a></strong>
+
+<dd>
+<p>causes a summary of the other options to be displayed without taking
+further action.</p>
+</dd>
+</li>
+<dt><strong><a name="item__2da_or__2badd">-A or +add</a></strong>
+
+<dd>
+<p>The command interpreter whose name and details are given with the
+other options is to be added.</p>
+</dd>
+</li>
+<dt><strong><a name="item__2da_args_or__2bargs_args">-a <em>args</em> or +args <em>args</em></a></strong>
+
+<dd>
+<p>Set the ``predefined argument list'' to be that given by <em>args</em>. This
+replaces any existing predefined arguments. Supply an empty string
+with <code>&quot;&quot;</code> to delete all arguments.</p>
+</dd>
+<dd>
+<p>Almost invariably with shells, the <code>-s</code> option should be supplied as
+a predefined argument. This will cause the ``real'' arguments supplied
+by the job, e.g. with the <strong>-a</strong> option to gbch-r(1), which follow the
+predefined arguments, to be treated as strings and not the names of
+files.</p>
+</dd>
+</li>
+<dt><strong><a name="item__2dd_or__2bdelete">-D or +delete</a></strong>
+
+<dd>
+<p>The specified command interpreter is to be deleted. Note that the
+first entry on the list, which is initialised on installation to be
+the Bourne shell <code>sh</code>, cannot be deleted.</p>
+</dd>
+<dd>
+<p><strong>N.B. This is not subject to extensive checking to ensure that no job
+currently uses the specified command interpreter, so please check
+first.</strong></p>
+</dd>
+</li>
+<dt><strong><a name="item__2de_or__2bexpand_2dargs">-e or +expand-args</a></strong>
+
+<dd>
+<p>Expand <code>$</code>-prefixed environment variables, <code>~user</code> and backquote
+constructs in job argument strings before invoking the command
+interpreter, rather than relying upon the command interpreter to do
+it.</p>
+</dd>
+</li>
+<dt><strong><a name="item__2di_or__2bset_2darg0_2dname">-i or +set-arg0-name</a></strong>
+
+<dd>
+<p>Argument 0 of the job, often displayed as the process name, is the
+name of the command interpreter. This is the default.</p>
+</dd>
+</li>
+<dt><strong><a name="item__2dl_number_or__2bload_2dlevel_number">-L <em>number</em> or +load-level <em>number</em></a></strong>
+
+<dd>
+<p>Set the load level to <em>number</em> to be the default for new jobs created
+with this command interpreter. The default for new command
+interpreters if this option is not given is the <em>special create load
+level</em> given in the user's profile as displayed by gbch-user(1).</p>
+</dd>
+<dd>
+<p>Remember that this load level must be less than or equal to a user's
+maximum load level per job to make use of this.</p>
+</dd>
+</li>
+<dt><strong><a name="item__2dn_number_or__2bnice_number">-N <em>number</em> or +nice <em>number</em></a></strong>
+
+<dd>
+<p>Set the <code>nice(2)</code> value to <em>number</em>.</p>
+</dd>
+</li>
+<dt><strong><a name="item__2dn_name_or__2bnew_2dname_name">-n <em>name</em> or +new-name <em>name</em></a></strong>
+
+<dd>
+<p>Supply a new name <em>name</em> for an existing command interpreter. <strong>N.B. Beware
+that existing jobs referring to the old name will not be checked for
+or changed.</strong></p>
+</dd>
+</li>
+<dt><strong><a name="item__2dp_pathname_or__2bpath_pathname">-p <em>pathname</em> or +path <em>pathname</em></a></strong>
+
+<dd>
+<p>Set the path <em>pathname</em> to be the process invoked as the command
+interpreter. Note that <strong>gbch-cichange</strong> does not attempt to verify the
+accuracy of this path name. Environment variables etc are not expanded
+here, the full path name (starting from <code>/</code>) should be given.</p>
+</dd>
+</li>
+<dt><strong><a name="item__2dt_or__2bset_2darg0_2dtitle">-t or +set-arg0-title</a></strong>
+
+<dd>
+<p>Set the flag whereby the process name (or 0th argument) to the command
+interpreter becomes the job title.</p>
+</dd>
+</li>
+<dt><strong><a name="item__2du_or__2bupdate">-U or +update</a></strong>
+
+<dd>
+<p>The specified command interpreter is to have details changed as
+specified. This is the default in the absence of other options.</p>
+</dd>
+</li>
+<dt><strong><a name="item__2du_or__2bno_2dexpand_2dargs">-u or +no-expand-args</a></strong>
+
+<dd>
+<p>Turn off expansion of environment variables, <code>~name</code> constructs and
+backquote commands.</p>
+</dd>
+</li>
+<dt><strong><a name="item__2bfreeze_2dcurrent">+freeze-current</a></strong>
+
+<dd>
+<p>Save all the current options in a <em>.gnubatch</em> file in the current
+directory with keyword <a href="#item_gbch_cichange"><code>GBCH_CICHANGE</code></a>. The program will exit without
+error if no command interpreter argument is given.</p>
+</dd>
+</li>
+<dt><strong><a name="item__2bfreeze_2dhome">+freeze-home</a></strong>
+
+<dd>
+<p>Save all the current options in a <em>.gnubatch</em> file in the user's home
+directory with keyword <a href="#item_gbch_cichange"><code>GBCH_CICHANGE</code></a>. The program will exit without
+error if no command interpreter argument is given.</p>
+</dd>
+</li>
+</dl>
+<p>
+</p>
+<hr />
+<h1><a name="files">FILES</a></h1>
+<p><em>~/.gnubatch</em>
+configuration file (home directory)
+<em>.gnubatch</em>
+configureation file (current directory)
+<em>btrest.help</em>
+message file</p>
+<p>
+</p>
+<hr />
+<h1><a name="environment">ENVIRONMENT</a></h1>
+<dl>
+<dt><strong><a name="item_gbch_cichange">GBCH_CICHANGE</a></strong>
+
+<dd>
+<p>space-separated options to override defaults.</p>
+</dd>
+</li>
+<dt><strong><a name="item_btrestconf">BTRESTCONF</a></strong>
+
+<dd>
+<p>location of alternative help file.</p>
+</dd>
+</li>
+</dl>
+<p>
+</p>
+<hr />
+<h1><a name="examples">EXAMPLES</a></h1>
+<p>To change the nice value, load level and to specify that the job title
+will become the process name for jobs running under the <code>sh</code> command
+interpreter:</p>
+<pre>
+        gbch-cichange -N 22 -L 500 -t sh</pre>
+<p>To add a new command interpreter using the Korn shell with the <strong>-s</strong>
+option:</p>
+<pre>
+        gbch-cichange -A -N 25 -L 1500 -p /bin/ksh -a '-s' ksh</pre>
+<p>The quotes around <code>-s</code> are not necessary in this case, only if spaces
+are included.</p>
+<p>To change the name to <code>korn</code></p>
+<pre>
+        gbch-cichange -n korn ksh</pre>
+<p>
+</p>
+<hr />
+<h1><a name="see_also">SEE ALSO</a></h1>
+<p>btsyntax(5),
+gbch-cilist(1),
+gbch-user(1),
+gnubatch.conf(5),
+gnubatch.hosts(5).</p>
+<p>
+</p>
+<hr />
+<h1><a name="diagnostics">DIAGNOSTICS</a></h1>
+<p>Various diagnostics are read and printed as required from the message
+file, <em>btrest.help</em>.</p>
+<p>
+</p>
+<hr />
+<h1><a name="copyright">COPYRIGHT</a></h1>
+<p>Copyright (c) 2009 Free Software Foundation, Inc.
+This is free software. You may redistribute copies of it under the
+terms of the GNU General Public License
+&lt;http://www.gnu.org/licenses/gpl.html&gt;.
+There is NO WARRANTY, to the extent permitted by law.</p>
+<p>
+</p>
+<hr />
+<h1><a name="author">AUTHOR</a></h1>
+<p>John M Collins, Xi Software Ltd.</p>
+
+</body>
+
+</html>

@@ -1,0 +1,527 @@
+<?xml version="1.0" ?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<title>gbch-filemon - monitor for changes to files</title>
+<meta http-equiv="content-type" content="text/html; charset=utf-8" />
+<link rev="made" href="mailto:root@localhost" />
+</head>
+
+<body style="background-color: white">
+
+<p><a name="__index__"></a></p>
+<!-- INDEX BEGIN -->
+<!--
+
+<ul>
+
+	<li><a href="#name">NAME</a></li>
+	<li><a href="#synopsis">SYNOPSIS</a></li>
+	<li><a href="#description">DESCRIPTION</a></li>
+	<li><a href="#options">OPTIONS</a></li>
+	<ul>
+
+		<li><a href="#file_matching">File matching</a></li>
+		<li><a href="#criteria">Criteria</a></li>
+		<li><a href="#preexisting_files">Pre-existing files</a></li>
+		<li><a href="#recursive_searches">Recursive searches</a></li>
+	</ul>
+
+	<li><a href="#examples">EXAMPLES</a></li>
+	<li><a href="#files">FILES</a></li>
+	<li><a href="#environment">ENVIRONMENT</a></li>
+	<li><a href="#diagnostics">DIAGNOSTICS</a></li>
+	<li><a href="#copyright">COPYRIGHT</a></li>
+	<li><a href="#author">AUTHOR</a></li>
+</ul>
+-->
+<!-- INDEX END -->
+
+<p>
+</p>
+<h1><a name="name">NAME</a></h1>
+<p>gbch-filemon - monitor for changes to files</p>
+<p>
+</p>
+<hr />
+<h1><a name="synopsis">SYNOPSIS</a></h1>
+<p><strong>gbch-filemon</strong>
+[ <em>-options</em> ]</p>
+<p>
+</p>
+<hr />
+<h1><a name="description">DESCRIPTION</a></h1>
+<p><strong>gbch-filemon</strong> executes a given program or script when specified files
+change in specified ways in a specified directory.</p>
+<p>It is intentionally not integrated with the <strong>GNUbatch</strong> core product,
+as there is no automatic mechanism within Unix for signalling changes
+to files, and it is therefore necessary to ``poll'' or monitor the files
+aaat a given interval. <strong>gbch-filemon</strong> is made as small as possible so
+that the ``polling'' does not have a large impact on the system.</p>
+<p>The rest of <strong>GNUbatch</strong> is made to be ``event-driven'', as this has
+minimal impact on the system when the product is inactive.</p>
+<p>The ``action'' of <strong>gbch-filemon</strong> may be to run a <strong>GNUbatch</strong> job, set a
+variable, or perform some completely unrelated task.</p>
+<p><strong>Gbch-filemon</strong> may optionally be used to list or terminate running
+copies of itself.</p>
+<p>
+</p>
+<hr />
+<h1><a name="options">OPTIONS</a></h1>
+<p>The GTK program gbch-xfilemon(1) or the X/Motif program
+gbch-xmfilemon(1) may be used to set up the options to and run
+<strong>gbch-filemon</strong> rather than remembering them here.</p>
+<p>Note that the order of treatment, letters and keywords described below
+may be modified by editing the file <em>filemon.help</em> -
+see btsyntax(5).</p>
+<p>The environment variable on which options are supplied is <a href="#item_gbch_filemon"><code>GBCH_FILEMON</code></a>
+and the environment variable to specify the help file is <a href="#item_filemonconf"><code>FILEMONCONF</code></a>.</p>
+<dl>
+<dt><strong><a name="item__2d_3f_or__2bexplain">-? or +explain</a></strong>
+
+<dd>
+<p>causes a summary of the other options to be displayed without taking
+further action.</p>
+</dd>
+</li>
+<dt><strong><a name="item__2da_or__2bfile_2darrives">-A or +file-arrives</a></strong>
+
+<dd>
+<p>Perform the required action when a new file is detected in the
+directory.</p>
+</dd>
+</li>
+<dt><strong><a name="item__2da_or__2bany_2dfile">-a or +any-file</a></strong>
+
+<dd>
+<p>Perform the required action for any file name.</p>
+</dd>
+</li>
+<dt><strong><a name="item__2dc_or__2bcontinue_2drunning">-C or +continue-running</a></strong>
+
+<dd>
+<p>Continue <strong>gbch-filemon</strong> after a matching file and condition has been
+found, looking for further files.</p>
+</dd>
+</li>
+<dt><strong><a name="item__2dc_command">-c <em>command</em></a></strong>
+
+<dd>
+<p>Specify <em>command</em> to execute when one of the monitored events
+occurs. This is an alternative to <strong>-X</strong>, which runs a named shell
+script.</p>
+</dd>
+<dd>
+<p>In the <em>command</em> the sequence <strong>%f</strong> is replaced by the name of the
+file whose activity has provoked the action, and <strong>%d</strong> by the
+directory.</p>
+</dd>
+<dd>
+<p>To use this option, be sure to enclose the whole shell command in
+quotes so that it is passed as one argument, thus:</p>
+</dd>
+<dd>
+<pre>
+ -c &quot;xmessage -bg red 'Found %f'&quot;</pre>
+</dd>
+</li>
+<dt><strong><a name="item__2dd_dir_or__2bdirectory_dir">-D <em>dir</em> or +directory <em>dir</em></a></strong>
+
+<dd>
+<p>Specify the given <em>dir</em> as the directory to monitor rather than the
+current directory.</p>
+</dd>
+</li>
+<dt><strong><a name="item__2dd_or__2bdaemon_2dprocess">-d or +daemon-process</a></strong>
+
+<dd>
+<p>Detach a futher <strong>gbch-filemon</strong> as a daemon process, and return to the
+user.</p>
+</dd>
+</li>
+<dt><strong><a name="item__2de_or__2binclude_2dexisting">-e or +include-existing</a></strong>
+
+<dd>
+<p>Include existing files in the scan, and report changes etc to
+those. If the <strong>-A</strong> option (watch for file arriving), this will have
+no effect unless an existing file is deleted and is recreated.</p>
+</dd>
+</li>
+<dt><strong><a name="item__2dg_secs_or__2bfile_2dstops_2dgrowing_secs">-G <em>secs</em> or +file-stops-growing <em>secs</em></a></strong>
+
+<dd>
+<p>Activate command when a file has appeared, and has not grown further
+for at least <em>secs</em>. Distinguish this from the <strong>-M</strong> option, which
+will check for any change, possibly in the middle of a file.</p>
+</dd>
+</li>
+<dt><strong><a name="item__2di_secs_or__2bfile_2dstops_2dchanging_secs">-I <em>secs</em> or +file-stops-changing <em>secs</em></a></strong>
+
+<dd>
+<p>Activate command when a file has appeared, and has not been changed
+for at least <em>secs</em>. This is more inclusive than <strong>-M</strong>, as it
+includes activities such as changing the ownership or mode of the
+file, or making hard links.</p>
+</dd>
+</li>
+<dt><strong><a name="item__2di_or__2bignore_2dexisting">-i or +ignore-existing</a></strong>
+
+<dd>
+<p>Ignore existing files (default). However if an existing file is noted
+to have been deleted, and then re-created, the new version will be
+treated as a new file.</p>
+</dd>
+</li>
+<dt><strong><a name="item__2dk_or__2bkill_2dall">-K or +kill-all</a></strong>
+
+<dd>
+<p>Kill all <strong>gbch-filemon</strong> daemon processes belonging to the user, or all
+processes if invoked by <code>root</code>.</p>
+</dd>
+</li>
+<dt><strong><a name="item__2dk_dir_or__2bkill_2dprocesses_dir">-k <em>dir</em> or +kill-processes <em>dir</em></a></strong>
+
+<dd>
+<p>Kill any <strong>gbch-filemon</strong> daemon processes left running which are scanning
+the given directory. Processes must belong to the invoking user, or
+<strong>gbch-filemon</strong> be invoked by <code>root</code>.</p>
+</dd>
+</li>
+<dt><strong><a name="item__2dl_or__2bfollow_2dlinks">-L or +follow-links</a></strong>
+
+<dd>
+<p>Follow symbolic links to files (and subdirectories with the <strong>-R</strong>
+option).</p>
+</dd>
+</li>
+<dt><strong><a name="item__2dl_or__2blist_2dprocesses">-l or +list-processes</a></strong>
+
+<dd>
+<p>List running <strong>gbch-filemon</strong> processes and which directories they are
+accessing.</p>
+</dd>
+</li>
+<dt><strong><a name="item__2dm_secs_or__2bfile_2dstops_2dwriting_secs">-M <em>secs</em> or +file-stops-writing <em>secs</em></a></strong>
+
+<dd>
+<p>Activate command when a file has appeared, and has not been written to
+for at least <em>secs</em>.  This is more inclusive than B-G&gt;, as it
+includes writes other than to the end of the file. It is less
+inclusive than <strong>-I</strong>, which also monitors for linking and
+permission-changing.</p>
+</dd>
+</li>
+<dt><strong><a name="item__2dm_or__2brun_2dmonitor">-m or +run-monitor</a></strong>
+
+<dd>
+<p>Run as a file monitor program (default) rather than <strong>-l</strong>, <strong>-k</strong> or
+<strong>-K</strong>.</p>
+</dd>
+</li>
+<dt><strong><a name="item__2dn_or__2bnot_2ddaemon">-n or +not-daemon</a></strong>
+
+<dd>
+<p>Do not detach <strong>gbch-filemon</strong> as a daemon process (default), wait and
+only return to the user when a file event has been detected.</p>
+</dd>
+</li>
+<dt><strong><a name="item__2dp_secs_or__2bpoll_2dtime_secs">-P <em>secs</em> or +poll-time <em>secs</em></a></strong>
+
+<dd>
+<p>Poll directory every <em>secs</em> seconds. This should be sufficiently
+small not to ``miss'' events for a long time, but large enough to not
+load the system. The default if this is not specified is 20 seconds.</p>
+</dd>
+</li>
+<dt><strong><a name="item__2dp_pattern_or__2bpattern_2dfile_pattern">-p <em>pattern</em> or +pattern-file <em>pattern</em></a></strong>
+
+<dd>
+<p>Perform action on a file name matching <em>pattern</em>.</p>
+</dd>
+<dd>
+<p><em>Pattern</em> may take the form of wild-card matching given by the shell,
+with <code>*</code>, <code>?</code>, <code>[a-z]</code>, <code>[!a-z]</code> having the same meanings as with
+the shell, and possible alternative patterns separated by commas, for
+example:</p>
+</dd>
+<dd>
+<pre>
+ -p '*.[chyl],*.obj'</pre>
+</dd>
+<dd>
+<p>Remember to enclose the argument in quotes so that it is interpreted
+by <strong>gbch-filemon</strong> and not the shell.</p>
+</dd>
+</li>
+<dt><strong><a name="item__2dr_or__2brecursive">-R or +recursive</a></strong>
+
+<dd>
+<p>Recursively follow subdirectories of the starting directory.</p>
+</dd>
+</li>
+<dt><strong><a name="item__2dr_or__2bfile_2ddeleted">-r or +file-deleted</a></strong>
+
+<dd>
+<p>Perform action when a file matching the criteria has been deleted.</p>
+</dd>
+</li>
+<dt><strong><a name="item__2ds_or__2bhalt_2dwhen_2dfound">-S or +halt-when-found</a></strong>
+
+<dd>
+<p>Halt <strong>gbch-filemon</strong> once a matching file and condition has been found.</p>
+</dd>
+</li>
+<dt><strong><a name="item__2ds_file_or__2bspecific_2dfile_file">-s <em>file</em> or +specific-file <em>file</em></a></strong>
+
+<dd>
+<p>Perform action only with a specific named file, not a pattern.</p>
+</dd>
+</li>
+<dt><strong><a name="item__2du_secs_or__2bfile_2dstops_2duse_secs">-u <em>secs</em> or +file-stops-use <em>secs</em></a></strong>
+
+<dd>
+<p>Perform action when a file has appeared, and has not been read
+for at least <em>secs</em>.</p>
+</dd>
+</li>
+<dt><strong><a name="item__2dx_script">-X <em>script</em></a></strong>
+
+<dd>
+<p>Specify the given <em>script</em> as a shell script to execute when one of
+the monitored events occurs. This is an alternative to <strong>-c</strong>. The
+existence of the shell script is checked, and <strong>gbch-filemon</strong> will fail
+with an error message if it does not exist.</p>
+</dd>
+<dd>
+<p>The shell script is passed the following arguments:</p>
+</dd>
+<ol>
+<li>
+<p>File name</p>
+</li>
+<li>
+<p>Directory path</p>
+</li>
+<li>
+<p>File size (or last file size if file deleted).</p>
+</li>
+<li>
+<p>Date of file modification, change or access as YYYY/MM/DD, but only
+for those type of changes.</p>
+</li>
+<li>
+<p>Time of file modification, change or access as HH:MM:SS, but only
+for those type of changes.</p>
+</li>
+</ol>
+<dt><strong><a name="item__2bfreeze_2dcurrent">+freeze-current</a></strong>
+
+<dd>
+<p>Save all the current options in a <em>.gnubatch</em> file in the current
+directory with keyword <code>BTFILEMON</code>. If this is specified,
+<strong>gbch-filemon</strong> will terminate after saving the file.</p>
+</dd>
+</li>
+<dt><strong><a name="item__2bfreeze_2dhome">+freeze-home</a></strong>
+
+<dd>
+<p>Save all the current options in a <em>.gnubatch</em> file in the user's home
+directory. If this is specified, <strong>gbch-filemon</strong> will terminate after
+saving the file.</p>
+</dd>
+</li>
+</dl>
+<p>
+</p>
+<h2><a name="file_matching">File matching</a></h2>
+<p>What to look for may be made to depend upon something happening to</p>
+<dl>
+<dt><strong><a name="item_any_file">Any file</a></strong>
+
+<dd>
+<p>With the <strong>-a</strong> option. Any file that meets the other criteria will
+trigger the event.</p>
+</dd>
+</li>
+<dt><strong><a name="item_specific_file">Specific file</a></strong>
+
+<dd>
+<p>With the <strong>-s</strong> option, <strong>gbch-filemon</strong> will watch for the specific file
+named.</p>
+</dd>
+</li>
+<dt><strong><a name="item_pattern">Pattern</a></strong>
+
+<dd>
+<p>With the <strong>-p</strong> option, a file which matches the pattern and the other
+criteria will trigger the action.</p>
+</dd>
+</li>
+</dl>
+<p>
+</p>
+<h2><a name="criteria">Criteria</a></h2>
+<p>There are 6 criteria to watch for.</p>
+<dl>
+<dt><strong><a name="item_file_arriving">File arriving</a></strong>
+
+<dd>
+<p>This is probably the most common case. If you want to wait for a file
+being written and trigger an event, the <strong>-A</strong> option will look for
+this.</p>
+</dd>
+</li>
+<dt><strong><a name="item_file_removal">File removal</a></strong>
+
+<dd>
+<p>This will watch for files being deleted, for example some applications
+use a ``lock file'' to denote that they are being run, and you might
+wish to start something else when it has gone.</p>
+</dd>
+<dd>
+<p>Remember that you might want to include existing files in the scan
+with <strong>-e</strong> if the file in question existed when you started
+<strong>gbch-filemon</strong>.</p>
+</dd>
+</li>
+<dt><strong><a name="item_file_stopped_growing">File stopped growing</a></strong>
+
+<dd>
+<p>What this watches for is for a file being having been created, or with
+the <strong>-e</strong> option starting to ``grow'', and then apparently no longer
+grown for the given time.</p>
+</dd>
+<dd>
+<p>If files are arriving from FTP, for example, then when they are
+complete, they will cease to ``grow'' in size.</p>
+</dd>
+</li>
+<dt><strong><a name="item_file_no_longer_written">File no longer written</a></strong>
+
+<dd>
+<p>A file not used sequentially may be written to internally rather than
+have additional data appended. This often occurs with database files,
+where records are updated somewhere in the middle of the file. If a
+series of database transactions is made and then completed, the file
+will no longer be written to for some time, and <strong>gbch-filemon</strong> can be
+made to trigger an action after that time.</p>
+</dd>
+<dd>
+<p>You will often want to include the <strong>-e</strong> option if the file existed
+already on entry.</p>
+</dd>
+</li>
+<dt><strong><a name="item_file_no_longer_changed">File no longer changed</a></strong>
+
+<dd>
+<p>This goes a stage further than ``no longer written'' as it includes any
+kind of change to the file, such as permissions, owner, hard links or
+change of access and write times.</p>
+</dd>
+</li>
+<dt><strong><a name="item_file_no_longer_used">File no longer used</a></strong>
+
+<dd>
+<p>This monitors the access time of the file, updated whenever the file
+is read, and proceeds when this has gone unchanged for the specified
+time.</p>
+</dd>
+<dd>
+<p>You will often want to include the <strong>-e</strong> option with this if the file
+existed already on entry.</p>
+</dd>
+</li>
+</dl>
+<p>
+</p>
+<h2><a name="preexisting_files">Pre-existing files</a></h2>
+<p>If the <strong>-i</strong> (ignore existing) option is specified, which is the
+default, then no changes to existing files which would otherwise match
+the criteria will be considered, except where an existing file is
+deleted and then recreated and <strong>gbch-filemon</strong> ``notices'' this happen, in
+that the file is deleted before one ``poll'' of the directory and
+recreated before another. In other words, if the poll time is 20
+seconds, then the deletion and recreation will have to be 20 seconds
+apart.</p>
+<p>If the <strong>-e</strong> option to include existing files is specified, the <strong>-G</strong>,
+<strong>-u</strong>, <strong>-M</strong>, <strong>-I</strong> and <strong>-r</strong> options will work as for new files but
+not <strong>-A</strong>, as the file has already ``arrived''. However, if it is
+deleted, this is ``noticed'' and then recreated, it will be treated as a
+``new'' file.</p>
+<p>
+</p>
+<h2><a name="recursive_searches">Recursive searches</a></h2>
+<p>If recursive searches are specified using the <strong>-R</strong> option, a separate
+<strong>gbch-filemon</strong> process will be invoked for each subdirectory, for
+each further subdirectory within each of those subdirectories, and for
+each new subdirectory created within one of those whilst each process
+is running, unless the <strong>-r</strong> option is being used to watch for file
+removal, whereupon only those subdirectories which existed to begin
+with will be considered.</p>
+<p>If the <strong>-S</strong> option is specified to stop once a file has been found,
+each process will continue until a file is found in its particular
+subdirectory.</p>
+<p>
+</p>
+<hr />
+<h1><a name="examples">EXAMPLES</a></h1>
+<p>Monitor the FTP directories for new files which have finished
+arriving, sending a message to the user:</p>
+<pre>
+ gbch-filemon -aRC -D /var/spool/ftp -G 30 -c &quot;xmessage '%f in %d'&quot;</pre>
+<p>Set a <strong>GNUbatch</strong> variable to an appropriate value when a file
+arrives in the current directory</p>
+<pre>
+ gbch-filemon -aAC -c &quot;gbch-var -s '%f arrived' file_var&quot;</pre>
+<p>
+</p>
+<hr />
+<h1><a name="files">FILES</a></h1>
+<p><em>~/.gnubatch</em>
+configuration file (home directory)</p>
+<p><em>.gnubatch</em>
+configuration file (current directory)</p>
+<p><em>filemon.help</em>
+message file</p>
+<p>
+</p>
+<hr />
+<h1><a name="environment">ENVIRONMENT</a></h1>
+<dl>
+<dt><strong><a name="item_gbch_filemon">GBCH_FILEMON</a></strong>
+
+<dd>
+<p>space-separated options to override defaults.</p>
+</dd>
+</li>
+<dt><strong><a name="item_filemonconf">FILEMONCONF</a></strong>
+
+<dd>
+<p>location of alternative help file.</p>
+</dd>
+</li>
+</dl>
+<p>
+</p>
+<hr />
+<h1><a name="diagnostics">DIAGNOSTICS</a></h1>
+<p>Various diagnostics are read and printed as required from the message
+file <em>filemon.help</em>.</p>
+<p>
+</p>
+<hr />
+<h1><a name="copyright">COPYRIGHT</a></h1>
+<p>Copyright (c) 2009 Free Software Foundation, Inc.
+This is free software. You may redistribute copies of it under the
+terms of the GNU General Public License
+&lt;http://www.gnu.org/licenses/gpl.html&gt;.
+There is NO WARRANTY, to the extent permitted by law.</p>
+<p>
+</p>
+<hr />
+<h1><a name="author">AUTHOR</a></h1>
+<p>John M Collins, Xi Software Ltd.</p>
+
+</body>
+
+</html>

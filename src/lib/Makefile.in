@@ -1,0 +1,268 @@
+#
+#   Copyright 2009 Free Software Foundation, Inc.
+#
+#  This program is free software: you can redistribute it and/or modify
+#  it under the terms of the GNU General Public License as published by
+#  the Free Software Foundation, either version 3 of the License, or
+#  (at your option) any later version.
+#
+#  This program is distributed in the hope that it will be useful,
+#  but WITHOUT ANY WARRANTY; without even the implied warranty of
+#  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#  GNU General Public License for more details.
+#
+#   You should have received a copy of the GNU General Public License
+#  along with this program.  If not, see <http://www.gnu.org/licenses/>.
+#
+# ----------------------------------------------------------------------
+#		Makefile for main library
+#-----------------------------------------------------------------------
+#
+SHELL		=	/bin/sh
+@SET_MAKE@
+prefix		=	@prefix@
+exec_prefix	=	@exec_prefix@
+AR		=	ar
+CC		=	@CC@
+PARENT		=	..
+BASE		=	../..
+HDRS		=	$(PARENT)/hdrs
+CCFLAGS		=	-O @gcc_useful_options@ @funny_compiler_options@ @lib_pic@
+CFLAGS		=	$(CCFLAGS) -I$(HDRS) -I$(BASE)
+LIBDIR		=	@libdir@
+LDSHARED	=	ld -shared -o
+LIB		=	libgnubatch_int.a
+SHLIB		=	libgnubatch_int.so
+SHLIBCLIENT	=	libgnubatch_client.so
+SHLIBCURS	=	libgnubatch_curs.so
+RM		=	rm -f
+INSTALL		=	@INSTALL@
+INSTALL_DATA	=	@INSTALL_DATA@
+
+SHLIB_OBJS=\
+	advtime.o\
+	altlen.o\
+	calcharge.o\
+	calchash.o\
+	condname.o\
+	disp_alt.o\
+	disperror.o\
+	envgetserv.o\
+	envprocess.o\
+	getbtuser.o\
+	helpprmpt.o\
+	helprdalt.o\
+	helprdn.o\
+	help_readl.o\
+	helpvec.o\
+	insertu.o\
+	look_host.o\
+	mkspid.o\
+	mmangle.o\
+	mpermitted.o\
+	ncstrncmp.o\
+	net_feed.o\
+	open_ci.o\
+	op_icf.o\
+	packjstring.o\
+	prin_gname.o\
+	prin_uname.o\
+	qmatch.o\
+	readu.o\
+	runpwd.o\
+	spath.o\
+	stracpy.o\
+	stringsch.o\
+	strread.o\
+	versionprint.o
+
+# libgnubatch_client is for client programs
+
+SHLIBCLIENT_OBJS=\
+	cgifndjb.o\
+	cgiuser.o\
+	cgiutil.o\
+	chkfuture.o\
+	doenv.o\
+	doopts.o\
+	dumpargs.o\
+	dumpconds.o\
+	dumpcon.o\
+	dumpecrun.o\
+	dumpemode.o \
+	dumpmode.o\
+	dumpnstr.o\
+	dumpredirs.o\
+	dumpstr.o\
+	dumptime.o\
+	getxbuf.o\
+	gprompt.o \
+	helpnstate.o\
+	helpargs.o\
+	htmllib.o\
+	lookup_alt.o\
+	makeovec.o\
+	makevec.o\
+	open_cfile.o\
+	optdisp.o\
+	optpparm.o\
+	optprocess.o\
+	opttime.o \
+	optvars.o\
+	produser.o\
+	rdoptfile.o\
+	readreply.o\
+	repmnthfix.o\
+	rjfile.o\
+	rvfile.o\
+	saveopts.o\
+	shutilmsg.o\
+	spitbtrstr.o\
+	spit_cond.o\
+	spit_msg.o \
+	spit_pparm.o\
+	spit_redir.o\
+	spit_time.o\
+	stringvec.o
+
+# libgnubatch_curs is for clients which use curses routines
+
+SHLIBCURS_OBJS=\
+	galts.o\
+	getkey.o\
+	helphdr.o\
+	make_km.o\
+	setkey.o\
+	wgets.o\
+	whdrstr.o\
+	whexnum.o \
+	wnum.o\
+
+# OBJECTS needs to be "lordered and tsorted"
+
+OBJECTS=$(SHLIB_OBJS) $(SHLIBCLIENT_OBJS) $(SHLIBCURS_OBJS)
+
+all:	@main_target@
+
+nonshared:	$(LIB)
+	@RANLIB@ $(LIB)
+
+shared: $(SHLIB) $(SHLIBCLIENT) $(SHLIBCURS)
+	$(AR) crv $(LIB) $(OBJECTS)
+	@RANLIB@ $(LIB)
+	$(RM) $(OBJECTS)
+
+$(LIB):	$(LIB)(wnum.o)\
+	$(LIB)(whexnum.o)\
+	$(LIB)(whdrstr.o)\
+	$(LIB)(wgets.o)\
+	$(LIB)(stringsch.o)\
+	$(LIB)(spit_time.o)\
+	$(LIB)(spit_redir.o)\
+	$(LIB)(spit_pparm.o)\
+	$(LIB)(spit_msg.o)\
+	$(LIB)(spit_cond.o)\
+	$(LIB)(spath.o)\
+	$(LIB)(shutilmsg.o)\
+	$(LIB)(setkey.o)\
+	$(LIB)(saveopts.o)\
+	$(LIB)(rvfile.o)\
+	$(LIB)(runpwd.o)\
+	$(LIB)(repmnthfix.o)\
+	$(LIB)(readreply.o)\
+	$(LIB)(produser.o)\
+	$(LIB)(optvars.o)\
+	$(LIB)(opttime.o)\
+	$(LIB)(optprocess.o)\
+	$(LIB)(optpparm.o)\
+	$(LIB)(optdisp.o)\
+	$(LIB)(open_cfile.o)\
+	$(LIB)(op_icf.o)\
+	$(LIB)(net_feed.o)\
+	$(LIB)(mkspid.o)\
+	$(LIB)(makeovec.o)\
+	$(LIB)(make_km.o)\
+	$(LIB)(helpnstate.o)\
+	$(LIB)(helphdr.o)\
+	$(LIB)(helpargs.o)\
+	$(LIB)(gprompt.o)\
+	$(LIB)(getxbuf.o)\
+	$(LIB)(getkey.o)\
+	$(LIB)(getbtuser.o)\
+	$(LIB)(galts.o)\
+	$(LIB)(dumptime.o)\
+	$(LIB)(dumpredirs.o)\
+	$(LIB)(dumpnstr.o)\
+	$(LIB)(dumpmode.o)\
+	$(LIB)(dumpemode.o)\
+	$(LIB)(dumpecrun.o)\
+	$(LIB)(dumpconds.o)\
+	$(LIB)(dumpcon.o)\
+	$(LIB)(dumpargs.o)\
+	$(LIB)(doenv.o)\
+	$(LIB)(condname.o)\
+	$(LIB)(chkfuture.o)\
+	$(LIB)(cgiutil.o)\
+	$(LIB)(cgiuser.o)\
+	$(LIB)(cgifndjb.o)\
+	$(LIB)(calchash.o)\
+	$(LIB)(calcharge.o)\
+	$(LIB)(altlen.o)\
+	$(LIB)(advtime.o)\
+	$(LIB)(spitbtrstr.o)\
+	$(LIB)(rjfile.o)\
+	$(LIB)(readu.o)\
+	$(LIB)(rdoptfile.o)\
+	$(LIB)(qmatch.o)\
+	$(LIB)(packjstring.o)\
+	$(LIB)(open_ci.o)\
+	$(LIB)(mpermitted.o)\
+	$(LIB)(makevec.o)\
+	$(LIB)(insertu.o)\
+	$(LIB)(htmllib.o)\
+	$(LIB)(helprdalt.o)\
+	$(LIB)(helpprmpt.o)\
+	$(LIB)(dumpstr.o)\
+	$(LIB)(doopts.o)\
+	$(LIB)(disperror.o)\
+	$(LIB)(disp_alt.o)\
+	$(LIB)(lookup_alt.o)\
+	$(LIB)(helpvec.o)\
+	$(LIB)(helprdn.o)\
+	$(LIB)(help_readl.o)\
+	$(LIB)(mmangle.o)\
+	$(LIB)(look_host.o)\
+	$(LIB)(prin_gname.o)\
+	$(LIB)(ncstrncmp.o)\
+	$(LIB)(prin_uname.o)\
+	$(LIB)(envgetserv.o)\
+	$(LIB)(envprocess.o)\
+	$(LIB)(stringvec.o)\
+	$(LIB)(strread.o)\
+	$(LIB)(stracpy.o)\
+	$(LIB)(versionprint.o)
+
+$(SHLIB):	$(SHLIB_OBJS)
+	$(LDSHARED) $(SHLIB) -h $(SHLIB) $(SHLIB_OBJS)
+
+$(SHLIBCLIENT):	$(SHLIBCLIENT_OBJS)
+	$(LDSHARED) $(SHLIBCLIENT) -h $(SHLIBCLIENT) $(SHLIBCLIENT_OBJS)
+
+$(SHLIBCURS):	$(SHLIBCURS_OBJS)
+	$(LDSHARED) $(SHLIBCURS) -h $(SHLIBCURS) $(SHLIBCURS_OBJS)
+
+install:
+	$(INSTALL) -d $(LIBDIR)
+	$(INSTALL_DATA) $(LIB) $(LIBDIR)
+	if test -f $(SHLIB); then $(INSTALL) $(SHLIB) $(SHLIBCLIENT) $(SHLIBCURS) $(LIBDIR); fi
+
+install_strip:
+	$(INSTALL) -d $(LIBDIR)
+	$(INSTALL_DATA) $(LIB) $(LIBDIR)
+	if test -f $(SHLIB); then $(INSTALL) $(SHLIB) $(SHLIBCLIENT) $(SHLIBCURS) $(LIBDIR); fi
+
+clean:
+	$(RM) *.[oa] *.so
+
+distclean:	clean
+	$(RM) Makefile

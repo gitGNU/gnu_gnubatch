@@ -1,0 +1,961 @@
+//Microsoft Developer Studio generated resource script.
+//
+#include "resource.h"
+
+// Generated Help ID header file
+#define APSTUDIO_HIDDEN_SYMBOLS
+#include "resource.hm"
+#undef APSTUDIO_HIDDEN_SYMBOLS
+
+#define APSTUDIO_READONLY_SYMBOLS
+/////////////////////////////////////////////////////////////////////////////
+//
+// Generated from the TEXTINCLUDE 2 resource.
+//
+#include "afxres.h"
+
+/////////////////////////////////////////////////////////////////////////////
+#undef APSTUDIO_READONLY_SYMBOLS
+
+/////////////////////////////////////////////////////////////////////////////
+// English (U.K.) resources
+
+#if !defined(AFX_RESOURCE_DLL) || defined(AFX_TARG_ENG)
+#ifdef _WIN32
+LANGUAGE LANG_ENGLISH, SUBLANG_ENGLISH_UK
+#pragma code_page(1252)
+#endif //_WIN32
+
+#ifdef APSTUDIO_INVOKED
+/////////////////////////////////////////////////////////////////////////////
+//
+// TEXTINCLUDE
+//
+
+1 TEXTINCLUDE DISCARDABLE 
+BEGIN
+    "resource.h\0"
+END
+
+2 TEXTINCLUDE DISCARDABLE 
+BEGIN
+    "#include ""afxres.h""\r\n"
+    "\0"
+END
+
+3 TEXTINCLUDE DISCARDABLE 
+BEGIN
+    "#include ""res\\btrsetw.rc2""  // non-App Studio edited resources\r\n"
+    "\r\n"
+    "#include ""afxres.rc""  // Standard components\r\n"
+    "\0"
+END
+
+#endif    // APSTUDIO_INVOKED
+
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// Icon
+//
+
+// Icon with lowest ID value placed first to ensure application icon
+// remains consistent on all systems.
+IDR_MAINFRAME           ICON    DISCARDABLE     "RES\\BTRSETW.ICO"
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// Bitmap
+//
+
+IDR_MAINFRAME           BITMAP  MOVEABLE PURE   "RES\\TOOLBAR.BMP"
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// Menu
+//
+
+IDR_MAINFRAME MENU PRELOAD DISCARDABLE 
+BEGIN
+    POPUP "&Program"
+    BEGIN
+        MENUITEM "&Save\tCtrl+S",               ID_PROGRAM_SAVE
+        MENUITEM SEPARATOR
+        MENUITEM "&Login or Logout",            ID_PROGRAM_LOGINORLOGOUT
+        MENUITEM "New &Group",                  ID_PROGRAM_NEWGROUP
+        MENUITEM SEPARATOR
+        MENUITEM "&Port Settings",              ID_PROGRAM_PORTSETTINGS
+        MENUITEM SEPARATOR
+        MENUITEM "E&xit",                       ID_APP_EXIT
+    END
+    POPUP "&Network"
+    BEGIN
+        MENUITEM "&Add new host\tINS",          ID_NETWORK_ADDNEWHOST
+        MENUITEM "&Delete host\tDEL",           ID_NETWORK_DELETEHOST
+        MENUITEM "&Change host",                ID_NETWORK_CHANGEHOST
+        MENUITEM SEPARATOR
+        MENUITEM "&Set as Server\tHOME",        ID_NETWORK_SETASSERVER
+    END
+    POPUP "&Options"
+    BEGIN
+        MENUITEM "Restore &Defaults",           ID_OPTIONS_RESTOREDEFAULTS
+        MENUITEM SEPARATOR
+        MENUITEM "&Program defaults",           ID_OPTIONS_PROGRAMDEFAULTS
+        MENUITEM SEPARATOR
+        MENUITEM "&Time defaults",              ID_OPTIONS_TIMEDEFAULTS
+        MENUITEM "&Condition defaults",         ID_OPTIONS_CONDITIONDEFAULTS
+        MENUITEM "&Assignment defaults",        ID_OPTIONS_ASSIGNMENTDEFAULTS
+
+        MENUITEM "&Queue defaults",             ID_OPTIONS_QUEUEDEFAULTS
+        MENUITEM "&Process parameters",         ID_OPTIONS_PROCESSPARAMETERS
+        MENUITEM "Time &Limits",                ID_OPTIONS_TIMELIMITS
+        MENUITEM "Per&missions",                ID_OPTIONS_PERMISSIONS
+    END
+    POPUP "&View"
+    BEGIN
+        MENUITEM "&Toolbar",                    ID_VIEW_TOOLBAR
+        MENUITEM "&Status Bar",                 ID_VIEW_STATUS_BAR
+    END
+    POPUP "&Help"
+    BEGIN
+        MENUITEM "&Index",                      ID_HELP_INDEX
+        MENUITEM "&Using Help",                 ID_HELP_USING
+        MENUITEM SEPARATOR
+        MENUITEM "&About BTRSETW...",           ID_APP_ABOUT
+    END
+END
+
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// Accelerator
+//
+
+IDR_MAINFRAME ACCELERATORS PRELOAD MOVEABLE PURE 
+BEGIN
+    "S",            ID_PROGRAM_SAVE,        VIRTKEY, CONTROL, NOINVERT
+    VK_DELETE,      ID_NETWORK_DELETEHOST,  VIRTKEY, NOINVERT
+    VK_F1,          ID_HELP,                VIRTKEY, NOINVERT
+    VK_F1,          ID_CONTEXT_HELP,        VIRTKEY, SHIFT, NOINVERT
+    VK_F6,          ID_NEXT_PANE,           VIRTKEY, NOINVERT
+    VK_F6,          ID_PREV_PANE,           VIRTKEY, SHIFT, NOINVERT
+    VK_HOME,        ID_NETWORK_SETASSERVER, VIRTKEY, NOINVERT
+    VK_INSERT,      ID_NETWORK_ADDNEWHOST,  VIRTKEY, NOINVERT
+END
+
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// Dialog
+//
+
+IDD_ABOUTBOX DIALOG DISCARDABLE  34, 22, 217, 55
+STYLE DS_MODALFRAME | WS_POPUP | WS_CAPTION | WS_SYSMENU
+CAPTION "About BTRSETW"
+FONT 8, "MS Sans Serif"
+BEGIN
+    ICON            IDR_MAINFRAME,IDC_STATIC,11,17,20,20
+    CTEXT           "BTRSETW opts set Version 6.13",IDC_STATIC,44,8,123,8
+    CTEXT           "Copyright © Xi Software Ltd  2003",IDC_STATIC,48,25,119,
+                    8
+    DEFPUSHBUTTON   "OK",IDOK,176,6,32,14,WS_GROUP
+    CTEXT           "Revised 19 February 2003",IDC_STATIC,48,42,119,8
+END
+
+IDD_DEFTIMES DIALOGEX 0, 0, 271, 210
+STYLE DS_MODALFRAME | DS_CONTEXTHELP | WS_POPUP | WS_VISIBLE | WS_CAPTION | 
+    WS_SYSMENU
+CAPTION "Time defaults"
+FONT 8, "MS Sans Serif", 0, 0, 0x1
+BEGIN
+    CONTROL         "Run and delete",IDC_DELETE,"Button",BS_AUTORADIOBUTTON | 
+                    WS_GROUP | WS_TABSTOP,76,0,76,10,0,HIDC_DELETE
+    CONTROL         "Run and retain",IDC_RETAIN,"Button",BS_AUTORADIOBUTTON | 
+                    WS_TABSTOP,76,13,84,10,0,HIDC_RETAIN
+    CONTROL         "Minutes",IDC_REPMINS,"Button",BS_AUTORADIOBUTTON | 
+                    WS_TABSTOP,76,32,40,10,0,HIDC_REPMINS
+    CONTROL         "Hours",IDC_REPHOURS,"Button",BS_AUTORADIOBUTTON | 
+                    WS_TABSTOP,76,45,34,10,0,HIDC_REPHOURS
+    CONTROL         "Days",IDC_REPDAYS,"Button",BS_AUTORADIOBUTTON | 
+                    WS_TABSTOP,76,56,34,10,0,HIDC_REPDAYS
+    CONTROL         "Weeks",IDC_REPWEEKS,"Button",BS_AUTORADIOBUTTON | 
+                    WS_TABSTOP,76,69,34,10,0,HIDC_REPWEEKS
+    CONTROL         "Months (rel begin)",IDC_REPMONTHSB,"Button",
+                    BS_AUTORADIOBUTTON | WS_TABSTOP,76,80,72,10,0,
+                    HIDC_REPMONTHSB
+    CONTROL         "Months (rel end)",IDC_REPMONTHSE,"Button",
+                    BS_AUTORADIOBUTTON | WS_TABSTOP,76,93,76,10,0,
+                    HIDC_REPMONTHSE
+    CONTROL         "Years",IDC_REPYEARS,"Button",BS_AUTORADIOBUTTON | 
+                    WS_TABSTOP,76,104,34,10,0,HIDC_REPYEARS
+    GROUPBOX        "Repeat every",IDC_MESS_REPEATEVERY,8,21,156,100
+    EDITTEXT        IDC_REPEAT,20,40,34,12,ES_AUTOHSCROLL,0,HIDC_REPEAT
+    CONTROL         "Spin1",IDC_SCR_REPEAT,"msctls_updown32",UDS_SETBUDDYINT | 
+                    UDS_ALIGNRIGHT | UDS_AUTOBUDDY | UDS_ARROWKEYS | 
+                    UDS_NOTHOUSANDS,57,39,10,14,0,HIDC_SCR_REPEAT
+    LTEXT           "Month day",IDC_MONDAYNAME,20,69,44,8
+    EDITTEXT        IDC_MONTHDAY,20,85,34,12,ES_AUTOHSCROLL | ES_READONLY | 
+                    ES_NUMBER,0,HIDC_MONTHDAY
+    CONTROL         "Spin2",IDC_SCR_MONTHDAY,"msctls_updown32",
+                    UDS_SETBUDDYINT | UDS_ALIGNRIGHT | UDS_AUTOBUDDY | 
+                    UDS_ARROWKEYS | UDS_NOTHOUSANDS,57,84,10,14,0,
+                    HIDC_SCR_MONTHDAY
+    GROUPBOX        "Avoiding...",IDC_MESS_AVOIDING,168,21,96,60
+    CONTROL         "Sun",IDC_AVSUN,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,
+                    172,32,34,10,0,HIDC_AVSUN
+    CONTROL         "Mon",IDC_AVMON,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,
+                    172,45,34,8,0,HIDC_AVMON
+    CONTROL         "Tue",IDC_AVTUE,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,
+                    172,56,34,10,0,HIDC_AVTUE
+    CONTROL         "Wed",IDC_AVWED,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,
+                    172,69,34,10,0,HIDC_AVWED
+    CONTROL         "Thur",IDC_AVTHU,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,
+                    216,32,34,10,0,HIDC_AVTHU
+    CONTROL         "Fri",IDC_AVFRI,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,
+                    216,45,34,10,0,HIDC_AVFRI
+    CONTROL         "Sat",IDC_AVSAT,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,
+                    216,56,34,10,0,HIDC_AVSAT
+    CONTROL         "Holiday",IDC_AVHOLIDAY,"Button",BS_AUTOCHECKBOX | 
+                    WS_TABSTOP,216,69,42,10,0,HIDC_AVHOLIDAY
+    GROUPBOX        "If not possible",IDC_MESS_NOTPOSS,80,128,83,76
+    CONTROL         "Skip",IDC_NPSKIP,"Button",BS_AUTORADIOBUTTON | WS_GROUP | 
+                    WS_TABSTOP,84,144,34,10,0,HIDC_NPSKIP
+    CONTROL         "Delay Current",IDC_NPDELCURR,"Button",
+                    BS_AUTORADIOBUTTON | WS_TABSTOP,84,160,72,10,0,
+                    HIDC_NPDELCURR
+    CONTROL         "Delay all",IDC_NPDELALL,"Button",BS_AUTORADIOBUTTON | 
+                    WS_TABSTOP,84,176,57,10,0,HIDC_NPDELALL
+    CONTROL         "Catch up",IDC_NPCATCHUP,"Button",BS_AUTORADIOBUTTON | 
+                    WS_TABSTOP,84,192,57,10,0,HIDC_NPCATCHUP
+    DEFPUSHBUTTON   "OK",IDOK,193,128,40,14
+    PUSHBUTTON      "Cancel",IDCANCEL,193,190,40,14
+END
+
+IDD_DEFCOND DIALOGEX 0, 0, 236, 115
+STYLE DS_MODALFRAME | DS_CONTEXTHELP | WS_POPUP | WS_VISIBLE | WS_CAPTION | 
+    WS_SYSMENU
+CAPTION "Condition defaults"
+FONT 10, "MS Sans Serif", 0, 0, 0x1
+BEGIN
+    EDITTEXT        IDC_VALUE,12,12,113,13,ES_AUTOHSCROLL,0,HIDC_VALUE
+    CONTROL         "Spin1",IDC_SCR_VALUE,"msctls_updown32",UDS_ALIGNRIGHT | 
+                    UDS_AUTOBUDDY | UDS_ARROWKEYS,130,11,7,14,0,
+                    HIDC_SCR_VALUE
+    LTEXT           "Value",IDC_STATIC,151,13,40,10
+    GROUPBOX        "Comparison",IDC_STATIC,12,40,73,70
+    CONTROL         "=",IDC_CEQ,"Button",BS_AUTORADIOBUTTON | BS_LEFTTEXT | 
+                    WS_GROUP | WS_TABSTOP,28,55,19,12,0,HIDC_CEQ
+    CONTROL         "!=",IDC_CNE,"Button",BS_AUTORADIOBUTTON | BS_LEFTTEXT | 
+                    WS_TABSTOP,28,74,19,12,0,HIDC_CNE
+    CONTROL         "<",IDC_CLT,"Button",BS_AUTORADIOBUTTON | BS_LEFTTEXT | 
+                    WS_TABSTOP,28,94,19,12,0,HIDC_CLT
+    CONTROL         "<=",IDC_CLE,"Button",BS_AUTORADIOBUTTON | BS_LEFTTEXT | 
+                    WS_TABSTOP,53,55,19,12,0,HIDC_CLE
+    CONTROL         ">",IDC_CGT,"Button",BS_AUTORADIOBUTTON | BS_LEFTTEXT | 
+                    WS_TABSTOP,53,74,19,12,0,HIDC_CGT
+    CONTROL         ">=",IDC_CGE,"Button",BS_AUTORADIOBUTTON | BS_LEFTTEXT | 
+                    WS_TABSTOP,53,94,19,12,0,HIDC_CGE
+    GROUPBOX        "If host unavailable",IDC_STATIC,92,44,98,49
+    CONTROL         "Ignore",IDC_CNOTCRIT,"Button",BS_AUTORADIOBUTTON | 
+                    WS_GROUP | WS_TABSTOP,97,58,45,12,0,HIDC_CNOTCRIT
+    CONTROL         "Hold job",IDC_CCRIT,"Button",BS_AUTORADIOBUTTON | 
+                    WS_TABSTOP,97,73,77,12,0,HIDC_CCRIT
+    DEFPUSHBUTTON   "OK",IDOK,196,16,36,17
+    PUSHBUTTON      "Cancel",IDCANCEL,196,40,36,17
+END
+
+IDD_DEFASS DIALOGEX 0, 0, 252, 199
+STYLE DS_MODALFRAME | DS_CONTEXTHELP | WS_POPUP | WS_VISIBLE | WS_CAPTION | 
+    WS_SYSMENU
+CAPTION "Assignment defaults"
+FONT 8, "MS Sans Serif", 0, 0, 0x1
+BEGIN
+    LTEXT           "Value",IDC_STATIC,17,9,39,10
+    EDITTEXT        IDC_VALUE,68,8,148,12,ES_AUTOHSCROLL,0,HIDC_VALUE
+    CONTROL         "Spin1",IDC_SCR_VALUE,"msctls_updown32",UDS_ALIGNRIGHT | 
+                    UDS_AUTOBUDDY | UDS_ARROWKEYS,221,7,9,14,0,
+                    HIDC_SCR_VALUE
+    GROUPBOX        "Assignment type",IDC_STATIC,4,40,129,86
+    CONTROL         "Set",IDC_ASET,"Button",BS_AUTORADIOBUTTON | BS_LEFTTEXT | 
+                    WS_GROUP | WS_TABSTOP,24,58,25,15,0,HIDC_ASET
+    CONTROL         "+",IDC_AADD,"Button",BS_AUTORADIOBUTTON | BS_LEFTTEXT | 
+                    WS_TABSTOP,24,81,25,15,0,HIDC_AADD
+    CONTROL         "-",IDC_ASUB,"Button",BS_AUTORADIOBUTTON | BS_LEFTTEXT | 
+                    WS_TABSTOP,24,106,25,15,0,HIDC_ASUB
+    CONTROL         "X",IDC_AMULT,"Button",BS_AUTORADIOBUTTON | BS_LEFTTEXT | 
+                    WS_TABSTOP,57,58,25,15,0,HIDC_AMULT
+    CONTROL         "/",IDC_ADIV,"Button",BS_AUTORADIOBUTTON | BS_LEFTTEXT | 
+                    WS_TABSTOP,57,81,25,15,0,HIDC_ADIV
+    CONTROL         "Md",IDC_AMOD,"Button",BS_AUTORADIOBUTTON | BS_LEFTTEXT | 
+                    WS_TABSTOP,57,106,25,15,0,HIDC_AMOD
+    CONTROL         "Exit",IDC_AEXIT,"Button",BS_AUTORADIOBUTTON | 
+                    BS_LEFTTEXT | WS_TABSTOP,87,58,35,15,0,HIDC_AEXIT
+    CONTROL         "Sig",IDC_ASIGNAL,"Button",BS_AUTORADIOBUTTON | 
+                    BS_LEFTTEXT | WS_TABSTOP,87,81,35,15,0,HIDC_ASIGNAL
+    GROUPBOX        "If host unavailable",IDC_STATIC,4,133,126,60
+    CONTROL         "Ignore",IDC_ANOTCRIT,"Button",BS_AUTORADIOBUTTON | 
+                    WS_GROUP | WS_TABSTOP,11,152,58,15,0,HIDC_ANOTCRIT
+    CONTROL         "Hold job",IDC_ACRIT,"Button",BS_AUTORADIOBUTTON | 
+                    WS_TABSTOP,11,170,99,15,0,HIDC_ACRIT
+    CONTROL         "On start",IDC_ASTART,"Button",BS_AUTOCHECKBOX | 
+                    WS_TABSTOP,161,40,46,11,0,HIDC_ASTART
+    CONTROL         "REVERSE on exit",IDC_AREVERSE,"Button",BS_AUTOCHECKBOX | 
+                    WS_TABSTOP,161,56,85,12,0,HIDC_AREVERSE
+    CONTROL         "Normal exit",IDC_ANORMAL,"Button",BS_AUTOCHECKBOX | 
+                    WS_TABSTOP,161,73,61,10,0,HIDC_ANORMAL
+    CONTROL         "Error exit",IDC_AERROR,"Button",BS_AUTOCHECKBOX | 
+                    WS_TABSTOP,161,88,61,12,0,HIDC_AERROR
+    CONTROL         "Abort",IDC_AABORT,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,
+                    161,105,61,12,0,HIDC_AABORT
+    CONTROL         "Cancel",IDC_ACANCEL,"Button",BS_AUTOCHECKBOX | 
+                    WS_TABSTOP,161,122,61,12,0,HIDC_ACANCEL
+    DEFPUSHBUTTON   "OK",IDOK,139,176,44,17
+    PUSHBUTTON      "Cancel",IDCANCEL,202,176,44,17
+END
+
+IDD_PROGOPTS DIALOGEX 0, 0, 216, 79
+STYLE DS_MODALFRAME | DS_CONTEXTHELP | WS_POPUP | WS_VISIBLE | WS_CAPTION | 
+    WS_SYSMENU
+CAPTION "Program Options"
+FONT 10, "MS Sans Serif", 0, 0, 0x1
+BEGIN
+    LTEXT           "Job queue",IDC_STATIC,12,14,36,10
+    EDITTEXT        IDC_JOBQUEUE,56,12,100,13,ES_AUTOHSCROLL,0,HIDC_JOBQUEUE
+    CONTROL         "Verbose",IDC_VERBOSE,"Button",BS_AUTOCHECKBOX | 
+                    WS_TABSTOP,12,36,36,10,0,HIDC_VERBOSE
+    CONTROL         "Binary mode (no CR conversion)",IDC_BINMODE,"Button",
+                    BS_AUTOCHECKBOX | WS_TABSTOP,12,52,127,10,0,HIDC_BINMODE
+    DEFPUSHBUTTON   "OK",IDOK,172,12,32,17
+    PUSHBUTTON      "Cancel",IDCANCEL,172,32,32,17
+END
+
+IDD_QUEUEDEFS DIALOGEX 0, 0, 228, 124
+STYLE DS_MODALFRAME | DS_CONTEXTHELP | WS_POPUP | WS_VISIBLE | WS_CAPTION | 
+    WS_SYSMENU
+CAPTION "Queue defaults"
+FONT 10, "MS Sans Serif", 0, 0, 0x1
+BEGIN
+    LTEXT           "Title",IDC_STATIC,10,12,37,10
+    EDITTEXT        IDC_TITLE,92,11,89,12,ES_AUTOHSCROLL,0,HIDC_TITLE
+    LTEXT           "Command Interp",IDC_STATIC,10,42,72,10
+    COMBOBOX        IDC_CMDINTERP,93,41,67,30,CBS_DROPDOWNLIST | 
+                    CBS_AUTOHSCROLL | CBS_SORT | WS_VSCROLL | WS_TABSTOP,0,
+                    HIDC_CMDINTERP
+    LTEXT           "Priority",IDC_STATIC,10,72,34,10
+    EDITTEXT        IDC_PRIORITY,92,69,34,12,0,0,HIDC_PRIORITY
+    CONTROL         "Spin1",IDC_SCR_PRIORITY,"msctls_updown32",
+                    UDS_SETBUDDYINT | UDS_ALIGNRIGHT | UDS_AUTOBUDDY | 
+                    UDS_ARROWKEYS | UDS_NOTHOUSANDS,136,68,10,14,0,
+                    HIDC_SCR_PRIORITY
+    LTEXT           "Load level",IDC_STATIC,10,102,54,10
+    EDITTEXT        IDC_LOADLEV,92,99,41,12,0,0,HIDC_LOADLEV
+    CONTROL         "Spin2",IDC_SCR_LOADLEV,"msctls_updown32",
+                    UDS_SETBUDDYINT | UDS_ALIGNRIGHT | UDS_AUTOBUDDY | 
+                    UDS_ARROWKEYS | UDS_NOTHOUSANDS,135,97,10,14,0,
+                    HIDC_SCR_LOADLEV
+    DEFPUSHBUTTON   "OK",IDOK,192,8,32,16
+    PUSHBUTTON      "Cancel",IDCANCEL,192,48,32,16
+END
+
+IDD_PROCPAR DIALOGEX 0, 0, 307, 202
+STYLE DS_MODALFRAME | DS_CONTEXTHELP | WS_POPUP | WS_VISIBLE | WS_CAPTION | 
+    WS_SYSMENU
+CAPTION "Process parameters"
+FONT 8, "MS Sans Serif", 0, 0, 0x1
+BEGIN
+    LTEXT           "Directory",IDC_STATIC,0,20,39,10
+    EDITTEXT        IDC_DIRECTORY,57,17,211,12,ES_AUTOHSCROLL,0,
+                    HIDC_DIRECTORY
+    LTEXT           "Umask - turn OFF",IDC_STATIC,0,54,72,10
+    LTEXT           "User",IDC_STATIC,82,39,26,10
+    CONTROL         "R",IDC_UR,"Button",BS_AUTOCHECKBOX | BS_LEFTTEXT | 
+                    WS_TABSTOP,82,54,21,12,0,HIDC_UR
+    CONTROL         "W",IDC_UW,"Button",BS_AUTOCHECKBOX | BS_LEFTTEXT | 
+                    WS_TABSTOP,82,69,21,12,0,HIDC_UW
+    CONTROL         "X",IDC_UX,"Button",BS_AUTOCHECKBOX | BS_LEFTTEXT | 
+                    WS_TABSTOP,82,84,21,12,0,HIDC_UX
+    LTEXT           "Group",IDC_STATIC,123,39,26,10
+    CONTROL         "R",IDC_GR,"Button",BS_AUTOCHECKBOX | BS_LEFTTEXT | 
+                    WS_TABSTOP,123,54,21,12,0,HIDC_GR
+    CONTROL         "W",IDC_GW,"Button",BS_AUTOCHECKBOX | BS_LEFTTEXT | 
+                    WS_TABSTOP,123,69,21,12,0,HIDC_GW
+    CONTROL         "X",IDC_GX,"Button",BS_AUTOCHECKBOX | BS_LEFTTEXT | 
+                    WS_TABSTOP,123,84,21,12,0,HIDC_GX
+    LTEXT           "Others",IDC_STATIC,159,39,26,10
+    CONTROL         "R",IDC_OR,"Button",BS_AUTOCHECKBOX | BS_LEFTTEXT | 
+                    WS_TABSTOP,159,54,21,12,0,HIDC_OR
+    CONTROL         "W",IDC_OW,"Button",BS_AUTOCHECKBOX | BS_LEFTTEXT | 
+                    WS_TABSTOP,159,69,21,12,0,HIDC_OW
+    CONTROL         "X",IDC_OX,"Button",BS_AUTOCHECKBOX | BS_LEFTTEXT | 
+                    WS_TABSTOP,159,84,21,12,0,HIDC_OX
+    LTEXT           "Ulimit",IDC_STATIC,211,39,39,10
+    EDITTEXT        IDC_ULIMIT,206,64,51,12,0,0,HIDC_ULIMIT
+    CONTROL         "Spin1",IDC_SCR_ULIMIT,"msctls_updown32",UDS_ALIGNRIGHT | 
+                    UDS_AUTOBUDDY | UDS_ARROWKEYS,265,63,10,14,0,
+                    HIDC_SCR_ULIMIT
+    LTEXT           "Normal exit",IDC_STATIC,0,106,46,10
+    EDITTEXT        IDC_NEXITL,57,104,29,13,ES_READONLY | ES_NUMBER,0,
+                    HIDC_NEXITL
+    CONTROL         "Spin2",IDC_SCR_NEXITL,"msctls_updown32",UDS_SETBUDDYINT | 
+                    UDS_ALIGNRIGHT | UDS_AUTOBUDDY | UDS_ARROWKEYS | 
+                    UDS_NOTHOUSANDS,83,103,10,14,0,HIDC_SCR_NEXITL
+    LTEXT           "to",IDC_STATIC,98,106,15,10
+    EDITTEXT        IDC_NEXITU,118,104,29,12,ES_READONLY | ES_NUMBER,0,
+                    HIDC_NEXITU
+    CONTROL         "Spin3",IDC_SCR_NEXITU,"msctls_updown32",UDS_SETBUDDYINT | 
+                    UDS_ALIGNRIGHT | UDS_AUTOBUDDY | UDS_ARROWKEYS | 
+                    UDS_NOTHOUSANDS,143,103,10,14,0,HIDC_SCR_NEXITU
+    LTEXT           "Error exit",IDC_STATIC,0,130,46,10
+    EDITTEXT        IDC_EEXITL,57,129,29,12,ES_READONLY | ES_NUMBER,0,
+                    HIDC_EEXITL
+    CONTROL         "Spin4",IDC_SCR_EEXITL,"msctls_updown32",UDS_SETBUDDYINT | 
+                    UDS_ALIGNRIGHT | UDS_AUTOBUDDY | UDS_ARROWKEYS | 
+                    UDS_NOTHOUSANDS,85,128,10,14,0,HIDC_SCR_EEXITL
+    LTEXT           "to",IDC_STATIC,98,130,15,10
+    EDITTEXT        IDC_EEXITU,118,129,29,12,ES_READONLY | ES_NUMBER,0,
+                    HIDC_EEXITU
+    CONTROL         "Spin5",IDC_SCR_EEXITU,"msctls_updown32",UDS_SETBUDDYINT | 
+                    UDS_ALIGNRIGHT | UDS_AUTOBUDDY | UDS_ARROWKEYS | 
+                    UDS_NOTHOUSANDS,147,128,10,14,0,HIDC_SCR_EEXITU
+    GROUPBOX        "Export type",IDC_STATIC,8,144,87,56
+    CONTROL         "Local to server",IDC_LOCAL,"Button",BS_AUTORADIOBUTTON | 
+                    WS_GROUP,12,156,64,10,0,HIDC_LOCAL
+    CONTROL         "Export",IDC_EXPORT,"Button",BS_AUTORADIOBUTTON | 
+                    WS_TABSTOP,12,170,64,10,0,HIDC_EXPORT
+    CONTROL         "Remote runnable",IDC_REMRUNNABLE,"Button",
+                    BS_AUTORADIOBUTTON | WS_TABSTOP,12,184,68,10,0,
+                    HIDC_REMRUNNABLE
+    GROUPBOX        "After error",IDC_STATIC,160,98,135,49
+    CONTROL         "Advance time",IDC_ADVTERR,"Button",BS_AUTORADIOBUTTON | 
+                    WS_GROUP | WS_TABSTOP,175,113,72,12,0,HIDC_ADVTERR
+    CONTROL         "Do not advance time",IDC_NADVTERR,"Button",
+                    BS_AUTORADIOBUTTON | WS_TABSTOP,175,128,98,12,0,
+                    HIDC_NADVTERR
+    DEFPUSHBUTTON   "OK",IDOK,120,183,51,17
+    PUSHBUTTON      "Cancel",IDCANCEL,244,183,51,17
+END
+
+IDD_JOBMODE DIALOGEX 0, 0, 307, 186
+STYLE DS_MODALFRAME | DS_CONTEXTHELP | WS_POPUP | WS_VISIBLE | WS_CAPTION | 
+    WS_SYSMENU
+CAPTION "Job permissions"
+FONT 8, "MS Sans Serif", 0, 0, 0x1
+BEGIN
+    LTEXT           "User",IDC_STATIC,108,10,21,10
+    LTEXT           "Group",IDC_STATIC,144,10,26,10
+    LTEXT           "Others",IDC_STATIC,175,10,31,10
+    CONTROL         "Read",IDC_JUREAD,"Button",BS_AUTOCHECKBOX | BS_LEFTTEXT | 
+                    WS_TABSTOP,10,25,113,12,0,HIDC_JUREAD
+    CONTROL         "Write",IDC_JUWRITE,"Button",BS_AUTOCHECKBOX | 
+                    BS_LEFTTEXT | WS_TABSTOP,10,39,113,12,0,HIDC_JUWRITE
+    CONTROL         "Reveal",IDC_JUREVEAL,"Button",BS_AUTOCHECKBOX | 
+                    BS_LEFTTEXT | WS_TABSTOP,10,54,113,12,0,HIDC_JUREVEAL
+    CONTROL         "Display modes",IDC_JUDISPMODE,"Button",BS_AUTOCHECKBOX | 
+                    BS_LEFTTEXT | WS_TABSTOP,10,69,113,12,0,HIDC_JUDISPMODE
+    CONTROL         "Set modes",IDC_JUSETMODE,"Button",BS_AUTOCHECKBOX | 
+                    BS_LEFTTEXT | WS_TABSTOP,10,84,113,12,0,HIDC_JUSETMODE
+    CONTROL         "Assume ownership",IDC_JUASSOWN,"Button",BS_AUTOCHECKBOX | 
+                    BS_LEFTTEXT | WS_TABSTOP,10,98,113,12,0,HIDC_JUASSOWN
+    CONTROL         "Assume group ownership",IDC_JUASSGOWN,"Button",
+                    BS_AUTOCHECKBOX | BS_LEFTTEXT | WS_TABSTOP,10,113,113,12,
+                    0,HIDC_JUASSGOWN
+    CONTROL         "Give away ownership",IDC_JUGOWN,"Button",
+                    BS_AUTOCHECKBOX | BS_LEFTTEXT | WS_TABSTOP,10,128,113,12,
+                    0,HIDC_JUGOWN
+    CONTROL         "Give away group",IDC_JUGGROUP,"Button",BS_AUTOCHECKBOX | 
+                    BS_LEFTTEXT | WS_TABSTOP,10,143,113,12,0,HIDC_JUGGROUP
+    CONTROL         "Delete",IDC_JUDELETE,"Button",BS_AUTOCHECKBOX | 
+                    BS_LEFTTEXT | WS_TABSTOP,10,158,113,12,0,HIDC_JUDELETE
+    CONTROL         "Kill",IDC_JUKILL,"Button",BS_AUTOCHECKBOX | BS_LEFTTEXT | 
+                    WS_TABSTOP,10,172,113,12,0,HIDC_JUKILL
+    CONTROL         "",IDC_JGREAD,"Button",BS_AUTOCHECKBOX | BS_LEFTTEXT | 
+                    WS_TABSTOP,144,25,15,12,0,HIDC_JGREAD
+    CONTROL         "",IDC_JGWRITE,"Button",BS_AUTOCHECKBOX | BS_LEFTTEXT | 
+                    WS_TABSTOP,144,39,15,12,0,HIDC_JGWRITE
+    CONTROL         "",IDC_JGREVEAL,"Button",BS_AUTOCHECKBOX | BS_LEFTTEXT | 
+                    WS_TABSTOP,144,54,15,12,0,HIDC_JGREVEAL
+    CONTROL         "",IDC_JGDISPMODE,"Button",BS_AUTOCHECKBOX | BS_LEFTTEXT | 
+                    WS_TABSTOP,144,69,15,12,0,HIDC_JGDISPMODE
+    CONTROL         "",IDC_JGSETMODE,"Button",BS_AUTOCHECKBOX | BS_LEFTTEXT | 
+                    WS_TABSTOP,144,84,15,12,0,HIDC_JGSETMODE
+    CONTROL         "",IDC_JGASSOWN,"Button",BS_AUTOCHECKBOX | BS_LEFTTEXT | 
+                    WS_TABSTOP,144,98,15,12,0,HIDC_JGASSOWN
+    CONTROL         "",IDC_JGASSGOWN,"Button",BS_AUTOCHECKBOX | BS_LEFTTEXT | 
+                    WS_TABSTOP,144,113,15,12,0,HIDC_JGASSGOWN
+    CONTROL         "",IDC_JGGOWN,"Button",BS_AUTOCHECKBOX | BS_LEFTTEXT | 
+                    WS_TABSTOP,144,128,15,12,0,HIDC_JGGOWN
+    CONTROL         "",IDC_JGGGROUP,"Button",BS_AUTOCHECKBOX | BS_LEFTTEXT | 
+                    WS_TABSTOP,144,143,15,12,0,HIDC_JGGGROUP
+    CONTROL         "",IDC_JGDELETE,"Button",BS_AUTOCHECKBOX | BS_LEFTTEXT | 
+                    WS_TABSTOP,144,158,15,12,0,HIDC_JGDELETE
+    CONTROL         "",IDC_JGKILL,"Button",BS_AUTOCHECKBOX | BS_LEFTTEXT | 
+                    WS_TABSTOP,144,172,15,12,0,HIDC_JGKILL
+    CONTROL         "",IDC_JOREAD,"Button",BS_AUTOCHECKBOX | BS_LEFTTEXT | 
+                    WS_TABSTOP,180,25,15,12,0,HIDC_JOREAD
+    CONTROL         "",IDC_JOWRITE,"Button",BS_AUTOCHECKBOX | BS_LEFTTEXT | 
+                    WS_TABSTOP,180,39,15,12,0,HIDC_JOWRITE
+    CONTROL         "",IDC_JOREVEAL,"Button",BS_AUTOCHECKBOX | BS_LEFTTEXT | 
+                    WS_TABSTOP,180,54,15,12,0,HIDC_JOREVEAL
+    CONTROL         "",IDC_JODISPMODE,"Button",BS_AUTOCHECKBOX | BS_LEFTTEXT | 
+                    WS_TABSTOP,180,69,15,12,0,HIDC_JODISPMODE
+    CONTROL         "",IDC_JOSETMODE,"Button",BS_AUTOCHECKBOX | BS_LEFTTEXT | 
+                    WS_TABSTOP,180,84,15,12,0,HIDC_JOSETMODE
+    CONTROL         "",IDC_JOASSOWN,"Button",BS_AUTOCHECKBOX | BS_LEFTTEXT | 
+                    WS_TABSTOP,180,98,15,12,0,HIDC_JOASSOWN
+    CONTROL         "",IDC_JOASSGOWN,"Button",BS_AUTOCHECKBOX | BS_LEFTTEXT | 
+                    WS_TABSTOP,180,113,15,12,0,HIDC_JOASSGOWN
+    CONTROL         "",IDC_JOGOWN,"Button",BS_AUTOCHECKBOX | BS_LEFTTEXT | 
+                    WS_TABSTOP,180,128,15,12,0,HIDC_JOGOWN
+    CONTROL         "",IDC_JOGGROUP,"Button",BS_AUTOCHECKBOX | BS_LEFTTEXT | 
+                    WS_TABSTOP,180,143,15,12,0,HIDC_JOGGROUP
+    CONTROL         "",IDC_JODELETE,"Button",BS_AUTOCHECKBOX | BS_LEFTTEXT | 
+                    WS_TABSTOP,180,158,15,12,0,HIDC_JODELETE
+    CONTROL         "",IDC_JOKILL,"Button",BS_AUTOCHECKBOX | BS_LEFTTEXT | 
+                    WS_TABSTOP,180,172,15,12,0,HIDC_JOKILL
+    LTEXT           "User",IDC_STATIC,240,8,21,10
+    COMBOBOX        IDC_USER,216,20,78,72,CBS_DROPDOWN | CBS_AUTOHSCROLL | 
+                    CBS_SORT | WS_VSCROLL | WS_TABSTOP,0,HIDC_USER
+    LTEXT           "Group",IDC_STATIC,236,40,26,10
+    COMBOBOX        IDC_GROUP,216,54,78,74,CBS_DROPDOWN | CBS_AUTOHSCROLL | 
+                    CBS_SORT | WS_VSCROLL | WS_TABSTOP,0,HIDC_GROUP
+    DEFPUSHBUTTON   "OK",IDOK,223,126,50,17
+    PUSHBUTTON      "Cancel",IDCANCEL,223,161,50,17
+END
+
+IDD_HOST DIALOGEX 6, 18, 160, 119
+STYLE DS_MODALFRAME | DS_CONTEXTHELP | WS_POPUP | WS_VISIBLE | WS_CAPTION | 
+    WS_SYSMENU
+CAPTION "New Host Name"
+FONT 10, "MS Sans Serif", 0, 0, 0x1
+BEGIN
+    LTEXT           "Host name",IDC_STATIC,10,10,46,8
+    EDITTEXT        IDC_HOSTNAME,62,8,88,12,ES_AUTOHSCROLL,0,HIDC_HOSTNAME
+    LTEXT           "Alias name",IDC_STATIC,10,32,46,8
+    EDITTEXT        IDC_ALIASNAME,62,30,88,12,ES_AUTOHSCROLL,0,
+                    HIDC_ALIASNAME
+    LTEXT           "Timeout",IDC_STATIC,10,52,42,8
+    EDITTEXT        IDC_TIMEOUT,62,50,41,12,ES_AUTOHSCROLL,0,HIDC_TIMEOUT
+    CONTROL         "Spin1",IDC_SCR_TIMEOUT,"msctls_updown32",
+                    UDS_SETBUDDYINT | UDS_ALIGNRIGHT | UDS_AUTOBUDDY | 
+                    UDS_ARROWKEYS | UDS_NOTHOUSANDS,107,49,10,14,0,
+                    HIDC_SCR_TIMEOUT
+    CONTROL         "Probe first",IDC_PROBEFIRST,"Button",BS_AUTOCHECKBOX | 
+                    BS_LEFTTEXT | WS_TABSTOP,10,72,60,10,0,HIDC_PROBEFIRST
+    DEFPUSHBUTTON   "OK",IDOK,12,96,28,14
+    PUSHBUTTON      "Cancel",IDCANCEL,122,96,28,14
+END
+
+IDD_TIMELIMS DIALOGEX 0, 0, 212, 135
+STYLE DS_MODALFRAME | DS_CONTEXTHELP | WS_POPUP | WS_VISIBLE | WS_CAPTION | 
+    WS_SYSMENU
+CAPTION "Job time limits"
+FONT 10, "MS Sans Serif", 0, 0, 0x1
+BEGIN
+    LTEXT           "Delete job after (hours)",IDC_STATIC,8,12,76,7
+    EDITTEXT        IDC_DELTIME,96,9,50,12,ES_READONLY,0,HIDC_DELTIME
+    CONTROL         "Spin1",IDC_SCR_DELTIME,"msctls_updown32",
+                    UDS_SETBUDDYINT | UDS_ALIGNRIGHT | UDS_AUTOBUDDY | 
+                    UDS_ARROWKEYS | UDS_NOTHOUSANDS,147,7,10,14,0,
+                    HIDC_SCR_DELTIME
+    LTEXT           "Maximum run time",IDC_STATIC,8,32,72,8
+    EDITTEXT        IDC_HOUR,96,30,21,12,ES_READONLY | ES_NUMBER,0,HIDC_HOUR
+    CONTROL         "Spin2",IDC_SCR_HOUR,"msctls_updown32",UDS_ALIGNRIGHT | 
+                    UDS_AUTOBUDDY | UDS_ARROWKEYS,108,29,10,14,0,
+                    HIDC_SCR_HOUR
+    LTEXT           ":",IDC_COLON,118,33,2,7
+    EDITTEXT        IDC_MIN,121,30,21,12,ES_READONLY | ES_NUMBER,0,HIDC_MIN
+    CONTROL         "Spin3",IDC_SCR_MIN,"msctls_updown32",UDS_ALIGNRIGHT | 
+                    UDS_AUTOBUDDY | UDS_ARROWKEYS,133,29,10,14,0,
+                    HIDC_SCR_MIN
+    LTEXT           ":",IDC_COLON2,144,32,2,7
+    EDITTEXT        IDC_SEC,148,30,21,12,ES_READONLY | ES_NUMBER,0,HIDC_SEC
+    CONTROL         "Spin4",IDC_SCR_SEC,"msctls_updown32",UDS_ALIGNRIGHT | 
+                    UDS_AUTOBUDDY | UDS_ARROWKEYS,162,29,10,14,0,
+                    HIDC_SCR_SEC
+    PUSHBUTTON      "OFF",IDC_RTOFF,177,29,28,14,0,0,HIDC_RTOFF
+    GROUPBOX        "Kill With",IDC_STATIC,28,48,133,53
+    CONTROL         "Sigterm",IDC_KW_TERM,"Button",BS_AUTORADIOBUTTON | 
+                    WS_GROUP | WS_TABSTOP,33,61,35,10,0,HIDC_KW_TERM
+    CONTROL         "Sigkill",IDC_KW_KILL,"Button",BS_AUTORADIOBUTTON | 
+                    WS_TABSTOP,33,73,35,10,0,HIDC_KW_KILL
+    CONTROL         "Sighup",IDC_KW_HUP,"Button",BS_AUTORADIOBUTTON | 
+                    WS_TABSTOP,33,85,35,10,0,HIDC_KW_HUP
+    CONTROL         "Sigint",IDC_KW_INT,"Button",BS_AUTORADIOBUTTON | 
+                    WS_TABSTOP,77,61,35,10,0,HIDC_KW_INT
+    CONTROL         "Sigquit",IDC_KW_QUIT,"Button",BS_AUTORADIOBUTTON | 
+                    WS_TABSTOP,77,73,35,10,0,HIDC_KW_QUIT
+    CONTROL         "Sigalrm",IDC_KW_ARLM,"Button",BS_AUTORADIOBUTTON | 
+                    WS_TABSTOP,77,85,35,10,0,HIDC_KW_ARLM
+    CONTROL         "Sigbus",IDC_KW_BUS,"Button",BS_AUTORADIOBUTTON | 
+                    WS_TABSTOP,121,61,35,10,0,HIDC_KW_BUS
+    CONTROL         "Sigsegv",IDC_KW_SEGV,"Button",BS_AUTORADIOBUTTON | 
+                    WS_TABSTOP,121,73,35,10,0,HIDC_KW_SEGV
+    LTEXT           "Allow to clean up for",IDC_STATIC,8,111,68,8
+    EDITTEXT        IDC_MIN2,78,109,23,12,ES_READONLY,0,HIDC_MIN2
+    CONTROL         "Spin5",IDC_SCR_MIN2,"msctls_updown32",UDS_ALIGNRIGHT | 
+                    UDS_AUTOBUDDY | UDS_ARROWKEYS,104,108,10,14,0,
+                    HIDC_SCR_MIN2
+    LTEXT           ":",IDC_COLON3,109,110,2,7
+    EDITTEXT        IDC_SEC2,119,109,23,12,ES_READONLY,0,HIDC_SEC2
+    CONTROL         "Spin6",IDC_SCR_SEC2,"msctls_updown32",UDS_ALIGNRIGHT | 
+                    UDS_AUTOBUDDY | UDS_ARROWKEYS,138,108,7,14,0,
+                    HIDC_SCR_SEC2
+    DEFPUSHBUTTON   "OK",IDOK,169,67,36,14
+    PUSHBUTTON      "Cancel",IDCANCEL,169,105,36,14
+END
+
+IDD_PORTNUMS DIALOGEX 0, 0, 244, 187
+STYLE DS_MODALFRAME | DS_CONTEXTHELP | WS_POPUP | WS_VISIBLE | WS_CAPTION | 
+    WS_SYSMENU
+CAPTION "Port Numbers"
+FONT 10, "MS Sans Serif", 0, 0, 0x1
+BEGIN
+    CTEXT           "PLEASE BE CAREFUL ABOUT SETTING THESE!!!",IDC_STATIC,4,
+                    11,236,8
+    PUSHBUTTON      "Set Default",IDC_SETDEFAULT,8,24,50,14,0,0,
+                    HIDC_SETDEFAULT
+    LTEXT           "Adjust all by:",IDC_STATIC,67,27,43,8
+    EDITTEXT        IDC_INCALLBY,120,24,41,13,ES_AUTOHSCROLL,0,HIDC_INCALLBY
+    CONTROL         "Spin1",IDC_SCR_INCALLBY,"msctls_updown32",
+                    UDS_SETBUDDYINT | UDS_ALIGNRIGHT | UDS_AUTOBUDDY | 
+                    UDS_ARROWKEYS | UDS_NOTHOUSANDS,161,23,10,14,0,
+                    HIDC_SCR_INCALLBY
+    PUSHBUTTON      "Incr",IDC_APPLYINC,185,24,21,15,0,0,HIDC_APPLYINC
+    PUSHBUTTON      "Decr",IDC_APPLYDEC,215,24,21,15,0,0,HIDC_APPLYDEC
+    LTEXT           "Client access",IDC_STATIC,4,51,52,7
+    EDITTEXT        IDC_CLIENTPORT,76,48,50,13,ES_AUTOHSCROLL | ES_NUMBER,0,
+                    HIDC_CLIENTPORT
+    CONTROL         "Spin2",IDC_SCR_CLIENTPORT,"msctls_updown32",
+                    UDS_SETBUDDYINT | UDS_ALIGNRIGHT | UDS_AUTOBUDDY | 
+                    UDS_ARROWKEYS | UDS_NOTHOUSANDS,126,47,10,14,0,
+                    HIDC_SCR_CLIENTPORT
+    LTEXT           "Connection - Probe",IDC_STATIC,4,73,64,8
+    EDITTEXT        IDC_PROBEPORT,76,69,50,13,ES_AUTOHSCROLL,0,
+                    HIDC_PROBEPORT
+    CONTROL         "Spin3",IDC_SCR_PROBEPORT,"msctls_updown32",
+                    UDS_SETBUDDYINT | UDS_ALIGNRIGHT | UDS_AUTOBUDDY | 
+                    UDS_ARROWKEYS | UDS_NOTHOUSANDS,126,70,10,14,0,
+                    HIDC_SCR_PROBEPORT
+    LTEXT           "Connect (TCP)",IDC_STATIC,136,73,45,8
+    EDITTEXT        IDC_CONNPORT,188,71,50,13,ES_AUTOHSCROLL,0,HIDC_CONNPORT
+    CONTROL         "Spin4",IDC_SCR_CONNPORT,"msctls_updown32",
+                    UDS_SETBUDDYINT | UDS_ALIGNRIGHT | UDS_AUTOBUDDY | 
+                    UDS_ARROWKEYS | UDS_NOTHOUSANDS,231,70,10,14
+    LTEXT           "Job view (TCP)",IDC_STATIC,4,96,64,8
+    EDITTEXT        IDC_VIEWPORT,76,92,50,13,ES_AUTOHSCROLL,0,HIDC_VIEWPORT
+    CONTROL         "Spin8",IDC_SCR_VIEWPORT,"msctls_updown32",
+                    UDS_SETBUDDYINT | UDS_ALIGNRIGHT | UDS_AUTOBUDDY | 
+                    UDS_ARROWKEYS | UDS_NOTHOUSANDS,131,91,10,14,0,
+                    HIDC_SCR_VIEWPORT
+    LTEXT           "API (TCP)",IDC_STATIC,4,119,52,8
+    EDITTEXT        IDC_APITCPPORT,76,116,50,13,ES_AUTOHSCROLL,0,
+                    HIDC_APITCPPORT
+    CONTROL         "Spin6",IDC_SCR_APITCPPORT,"msctls_updown32",
+                    UDS_SETBUDDYINT | UDS_ALIGNRIGHT | UDS_AUTOBUDDY | 
+                    UDS_ARROWKEYS | UDS_NOTHOUSANDS,122,115,10,14,0,
+                    HIDC_SCR_APITCPPORT
+    LTEXT           "API (UDP)",IDC_STATIC,136,119,40,8
+    EDITTEXT        IDC_APIUDPPORT,188,116,50,13,ES_AUTOHSCROLL,0,
+                    HIDC_APIUDPPORT
+    CONTROL         "Spin7",IDC_SCR_APIUDPPORT,"msctls_updown32",
+                    UDS_SETBUDDYINT | UDS_ALIGNRIGHT | UDS_AUTOBUDDY | 
+                    UDS_ARROWKEYS | UDS_NOTHOUSANDS,231,115,10,14
+    PUSHBUTTON      "Save Settings to INI file",IDC_SAVESETTINGS,68,140,100,
+                    14,0,0,HIDC_SAVESETTINGS
+    DEFPUSHBUTTON   "OK",IDOK,8,164,50,14
+    PUSHBUTTON      "Cancel",IDCANCEL,188,164,50,14
+END
+
+IDD_LOGINHOST DIALOGEX 0, 0, 186, 131
+STYLE DS_MODALFRAME | DS_CONTEXTHELP | WS_POPUP | WS_CAPTION | WS_SYSMENU
+CAPTION "Please log in to Unix Host...."
+FONT 10, "MS Sans Serif", 0, 0, 0x1
+BEGIN
+    LTEXT           "Login to Unix Host",IDC_STATIC,13,15,55,8
+    EDITTEXT        IDC_UNIXHOST,90,13,67,12,ES_AUTOHSCROLL | ES_READONLY | 
+                    NOT WS_BORDER | NOT WS_TABSTOP
+    LTEXT           "Client Host Name",IDC_STATIC,13,37,53,8
+    EDITTEXT        IDC_CLIENTHOST,90,35,67,12,ES_AUTOHSCROLL | ES_READONLY | 
+                    NOT WS_BORDER | NOT WS_TABSTOP
+    LTEXT           "User Name",IDC_STATIC,13,59,35,8
+    EDITTEXT        IDC_USERNAME,64,56,94,14,ES_AUTOHSCROLL,0,HIDC_USERNAME
+    LTEXT           "Password",IDC_STATIC,13,81,31,8
+    EDITTEXT        IDC_PASSWD,64,78,94,14,ES_PASSWORD | ES_AUTOHSCROLL,0,
+                    HIDC_PASSWD
+    DEFPUSHBUTTON   "OK",IDOK,7,110,50,14
+    PUSHBUTTON      "Cancel",IDCANCEL,129,110,50,14
+END
+
+IDD_LOGINOUT DIALOGEX 0, 0, 186, 95
+STYLE DS_MODALFRAME | DS_CONTEXTHELP | WS_POPUP | WS_CAPTION | WS_SYSMENU
+CAPTION "Login as new user or log out"
+FONT 10, "MS Sans Serif", 0, 0, 0x1
+BEGIN
+    LTEXT           "Currently logged in as",IDC_STATIC,15,14,71,8
+    EDITTEXT        IDC_UNIXUSER,94,12,53,12,ES_AUTOHSCROLL | ES_READONLY | 
+                    NOT WS_BORDER
+    LTEXT           "Windows user",IDC_STATIC,15,32,43,8
+    EDITTEXT        IDC_WINUSER,94,30,53,12,ES_AUTOHSCROLL | ES_READONLY | 
+                    NOT WS_BORDER
+    PUSHBUTTON      "Login as new user",IDC_LOGIN,7,50,73,14,0,0,HIDC_LOGIN
+    PUSHBUTTON      "Log out",IDC_LOGOUT,107,50,73,14,0,0,HIDC_LOGOUT
+    DEFPUSHBUTTON   "Cancel",IDCANCEL,68,73,50,14
+END
+
+IDD_NEWGROUP DIALOGEX 0, 0, 186, 95
+STYLE DS_MODALFRAME | DS_CONTEXTHELP | WS_POPUP | WS_CAPTION | WS_SYSMENU
+CAPTION "Select New Group"
+FONT 10, "MS Sans Serif", 0, 0, 0x1
+BEGIN
+    LTEXT           "Group Name",IDC_STATIC,16,27,41,8
+    COMBOBOX        IDC_GROUP,16,46,124,85,CBS_DROPDOWN | CBS_SORT | 
+                    WS_VSCROLL | WS_TABSTOP,0,HIDC_GROUP
+    DEFPUSHBUTTON   "OK",IDOK,129,7,50,14
+    PUSHBUTTON      "Cancel",IDCANCEL,129,24,50,14
+END
+
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// Toolbar
+//
+
+IDR_MAINFRAME TOOLBAR DISCARDABLE  16, 15
+BEGIN
+    BUTTON      ID_PROGRAM_SAVE
+    SEPARATOR
+    BUTTON      ID_NETWORK_ADDNEWHOST
+    BUTTON      ID_NETWORK_DELETEHOST
+    BUTTON      ID_NETWORK_CHANGEHOST
+    SEPARATOR
+    BUTTON      ID_NETWORK_SETASSERVER
+    SEPARATOR
+    BUTTON      ID_OPTIONS_PROGRAMDEFAULTS
+    SEPARATOR
+    BUTTON      ID_OPTIONS_TIMEDEFAULTS
+    BUTTON      ID_OPTIONS_CONDITIONDEFAULTS
+    BUTTON      ID_OPTIONS_ASSIGNMENTDEFAULTS
+    SEPARATOR
+    BUTTON      ID_OPTIONS_QUEUEDEFAULTS
+    BUTTON      ID_OPTIONS_PROCESSPARAMETERS
+    BUTTON      ID_OPTIONS_PERMISSIONS
+    SEPARATOR
+    BUTTON      ID_APP_ABOUT
+    BUTTON      ID_CONTEXT_HELP
+END
+
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// DESIGNINFO
+//
+
+#ifdef APSTUDIO_INVOKED
+GUIDELINES DESIGNINFO DISCARDABLE 
+BEGIN
+    IDD_LOGINHOST, DIALOG
+    BEGIN
+        LEFTMARGIN, 7
+        RIGHTMARGIN, 179
+        TOPMARGIN, 7
+        BOTTOMMARGIN, 124
+    END
+
+    IDD_LOGINOUT, DIALOG
+    BEGIN
+        LEFTMARGIN, 7
+        RIGHTMARGIN, 179
+        TOPMARGIN, 7
+        BOTTOMMARGIN, 87
+    END
+
+    IDD_NEWGROUP, DIALOG
+    BEGIN
+        LEFTMARGIN, 7
+        RIGHTMARGIN, 179
+        TOPMARGIN, 7
+        BOTTOMMARGIN, 88
+    END
+END
+#endif    // APSTUDIO_INVOKED
+
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// String Table
+//
+
+STRINGTABLE PRELOAD DISCARDABLE 
+BEGIN
+    IDR_MAINFRAME           "BTRSETW Windows Application\nBtrsetw\nBTRSET Document"
+END
+
+STRINGTABLE PRELOAD DISCARDABLE 
+BEGIN
+    AFX_IDS_APP_TITLE       "BTRSETW Windows Application"
+    AFX_IDS_IDLEMESSAGE     "For Help, press F1"
+    AFX_IDS_HELPMODEMESSAGE "Select an object on which to get Help"
+END
+
+STRINGTABLE DISCARDABLE 
+BEGIN
+    ID_INDICATOR_EXT        "EXT"
+    ID_INDICATOR_CAPS       "CAP"
+    ID_INDICATOR_NUM        "NUM"
+    ID_INDICATOR_SCRL       "SCRL"
+    ID_INDICATOR_OVR        "OVR"
+    ID_INDICATOR_REC        "REC"
+END
+
+STRINGTABLE DISCARDABLE 
+BEGIN
+    ID_APP_ABOUT            "Display program information, version number and copyright\nVersion number"
+    ID_APP_EXIT             "Quit the application; prompts to save documents"
+    ID_HELP_INDEX           "List Help topics"
+    ID_HELP_USING           "Display instructions about how to use help"
+    ID_CONTEXT_HELP         "Display help for clicked on buttons, menus and windows\nContext help"
+    ID_HELP                 "Display help for current task or command"
+END
+
+STRINGTABLE DISCARDABLE 
+BEGIN
+    ID_FILE_MRU_FILE1       "Open this document"
+    ID_FILE_MRU_FILE2       "Open this document"
+    ID_FILE_MRU_FILE3       "Open this document"
+    ID_FILE_MRU_FILE4       "Open this document"
+END
+
+STRINGTABLE DISCARDABLE 
+BEGIN
+    ID_NEXT_PANE            "Switch to the next window pane"
+    ID_PREV_PANE            "Switch back to the previous window pane"
+END
+
+STRINGTABLE DISCARDABLE 
+BEGIN
+    ID_VIEW_TOOLBAR         "Show or hide the toolbar"
+    ID_VIEW_STATUS_BAR      "Show or hide the status bar"
+END
+
+STRINGTABLE DISCARDABLE 
+BEGIN
+    AFX_IDS_SCSIZE          "Change the window size"
+    AFX_IDS_SCMOVE          "Change the window position"
+    AFX_IDS_SCMINIMIZE      "Reduce the window to an icon"
+    AFX_IDS_SCMAXIMIZE      "Enlarge the window to full size"
+    AFX_IDS_SCNEXTWINDOW    "Switch to the next document window"
+    AFX_IDS_SCPREVWINDOW    "Switch to the previous document window"
+    AFX_IDS_SCCLOSE         "Close the active window and prompts to save the documents"
+END
+
+STRINGTABLE DISCARDABLE 
+BEGIN
+    AFX_IDS_SCRESTORE       "Restore the window to normal size"
+    AFX_IDS_SCTASKLIST      "Activate Task List"
+END
+
+STRINGTABLE DISCARDABLE 
+BEGIN
+    ID_PROGRAM_SAVE         "Save data in Xi-Batch initialisation files\nSave data"
+    ID_NETWORK_ADDNEWHOST   "Add new Unix host to list.\nNew host"
+    ID_NETWORK_DELETEHOST   "Delete host from list.\nDelete host"
+    ID_NETWORK_CHANGEHOST   "Change details of host in list.\nChange host"
+    ID_NETWORK_SETASSERVER  "Set as main Unix server\nSet as Server"
+    ID_OPTIONS_PROGRAMDEFAULTS 
+                            "Set defaults for various programs - job queue etc.\nSet defaults"
+    ID_OPTIONS_RESTOREDEFAULTS 
+                            "Restore options to standard defaults for server."
+    ID_OPTIONS_TIMEDEFAULTS "Set repeat interval defaults\nTime defaults"
+    ID_OPTIONS_CONDITIONDEFAULTS 
+                            "Set default constant and operation for conditions\nCondition defaults"
+    ID_OPTIONS_ASSIGNMENTDEFAULTS 
+                            "Set default value flags and operation for assignments\nAssignment defaults"
+    ID_OPTIONS_QUEUEDEFAULTS 
+                            "Set default title, priority, command interpreter and load level\nDefault title, pri, loadlev"
+    ID_OPTIONS_PROCESSPARAMETERS 
+                            "Set default umask, ulimit, directory and exit codes.\nProcess params"
+    ID_OPTIONS_PERMISSIONS  "Set default permissions\nPermissions"
+    ID_OPTIONS_TIMELIMITS   "Set delete and maximum run times defaults."
+    ID_PROGRAM_PORTSETTINGS "Save alternative port settings"
+END
+
+STRINGTABLE DISCARDABLE 
+BEGIN
+    IDP_XBENQ_PASSREQ       "You need to supply a password to log in to the server."
+    IDP_XBENQ_BADPASSWD     "The supplied password is incorrect."
+    IDP_XBENQ_UNKNOWN       "Unknown problem obtaining user data from server."
+    IDP_XBENQ_BADCLIENT     "This is an unknown client user or host name. Please check that the /etc/Xibatch-hosts file is correct on the server."
+    IDP_XBENQ_UNKNOWNU      "Unable to identify user on server. Please check the windows user name and also the user name(s) in the /etc/Xibatch-hosts file."
+    IDP_XBENQ_UNKNOWNG      "Unknown or invalid group. You may be limited to a subset of groups."
+    IDP_CONNDIED            "Connection has died to server. Shall I refresh it?"
+    IDP_PREVINSTANCE        "Sorry but you are only supposed to have one copy of this program running at once as it uses too many system resources. Please switch to your previous copy."
+    IDP_NOHOSTSYET          "You have not got any hosts yet to edit."
+    IDP_NOTSELECTED         "You have not selected a host for this operation. Please do so by clicking on one."
+    IDP_SUREDEL             "Are you sure you want to delete this entry?"
+    IDP_NOHOSTNAME          "You haven't provided a host name - please try again."
+    IDP_NOALIASNAME         "You have given the host name as an Internet address. However you have not given an alias name."
+    IDP_ALIASSAMEASHOST     "Your alias name is the same as your host name - please try again."
+    IDP_BADINETADDR         "Invalid internet address supplied as host name. Please try again."
+    IDP_HIDCLASH            "Your host id (given as an internet number) conflicts with an existing one."
+END
+
+STRINGTABLE DISCARDABLE 
+BEGIN
+    IDS_NOTLOGGED           "(No user)"
+    IDS_UNKNOWN             "UNKNOWN"
+    IDS_PROBE               "Probe"
+    IDS_SERVER              "Server"
+END
+
+STRINGTABLE DISCARDABLE 
+BEGIN
+    IDP_NOCILIST            "Sorry, cannot get ""command interpreter"" list from server."
+    IDP_NORMBADRANGE        "Bad range given for normal exit codes."
+    IDP_ERRBADRANGE         "Bad range given for error exit codes."
+    IDP_JLTMINMODE          "The proposed new modes are less than the minimum to enable anyone to do anything."
+    IDP_SURERESTORE         "Sure that you want to restore default options?"
+    IDP_SAVEPROPTS          "Save host file, program options and default settings before exit?"
+END
+
+STRINGTABLE DISCARDABLE 
+BEGIN
+    IDP_HIDCLASHMINE        "You have given an internet address which is the same as the address of this machine. Please try again."
+    IDP_ALIASCLASH          "Your alias name clashes with an existing name. Please try again."
+    IDP_HOSTCLASH           "Your host name clashes with an existing name. Please try again."
+    IDP_UNKNOWNHOSTNAME     "Your host name is not known. Maybe you need to set it up in the TCP file \\etc\\hosts."
+    IDP_MYHOSTNAME          "The host name you have given conflicts with the name of this machine."
+    IDP_NOTALIVE            "Unable to access new server - ignored."
+    IDP_NO_SERVER           "No server is specified in hosts file. Please set one up."
+    IDP_NO_HOSTFILE         "There is no hosts file (typically C:\\XIBATCH\\HOSTS)."
+    IDP_HF_INVALIDHOST      "Unknown or invalid host name in hosts file."
+    IDP_HF_BADTIMEOUT       "Invalid timeout entry in hosts file."
+    IDP_HF_NOALIAS          "Your hosts file specifies a host as an internet address (e.g. 192.10.2.3), but you have given no alias.\nPlease re-run ""sprsetw"" to fix."
+    IDP_GBTU_NOBIND         "Unable to bind UDP socket to access user details. Please reboot machine."
+    IDP_GBTU_NOSEND         "Send failure on UDP socket for accessing user details from server. Please reboot this machine."
+    IDP_GBTU_NORECV         "Receive failure obtaining user details from Unix host. Is ""xbnetserv"" running?"
+    IDP_GBTU_NVALID         "Invalid user details returned from Unix Server. Is the ""/etc/Xibatch-hosts"" file set up correctly on the server? This machine should be set up as a DOS client and the appropriate user name included."
+    IDP_GBTU_NOSOCK         "Unable to create socket entry for accessing user details - aborting."
+END
+
+STRINGTABLE DISCARDABLE 
+BEGIN
+    ID_PROGRAM_LOGINORLOGOUT "Login as another user or log out from Unix host"
+END
+
+#endif    // English (U.K.) resources
+/////////////////////////////////////////////////////////////////////////////
+
+
+
+#ifndef APSTUDIO_INVOKED
+/////////////////////////////////////////////////////////////////////////////
+//
+// Generated from the TEXTINCLUDE 3 resource.
+//
+#include "res\btrsetw.rc2"  // non-App Studio edited resources
+
+#include "afxres.rc"  // Standard components
+
+/////////////////////////////////////////////////////////////////////////////
+#endif    // not APSTUDIO_INVOKED
+

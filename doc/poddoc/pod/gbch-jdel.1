@@ -1,0 +1,223 @@
+=head1 NAME
+
+gbch-jdel - delete batch jobs
+
+gbch-jgo - force job(s) to run ignoring time
+
+gbch-goadv - force job(s) to run ignoring time and advance time.
+
+gbch-adv - advance job(s) to next time without running.
+
+=head1 SYNOPSIS
+
+B<gbch-jdel>
+[ I<-options> ]
+job number ...
+
+=head1 DESCRIPTION
+
+B<gbch-jdel> provides a means of deleting batch jobs from the shell or a program,
+optionally killing running jobs if required.
+
+B<gbch-jgo> forces a job or jobs to run, ignoring the "next run time". Conditions
+and load level constraints are however still enforced. The "next run
+time" will not be affected when the job completes. This inserts an
+extra run of the job.
+
+B<gbch-jgoadv> forces a job or jobs to run, ignoring the "next run
+time". Conditions and load level constraints are however still
+enforced. The "next run time" is advanced to the next time. This
+brings forward the next run, thereafter resuming the sequence.
+
+B<gbch-jadv> advances the run time on each job specified to the next run
+time according to its repeat time without running the job or looking
+at conditions.
+
+The four programs are all hard links to the same file.
+
+Jobs are specified by using the job number, as displayed by gbch-r(1)
+with the B<-v> (verbose) option, or as in the output of the first
+column of the gbch-jlist(1) command with default format.
+
+Remote jobs should be specified by prefixing the job numbers with the
+host name thus:
+
+	host:1234
+
+It is not necessary to specify any leading zeros.
+
+Appropriate error messages are displayed if the user attempts to
+delete a job which is either running or if the user does not have the
+necessary permissions.
+
+=head1 OPTIONS
+
+Only B<gbch-jdel> takes any options.
+
+Note that the order of treatment, letters and keywords described below
+may be modified by editing the file F<btrest.help> -
+see btsyntax(5).
+
+The environment variable on which options are supplied is C<GBCH_JDEL>
+etc and the environment variable to specify the help file is
+C<BTRESTCONF>.
+
+=over 8
+
+=item -? or +explain
+
+causes a summary of the other options to be displayed without taking
+further action.
+
+=item -C I<name> or +command-prefix I<name>
+
+specify the given I<name> as the prefix for the command file, followed
+by the job number, to be used by the B<-u> option rather than the
+default of B<C> (which in turn may be changed by editing the
+message file).
+
+The command file is a shell script, typically containing a gbch-r(1)
+command, which when run via the shell will attempt to create a job
+equivalent to the one "unqueued". Obviously the user is at liberty to
+amend this or the job file before doing so.
+
+=item -D I<name> or +directory I<name>
+
+Save unqueued jobs to I<name> rather than the current directory when
+B<gbch-jdel> is invoked.
+
+=item -d or +delete
+
+Cancel any previous B<-k> option to be the default of deleting jobs.
+
+=item -e or +do-not-unqueue
+
+Cancel the effect of a previous B<-u> option.
+
+=item -J I<name> or +job-prefix I<name>
+
+specify the given I<name> as the prefix for the job file, followed
+by the job number, to be used by the B<-u> option rather than the
+default of B<J> (which in turn may be changed by editing the
+message file).
+
+=item -K I<signalnumber> or +signal-number I<signalnumber>
+
+Apply I<signalnumber> given to kill running job. Default is 15 (C<SIGTERM>).
+
+=item -k or +do-not-delete
+
+Kill jobs only where applicable, do not delete.
+
+=item -n or -N or +no-force
+
+Do not kill or delete running jobs (default).
+
+=item -S I<seconds> or +sleep-time I<seconds>
+
+Monitor process state for I<seconds> seconds after killing (default 10
+seconds).
+
+=item -u or +unqueue
+
+unqueue job(s) to the current directory. Do not delete if B<-k> given.
+
+=item -y or -Y or +force
+
+Kill and delete running jobs.
+
+=item +freeze-current
+
+Save all the current options in a F<.gnubatch> file in the current
+directory.
+
+=item +freeze-home
+
+Save all the current options in a F<.gnubatch> file in the user's home
+directory.
+
+=back
+
+=head1 FILES
+
+F<~/.gnubatch>
+configuration file (home directory)
+
+F<.gnubatch>
+configuration file (current directory)
+
+F<btrest.help>
+message file
+
+=head1 ENVIRONMENT
+
+=over 4
+
+=item GBCH_JDEL
+
+space-separated options to override defaults for gbch_jdel
+
+=item GBCH_JGO
+
+space-separated options to override defaults for gbch_jgo
+
+=item GBCH_JGOADV
+
+space-separated options to override defaults for gbch_jgoadv
+
+=item GBCH_JADV
+
+space-separated options to override defaults for gbch_jadv
+
+=item BTRESTCONF
+
+location of alternative help file.
+
+=back
+
+=head1 EXAMPLES
+
+To delete jobs even if running:
+
+	gbch-jdel -y 1237 avon:9371
+
+Kill a job without deleting it with signal 2 (SIGINT).
+
+	gbch-jdel -K 2 -k 9120
+
+Take a copy of the job in a work directory without deleting it.
+
+	gbch-jdel -u -k -D ~/work -C spec -J script 9123
+
+=head1 SEE ALSO
+
+btsyntax(5),
+gnubatch.conf(5),
+gnubatch.hosts(5),
+gbch-r(1),
+gbch-rr(1),
+gbch-jchange(1),
+gbch-jlist(1).
+
+=head1 DIAGNOSTICS
+
+Various diagnostics are read and printed as required from the message
+file F<btrest.help>.
+
+=head1 COPYRIGHT
+
+Copyright (c) 2009 Free Software Foundation, Inc.
+This is free software. You may redistribute copies of it under the
+terms of the GNU General Public License
+<http://www.gnu.org/licenses/gpl.html>.
+There is NO WARRANTY, to the extent permitted by law.
+
+=head1 AUTHOR
+
+John M Collins, Xi Software Ltd.
+
+=cut
+
+## Local Variables:
+## mode: nroff
+## End:

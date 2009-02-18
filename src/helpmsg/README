@@ -1,0 +1,18 @@
+Help message files.
+==================
+
+  Copyright 2009 Free Software Foundation, Inc.
+
+  Copying and distribution of this file, with or without modification,
+  are permitted in any medium without royalty provided the copyright
+  notice and this notice are preserved.
+
+----------------------------------------------------------------------
+
+The stuff in here is only a "stub" which "helpparse" inserts the
+appropriate messages from the message file and appends to the one in
+the "build" directory which is what actually gets installed.
+
+So please don't run any Makefile in here!
+
+John Collins

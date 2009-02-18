@@ -1,0 +1,78 @@
+#  bjparam.h -- memory allocation for helpfile parsing
+
+#  Copyright 2009 Free Software Foundation, Inc.
+
+#  This program is free software: you can redistribute it and/or modify
+#  it under the terms of the GNU General Public License as published by
+#  the Free Software Foundation, either version 3 of the License, or
+#  (at your option) any later version.
+
+#  This program is distributed in the hope that it will be useful,
+#  but WITHOUT ANY WARRANTY; without even the implied warranty of
+#  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#  GNU General Public License for more details.
+
+#  You should have received a copy of the GNU General Public License
+#  along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
+
+SHELL		=	/bin/sh
+@SET_MAKE@
+prefix		=	@prefix@
+exec_prefix	=	@exec_prefix@
+PARENT		=	..
+BASE		=	../..
+HDRS		=	$(PARENT)/hdrs
+YACC		=	@YACC@
+CC		=	@CC@
+CCFLAGS		=	-O @gcc_useful_options@ @funny_compiler_options@
+LDFLAGS		=
+LIBS		=	@LIBS@
+LIBNET		=	@SOCKLIBS@
+MYLIBDIR	=	$(PARENT)/lib
+LIB		=	$(MYLIBDIR)/libgnubatch_int.a
+HDRS		=	$(PARENT)/hdrs
+CFLAGS		=	$(CCFLAGS) -I$(HDRS) -I$(BASE)
+RM		=	rm -f
+INSTALL		=	@INSTALL@
+INSTALL_DATA	=	@INSTALL_DATA@
+BATCHUSER	=	@BATCHUSER@
+USERMODES	=	-o $(BATCHUSER) -g root -m 755
+BINDIR		=	@bindir@
+SBINDIR		=	@sbindir@
+INTBINDIR	=	@pkgexecdir@
+USERPROGS	=	gbch-atcover
+PROGS		=	gbch-btuconv gbch-ciconv gbch-cjlist gbch-cvlist gbch-ripc
+
+all shared nonshared:	gbch-atcover gbch-btuconv gbch-ciconv gbch-cjlist gbch-cvlist gbch-ripc
+
+gbch-atcover:	atcover.o
+	$(CC) $(LDFLAGS) -o $@ atcover.o $(LIB) $(LIBS)
+
+gbch-btuconv:	btuconv.o convcomm.o
+	$(CC) $(LDFLAGS) -o $@ btuconv.o convcomm.o $(LIB) $(LIBNET) $(LIBS)
+
+gbch-ciconv:	ciconv.o convcomm.o
+	$(CC) $(LDFLAGS) -o $@ ciconv.o convcomm.o $(LIB) $(LIBS)
+
+gbch-cjlist:	cjlist.o convcomm.o
+	$(CC) $(LDFLAGS) -o $@ cjlist.o convcomm.o $(LIB) $(LIBNET) $(LIBS)
+
+gbch-cvlist:	cvlist.o convcomm.o
+	$(CC) $(LDFLAGS) -o $@ cvlist.o convcomm.o $(LIB) $(LIBNET) $(LIBS)
+
+gbch-ripc:	ripc.o
+	$(CC) $(LDFLAGS) -o $@ ripc.o $(LIB) $(LIBNET) $(LIBS) -lm
+
+install:	all
+	$(INSTALL) $(PROGS) $(SBINDIR)
+	$(INSTALL) $(USERMODES) $(USERPROGS) $(SBINDIR)
+
+install-strip:	all
+	$(INSTALL) -s $(PROGS) $(SBINDIR)
+	$(INSTALL) -s $(USERMODES) $(USERPROGS) $(SBINDIR)
+
+clean:
+	$(RM) *.o gbch-atcover gbch-btuconv gbch-ciconv gbch-cjlist gbch-cvlist gbch-ripc y.tab.?
+
+distclean: clean
+	$(RM) Makefile

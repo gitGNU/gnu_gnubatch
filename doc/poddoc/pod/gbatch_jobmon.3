@@ -1,0 +1,116 @@
+=head1 NAME
+
+gbatch_jobmon - monitor changes to the job queue
+
+=head1 SYNOPSIS
+
+=for man
+\&\fB#include <gbatch.h>\fR
+.PP
+
+=for html
+<STRONG>#include &lt;gbatch.h&gt;</STRONG>
+<br>
+
+B<int gbatch_jobmon(const int>
+I<fd>B<, void (*>I<fn>B<)(const int))>
+
+B<int gbatch_setmon(const int>
+I<fd>B<, HWND>
+I<hWnd>B<, UINT>
+I<wMsg>B<)>
+
+B<int gbatch_procmon(const int>
+I<fd>B<)>
+
+B<void gbatch_unsetmon(const int> I<fd>B<)>
+
+=head1 DESCRIPTION
+
+=head2 Unix and GNU/Linux
+
+The function B<gbatch_jobmon()> is used to set a function to monitor
+changes to the job queue.
+
+I<fd> is a file descriptor which was previously returned by a
+successful call to gbatch_open(3).
+
+I<fn> is a pointer to a function which must be declared as returning
+void and taking one C<const int> argument. Alternatively, this may be
+C<NULL> to cancel monitoring.
+
+The function I<fn> will be called upon each change to the job
+list. The argument passed will be I<fd>. Note that any changes to the
+job queue are reported (including changes on other hosts whose details
+are passed through) as the API does not record which jobs the user is
+interested in.
+
+=head2 Windows
+
+The B<gbatch_setmon> routine may be used to monitor changes to the job
+queue or variable list. Its parameters are as follows.
+
+I<fd> is a file descriptor previously returned by B<gbatch_open>.
+
+I<hWnd> is a windows handle to which messages should be sent.
+
+I<wMsg> is the message id to be passed to the window (C<WM_USER> or a
+constant based on this is suggested).
+
+To decode the message, the B<gbatch_procmon> is provided. This returns
+C<XBWINAPI_JOBPROD> to indicate a change or changes to the job queue
+and C<XBWINAPI_VARPROD> to indicate a change or changes to the variable
+list. If there are changes to both, two or more messages will be sent,
+each of which should be decoded via separate B<gbatch_procmon> calls.
+
+To cancel monitoring, invoke the routine
+
+ gbatch_unsetmon(fd)
+
+If no monitoring is in progress, or the descriptor is invalid, this
+call is just ignored.
+
+=head1 RETURN VALUES
+
+The function B<gbatch_jobmon()> returns 0 if successful otherwise the
+error code C<XBAPI_INVALID_FD> if the file descriptor is
+invalid. Invalid I<fn> parameters will not be detected and the
+application program will probably crash.
+
+=head1 EXAMPLE
+
+ void note_mod(const int fd)  {
+     job_changes++;
+ }
+ . . .
+
+ gbatch_jobmon(fd, note_mod);
+ . . .
+
+ if (job_changes) { /* handle changes */
+ . . .
+ }
+
+=head1 SEE ALSO
+
+gbatch_close(3),
+gbatch_open(3),
+gbatch_varmon(3).
+
+=head1 COPYRIGHT
+
+Copyright (c) 2009 Free Software Foundation, Inc.
+This is free software. You may redistribute copies of it under the
+terms of the GNU General Public License
+<http://www.gnu.org/licenses/gpl.html>.
+There is NO WARRANTY, to the extent permitted by law.
+
+=head1 AUTHOR
+
+John M Collins, Xi Software Ltd.
+
+=cut
+
+## Local Variables:
+## mode: nroff
+## End:

@@ -1,0 +1,209 @@
+=head1 NAME
+
+gbch-cichange - add/delete/change details of a command interpreter.
+
+=head1 SYNOPSIS
+
+B<gbch-cichange>
+[ I<-options> ]
+I<name>
+
+=head1 DESCRIPTION
+
+B<gbch-cichange> is a shell-level command to create, delete or change
+details of a command interpreter according to the options
+specified. Only one command interpreter may be operated upon at a
+time.
+
+The command interpreter in question is that given by the final
+argument I<name> to the command.
+
+The user must have I<special create permission> to operate this
+command - see gbch-user(1).
+
+=head1 OPTIONS
+
+Note that the order of treatment, letters and keywords described below
+may be modified by editing the file F<btrest.help> -
+see btsyntax(5).
+
+The environment variable on which options are supplied is
+C<GBCH_CICHANGE> and the environment variable to specify the help file is
+C<BTRESTCONF>.
+
+=over 4
+
+=item -? or +explain
+
+causes a summary of the other options to be displayed without taking
+further action.
+
+=item -A or +add
+
+The command interpreter whose name and details are given with the
+other options is to be added.
+
+=item -a I<args> or +args I<args>
+
+Set the "predefined argument list" to be that given by I<args>. This
+replaces any existing predefined arguments. Supply an empty string
+with C<""> to delete all arguments.
+
+Almost invariably with shells, the C<-s> option should be supplied as
+a predefined argument. This will cause the "real" arguments supplied
+by the job, e.g. with the B<-a> option to gbch-r(1), which follow the
+predefined arguments, to be treated as strings and not the names of
+files.
+
+=item -D or +delete
+
+The specified command interpreter is to be deleted. Note that the
+first entry on the list, which is initialised on installation to be
+the Bourne shell C<sh>, cannot be deleted.
+
+B<N.B. This is not subject to extensive checking to ensure that no job
+currently uses the specified command interpreter, so please check
+first.>
+
+=item -e or +expand-args
+
+Expand C<$>-prefixed environment variables, C<~user> and backquote
+constructs in job argument strings before invoking the command
+interpreter, rather than relying upon the command interpreter to do
+it.
+
+=item -i or +set-arg0-name
+
+Argument 0 of the job, often displayed as the process name, is the
+name of the command interpreter. This is the default.
+
+=item -L I<number> or +load-level I<number>
+
+Set the load level to I<number> to be the default for new jobs created
+with this command interpreter. The default for new command
+interpreters if this option is not given is the I<special create load
+level> given in the user's profile as displayed by gbch-user(1).
+
+Remember that this load level must be less than or equal to a user's
+maximum load level per job to make use of this.
+
+=item -N I<number> or +nice I<number>
+
+Set the nice(2) value to I<number>.
+
+=item -n I<name> or +new-name I<name>
+
+Supply a new name I<name> for an existing command interpreter. B<N.B. Beware
+that existing jobs referring to the old name will not be checked for
+or changed.>
+
+=item -p I<pathname> or +path I<pathname>
+
+Set the path I<pathname> to be the process invoked as the command
+interpreter. Note that B<gbch-cichange> does not attempt to verify the
+accuracy of this path name. Environment variables etc are not expanded
+here, the full path name (starting from C</>) should be given.
+
+=item -t or +set-arg0-title
+
+Set the flag whereby the process name (or 0th argument) to the command
+interpreter becomes the job title.
+
+=item -U or +update
+
+The specified command interpreter is to have details changed as
+specified. This is the default in the absence of other options.
+
+=item -u or +no-expand-args
+
+Turn off expansion of environment variables, C<~name> constructs and
+backquote commands.
+
+=item +freeze-current
+
+Save all the current options in a F<.gnubatch> file in the current
+directory with keyword C<GBCH_CICHANGE>. The program will exit without
+error if no command interpreter argument is given.
+
+=item +freeze-home
+
+Save all the current options in a F<.gnubatch> file in the user's home
+directory with keyword C<GBCH_CICHANGE>. The program will exit without
+error if no command interpreter argument is given.
+
+=back
+
+=head1 FILES
+
+F<~/.gnubatch>
+configuration file (home directory)
+F<.gnubatch>
+configureation file (current directory)
+F<btrest.help>
+message file
+
+=head1 ENVIRONMENT
+
+=over 4
+
+=item GBCH_CICHANGE
+
+space-separated options to override defaults.
+
+=item BTRESTCONF
+
+location of alternative help file.
+
+=back
+
+=head1 EXAMPLES
+
+To change the nice value, load level and to specify that the job title
+will become the process name for jobs running under the C<sh> command
+interpreter:
+
+	gbch-cichange -N 22 -L 500 -t sh
+
+To add a new command interpreter using the Korn shell with the B<-s>
+option:
+
+	gbch-cichange -A -N 25 -L 1500 -p /bin/ksh -a '-s' ksh
+
+The quotes around C<-s> are not necessary in this case, only if spaces
+are included.
+
+To change the name to C<korn>
+
+	gbch-cichange -n korn ksh
+
+
+=head1 SEE ALSO
+
+btsyntax(5),
+gbch-cilist(1),
+gbch-user(1),
+gnubatch.conf(5),
+gnubatch.hosts(5).
+
+=head1 DIAGNOSTICS
+
+Various diagnostics are read and printed as required from the message
+file, F<btrest.help>.
+
+=head1 COPYRIGHT
+
+Copyright (c) 2009 Free Software Foundation, Inc.
+This is free software. You may redistribute copies of it under the
+terms of the GNU General Public License
+<http://www.gnu.org/licenses/gpl.html>.
+There is NO WARRANTY, to the extent permitted by law.
+
+=head1 AUTHOR
+
+John M Collins, Xi Software Ltd.
+
+=cut
+
+## Local Variables:
+## mode: nroff
+## End:

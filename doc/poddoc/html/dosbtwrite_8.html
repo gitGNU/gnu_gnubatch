@@ -1,0 +1,101 @@
+<?xml version="1.0" ?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<title>dosbtwrite - write messages to Windows PC</title>
+<meta http-equiv="content-type" content="text/html; charset=utf-8" />
+<link rev="made" href="mailto:root@localhost" />
+</head>
+
+<body style="background-color: white">
+
+<p><a name="__index__"></a></p>
+<!-- INDEX BEGIN -->
+<!--
+
+<ul>
+
+	<li><a href="#name">NAME</a></li>
+	<li><a href="#synopsis">SYNOPSIS</a></li>
+	<li><a href="#description">DESCRIPTION</a></li>
+	<li><a href="#files">FILES</a></li>
+	<li><a href="#environment">ENVIRONMENT</a></li>
+	<li><a href="#notes">NOTES</a></li>
+	<li><a href="#see_also">SEE ALSO</a></li>
+	<li><a href="#copyright">COPYRIGHT</a></li>
+	<li><a href="#author">AUTHOR</a></li>
+</ul>
+-->
+<!-- INDEX END -->
+
+<p>
+</p>
+<h1><a name="name">NAME</a></h1>
+<p>dosbtwrite - write messages to Windows PC</p>
+<p>
+</p>
+<hr />
+<h1><a name="synopsis">SYNOPSIS</a></h1>
+<p><strong>dosbtwrite</strong>
+<em>options</em></p>
+<p>
+</p>
+<hr />
+<h1><a name="description">DESCRIPTION</a></h1>
+<p><strong>Dosbtwrite</strong> sends messages to Windows PCs similar to <code>btwrite(8)</code> does
+for user's terminals in response to the equivalents of the <code>-w</code>
+options of gbch-r(1) and equivalents. This is only done for jobs which
+originated on Windows PCs.</p>
+<p>The Windows PC must be running an appropriate service for this to be
+effectual.</p>
+<p>If the job was submitted by a user working from a client with a
+DHCP-allocated IP address, a message may be received on all clients
+currently logged-in with that user name.</p>
+<p>
+</p>
+<hr />
+<h1><a name="files">FILES</a></h1>
+<p><em>btint-config</em>
+message file</p>
+<p>
+</p>
+<hr />
+<h1><a name="environment">ENVIRONMENT</a></h1>
+<dl>
+<dt><strong><a name="item_sphelpdir">SPHELPDIR</a></strong>
+
+<dd>
+<p>alternative location for help file directory.</p>
+</dd>
+</li>
+</dl>
+<p>
+</p>
+<hr />
+<h1><a name="notes">NOTES</a></h1>
+<p><strong>Dosbtwrite</strong> is identical to <strong>GNUspools</strong>'s dosspwrite(8), apart from using
+a different message file.</p>
+<p>
+</p>
+<hr />
+<h1><a name="see_also">SEE ALSO</a></h1>
+<p>btwrite(8),
+btmdisp(8).</p>
+<p>
+</p>
+<hr />
+<h1><a name="copyright">COPYRIGHT</a></h1>
+<p>Copyright (c) 2009 Free Software Foundation, Inc.
+This is free software. You may redistribute copies of it under the
+terms of the GNU General Public License
+&lt;http://www.gnu.org/licenses/gpl.html&gt;.
+There is NO WARRANTY, to the extent permitted by law.</p>
+<p>
+</p>
+<hr />
+<h1><a name="author">AUTHOR</a></h1>
+<p>John M Collins, Xi Software Ltd.</p>
+
+</body>
+
+</html>

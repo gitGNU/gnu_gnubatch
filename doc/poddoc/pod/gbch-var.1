@@ -1,0 +1,260 @@
+=head1 NAME
+
+gbch-var - access batch variables from shell
+
+=head1 SYNOPSIS
+
+B<gbch-var>
+[ I<-options> ]
+I<variable name>
+
+=head1 DESCRIPTION
+
+B<gbch-var> is a shell level tool to display, create, delete, modify or test the
+values of B<GNUbatch> variables. Testing may be "atomic", in the sense
+that if two or more users attempt to assign new values to the same variable
+conditional on a test, only one will "win".
+
+=head1 OPTIONS
+
+Note that the order of treatment, letters and keywords described below
+may be modified by editing the file F<btrest.help> - see btsyntax(5).
+
+The environment variable on which options are supplied is C<GBCH_VAR> and the
+environment variable to specify the help file is C<BTRESTCONF>.
+
+=over 4
+
+=item -? or +explain
+
+causes a summary of the other options to be displayed without taking
+further action.
+
+=item -C or +create
+
+Create the variable if it doesn't exist. An initial value should be
+supplied using the B<-s> option.
+
+=item -c I<string> or +comment I<string>
+
+Assign or update the given comment field of the variable to be
+I<string>.
+
+=item -D or +delete
+
+Delete the variable.
+
+=item -E or +set-export
+
+Mark the variable as "exported", i.e. visible to other hosts.
+
+=item -G I<group> or +set-group I<group>
+
+Change the group ownership of the variable to I<group>.
+
+=item -K or +cluster
+
+Set the "clustered" marker on the variable. When used in conditions or
+assignments, the local version is used.
+
+=item -k or +no-cluster
+
+Reset the "clustered" marker on the variable.
+
+=item -L or +set-local
+
+Mark the variable as local to the host only. This is the default for
+new variables, for existing variables it will turn off the export flag
+if it is specified. To leave existing variables unaffected, invoke the
+B<-N> flag.
+
+=item -M I<mode> or +set-mode I<mode>
+
+Set the mode (permissions) on the variable.
+
+=item -N or +reset-export
+
+Reset the B<-L> and B<-E> options. For new variables this will restore
+to the default of local only. For existing variables this will mean
+that the export flag is left unchanged.
+
+=item -o or +reset-cluster
+
+Reset the B<-k> and B<-K> options. For new variables this will restore
+to the default of not clustered. For existing variables this will mean
+that the cluster flag is left unchanged.
+
+=item -S or +force-string
+
+Force all set values to string even if they appear numeric.
+
+=item -s I<value> or +set-value I<value>
+
+Assign the given I<value> to the variable.
+
+=item -U I<user> or +set-owner I<user>
+
+Change the ownership of the variable to I<user>.
+
+=item -u I<value> or +undefined-value I<value>
+
+In the test operations, if the variable does not exist, treat it as if
+it did exist and had the given I<value>.
+
+=item -X or +cancel
+
+cancel options B<-S>, B<-C>, B<-D>, B<-s> and B<-u>.
+
+=item +freeze-current
+
+Save the current options in a F<.gnubatch> file in the current
+directory with keyword C<BTVAR>. Comparison options are not included.
+
+=item +freeze-home
+
+Save all the current options in a F<.gnubatch> file in the user's home
+directory with keyword C<BTVAR>. Comparison options are not included.
+
+=back
+
+=head1 CONDITIONS
+
+The six conditions C<+eq>, C<+ne>, C<+gt>, C<+ge>, C<+lt> C<+le>
+followed by a constant compare the variable value with the constant
+specified. The constant is assumed to be on the right of the
+comparison, for example:
+
+	gbch-var +gt 4 myvar
+
+Returns an exit code of zero ("true" to the shell) if C<myvar> is
+greater than 4, or 1 ("false" to the shell) if it is less than or
+equal to 4. (Some other exit code would be returned if C<myvar> did
+not exist.
+
+This may be combined with other options, for example
+
+	gbch-var -D +gt 100 myvar
+
+Would delete C<myvar> only if its value was greater than 100.
+
+	gbch-var -s 1 +le 0 myvar
+
+Would assign 1 to C<myvar> only if its previous value was less than or
+equal to 0. Exit code 0 (shell "true") would be returned if the test
+succeeded and the other operation was completed successfully, exit
+code 1 (shell "false") would be returned if the test failed and
+nothing was done, or some other error if the variable did not exist or
+the operation was not permitted.
+
+The test is "atomic" in the sense that a diagnostic will occur,
+and no assignment made, if some other process sets the value in
+between the test and the assignment (or other change).
+
+The condition I<must> follow all other options.
+
+B<+eq>, B<+ne>, B<+lt> and B<+gt> may be represented as B<-e>, B<-n>,
+B<-l> and B<-g> but this is not particularly recommended, especially
+for the last two.
+
+=head2 Use of options
+
+With no options, then the current value of the variable is printed,
+for example:
+
+	gbch-var abc
+
+prints out the value of variable C<abc>.
+
+To assign a value, the B<-s> option should be used, thus
+
+	gbch-var -s 29 abc
+
+assigns the numeric value 29 to C<abc>.
+
+Remote variables are referred to as follows:
+
+	gbch-var -s 32 host2:def
+
+assigns 32 to variable C<def> on C<host2>.
+
+The conditional options should be the last to be specified.
+
+The B<-u> option may be used to specify a value to substitute for a
+non-existent variable in a test rather than reporting an error, for
+example:
+
+	gbch-var -u 10 -gt 5 myvar
+
+will compare C<myvar> with 5 if it exists. If it does not exist, then
+it will compare the given value, in this case 10, with 5, and in this
+case return "true". There should not be a diagnostic unless there is a
+completely different error.
+
+=head2 Note on mode and owner changes
+
+Changing various parameters, the mode (permissions), the owner and the
+group are done as separate operations.
+
+In some cases changing the mode may prevent the next operation from
+taking place. In other cases it may need to be done first.
+
+Similar considerations apply to changes of the owner and the group.
+
+B<Btvar> does not attempt to work out the appropriate order to
+perform the operations, the user should execute separate B<gbch-var>
+commands in sequence to achieve the desired effect.
+
+=head1 FILES
+
+F<~/.gnubatch>
+configuration file (home directory)
+
+F<.gnubatch>
+configuration file (current directory)
+
+F<btrest.help>
+message file
+
+=head1 ENVIRONMENT
+
+=over 4
+
+=item GBCH_VAR
+
+space-separated options to override defaults.
+
+=item BTRESTCONF
+
+location of alternative help file.
+
+=back
+
+=head1 SEE ALSO
+
+gbch-q(1),
+gbch-vlist(1),
+btsyntax(5),
+gbch-cvlist(8).
+
+=head1 DIAGNOSTICS
+
+Various diagnostics are read and printed as required from the message
+file F<btrest.help>.
+
+=head1 COPYRIGHT
+
+Copyright (c) 2009 Free Software Foundation, Inc.
+This is free software. You may redistribute copies of it under the
+terms of the GNU General Public License
+<http://www.gnu.org/licenses/gpl.html>.
+There is NO WARRANTY, to the extent permitted by law.
+
+=head1 AUTHOR
+
+John M Collins, Xi Software Ltd.
+
+=cut
+
+## Local Variables:
+## mode: nroff
+## End:

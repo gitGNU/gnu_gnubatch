@@ -1,0 +1,130 @@
+#
+#   Copyright 2009 Free Software Foundation, Inc.
+#
+#  This program is free software: you can redistribute it and/or modify
+#  it under the terms of the GNU General Public License as published by
+#  the Free Software Foundation, either version 3 of the License, or
+#  (at your option) any later version.
+#
+#  This program is distributed in the hope that it will be useful,
+#  but WITHOUT ANY WARRANTY; without even the implied warranty of
+#  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#  GNU General Public License for more details.
+#
+#   You should have received a copy of the GNU General Public License
+#  along with this program.  If not, see <http://www.gnu.org/licenses/>.
+#
+#	Makefile for GTK routines
+#
+SHELL		=	/bin/sh
+prefix		=	@prefix@
+exec_prefix	=	@exec_prefix@
+PARENT		=	..
+BASE		=	../..
+HDRS		=	$(PARENT)/hdrs
+INLINE		=	$(PARENT)/inline
+CC		=	@CC@
+CCFLAGS		=	-O @gcc_useful_options@ @funny_compiler_options@
+LDFLAGS		=
+GTKINCL		=	`pkg-config --cflags gtk+-2.0`
+CFLAGS		=	$(CCFLAGS) -I$(HDRS) -I$(BASE) -I$(PARENT) $(GTKINCL)
+SHLIBDIR	=	@shlibdir@
+LIBDIR		=	@libdir@
+MYLIBDIR	=	$(PARENT)/lib
+LIB		=	$(MYLIBDIR)/libgnubatch_int.a
+SHLIB		=	$(MYLIBDIR)/libgnubatch_int.so
+SHLIBCLIENT	=	$(MYLIBDIR)/libgnubatch_client.so
+LIBS		=	@LIBS@
+LIBNET		=	@SOCKLIBS@
+GTKLIBS		=	`pkg-config --libs gtk+-2.0`
+RM		=	rm -f
+INSTALL		=	@INSTALL@
+INSTALL_DATA	=	@INSTALL_DATA@
+BATCHUSER	=	@BATCHUSER@
+USERMODES	=	-o $(BATCHUSER) -g root -m 4755
+NOSETMODES	=	-o $(BATCHUSER) -g root
+SUIDROOT	=	-o root -g root -m 4755
+BINDIR		=	@bindir@
+INTBINDIR	=	@pkgexecdir@
+HELPFILEDIR	=	@sphelpdir@
+USERBINS	=	gbch-xq gbch-xr gbch-xuser
+NOSETUBINS	=	gbch-xfilemon
+SETUROOTSYSBINS	=	bgtkldsv
+NOSETUSYSBINS	=	bgtksave
+XRES		=	xbtq.xpm xbtq.menu xbtqview.menu xbtqsel.menu xbtuser.xpm xbtuser.menu
+
+XFILEMONOBJS=xfilemon.o gtk_lib.o
+XBTQOBJS=xbtq.o xbq_jvlist.o xbq_cbs.o xbq_jcall.o xbq_jobpar.o xbq_cmdint.o xbq_vcall.o xbq_view.o gtk_lib.o gtk_modebits.o
+XBTUSEROBJS=xbtuser.o xbtu_cbs.o gtk_lib.o gtk_modebits.o
+XBTROBJS=xbtr.o xbr_jlist.o xbr_cbs.o xbr_jcall.o xbr_jobpar.o xbr_remsub.o xbr_jldsv.o gtk_lib.o gtk_modebits.o
+BGTKSAVEOBJS=bgtksave.o
+BGTKLDSVOBJS=bgtkldsv.o
+
+all:	@main_target@
+
+nonshared:	gbch-xfilemon gbch-xq gbch-xr gbch-xuser bgtksave bgtkldsv
+
+shared:		xfilemon_s xbtq_s xbtr_s xbtuser_s bgtksave bgtkldsv
+
+gbch-xfilemon:	$(XFILEMONOBJS)
+		$(CC) -o $@ $(LDFLAGS) $(XFILEMONOBJS) $(LIB) $(GTKLIBS) $(LIBNET) $(LIBS)
+
+xfilemon_s:	$(XFILEMONOBJS)
+		$(CC) -o gbch-xfilemon $(LDFLAGS) $(XFILEMONOBJS) $(SHLIB) $(SHLIBCLIENT) $(GTKLIBS) $(LIBNET) $(LIBS)
+		touch $@
+
+gbch-xq:	$(XBTQOBJS)
+		$(CC) -o $@ $(LDFLAGS) $(XBTQOBJS) $(LIB) $(GTKLIBS) $(LIBNET) $(LIBS)
+
+xbtq_s:		$(XBTQOBJS)
+		$(CC) -o gbch-xq $(LDFLAGS) $(XBTQOBJS) $(SHLIB) $(SHLIBCLIENT) $(GTKLIBS) $(LIBNET) $(LIBS)
+		touch $@
+
+gbch-xr:	$(XBTROBJS)
+		$(CC) -o $@ $(LDFLAGS) $(XBTROBJS) $(LIB) $(GTKLIBS) $(LIBNET) $(LIBS)
+
+xbtr_s:		$(XBTROBJS)
+		$(CC) -o gbch-xr $(LDFLAGS) $(XBTROBJS) $(SHLIB) $(SHLIBCLIENT) $(GTKLIBS) $(LIBNET) $(LIBS)
+		touch $@
+
+gbch-xuser:	$(XBTUSEROBJS)
+		$(CC) -o $@ $(LDFLAGS) $(XBTUSEROBJS) $(LIB) $(GTKLIBS) $(LIBNET) $(LIBS)
+
+xbtuser_s:	$(XBTUSEROBJS)
+		$(CC) -o gbch-xuser $(LDFLAGS) $(XBTUSEROBJS) $(SHLIB) $(SHLIBCLIENT) $(GTKLIBS) $(LIBNET) $(LIBS)
+		touch $@
+
+xbr_jcall.o:	xbq_jcall.c
+	$(CC) -c -o $@ $(CFLAGS) -DIN_XBTR xbq_jcall.c
+
+xbr_jobpar.o:	xbq_jobpar.c
+	$(CC) -c -o $@ $(CFLAGS) -DIN_XBTR xbq_jobpar.c
+
+# bgtksave and bgtkldsv don't use any library routines (apart from versionprint) so
+# we don't have different shlib versions
+
+bgtksave: bgtksave.o
+		$(CC) -o $@ $(BGTKSAVEOBJS) $(LDFLAGS) $(LIB) $(LIBS)
+
+bgtkldsv: bgtkldsv.o
+		$(CC) -o $@ $(BGTKLDSVOBJS) $(LDFLAGS) $(LIB) $(LIBS)
+
+install:	all
+		$(INSTALL) $(USERMODES) $(USERBINS) $(BINDIR)
+		$(INSTALL) $(NOSETMODES) $(NOSETUBINS) $(BINDIR)
+		$(INSTALL) $(SUIDROOT) $(SETUROOTSYSBINS) $(INTBINDIR)
+		$(INSTALL) $(NOSETMODES) $(NOSETUSYSBINS) $(INTBINDIR)
+		$(INSTALL_DATA) $(XRES) $(HELPFILEDIR)
+
+install-strip:	all
+		$(INSTALL) -s $(USERMODES) $(USERBINS) $(BINDIR)
+		$(INSTALL) -s $(NOSETMODES) $(NOSETUBINS) $(BINDIR)
+		$(INSTALL) -s $(SUIDROOT) $(SETUROOTSYSBINS) $(INTBINDIR)
+		$(INSTALL) -s $(NOSETMODES) $(NOSETUSYSBINS) $(INTBINDIR)
+		$(INSTALL_DATA) $(XRES) $(HELPFILEDIR)
+
+clean:
+	$(RM) *.o xbtq xbtuser xbtr xbtr xfilemon *_s bgtksave bgtkldsv
+
+distclean:	clean
+	$(RM) Makefile

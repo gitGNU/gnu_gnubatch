@@ -1,0 +1,204 @@
+=head1 NAME
+
+gbatch_jobadd - create a new job
+
+=head1 SYNOPSIS
+
+=for man
+\&\fB#include <gbatch.h>\fR
+.PP
+
+=for html
+<STRONG>#include &lt;gbatch.h&gt;</STRONG>
+<br>
+
+B<FILE *gbatch_jobadd(const int>
+I<fd>B<, apiBtjob *>I<jobd>B<)>
+
+B<int gbatch_jobres(const int>
+I<fd>B<, jobno_t *>I<jobno>B<)>
+
+B<int gbatch_jobadd(const int>
+I<fd>B<, const int>
+I<infile>B<, int(*>I<fn>B<)(int,void*,unsigned), apiBtjob *>I<jobd>B<)>
+
+=head1 DESCRIPTION
+
+The function B<gbatch_jobadd>, is used to create a new B<GNUbatch> job.
+
+There are two forms of B<gbatch_jobadd>. The first form, together with
+B<gbatch_jobres>, is used to create jobs using the Unix or GNU/Linux
+version of the API.
+
+The second form is used under Windows as there is no acceptable
+substitute for the pipe(2) system call.
+
+In both forms of the call, I<fd> is a file descriptor which was
+previously returned by a successful call to gbatch_open(3).
+
+I<jobd> is a pointer to a structure containing the attributes of the
+job to be created apart from the job script.
+
+The difference between the two versions of B<gbatch_jobadd> is in the
+method of passing the job script.
+
+=head2 Unix and GNU/Linux
+
+The Unix and GNU/Linux API version returns a I<stdio> file descriptor
+which may be used with the standard I/O functions fputs(3), fprintf(3)
+etc to write the job script. When complete, the job script should be
+closed using fclose(3). The result of the job submission is then
+collected using the B<gbatch_jobres> routine, which assigns the job number
+to the contents of the I<jobno> parameter and returns zero as its
+result. The job number is also placed into the C<bj_job> field in the
+job structure.
+
+For reasons of correctly synchronising socket messages, be sure to
+call B<gbatch_jobres> immediately after the call to fclose(3), even if you
+do not require the answer.
+
+If there is any kind of error, then depending upon at what point the
+error is detected, either B<gbatch_jobadd> will return C<NULL>, leaving
+the error code in the external variable B<gbatch_dataerror>, or
+B<gbatch_jobres> will return the error as its result rather than zero.
+
+=head2 Windows
+
+In the case of the Windows version, the specified function I<fn> is
+invoked with parameters similar to B<read> to read data to pass across
+as the job script, the argument I<infile> being passed as a file
+handle as the first argument to I<fn>.
+
+I<fn> may very well be B<read>. The reason for the routine not
+invoking B<read> itself is partly flexibility but mostly because some
+versions of Windows DLLs do not allow B<read> to be invoked directly
+from within it.
+
+B<N.B. This routine is particularly susceptible to peculiar effects
+due to assignment of insufficient stack space.>
+
+The return value is zero for success, in which case the job number
+will be assigned to the C<bj_job> field of I<jobd>, or an error
+code. The error code is also assigned to the external variable
+C<gbatch_dataerror> for consistency with the Unix version.
+
+=head1 RETURN VALUES
+
+The Unix version of B<gbatch_jobadd> returns C<NULL> if unsuccessful,
+placing the error code in the external variable C<gbatch_dataerror>.
+
+The Windows version of B<gbatch_jobadd> and the B<xb_jobres> under Unix
+return zero if successful, otherwise an error code.
+
+The error codes which may be returned are defined in the include file
+\fBgbatch.h\fR.
+
+=head1 EXAMPLE
+
+This example creates a job from standard input:
+
+ int fd, ret, ch;
+ FILE *outf;
+ jobno_t jn;
+ apiBtjob outj;
+
+ fd = gbatch_open("myhost", (char *) 0);
+ if (fd < 0) { /* error handling */
+     . . .
+ }
+
+ /* always clear the structure first */
+ memset((void *)&outj, '\0', sizeof(outj));
+
+ /* only the following parameters are compulsory */
+
+ outj.h.bj_pri = 150;
+ outj.h.bj_ll = 1000;
+ outj.h.bj_mode.u_flags = JALLMODES;
+ outj.h.bj_exits.elower = 1;
+ outj.h.bj_eupper = 255;
+ outj.h.bj_ulimit = 0x10000;
+ strcpy(outj.h.bj_cmdinterp, "sh"); /* NB assumes sh defined */
+ gbatch_putdirec(&outj, "~/work");
+
+ /* set progress code to zero */
+ outj.h.bj_progress = BJP_CANCELLED;
+
+ /* set up a time constraint */
+ outj.h.bj_times.tc_istime = 1;
+ outj.h.bj_times.tc_nexttime = time(long *)0) + 300;
+ outj.h.bj_times.tc_repeat = TC_MINUTES;
+ outj.h.bj_times.tc_rate = 10;
+ outj.h.bj_times.tc_nposs = TC_SKIP;
+
+ gbatch_puttitle(&outj, "MyTitle");
+
+ outf = gbatch_jobadd(fd, &outj);
+ if  (!outf)  {  /* error in gbatch_dataerror */
+    . . .
+ }
+
+ while ((ch = getchar()) != EOF)
+     putc(ch, outf);
+ fclose(outf);
+ ret = gbatch_jobres(fd, &jn);
+ if (ret < 0) {  /* error in ret */
+     . . .
+ }
+ else
+     printf("job number is %ld\n", jn);
+
+ gbatch_close(fd);
+
+=head1 SEE ALSO
+
+gbatch_ciread(3),
+gbatch_delarg(3),
+gbatch_delenv(3),
+gbatch_delredir(3),
+gbatch_getarg(3),
+gbatch_getdirect(3),
+gbatch_getenv(3),
+gbatch_getenvlist(3),
+gbatch_getredir(3),
+gbatch_gettitle(3),
+gbatch_jobchgrp(3),
+gbatch_jobchmod(3),
+gbatch_jobchown(3),
+gbatch_jobdata(3),
+gbatch_jobdel(3),
+gbatch_jobfind(3),
+gbatch_joblist(3),
+gbatch_jobmon(3),
+gbatch_jobop(3),
+gbatch_jobread(3),
+gbatch_jobupd(3),
+gbatch_putarg(3),
+gbatch_putarglist(3),
+gbatch_putdirect(3),
+gbatch_putenv(3),
+gbatch_putenvlist(3),
+gbatch_putredir(3),
+gbatch_putredirlist(3),
+gbatch_puttitle(3),
+gbatch_setqueue(3),
+gbatch_varlist(3),
+gbatch_varread(3).
+
+=head1 COPYRIGHT
+
+Copyright (c) 2009 Free Software Foundation, Inc.
+This is free software. You may redistribute copies of it under the
+terms of the GNU General Public License
+<http://www.gnu.org/licenses/gpl.html>.
+There is NO WARRANTY, to the extent permitted by law.
+
+=head1 AUTHOR
+
+John M Collins, Xi Software Ltd.
+
+=cut
+
+## Local Variables:
+## mode: nroff
+## End:

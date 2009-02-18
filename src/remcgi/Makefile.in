@@ -1,0 +1,123 @@
+#
+#   Copyright 2009 Free Software Foundation, Inc.
+#
+#  This program is free software: you can redistribute it and/or modify
+#  it under the terms of the GNU General Public License as published by
+#  the Free Software Foundation, either version 3 of the License, or
+#  (at your option) any later version.
+#
+#  This program is distributed in the hope that it will be useful,
+#  but WITHOUT ANY WARRANTY; without even the implied warranty of
+#  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#  GNU General Public License for more details.
+#
+#   You should have received a copy of the GNU General Public License
+#  along with this program.  If not, see <http://www.gnu.org/licenses/>.
+#
+#	Makefile for remote CGI programs
+#
+
+SHELL		=	/bin/sh
+@SET_MAKE@
+prefix		=	@prefix@
+exec_prefix	=	@exec_prefix@
+CC		=	@CC@
+CCFLAGS		=	-O @gcc_useful_options@ @funny_compiler_options@
+LDFLAGS		=
+LIBS		=	@LIBS@
+LIBDIR		=	@libdir@
+LIBNET		=	@SOCKLIBS@
+MV		=	mv
+RM		= 	rm -f
+PARENT		=	..
+BASE		=	../..
+HDRS		=	$(PARENT)/hdrs
+MYLIBDIR	=	$(PARENT)/lib
+APILIBDIR	=	$(PARENT)/apilib
+CFLAGS		=	$(CCFLAGS) -I$(HDRS) -I$(PARENT) -I$(APILIBDIR)
+LIB		=	$(MYLIBDIR)/libgnubatch_int.a
+APILIB		=	$(APILIBDIR)/libgnubatch.a
+APISHLIB	=	$(APILIBDIR)/libgnubatch.so
+INSTALL		=	@INSTALL@
+INSTALL_DATA	=	@INSTALL_DATA@
+RCGIMODES	=	-o root -g root -m 6755
+BINDIR		=	@bindir@
+INTBINDIR	=	@pkgexecdir@
+CGIBINDIR	=	$(INTBINDIR)/cgi-bin
+
+RBTJCGIOBS	=	rbtjcgi.o rcgilib.o
+RBTJCCGIOBS	=	rbtjccgi.o rcgilib.o
+RBTJDCGIOBS	=	rbtjdcgi.o rcgilib.o
+RBTJVCGIOBS	=	rbtjvcgi.o rcgilib.o
+RBTJCRCGIOBS	=	rbtjcrcgi.o rcgilib.o
+RBTVCGIOBS	=	rbtvcgi.o rcgilib.o
+RBTVCCGIOBS	=	rbtvccgi.o rcgilib.o
+
+all:	@main_target@
+
+nonshared:	rbtjcgi rbtjccgi rbtjdcgi rbtjvcgi rbtjcrcgi rbtvcgi rbtvccgi
+
+shared:		rbtjcgi_s rbtjccgi_s rbtjdcgi_s rbtjvcgi_s rbtjcrcgi_s rbtvcgi_s rbtvccgi_s
+
+rbtjcgi:	$(RBTJCGIOBS)
+	$(CC) -o $@ $(LDFLAGS) $(RBTJCGIOBS) $(APILIB) $(LIB) $(LIBNET) $(LIBS)
+
+rbtjccgi:	$(RBTJCCGIOBS)
+	$(CC) -o $@ $(LDFLAGS) $(RBTJCCGIOBS) $(APILIB) $(LIB) $(LIBNET) $(LIBS)
+
+rbtjdcgi:	$(RBTJDCGIOBS)
+	$(CC) -o $@ $(LDFLAGS) $(RBTJDCGIOBS) $(APILIB) $(LIB) $(LIBNET) $(LIBS)
+
+rbtjvcgi:	$(RBTJVCGIOBS)
+	$(CC) -o $@ $(LDFLAGS) $(RBTJVCGIOBS) $(APILIB) $(LIB) $(LIBNET) $(LIBS)
+
+rbtjcrcgi:	$(RBTJCRCGIOBS)
+	$(CC) -o $@ $(LDFLAGS) $(RBTJCRCGIOBS) $(APILIB) $(LIB) $(LIBNET) $(LIBS)
+
+rbtvcgi:	$(RBTVCGIOBS)
+	$(CC) -o $@ $(LDFLAGS) $(RBTVCGIOBS) $(APILIB) $(LIB) $(LIBNET) $(LIBS)
+
+rbtvccgi:	$(RBTVCCGIOBS)
+	$(CC) -o $@ $(LDFLAGS) $(RBTVCCGIOBS) $(APILIB) $(LIB) $(LIBNET) $(LIBS)
+
+rbtjcgi_s:	$(RBTJCGIOBS)
+	$(CC) -o rbtjcgi $(LDFLAGS) $(RBTJCGIOBS) $(APISHLIB) $(LIB) $(LIBNET) $(LIBS)
+	touch $@
+
+rbtjccgi_s:	$(RBTJCCGIOBS)
+	$(CC) -o rbtjccgi $(LDFLAGS) $(RBTJCCGIOBS) $(APISHLIB) $(LIB) $(LIBNET) $(LIBS)
+	touch $@
+
+rbtjdcgi_s:	$(RBTJDCGIOBS)
+	$(CC) -o rbtjdcgi $(LDFLAGS) $(RBTJDCGIOBS) $(APISHLIB) $(LIB) $(LIBNET) $(LIBS)
+	touch $@
+
+rbtjvcgi_s:	$(RBTJVCGIOBS)
+	$(CC) -o rbtjvcgi $(LDFLAGS) $(RBTJVCGIOBS) $(APISHLIB) $(LIB) $(LIBNET) $(LIBS)
+	touch $@
+
+rbtjcrcgi_s:	$(RBTJCRCGIOBS)
+	$(CC) -o rbtjcrcgi $(LDFLAGS) $(RBTJCRCGIOBS) $(APISHLIB) $(LIB) $(LIBNET) $(LIBS)
+	touch $@
+
+rbtvcgi_s:	$(RBTVCGIOBS)
+	$(CC) -o rbtvcgi $(LDFLAGS) $(RBTVCGIOBS) $(APISHLIB) $(LIB) $(LIBNET) $(LIBS)
+	touch $@
+
+rbtvccgi_s:	$(RBTVCCGIOBS)
+	$(CC) -o rbtvccgi $(LDFLAGS) $(RBTVCCGIOBS) $(APISHLIB) $(LIB) $(LIBNET) $(LIBS)
+	touch $@
+
+install:
+	$(INSTALL) -d $(CGIBINDIR)
+	$(INSTALL) $(RCGIMODES) rbtjcgi rbtjccgi rbtjcrcgi rbtjdcgi rbtjvcgi rbtvcgi rbtvccgi $(CGIBINDIR)
+
+install-strip:
+	$(INSTALL) -d $(CGIBINDIR)
+	$(INSTALL) -s $(RCGIMODES) rbtjcgi rbtjccgi rbtjcrcgi rbtjdcgi rbtjvcgi rbtvcgi rbtvccgi $(CGIBINDIR)
+
+clean:
+	$(RM) *.o rbtjcgi rbtjccgi rbtjcrcgi rbtjdcgi rbtjvcgi rbtvcgi rbtvccgi *_s
+
+distclean:	clean
+	$(RM) Makefile

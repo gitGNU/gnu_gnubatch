@@ -1,0 +1,201 @@
+=head1 NAME
+
+gbch-q - view batch jobs and variables interactively
+
+=head1 SYNOPSIS
+
+B<gbch-q>
+[ I<-options> ]
+
+=head1 DESCRIPTION
+
+B<gbch-q> is an interactive program that allows the user to display in
+real-time state and details of B<GNUbatch> jobs and variables on local
+or remote machines, refreshing the screen automatically as the queue
+changes or variables are updated, and allowing the status of jobs and
+variables on the queue to be altered according to each user's
+permissions and privileges.
+
+For more information about the details of the interactive commands,
+please see the on-line help information, obtained by pressing ?
+(although this may be changed on your site). This section focuses on
+the command-line options which may be used to control the initial
+display.
+
+=head1 OPTIONS
+
+Note that the order of treatment, letters and keywords described below
+may be modified by editing the file F<btrest.help> -
+see btsyntax(5).
+
+The environment variable on which options are supplied is C<GBCH_Q> and the
+environment variable to specify the help file is C<BTQCONF>.
+
+Certain commands available on-screen enable many of these options to
+be changed and saved in configuration files.
+
+=over 4
+
+=item -? or +explain
+
+Causes a summary of the other options to be displayed without taking
+further action or entering the interactive display.
+
+=item -A or +no-confirm-delete
+
+Suppress confirmation request for delete operations.
+
+=item -a or +confirm-delete
+
+Ask confirmation of delete operations (this is the default).
+
+=item -B or +no-help-box
+
+Put help messages in inverse video rather than in a box (this is the default).
+
+=item -b or +help-box
+
+Put help messages in a box rather than displaying inverse video.
+
+=item -E or +no-error-box
+
+Put error messages in inverse video rather than in a box.
+
+=item -e or +error-box
+
+Put error messages in a box rather than displaying inverse video.
+
+=item -g I<group> or +just-group I<group>
+
+Restrict the output to jobs owned by the I<group> specified. Cancel
+this argument by giving a single C<-> sign as an argument. The group
+name may be a pattern with shell-like wild cards.
+
+The wild card options are as described in the documentation of gbch-jlist(1).
+
+=item -H or +keep-char-help
+
+When displaying a help screen, interpret the next key press as a
+command as well as clearing the help screen. This is the default.
+
+=item -h or +lose-char-help
+
+Discard whatever key press is made to clear a help screen.
+
+=item -j or +jobs-screen
+
+Commence display in jobs screen. This is the default unless there are
+no jobs to be viewed.
+
+=item -l or +local-only
+
+Only display jobs local to the machine.
+
+=item -N or +follow-job
+
+If a job or variable moves on the screen, try to follow it and do not
+try to retain relative screen positions.
+
+=item -q I<name> or +job-queue I<name>
+
+Restricts attention to jobs with the queue prefix I<name>. Cancel
+this argument by giving a single C<-> sign as an argument. The queue
+name may be a pattern with shell-like wild cards.
+
+The wild card options are as described in the documentation of gbch-jlist(1).
+
+The queue prefix is deleted from the titles of jobs which are
+displayed.
+
+=item -r or +network-wide
+
+Display jobs on all connected hosts.
+
+=item -s or +keep-cursor
+
+If a job or variable moves on the screen, try to preserve the relative
+position of the cursor on the screen rather than following the job or
+variable.
+
+=item -u I<user> or +just-user I<user>
+
+Restrict the output to jobs owned by the I<user> specified. Cancel
+this argument by giving a C<-> parameter.
+
+The user name may be a pattern with shell-like wild cards.
+
+The wild card options are as described in the documentation of gbch-jlist(1).
+
+=item -v or +vars-screen
+
+Commence display in variables screen.
+
+=item -Z or +no-null-queues
+
+In conjunction with the B<-q> parameter, do not include jobs with no
+queue prefix in the list.
+
+=item -z or +null-queues
+
+In conjunction with the B<-q> parameter, include jobs with no queue
+prefix in the list.
+
+=back
+
+=head1 FILES
+
+F<~/.gnubatch>
+configuration file (home directory)
+
+F<.gnubatch>
+configuration file (current directory)
+
+F<btq.help>
+message file
+
+=head1 ENVIRONMENT
+
+=over 4
+
+=item GBCH_Q
+
+space-separated options to override defaults.
+
+=item BTQCONF
+
+location of alternative help file.
+
+=back
+
+=head1 SEE ALSO
+
+gbch-jlist(1),
+gbch-vlist(1),
+btsyntax(5),
+
+=head1 DIAGNOSTICS
+
+Various diagnostics are read and printed as required from the message
+file  F<btqq.help>.
+
+Messages about key conflicts are probably because entries in your
+I<terminfo> file contain duplications. Please see the I<GNUbatch
+Administration Guide>.
+
+=head1 COPYRIGHT
+
+Copyright (c) 2009 Free Software Foundation, Inc.
+This is free software. You may redistribute copies of it under the
+terms of the GNU General Public License
+<http://www.gnu.org/licenses/gpl.html>.
+There is NO WARRANTY, to the extent permitted by law.
+
+=head1 AUTHOR
+
+John M Collins, Xi Software Ltd.
+
+=cut
+
+## Local Variables:
+## mode: nroff
+## End:

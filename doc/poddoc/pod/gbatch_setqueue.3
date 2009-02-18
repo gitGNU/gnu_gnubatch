@@ -1,0 +1,60 @@
+=head1 NAME
+
+gbatch_setqueue - select a queue for a connection
+
+=head1 SYNOPSIS
+
+=for man
+\&\fB#include <gbatch.h>\fR
+.PP
+
+=for html
+<STRONG>#include &lt;gbatch.h&gt;</STRONG>
+<br>
+
+B<int gbatch_setqueue(const int>
+I<fd>B<, const char *>I<queuename>B<)>
+
+=head1 DESCRIPTION
+
+The function B<gbatch_setqueue()> is used to allocate a queue name for
+transactions with the API.  This may effect the selection of jobs and
+job titles.
+
+I<fd> is a file descriptor which was previously returned by a
+successful call to gbatch_open(3).
+
+I<queuename> is the name of the proposed queue or C<NULL> to delete a
+previous queue name.
+
+=head1 RETURN VALUES
+
+The function returns 0 if successful, otherwise an error code as
+defined in the include file \fBgbatch.h\fR.
+
+=head1 SEE ALSO
+
+gbatch_close(3),
+gbatch_gettitle(3),
+gbatch_joblist(3),
+gbatch_jobread(3),
+gbatch_open(3),
+gbatch_puttitle(3),
+
+=head1 COPYRIGHT
+
+Copyright (c) 2009 Free Software Foundation, Inc.
+This is free software. You may redistribute copies of it under the
+terms of the GNU General Public License
+<http://www.gnu.org/licenses/gpl.html>.
+There is NO WARRANTY, to the extent permitted by law.
+
+=head1 AUTHOR
+
+John M Collins, Xi Software Ltd.
+
+=cut
+
+## Local Variables:
+## mode: nroff
+## End:

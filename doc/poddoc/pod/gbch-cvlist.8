@@ -1,0 +1,112 @@
+=head1 NAME
+
+gbch-cvlist - dump out GNUbatch variables to a shell script
+
+=head1 SYNOPSIS
+
+B<gbch-cvlist>
+[ I<-D dir> ]
+[ I<-v n> ]
+[ I<-e n> ]
+[ I<-s> ]
+[ I<-f> ]
+I<var file> I<outfile>
+
+=head1 DESCRIPTION
+
+B<gbch-cvlist> converts B<GNUbatch> variables held in the batch spool
+directory to an executable shell script which may be used to
+re-install them. This may be useful for backup purposes or for one
+stage in upgrade from one release of B<GNUbatch> to another.
+
+B<gbch-cvlist> understands the format of the saved variable file for
+versions of B<Xi-Batch> going back to release 4, and when presented
+with a saved file, will attempt to work out from the format which
+release it relates to.
+
+In addition to options, two arguments are always supplied to
+B<gbch-cvlist>.
+
+=over 4
+
+=item Variable list file
+
+This is the file containing the attributes of the variables,
+F<btsched_vfile> in the batch spool directory, by default
+F</usr/spool/batch>, or as relocated by re-specifying C<SPOOLDIR>.
+
+=item Output file
+
+This file is created by B<gbch-cvlist> to contain the executable shell
+script, containing gbch-var(1) commands, which may be used to recreate
+the variables.
+
+=back
+
+=head1 OPTIONS
+
+=over 4
+
+=item -D I<directory>
+
+Specifies the source directory for the variables and I<var file> if
+not the current directory. It can be specified as C<$SPOOLDIR> or
+C<${SPOOLDIR-/var/spool/gnubatch}> etc and the environment and/or
+F</etc/gnubatch.conf> will be interrogated to interpolate the value
+of the environment variable given.
+
+If you use this, don't forget to put single quotes around it thus:
+
+ gbch-cvlist -D '${SPOOLDIR-/var/spool/gnubatch}' ...
+
+otherwise the shell will try to interpret the C<$> construct and not
+B<gbch-cvlist>.
+
+=item -e I<n>
+
+Tolerate I<n> errors of the kinds denoted by the other options before
+giving up trying to convert the file.
+
+=item -f
+
+Ignore format errors in the saved variable file, skip over invalid
+entries up to the limit given by the B<-e> option.
+
+=item -s
+
+Ignore file size errors in the saved variable file (up to the number of
+total errors given by the B<-e> option).
+
+=item -v I<number>
+
+Tell B<gbch-cvlist> that the variable file is for release I<number> of
+B<Xi-Batch>, where I<number> is 4 to 6.
+
+This may be necessary where the variable file is corrupted and
+B<gbch-cvlist> cannot guess what is meant.
+
+=back
+
+=head1 SEE ALSO
+
+gbch-ciconv(8),
+gbch-cjlist(8),
+gbch-uconv(8).
+
+=head1 COPYRIGHT
+
+Copyright (c) 2009 Free Software Foundation, Inc.
+This is free software. You may redistribute copies of it under the
+terms of the GNU General Public License
+<http://www.gnu.org/licenses/gpl.html>.
+There is NO WARRANTY, to the extent permitted by law.
+
+=head1 AUTHOR
+
+John M Collins, Xi Software Ltd.
+
+=cut
+
+## Local Variables:
+## mode: nroff
+## End:

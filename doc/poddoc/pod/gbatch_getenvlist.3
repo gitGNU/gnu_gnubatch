@@ -1,0 +1,76 @@
+=head1 NAME
+
+gbatch_getenvlist - get the environment variable list from a job structure
+
+=head1 SYNOPSIS
+
+=for man
+\&\fB#include <gbatch.h>\fR
+.PP
+
+=for html
+<STRONG>#include &lt;gbatch.h&gt;</STRONG>
+<br>
+
+B<const char **gbatch_getenv(const apiBtjob *>I<jobp>B<), const char *>I<name>B<)>
+
+=head1 DESCRIPTION
+
+The function B<gbatch_getenvlist> is used to extract the list of
+environment variables from a job string table.
+
+I<jobp> is a pointer to a structure containing the details of the job.
+
+=head1 RETURN VALUES
+
+The result is a null-terminated vector of environment variables in the
+form C<NAME=VALUE>, or C<NULL> if memory could not be allocated for
+it.
+
+The space is allocated within the API. The user should not attempt to
+free it after use. Also note that the space is re=used if B<gbatch_getenv>
+is invoked on a different job, the result should be copied if needed.
+
+=head1 SEE ALSO
+
+gbatch_delarg(3),
+gbatch_delenv(3),
+gbatch_delenv(3),
+gbatch_delredir(3),
+gbatch_getarg(3),
+gbatch_getdirect(3),
+gbatch_getenv(3),
+gbatch_getenv(3),
+gbatch_getenvlist(3),
+gbatch_gethenv(3),
+gbatch_getredir(3),
+gbatch_gettitle(3),
+gbatch_putarg(3),
+gbatch_putarglist(3),
+gbatch_putdirect(3),
+gbatch_putenv(3),
+gbatch_putenv(3),
+gbatch_putenvlist(3),
+gbatch_putenvlist(3),
+gbatch_putredir(3),
+gbatch_putredirlist(3),
+gbatch_puttitle(3),
+gbatch_setqueue(3).
+
+=head1 COPYRIGHT
+
+Copyright (c) 2009 Free Software Foundation, Inc.
+This is free software. You may redistribute copies of it under the
+terms of the GNU General Public License
+<http://www.gnu.org/licenses/gpl.html>.
+There is NO WARRANTY, to the extent permitted by law.
+
+=head1 AUTHOR
+
+John M Collins, Xi Software Ltd.
+
+=cut
+
+## Local Variables:
+## mode: nroff
+## End:

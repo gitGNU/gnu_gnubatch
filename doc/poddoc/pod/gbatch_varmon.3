@@ -1,0 +1,88 @@
+=head1 NAME
+
+gbatch_varmon - monitor changes to the variables list
+
+=head1 SYNOPSIS
+
+=for man
+\&\fB#include <gbatch.h>\fR
+.PP
+
+=for html
+<STRONG>#include &lt;gbatch.h&gt;</STRONG>
+<br>
+
+B<int gbatch_varmon(const int>
+I<fd>B<, void (*>I<fn>B<)(const int))>
+
+=head1 DESCRIPTION
+
+Note that this routine is not available in the Windows
+version, please see <a href="#Xb_setmon_def">the section on
+gbatch_setmon</a> which covers both jobs and variables.
+
+=for man
+Note that this routine is not available in the Windows version, please
+see the section on \fBgbatch_setmon\fR, which covers both jobs and
+variables.
+
+The function B<gbatch_varmon> is used to set a function to monitor changes
+to the variables list.
+
+I<fd> is a file descriptor which was previously returned by a
+successful call to gbatch_open(3).
+
+I<fn> is a pointer to a function which will handle the changes to the
+list or C<NULL>, which cancels any previous call. This function will
+be called with I<fd> as an argument when any change is noted. The API
+does not note which variables the user is interested in, so any
+changes to variables may provoke a call to this function.
+
+=head1 RETURN VALUES
+
+The function returns 0 if successful, otherwise an error code as
+defined in the include file \fBgbatch.h\fR.
+
+=head1 EXAMPLE
+
+ void note_mod(const int fd)
+ {
+	var_changes++;
+ }
+
+ ...
+
+ gbatch_varmon(fd, note_mod);
+
+ if (var_changes)  {
+    var_changes = 0;
+    ...
+    /* Re-read list etc */
+    ...
+ }
+
+ gbatch_varmon(fd, NULL);
+
+=head1 SEE ALSO
+
+gbatch_open(3),
+gbatch_close(3),
+gbatch_jobmon(3).
+
+=head1 COPYRIGHT
+
+Copyright (c) 2009 Free Software Foundation, Inc.
+This is free software. You may redistribute copies of it under the
+terms of the GNU General Public License
+<http://www.gnu.org/licenses/gpl.html>.
+There is NO WARRANTY, to the extent permitted by law.
+
+=head1 AUTHOR
+
+John M Collins, Xi Software Ltd.
+
+=cut
+
+## Local Variables:
+## mode: nroff
+## End:

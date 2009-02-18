@@ -1,0 +1,157 @@
+<?xml version="1.0" ?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<title>gbatch_jobdata - read a job's job script</title>
+<meta http-equiv="content-type" content="text/html; charset=utf-8" />
+<link rev="made" href="mailto:root@localhost" />
+</head>
+
+<body style="background-color: white">
+
+<p><a name="__index__"></a></p>
+<!-- INDEX BEGIN -->
+<!--
+
+<ul>
+
+	<li><a href="#name">NAME</a></li>
+	<li><a href="#synopsis">SYNOPSIS</a></li>
+	<li><a href="#description">DESCRIPTION</a></li>
+	<ul>
+
+		<li><a href="#unix_and_linux">Unix and Linux</a></li>
+		<li><a href="#windows">Windows</a></li>
+	</ul>
+
+	<li><a href="#return_values">RETURN VALUES</a></li>
+	<li><a href="#example">EXAMPLE</a></li>
+	<li><a href="#see_also">SEE ALSO</a></li>
+	<li><a href="#copyright">COPYRIGHT</a></li>
+	<li><a href="#author">AUTHOR</a></li>
+</ul>
+-->
+<!-- INDEX END -->
+
+<p>
+</p>
+<h1><a name="name">NAME</a></h1>
+<p>gbatch_jobdata - read a job's job script</p>
+<p>
+</p>
+<hr />
+<h1><a name="synopsis">SYNOPSIS</a></h1>
+<STRONG>#include &lt;stdio.h&gt;</STRONG>
+<br>
+<STRONG>#include &lt;gbatch.h&gt;</STRONG>
+<br><p><strong>FILE *gbatch_jobdata(const int</strong>
+<em>fd</em><strong>, const int</strong>
+<em>flags</em><strong>, const slotno_t</strong>
+<em>slot</em><strong>)</strong></p>
+<p><strong>int gbatch_jobdata(const int</strong>
+<em>fd</em><strong>, const int</strong>
+<em>outfile</em><strong>, int(*</strong><em>fn</em><strong>)(int,void*,unsigned), const unsigned,</strong>
+<em>flags</em><strong>, const slotno_t</strong>
+<em>slotno</em><strong>)</strong></p>
+<p>
+</p>
+<hr />
+<h1><a name="description">DESCRIPTION</a></h1>
+<p>The function <strong>gbatch_jobdata</strong> is used to retrieve the job script of a
+job. There are two versions, one for the Unix and Linux API and one
+for the Windows API. The second form is used under Windows as there is
+no acceptable substitute for the <code>pipe(2)</code> system call.</p>
+<p>In both forms of the call, <em>fd</em> is a file descriptor which was
+previously returned by a successful call to gbatch_open(3).</p>
+<p><em>flags</em> is zero or <code>GBATCH_FLAG_IGNORESEQ</code> to ignore recent changes
+to the job list.</p>
+<p><em>slot</em> is the slot number corresponding to the job as returned by
+<code>gbatch_joblist(3)</code> or xb_jobfindslot(3).</p>
+<p>The difference between the two versions of <strong>gbatch_jobadd</strong> is in the
+method of passing the job script.</p>
+<p>
+</p>
+<h2><a name="unix_and_linux">Unix and Linux</a></h2>
+<p>The Unix and Linux API version returns a <em>stdio</em> file descriptor
+which may be used with the standard I/O functions getc(3), <code>fread(3)</code>
+etc to read the job script. The job script should always be read to
+the end and then using <code>fclose(3)</code> to ensure that all incoming data on
+the socket is collected.</p>
+<p>If there is any kind of error, then <strong>gbatch_jobdata</strong> will return <code>NULL</code>,
+leaving the error code in the external variable <strong>gbatch_dataerror</strong>.</p>
+<p>
+</p>
+<h2><a name="windows">Windows</a></h2>
+<p>In the case of the Windows version, the specified function <em>fn</em> is
+invoked with parameters similar to <strong>write</strong> to read data to pass across
+as the job script, the argument <em>outfile</em> being passed as a file
+handle as the first argument to <em>fn</em>.</p>
+<p><em>fn</em> may very well be <strong>write</strong>. The reason for the routine not
+invoking <strong>write</strong> itself is partly flexibility but mostly because some
+versions of Windows DLLs do not allow <strong>read</strong> to be invoked directly
+from within it.</p>
+<p><strong>N.B. This routine is particularly susceptible to peculiar effects
+due to assignment of insufficient stack space.</strong></p>
+<p>The return value is zero for success, or an error code. The error code
+is also assigned to the external variable <code>gbatch_dataerror</code> for
+consistency with the Unix version.</p>
+<p>
+</p>
+<hr />
+<h1><a name="return_values">RETURN VALUES</a></h1>
+<p>The Unix version of <strong>gbatch_jobdata</strong> returns <code>NULL</code> if unsuccessful,
+placing the error code in the external variable <code>gbatch_dataerror</code>.</p>
+<p>The Windows version of <strong>gbatch_jobdata</strong> returns zero if successful,
+otherwise an error code.</p>
+<p>The error codes which may be returned are defined in the include file
+\fBgbatch.h\fR.</p>
+<p>
+</p>
+<hr />
+<h1><a name="example">EXAMPLE</a></h1>
+<pre>
+ int fd, ret, ch;
+ FILE *inf;
+ slotno_t slot;</pre>
+<pre>
+ /*  select a job assign it to slot */</pre>
+<pre>
+ inf = gbatch_jobdata(fd, XBABI_IGNORESEQ, slot);</pre>
+<pre>
+ if (!inf) { /* error in gbatch_dataerror */ 
+     . . .
+ }
+ 
+ while ((ch = getc(inf)) != EOF)
+     putchar(ch);</pre>
+<pre>
+ fclose(inf);</pre>
+<p>
+</p>
+<hr />
+<h1><a name="see_also">SEE ALSO</a></h1>
+<p>gbatch_jobadd(3),
+gbatch_jobfind(3),
+gbatch_joblist(3),
+gbatch_jobmon(3),
+gbatch_jobop(3),
+gbatch_jobread(3),
+<code>gbatch_open(3)</code></p>
+<p>
+</p>
+<hr />
+<h1><a name="copyright">COPYRIGHT</a></h1>
+<p>Copyright (c) 2009 Free Software Foundation, Inc.
+This is free software. You may redistribute copies of it under the
+terms of the GNU General Public License
+&lt;http://www.gnu.org/licenses/gpl.html&gt;.
+There is NO WARRANTY, to the extent permitted by law.</p>
+<p>
+</p>
+<hr />
+<h1><a name="author">AUTHOR</a></h1>
+<p>John M Collins, Xi Software Ltd.</p>
+
+</body>
+
+</html>

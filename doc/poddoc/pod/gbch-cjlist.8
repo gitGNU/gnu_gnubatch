@@ -1,0 +1,128 @@
+=head1 NAME
+
+gbch-cjlist - dump out GNUbatch jobs to directory
+
+=head1 SYNOPSIS
+
+B<gbch-cjlist>
+[ I<-D dir> ]
+[ I<-v n> ]
+[ I<-e n> ]
+[ I<-u> ]
+[ I<-s> ]
+[ I<-f> ]
+I<job file> I<outfile> I<workdir>
+
+=head1 DESCRIPTION
+
+B<gbch-cjlist> converts B<GNUbatch> job files held in the batch spool
+directory to an executable shell script which may be used to recreate
+them. This may be useful for backup purposes or for one stage in
+upgrading from one release of B<GNUbatch> to another.
+
+The jobs are copied into the backup directory I<workdir>, and the
+generated shell script file I<outfile> refers to files in that
+directory.
+
+B<gbch-cjlist> understands the format of the saved job file for
+versions of B<GNUbatch> and Xi-Batch going back to release 5, and when
+presented with a saved file, will attempt to work out from the format
+which release it relates to. If required, it will skip apparent errors
+in the job file.
+
+In addition to options, three arguments are always supplied to
+B<gbch-cjlist>.
+
+=over 4
+
+=item Job list file
+
+This is the file containing the attributes of the jobs,
+F<btsched_jfile> in the spool directory.
+
+=item Output file
+
+This file is created by B<gbch-cjlist> to contain the executable shell
+script which may be used to create the jobs.
+
+=item Backup directory
+
+This directory is used to hold the job data.
+
+=back
+
+Note that saved jobs make use of the B<-U> option to gbch-r(1) to set the
+ownership correctly.
+
+=head1 OPTIONS
+
+=over 4
+
+=item -D I<directory>
+
+Specifies the source directory for the jobs and I<job file> rather
+than the current directory. It can be specified as C<$SPOOLDIR> or
+C<${SPOOLDIR-/var/spool/gnubatch}> etc and the environment and/or
+F<gnubatch.conf> will be interrogated to interpolate the value
+of the environment variable given.
+
+If you use this, don't forget to put single quotes around it thus:
+
+ gbch-cjlist -D '${SPOOLDIR-/var/spool/gnubatch}' ...
+
+otherwise the shell will try to interpret the C<$> construct and not
+B<gbch-cjlist>.
+
+=item -e I<n>
+
+Tolerate I<n> errors of the kinds denoted by the other options before
+giving up trying to convert the file.
+
+=item -f
+
+Ignore format errors (invalid strings etc) in the saved job file up to
+the number of total errors given by the B<-e> option. Offending jobs
+are skipped.
+
+=item -s
+
+Ignore file size errors in the saved job file (up to the number of
+total errors given by the B<-e> option.
+
+=item -u
+
+Do not check user names in the saved job file.
+
+=item -v I<number>
+
+Tell B<gbch-cjlist> that the job file is for release I<number> of
+B<Xi-Batch>, where I<number> is 5 to 6.
+
+This may be necessary where the job file is corrupted and B<gbch-cjlist>
+cannot guess what is meant.
+
+=back
+
+=head1 SEE ALSO
+
+gbch-ciconv(8),
+gbch-cvlist(8),
+gbch-uconv(8).
+
+=head1 COPYRIGHT
+
+Copyright (c) 2009 Free Software Foundation, Inc.
+This is free software. You may redistribute copies of it under the
+terms of the GNU General Public License
+<http://www.gnu.org/licenses/gpl.html>.
+There is NO WARRANTY, to the extent permitted by law.
+
+=head1 AUTHOR
+
+John M Collins, Xi Software Ltd.
+
+=cut
+
+## Local Variables:
+## mode: nroff
+## End:

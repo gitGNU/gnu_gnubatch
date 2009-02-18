@@ -1,0 +1,81 @@
+// MAKEHELP.BAT generated Help Map file.  Used by BTRSETW.HPJ. 
+ 
+// Commands (ID_* and IDM_*) 
+HID_PROGRAM_SAVE                        0x18000
+HID_NETWORK_ADDNEWHOST                  0x18001
+HID_NETWORK_DELETEHOST                  0x18002
+HID_NETWORK_CHANGEHOST                  0x18003
+HID_NETWORK_SETASSERVER                 0x18004
+HID_OPTIONS_PROGRAMDEFAULTS             0x18005
+HID_OPTIONS_RESTOREDEFAULTS             0x18006
+HID_OPTIONS_TIMEDEFAULTS                0x18007
+HID_OPTIONS_CONDITIONDEFAULTS           0x18008
+HID_OPTIONS_ASSIGNMENTDEFAULTS          0x18009
+HID_OPTIONS_QUEUEDEFAULTS               0x1800A
+HID_OPTIONS_PROCESSPARAMETERS           0x1800B
+HID_OPTIONS_PERMISSIONS                 0x1800C
+HID_OPTIONS_TIMELIMITS                  0x1800D
+HID_PROGRAM_PORTSETTINGS                0x1800E
+HID_PROGRAM_LOGINORLOGOUT               0x1801C
+HID_PROGRAM_NEWGROUP                    0x1801D
+ 
+// Prompts (IDP_*) 
+HIDP_XBENQ_PASSREQ                      0x307D0
+HIDP_XBENQ_BADPASSWD                    0x307D1
+HIDP_XBENQ_UNKNOWN                      0x307D2
+HIDP_XBENQ_BADCLIENT                    0x307D3
+HIDP_XBENQ_UNKNOWNU                     0x307D4
+HIDP_XBENQ_UNKNOWNG                     0x307D5
+HIDP_CONNDIED                           0x307D6
+HIDP_PREVINSTANCE                       0x307D7
+HIDP_NOHOSTSYET                         0x307D8
+HIDP_NOTSELECTED                        0x307D9
+HIDP_SUREDEL                            0x307DA
+HIDP_NOHOSTNAME                         0x307DB
+HIDP_NOALIASNAME                        0x307DC
+HIDP_ALIASSAMEASHOST                    0x307DD
+HIDP_BADINETADDR                        0x307DE
+HIDP_HIDCLASH                           0x307DF
+HIDP_HIDCLASHMINE                       0x307E0
+HIDP_ALIASCLASH                         0x307E1
+HIDP_HOSTCLASH                          0x307E2
+HIDP_UNKNOWNHOSTNAME                    0x307E3
+HIDP_MYHOSTNAME                         0x307E4
+HIDP_NOTALIVE                           0x307E5
+HIDP_NO_SERVER                          0x307E6
+HIDP_NO_HOSTFILE                        0x307E7
+HIDP_HF_INVALIDHOST                     0x307E8
+HIDP_HF_BADTIMEOUT                      0x307E9
+HIDP_HF_NOALIAS                         0x307EA
+HIDP_GBTU_NOBIND                        0x307EB
+HIDP_GBTU_NOSEND                        0x307EC
+HIDP_GBTU_NORECV                        0x307ED
+HIDP_GBTU_NVALID                        0x307EE
+HIDP_GBTU_NOSOCK                        0x307EF
+HIDP_NOCILIST                           0x307F0
+HIDP_NORMBADRANGE                       0x307F1
+HIDP_ERRBADRANGE                        0x307F2
+HIDP_JLTMINMODE                         0x307F3
+HIDP_SURERESTORE                        0x307F4
+HIDP_SAVEPROPTS                         0x307F5
+ 
+// Resources (IDR_*) 
+HIDR_MAINFRAME                          0x20002
+ 
+// Dialogs (IDD_*) 
+HIDD_ABOUTBOX                           0x20064
+HIDD_DEFASS                             0x20065
+HIDD_DEFCOND                            0x20066
+HIDD_DEFTIMES                           0x20067
+HIDD_HOST                               0x20068
+HIDD_JOBMODE                            0x20069
+HIDD_LOGINHOST                          0x2006A
+HIDD_LOGINOUT                           0x2006B
+HIDD_NEWGROUP                           0x2006C
+HIDD_PORTNUMS                           0x2006D
+HIDD_PROCPAR                            0x2006E
+HIDD_PROGOPTS                           0x2006F
+HIDD_QUEUEDEFS                          0x20070
+HIDD_TIMELIMS                           0x20071
+ 
+// Frame Controls (IDW_*) 

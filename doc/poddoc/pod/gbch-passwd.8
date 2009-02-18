@@ -1,0 +1,78 @@
+=head1 NAME
+
+gbch-passwd - set passwords for user and API
+
+=head1 SYNOPSIS
+
+B<xipassd>
+[ -I<u> user ]
+[ -I<p> password ]
+[ -I<f> ]
+[ -I<d> ]
+[ -I<F> file ]
+
+=head1 DESCRIPTION
+
+B<gbch-passwd> sets a password for the current user or a specified user
+if -B<u> is given. This is separate and distinct from the user's login
+password. This password is used by the web interfaces, the Windows
+interfaces and the APIs for GNUbatch.
+
+The reason for doing this is because it is considered insecure to
+possibly repeatedly try login passwords from user programs.
+
+If I<any> users have a password set in this way, then I<all> users
+will have to to have a password in the file to use any of the
+interfaces requiring a password.
+
+Unlike the Unix passwd(1) routine, the old password is not prompted
+for and there is no confirmation.
+
+=head1 OPTIONS
+
+=over 4
+
+=item B<-u> I<user>
+
+Set password for given user. This may only be for other than the
+current user if B<gbch-passwd> is invoked by B<root>.
+
+=item B<-p> I<password>
+
+Specify the password to be set other than prompting for it.
+
+=item B<-f>
+
+It is normally considered an error to include a password for B<root>
+for the same reasons that the password file is separate. However this
+option may be set to insist upon it.
+
+=item B<-d>
+
+Delete the user's password from the file.
+
+=item B<-F> I<file>
+
+Use I<file> to hold the password. The default if no I<file> is given
+is F<gbch-passwd>. Any number of B<-F> options may be
+given to set up several password files at once.
+
+=back
+
+=head1 COPYRIGHT
+
+Copyright (c) 2009 Free Software Foundation, Inc.
+This is free software. You may redistribute copies of it under the
+terms of the GNU General Public License
+<http://www.gnu.org/licenses/gpl.html>.
+There is NO WARRANTY, to the extent permitted by law.
+
+=head1 AUTHOR
+
+John M Collins, Xi Software Ltd.
+
+=cut
+
+## Local Variables:
+## mode: nroff
+## End:

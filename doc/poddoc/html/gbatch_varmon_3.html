@@ -1,0 +1,109 @@
+<?xml version="1.0" ?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<title>gbatch_varmon - monitor changes to the variables list</title>
+<meta http-equiv="content-type" content="text/html; charset=utf-8" />
+<link rev="made" href="mailto:root@localhost" />
+</head>
+
+<body style="background-color: white">
+
+<p><a name="__index__"></a></p>
+<!-- INDEX BEGIN -->
+<!--
+
+<ul>
+
+	<li><a href="#name">NAME</a></li>
+	<li><a href="#synopsis">SYNOPSIS</a></li>
+	<li><a href="#description">DESCRIPTION</a></li>
+	<li><a href="#return_values">RETURN VALUES</a></li>
+	<li><a href="#example">EXAMPLE</a></li>
+	<li><a href="#see_also">SEE ALSO</a></li>
+	<li><a href="#copyright">COPYRIGHT</a></li>
+	<li><a href="#author">AUTHOR</a></li>
+</ul>
+-->
+<!-- INDEX END -->
+
+<p>
+</p>
+<h1><a name="name">NAME</a></h1>
+<p>gbatch_varmon - monitor changes to the variables list</p>
+<p>
+</p>
+<hr />
+<h1><a name="synopsis">SYNOPSIS</a></h1>
+<STRONG>#include &lt;gbatch.h&gt;</STRONG>
+<br><p><strong>int gbatch_varmon(const int</strong>
+<em>fd</em><strong>, void (*</strong><em>fn</em><strong>)(const int))</strong></p>
+<p>
+</p>
+<hr />
+<h1><a name="description">DESCRIPTION</a></h1>
+<p>Note that this routine is not available in the Windows
+version, please see &lt;a href=``#Xb_setmon_def''&gt;the section on
+gbatch_setmon&lt;/a&gt; which covers both jobs and variables.</p>
+<p>The function <strong>gbatch_varmon</strong> is used to set a function to monitor changes
+to the variables list.</p>
+<p><em>fd</em> is a file descriptor which was previously returned by a
+successful call to gbatch_open(3).</p>
+<p><em>fn</em> is a pointer to a function which will handle the changes to the
+list or <code>NULL</code>, which cancels any previous call. This function will
+be called with <em>fd</em> as an argument when any change is noted. The API
+does not note which variables the user is interested in, so any
+changes to variables may provoke a call to this function.</p>
+<p>
+</p>
+<hr />
+<h1><a name="return_values">RETURN VALUES</a></h1>
+<p>The function returns 0 if successful, otherwise an error code as
+defined in the include file \fBgbatch.h\fR.</p>
+<p>
+</p>
+<hr />
+<h1><a name="example">EXAMPLE</a></h1>
+<pre>
+ void note_mod(const int fd)
+ {
+        var_changes++;
+ }</pre>
+<pre>
+ ...</pre>
+<pre>
+ gbatch_varmon(fd, note_mod);</pre>
+<pre>
+ if (var_changes)  {
+    var_changes = 0;
+    ...
+    /* Re-read list etc */
+    ...
+ }</pre>
+<pre>
+ gbatch_varmon(fd, NULL);</pre>
+<p>
+</p>
+<hr />
+<h1><a name="see_also">SEE ALSO</a></h1>
+<p>gbatch_open(3),
+gbatch_close(3),
+gbatch_jobmon(3).</p>
+<p>
+</p>
+<hr />
+<h1><a name="copyright">COPYRIGHT</a></h1>
+<p>Copyright (c) 2009 Free Software Foundation, Inc.
+This is free software. You may redistribute copies of it under the
+terms of the GNU General Public License
+&lt;http://www.gnu.org/licenses/gpl.html&gt;.
+There is NO WARRANTY, to the extent permitted by law.</p>
+<p>
+</p>
+<hr />
+<h1><a name="author">AUTHOR</a></h1>
+<p>John M Collins, Xi Software Ltd.</p>
+
+</body>
+
+</html>

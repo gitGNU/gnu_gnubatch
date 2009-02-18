@@ -1,0 +1,43 @@
+=head1 NAME
+
+gbch-atcover - emulate AT
+
+=head1 SYNOPSIS
+
+B<gbch-atcover>
+I<options>
+
+=head1 DESCRIPTION
+
+B<gbch-atcover> may be used instead of the standard at(1) command. It
+converts the options that most versions of the at(1) commands take to
+the equivalent gbch-r(1) commandds and then invokes btr(1) to submit the
+batch jobs.
+
+The gbch-r(1) program provides a much greater set of facilities than
+at(1). Although it is strongly recommended to switch to the gbch-r(1)
+command to take advantage of these, they can be made available to
+users of our B<gbch-atcover> command. This is done by setting up
+C<GBCH_R> in the application or user environment.
+
+B<gbch-atcover> may be installed in place of at(1) in F</usr/bin>, with
+the original binary moved to something like F<old.at> in the same
+directory.
+
+=head1 COPYRIGHT
+
+Copyright (c) 2009 Free Software Foundation, Inc.
+This is free software. You may redistribute copies of it under the
+terms of the GNU General Public License
+<http://www.gnu.org/licenses/gpl.html>.
+There is NO WARRANTY, to the extent permitted by law.
+
+=head1 AUTHOR
+
+John M Collins, Xi Software Ltd.
+
+=cut
+
+## Local Variables:
+## mode: nroff
+## End:

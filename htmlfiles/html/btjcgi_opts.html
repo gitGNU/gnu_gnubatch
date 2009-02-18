@@ -1,0 +1,63 @@
+<!--
+   Copyright 2009 Free Software Foundation, Inc.
+
+  This program is free software: you can redistribute it and/or modify
+  it under the terms of the GNU General Public License as published by
+  the Free Software Foundation, either version 3 of the License, or
+  (at your option) any later version.
+
+  This program is distributed in the hope that it will be useful,
+  but WITHOUT ANY WARRANTY; without even the implied warranty of
+  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+  GNU General Public License for more details.
+
+   You should have received a copy of the GNU General Public License
+  along with this program.  If not, see <http://www.gnu.org/licenses/>.
+  -->	
+<html>
+<head><title>Set Options for GNUbatch job listing</title>
+</head>
+<body>
+<h1>Options for GNUbatch Jobs</h1>
+<script src="/gbjsfunc.js"></script>
+<form name=optform method=get onsubmit="return optsave($Z);">
+<table>
+<tr align=left>
+<td colspan=2><input type=checkbox name=header value=1 checked>Display column headers</td>
+</tr>
+<tr align=left>
+<td colspan=2><input type=checkbox name=sort value=1>Sort jobs by time order</td>
+</tr>
+<tr align=left><td>Display job queue prefix</td>
+<td><input type=text name=queue size=30 maxlength=60></td>
+</tr>
+<tr align=left>
+<td colspan=2><input type=checkbox name=incnull value=1 checked>Include null prefixes</td>
+<tr align=left>
+<td>Limit to user</td>
+<td><input type=text name=user size=11 maxlength=11></td>
+</tr>
+<tr align=left>
+<td>Limit to group</td>
+<td><input type=text name=group size=11 maxlength=11></td>
+</tr>
+<tr align=left>
+<td>Remote/local jobs</td>
+<td><input type=radio name=export value=A checked>Display all jobs
+</tr>
+<tr align=left>
+<td></td>
+<td><input type=radio name=export value=R>Display local and remote executable jobs</td>
+</tr>
+<tr align=left>
+<td></td>
+<td><input type=radio name=export value=L>Display jobs local to current host only</td>
+</tr>
+</table>
+<input type=submit value="Set Options" name="Action">
+<input type=reset onClick="return clearchanges();">
+</form>
+<script LANGUAGE="JavaScript">
+record_formchanges(document.optform);
+</script>
+</body>

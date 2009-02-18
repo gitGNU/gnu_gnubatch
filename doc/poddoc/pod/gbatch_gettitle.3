@@ -1,0 +1,74 @@
+=head1 NAME
+
+gbatch_gettitle - get the job title from a job structure
+
+=head1 SYNOPSIS
+
+=for man
+\&\fB#include <gbatch.h>\fR
+.PP
+
+=for html
+<STRONG>#include &lt;gbatch.h&gt;</STRONG>
+<br>
+
+B<const char *gbatch_gettitle(const int>
+I<fd>B<, const apiBtjob *>I<jobp>B<)>
+
+=head1 DESCRIPTION
+
+The function B<gbatch_gettitle> may be used to extract the title from a
+job as a character string. Optionally the queue name (as set by gbatch_setqueue(3)) may be elided from the title.
+
+I<fd> is a file descriptor which was previously returned by a
+successful call to gbatch_open(3), or C<-1> to disregard the queue name.
+
+I<jobp> is a pointer to a structure containing the details of the job.
+
+=head1 RETURN VALUES
+
+The result is the title of the job as a C<const> character string.
+
+If a valid file descriptor is provided, and this has a queue name set
+using gbatch_setqueue(3), and the queue name is the same as that in the
+job title, then the queue name is deleted from the title returned to
+the user.
+
+=head1 SEE ALSO
+
+gbatch_delarg(3),
+gbatch_delenv(3),
+gbatch_delredir(3),
+gbatch_getarg(3),
+gbatch_getdirect(3),
+gbatch_getenv(3),
+gbatch_getenvlist(3),
+gbatch_getredir(3),
+gbatch_open(3),
+gbatch_putarg(3),
+gbatch_putarglist(3),
+gbatch_putdirect(3),
+gbatch_putenv(3),
+gbatch_putenvlist(3),
+gbatch_putredir(3),
+gbatch_putredirlist(3),
+gbatch_puttitle(3),
+gbatch_setqueue(3).
+
+=head1 COPYRIGHT
+
+Copyright (c) 2009 Free Software Foundation, Inc.
+This is free software. You may redistribute copies of it under the
+terms of the GNU General Public License
+<http://www.gnu.org/licenses/gpl.html>.
+There is NO WARRANTY, to the extent permitted by law.
+
+=head1 AUTHOR
+
+John M Collins, Xi Software Ltd.
+
+=cut
+
+## Local Variables:
+## mode: nroff
+## End:

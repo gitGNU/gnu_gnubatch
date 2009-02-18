@@ -1,0 +1,57 @@
+#! /bin/sh
+#
+#   Copyright 2009 Free Software Foundation, Inc.
+#
+#  This program is free software: you can redistribute it and/or modify
+#  it under the terms of the GNU General Public License as published by
+#  the Free Software Foundation, either version 3 of the License, or
+#  (at your option) any later version.
+#
+#  This program is distributed in the hope that it will be useful,
+#  but WITHOUT ANY WARRANTY; without even the implied warranty of
+#  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#  GNU General Public License for more details.
+#
+#   You should have received a copy of the GNU General Public License
+#  along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+# Try to find where X app-defaults live
+
+for xdir in `IFS=:;echo $PATH` /usr/X*/bin /usr/dt/bin /usr/openwin/bin
+  do
+  if [ -x $xdir/xmkmf ]
+  then
+      XBINDIR=$xdir
+      break
+  fi
+done
+
+if [ "$XBINDIR" != "" ]
+then
+    mkdir trial
+    cd trial
+    cat >Imakefile <<'EOF'
+findappd:
+	@echo $(XAPPLOADDIR)
+EOF
+    if xmkmf >/dev/null 2>&1
+    then
+	Appdefloc=`make findappd 2>/dev/null`
+	cd ..
+	rm -rf trial
+	echo $Appdefloc
+	exit 0
+    fi
+    cd ..
+    rm -rf trial
+fi
+
+Appdefloc=`find /etc /usr -type d -name app-defaults -print 2>/dev/null|sed -e 1q`
+if [ "$Appdefloc" = "" ]
+then
+    echo app-defaults location not found
+    exit 1
+fi
+
+echo $Appdefloc
+exit 0

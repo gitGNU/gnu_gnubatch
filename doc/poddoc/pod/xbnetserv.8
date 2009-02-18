@@ -1,0 +1,116 @@
+=head1 NAME
+
+xbnetserv - remote server process
+
+=head1 SYNOPSIS
+
+B<xbnetserv>
+
+=head1 DESCRIPTION
+
+B<xbnetserv> is the remote server process for the B<GNUbatch> batch
+scheduler system.
+
+It serves 3 purposes
+
+=over 4
+
+=item 1
+
+It accepts jobs from other hosts submitted by gbch-rr(1).
+
+=item 2
+
+It accepts jobs and administration requests from DOS and
+Windows machines.
+
+=item 3
+
+It supports API operations.
+
+=back
+
+It is normally invoked by the system startup routines, or otherwise by
+gbch-start(1).
+
+It takes no arguments from the command line (and ignores any which are
+supplied). Information, in respect of other machines to connect to is
+read from the file F<gnubach.hosts>.
+
+=head1 FILES
+
+F<gnubatch.hosts>
+host names and descriptions
+
+F<gnubatch.conf>
+master configuration file
+
+F<btint-config>
+message file
+
+F<btsched_reps>
+error log file
+
+F<btufile>
+user data
+
+=head1 ENVIRONMENT
+
+=over 4
+
+=item SPOOLDIR
+
+alternative location for spool directory
+
+=back
+
+=head1 INTERNET PORTS
+
+B<xbnetserv> uses 2 ports
+
+	gnubach-netsrv
+
+(B<N.B.> no second "e") to accept incoming jobs on TCP from gbch-rr(1),
+and on UDP from the DOS/Windows interface, and 2 further ports
+
+	gnubatch-api
+
+to communicate with the API library.
+
+The port numbers are set up in the F</etc/services> file when B<GNUbatch>
+is first installed.
+
+=head1 SEE ALSO
+
+gbch-r(1),
+gbch-start(1),
+gbch-quit(1),
+gnubatch.conf(5),
+gnubatch.hosts(5),
+btsched(8).
+
+=head1 DIAGNOSTICS
+
+B<xbnetserv> runs as a "daemon process" and diagnostics, apart from those detected
+when it is first started, are not usually written to any terminal but
+to the file F<btsched_reps>.
+
+In the event of any problems this file should be examined.
+
+=head1 COPYRIGHT
+
+Copyright (c) 2009 Free Software Foundation, Inc.
+This is free software. You may redistribute copies of it under the
+terms of the GNU General Public License
+<http://www.gnu.org/licenses/gpl.html>.
+There is NO WARRANTY, to the extent permitted by law.
+
+=head1 AUTHOR
+
+John M Collins, Xi Software Ltd.
+
+=cut
+
+## Local Variables:
+## mode: nroff
+## End:

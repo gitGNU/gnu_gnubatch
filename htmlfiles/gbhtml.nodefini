@@ -1,0 +1,153 @@
+#
+#   Copyright 2009 Free Software Foundation, Inc.
+#
+#  This program is free software: you can redistribute it and/or modify
+#  it under the terms of the GNU General Public License as published by
+#  the Free Software Foundation, either version 3 of the License, or
+#  (at your option) any later version.
+#
+#  This program is distributed in the hope that it will be useful,
+#  but WITHOUT ANY WARRANTY; without even the implied warranty of
+#  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#  GNU General Public License for more details.
+#
+#   You should have received a copy of the GNU General Public License
+#  along with this program.  If not, see <http://www.gnu.org/licenses/>.
+#
+# Files and parameters to control login
+# First user key file
+
+userfile=/usr/spool/html_ufile
+
+# Uncomment the following if you want accesses to refresh the user file
+# in other words restart the "usertimeout" on each successful access
+#userrefresh=y
+
+# Comment out the following if you do not want a default user
+#defltuser=guest
+
+# Comment out the following if you do not want a default host
+deflthost=localhost
+
+# Days after which timeout occurs
+# Single figure gives days, otherwise hh:mm or dd:hh:mm thus 01:12:00 would be 1.5 days
+usertimeout=7
+
+error_preamble=html/error_pre.html
+error_postamble=html/error_post.html
+nologin=html/nologin.html
+gotlogin=html/gotlogin.html
+invhost=html/invalidhost.html
+defltlogin=html/defltlogin.html
+logfailed=html/logfailed.html
+badargs=html/badargs.html
+sbadargs=html/sbadargs.html
+stalelogin=html/stalelogin.html
+stalesubs=html/stalesubs.html
+jobgone=html/jobgone.html
+ptrgone=html/ptrgone.html
+nopriv=html/nopriv.html
+badstate=html/badstate.html
+listfmt_post=html/fmt_post.html
+list_postamble=html/list_post.html
+
+# Number of days before stored cookies expire (may be as hh:mm or dd:hh:mm as above
+cookexpiry=14
+
+[btjcgi]
+headers=y
+list_preamble=html/btjcgilist_pre.html
+setopts=html/btjcgi_opts.html
+listfmt_pre=html/btjcgifmt_pre.html
+create_pre=html/gbjcreate_pre.html
+create_postfl=html/gbjcreate_postfl.html
+create_post=html/gbjcreate_post.html
+perm_pre=html/btjcgiperm_pre.html
+perm_post=html/gbjobch_post.html
+time_pre=html/btjcgitime_pre.html
+time_post=html/gbjobch_post.html
+tpl_pre=html/btjcgitpl_pre.html
+tpl_post=html/gbjobch_post.html
+procp_pre=html/btjcgippar_pre.html
+procp_post=html/gbjobch_post.html
+conds_pre=html/btjcgicond_pre.html
+conds_post=html/gbjlistch_post.html
+asses_pre=html/btjcgiass_pre.html
+asses_post=html/gbjlistch_post.html
+args_pre=html/btjcgiargs_pre.html
+args_post=html/gbjlistch_post.html
+io_pre=html/btjcgiio_pre.html
+io_post=html/gbjlistch_post.html
+
+[rbtjcgi]
+headers=y
+list_preamble=html/btjcgilist_pre.html
+setopts=html/btjcgi_opts.html
+listfmt_pre=html/btjcgifmt_pre.html
+create_pre=html/gbjcreate_pre.html
+create_post=html/gbjcreate_post.html
+create_postfl=html/gbjcreate_postfl.html
+perm_pre=html/btjcgiperm_pre.html
+perm_post=html/gbjobch_post.html
+time_pre=html/btjcgitime_pre.html
+time_post=html/gbjobch_post.html
+tpl_pre=html/btjcgitpl_pre.html
+tpl_post=html/gbjobch_post.html
+procp_pre=html/btjcgippar_pre.html
+procp_post=html/gbjobch_post.html
+conds_pre=html/btjcgicond_pre.html
+conds_post=html/gbjlistch_post.html
+asses_pre=html/btjcgiass_pre.html
+asses_post=html/gbjlistch_post.html
+args_pre=html/btjcgiargs_pre.html
+args_post=html/gbjlistch_post.html
+io_pre=html/btjcgiio_pre.html
+io_post=html/gbjlistch_post.html
+
+[btjvcgi]
+viewstart=html/viewstart.html
+viewend=html/viewend.html
+
+[rbtjvcgi]
+viewstart=html/viewstart.html
+viewend=html/viewend.html
+
+[btjdcgi]
+chngok=html/bjchngok.html
+
+[rbtjdcgi]
+chngok=html/bjchngok.html
+
+[btjccgi]
+chngok=html/bjchngok.html
+
+[rbtjccgi]
+chngok=html/bjchngok.html
+
+[btjcrcgi]
+submitok=html/gbjsubmitok.html
+
+[rbtjcrcgi]
+submitok=html/gbjsubmitok.html
+
+[btvcgi]
+headers=y
+list_preamble=html/btvcgilist_pre.html
+setopts=html/btvcgi_opts.html
+listfmt_pre=html/btvcgifmt_pre.html
+perm_pre=html/btvcgiperm_pre.html
+perm_post=html/btvcgiperm_post.html
+
+[rbtvcgi]
+headers=y
+list_preamble=html/btvcgilist_pre.html
+setopts=html/btvcgi_opts.html
+listfmt_pre=html/btvcgifmt_pre.html
+perm_pre=html/btvcgiperm_pre.html
+perm_post=html/btvcgiperm_post.html
+
+[btvccgi]
+vopok=html/btvok.html
+
+[rbtvccgi]
+vopok=html/btvok.html

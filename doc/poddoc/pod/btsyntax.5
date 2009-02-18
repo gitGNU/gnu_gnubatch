@@ -1,0 +1,347 @@
+=head1 NAME
+
+btsyntax - option handling for GNUbatch programs
+
+=head1 DESCRIPTION
+
+All of the options referred to in the descriptions of the shell-level
+programs for B<GNUbatch> below may be supplied in a I<configuration
+file> (q.v.), or in an environment variable whose name is the same as
+the calling program, except that it is in lower case.
+
+This may enable defaults to be supplied according to the application
+from which the program is invoked. However any options and arguments
+supplied on the command line usually take priority.
+
+Additionally by editing the appropriate I<message file> (q.v.) it is
+possible to change the option letters and keywords from those
+described.
+
+=head2 Option types
+
+In nearly all cases there are two alternative ways of supplying
+options:
+
+=over 4
+
+=item *
+
+Via a traditional Unix-style B<->I<letter> option, for example as
+B<-z>. In some cases, such as in gbch-r(1) and gbch-jchange(1) we ran out of
+letters and had to use other a few other characters, such as digits.
+
+=item *
+
+Via a keyword-style option, such as C<+zero-charge>. Keywords are
+case-insensitive.
+
+=back
+
+=head2 Option syntax
+
+The syntax of options is intended to be as flexible as
+possible. Options which do not take arguments may be grouped together
+as in
+
+	-Nwm
+
+or they may be given separately as in
+
+	-N -w -m
+
+White space is optional in the case of options which do take
+arguments, thus both
+
+	-p150
+
+and
+
+	-p 150
+
+are acceptable and have the same effect.
+
+If the keyword version of an option is given, then it must be
+separated from its argument by white space thus
+
+	+priority 150
+
+=head2 Configuration files
+
+To save the user from having to specify commonly-used combinations of
+options, there are mechanisms enabling these to be supplied to each
+program automatically.
+
+One mechanism is the use of a I<configuration file>, F<.gnubatch> in the
+current or user's home directory. The other is the use of an
+environment variable.
+
+These files may also be used to specify alternative I<message files>.
+
+The format of configuration files is akin to a set of environment
+variable assignments, with empty lines and lines beginning with C<#>
+being ignored.
+
+The name assigned to is the same as that of the calling program but in
+upper case and hyphens changed to underscores, for example that
+corresponding to B<gbch-r> is C<GBCH_R> etc. This is the same as for the
+corresponding environment variable.
+
+Usually options are taken from the following places in order, so that
+later-processed ones override earlier ones:
+
+=over 4
+
+=item Standard defaults
+
+Each program has a set of standard defaults which are used to
+initialise the parmaters when the program is invoked.
+
+=item User profile
+
+In some cases, for example default priority, the user's profile as
+displayed by gbch-user(1) is used to initialise the defaults.
+
+=item Home directory
+
+The file F<~/.gnubatch> is read, and any options specified therein
+(i.e. with an assignment to the appropriate name) are interpreted.
+
+=item Environment
+
+Any options specified in the appropriate environment variable (you
+will almost certainly have to use quotes when setting it via the shell
+in order to preserve the white space) are read and interpreted.
+
+=item Current Directory
+
+The file F<.gnubatch> is read, and any options specified therein
+(i.e. with an assignment to the appropriate name) are interpreted.
+
+Note that this may mean that the F<.gnubatch> file is read twice if the
+command is run from the home directory. Beware therefore of options
+which are cumulative, such as arguments and redirections, and use the
+"cancel existing" options.
+
+=item Command line
+
+Any options specified on the command line are interpreted last.
+
+=back
+
+Most options have inverses so that it is possible to reset anything
+which may have been set by previously-read options. Extra care should
+be taken with cumulative options, notably arguments and redirections,
+so that these are not doubled, especially in the case where the home
+directory is also the current directory.
+
+=head2 Option path
+
+The above description of the order of selection of configuration
+files, environment and command-line options is the default.
+
+It may be desirable to change the order of selection of options, in
+to eliminate some alternative locations or to include others.
+
+The environment variable C<GB_CONFIGPATH> may be set to a
+colon-separated list of directories (environment variables and
+C<~>I<user> constructs are appropriately interpreted).
+
+The symbol C<!> is used to represent the relevant environment
+variable, and C<-> is used to represent option arguments.
+
+The default value of C<GB_CONFIGPATH> is
+
+	~:!:.:-
+
+This provides the interpretation of options in various configuration
+files and the environment which is documented above.
+
+Note that it is possible to eliminate or override the interpretation
+of options on the command line by removing or relocating the C<->. This
+may have very surprising effects especially where configuration files
+wipe out the effects of options which may have been set on the command
+line. Where the interpretation of options has been removed altogether,
+then any options supplied will probably be objected to or
+misinterpreted as file names or similar.
+
+The commands
+
+	+freeze-home
+
+and
+
+	+freeze-current
+
+and equivalents do not take into account the value of C<GB_CONFIGPATH>
+in any way.
+
+Finally please note that any non-existent or inaccessible directories
+and files will (usually) be silently ignored. If a configuration file
+appears to exist but is inaccessible, a diagnostic may be given;
+however in some cases this may be misleading due to the fact that
+various versions of Unix are misleading or inconsistent with regard to
+the error codes reported from an attempt to open a non-existent or
+inaccessible file in a non-existent or inaccessible directory.
+
+=head2 Message files
+
+As well as providing help and error messages, screen key assignments
+etc, message files also provide the option letters and keyword names
+used to specify the options.
+
+For each command, there is a default message file. For most of the
+shell-based commands, this is F<btrest.help>. Alternative message
+files may be specified using an environment variable or configuration
+file assigning values to a name. For most of the shell-based commands,
+this is C<BTRESTCONF>.
+
+Within the message file itself, the option letters and keywords are
+set up using sequences of the form
+
+	A300:?,explain
+
+Comments and the context should make clear which commands these
+options relate to.
+
+These sequences define
+
+=over 4
+
+=item A state number
+
+The state number, in the above example C<300>, which is used internally
+to denote the argument.
+
+=item option letters
+
+A single character, often a letter, but in the above example C<?>,
+which is the single-character variant of the option, thus C<-?>.
+
+Several option letters, each separated by commas may be defined. To
+define <,> itself as an option "letter", use C<\,>.
+
+=item option keywords
+
+A string of alphanumerics, possibly including hyphens and underscores,
+is used to denote an option keyword, in the above example
+C<+explain>. Several such keywords may be defined, each separated by
+commas. Note that the case of letters in the keywords is discarded.
+
+=back
+
+=head2 Location of message files
+
+It is possible to specify alternative locations for message files so
+that alternatives are selected according to the application being run
+etc.
+
+The location may be specified using configuration files in a similar
+fashion to the search for options, except that the search runs the
+other way.
+
+The search is in the following order:
+
+=over 4
+
+=item Current Directory
+
+If a configuration file in the current directory specifies a location
+for the message file, by means of an assignment to the relevant
+variable (for most shell-based commands this is C<BTRESTCONF>), then
+this file is taken.
+
+Environment variables in the form C<$ABC> and users' home directories
+in the form C<~>I<user> are appropriately expanded. The sequence C<$0>
+is replaced by the name of the program being invoked. (This process
+may run recursively up to a level of 10).
+
+=item Environment
+
+If the relevant environment variable (for most shell-based commands
+this is C<BTRESTCONF>) specifies a location, then this is taken.
+
+=item Home Directory
+
+A configuration file in the home directory may specify a location for
+the message file.
+
+=item Default Location
+
+If none of the above specify a replacment message file then the
+default location is taken.
+
+=back
+
+If a file is specified but does not exist, then this is a fatal
+error.
+
+However there is an additional step to assist the user to set up some
+alternative files with a default name.
+
+Should the file not exist, then the search falls back to a name
+generated by taking the last part of the default file name (for
+example F<btrest.conf>) and substituting this for the last part of the
+file name specified.
+
+For example if the normal message file for the command were
+
+	/var/lib/gnubatch/btrest.help
+
+and the user had specified in a configuration file
+
+	BTRESTCONF=~/$0.help
+
+then if he or she were to run, say, B<gbch-r>, then the file
+
+	~/gbch-r.help
+
+would be searched for. If this did not exist, then a search would be
+made for
+
+	~/btrest.help
+
+=head2 Path to locate message files
+
+The above search path may be modified using the environment variable
+C<GB_HELPPATH>. The interpretation is very similar to the description
+above for C<GB_CONFIGPATH>, except that C<-> fields are ignored.
+
+=head1 FILES
+
+F<~/.gnubatch>
+configuration file (home directory)
+
+F<.gnubatch>
+configuration file (current directory)
+
+=head1 ENVIRONMENT
+
+=over 4
+
+=item GB_CONFIGPATH
+
+Path to search for options in.
+
+=item GB_HELPPATH
+
+Path to search for location of message files in.
+
+=back
+
+=head1 COPYRIGHT
+
+Copyright (c) 2009 Free Software Foundation, Inc.
+This is free software. You may redistribute copies of it under the
+terms of the GNU General Public License
+<http://www.gnu.org/licenses/gpl.html>.
+There is NO WARRANTY, to the extent permitted by law.
+
+=head1 AUTHOR
+
+John M Collins, Xi Software Ltd.
+
+=cut
+
+## Local Variables:
+## mode: nroff
+## End:

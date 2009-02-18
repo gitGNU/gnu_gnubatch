@@ -1,0 +1,666 @@
+<?xml version="1.0" ?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<title>gbch-jchange - change batch jobs</title>
+<meta http-equiv="content-type" content="text/html; charset=utf-8" />
+<link rev="made" href="mailto:root@localhost" />
+</head>
+
+<body style="background-color: white">
+
+<p><a name="__index__"></a></p>
+<!-- INDEX BEGIN -->
+<!--
+
+<ul>
+
+	<li><a href="#name">NAME</a></li>
+	<li><a href="#synopsis">SYNOPSIS</a></li>
+	<li><a href="#description">DESCRIPTION</a></li>
+	<li><a href="#options">OPTIONS</a></li>
+	<ul>
+
+		<li><a href="#mode_arguments">Mode arguments</a></li>
+		<li><a href="#note_on_mode_and_owner_changes">Note on mode and owner changes</a></li>
+	</ul>
+
+	<li><a href="#files">FILES</a></li>
+	<li><a href="#environment">ENVIRONMENT</a></li>
+	<li><a href="#see_also">SEE ALSO</a></li>
+	<li><a href="#diagnostics">DIAGNOSTICS</a></li>
+	<li><a href="#copyright">COPYRIGHT</a></li>
+	<li><a href="#author">AUTHOR</a></li>
+</ul>
+-->
+<!-- INDEX END -->
+
+<p>
+</p>
+<h1><a name="name">NAME</a></h1>
+<p>gbch-jchange - change batch jobs</p>
+<p>
+</p>
+<hr />
+<h1><a name="synopsis">SYNOPSIS</a></h1>
+<p><strong>gbch-jchange</strong>
+[ <em>-options</em> ]
+<em>job number</em> ...</p>
+<p>
+</p>
+<hr />
+<h1><a name="description">DESCRIPTION</a></h1>
+<p><strong>gbch-jchange</strong> is a program to modify details of a job or jobs from a
+shell script or another program. Jobs are specified by using the job
+number, as displayed by gbch-r(1) with the <strong>-v</strong> (verbose) option, or as
+in the output of the first column of the gbch-jlist(1) command with
+default format.</p>
+<p>Remote jobs should be specified by prefixing the job numbers with the
+host name thus:</p>
+<pre>
+        host:1234</pre>
+<p>It is not necessary to specify any leading zeros.</p>
+<p>Several jobs may be specified at once to apply the same set of changes
+to all of them at once.</p>
+<p>
+</p>
+<hr />
+<h1><a name="options">OPTIONS</a></h1>
+<p>As supplied, the options to <strong>gbch-jchange</strong> are more or less identical to
+those for <strong>gbch-r</strong>, except that existing jobs have their parameters
+changed from whatever they are to the specified parameters, and there
+is no ``default'', in that mentioning an option means that the user
+requires an existing parameter for the job or jobs changed. For
+details of the syntax and much of the meaning of the options, please
+see the documentation of gbch-r(1) at the corresponding option.</p>
+<p>It is a mistake not to specify any options at all.</p>
+<p>Note that the order of treatment, letters and keywords described below
+may be modified by editing the file <em>btrest.help</em> - see
+btsyntax(5).</p>
+<p>The environment variable on which options are supplied is <a href="#item_gbch_jchange"><code>GBCH_JCHANGE</code></a> and the
+environment variable to specify the help file is <a href="#item_btrestconf"><code>BTRESTCONF</code></a>.</p>
+<dl>
+<dt><strong><a name="item__2d_3f_or__2bexplain">-? or +explain</a></strong>
+
+<dd>
+<p>causes a summary of the other options to be displayed without taking
+further action.</p>
+</dd>
+</li>
+<dt><strong><a name="item__2d2_time_or__2bgrace_2dtime_time">-2 <em>time</em> or +grace-time <em>time</em></a></strong>
+
+<dd>
+<p>change the secondary maximum run time to <em>time</em> seconds (<em>time</em> may
+be a number of seconds, or <em>mm:ss</em> for minutes and seconds).</p>
+</dd>
+</li>
+<dt><strong><a name="item__2d9_or__2bcatch_2dup">-9 or +catch-up</a></strong>
+
+<dd>
+<p>change the ``if not possible'' action of the job or jobs to ``catch up''.</p>
+</dd>
+</li>
+<dt><strong><a name="item__2da_days_or__2bavoiding_2ddays_days">-A <em>days</em> or +avoiding-days <em>days</em></a></strong>
+
+<dd>
+<p>signifies days to avoid when the job or jobs are repeated. The
+interpretation of the option syntax, and default days is just the same
+as for gbch-r(1), but the existing ``days to avoid'' in each job is
+replaced completely with the result. For example, the default days are
+<code>Sat</code> and <code>Sun</code>, so</p>
+</dd>
+<dd>
+<pre>
+        -A ,Wed</pre>
+</dd>
+<dd>
+<p>Will incorporate the default days to avoid taken from the help file,
+adding Wednesday and change the days to avoid in the job or jobs to
+Saturday, Sunday and Wednesday.</p>
+</dd>
+</li>
+<dt><strong><a name="item__2da_string_or__2bargument_string">-a <em>string</em> or +argument <em>string</em></a></strong>
+
+<dd>
+<p>Specify an argument for the job or jobs. The argument will be added to
+the end of the arguments already in the job or jobs or added by
+previous <strong>-a</strong> arguments to <strong>gbch-jchange</strong> unless the <strong>-e</strong> option is
+used, which will discard any pre-existing arguments in the job or
+jobs as well as any previously-specified <strong>-a</strong> arguments.</p>
+</dd>
+</li>
+<dt><strong><a name="item__2db_or__2bassignment_2dnot_2dcritical">-B or +assignment-not-critical</a></strong>
+
+<dd>
+<p>Marks subsequently specified assignments as ``not critical'', i.e. an
+assignment of a variable on an inaccessible remote host will be
+ignored. Existing assignments are not affected.</p>
+</dd>
+</li>
+<dt><strong><a name="item__2db_or__2bassignment_2dcritical">-b or +assignment-critical</a></strong>
+
+<dd>
+<p>Marks subsequent assignments as ``critical'', i.e. an assignment of a
+variable on an inaccessible remote host will cause the job to be held
+up. Existing assignments are not affected.</p>
+</dd>
+</li>
+<dt><strong><a name="item__2dc_or__2bcancelled">-C or +cancelled</a></strong>
+
+<dd>
+<p>Sets the job or jobs to ``cancelled'' state.</p>
+</dd>
+</li>
+<dt><strong><a name="item__2dc_condition_or__2bcondition_condition">-c <em>condition</em> or +condition <em>condition</em></a></strong>
+
+<dd>
+<p>Sets a condition on the job or jobs. This will add an extra condition
+to existing conditions in the job or jobs or preceding <strong>-c</strong> unless
+the <strong>-y</strong> option is given to discard any previously-specified conditions.</p>
+</dd>
+</li>
+<dt><strong><a name="item__2dd_directory_or__2bdirectory_directory">-D <em>directory</em> or +directory <em>directory</em></a></strong>
+
+<dd>
+<p>Sets the working directory for the job or jobs.</p>
+</dd>
+</li>
+<dt><strong><a name="item__2dd_or__2bdelete_2dat_2dend">-d or +delete-at-end</a></strong>
+
+<dd>
+<p>Cancels any repeat option of the job or jobs so that they will be deleted at
+the end of the next run.</p>
+</dd>
+</li>
+<dt><strong><a name="item__2de_or__2breset_2denvironment">-E or +reset-environment</a></strong>
+
+<dd>
+<p>Resets the environment for the job or jobs to be that of the
+environment of the <strong>gbch-jchange</strong> command.</p>
+</dd>
+</li>
+<dt><strong><a name="item__2de_or__2bcancel_2darguments">-e or +cancel-arguments</a></strong>
+
+<dd>
+<p>Deletes any existing arguments for the job or jobs.</p>
+</dd>
+</li>
+<dt><strong><a name="item__2df_or__2bexport">-F or +export</a></strong>
+
+<dd>
+<p>Marks the job or jobs to be visible throughout the network, but only
+liable to run on the machine which they are on.</p>
+</dd>
+</li>
+<dt><strong><a name="item__2df_flags_or__2bflags_2dfor_2dset_flags">-f <em>flags</em> or +flags-for-set <em>flags</em></a></strong>
+
+<dd>
+<p>Sets the flags which determine when an assignment is performed for
+subsequent <strong>-s</strong> options. Will not affect any existing assigments.</p>
+</dd>
+</li>
+<dt><strong><a name="item__2dg_or__2bfull_2dexport">-G or +full-export</a></strong>
+
+<dd>
+<p>Marks the job or jobs to be visible throughout the network and
+potentially available to run on any machine.</p>
+</dd>
+</li>
+<dt><strong><a name="item__2dg_group_or__2bset_2dgroup_group">-g <em>group</em> or +set-group <em>group</em></a></strong>
+
+<dd>
+<p>Resets the group owner of the job or jobs to <em>group</em>.</p>
+</dd>
+<dd>
+<p>Note that the setting of the group is done as a separate operation
+from any other changes. Depending upon whether the pre-existing and
+new modes and ownership permit the various operations, this may need
+to be done before, after or interleaved with other changes for it to
+succeed.</p>
+</dd>
+</li>
+<dt><strong><a name="item__2dh_or__2bhold_2dcurrent">-H or +hold-current</a></strong>
+
+<dd>
+<p>sets the ``if not possible'' action of the job or jobs to hold current - the
+run is done when it is possible without affecting subsequent runs.</p>
+</dd>
+</li>
+<dt><strong><a name="item__2dh_title_or__2btitle_title">-h <em>title</em> or +title <em>title</em></a></strong>
+
+<dd>
+<p>Sets the title of the job or jobs to <em>title</em>. Note that this may be
+done whilst the job or jobs are running.</p>
+</dd>
+</li>
+<dt><strong><a name="item__2di_redirection_or__2binput_2doutput_redirection">-I <em>redirection</em> or +input-output <em>redirection</em></a></strong>
+
+<dd>
+<p>Sets a redirection for the job or jobs. This will add the redirection
+to any existing redirections for the job or jobs unless they are all
+reset first using the <strong>-Z</strong> option.</p>
+</dd>
+</li>
+<dt><strong><a name="item__2di_name_or__2binterpreter_name">-i <em>name</em> or +interpreter <em>name</em></a></strong>
+
+<dd>
+<p>Sets the command interpreter for the job or jobs to be <em>name</em>. This
+will also reset the load level of the job or jobs to be that of the
+command interpreter. If the load level is to be different from this
+value, use the <strong>-l</strong> option after this option.</p>
+</dd>
+</li>
+<dt><strong><a name="item__2dj_or__2bno_2dadvance_2dtime_2derror">-J or +no-advance-time-error</a></strong>
+
+<dd>
+<p>Sets the flag so that if the job or jobs exit with an error, the next time to
+run is not advanced.</p>
+</dd>
+</li>
+<dt><strong><a name="item__2dj_or__2badvance_2dtime_2derror">-j or +advance-time-error</a></strong>
+
+<dd>
+<p>Sets the flag so that if the job or jobs exit with an error, the next
+time to run is still advanced if applicable.</p>
+</dd>
+</li>
+<dt><strong><a name="item__2dk_or__2bcondition_2dnot_2dcritical">-K or +condition-not-critical</a></strong>
+
+<dd>
+<p>Marks subsequent conditions as ``not critical'', i.e. a condition dependent
+on a variable on an inaccessible remote host will be ignored. Does not
+affect any conditions already defined.</p>
+</dd>
+</li>
+<dt><strong><a name="item__2dk_or__2bcondition_2dcritical">-k or +condition-critical</a></strong>
+
+<dd>
+<p>Marks subsequent conditions as ``critical'', i.e. a condition dependent
+on a variable on an inaccessible remote host will cause the job to be
+held up. Does not affect any conditions already defined.</p>
+</dd>
+</li>
+<dt><strong><a name="item__2dl_value_or__2bulimit_value">-L <em>value</em> or +ulimit <em>value</em></a></strong>
+
+<dd>
+<p>Sets the ulimit value of the job or jobs to the value given.</p>
+</dd>
+</li>
+<dt><strong><a name="item__2dl_number_or__2bloadlev_number">-l <em>number</em> or +loadlev <em>number</em></a></strong>
+
+<dd>
+<p>Sets the load level of the job or jobs to be <em>number</em>. The user must
+have <em>special create permission</em> for this to differ from that of the
+command interpreter.</p>
+</dd>
+</li>
+<dt><strong><a name="item__2dm_modes_or__2bmode_modes">-M <em>modes</em> or +mode <em>modes</em></a></strong>
+
+<dd>
+<p>Sets the permissions of the job or jobs to be <em>modes</em>. The format of
+the <em>modes</em> argument is defined in more detail below.</p>
+</dd>
+<dd>
+<p>Note that the setting of the mode is done as a separate operation from
+any other changes. Depending upon whether the pre-existing and new
+modes and ownership permit the various operations, this may need to be
+done before, after or interleaved with other changes to succeed.</p>
+</dd>
+</li>
+<dt><strong><a name="item__2dm_or__2bmail_2dmessage">-m or +mail-message</a></strong>
+
+<dd>
+<p>Sets the flag whereby completion messages are mailed to the owner of
+the job or jobs.</p>
+</dd>
+</li>
+<dt><strong><a name="item__2dn_or__2bnormal">-N or +normal</a></strong>
+
+<dd>
+<p>Sets the job or jobs to normal ``ready to run'' state.</p>
+</dd>
+</li>
+<dt><strong><a name="item__2dn_or__2blocal_2donly">-n or +local-only</a></strong>
+
+<dd>
+<p>Marks the job or jobs to be local only to the machines which they are
+on.</p>
+</dd>
+</li>
+<dt><strong><a name="item__2do_or__2bno_2drepeat">-o or +no-repeat</a></strong>
+
+<dd>
+<p>Cancels any repeat option of the job or jobs, so that the they will be
+run and retained on the queue marked ``done'' at the end.</p>
+</dd>
+</li>
+<dt><strong><a name="item__2dp_value_or__2bumask_value">-P <em>value</em> or +umask <em>value</em></a></strong>
+
+<dd>
+<p>Sets the umask value of the job or jobs to the <em>octal</em> value given.
+The value should be up to 3 octal digits as per the shell.</p>
+</dd>
+</li>
+<dt><strong><a name="item__2dp_number_or__2bpriority_number">-p <em>number</em> or +priority <em>number</em></a></strong>
+
+<dd>
+<p>Sets the priority of the job or jobs to be <em>number</em>. Note that the
+specified priority must be in the range given by the user's minimum
+and maximum priority.</p>
+</dd>
+</li>
+<dt><strong><a name="item__2dq_queuename_or__2bjob_2dqueue_queuename">-q <em>queuename</em> or +job-queue <em>queuename</em></a></strong>
+
+<dd>
+<p>Sets a job queue name as specified on the job or jobs.</p>
+</dd>
+</li>
+<dt><strong><a name="item__2dr_or__2breschedule_2dall">-R or +reschedule-all</a></strong>
+
+<dd>
+<p>Sets the ``if not possible'' action of the job or jobs to reschedule
+all - the run is done when it is possible and subsequent runs are rescheduled.</p>
+</dd>
+</li>
+<dt><strong><a name="item__2dr_repeat_option_or__2brepeat_repeat_option">-r <em>repeat option</em> or +repeat <em>repeat option</em></a></strong>
+
+<dd>
+<p>Sets the repeat option of the jobs as specified.</p>
+</dd>
+</li>
+<dt><strong><a name="item__2ds_or__2bskip_2dif_2dheld">-S or +skip-if-held</a></strong>
+
+<dd>
+<p>Sets the ``if not possible'' action of the job or jobs to skip - the run
+is skipped if it could not be done at the specified time.</p>
+</dd>
+</li>
+<dt><strong><a name="item__2ds_assignment_or__2bset_assignment">-s <em>assignment</em> or +set <em>assignment</em></a></strong>
+
+<dd>
+<p>Sets an assignment on the job or jobs. The assignment will be added to
+those already defined unless the existing assignments are cleared
+first with the <strong>-z</strong> option.</p>
+</dd>
+</li>
+<dt><strong><a name="item__2dt_time_or__2btime_time">-T <em>time</em> or +time <em>time</em></a></strong>
+
+<dd>
+<p>Sets the next run time of the job or jobs as specified.</p>
+</dd>
+</li>
+<dt><strong><a name="item__2dt_time_or__2bdelete_2dtime_time">-t <em>time</em> or +delete-time <em>time</em></a></strong>
+
+<dd>
+<p>Sets a delete time for the specified job or jobs as a time in hours
+after which it will be automatically deleted.</p>
+</dd>
+</li>
+<dt><strong><a name="item__2du_or__2bno_2dtime">-U or +no-time</a></strong>
+
+<dd>
+<p>Cancels any time setting on the job or jobs.</p>
+</dd>
+</li>
+<dt><strong><a name="item__2du_user_or__2bset_2downer_user">-u <em>user</em> or +set-owner <em>user</em></a></strong>
+
+<dd>
+<p>Resets the owner of the job or jobs to <em>user</em>.</p>
+</dd>
+<dd>
+<p>Note that the setting of the user is done as a separate operation from
+any other changes. Depending upon whether the pre-existing and new
+modes and ownership permit the various operations, this may need to be
+done before, after or interleaved with other changes to succeed.</p>
+</dd>
+</li>
+<dt><strong><a name="item__2dw_sig_or__2bwhich_2dsignal_sig">-W <em>sig</em> or +which-signal <em>sig</em></a></strong>
+
+<dd>
+<p>Sets the signal to kill the job or jobs after the maximum run time has
+been exceeded.</p>
+</dd>
+</li>
+<dt><strong><a name="item__2dw_or__2bwrite_2dmessage">-w or +write-message</a></strong>
+
+<dd>
+<p>Sets the flag whereby completion messages are written to the owner's
+terminal if available.</p>
+</dd>
+</li>
+<dt><strong><a name="item__2dx_range_or__2bexit_2dcode_range">-X <em>range</em> or +exit-code <em>range</em></a></strong>
+
+<dd>
+<p>Sets the normal or error exit code ranges for the job or jobs. The
+format of the <em>range</em> argument is <code>N</code> or <code>E</code> followed by a range in
+the form <code>nn:nn</code>, thus for example</p>
+</dd>
+<dd>
+<pre>
+        -X N0:9</pre>
+</dd>
+</li>
+<dt><strong><a name="item__2dx_or__2bno_2dmessage">-x or +no-message</a></strong>
+
+<dd>
+<p>Resets both flags as set by <strong>-m</strong> and <strong>-w</strong>.</p>
+</dd>
+</li>
+<dt><strong><a name="item__2dy_time_or__2brun_2dtime_time">-Y <em>time</em> or +run-time <em>time</em></a></strong>
+
+<dd>
+<p>Sets a maximum run time for the specified job or jobs. <em>time</em> is in
+seconds, which may be expressed as <em>hh:mm:ss</em>.</p>
+</dd>
+</li>
+<dt><strong><a name="item__2dy_or__2bcancel_2dcondition">-y or +cancel-condition</a></strong>
+
+<dd>
+<p>Deletes any existing conditions in the job or jobs.</p>
+</dd>
+</li>
+<dt><strong><a name="item__2dz_or__2bcancel_2dio">-Z or +cancel-io</a></strong>
+
+<dd>
+<p>Deletes any existing redirections in the job or jobs.</p>
+</dd>
+</li>
+<dt><strong><a name="item__2dz_or__2bcancel_2dset">-z or +cancel-set</a></strong>
+
+<dd>
+<p>Deletes any existing assignments in the job or jobs.</p>
+</dd>
+</li>
+<dt><strong><a name="item__2bfreeze_2dcurrent">+freeze-current</a></strong>
+
+<dd>
+<p>Save all the current options in a <em>.gnubatch</em> file in the current
+directory. If no jobs are specified, this will not be treated as an
+error and the program will exit after saving the options.</p>
+</dd>
+</li>
+<dt><strong><a name="item__2bfreeze_2dhome">+freeze-home</a></strong>
+
+<dd>
+<p>Save all the current options in a <em>.gnubatch</em> file in the user's home
+directory. If no jobs are specified, this will not be treated as an
+error and the program will exit after saving the options.</p>
+</dd>
+</li>
+</dl>
+<p>
+</p>
+<h2><a name="mode_arguments">Mode arguments</a></h2>
+<p>&lt;a name=``Change_mode_argument''&gt;&lt;/a&gt;
+The argument to the <strong>-M</strong> option provides for a wide variety of
+operations.</p>
+<p>Each permission is represented by a letter, as follows:</p>
+<dl>
+<dt><strong><a name="item_r">R</a></strong>
+
+<dd>
+<p>read permission</p>
+</dd>
+</li>
+<dt><strong><a name="item_w">W</a></strong>
+
+<dd>
+<p>write permission</p>
+</dd>
+</li>
+<dt><strong><a name="item_s">S</a></strong>
+
+<dd>
+<p>reveal permission</p>
+</dd>
+</li>
+<dt><strong><a name="item_m">M</a></strong>
+
+<dd>
+<p>read mode</p>
+</dd>
+</li>
+<dt><strong><a name="item_p">P</a></strong>
+
+<dd>
+<p>set mode</p>
+</dd>
+</li>
+<dt><strong><a name="item_u">U</a></strong>
+
+<dd>
+<p>give away owner</p>
+</dd>
+</li>
+<dt><strong><a name="item_v">V</a></strong>
+
+<dd>
+<p>assume owner</p>
+</dd>
+</li>
+<dt><strong><a name="item_g">G</a></strong>
+
+<dd>
+<p>give away group</p>
+</dd>
+</li>
+<dt><strong><a name="item_h">H</a></strong>
+
+<dd>
+<p>assume group</p>
+</dd>
+</li>
+<dt><strong><a name="item_d">D</a></strong>
+
+<dd>
+<p>delete</p>
+</dd>
+</li>
+<dt><strong><a name="item_k">K</a></strong>
+
+<dd>
+<p>kill</p>
+</dd>
+</li>
+</dl>
+<p>Each section of the mode (user, group, others) is represented by the
+prefixes <code>U:</code>, <code>G:</code> and <code>O:</code> and separated by commas.</p>
+<p>For example:</p>
+<pre>
+        -M U:RWSMPDK,G:RWSDK,O:RS</pre>
+<p>would set the permissions for the user, group and others as given. If
+the prefixes are omitted, as in</p>
+<pre>
+        -M RWSDK</pre>
+<p>then all of the job, group and other permissions are set to the same
+value.</p>
+<p>An alternative format allows permissions to be added to the existing
+permissions, thus</p>
+<pre>
+        -M U:+WD,G:+D</pre>
+<p>will add the relevant permissions to whatever is currently set.</p>
+<p>Similarly permissions may be cancelled individually by constructs of
+the form:</p>
+<pre>
+        -M G:-W,O:-RS</pre>
+<p>If the same operation is to be done with two or more of <a href="#item_u"><code>U</code></a>, <a href="#item_g"><code>G</code></a> or
+<code>O</code>, the letters may be run together, for example</p>
+<pre>
+        -M GO:+W</pre>
+<p>
+</p>
+<h2><a name="note_on_mode_and_owner_changes">Note on mode and owner changes</a></h2>
+<p>Changing various parameters, the mode (permissions), the owner and the
+group are done as separate operations.</p>
+<p>In some cases changing the mode may prevent the next operation from
+taking place. In other cases it may need to be done first.</p>
+<p>Similar considerations apply to changes of the owner and the group.</p>
+<p><strong>Btjchange</strong> does not attempt to work out the appropriate order to
+perform the operations, the user should execute separate <strong>gbch-jchange</strong>
+commands in sequence to achieve the desired effect.</p>
+<p>
+</p>
+<hr />
+<h1><a name="files">FILES</a></h1>
+<p><em>~/.gnubatch</em>
+configuration file (home directory)</p>
+<p><em>.gnubatch</em>
+configuration file (current directory)</p>
+<p><em>btrest.help</em>
+message file</p>
+<p>
+</p>
+<hr />
+<h1><a name="environment">ENVIRONMENT</a></h1>
+<dl>
+<dt><strong><a name="item_gbch_jchange">GBCH_JCHANGE</a></strong>
+
+<dd>
+<p>space-separated options to override defaults.</p>
+</dd>
+</li>
+<dt><strong><a name="item_btrestconf">BTRESTCONF</a></strong>
+
+<dd>
+<p>path name of alternative message file.</p>
+</dd>
+</li>
+</dl>
+<p>
+</p>
+<hr />
+<h1><a name="see_also">SEE ALSO</a></h1>
+<p>btsyntax(5),
+gnubatch.conf(5),
+gnubatch.hosts(5),
+gbch-r(1),
+gbch-jlist(1),
+gbch-jdel(1),
+gbch-user(1),
+gbch-rr(1).</p>
+<p>
+</p>
+<hr />
+<h1><a name="diagnostics">DIAGNOSTICS</a></h1>
+<p>Various diagnostics may be issued if the user attempts operations
+which are not permitted to him or her, or if various errors are
+detected. The diagnostics are read as required from the message file
+<em>rest.help</em>.</p>
+<p>
+</p>
+<hr />
+<h1><a name="copyright">COPYRIGHT</a></h1>
+<p>Copyright (c) 2009 Free Software Foundation, Inc.
+This is free software. You may redistribute copies of it under the
+terms of the GNU General Public License
+&lt;http://www.gnu.org/licenses/gpl.html&gt;.
+There is NO WARRANTY, to the extent permitted by law.</p>
+<p>
+</p>
+<hr />
+<h1><a name="author">AUTHOR</a></h1>
+<p>John M Collins, Xi Software Ltd.</p>
+
+</body>
+
+</html>

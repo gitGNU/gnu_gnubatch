@@ -1,0 +1,180 @@
+<?xml version="1.0" ?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<title>btsched - batch scheduler</title>
+<meta http-equiv="content-type" content="text/html; charset=utf-8" />
+<link rev="made" href="mailto:root@localhost" />
+</head>
+
+<body style="background-color: white">
+
+<p><a name="__index__"></a></p>
+<!-- INDEX BEGIN -->
+<!--
+
+<ul>
+
+	<li><a href="#name">NAME</a></li>
+	<li><a href="#synopsis">SYNOPSIS</a></li>
+	<li><a href="#description">DESCRIPTION</a></li>
+	<li><a href="#files">FILES</a></li>
+	<li><a href="#environment">ENVIRONMENT</a></li>
+	<li><a href="#ipc_facilities">IPC FACILITIES</a></li>
+	<li><a href="#internet_ports">INTERNET PORTS</a></li>
+	<li><a href="#see_also">SEE ALSO</a></li>
+	<li><a href="#diagnostics">DIAGNOSTICS</a></li>
+	<li><a href="#copyright">COPYRIGHT</a></li>
+	<li><a href="#author">AUTHOR</a></li>
+</ul>
+-->
+<!-- INDEX END -->
+
+<p>
+</p>
+<h1><a name="name">NAME</a></h1>
+<p>btsched - batch scheduler</p>
+<p>
+</p>
+<hr />
+<h1><a name="synopsis">SYNOPSIS</a></h1>
+<p><strong>btsched</strong>
+[ <em>-options</em> ]</p>
+<p>
+</p>
+<hr />
+<h1><a name="description">DESCRIPTION</a></h1>
+<p><strong>btsched</strong> is the scheduler process for the <strong>GNUbatch</strong> batch
+processing system.</p>
+<p>It is normally invoked by the system startup routines, or otherwise by
+gbch-start(1).</p>
+<p>It may take certain options from the command line, but these are
+normally passed to it by gbch-start(1) and are not documented here as
+they are part of the internal interfaces of <strong>GNUbatch</strong> and are
+subject to change.</p>
+<p>Information, either in respect of other machines to connect
+to, or pre-existing jobs and variables on the current machine, are
+read respectively from the files <em>gnubatch.hosts</em> and the spool directory.</p>
+<p>A ``slave'' <strong>btsched</strong> process is spawned to control running jobs, and
+if a networked version of <strong>GNUbatch</strong> is being run, then an additional
+``slave'' <strong>btsched</strong> process is spawned to monitor and process incoming
+network messages.</p>
+<p>Incoming remotely-submitted jobs and API interfaces are handled via a
+separate process (also invoked by gbch-start(1)), xbnetserv(8).</p>
+<p>
+</p>
+<hr />
+<h1><a name="files">FILES</a></h1>
+<p><em>gnubatch.hosts</em>
+host names and descriptions</p>
+<p><em>gnubatch.conf</em>
+master configuration file</p>
+<p><em>btint-config</em>
+message file</p>
+<p><em>btsched_jfile</em>
+job file</p>
+<p><em>btsched_vfile</em>
+variables file</p>
+<p><em>btsched_reps</em>
+error log file</p>
+<p><em>btufile</em>
+user data</p>
+<p><em>btmm_jobs</em>
+job memory-mapped file</p>
+<p><em>btmm_vars</em>
+variables memory-mapped file</p>
+<p><em>btmm_xfer</em>
+communication buffer memory-mapped file</p>
+<p>
+</p>
+<hr />
+<h1><a name="environment">ENVIRONMENT</a></h1>
+<dl>
+<dt><strong><a name="item_spooldir">SPOOLDIR</a></strong>
+
+<dd>
+<p>alternative location for spool directory</p>
+</dd>
+</li>
+</dl>
+<p>
+</p>
+<hr />
+<h1><a name="ipc_facilities">IPC FACILITIES</a></h1>
+<p>An IPC message queue, with key <code>0x5869b000</code> and owned by user <em>batch</em>
+is created by <strong>btsched</strong> and used to receive messages from user
+processes and pass instructions to and internal messages from the
+slave <strong>btsched</strong> processes to the master.</p>
+<p>Two shared memory segments are created to hold details of jobs and
+variables. As the shared memory facility provides no facilities for
+growth, then additional shared memory segments may be created if the
+job and variable lists expand sufficiently and the original ones
+deallocated.</p>
+<p>A further shared memory segment, with key <code>0x5869b100</code> is created to
+hold details of pending jobs before transfer to the main shared memory
+segment.</p>
+<p>The keys given to the shared memory segments start at <code>0x5869b002</code>
+and ascend upwards to <code>0x5869b064</code> before wrapping around.</p>
+<p>Some versions of <strong>btsched</strong> may use memory-mapped files rather than
+shared memory. The files are held in the spool directory and have the
+names <em>btmm_jobs</em>, <em>btmm_vars</em> and <em>btmm_xfer</em>.</p>
+<p>A set of 10 semaphores, with the key <code>0x5869b001</code> is created to
+interlock access to the shared memory segments, and a further set of 3
+semaphores with the key <code>0x5869b003</code> is created to interlock network
+processes.</p>
+<p>The presence or absence of these IPC facilities is used by <strong>btsched</strong>
+and other programs to determine whether a previous copy of itself is
+running. If <strong>btsched</strong> is abnormally terminated, it may be necessary
+to delete these IPC facilities before <strong>btsched</strong> can be restarted.</p>
+<p>The utility gbch-ripc(8) may be used to delete the IPC facilities quickly.</p>
+<p>
+</p>
+<hr />
+<h1><a name="internet_ports">INTERNET PORTS</a></h1>
+<p><strong>btsched</strong> accepts and sends interconnections from other machines on
+TCP port, passes the contents of batch jobs on a further TCP port, and
+undertakes ``probes'' on a UDP port.</p>
+<p>The port numbers are set up in the <em>/etc/services</em> file when
+<strong>GNUbatch</strong> is first installed.</p>
+<p>
+</p>
+<hr />
+<h1><a name="see_also">SEE ALSO</a></h1>
+<p>gbch-r(1),
+gbch-q(1),
+gbch-var(1),
+gbch-jlist(1),
+gbch-vlist(1),
+gbch-start(1),
+gbch-quit(1),
+gbch-ripc(8),
+gnubatch.conf(5),
+(5),
+xbnetserv(8).</p>
+<p>
+</p>
+<hr />
+<h1><a name="diagnostics">DIAGNOSTICS</a></h1>
+<p><strong>btsched</strong> is usually invoked from system startup procedures or
+gbch-start(1).</p>
+<p>Thereafter it runs as a ``daemon process'' and diagnostics are not
+written to any terminal but to the file <em>btsched_reps</em>.</p>
+<p>In the event of any problems this file should be examined.</p>
+<p>
+</p>
+<hr />
+<h1><a name="copyright">COPYRIGHT</a></h1>
+<p>Copyright (c) 2009 Free Software Foundation, Inc.
+This is free software. You may redistribute copies of it under the
+terms of the GNU General Public License
+&lt;http://www.gnu.org/licenses/gpl.html&gt;.
+There is NO WARRANTY, to the extent permitted by law.</p>
+<p>
+</p>
+<hr />
+<h1><a name="author">AUTHOR</a></h1>
+<p>John M Collins, Xi Software Ltd.</p>
+
+</body>
+
+</html>

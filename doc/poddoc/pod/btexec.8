@@ -1,0 +1,37 @@
+=head1 NAME
+
+btexec - run commands for macros
+
+=head1 SYNOPSIS
+
+B</usr/spool/progs/btexec>
+I<options>
+
+=head1 DESCRIPTION
+
+B<Btexec> runs commands for macros under the identity of the invoking
+user. This is required because gbch-q(1), gbch-xq(1) and gbch-xmq(1)
+are set-user programs (to other than C<root>) and there is an inherent
+security breach in many versions of Unix in that such programs cannot
+divest themselves of traces of the set-user user id.
+
+This program is only intended for internal use and is not further
+documented.
+
+=head1 COPYRIGHT
+
+Copyright (c) 2009 Free Software Foundation, Inc.
+This is free software. You may redistribute copies of it under the
+terms of the GNU General Public License
+<http://www.gnu.org/licenses/gpl.html>.
+There is NO WARRANTY, to the extent permitted by law.
+
+=head1 AUTHOR
+
+John M Collins, Xi Software Ltd.
+
+=cut
+
+## Local Variables:
+## mode: nroff
+## End:

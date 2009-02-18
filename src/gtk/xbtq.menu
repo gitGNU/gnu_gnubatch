@@ -1,0 +1,148 @@
+<ui>
+  <menubar name='MenuBar'>
+    <menu action='FileMenu'>
+	<menuitem action='Viewopts'/>
+	<menuitem action='Saveopts'/>
+	<separator/>
+	<menuitem action='Syserror'/>
+	<separator/>
+	<menuitem action='Quit'/>
+    </menu>
+    <menu action='ActMenu'>
+	<menuitem action='Setrun'/>
+	<menuitem action='Setcanc'/>
+	<menuitem action='Force'/>
+	<menuitem action='Forceadv'/>
+	<menuitem action='Intsig'/>
+	<menuitem action='Quitsig'/>
+	<menuitem action='Stopsig'/>
+	<menuitem action='Contsig'/>
+	<menuitem action='Othersig'/>
+    </menu>
+    <menu action='JobMenu'>
+	<menuitem action='View'/>
+	<menuitem action='Time'/>
+	<menuitem action='Advtime'/>
+	<menuitem action='Title'/>
+	<menuitem action='Process'/>
+	<menuitem action='Runtime'/>
+	<menuitem action='Mail'/>
+	<menuitem action='Permj'/>
+	<menuitem action='Ownj'/>
+	<separator/>
+	<menuitem action='Args'/>
+	<menuitem action='Env'/>
+	<menuitem action='Redirs'/>
+    </menu>
+    <menu action='CreateMenu'>
+	<menuitem action='Createj'/>
+	<separator/>
+	<menuitem action='Timedefs'/>
+	<menuitem action='Conddefs'/>
+	<menuitem action='Assdefs'/>
+	<separator/>
+	<menuitem action='Createv'/>
+	<menuitem action='Rename'/>
+	<separator/>
+	<menuitem action='Interps'/>
+	<separator/>
+	<menuitem action='Holidays'/>
+    </menu>
+    <menu action='DeleteMenu'>
+	<menuitem action='Deletej'/>
+	<menuitem action='Deletev'/>
+	<separator/>
+	<menuitem action='Unqueue'/>
+	<separator/>
+	<menuitem action='Freeeh'/>
+	<menuitem action='Freeec'/>
+    </menu>
+    <menu action='CondMenu'>
+	<menuitem action='Conds'/>
+	<menuitem action='Asses'/>
+    </menu>
+    <menu action='VarMenu'>
+	<menuitem action='Assign'/>
+	<menuitem action='Comment'/>
+	<separator/>
+	<menuitem action='Export'/>
+	<menuitem action='Permv'/>
+	<menuitem action='Ownv'/>
+	<separator/>
+	<menuitem action='Plus'/>
+	<menuitem action='Minus'/>
+	<menuitem action='Times'/>
+	<menuitem action='Div'/>
+	<menuitem action='Mod'/>
+	<separator/>
+	<menuitem action='Arithc'/>
+    </menu>
+    <menu action='SrchMenu'>
+	<menuitem action='Search'/>
+	<menuitem action='Fsearch'/>
+	<menuitem action='Rsearch'/>
+    </menu>
+    <menu action='jmacMenu'>
+	<menuitem action='jrunmac'/>
+	<separator/>
+	<placeholder name='jmac1'/>
+	<placeholder name='jmac2'/>
+	<placeholder name='jmac3'/>
+	<placeholder name='jmac4'/>
+	<placeholder name='jmac5'/>
+	<placeholder name='jmac6'/>
+	<placeholder name='jmac7'/>
+	<placeholder name='jmac8'/>
+	<placeholder name='jmac9'/>
+	<placeholder name='jmac10'/>
+	<separator/>
+	<menuitem action='Jmacedit'/>
+    </menu>
+    <menu action='vmacMenu'>
+	<menuitem action='vrunmac'/>
+	<separator/>
+	<placeholder name='vmac1'/>
+	<placeholder name='vmac2'/>
+	<placeholder name='vmac3'/>
+	<placeholder name='vmac4'/>
+	<placeholder name='vmac5'/>
+	<placeholder name='vmac6'/>
+	<placeholder name='vmac7'/>
+	<placeholder name='vmac8'/>
+	<placeholder name='vmac9'/>
+	<placeholder name='vmac10'/>
+	<separator/>
+	<menuitem action='Vmacedit'/>
+    </menu>
+    <menu action='HelpMenu'>
+      <menuitem action='About'/>
+    </menu>
+  </menubar>
+  <popup action="jpop">
+	<menuitem action="View"/>
+	<separator/>
+	<menuitem action="Time"/>
+	<menuitem action="Conds"/>
+	<menuitem action="Asses"/>
+	<separator/>
+	<menuitem action="Title"/>
+	<separator/>
+	<menuitem action='Setrun'/>
+	<menuitem action='Setcanc'/>
+	<menuitem action='Force'/>
+	<separator/>
+	<menuitem action='Deletej'/>
+	<separator/>
+	<menuitem action='Intsig'/>
+	<menuitem action='Quitsig'/>
+  </popup>
+  <popup action="vpop">
+	<menuitem action='Plus'/>
+	<menuitem action='Minus'/>
+	<menuitem action='Assign'/>
+	<separator/>
+	<menuitem action='Export'/>
+	<separator/>
+	<menuitem action='Deletev'/>
+  </popup>
+</ui>

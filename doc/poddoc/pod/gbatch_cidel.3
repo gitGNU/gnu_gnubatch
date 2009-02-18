@@ -1,0 +1,75 @@
+=head1 NAME
+
+gbatch_cidel - delete a command interpreter
+
+=head1 SYNOPSIS
+
+=for man
+\&\fB#include <gbatch.h>\fR
+.PP
+
+=for html
+<STRONG>#include &lt;gbatch.h&gt;</STRONG>
+<br>
+
+B<int gbatch_cidel(const int>
+I<fd>B<, const unsigned>
+I<flags>B<, const unsigned>
+I<indx>B<)>
+
+=head1 DESCRIPTION
+
+The function B<gbatch_cidel> is used to delete a command interpreter from
+a B<GNUbatch> server. The invoking user must have I<special create>
+permission or the call will be rejected.
+
+I<fd> is a file descriptor which was previously returned by a
+successful call to gbatch_open(3).
+
+I<flags> is currently unused, but is reserved for future extensions.
+
+I<indx> is the number of the command interpreter to be deleted.
+
+=head1 RETURN VALUES
+
+=for html
+<P>The function returns 0 if successful otherwise one of the error codes
+<A HREF="#Error_codes">listed in the start of this chapter</A>.</P>
+
+=for man
+The function returns 0 if successful, otherwise an error code as
+defined in the include file \fBgbatch.h\fR.
+
+=head1 NOTES
+
+The standard shell entry, entry zero, cannot be deleted and attempts
+to do so will always return an error code (C<XBAPI_BAD_CI>).
+
+There are few checks and interlocks on command interpreter lists,
+which are assumed to be likely to be changed sparingly. The user
+should satisfy him or herself that there are no jobs likely to use the
+command interpreter about to be deleted before invoking this operation.
+
+=head1 SEE ALSO
+
+gbatch_ciadd(3),
+gbatch_ciread(3),
+gbatch_ciupd(3).
+
+=head1 COPYRIGHT
+
+Copyright (c) 2009 Free Software Foundation, Inc.
+This is free software. You may redistribute copies of it under the
+terms of the GNU General Public License
+<http://www.gnu.org/licenses/gpl.html>.
+There is NO WARRANTY, to the extent permitted by law.
+
+=head1 AUTHOR
+
+John M Collins, Xi Software Ltd.
+
+=cut
+
+## Local Variables:
+## mode: nroff
+## End:

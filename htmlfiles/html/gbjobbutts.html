@@ -1,0 +1,98 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2//EN">
+<!--
+   Copyright 2009 Free Software Foundation, Inc.
+
+  This program is free software: you can redistribute it and/or modify
+  it under the terms of the GNU General Public License as published by
+  the Free Software Foundation, either version 3 of the License, or
+  (at your option) any later version.
+
+  This program is distributed in the hope that it will be useful,
+  but WITHOUT ANY WARRANTY; without even the implied warranty of
+  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+  GNU General Public License for more details.
+
+   You should have received a copy of the GNU General Public License
+  along with this program.  If not, see <http://www.gnu.org/licenses/>.
+  -->	
+<html>
+<head>
+	<meta http-equiv="content-type" content="text/html; charset=iso-8859-1">
+	<title>Job Operations</title>
+	<style>
+	<!--
+		TD P { margin-bottom: 0.06in; font-family: "Times"; font-size: 14pt; font-weight: bold }
+		H2 { margin-top: 0in; margin-bottom: 0.08in; font-family: "Times" }
+		H3 { margin-top: 0.05in; margin-bottom: 0.02in; font-family: "Times"; text-decoration: underline }
+		P { margin-bottom: 0.02in; font-family: "Times"; font-size: 14pt; font-weight: bold }
+		A:link { color: #993366; font-family: "Times";
+		font-size: 12pt; font-weight: bold;
+		text-decoration: none }
+		A:visited { color: #993366; font-family: "Times";
+		font-size: 12pt; font-weight: bold;
+		text-decoration: none }
+		A:active { color: #993366; font-family: "Times";
+		font-size: 12pt; font-weight: bold; text-decoration: none }
+	-->
+	</style>
+</head>
+<body link="#993366" bgcolor="#ffffcc">
+<h2>GNUbatch</h2>
+<p><font color="#ff0000"><i>Jobs</i></font></p>
+<p><a target=List href="javascript:gbj_viewvars()"
+onmouseover="javascript:window.status='Switch to variable view';return true">Variables</a></p>
+<p><a target=List href="javascript:relogin()"
+onmouseover="javascript:window.status='Login as a different user';return true">Re-login</a></p>
+<h3>Jobs</h3>
+<p><a target=List href="javascript:viewclicked('btjvcgi')"
+onmouseover="javascript:window.status='View text of selected job(s)';return true">View jobs</a></p>
+<p><a target=List href="javascript:gbj_create(0)"
+onmouseover="javascript:window.status='Create a new job';return true">Create</a></p>
+<p><a target=List href="javascript:gbj_create(1)"
+onmouseover="javascript:window.status='Create a new job from file';return true">File create</a></p>
+<p><a target=List href="javascript:gbj_delete()"
+onmouseover="javascript:window.status='Delete selected job(s)';return true">Delete</a></p>
+<h3>State</h3>
+<p><a target=List href="javascript:gbj_runnable()"
+onmouseover="javascript:window.status='Set job status to ready to run';return true">Runnable</a></p>
+<p><a target=List href="javascript:gbj_cancel()"
+onmouseover="javascript:window.status='Set job status to cancelled';return true">Cancelled</a></p>
+<p><a target=List href="javascript:gbj_force(0)"
+onmouseover="javascript:window.status='Force job to run, do not advance time';return true">Force</a></p>
+<p><a target=List href="javascript:gbj_force(1)"
+onmouseover="javascript:window.status='Force job to run, advance time';return true">Force/adv</a></p>
+<p><a target=List href="javascript:gbj_advance()"
+onmouseover="javascript:window.status='Advance time';return true">Advance</a></p>
+<p><a target=List href="javascript:gbj_kill()"
+onmouseover="javascript:window.status='Kill job';return true">Kill</a></p>
+<h3>Parameters</h3>
+<p><a target=List href="javascript:gbj_titprill()"
+onmouseover="javascript:window.status='Set job title, cmd interp, priority and load level';return true">Title/pri/load-level</a></p>
+<p><a target=List href="javascript:gbj_procpar()"
+onmouseover="javascript:window.status='Set job process parameters';return true">Process</a></p>
+<p><a target=List href="javascript:gbj_args()"
+onmouseover="javascript:window.status='Set job arguments';return true">Args</a></p>
+<p><a target=List href="javascript:gbj_io()"
+onmouseover="javascript:window.status='Set job IO parameters';return true">Redirect I/O</a></p>
+<p><a target=List href="javascript:gbj_perms()"
+onmouseover="javascript:window.status='Set job permissions';return true">Permissions</a></p>
+<p><a target=List href="javascript:gbj_mailwrt()"
+onmouseover="javascript:window.status='Set job mail/write markers';return true">Mail/Write</a></p>
+<h3>Conditions</h3>
+<p><a target=List href="javascript:gbj_times()"
+onmouseover="javascript:window.status='Set job times';return true">Time</a></p>
+<p><a target=List href="javascript:gbj_conds()"
+onmouseover="javascript:window.status='Set job conditions';return true">Conditions</a></p>
+<p><a target=List href="javascript:gbj_asses()"
+onmouseover="javascript:window.status='Set job assignments';return true">Assignments</a></p>
+<h3>List format</h3>
+<p><a target=List href="javascript:do_formats()"
+onmouseover="javascript:window.status='Select job attributes on main listing';return true">Set format</a></p>
+<p><a target=List href="javascript:do_options()"
+onmouseover="javascript:window.status='Set various display options';return true">Options</a></p>
+<p><a target=List href="javascript:clearboxes()"
+onmouseover="javascript:window.status='Clear selections';return true">Clear Marked</a></p>
+<p><a target=List href="javascript:document.location.reload()"
+onmouseover="javascript:window.status='Refresh display';return true">Refresh</a></p>
+</body>
+</html>

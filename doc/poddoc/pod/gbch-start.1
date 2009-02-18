@@ -1,0 +1,197 @@
+=head1 NAME
+
+gbch-start - start batch scheduler
+
+gbch-conn - connect to host
+
+gbch-disconn - disconnect from host
+
+btdst - adjust for daylight saving time
+
+=head1 SYNOPSIS
+
+B<gbch-start>
+[ I<-options> ]
+
+B<gbch-conn>
+I<hostname>
+
+B<gbch-disconn>
+I<hostname>
+
+B<gbch-dst>
+[ I<-R> ]
+I<startdate>
+I<enddate>
+I<adjustment>
+
+=head1 DESCRIPTION
+
+B<gbch-start> initiates the B<GNUbatch> batch scheduler system, by
+starting the processes btsched(8) and xbnetserv(8).
+
+Optional arguments enable the initial sizes of shared memory to be
+determined and also an initial value for the C<LOADLEVEL> variable,
+which may determine how many jobs (possibly none) start up as soon as
+B<GNUbatch> comes up.
+
+B<gbch-conn> instructs the B<GNUbatch> scheduler to attempt to raise a
+connection to the given host, which should be specified in the file
+F<gnubatch.hosts>, and not currently active.
+
+B<gbch-disconn> instructs the B<GNUbatch> scheduler to close a connection
+to the given host, which should be specified in the file
+F</etc/>, and currently active.
+
+B<gbch-dst> adjusts all jobs between the specified start and end dates
+and times by adding the specified (possibly signed) I<adjustment> in
+seconds to it.
+
+The dates and times may be specified in the forms
+
+	dd/mm
+	mm/dd
+or
+
+	yy/mm/dd
+
+Which of the first two forms is chosen is taken from the existing time
+zone. For time zones greater or equal to 4 West from GMT, the C<mm/dd>
+form is chosen, otherwise C<dd/mm>.
+
+The dates may be followed by a comma and a time in the form C<hh:mm>,
+otherwise midnight is assumed.
+
+When working out what to do, remember that Unix internal time is based
+upon Greenwich Mean Time (GMT), it is the I<display> which changes, so
+that the effect of moving the clocks forward is to make the times
+(held as GMT) appear later than they did before.
+
+A negative adjustment is I<subtracted> from the time, making jobs run
+sooner. This is therefore appropriate when the clocks go forward at
+the start of the summer time. Likewise a positive adjustment should be
+used at the end of summer time.
+
+The optional argument B<-R> tries to apply the option to all exported
+remote jobs, but this really is not recommended as the local jobs on
+those hosts will be unaffected probably leaving the users on those
+machines confused.
+
+=head1 OPTIONS
+
+Note that everything in this section only applies to B<gbch-start>.
+
+Note that the order of treatment, letters and keywords described below
+may be modified by editing the file F<btrest.help> -
+see btsyntax(5).
+
+The environment variable on which options are supplied is C<GBCH_START> and the
+environment variable to specify the help file is C<BTRESTCONF>.
+
+=over 4
+
+=item -? or +explain
+
+causes a summary of the other options to be displayed without taking
+further action.
+
+=item -l I<number> or +initial-load-level I<number>
+
+set the initial value of the C<LOADLEVEL> variable, which controls the
+total load level of running jobs to the specified number (usually
+zero). If this option is not specified, then the value is unchanged
+from its initial value saved by the scheduler when it was last shut
+down.
+
+If the B<GNUbatch> scheduler is already running, this option has no
+effect.
+
+=item -j I<number> or +initial-job-size I<number>
+
+Allocate shared memory initially for the specified I<number> of
+jobs. This is necessary in some situations where other applications
+use up the system limit of shared memory and it is not possible to
+allocate further after the system has been running for some time.
+
+If the B<gnubatch> scheduler is already running, this option has no
+effect.
+
+=item -v I<number> or +initial-var-size I<number>
+
+Allocate shared memory initially for the specified I<number> of
+variables. This is necessary in some situations where other
+applications use up the system limit of shared memory and it is not
+possible to allocate further after the system has been running for
+some time.
+
+If the B<GNUbatch> scheduler is already running, this option has no
+effect.
+
+=item +freeze-current
+
+Save all the current options in a F<.gnubatch> file in the current
+directory. If this option is specified, there is no further action.
+
+=item +freeze-home
+
+Save all the current options in a F<.gnubatch> file in the user's home
+directory. If this option is specified, there is no further action.
+
+=back
+
+=head1 FILES
+
+F<~/.gnubatch>
+configuration file (home directory)
+
+F<.gnubatch>
+configuration file (current directory)
+
+F<btrest.help>
+message file
+
+=head1 ENVIRONMENT
+
+=over 4
+
+=item GBCH_START
+
+space-separated options to override defaults for B<gbch-start>
+
+=item BTRESTCONF
+
+location of alternative help file.
+
+=back
+
+=head1 SEE ALSO
+
+gbch-quit(1),
+btsyntax(5),
+gnubatch.conf(5),
+gnubatch.hosts(5),
+btsched(8),
+xbnetserv(8).
+
+=head1 DIAGNOSTICS
+
+Various diagnostics are read and printed as required from the message
+file F<btrest.help>.
+
+=head1 COPYRIGHT
+
+Copyright (c) 2009 Free Software Foundation, Inc.
+This is free software. You may redistribute copies of it under the
+terms of the GNU General Public License
+<http://www.gnu.org/licenses/gpl.html>.
+There is NO WARRANTY, to the extent permitted by law.
+
+=head1 AUTHOR
+
+John M Collins, Xi Software Ltd.
+
+=cut
+
+## Local Variables:
+## mode: nroff
+## End:

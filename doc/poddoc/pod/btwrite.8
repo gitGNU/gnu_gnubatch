@@ -1,0 +1,64 @@
+=head1 NAME
+
+btwrite - write messages
+
+=head1 SYNOPSIS
+
+B<btwrite>
+I<user> [ ... ]
+
+=head1 DESCRIPTION
+
+B<Btwrite> sends messages to users' terminals in response to the C<-w>
+option of gbch-r(1) and equivalent. It is used in preference to the
+write(1) command as this picks just one (and usually the wrong one!)
+of the terminals at which the user may be logged in, and does not
+display a suitable name for the originator of messages.
+
+B<Btwrite> takes a list of one or more users as arguments. It sends
+the text on standard input to each user's terminal. The message is
+mailed to users who cannot be reached. This facility is available for
+use in your own software if you wish.
+
+=head1 FILES
+
+F<btint-config>
+message file
+
+=head1 ENVIRONMENT
+
+=over 4
+
+=item SPHELPDIR
+
+alternative location for help file directory.
+
+=back
+
+=head1 NOTES
+
+B<Btwrite> is identical to B<GNUspools>'s spwrite(8), apart from using
+a different message file.
+
+=head1 SEE ALSO
+
+btmdisp(8),
+dosbtwrite(8).
+
+=head1 COPYRIGHT
+
+Copyright (c) 2009 Free Software Foundation, Inc.
+This is free software. You may redistribute copies of it under the
+terms of the GNU General Public License
+<http://www.gnu.org/licenses/gpl.html>.
+There is NO WARRANTY, to the extent permitted by law.
+
+=head1 AUTHOR
+
+John M Collins, Xi Software Ltd.
+
+=cut
+
+## Local Variables:
+## mode: nroff
+## End:

@@ -1,0 +1,202 @@
+<?xml version="1.0" ?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<title>gnubatch.hosts - hosts description file</title>
+<meta http-equiv="content-type" content="text/html; charset=utf-8" />
+<link rev="made" href="mailto:root@localhost" />
+</head>
+
+<body style="background-color: white">
+
+<p><a name="__index__"></a></p>
+<!-- INDEX BEGIN -->
+<!--
+
+<ul>
+
+	<li><a href="#name">NAME</a></li>
+	<li><a href="#description">DESCRIPTION</a></li>
+	<ul>
+
+		<li><a href="#host_name">Host name</a></li>
+		<li><a href="#alias_name">Alias name</a></li>
+		<li><a href="#flags">Flags</a></li>
+		<li><a href="#timeout">Timeout</a></li>
+	</ul>
+
+	<li><a href="#local_address">LOCAL ADDRESS</a></li>
+	<li><a href="#files">FILES</a></li>
+	<li><a href="#copyright">COPYRIGHT</a></li>
+	<li><a href="#author">AUTHOR</a></li>
+</ul>
+-->
+<!-- INDEX END -->
+
+<p>
+</p>
+<h1><a name="name">NAME</a></h1>
+<p>gnubatch.hosts - hosts description file</p>
+<p>
+</p>
+<hr />
+<h1><a name="description">DESCRIPTION</a></h1>
+<p><em>gnubatch.hosts</em> is used to inform the <strong>GNUbatch</strong> batch
+scheduling system, and in particular <code>btsched(8)</code> and xbnetserv(8),
+which other host machines are to be attached.</p>
+<p>The host machines should in general be provided for in the standard
+file <em>/etc/hosts</em>.</p>
+<p>The file consists of comment lines introduced by the <strong>#</strong> character,
+and of lines consisting of up to 4 fields, of which only
+the first is mandatory. These fields are as follows:</p>
+<p>
+</p>
+<h2><a name="host_name">Host name</a></h2>
+<p>This is the name of the host.</p>
+<p>Alternatively an internet address of the form <code>193.112.238.10</code> may be
+given if necessary and an alias is provided on the next field,
+but this is not recommended.</p>
+<p>
+</p>
+<h2><a name="alias_name">Alias name</a></h2>
+<p>This is the name of an alias to be used in preference to the host name
+to refer to the machine. To be particularly beneficial, this should be
+shorter than the host name.</p>
+<p>If this field is not required, but subsequent fields are required,
+then the alias name may be replaced by a single <strong>-</strong> sign.</p>
+<p>
+</p>
+<h2><a name="flags">Flags</a></h2>
+<p>This is a comma-separated list of markers to denote information about
+the connection. The currently-supported markers are <strong>probe</strong>,
+<strong>dos(</strong><em>username</em><strong>)</strong> and <strong>manual</strong>, any or all of which may be
+specified.</p>
+<dl>
+<dt><strong><a name="item_probe">probe</a></strong>
+
+<dd>
+<p>Indicates that a datagram should be sent, and a reply
+awaited, from the host, before a full-blown connection is
+attempted. This is recommended wherever possible, or it is not sure in
+which order machines are booted.</p>
+</dd>
+</li>
+<dt><strong><a name="item_manual">manual</a></strong>
+
+<dd>
+<p>indicates that no connection at all is attempted. To connect to the
+machine in question, then <code>btconn(1)</code> should be invoked.</p>
+</dd>
+</li>
+<dt><strong><a name="item_trusted">trusted</a></strong>
+
+<dd>
+<p>indicates that the host is ``trusted'' by the current machine, which
+transmits information about Windows clients and their password
+validations, so the other host need not make such enquiries.</p>
+</dd>
+</li>
+<dt><strong><a name="item_client">client</a></strong>
+
+<dt><strong>client<em>(username)</em></strong>
+
+<dd>
+<p>indicates that no connection is attempted; the current machine is
+acting as a server for Windows clients. The specified <em>username</em> is to be
+considered as the owner of any jobs submitted, and the user to whom
+charges should be applied and to which privileges apply; see
+gbch-user(1).</p>
+</dd>
+<dd>
+<p>If <em>(username)</em> is omitted, then the Windows user is assumed, which
+should correspond to a user name on the host system.</p>
+</dd>
+</li>
+<dt><strong><a name="item_clientuser">clientuser</a></strong>
+
+<dt><strong>clientuser<em>(machine)</em></strong>
+
+<dd>
+<p>Indicates that the whole entry identifies a ``roaming user'' who might
+be using one of several Windows clients, possibly with <code>IP</code> addresses
+assigned via <code>DHCP</code>. The host name in this case is replaced by the
+Windows user name, and the alias gives the Unix user name if
+different.</p>
+</dd>
+<dd>
+<p>If <em>(machine)</em> is specified, then a password is demanded at the
+Windows client if the client's <code>IP</code> address does not match that of
+<em>machine</em>.</p>
+</dd>
+</li>
+<dt><strong><a name="item_dos">dos<em>(username)</em></a></strong>
+
+<dd>
+<p>Is a synonym for <strong>client</strong><em>(username)</em> kept for historical reasons.</p>
+</dd>
+</li>
+<dt><strong><a name="item_dosuser">dosuser<em>(username)</em></a></strong>
+
+<dd>
+<p>Is a synonym for <strong>clientuser</strong><em>(username)</em> kept for historical
+reasons.</p>
+</dd>
+</li>
+<dt><strong><a name="item_external">external</a></strong>
+
+<dd>
+<p>Is a synonym for <strong>client</strong> (no username) kept for future extensions.</p>
+</dd>
+</li>
+<dt><strong><a name="item_pwchk">pwchk</a></strong>
+
+<dd>
+<p>Always demand the user's Unix password when first starting up.</p>
+</dd>
+</li>
+</dl>
+<p>
+</p>
+<h2><a name="timeout">Timeout</a></h2>
+<p>This gives a timeout value in seconds after which the interface is to
+be considered closed following a connection or alternatively to await
+a connection after a <strong>probe</strong> request.</p>
+<p>A default of 1000 seconds applies if none is specified.</p>
+<p>In the case of Windows clients, the ``login'' is considered to be
+dropped after this time, and the user may be asked for a password
+again.</p>
+<p>
+</p>
+<hr />
+<h1><a name="local_address">LOCAL ADDRESS</a></h1>
+<p>On some machines, the ``local'' host address may be different from that
+obtained by looking at the result of <em>gethostname</em>(3). To specify a
+different address for ``this'' machine, a line of the form:</p>
+<pre>
+ localaddress 193.112.238.112</pre>
+<p>may be specified, but this <strong>must</strong> precede all other host names in the
+file.</p>
+<p>
+</p>
+<hr />
+<h1><a name="files">FILES</a></h1>
+<p><em>gnubatch.hosts</em>
+hosts description file</p>
+<p>
+</p>
+<hr />
+<h1><a name="copyright">COPYRIGHT</a></h1>
+<p>Copyright (c) 2009 Free Software Foundation, Inc.
+This is free software. You may redistribute copies of it under the
+terms of the GNU General Public License
+&lt;http://www.gnu.org/licenses/gpl.html&gt;.
+There is NO WARRANTY, to the extent permitted by law.</p>
+<p>
+</p>
+<hr />
+<h1><a name="author">AUTHOR</a></h1>
+<p>John M Collins, Xi Software Ltd.</p>
+
+</body>
+
+</html>

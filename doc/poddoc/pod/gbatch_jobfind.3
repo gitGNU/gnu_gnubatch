@@ -1,0 +1,109 @@
+=head1 NAME
+
+gbatch_jobfind - obtain the details of a job by the job number
+
+gbatch_jobfindslot - obtain the slot number of a job from the job number
+
+=head1 SYNOPSIS
+
+=for man
+\&\fB#include <gbatch.h>\fR
+.PP
+
+=for html
+<STRONG>#include &lt;gbatch.h&gt;</STRONG>
+<br>
+
+B<int gbatch_jobfind(const int>
+I<fd>B<, const unsigned>
+I<flags>B<, const jobno_t>
+I<jobnum>B<, const netid_t>
+I<nid>B<, slotno_t *>I<slot>B<, apiBtjob *>I<jobd>B<)>
+
+B<int gbatch_jobfindslot(const int>
+I<fd>B<, const unsigned>
+I<flags>B<, const jobno_t>
+I<jobnum>B<, const netid_t>
+I<nid>B<, slotno_t *>I<slot>B<)>
+
+=head1 DESCRIPTION
+
+The function B<gbatch_jobfind> is used to retrieve the details of a job,
+starting from the job number, in one operation.
+
+The function B<gbatch_jobfindslot> is used to retrieve just the slot
+number of a job, starting from the job number.
+
+I<fd> is a file descriptor which was previously returned by a
+successful call to gbatch_open(3).
+
+I<flags> is zero or the logical OR of one or more of the following
+bits:
+
+=over 8
+
+=item GBATCH_FLAG_LOCALONLY
+
+Search for jobs local to the server only.
+
+=item GBATCH_FLAG_USERONLY
+
+Search for jobs owned by the user only.
+
+=item GBATCH_FLAG_GROUPONLY
+
+Search for jobs owned by the group only.
+
+=item GBATCH_FLAG_QUEUEONLY
+
+Search for jobs with the queue name specified by gbatch_setqueue(3) only.
+
+=back
+
+I<jobnum> is the job number to be searched for.
+
+I<nid> is the IP address (in network byte order) of the host on which
+the searched-for job is to be located. It should be correct even if
+C<GBATCH_FLAG_LOCALONLY> is specified.
+
+I<slot> is assigned the slot number corresponding to the job. It may
+be null is not required, but this would be nearly pointless with
+B<gbatch_jobfindslot> (other than reporting that the job was unknown).
+
+I<jobp> is a pointer to a structure to contain the details of the job
+for B<gbatch_jobfind>.
+
+=for html
+<P>The definition of the job structure is given in <a
+href="BchAPI-7.html#Job_struct_def">a previous section</a> of this
+manual.</P>
+
+=head1 RETURN VALUES
+
+The function returns 0 if successful, otherwise an error code as
+defined in the include file \fBgbatch.h\fR.
+
+=head1 SEE ALSO
+
+gbatch_jobdata(3),
+gbatch_joblist(3),
+gbatch_jobread(3),
+gbatch_jobupd(3).
+
+=head1 COPYRIGHT
+
+Copyright (c) 2009 Free Software Foundation, Inc.
+This is free software. You may redistribute copies of it under the
+terms of the GNU General Public License
+<http://www.gnu.org/licenses/gpl.html>.
+There is NO WARRANTY, to the extent permitted by law.
+
+=head1 AUTHOR
+
+John M Collins, Xi Software Ltd.
+
+=cut
+
+## Local Variables:
+## mode: nroff
+## End:

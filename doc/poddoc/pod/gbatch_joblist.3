@@ -1,0 +1,101 @@
+=head1 NAME
+
+gbatch_joblist - obtain a list of jobs
+
+=head1 SYNOPSIS
+
+=for man
+\&\fB#include <gbatch.h>\fR
+.PP
+
+=for html
+<STRONG>#include &lt;gbatch.h&gt;</STRONG>
+<br>
+
+B<int gbatch_joblist(const int>
+I<fd>B<, const unsigned>
+I<flags>B<, int *>I<numjobs>B<, slotno_t **>I<slots>B<)>
+
+=head1 DESCRIPTION
+
+The function B<gbatch_joblist()> si used to get a list of jobs from the API.
+
+I<fd> is a file descriptor which was previously returned by a
+successful call to gbatch_open(3).
+
+I<flags> is zero, or a logical OR of one or more of the following values
+
+=over 4
+
+=item GBATCH_FLAG_LOCALONLY
+
+Ignore remote jobs/hosts, i.e. not local to the server, not the client.
+
+=item GBATCH_FLAG_QUEUEONLY
+
+Restrict to the selected queue (with gbatch_setqueue(3)) only.
+
+=item GBATCH_FLAG_USERONLY
+
+Restrict to the user only.
+
+=item GBATCH_FLAG_GROUPONLY
+
+Restrict to the current group (possibly as selected by gbatch_newgrp(3))
+only.
+
+=back
+
+I<numjobs> is a pointer to an integer which upon return will contain
+the number of jobs in the list.
+
+I<slots> will upon return contain a list of slot numbers, each of
+which can be used to access an individual job.  The memory used by
+this array is owned by the API and therefore the user should not
+attempt to deallocate it.
+
+=head1 RETURN VALUES
+
+The function returns 0 if successful, otherwise an error code as
+defined in the include file \fBgbatch.h\fR.
+
+=head1 EXAMPLE
+
+ int fd, ret, cnt, numjobs;
+
+ ret = gbatch_joblist(fd, 0, &numjobs, &list);
+ if (ret < 0) {  /* handle error */
+     . . .
+ }
+
+ for (cnt = 0; cnt < numjobs; cnt++)  {
+     slotno_t this_slot = list[cnt];
+     /* process this_slot */
+ }
+
+ /* do not try to deallocate the list
+
+=head1 SEE ALSO
+
+gbatch_jobdata(3),
+gbatch_jobfind(3),
+gbatch_jobread(3),
+gbatch_setqueue(3).
+
+=head1 COPYRIGHT
+
+Copyright (c) 2009 Free Software Foundation, Inc.
+This is free software. You may redistribute copies of it under the
+terms of the GNU General Public License
+<http://www.gnu.org/licenses/gpl.html>.
+There is NO WARRANTY, to the extent permitted by law.
+
+=head1 AUTHOR
+
+John M Collins, Xi Software Ltd.
+
+=cut
+
+## Local Variables:
+## mode: nroff
+## End:

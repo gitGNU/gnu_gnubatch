@@ -1,0 +1,15 @@
+  Copyright 2009 Free Software Foundation, Inc.
+
+  Copying and distribution of this file, with or without modification,
+  are permitted in any medium without royalty provided the copyright
+  notice and this notice are preserved.
+
+----------------------------------------------------------------------
+
+These are "remote CGI" routines so you don't have to have the full
+product on the same machine as the web server.
+
+This is probably a mistake and the whole lot should be written in PHP
+and use the shell-level routines, possibly run remotely.
+
+Nevertheless it is a useful proof of conceept of the API routines.

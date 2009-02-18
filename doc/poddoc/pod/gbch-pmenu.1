@@ -1,0 +1,182 @@
+=head1 NAME
+
+gbch-pmenu - prompt user for selection from list
+
+=head1 SYNOPSIS
+
+B<gbch-pmenu>
+[ -I<h header> ]
+[ -I<d delim> ]
+[ -I<s start> ]
+[ -I<f file> ]
+[ -I<N num> ]
+[ -I<F> ]
+[ -I<n> ]
+[ -I<m> ]
+
+=head1 DESCRIPTION
+
+B<gbch-pmenu> is a simple curses-based program to select one (or more) of a
+list of options from within a shell script.
+
+The options are supplied on standard input, typically in the form:
+
+ item1<tab>Description1
+ item2<tab>Description2
+
+in multiple columns if possible, with one of the items (often the
+first) highlighted and the user is invited to move the highlight to a
+selected item if appropriate using the cursor keys and then press
+ENTER.
+
+The selected row is then output on standard output.
+
+When the options are displayed on the screen, the cursor keys,
+together with B<h>, B<l>, B<k> and <j> may be used to move left,
+right, up and down respectively. The numeric keypad in numeric mode
+may also be used.
+
+If available, I<Next page>, I<Previous page> or B<N> and B<P> may be
+used to select the next column or screenful. Any other character may
+be used to select the next row starting with that character.
+
+When the correct entry has been selected, press ENTER to select
+it. Alternatively press B<q> to quit with no output.
+
+The behaviour of B<gbch-pmenu> may be modified by means of various options.
+
+=head1 OPTIONS
+
+=over 8
+
+=item B<-h> I<text>
+
+Display a heading to be centred at the top of the screen. The heading
+may consist of more than one line, each of which is centred
+separately. When B<gbch-pmenu> is invoked from the shell, the heading should be
+enclosed in quotes.
+
+As an alternative, the header may be provided in the standard
+input. To signify this, the I<text> should be a single B<=> sign thus:
+
+ -h =
+
+The standard input will be read up to the first blank line to constitute
+the header, and thereafter the selection rows.
+
+=item B<-d> I<char>
+
+Use the specified I<char> as a delimiter rather than tab.
+
+=item B<-s> I<num>
+
+Initialise the display to select the given item rather than the first
+on entry.
+
+=item B<-f> I<file>
+
+Take input from the specified file rather than standard input.
+
+=item B<-N> I<num>
+
+Enables multiple selection menus to be provided for in one file. The
+standard input is read up to the first line consisting of the given
+number (possibly negative) and a colon. Input is terminated by a blank
+line. Thus the input file might look like:
+
+ 1:
+ optiona1	description1
+ optiona2	description2
+ options3	description3
+
+ 2:
+ optionb1	description4
+ optionb2	description5
+ optionb3	description6
+
+With the appropriate set of options and descriptions selected by
+
+ -N 1
+
+or
+
+ -N 2
+
+If headers are to be supplied in the file using C<-h =>, then these
+should follow the numbers with a blank line, thus:
+
+ 1:
+ Header for first group
+ of selections
+
+ optiona1	description1
+ optiona2	description2
+ options3	description3
+
+ 2:
+ Header for second group
+
+ optionb1	description4
+ optionb2	description5
+ optionb3	description6
+
+=item B<-F>
+
+Just return the first field of the selection "the option" on exit, not
+the whole line.
+
+=item B<-n>
+
+Return the number (starting at 1) of the row selected on exit, rather
+than the text of the line.
+
+=item B<-m>
+
+Enable multi-selection mode. In this mode several lines may be
+selected, by moving to each line and pressing space. Pressing space
+again deselects the line. A plus sign appears against each choice to
+indicate selection.
+
+When all have been selected, press B<q> to quit.
+
+The ENTER key behaves slightly differently. If the last action was to
+select or deselect an entry, then the program exits as if B<q> had
+been pressed. If the last character was not a space, then the current
+line is selected or deselected.
+
+=back
+
+=head2 Help files
+
+Help files may be provided for each item in a list by providing text
+files in the directory from which B<gbch-pmenu> is run with names:
+
+ item1.menuhelp
+ item2/Menuhelp
+
+where C<item1> etc are the first field in each choice.
+
+To provide a "catch all" for items without help files, a help file
+named
+
+ Menu-summary
+
+may be provided.
+
+=head1 COPYRIGHT
+
+Copyright (c) 2009 Free Software Foundation, Inc.
+This is free software. You may redistribute copies of it under the
+terms of the GNU General Public License
+<http://www.gnu.org/licenses/gpl.html>.
+There is NO WARRANTY, to the extent permitted by law.
+
+=head1 AUTHOR
+
+John M Collins, Xi Software Ltd.
+
+=cut
+
+## Local Variables:
+## mode: nroff
+## End:

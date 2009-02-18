@@ -1,0 +1,162 @@
+=head1 NAME
+
+btsched - batch scheduler
+
+=head1 SYNOPSIS
+
+B<btsched>
+[ I<-options> ]
+
+=head1 DESCRIPTION
+
+B<btsched> is the scheduler process for the B<GNUbatch> batch
+processing system.
+
+It is normally invoked by the system startup routines, or otherwise by
+gbch-start(1).
+
+It may take certain options from the command line, but these are
+normally passed to it by gbch-start(1) and are not documented here as
+they are part of the internal interfaces of B<GNUbatch> and are
+subject to change.
+
+Information, either in respect of other machines to connect
+to, or pre-existing jobs and variables on the current machine, are
+read respectively from the files F<gnubatch.hosts> and the spool directory.
+
+A "slave" B<btsched> process is spawned to control running jobs, and
+if a networked version of B<GNUbatch> is being run, then an additional
+"slave" B<btsched> process is spawned to monitor and process incoming
+network messages.
+
+Incoming remotely-submitted jobs and API interfaces are handled via a
+separate process (also invoked by gbch-start(1)), xbnetserv(8).
+
+=head1 FILES
+
+F<gnubatch.hosts>
+host names and descriptions
+
+F<gnubatch.conf>
+master configuration file
+
+F<btint-config>
+message file
+
+F<btsched_jfile>
+job file
+
+F<btsched_vfile>
+variables file
+
+F<btsched_reps>
+error log file
+
+F<btufile>
+user data
+
+F<btmm_jobs>
+job memory-mapped file
+
+F<btmm_vars>
+variables memory-mapped file
+
+F<btmm_xfer>
+communication buffer memory-mapped file
+
+=head1 ENVIRONMENT
+
+=over 4
+
+=item SPOOLDIR
+
+alternative location for spool directory
+
+=back
+
+=head1 IPC FACILITIES
+
+An IPC message queue, with key C<0x5869b000> and owned by user I<batch>
+is created by B<btsched> and used to receive messages from user
+processes and pass instructions to and internal messages from the
+slave B<btsched> processes to the master.
+
+Two shared memory segments are created to hold details of jobs and
+variables. As the shared memory facility provides no facilities for
+growth, then additional shared memory segments may be created if the
+job and variable lists expand sufficiently and the original ones
+deallocated.
+
+A further shared memory segment, with key C<0x5869b100> is created to
+hold details of pending jobs before transfer to the main shared memory
+segment.
+
+The keys given to the shared memory segments start at C<0x5869b002>
+and ascend upwards to C<0x5869b064> before wrapping around.
+
+Some versions of B<btsched> may use memory-mapped files rather than
+shared memory. The files are held in the spool directory and have the
+names F<btmm_jobs>, F<btmm_vars> and F<btmm_xfer>.
+
+A set of 10 semaphores, with the key C<0x5869b001> is created to
+interlock access to the shared memory segments, and a further set of 3
+semaphores with the key C<0x5869b003> is created to interlock network
+processes.
+
+The presence or absence of these IPC facilities is used by B<btsched>
+and other programs to determine whether a previous copy of itself is
+running. If B<btsched> is abnormally terminated, it may be necessary
+to delete these IPC facilities before B<btsched> can be restarted.
+
+The utility gbch-ripc(8) may be used to delete the IPC facilities quickly.
+
+=head1 INTERNET PORTS
+
+B<btsched> accepts and sends interconnections from other machines on
+TCP port, passes the contents of batch jobs on a further TCP port, and
+undertakes "probes" on a UDP port.
+
+The port numbers are set up in the F</etc/services> file when
+B<GNUbatch> is first installed.
+
+=head1 SEE ALSO
+
+gbch-r(1),
+gbch-q(1),
+gbch-var(1),
+gbch-jlist(1),
+gbch-vlist(1),
+gbch-start(1),
+gbch-quit(1),
+gbch-ripc(8),
+gnubatch.conf(5),
+(5),
+xbnetserv(8).
+
+=head1 DIAGNOSTICS
+
+B<btsched> is usually invoked from system startup procedures or
+gbch-start(1).
+
+Thereafter it runs as a "daemon process" and diagnostics are not
+written to any terminal but to the file F<btsched_reps>.
+
+In the event of any problems this file should be examined.
+
+=head1 COPYRIGHT
+
+Copyright (c) 2009 Free Software Foundation, Inc.
+This is free software. You may redistribute copies of it under the
+terms of the GNU General Public License
+<http://www.gnu.org/licenses/gpl.html>.
+There is NO WARRANTY, to the extent permitted by law.
+
+=head1 AUTHOR
+
+John M Collins, Xi Software Ltd.
+
+=cut
+
+# Local Variables:
+# mode: nroff
+# End:

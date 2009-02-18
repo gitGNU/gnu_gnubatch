@@ -1,0 +1,100 @@
+=head1 NAME
+
+gbatch_jobop - perform an operation on a job
+
+=head1 SYNOPSIS
+
+=for man
+\&\fB#include <gbatch.h>\fR
+.PP
+
+=for html
+<STRONG>#include &lt;gbatch.h&gt;</STRONG>
+<br>
+
+B<int gbatch_jobop(const int>
+I<fd>B<, const unsigned>
+I<flags>B<, const slotno_t>
+I<slot>B<, const unsigned>
+I<op>B<, const unsigned>
+B<param>B<)>
+
+=head1 DESCRIPTION
+
+The function B<gbatch_jobop()> is used to perform an operation on a job.
+
+I<fd> is a file descriptor which was previously returned by a
+successful call to gbatch_open(3).
+
+I<flags> is zero or C<GBATCH_FLAG_IGNORESEQ> to ignore recent changes
+to the job list.
+
+I<slot> is the slot number corresponding to the job as returned by
+gbatch_joblist(3) or xb_jobfindslot(3).
+
+I<op> is one of the following:
+
+=over 8
+
+=item XBAPI_JOP_SETRUN
+
+Set job running
+
+=item XBAPI_JOP_SETCANC
+
+Cancel a job
+
+=item XBAPI_JOP_FORCE
+
+Force a job to start
+
+=item XBAPI_JOP_FORCEADV
+
+Force to start and advance time
+
+=item XBAPI_JOP_ADVTIME
+
+Advance to next repeat
+
+=item XBAPI_JOP_KILL
+
+Kill job
+
+=back
+
+I<param> is only relevant to C<XBAPI_JOP_KILL>, in which case it gives
+the signal number to kill the job.
+
+=head1 RETURN VALUES
+
+The function returns 0 if successful, otherwise an error code as
+defined in the include file \fBgbatch.h\fR.
+
+=head1 SEE ALSO
+
+gbatch_jobadd(3),
+gbatch_jobdata(3),
+gbatch_jobdel(3),
+gbatch_jobfind(3),
+gbatch_joblist(3),
+gbatch_jobmon(3),
+gbatch_jobread(3),
+gbatch_jobupd(3).
+
+=head1 COPYRIGHT
+
+Copyright (c) 2009 Free Software Foundation, Inc.
+This is free software. You may redistribute copies of it under the
+terms of the GNU General Public License
+<http://www.gnu.org/licenses/gpl.html>.
+There is NO WARRANTY, to the extent permitted by law.
+
+=head1 AUTHOR
+
+John M Collins, Xi Software Ltd.
+
+=cut
+
+## Local Variables:
+## mode: nroff
+## End:

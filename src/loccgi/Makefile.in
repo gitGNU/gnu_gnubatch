@@ -1,0 +1,125 @@
+#
+#   Copyright 2009 Free Software Foundation, Inc.
+#
+#  This program is free software: you can redistribute it and/or modify
+#  it under the terms of the GNU General Public License as published by
+#  the Free Software Foundation, either version 3 of the License, or
+#  (at your option) any later version.
+#
+#  This program is distributed in the hope that it will be useful,
+#  but WITHOUT ANY WARRANTY; without even the implied warranty of
+#  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#  GNU General Public License for more details.
+#
+#   You should have received a copy of the GNU General Public License
+#  along with this program.  If not, see <http://www.gnu.org/licenses/>.
+#
+#	Makefile for local CGI programs
+#
+
+SHELL		=	/bin/sh
+@SET_MAKE@
+prefix		=	@prefix@
+exec_prefix	=	@exec_prefix@
+CC		=	@CC@
+CCFLAGS		=	-O @gcc_useful_options@ @funny_compiler_options@
+LDFLAGS		=
+LIBS		=	@LIBS@
+LIBDIR		=	@libdir@
+LIBNET		=	@SOCKLIBS@
+MV		=	mv
+RM		= 	rm -f
+PARENT		=	..
+BASE		=	../..
+INLINE		=	$(PARENT)/inline
+HDRS		=	$(PARENT)/hdrs
+MYLIBDIR	=	$(PARENT)/lib
+LIB		=	$(MYLIBDIR)/libgnubatch_int.a
+SHLIB		=	$(MYLIBDIR)/libgnubatch_int.so
+SHLIBCLIENT	=	$(MYLIBDIR)/libgnubatch_client.so
+CFLAGS		=	$(CCFLAGS) -I$(HDRS) -I$(PARENT) -I$(BASE)
+INSTALL		=	@INSTALL@
+INSTALL_DATA	=	@INSTALL_DATA@
+BATCHUSER	=	@BATCHUSER@
+USERMODES	=	-o $(BATCHUSER) -g root -m 4755
+CGIMODES	=	-o $(BATCHUSER) -g root -m 6755
+BINDIR		=	@bindir@
+INTBINDIR	=	@pkgexecdir@
+CGIBINDIR	=	$(INTBINDIR)/cgi-bin
+
+PROGS=btjccgi btjcgi btjcrcgi btjdcgi btjvcgi btvccgi btvcgi
+SHPROGS=btjccgi_s btjcgi_s btjcrcgi_s btjdcgi_s btjvcgi_s btvccgi_s btvcgi_s
+
+all:	@main_target@
+
+nonshared:	$(PROGS)
+
+shared:	$(SHPROGS)
+
+btjcgi:		btjcgi.o $(LIB)
+	$(CC) -o $@ $(LDFLAGS) btjcgi.o $(LIB) $(LIBNET) $(LIBS)
+
+btjcgi_s:	btjcgi.o $(LIB)
+	$(CC) -o btjcgi $(LDFLAGS) btjcgi.o $(SHLIB) $(SHLIBCLIENT) $(LIBNET) $(LIBS)
+	touch $@
+
+btjccgi:		btjccgi.o $(LIB)
+	$(CC) -o $@ $(LDFLAGS) btjccgi.o $(LIB) $(LIBNET) $(LIBS)
+
+btjccgi_s:	btjccgi.o $(LIB)
+	$(CC) -o btjccgi $(LDFLAGS) btjccgi.o $(SHLIB) $(SHLIBCLIENT) $(LIBNET) $(LIBS)
+	touch $@
+
+btjcrcgi:		btjcrcgi.o $(LIB)
+	$(CC) -o $@ $(LDFLAGS) btjcrcgi.o $(LIB) $(LIBNET) $(LIBS)
+
+btjcrcgi_s:	btjcrcgi.o $(LIB)
+	$(CC) -o btjcrcgi $(LDFLAGS) btjcrcgi.o $(SHLIB) $(SHLIBCLIENT) $(LIBNET) $(LIBS)
+	touch $@
+
+btjdcgi:		btjdcgi.o $(LIB)
+	$(CC) -o $@ $(LDFLAGS) btjdcgi.o $(LIB) $(LIBNET) $(LIBS)
+
+btjdcgi_s:	btjdcgi.o $(LIB)
+	$(CC) -o btjdcgi $(LDFLAGS) btjdcgi.o $(SHLIB) $(SHLIBCLIENT) $(LIBNET) $(LIBS)
+	touch $@
+
+btjvcgi:		btjvcgi.o $(LIB)
+	$(CC) -o $@ $(LDFLAGS) btjvcgi.o $(LIB) $(LIBNET) $(LIBS)
+
+btjvcgi_s:	btjvcgi.o $(LIB)
+	$(CC) -o btjvcgi $(LDFLAGS) btjvcgi.o $(SHLIB) $(SHLIBCLIENT) $(LIBNET) $(LIBS)
+	touch $@
+
+btvccgi:	btvccgi.o $(LIB)
+	$(CC) -o $@ $(LDFLAGS) btvccgi.o $(LIB) $(LIBNET) $(LIBS)
+
+btvccgi_s:	btvccgi.o $(LIB)
+	$(CC) -o btvccgi $(LDFLAGS) btvccgi.o $(SHLIB) $(SHLIBCLIENT) $(LIBNET) $(LIBS)
+	touch $@
+
+btvcgi:		btvcgi.o $(LIB)
+	$(CC) -o $@ $(LDFLAGS) btvcgi.o $(LIB) $(LIBNET) $(LIBS)
+
+btvcgi_s:	btvcgi.o $(LIB)
+	$(CC) -o btvcgi $(LDFLAGS) btvcgi.o $(SHLIB) $(SHLIBCLIENT) $(LIBNET) $(LIBS)
+	touch $@
+
+install:
+	$(INSTALL) -d $(CGIBINDIR)
+	$(INSTALL) $(CGIMODES) $(PROGS) $(CGIBINDIR)
+
+install-strip:
+	$(INSTALL) -d $(CGIBINDIR)
+	$(INSTALL) -s $(CGIMODES) $(PROGS) $(CGIBINDIR)
+
+#	Clean-ups.
+
+clean:
+	$(RM) *.o $(PROGS) *_s
+
+distclean:	clean
+	$(RM) Makefile
+
+reallyclean:	distclean
+	$(RM) TAGS

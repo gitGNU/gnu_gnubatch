@@ -1,0 +1,161 @@
+=head1 NAME
+
+gbch-ripc - trace and clean GNUbatch IPC facilities
+
+=head1 SYNOPSIS
+
+B<gbch-ripc>
+[ I<-d> ]
+[ I<-r> ]
+[ I<-F> ]
+[ I<-A> ]
+[ I<-D secs> ]
+[ I<-P psarg> ]
+[ I<-G> ]
+[ I<-n> ]
+[ I<-o file> ]
+[ I<-S dir> ]
+[ I<-x> ]
+[ I<-B n> ]
+[ I<-N char> ]
+
+=head1 DESCRIPTION
+
+B<gbch-ripc> traces, and/or optionally monitors or deletes IPC facilities
+for B<GNUbatch>. Many of the facilities are used for debugging, but it
+also serves as a quick method of deleting the IPC facilities, being
+easier to use than B<ipcs> and B<ipcrm>, in the event that the
+scheduler has crashed or been killed without deleting the IPC
+facilities.
+
+To use this facility, just run B<gbch-ripc> thus:
+
+	gbch-ripc -d >/dev/null
+
+The diagnostic output may be useful as it reports any inconsistencies.
+
+The monitoring option can be used to diagnose processes, possibly not
+B<GNUbatch> ones, which are interfering with B<GNUbatch> shared memory
+segments, in cases where a third-party application is suspected of
+damaging the shared memory.
+
+B<Gbch-ripc> also checks for errors in memory-mapped files where the
+version of B<GNUbatch> is using those rather than shared memory.
+
+=head1 OPTIONS
+
+=over 8
+
+=item -A
+
+Display details of jobs and variables. This often generates a lot of
+output and is not really necessary.
+
+=item -D I<secs>
+
+Monitor which process has last attached to the job shared memory
+segment and report apparent corruption, polling every I<secs> seconds.
+
+=item -d
+
+Delete the IPC facilities after printing out contents. This saves
+messing with arguments to ipcrm(1).
+
+=item -f
+
+Display the free chains for jobs and variables. This generates a lot of
+output and isn't usually necessary.
+
+=item -n
+
+Suppress display from B<-D> option if everything is OK.
+
+=item -o I<outfile>
+
+Output to I<outfile> rather than standard output. Set it to
+F</dev/null> if you don't want to see any output.
+
+=item -P I<psarg>
+
+Specify argument to ps(1) to invoke if corruption detected when
+monitoring with B<-D> option. The output is passed through fgrep(1) to
+find the line (if any) with the process id of the process which last
+attached to the shared memory.
+
+=item -G
+
+Used in conjunction with the B<-P> option, the output from ps(1) is
+displayed in full, without passing it through fgrep(1).
+
+=item -r
+
+Read and display the entries on the message queue. This is normally
+suppressed because they can't be "peeked at" or "unread".
+
+=item -S I<dir>
+
+This is only relevant for versions of B<GNUbatch> which use
+memory-mapped files rather than shared memory. It specifies the
+location of the spool directory. If this is not specified, then the
+master configuration file F<gnubatch.conf> is consulted to find
+the spool directory location, or failing that, the default directory
+is used.
+
+=item -x
+
+Dump the contents of shared memory or memory-mapped files in
+hexadecimal and ASCII characters.
+
+=item -B I<n>
+
+Where I<n> may be 1 to 8, specify the width of the hexadecimal dump
+output as a number of 32-bit words.
+
+=item -N <char>
+
+Replace the character in the ASCII part of the hexadecimal dump to
+represent non-ASCII characters with the specified character (the first
+character of the argument). The default is C<.>.
+
+To specify a space, you may need to use quotes thus:
+
+	-N ' '
+
+=back
+
+=head1 EXAMPLE
+
+To delete all IPC facilities after B<GNUbatch> has crashed.
+
+	gbch-ripc -d -o /dev/null
+
+To monitor the job shared memory segment for errors, printing out the
+ps(1) output (where the full listing is obtained with C<-ef>) search
+for the process id of the last process to attach to the segment. Print
+out the contents of the segment including in hexadecimal after
+corruption is detected.
+
+	gbch-ripc -D 30 -P -ef -o joblog -A -x
+
+=head1 SEE ALSO
+
+gbch-start(1).
+btsched(8).
+
+=head1 COPYRIGHT
+
+Copyright (c) 2009 Free Software Foundation, Inc.
+This is free software. You may redistribute copies of it under the
+terms of the GNU General Public License
+<http://www.gnu.org/licenses/gpl.html>.
+There is NO WARRANTY, to the extent permitted by law.
+
+=head1 AUTHOR
+
+John M Collins, Xi Software Ltd.
+
+=cut
+
+## Local Variables:
+## mode: nroff
+## End:

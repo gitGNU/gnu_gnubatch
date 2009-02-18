@@ -1,0 +1,12 @@
+<ui>
+  <menubar name='ViewMenu'>
+    <menu action='VFileMenu'>
+      <menuitem action='ExitV'/>
+    </menu>
+    <menu action='VSearchMenu'>
+      <menuitem action='VSearch'/>
+      <menuitem action='VSearchf'/>
+      <menuitem action='VSearchb'/>
+    </menu>
+  </menubar>
+</ui>

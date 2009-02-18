@@ -1,0 +1,248 @@
+<?xml version="1.0" ?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<title>gbch-pmenu - prompt user for selection from list</title>
+<meta http-equiv="content-type" content="text/html; charset=utf-8" />
+<link rev="made" href="mailto:root@localhost" />
+</head>
+
+<body style="background-color: white">
+
+<p><a name="__index__"></a></p>
+<!-- INDEX BEGIN -->
+<!--
+
+<ul>
+
+	<li><a href="#name">NAME</a></li>
+	<li><a href="#synopsis">SYNOPSIS</a></li>
+	<li><a href="#description">DESCRIPTION</a></li>
+	<li><a href="#options">OPTIONS</a></li>
+	<ul>
+
+		<li><a href="#help_files">Help files</a></li>
+	</ul>
+
+	<li><a href="#copyright">COPYRIGHT</a></li>
+	<li><a href="#author">AUTHOR</a></li>
+</ul>
+-->
+<!-- INDEX END -->
+
+<p>
+</p>
+<h1><a name="name">NAME</a></h1>
+<p>gbch-pmenu - prompt user for selection from list</p>
+<p>
+</p>
+<hr />
+<h1><a name="synopsis">SYNOPSIS</a></h1>
+<p><strong>gbch-pmenu</strong>
+[ -<em>h header</em> ]
+[ -<em>d delim</em> ]
+[ -<em>s start</em> ]
+[ -<em>f file</em> ]
+[ -<em>N num</em> ]
+[ -<em>F</em> ]
+[ -<em>n</em> ]
+[ -<em>m</em> ]</p>
+<p>
+</p>
+<hr />
+<h1><a name="description">DESCRIPTION</a></h1>
+<p><strong>gbch-pmenu</strong> is a simple curses-based program to select one (or more) of a
+list of options from within a shell script.</p>
+<p>The options are supplied on standard input, typically in the form:</p>
+<pre>
+ item1&lt;tab&gt;Description1
+ item2&lt;tab&gt;Description2</pre>
+<p>in multiple columns if possible, with one of the items (often the
+first) highlighted and the user is invited to move the highlight to a
+selected item if appropriate using the cursor keys and then press
+ENTER.</p>
+<p>The selected row is then output on standard output.</p>
+<p>When the options are displayed on the screen, the cursor keys,
+together with <strong>h</strong>, <strong>l</strong>, <strong>k</strong> and &lt;j&gt; may be used to move left,
+right, up and down respectively. The numeric keypad in numeric mode
+may also be used.</p>
+<p>If available, <em>Next page</em>, <em>Previous page</em> or <strong>N</strong> and <strong>P</strong> may be
+used to select the next column or screenful. Any other character may
+be used to select the next row starting with that character.</p>
+<p>When the correct entry has been selected, press ENTER to select
+it. Alternatively press <strong>q</strong> to quit with no output.</p>
+<p>The behaviour of <strong>gbch-pmenu</strong> may be modified by means of various options.</p>
+<p>
+</p>
+<hr />
+<h1><a name="options">OPTIONS</a></h1>
+<dl>
+<dt><strong><a name="item__2dh_text"><strong>-h</strong> <em>text</em></a></strong>
+
+<dd>
+<p>Display a heading to be centred at the top of the screen. The heading
+may consist of more than one line, each of which is centred
+separately. When <strong>gbch-pmenu</strong> is invoked from the shell, the heading should be
+enclosed in quotes.</p>
+</dd>
+<dd>
+<p>As an alternative, the header may be provided in the standard
+input. To signify this, the <em>text</em> should be a single <strong>=</strong> sign thus:</p>
+</dd>
+<dd>
+<pre>
+ -h =</pre>
+</dd>
+<dd>
+<p>The standard input will be read up to the first blank line to constitute
+the header, and thereafter the selection rows.</p>
+</dd>
+</li>
+<dt><strong><a name="item__2dd_char"><strong>-d</strong> <em>char</em></a></strong>
+
+<dd>
+<p>Use the specified <em>char</em> as a delimiter rather than tab.</p>
+</dd>
+</li>
+<dt><strong><a name="item__2ds_num"><strong>-s</strong> <em>num</em></a></strong>
+
+<dd>
+<p>Initialise the display to select the given item rather than the first
+on entry.</p>
+</dd>
+</li>
+<dt><strong><a name="item__2df_file"><strong>-f</strong> <em>file</em></a></strong>
+
+<dd>
+<p>Take input from the specified file rather than standard input.</p>
+</dd>
+</li>
+<dt><strong><a name="item__2dn_num"><strong>-N</strong> <em>num</em></a></strong>
+
+<dd>
+<p>Enables multiple selection menus to be provided for in one file. The
+standard input is read up to the first line consisting of the given
+number (possibly negative) and a colon. Input is terminated by a blank
+line. Thus the input file might look like:</p>
+</dd>
+<dd>
+<pre>
+ 1:
+ optiona1       description1
+ optiona2       description2
+ options3       description3</pre>
+</dd>
+<dd>
+<pre>
+ 2:
+ optionb1       description4
+ optionb2       description5
+ optionb3       description6</pre>
+</dd>
+<dd>
+<p>With the appropriate set of options and descriptions selected by</p>
+</dd>
+<dd>
+<pre>
+ -N 1</pre>
+</dd>
+<dd>
+<p>or</p>
+</dd>
+<dd>
+<pre>
+ -N 2</pre>
+</dd>
+<dd>
+<p>If headers are to be supplied in the file using <code>-h =</code>, then these
+should follow the numbers with a blank line, thus:</p>
+</dd>
+<dd>
+<pre>
+ 1:
+ Header for first group
+ of selections</pre>
+</dd>
+<dd>
+<pre>
+ optiona1       description1
+ optiona2       description2
+ options3       description3</pre>
+</dd>
+<dd>
+<pre>
+ 2:
+ Header for second group</pre>
+</dd>
+<dd>
+<pre>
+ optionb1       description4
+ optionb2       description5
+ optionb3       description6</pre>
+</dd>
+</li>
+<dt><strong><a name="item__2df"><strong>-F</strong></a></strong>
+
+<dd>
+<p>Just return the first field of the selection ``the option'' on exit, not
+the whole line.</p>
+</dd>
+</li>
+<dt><strong><a name="item__2dn"><strong>-n</strong></a></strong>
+
+<dd>
+<p>Return the number (starting at 1) of the row selected on exit, rather
+than the text of the line.</p>
+</dd>
+</li>
+<dt><strong><a name="item__2dm"><strong>-m</strong></a></strong>
+
+<dd>
+<p>Enable multi-selection mode. In this mode several lines may be
+selected, by moving to each line and pressing space. Pressing space
+again deselects the line. A plus sign appears against each choice to
+indicate selection.</p>
+</dd>
+<dd>
+<p>When all have been selected, press <strong>q</strong> to quit.</p>
+</dd>
+<dd>
+<p>The ENTER key behaves slightly differently. If the last action was to
+select or deselect an entry, then the program exits as if <strong>q</strong> had
+been pressed. If the last character was not a space, then the current
+line is selected or deselected.</p>
+</dd>
+</li>
+</dl>
+<p>
+</p>
+<h2><a name="help_files">Help files</a></h2>
+<p>Help files may be provided for each item in a list by providing text
+files in the directory from which <strong>gbch-pmenu</strong> is run with names:</p>
+<pre>
+ item1.menuhelp
+ item2/Menuhelp</pre>
+<p>where <code>item1</code> etc are the first field in each choice.</p>
+<p>To provide a ``catch all'' for items without help files, a help file
+named</p>
+<pre>
+ Menu-summary</pre>
+<p>may be provided.</p>
+<p>
+</p>
+<hr />
+<h1><a name="copyright">COPYRIGHT</a></h1>
+<p>Copyright (c) 2009 Free Software Foundation, Inc.
+This is free software. You may redistribute copies of it under the
+terms of the GNU General Public License
+&lt;http://www.gnu.org/licenses/gpl.html&gt;.
+There is NO WARRANTY, to the extent permitted by law.</p>
+<p>
+</p>
+<hr />
+<h1><a name="author">AUTHOR</a></h1>
+<p>John M Collins, Xi Software Ltd.</p>
+
+</body>
+
+</html>

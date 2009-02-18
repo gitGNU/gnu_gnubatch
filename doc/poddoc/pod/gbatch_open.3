@@ -1,0 +1,120 @@
+=head1 NAME
+
+gbatch_open - open a connection to GNUbatch
+
+gbatch_login - open a connection to GNUbatch with password
+
+=head1 SYNOPSIS
+
+=for man
+\&\fB#include <gbatch.h>\fR
+.PP
+
+=for html
+<STRONG>#include &lt;gbatch.h&gt;</STRONG>
+<br>
+
+B<int gbatch_open(const char *>I<hostname>B<, const char *>I<servname>B<)>
+
+B<int gbatch_open(const char *>I<hostname>B<, const char *>I<servname>B<,
+const char *>I<username>B<)>
+
+B<int gbatch_login(const char *>I<hostname>B<, const char *>I<servname>B<,
+const char *>I<username>B<, char *>I<passwd>B<, const int>
+I<rereg>B<)>
+
+=head1 DESCRIPTION
+
+The function B<gbatch_open> is used to open a connection to the
+B<GNUbatch> API. It has two slightly different variants on Windows
+clients.
+
+The first format, with two arguments, applies to Unix and GNU/Linux
+applications. The username used is that of the effective userid at the
+time of the call.
+
+The second format, with three arguments is used on Windows clients and
+specifies the Unix user name in the call. This may not be acceptable
+unless the user is on a static IP address client with a default user
+either matching the user name given or being a user with I<Write Admin
+File> privilege. So if the F</etc/> file has the
+following in:
+
+ mypc  -  client(myuser)
+
+then C<myuser> can invoke this call from client C<mypc>, or some other
+user if C<myuser> has I<write admin file> privilege. The final
+privilege will be that of the user logged-in as.
+
+The third format, which should probably be used if in any doubt,
+supplies a password.
+
+In all cases, I<hostname> is the name of the host being connected to.
+This may be in any format which can be recognised by the network
+library routine gethostbyname(3). C<localhost> is acceptable if the
+local server is to be used.
+
+I<servname> may be C<NULL> to use a standard service name, otherwise
+an alternative service may be specified.
+
+I<username> should be a valid user on the server.
+
+I<passwd> should be the Unix password on the server or an alternate
+I<interface password> set up by gbch-passwd(8).
+If this is not required it may be nulls. Note that this is a non-C<const> array; it
+will be deliberately filled with nulls as soon as possible after
+entering the routine to minimise the length of time during which
+clear-text passwords are on the stack.
+
+I<rereg>, if non-zero, only applies to DHCP clients, and denotes that
+the Unix host should register the user as the "primary" user for the
+given client. The main effect of this is to override the user
+permissions for operations being performed by a concurrent B<gbch-qw>
+session.
+
+Note that more than one connection can be open at
+any time with various combinations of user names and hosts.
+
+When finished, close the conection with a call to gbatch_close(3).
+
+=head1 RETURN VALUES
+
+The function a non-negative value if successful, which is the I<file
+descriptor> used in various other calls, otherwise an error code as
+defined in the include file F<gbatch.h>.
+
+=head1 EXAMPLE
+
+ int fd;
+ fd = gbatch_open("myhost", (char *) 0);
+ if (fd < 0)  { /* handle error */
+ ...
+ }
+ ...
+ gbatch_close(fd)
+
+=head1 SEE ALSO
+
+gbatch_close(3),
+gbatch_newgrp(3),
+gbatch_setqueue(3),
+gbatch_jobmon(3),
+gbatch_varmon(3).
+
+=head1 COPYRIGHT
+
+Copyright (c) 2009 Free Software Foundation, Inc.
+This is free software. You may redistribute copies of it under the
+terms of the GNU General Public License
+<http://www.gnu.org/licenses/gpl.html>.
+There is NO WARRANTY, to the extent permitted by law.
+
+head1 AUTHOR
+
+John M Collins, Xi Software Ltd.
+
+=cut
+
+## Local Variables:
+## mode: nroff
+## End:

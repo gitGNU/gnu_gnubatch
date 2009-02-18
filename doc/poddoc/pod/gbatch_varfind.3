@@ -1,0 +1,105 @@
+=head1 NAME
+
+gbatch_varfind - find a variable by name and read it
+
+gbatch_varfindslot - find a variable by name return the slot number
+
+=head1 SYNOPSIS
+
+=for man
+\&\fB#include <gbatch.h>\fR
+.PP
+
+=for html
+<STRONG>#include &lt;gbatch.h&gt;</STRONG>
+<br>
+
+B<int gbatch_varfind(const int>
+I<fd>B<, const unsigned>
+I<flags>B<, const char *>I<vname>B<, const netid_t>
+I<nid>B<, slotno_t *>I<slot>B<, apiBtvar *>I<vard>B<)>
+
+B<int gbatch_varfindslot(const int>
+I<fd>B<, const unsigned>
+I<flags>B<, const char *>I<vname>B<, const netid_t>
+I<nid>B<, slotno_t *>I<slot>B<)>
+
+=head1 DESCRIPTION
+
+The function B<gbatch_varfind> is used to retrieve the details of a
+variable, starting from its name, in one operation.
+
+The function B<gbatch_varfindslot> is used to retrieve just the slot number of
+a variable, starting from its name.
+
+I<fd> is a file descriptor which was previously returned by a
+successful call to gbatch_open(3).
+
+I<flags> is zero or the logical OR of one or more of the following
+bits:
+
+=over 8
+
+=item GBATCH_FLAG_LOCALONLY
+
+Search for variables local to the server only.
+
+=item GBATCH_FLAG_USERONLY
+
+Search for variables owned by the user only.
+
+=item GBATCH_FLAG_GROUPONLY
+
+Search for variables owned by the group only.
+
+=back
+
+I<vname> is the variable name to be searched for.
+
+I<nid> is the IP address (in network byte order) of the host on which
+the searched-for variable is to be located. It should be correct even if
+C<GBATCH_FLAG_LOCALONLY> is specified.
+
+I<slot> is assigned the slot number corresponding to the variable. It
+may be null is not required, but this would be nearly pointless with
+B<gbatch_varfindslot> (other than reporting that the variable was unknown).
+
+I<vard> is a pointer to a structure which will contain the details of
+the variable for B<gbatch_varfind>.
+
+=head1 RETURN VALUES
+
+The function returns 0 if successful, otherwise an error code as
+defined in the include file \fBgbatch.h\fR.
+
+=head1 SEE ALSO
+
+gbatch_varadd(3),
+gbatch_varchcomm(3),
+gbatch_varchgrp(3),
+gbatch_varchmod(3),
+gbatch_varchown(3),
+gbatch_vardel(3),
+gbatch_varlist(3),
+gbatch_varmon(3),
+gbatch_varread(3),
+gbatch_varrename(3),
+gbatch_varupd(3).
+
+=head1 COPYRIGHT
+
+Copyright (c) 2009 Free Software Foundation, Inc.
+This is free software. You may redistribute copies of it under the
+terms of the GNU General Public License
+<http://www.gnu.org/licenses/gpl.html>.
+There is NO WARRANTY, to the extent permitted by law.
+
+=head1 AUTHOR
+
+John M Collins, Xi Software Ltd.
+
+=cut
+
+## Local Variables:
+## mode: nroff
+## End:

@@ -1,0 +1,15 @@
+  Copyright 2009 Free Software Foundation, Inc.
+
+  Copying and distribution of this file, with or without modification,
+  are permitted in any medium without royalty provided the copyright
+  notice and this notice are preserved.
+
+----------------------------------------------------------------------
+These are mostly bits of code that seemed easiest to
+#include in various programs rather than having a full-blown
+library routine to do it.
+
+In many cases there is conditionally compiled code that
+depends on what it's included in.
+
+John Collins

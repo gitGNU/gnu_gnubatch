@@ -1,0 +1,392 @@
+=head1 NAME
+
+gbch-uchange - update or change user permissions
+
+=head1 SYNOPSIS
+
+B<gbch-uchange>
+[ I<-options> ]
+[ users ]
+
+=head1 DESCRIPTION
+
+B<gbch-uchange> is a shell tool that may be used to update the user
+permissions file giving the user profiles of various users and the
+operations which they may be permitted to perform within the
+B<GNUbatch> system. Alternatively the "default permissions" may be
+updated. These are the permissions which are assigned by default to
+new B<GNUbatch> users.
+
+Further options allow for a "password dump" file to be
+maintained. This is for the benefit of NIS-type environments where
+reading through most of the password database can take an unacceptably
+long time, the user name and userid hash table is maintained in a file
+and updated as necessary.
+
+The invoking user must have I<write admin file> permission.
+
+=head1 OPTIONS
+
+Note that the order of treatment, letters and keywords described below
+may be modified by editing the file F<btrest.help> - see
+btsyntax(5).
+
+The environment variable on which options are supplied is C<GBCH_UCHANGE> and the
+environment variable to specify the help file is C<BTRESTCONF>.
+
+=over 8
+
+=item -? or +explain
+
+Causes a summary of the other options to be displayed without taking
+further action.
+
+=item -A or +copy-defaults
+
+Copy the default profile to all users I<before> setting other
+permissions on the named users (with the B<-u> option) or after
+setting the defaults (with the B<-D> option).
+
+The privileges of the invoking user are not changed by this operation.
+
+=item -D or +set-defaults
+
+Indicate that the other options are to apply to the default
+profile for new users.
+
+=item -d I<num> or +default-priority I<num>
+
+Set the default job priority to I<num>, which must be between 1 and
+255.
+
+=item -J I<modes> or +job-mode I<modes>
+
+Set the default permissions on jobs according to the format of the
+I<modes> argument.
+
+=item -l I<num> or +min-priority I<num>
+
+Set the minimum job priority to I<num>, which must be between 1 and 255.
+
+=item -M I<num> or +max-load-level I<num>
+
+Set the maximum load level for any one job to I<num>, which must be
+between 1 and 32767.
+
+=item -m I<num> or +max-priority I<num>
+
+Set the maximum job priority to I<num>, which must be between 1 and 255.
+
+=item -N or +no-rebuild
+
+Cancel the B<-R> option.
+
+=item -p I<privileges> or +privileges I<privileges>
+
+Set the privileges of the user(s) as specified by the argument.
+
+=item -R or +rebuild-file
+
+Rebuild the user permissions file F<btufile> incorporating any changes
+in the password list.
+
+=item -S I<num> or +special-load-level I<num>
+
+Set the special load level for the user(s) to I<num>, which must be
+between 1 and 32767.
+
+=item -s or +no-copy-defaults
+
+Cancel the effect of the B<-A> option
+
+=item -T I<num> or +total-load-level I<num>
+
+Set the total load level for the user(s) to I<num>, which must be
+between 1 and 32767.
+
+=item -u or +set-users
+
+Indicate that the other options are to apply to the users specified on
+the rest of the command line, resetting any previous B<-D> option.
+
+=item -V or +var-mode
+
+Set the default permissions on variables according to the format of the
+I<modes> argument.
+
+=item -X or +dump-passwd
+
+Dump out the hash table of the password file to avoid re-reading the
+password file within the other programs.
+
+=item -Y or +default-passwd
+
+Default handling of password hash file dump - rebuild if it is already
+present and B<-R> specified, otherwise not.
+
+=item -Z or +kill-dump-passwd
+
+Delete any existing dumped password hash file.
+
+=item +freeze-current
+
+Save all the current options in a F<.gnubatch> file in the current
+directory.
+
+=item +freeze-home
+
+Save all the current options in a F<.gnubatch> file in the user's home
+directory.
+
+=back
+
+=head1 Users or default
+
+In one operation B<gbch-uchange> either adjusts the default permissions,
+to be applied to new users, if B<-D> is specified, or specified users,
+if nothing or B<-u> is specified. So first set the required defaults:
+
+	gbch-uchange -D -n 20 -p CR,SPC,ST,Cdft -A
+
+Then set named users
+
+	gbch-uchange -p ALL jmc root batch
+
+=head1 Rebuilding the user control file
+
+After adding new users to the system, you should rebuild the user
+control file by running
+
+	gbch-uchange -R
+
+On a system with a large number of users, this can take a long time,
+so the previous method of adding new users as they were encountered
+meant that various hold-ups occurred in standard utilities or the
+scheduler, whichever was the first to "notice" the changes, which
+might, in the event, be half-complete.
+
+We suggest that this command be added to the "add new user" procedure
+for your installation.
+
+=head1 Dumping the password file
+
+=for html
+<a name="Dumping_password_file"></a>
+
+When any of the B<GNUbatch> programs which may require to map numeric
+user ids to names and vice versa start, one of the first operations is
+to build the appropriate hash tables. This may take some time if there
+are a large number of user names, especially if NIS (a.k.a. I<yellow
+pages>) is in use.
+
+A short cut is to dump out the password file into a hash table file,
+by default F<pwdump6>, which may be quickly read in by the relevant
+programs instead of rebuilding the hash table each time.
+
+You may opt to create the dumped password file by running
+
+	gbch-uchange -X
+
+This should only be done when the scheduler is stopped.
+
+Afterwards, each time the user control file is rebuilt using the B<-R>
+option (or equivalents in other programs such as gbch-user(1)), this file
+will also be rebuilt. B<-X> does not have to be specified again.
+
+If you ever decide you want to dispense with this file, run
+B<gbch-uchange> with the B<-Z> option.
+
+For completeness, the B<-Y> option is provided to cancel B<-X> or
+B<-Z> in case they are provided in the environment or a F<.gnubatch>
+file, an extremely bad idea.
+
+=head2 Privileges
+
+The following may be specified as the argument to B<-p>, as one or
+more (comma-separated) of argument may be one or more of the following
+codes, optionally preceded by a minus to turn off the corresponding
+privilege.
+
+=over 4
+
+=item RA
+
+read admin file
+
+=item WA
+
+write admin file
+
+=item CR
+
+create
+
+=item SPC
+
+special create
+
+=item ST
+
+stop scheduler
+
+=item Cdft
+
+change default
+
+=item UG
+
+or user and group modes
+
+=item UO
+
+or user and other modes
+
+=item GO
+
+or group and other modes.
+
+=back
+
+C<ALL> may be used to denote all of the permissions, and then perhaps
+to cancel some. For example:
+
+	-p CR,ST,Cdft
+	-p ALL,-WA
+
+A hexadecimal value is also accepted, but this is intended only for
+the benefit of the installation routines.
+
+=head2 Mode arguments
+
+The argument to the B<-J> and B<-V> options provides for a wide variety of
+operations.
+
+Each permission is represented by a letter, as follows:
+
+=over 4
+
+=item R
+
+read permission
+
+=item W
+
+write permission
+
+=item S
+
+reveal permission
+
+=item M
+
+read mode
+
+=item P
+
+set mode
+
+=item U
+
+give away owner
+
+=item V
+
+assume owner
+
+=item G
+
+give away group
+
+=item H
+
+assume group
+
+=item D
+
+delete
+
+=item K
+
+kill (only valid for jobs)
+
+=back
+
+Each section of the mode (job, group, others) is represented by the
+prefixes C<U:>, C<G:> and C<O:> and separated by commas.
+
+For example:
+
+	-J U:RWSMPDK,G:RWSDK,O:RS
+
+would set the permissions for the user, group and others as given. If
+the prefixes are omitted, as in
+
+	-J RWSDK
+
+then all of the user, group and other permissions are set to the same
+value. Alternatively two of the C<J>, C<G> or C<O> may be run together
+as in
+
+	-J U:RWSKD,GO:RWS
+
+if "group" or "other" (in this case) are to have the same permissions.
+
+=head1 FILES
+
+F<~/.gnubatch>
+configuration file (home directory)
+
+F<.gnubatch>
+configuration file (current directory)
+
+F<btrest.help>
+message file
+
+F<btufile>
+user permissions file
+
+F<pwdump>
+saved password file
+
+=head1 ENVIRONMENT
+
+=over 4
+
+=item GBCH_UCHANGE
+
+space-separated options to override defaults.
+
+=item BTRESTCONF
+
+location of alternative help file.
+
+=back
+
+=head1 SEE ALSO
+
+gbch-ulist(1),
+gbch-user(1),
+btsyntax(5).
+
+=head1 DIAGNOSTICS
+
+Various diagnostics are read and printed as required from the message
+file F<btrest.help>.
+
+=head1 COPYRIGHT
+
+Copyright (c) 2009 Free Software Foundation, Inc.
+This is free software. You may redistribute copies of it under the
+terms of the GNU General Public License
+<http://www.gnu.org/licenses/gpl.html>.
+There is NO WARRANTY, to the extent permitted by law.
+
+=head1 AUTHOR
+
+John M Collins, Xi Software Ltd.
+
+=cut
+
+## Local Variables:
+## mode: nroff
+## End:

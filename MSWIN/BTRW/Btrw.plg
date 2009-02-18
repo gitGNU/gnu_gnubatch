@@ -1,0 +1,206 @@
+<html>
+<body>
+<pre>
+<h1>Build Log</h1>
+<h3>
+--------------------Configuration: Btrw - Win32 Release--------------------
+</h3>
+<h3>Command Lines</h3>
+Creating command line "rc.exe /l 0x809 /fo"Release/Btrw.res" /d "NDEBUG" /d "_AFXDLL" "C:\Sourcecode\Batch\BTRW\Btrw.rc"" 
+Creating temporary file "c:\windows\TEMP\RSPC002.TMP" with contents
+[
+/nologo /G3 /MD /W3 /GX /O2 /Ob2 /I "..\include" /I "..\BTRW" /D "WIN32" /D "NDEBUG" /D "_WINDOWS" /D "BTRW" /D "_AFXDLL" /FR"Release/" /Fp"Release/Btrw.pch" /Yu"STDAFX.H" /Fo"Release/" /Fd"Release/" /FD /c 
+"C:\Sourcecode\Batch\Winlib\Advtime.cpp"
+"C:\Sourcecode\Batch\BTRW\Argdlg.cpp"
+"C:\Sourcecode\Batch\BTRW\Btjobcd.cpp"
+"C:\Sourcecode\Batch\BTRW\Btrw.cpp"
+"C:\Sourcecode\Batch\BTRW\Btrwdoc.cpp"
+"C:\Sourcecode\Batch\BTRW\Btrwview.cpp"
+"C:\Sourcecode\Batch\BTRW\Chkminmd.cpp"
+"C:\Sourcecode\Batch\Winlib\conthelp.cpp"
+"C:\Sourcecode\Batch\BTRW\Defass.cpp"
+"C:\Sourcecode\Batch\BTRW\Defcond.cpp"
+"C:\Sourcecode\Batch\Winlib\Dumpjob.cpp"
+"C:\Sourcecode\Batch\BTRW\Editarg.cpp"
+"C:\Sourcecode\Batch\BTRW\Editass.cpp"
+"C:\Sourcecode\Batch\BTRW\Editcond.cpp"
+"C:\Sourcecode\Batch\BTRW\Editenv.cpp"
+"C:\Sourcecode\Batch\BTRW\editredi.cpp"
+"C:\Sourcecode\Batch\BTRW\Envlist.cpp"
+"C:\Sourcecode\Batch\BTRW\Envtable.cpp"
+"C:\Sourcecode\Batch\Winlib\Getregdata.cpp"
+"C:\Sourcecode\Batch\BTRW\Jasslist.cpp"
+"C:\Sourcecode\Batch\BTRW\Jcondlis.cpp"
+"C:\Sourcecode\Batch\BTRW\Jperm.cpp"
+"C:\Sourcecode\Batch\Winlib\LoadHost.cpp"
+"C:\Sourcecode\Batch\BTRW\LoginHost.cpp"
+"C:\Sourcecode\Batch\BTRW\Maildlg.cpp"
+"C:\Sourcecode\Batch\BTRW\Mainfrm.cpp"
+"C:\Sourcecode\Batch\Winlib\netrouts.cpp"
+"C:\Sourcecode\Batch\Winlib\Optcopy.cpp"
+"C:\Sourcecode\Batch\BTRW\Procpar.cpp"
+"C:\Sourcecode\Batch\BTRW\Progopts.cpp"
+"C:\Sourcecode\Batch\BTRW\Redirlis.cpp"
+"C:\Sourcecode\Batch\BTRW\Speakudp.cpp"
+"C:\Sourcecode\Batch\BTRW\Submitj.cpp"
+"C:\Sourcecode\Batch\BTRW\Timedlg.cpp"
+"C:\Sourcecode\Batch\BTRW\Timelim.cpp"
+"C:\Sourcecode\Batch\BTRW\Titledlg.cpp"
+"C:\Sourcecode\Batch\BTRW\Uperms.cpp"
+"C:\Sourcecode\Batch\Winlib\userops.cpp"
+]
+Creating command line "cl.exe @c:\windows\TEMP\RSPC002.TMP" 
+Creating temporary file "c:\windows\TEMP\RSPC003.TMP" with contents
+[
+/nologo /G3 /MD /W3 /GX /O2 /Ob2 /I "..\include" /I "..\BTRW" /D "WIN32" /D "NDEBUG" /D "_WINDOWS" /D "BTRW" /D "_AFXDLL" /FR"Release/" /Fp"Release/Btrw.pch" /Yc"STDAFX.H" /Fo"Release/" /Fd"Release/" /FD /c 
+"C:\Sourcecode\Batch\BTRW\Stdafx.cpp"
+]
+Creating command line "cl.exe @c:\windows\TEMP\RSPC003.TMP" 
+Creating temporary file "c:\windows\TEMP\RSPC004.TMP" with contents
+[
+wsock32.lib /nologo /stack:0x5000 /subsystem:windows /incremental:no /pdb:"Release/Btrw.pdb" /machine:IX86 /def:".\Btrw.def" /out:"Release/Btrw.exe" 
+.\Release\Advtime.obj
+.\Release\Argdlg.obj
+.\Release\Btjobcd.obj
+.\Release\Btrw.obj
+.\Release\Btrwdoc.obj
+.\Release\Btrwview.obj
+.\Release\Chkminmd.obj
+.\Release\conthelp.obj
+.\Release\Defass.obj
+.\Release\Defcond.obj
+.\Release\Dumpjob.obj
+.\Release\Editarg.obj
+.\Release\Editass.obj
+.\Release\Editcond.obj
+.\Release\Editenv.obj
+.\Release\editredi.obj
+.\Release\Envlist.obj
+.\Release\Envtable.obj
+.\Release\Getregdata.obj
+.\Release\Jasslist.obj
+.\Release\Jcondlis.obj
+.\Release\Jperm.obj
+.\Release\LoadHost.obj
+.\Release\LoginHost.obj
+.\Release\Maildlg.obj
+.\Release\Mainfrm.obj
+.\Release\netrouts.obj
+.\Release\Optcopy.obj
+.\Release\Procpar.obj
+.\Release\Progopts.obj
+.\Release\Redirlis.obj
+.\Release\Speakudp.obj
+.\Release\Stdafx.obj
+.\Release\Submitj.obj
+.\Release\Timedlg.obj
+.\Release\Timelim.obj
+.\Release\Titledlg.obj
+.\Release\Uperms.obj
+.\Release\userops.obj
+.\Release\Btrw.res
+]
+Creating command line "link.exe @c:\windows\TEMP\RSPC004.TMP"
+<h3>Output Window</h3>
+Compiling resources...
+Compiling...
+Stdafx.cpp
+Compiling...
+Advtime.cpp
+Argdlg.cpp
+Btjobcd.cpp
+Btrw.cpp
+Btrwdoc.cpp
+Btrwview.cpp
+Chkminmd.cpp
+conthelp.cpp
+Defass.cpp
+Defcond.cpp
+Dumpjob.cpp
+Editarg.cpp
+Editass.cpp
+Editcond.cpp
+Editenv.cpp
+editredi.cpp
+Envlist.cpp
+Envtable.cpp
+Getregdata.cpp
+Jasslist.cpp
+Generating Code...
+Compiling...
+Jcondlis.cpp
+Jperm.cpp
+LoadHost.cpp
+LoginHost.cpp
+Maildlg.cpp
+Mainfrm.cpp
+netrouts.cpp
+Optcopy.cpp
+Procpar.cpp
+Progopts.cpp
+Redirlis.cpp
+Speakudp.cpp
+Submitj.cpp
+Timedlg.cpp
+Timelim.cpp
+Titledlg.cpp
+Uperms.cpp
+userops.cpp
+Generating Code...
+Linking...
+.\Btrw.def : warning LNK4017: CODE statement not supported for the target platform; ignored
+.\Btrw.def : warning LNK4017: DATA statement not supported for the target platform; ignored
+   Creating library Release/Btrw.lib and object Release/Btrw.exp
+Creating temporary file "c:\windows\TEMP\RSPC204.TMP" with contents
+[
+/nologo /o"Release/Btrw.bsc" 
+.\Release\Stdafx.sbr
+.\Release\Advtime.sbr
+.\Release\Argdlg.sbr
+.\Release\Btjobcd.sbr
+.\Release\Btrw.sbr
+.\Release\Btrwdoc.sbr
+.\Release\Btrwview.sbr
+.\Release\Chkminmd.sbr
+.\Release\conthelp.sbr
+.\Release\Defass.sbr
+.\Release\Defcond.sbr
+.\Release\Dumpjob.sbr
+.\Release\Editarg.sbr
+.\Release\Editass.sbr
+.\Release\Editcond.sbr
+.\Release\Editenv.sbr
+.\Release\editredi.sbr
+.\Release\Envlist.sbr
+.\Release\Envtable.sbr
+.\Release\Getregdata.sbr
+.\Release\Jasslist.sbr
+.\Release\Jcondlis.sbr
+.\Release\Jperm.sbr
+.\Release\LoadHost.sbr
+.\Release\LoginHost.sbr
+.\Release\Maildlg.sbr
+.\Release\Mainfrm.sbr
+.\Release\netrouts.sbr
+.\Release\Optcopy.sbr
+.\Release\Procpar.sbr
+.\Release\Progopts.sbr
+.\Release\Redirlis.sbr
+.\Release\Speakudp.sbr
+.\Release\Submitj.sbr
+.\Release\Timedlg.sbr
+.\Release\Timelim.sbr
+.\Release\Titledlg.sbr
+.\Release\Uperms.sbr
+.\Release\userops.sbr]
+Creating command line "bscmake.exe @c:\windows\TEMP\RSPC204.TMP"
+Creating browse info file...
+<h3>Output Window</h3>
+
+
+
+<h3>Results</h3>
+Btrw.exe - 0 error(s), 2 warning(s)
+</pre>
+</body>
+</html>

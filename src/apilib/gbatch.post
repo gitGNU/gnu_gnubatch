@@ -1,0 +1,285 @@
+/* gspool.post -- postabmble for API header file
+
+   Copyright 2009 Free Software Foundation, Inc.
+
+   This program is free software: you can redistribute it and/or modify
+   it under the terms of the GNU General Public License as published by
+   the Free Software Foundation, either version 3 of the License, or
+   (at your option) any later version.
+
+   This program is distributed in the hope that it will be useful,
+   but WITHOUT ANY WARRANTY; without even the implied warranty of
+   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+   GNU General Public License for more details.
+
+   You should have received a copy of the GNU General Public License
+   along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
+
+typedef	struct	{		/* Format of environment descriptor */
+	unsigned  short	e_name;			/* Offset of name */
+	unsigned  short	e_value;		/* Offset of value */
+}  Envir;
+
+typedef	struct	{		/* Redirection in job buffer */
+	unsigned  char	fd;		/* Stream or -ve no more */
+	unsigned  char	action;		/* Action */
+#define	RD_ACT_RD	1		/* Open for reading */
+#define	RD_ACT_WRT	2		/* Open/create for writing */
+#define	RD_ACT_APPEND	3		/* Open/create and append write only */
+#define	RD_ACT_RDWR	4		/* Open/create for read/write */
+#define	RD_ACT_RDWRAPP	5		/* Open/create/read/write/append */
+#define	RD_ACT_PIPEO	6		/* Pipe out */
+#define	RD_ACT_PIPEI	7		/* Pipe in */
+#define	RD_ACT_CLOSE	8		/* Close it (no file) */
+#define	RD_ACT_DUP	9		/* Duplicate file descriptor given */
+
+	unsigned  short	arg;		/* Offset or file to dup from */
+}  Redir;
+
+typedef	struct	{		/* Redirection passed to/from user */
+	unsigned  char	fd;
+	unsigned  char	action;
+	union	{
+		unsigned  short	arg;		/* File to dup from */
+		const	char	*buffer;
+	}  un;
+}  apiMredir;
+
+typedef	struct	{		/* Variable identification in conds/asses */
+	slotno_t	slotno;			/* Slot number on our host */
+}  apiVid;
+
+typedef	struct	{		/* Condition structure */
+	unsigned char	bjc_compar;	/*  Comparison as: */
+	unsigned char	bjc_iscrit;	/*  Critical */
+	apiVid		bjc_var;	/*  Which variable */
+	Btcon	bjc_value;		/*  Value to compare */
+}  apiJcond;
+
+typedef	struct	{
+	unsigned  short	 bja_flags;	/*  When it applies */
+	unsigned  char	bja_op;		/*  What to do */
+	unsigned  char	bja_iscrit;	/*  Critical */
+	apiVid		bja_var;	/*  Which variable */
+	Btcon	bja_con;
+}  apiJass;
+
+/* This is the job header, not including any strings */
+
+typedef	struct	{
+	jobno_t		bj_job;		/*  Job number  */
+	jobno_t		bj_sonum;	/*  Standard output id */
+	jobno_t		bj_senum;	/*  Standard error id */
+	time_t		bj_time;	/*  When originally submitted  */
+	time_t		bj_stime;	/*  Time started */
+	time_t		bj_etime;	/*  Last end time */
+	int_pid_t	bj_pid;		/*  Process id if running */
+	netid_t		bj_orighostid;	/*  Original hostid (for remotely submitted jobs) */
+	netid_t		bj_hostid;	/*  Host id job belongs to */
+	netid_t		bj_runhostid;	/*  Host id job running on (might be different) */
+	slotno_t	bj_slotno;	/*  Slot number */
+
+	unsigned  char	bj_progress;	/*  As below */
+	unsigned  char  bj_pri;		/*  Priority  */
+	SHORT		bj_wpri;	/*  Working priority  */
+
+	USHORT		bj_ll;		/*  Load level */
+	USHORT		bj_umask;	/*  Copy of umask */
+
+	USHORT		bj_nredirs,	/*  Number of redirections */
+			bj_nargs,	/*  Number of arguments */
+			bj_nenv;	/*  Environment */
+	unsigned  char	bj_jflags;	/*  Flags */
+	unsigned  char	bj_jrunflags;	/*  Run flags*/
+
+	SHORT		bj_title;	/*  Name of job (offset) */
+	SHORT		bj_direct;	/*  Directory (offset) */
+
+	ULONG		bj_runtime;	/*  Run limit (secs) */
+	USHORT		bj_autoksig;	/*  Auto kill sig before size 9s applied */
+	USHORT		bj_runon;	/*  Grace period (secs) */
+	USHORT		bj_deltime;	/*  Delete job automatically */
+	SHORT		bj_padding;	/*  Up to long boundary */
+
+	char		bj_cmdinterp[CI_MAXNAME+1];	/*  Command interpreter (now a string) */
+	Btmode		bj_mode;		/*  Permissions */
+	apiJcond	bj_conds[MAXCVARS];	/*  Conditions */
+	apiJass		bj_asses[MAXSEVARS];	/*  Assignments */
+	Timecon		bj_times;	/*  Time control */
+	LONG		bj_ulimit;	/*  Copied ulimit */
+
+	SHORT		bj_redirs;	/* Redirections (offset of vector) */
+	SHORT		bj_env;		/* Environment (offset of vector) */
+	SHORT		bj_arg;		/* Max args (offset of vector) */
+	USHORT		bj_lastexit;	/* Last exit status (as returned by wait) */
+
+	Exits		bj_exits;
+}  apiBtjobh;
+
+typedef	struct	{		/* This is the whole lot including the string space */
+	apiBtjobh	h;
+	char		bj_space[JOBSPACE];	/* Room for chars of char strings */
+}  apiBtjob;
+
+typedef	struct	{
+	netid_t		hostid;	/* Originating host id - never zero */
+	slotno_t	slotno;	/* SHM slot number on machine */
+}  jident;
+
+#define	BTV_NAME	19
+#define	BTV_COMMENT	41
+
+typedef	struct	{
+	netid_t		hostid;			/* Originating host id - never zero */
+	slotno_t	slotno;			/* SHM slot number on machine */
+}  vident;
+
+typedef	struct	{
+	ULONG		var_sequence;		/* Change sequence */
+	vident		var_id;
+	time_t	var_c_time, var_m_time;		/* Create/mod time */
+	unsigned char	var_type;		/* Is it special? */
+	unsigned char	var_flags;		/* If so, set read-only */
+	char	var_name[BTV_NAME+1];		/* Name */
+	char	var_comment[BTV_COMMENT+1];	/* User-assigned comment */
+	Btmode	var_mode;			/* Permissions */
+	Btcon	var_value;			/* Value */
+}  apiBtvar;
+
+/* Values for var_type to indicate special (non-zero) */
+
+#define VT_LOADLEVEL	1			/* Maximum Load Level */
+#define VT_CURRLOAD	2			/* Current load level */
+#define VT_LOGJOBS	3			/* Log jobs */
+#define VT_LOGVARS	4			/* Log vars */
+#define	VT_MACHNAME	5			/* Machine name */
+#define	VT_STARTLIM	6			/* Max number of jobs to start at once */
+#define	VT_STARTWAIT	7			/* Wait time */
+
+/* Values for var_flags */
+
+#define	VF_READONLY	0x01
+#define	VF_STRINGONLY	0x02
+#define	VF_LONGONLY	0x04
+#define	VF_EXPORT	0x08			/* Visible to outside world */
+#define	VF_SKELETON	0x10			/* Skeleton variable for offline host */
+#define	VF_CLUSTER	0x20			/* Local to machine in conditions/assignments */
+
+typedef	struct	{		/* Default strucure */
+	unsigned  char	btd_version;	/* Major Xi-Batch version number */
+	unsigned  char	btd_minp,	/* Minimum priority  */
+			btd_maxp,	/* Maximum priority  */
+			btd_defp;	/* Default priority  */
+
+	time_t		btd_lastp;	/* Last read password file */
+
+	ULONG		btd_priv;	/* Privileges */
+	USHORT		btd_maxll;	/* Max load level */
+	USHORT		btd_totll;	/* Max total load level */
+	USHORT		btd_spec_ll;	/* Non-std jobs load level */
+	USHORT		btd_jflags[3];	/* Flags for jobs */
+	USHORT		btd_vflags[3];	/* Flags for variables */
+}  apiBtdef;
+
+typedef	struct	{
+	unsigned  char	btu_isvalid,	/* Valid user id */
+			btu_minp,	/* Minimum priority  */
+			btu_maxp,	/* Maximum priority  */
+			btu_defp;	/* Default priority  */
+	int_ugid_t	btu_user;	/* User id */
+
+	ULONG		btu_priv;	/* Privileges */
+
+	USHORT		btu_maxll;	/* Max load level */
+	USHORT		btu_totll;	/* Max total load level */
+	USHORT		btu_spec_ll;	/* Non-std jobs load level */
+	USHORT		btu_jflags[3];	/* Flags for jobs */
+	USHORT		btu_vflags[3];	/* Flags for variables */
+}  apiBtuser;
+
+typedef	struct	{		/* Command interpreter */
+	USHORT		ci_ll;		/*  Default load level */
+	unsigned  char  ci_nice;	/*  Nice value */
+	unsigned  char	ci_flags;	/*  Flags for cmd int */
+	char	ci_name[CI_MAXNAME+1];	/*  Name (e.g. shell) */
+	char	ci_path[CI_MAXFPATH+1];	/*  Path name */
+	char	ci_args[CI_MAXARGS+1];	/*  Arg list */
+}  Cmdint;
+
+#define	CI_STDSHELL	0		/* Standard shell */
+#define	CIF_SETARG0	(1 << 0)	/* Flag to set arg0 from job title */
+#define	CIF_INTERPARGS	(1 << 1) 	/* Flag to set to interpolate $1 etc args ourselves */
+
+#ifdef	__cplusplus
+extern	"C"	{
+#endif
+extern	int	gbatch_open(const char *, const char *),
+		gbatch_close(const int),
+		gbatch_newgrp(const int, const char *),
+		gbatch_setqueue(const int, const char *),
+		gbatch_ciadd(const int, const unsigned, const Cmdint *, unsigned *),
+		gbatch_cidel(const int, const unsigned, const unsigned),
+		gbatch_ciread(const int, const unsigned, int *, Cmdint **),
+		gbatch_ciupd(const int, const unsigned, const unsigned, const Cmdint *),
+		gbatch_holread(const int, const unsigned, int, unsigned char **),
+		gbatch_holupd(const int, const unsigned, int, unsigned char *),
+		gbatch_getbtd(const int, apiBtdef *),
+		gbatch_getbtu(const int, char *, char *, apiBtuser *),
+		gbatch_jobres(const int, jobno_t *),
+		gbatch_jobchgrp(const int, const unsigned, const slotno_t, const char *),
+		gbatch_jobchmod(const int, const unsigned, const slotno_t, const Btmode *),
+		gbatch_jobchown(const int, const unsigned, const slotno_t, const char *),
+		gbatch_jobdel(const int, const unsigned, const slotno_t),
+		gbatch_jobfind(const int, const unsigned, const jobno_t, const netid_t, slotno_t *, apiBtjob *),
+		gbatch_jobfindslot(const int, const unsigned, const jobno_t, const netid_t, slotno_t *),
+		gbatch_joblist(const int, const unsigned, int *, slotno_t **),
+		gbatch_jobop(const int, const unsigned, const slotno_t, const unsigned, const unsigned),
+		gbatch_jobread(const int, const unsigned, const slotno_t, apiBtjob *),
+		gbatch_jobupd(const int, const unsigned, const slotno_t, apiBtjob *),
+		gbatch_jobmon(const int, void (*)(const int)),
+		gbatch_varmon(const int, void (*)(const int)),
+		gbatch_putbtd(const int, const apiBtdef *),
+		gbatch_putbtu(const int, const char *, const apiBtuser *),
+		gbatch_unpackenv(const apiBtjob *, const unsigned, const char **, const char **),
+		gbatch_puttitle(const int, apiBtjob *, const char *),
+		gbatch_putdirect(apiBtjob *, const char *),
+		gbatch_putarg(apiBtjob *, const unsigned, const char *),
+		gbatch_delarg(apiBtjob *, const unsigned),
+		gbatch_putarglist(apiBtjob *, const char **),
+		gbatch_putenv(apiBtjob *, const char *),
+		gbatch_delenv(apiBtjob *, const char *),
+		gbatch_putelist(apiBtjob *, const char **),
+		gbatch_putredir(apiBtjob *, const unsigned, const apiMredir *),
+		gbatch_delredir(apiBtjob *, const unsigned),
+		gbatch_putredirlist(apiBtjob *, const apiMredir *, const unsigned),
+		gbatch_varadd(const int, const apiBtvar *),
+		gbatch_varchcomm(const int, const unsigned, const slotno_t, const char *),
+		gbatch_varchgrp(const int, const unsigned, const slotno_t, const char *),
+		gbatch_varchmod(const int, const unsigned, const slotno_t, const Btmode *),
+		gbatch_varchown(const int, const unsigned, const slotno_t, const char *),
+		gbatch_vardel(const int, const unsigned, const slotno_t),
+		gbatch_varfind(const int, const unsigned, const char *, const netid_t, slotno_t *, apiBtvar *),
+		gbatch_varfindslot(const int, const unsigned, const char *, const netid_t, slotno_t *),
+		gbatch_varlist(const int, const unsigned, int *, slotno_t **),
+		gbatch_varread(const int, const unsigned, const slotno_t, apiBtvar *),
+		gbatch_varrename(const int, const unsigned, const slotno_t, const char *),
+		gbatch_varupd(const int, const unsigned, const slotno_t, const apiBtvar *);
+
+extern	const	char	*gbatch_gettitle(const int, const apiBtjob *),
+			*gbatch_getdirect(const apiBtjob *),
+			*gbatch_getarg(const apiBtjob *, const unsigned),
+			*gbatch_getenv(const apiBtjob *, const char *),
+			**gbatch_getenvlist(const apiBtjob *);
+
+extern	char	**gbatch_gethenv(const int);
+
+extern	const	apiMredir	*gbatch_getredir(const apiBtjob *, const unsigned);
+
+extern	FILE	*gbatch_jobadd(const int, apiBtjob *),
+		*gbatch_jobdata(const int, const unsigned, const slotno_t);
+#ifdef	__cplusplus
+}
+#endif
+
+extern	int	gbatch_dataerror;
+#endif	/*_XBAPI_H*/

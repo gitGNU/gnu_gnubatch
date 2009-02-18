@@ -1,0 +1,338 @@
+=head1 NAME
+
+gbch-ulist - list permissions for users
+
+=head1 SYNOPSIS
+
+B<gbch-ulist>
+[ I<-options> ]
+[ I<user> ... ]
+
+=head1 DESCRIPTION
+
+B<gbch-ulist> lists the permissions of users known to the B<GNUbatch>
+batch scheduler system. All users are listed if no users are
+specified, otherwise the named users are listed. The report is similar
+to the main display of gbch-user(1).
+
+The invoking user must have I<read admin file> permission to use
+B<gbch-ulist>.
+
+=head1 OPTIONS
+
+Note that the order of treatment, letters and keywords described below
+may be modified by editing the file F<btrest.help> -
+see btsyntax(5).
+
+The environment variable on which options are supplied is C<GBCH_ULIST> and the
+environment variable to specify the help file is C<BTRESTCONF>.
+
+=over 8
+
+=item -? or +explain
+
+Causes a summary of the other options to be displayed without taking
+further action.
+
+=item -D or +default-format
+
+Cancel the B<-F> option and revert to the default format.
+
+=item -d or +default-line
+
+Display an initial line giving the default options (included by default).
+
+=item -F I<format> or +format I<format>
+
+Format the output according to the I<format> string given.
+
+=item -g or +group-name-sort
+
+Sort the list of users by the group name in ascending order, then by
+users within that group as primary group.
+
+=item -H or +header
+
+Generate a header for each column of the output.
+
+=item -N or +no-header
+
+Cancel the B<-H> option.
+
+=item -n or +numeric-user-sort
+
+Sort the list of users by the numeric user id (default).
+
+=item -S or +no-user-lines
+
+Suppress the user lines. It is an error to invoke this and the B<-s>
+option as well.
+
+=item -s or +no-default-line
+
+Suppress the initial line giving the default options.
+
+=item -U or +user-lines
+
+Display the user lines (default).
+
+=item -u or +user-name-sort
+
+Sort the list of users by the user name.
+
+=item +freeze-current
+
+Save all the current options in a F<.gnubatch> file in the current
+directory.
+
+=item +freeze-home
+
+Save all the current options in a F<.gnubatch> file in the user's home
+directory.
+
+=back
+
+=head1 Format argument.
+
+The format string consists of a string containing the following
+character sequences, which are replaced by various user permission
+parameters. The string may contain various other printing characters
+or spaces as required.
+
+Each column is padded on the right to the length of the longest
+entry.
+
+If a header is requested, the appropriate abbreviation is obtained
+from the message file and inserted.
+
+=over 4
+
+=item %%
+
+Insert a single C<%> character.
+
+=item %d
+
+Default priority
+
+=item %g
+
+Group name
+
+=item %j
+
+Job mode
+
+=item %l
+
+Minimum priority
+
+=item %m
+
+Maximum priority
+
+=item %p
+
+Privileges
+
+=item %s
+
+Special create load level
+
+=item %t
+
+Total load level
+
+=item %u
+
+User name.
+
+=item %v
+
+Variable mode
+
+=item %x
+
+Maximum load level
+
+=back
+
+The string C<DEFAULT> replaces the user name in the default values
+line, or the group name if the user name is not printed. If the group
+name is not printed as well, then this will be omitted and will be
+indistinguishable from the rest of the output.
+
+Note that the various strings are read from the message file, so it is
+possible to modify them as required by the user.
+
+The default format is
+
+	%u %g %d %l %m %x %t %s %p
+
+=head2 Privileges format
+
+The following are output via the C<%p> format. Note that the actual
+strings are read from the message file, and are the same ones as are
+used by gbch-uchange(1).
+
+=over 4
+
+=item RA
+
+read admin file
+
+=item WA
+
+write admin file
+
+=item CR
+
+create
+
+=item SPC
+
+special create
+
+=item ST
+
+stop scheduler
+
+=item Cdft
+
+change default
+
+=item UG
+
+or user and group modes
+
+=item UO
+
+or user and other modes
+
+=item GO
+
+or group and other modes.
+
+=back
+
+C<ALL> is printed if all privileges are set.
+
+=head2 Modes
+
+Modes printed by the C<%j> and C<%v> options are as follows:
+
+=over 4
+
+=item R
+
+read permission
+
+=item W
+
+write permission
+
+=item S
+
+reveal permission
+
+=item M
+
+read mode
+
+=item P
+
+set mode
+
+=item U
+
+give away owner
+
+=item V
+
+assume owner
+
+=item G
+
+give away group
+
+=item H
+
+assume group
+
+=item D
+
+delete
+
+=item K
+
+kill (only valid for jobs)
+
+=back
+
+Each section of the mode (job, group, others) is represented by the
+prefixes C<U:>, C<G:> and C<O:> and separated by commas.
+
+For example:
+
+	U:RWSMPDK,G:RWSDK,O:RS
+
+This is exactly the same format as is expected by gbch-uchange(1) etc.
+
+=head1 FILES
+
+F<~/.gnubatch>
+configuration file (home directory)
+
+F<.gnubatch>
+configuration file (current directory)
+
+F<btrest.help>
+message file
+
+F<btufile>
+user control file
+
+=head1 ENVIRONMENT
+
+=over 4
+
+=item GBCH_ULIST
+
+space-separated options to override defaults.
+
+=item BTRESTCONF
+
+location of alternative help file.
+
+=back
+
+=head1 SEE ALSO
+
+gbch-uchange(1),
+gbch-user(1),
+btsyntax(5),
+gnubatch.conf(5),
+gnubatch.hosts(5).
+
+=head1 DIAGNOSTICS
+
+Various diagnostics are read and printed as required from the message
+file F<btrest.help>.
+
+=head1 COPYRIGHT
+
+Copyright (c) 2009 Free Software Foundation, Inc.
+This is free software. You may redistribute copies of it under the
+terms of the GNU General Public License
+<http://www.gnu.org/licenses/gpl.html>.
+There is NO WARRANTY, to the extent permitted by law.
+
+=head1 AUTHOR
+
+John M Collins, Xi Software Ltd.
+
+=cut
+
+## Local Variables:
+## mode: nroff
+## End:

@@ -1,0 +1,89 @@
+=head1 NAME
+
+gbatch_varlist - obtain a list of variables
+
+=head1 SYNOPSIS
+
+=for man
+\&\fB#include <gbatch.h>\fR
+.PP
+
+=for html
+<STRONG>#include &lt;gbatch.h&gt;</STRONG>
+<br>
+
+B<int gbatch_varlist(const int>
+I<fd>B<, const unsigned>
+I<flags>B<, int *>
+I<numvars>B<, slotno_t **>I<slots>B<)>
+
+=head1 DESCRIPTION
+
+The function B<gbatch_varlist> is used to obtain a vector of slots which
+can be used to access the details of variables readable by the user.
+
+I<fd> is a file descriptor which was previously returned by a
+successful call to gbatch_open(3).
+
+I<flags> is zero, or a logical OR of one or more of the following values
+
+=over 4
+
+=item GBATCH_FLAG_LOCALONLY
+
+Ignore remote variables/hosts, i.e. not local to the server, not the client.
+
+=item GBATCH_FLAG_USERONLY
+
+Restrict to the user only.
+
+=item GBATCH_FLAG_GROUPONLY
+
+Restrict to the current group (possibly as selected by gbatch_newgrp(3))
+only.
+
+=back
+
+I<numvars> is a pointer to an integer which will contain the number of variables in the list.
+
+I<slots> is a pointer to an array of slots. The memory used by this
+list should not be freed by the user as it is owned by the API.
+
+=head1 RETURN VALUES
+
+The function returns 0 if successful, otherwise an error code as
+defined in the include file \fBgbatch.h\fR.
+
+=head1 SEE ALSO
+
+gbatch_joblist(3),
+gbatch_newgrp(3),
+gbatch_varadd(3),
+gbatch_varchcomm(3),
+gbatch_varchgrp(3),
+gbatch_varchmod(3),
+gbatch_varchown(3),
+gbatch_vardel(3),
+gbatch_varfind(3),
+gbatch_varmon(3),
+gbatch_varread(3),
+gbatch_varrename(3),
+gbatch_varupd(3).
+
+=head1 COPYRIGHT
+
+Copyright (c) 2009 Free Software Foundation, Inc.
+This is free software. You may redistribute copies of it under the
+terms of the GNU General Public License
+<http://www.gnu.org/licenses/gpl.html>.
+There is NO WARRANTY, to the extent permitted by law.
+
+=head1 AUTHOR
+
+John M Collins, Xi Software Ltd.
+
+=cut
+
+## Local Variables:
+## mode: nroff
+## End:

@@ -1,0 +1,458 @@
+<?xml version="1.0" ?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<title>gbch-ulist - list permissions for users</title>
+<meta http-equiv="content-type" content="text/html; charset=utf-8" />
+<link rev="made" href="mailto:root@localhost" />
+</head>
+
+<body style="background-color: white">
+
+<p><a name="__index__"></a></p>
+<!-- INDEX BEGIN -->
+<!--
+
+<ul>
+
+	<li><a href="#name">NAME</a></li>
+	<li><a href="#synopsis">SYNOPSIS</a></li>
+	<li><a href="#description">DESCRIPTION</a></li>
+	<li><a href="#options">OPTIONS</a></li>
+	<li><a href="#format_argument_">Format argument.</a></li>
+	<ul>
+
+		<li><a href="#privileges_format">Privileges format</a></li>
+		<li><a href="#modes">Modes</a></li>
+	</ul>
+
+	<li><a href="#files">FILES</a></li>
+	<li><a href="#environment">ENVIRONMENT</a></li>
+	<li><a href="#see_also">SEE ALSO</a></li>
+	<li><a href="#diagnostics">DIAGNOSTICS</a></li>
+	<li><a href="#copyright">COPYRIGHT</a></li>
+	<li><a href="#author">AUTHOR</a></li>
+</ul>
+-->
+<!-- INDEX END -->
+
+<p>
+</p>
+<h1><a name="name">NAME</a></h1>
+<p>gbch-ulist - list permissions for users</p>
+<p>
+</p>
+<hr />
+<h1><a name="synopsis">SYNOPSIS</a></h1>
+<p><strong>gbch-ulist</strong>
+[ <em>-options</em> ]
+[ <em>user</em> ... ]</p>
+<p>
+</p>
+<hr />
+<h1><a name="description">DESCRIPTION</a></h1>
+<p><strong>gbch-ulist</strong> lists the permissions of users known to the <strong>GNUbatch</strong>
+batch scheduler system. All users are listed if no users are
+specified, otherwise the named users are listed. The report is similar
+to the main display of gbch-user(1).</p>
+<p>The invoking user must have <em>read admin file</em> permission to use
+<strong>gbch-ulist</strong>.</p>
+<p>
+</p>
+<hr />
+<h1><a name="options">OPTIONS</a></h1>
+<p>Note that the order of treatment, letters and keywords described below
+may be modified by editing the file <em>btrest.help</em> -
+see btsyntax(5).</p>
+<p>The environment variable on which options are supplied is <a href="#item_gbch_ulist"><code>GBCH_ULIST</code></a> and the
+environment variable to specify the help file is <a href="#item_btrestconf"><code>BTRESTCONF</code></a>.</p>
+<dl>
+<dt><strong><a name="item__2d_3f_or__2bexplain">-? or +explain</a></strong>
+
+<dd>
+<p>Causes a summary of the other options to be displayed without taking
+further action.</p>
+</dd>
+</li>
+<dt><strong><a name="item__2dd_or__2bdefault_2dformat">-D or +default-format</a></strong>
+
+<dd>
+<p>Cancel the <strong>-F</strong> option and revert to the default format.</p>
+</dd>
+</li>
+<dt><strong><a name="item__2dd_or__2bdefault_2dline">-d or +default-line</a></strong>
+
+<dd>
+<p>Display an initial line giving the default options (included by default).</p>
+</dd>
+</li>
+<dt><strong><a name="item__2df_format_or__2bformat_format">-F <em>format</em> or +format <em>format</em></a></strong>
+
+<dd>
+<p>Format the output according to the <em>format</em> string given.</p>
+</dd>
+</li>
+<dt><strong><a name="item__2dg_or__2bgroup_2dname_2dsort">-g or +group-name-sort</a></strong>
+
+<dd>
+<p>Sort the list of users by the group name in ascending order, then by
+users within that group as primary group.</p>
+</dd>
+</li>
+<dt><strong><a name="item__2dh_or__2bheader">-H or +header</a></strong>
+
+<dd>
+<p>Generate a header for each column of the output.</p>
+</dd>
+</li>
+<dt><strong><a name="item__2dn_or__2bno_2dheader">-N or +no-header</a></strong>
+
+<dd>
+<p>Cancel the <strong>-H</strong> option.</p>
+</dd>
+</li>
+<dt><strong><a name="item__2dn_or__2bnumeric_2duser_2dsort">-n or +numeric-user-sort</a></strong>
+
+<dd>
+<p>Sort the list of users by the numeric user id (default).</p>
+</dd>
+</li>
+<dt><strong><a name="item__2ds_or__2bno_2duser_2dlines">-S or +no-user-lines</a></strong>
+
+<dd>
+<p>Suppress the user lines. It is an error to invoke this and the <strong>-s</strong>
+option as well.</p>
+</dd>
+</li>
+<dt><strong><a name="item__2ds_or__2bno_2ddefault_2dline">-s or +no-default-line</a></strong>
+
+<dd>
+<p>Suppress the initial line giving the default options.</p>
+</dd>
+</li>
+<dt><strong><a name="item__2du_or__2buser_2dlines">-U or +user-lines</a></strong>
+
+<dd>
+<p>Display the user lines (default).</p>
+</dd>
+</li>
+<dt><strong><a name="item__2du_or__2buser_2dname_2dsort">-u or +user-name-sort</a></strong>
+
+<dd>
+<p>Sort the list of users by the user name.</p>
+</dd>
+</li>
+<dt><strong><a name="item__2bfreeze_2dcurrent">+freeze-current</a></strong>
+
+<dd>
+<p>Save all the current options in a <em>.gnubatch</em> file in the current
+directory.</p>
+</dd>
+</li>
+<dt><strong><a name="item__2bfreeze_2dhome">+freeze-home</a></strong>
+
+<dd>
+<p>Save all the current options in a <em>.gnubatch</em> file in the user's home
+directory.</p>
+</dd>
+</li>
+</dl>
+<p>
+</p>
+<hr />
+<h1><a name="format_argument_">Format argument.</a></h1>
+<p>The format string consists of a string containing the following
+character sequences, which are replaced by various user permission
+parameters. The string may contain various other printing characters
+or spaces as required.</p>
+<p>Each column is padded on the right to the length of the longest
+entry.</p>
+<p>If a header is requested, the appropriate abbreviation is obtained
+from the message file and inserted.</p>
+<dl>
+<dt><strong><a name="item___">%%</a></strong>
+
+<dd>
+<p>Insert a single <code>%</code> character.</p>
+</dd>
+</li>
+<dt><strong><a name="item__d">%d</a></strong>
+
+<dd>
+<p>Default priority</p>
+</dd>
+</li>
+<dt><strong><a name="item__g">%g</a></strong>
+
+<dd>
+<p>Group name</p>
+</dd>
+</li>
+<dt><strong><a name="item__j">%j</a></strong>
+
+<dd>
+<p>Job mode</p>
+</dd>
+</li>
+<dt><strong><a name="item__l">%l</a></strong>
+
+<dd>
+<p>Minimum priority</p>
+</dd>
+</li>
+<dt><strong><a name="item__m">%m</a></strong>
+
+<dd>
+<p>Maximum priority</p>
+</dd>
+</li>
+<dt><strong><a name="item__p">%p</a></strong>
+
+<dd>
+<p>Privileges</p>
+</dd>
+</li>
+<dt><strong><a name="item__s">%s</a></strong>
+
+<dd>
+<p>Special create load level</p>
+</dd>
+</li>
+<dt><strong><a name="item__t">%t</a></strong>
+
+<dd>
+<p>Total load level</p>
+</dd>
+</li>
+<dt><strong><a name="item__u">%u</a></strong>
+
+<dd>
+<p>User name.</p>
+</dd>
+</li>
+<dt><strong><a name="item__v">%v</a></strong>
+
+<dd>
+<p>Variable mode</p>
+</dd>
+</li>
+<dt><strong><a name="item__x">%x</a></strong>
+
+<dd>
+<p>Maximum load level</p>
+</dd>
+</li>
+</dl>
+<p>The string <code>DEFAULT</code> replaces the user name in the default values
+line, or the group name if the user name is not printed. If the group
+name is not printed as well, then this will be omitted and will be
+indistinguishable from the rest of the output.</p>
+<p>Note that the various strings are read from the message file, so it is
+possible to modify them as required by the user.</p>
+<p>The default format is</p>
+<pre>
+        %u %g %d %l %m %x %t %s %p</pre>
+<p>
+</p>
+<h2><a name="privileges_format">Privileges format</a></h2>
+<p>The following are output via the <a href="#item__p"><code>%p</code></a> format. Note that the actual
+strings are read from the message file, and are the same ones as are
+used by gbch-uchange(1).</p>
+<dl>
+<dt><strong><a name="item_ra">RA</a></strong>
+
+<dd>
+<p>read admin file</p>
+</dd>
+</li>
+<dt><strong><a name="item_wa">WA</a></strong>
+
+<dd>
+<p>write admin file</p>
+</dd>
+</li>
+<dt><strong><a name="item_cr">CR</a></strong>
+
+<dd>
+<p>create</p>
+</dd>
+</li>
+<dt><strong><a name="item_spc">SPC</a></strong>
+
+<dd>
+<p>special create</p>
+</dd>
+</li>
+<dt><strong><a name="item_st">ST</a></strong>
+
+<dd>
+<p>stop scheduler</p>
+</dd>
+</li>
+<dt><strong><a name="item_cdft">Cdft</a></strong>
+
+<dd>
+<p>change default</p>
+</dd>
+</li>
+<dt><strong><a name="item_ug">UG</a></strong>
+
+<dd>
+<p>or user and group modes</p>
+</dd>
+</li>
+<dt><strong><a name="item_uo">UO</a></strong>
+
+<dd>
+<p>or user and other modes</p>
+</dd>
+</li>
+<dt><strong><a name="item_go">GO</a></strong>
+
+<dd>
+<p>or group and other modes.</p>
+</dd>
+</li>
+</dl>
+<p><code>ALL</code> is printed if all privileges are set.</p>
+<p>
+</p>
+<h2><a name="modes">Modes</a></h2>
+<p>Modes printed by the <a href="#item__j"><code>%j</code></a> and <a href="#item__v"><code>%v</code></a> options are as follows:</p>
+<dl>
+<dt><strong><a name="item_r">R</a></strong>
+
+<dd>
+<p>read permission</p>
+</dd>
+</li>
+<dt><strong><a name="item_w">W</a></strong>
+
+<dd>
+<p>write permission</p>
+</dd>
+</li>
+<dt><strong><a name="item_s">S</a></strong>
+
+<dd>
+<p>reveal permission</p>
+</dd>
+</li>
+<dt><strong><a name="item_m">M</a></strong>
+
+<dd>
+<p>read mode</p>
+</dd>
+</li>
+<dt><strong><a name="item_p">P</a></strong>
+
+<dd>
+<p>set mode</p>
+</dd>
+</li>
+<dt><strong><a name="item_u">U</a></strong>
+
+<dd>
+<p>give away owner</p>
+</dd>
+</li>
+<dt><strong><a name="item_v">V</a></strong>
+
+<dd>
+<p>assume owner</p>
+</dd>
+</li>
+<dt><strong><a name="item_g">G</a></strong>
+
+<dd>
+<p>give away group</p>
+</dd>
+</li>
+<dt><strong><a name="item_h">H</a></strong>
+
+<dd>
+<p>assume group</p>
+</dd>
+</li>
+<dt><strong><a name="item_d">D</a></strong>
+
+<dd>
+<p>delete</p>
+</dd>
+</li>
+<dt><strong><a name="item_k">K</a></strong>
+
+<dd>
+<p>kill (only valid for jobs)</p>
+</dd>
+</li>
+</dl>
+<p>Each section of the mode (job, group, others) is represented by the
+prefixes <code>U:</code>, <code>G:</code> and <code>O:</code> and separated by commas.</p>
+<p>For example:</p>
+<pre>
+        U:RWSMPDK,G:RWSDK,O:RS</pre>
+<p>This is exactly the same format as is expected by gbch-uchange(1) etc.</p>
+<p>
+</p>
+<hr />
+<h1><a name="files">FILES</a></h1>
+<p><em>~/.gnubatch</em>
+configuration file (home directory)</p>
+<p><em>.gnubatch</em>
+configuration file (current directory)</p>
+<p><em>btrest.help</em>
+message file</p>
+<p><em>btufile</em>
+user control file</p>
+<p>
+</p>
+<hr />
+<h1><a name="environment">ENVIRONMENT</a></h1>
+<dl>
+<dt><strong><a name="item_gbch_ulist">GBCH_ULIST</a></strong>
+
+<dd>
+<p>space-separated options to override defaults.</p>
+</dd>
+</li>
+<dt><strong><a name="item_btrestconf">BTRESTCONF</a></strong>
+
+<dd>
+<p>location of alternative help file.</p>
+</dd>
+</li>
+</dl>
+<p>
+</p>
+<hr />
+<h1><a name="see_also">SEE ALSO</a></h1>
+<p>gbch-uchange(1),
+gbch-user(1),
+btsyntax(5),
+gnubatch.conf(5),
+gnubatch.hosts(5).</p>
+<p>
+</p>
+<hr />
+<h1><a name="diagnostics">DIAGNOSTICS</a></h1>
+<p>Various diagnostics are read and printed as required from the message
+file <em>btrest.help</em>.</p>
+<p>
+</p>
+<hr />
+<h1><a name="copyright">COPYRIGHT</a></h1>
+<p>Copyright (c) 2009 Free Software Foundation, Inc.
+This is free software. You may redistribute copies of it under the
+terms of the GNU General Public License
+&lt;http://www.gnu.org/licenses/gpl.html&gt;.
+There is NO WARRANTY, to the extent permitted by law.</p>
+<p>
+</p>
+<hr />
+<h1><a name="author">AUTHOR</a></h1>
+<p>John M Collins, Xi Software Ltd.</p>
+
+</body>
+
+</html>

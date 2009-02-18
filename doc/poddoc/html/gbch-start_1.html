@@ -1,0 +1,232 @@
+<?xml version="1.0" ?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<title>gbch-start - start batch scheduler</title>
+<meta http-equiv="content-type" content="text/html; charset=utf-8" />
+<link rev="made" href="mailto:root@localhost" />
+</head>
+
+<body style="background-color: white">
+
+<p><a name="__index__"></a></p>
+<!-- INDEX BEGIN -->
+<!--
+
+<ul>
+
+	<li><a href="#name">NAME</a></li>
+	<li><a href="#synopsis">SYNOPSIS</a></li>
+	<li><a href="#description">DESCRIPTION</a></li>
+	<li><a href="#options">OPTIONS</a></li>
+	<li><a href="#files">FILES</a></li>
+	<li><a href="#environment">ENVIRONMENT</a></li>
+	<li><a href="#see_also">SEE ALSO</a></li>
+	<li><a href="#diagnostics">DIAGNOSTICS</a></li>
+	<li><a href="#copyright">COPYRIGHT</a></li>
+	<li><a href="#author">AUTHOR</a></li>
+</ul>
+-->
+<!-- INDEX END -->
+
+<p>
+</p>
+<h1><a name="name">NAME</a></h1>
+<p>gbch-start - start batch scheduler</p>
+<p>gbch-conn - connect to host</p>
+<p>gbch-disconn - disconnect from host</p>
+<p>btdst - adjust for daylight saving time</p>
+<p>
+</p>
+<hr />
+<h1><a name="synopsis">SYNOPSIS</a></h1>
+<p><strong>gbch-start</strong>
+[ <em>-options</em> ]</p>
+<p><strong>gbch-conn</strong>
+<em>hostname</em></p>
+<p><strong>gbch-disconn</strong>
+<em>hostname</em></p>
+<p><strong>gbch-dst</strong>
+[ <em>-R</em> ]
+<em>startdate</em>
+<em>enddate</em>
+<em>adjustment</em></p>
+<p>
+</p>
+<hr />
+<h1><a name="description">DESCRIPTION</a></h1>
+<p><strong>gbch-start</strong> initiates the <strong>GNUbatch</strong> batch scheduler system, by
+starting the processes <code>btsched(8)</code> and xbnetserv(8).</p>
+<p>Optional arguments enable the initial sizes of shared memory to be
+determined and also an initial value for the <code>LOADLEVEL</code> variable,
+which may determine how many jobs (possibly none) start up as soon as
+<strong>GNUbatch</strong> comes up.</p>
+<p><strong>gbch-conn</strong> instructs the <strong>GNUbatch</strong> scheduler to attempt to raise a
+connection to the given host, which should be specified in the file
+<em>gnubatch.hosts</em>, and not currently active.</p>
+<p><strong>gbch-disconn</strong> instructs the <strong>GNUbatch</strong> scheduler to close a connection
+to the given host, which should be specified in the file
+<em>/etc/</em>, and currently active.</p>
+<p><strong>gbch-dst</strong> adjusts all jobs between the specified start and end dates
+and times by adding the specified (possibly signed) <em>adjustment</em> in
+seconds to it.</p>
+<p>The dates and times may be specified in the forms</p>
+<pre>
+        dd/mm
+        mm/dd
+or</pre>
+<pre>
+        yy/mm/dd</pre>
+<p>Which of the first two forms is chosen is taken from the existing time
+zone. For time zones greater or equal to 4 West from GMT, the <code>mm/dd</code>
+form is chosen, otherwise <code>dd/mm</code>.</p>
+<p>The dates may be followed by a comma and a time in the form <code>hh:mm</code>,
+otherwise midnight is assumed.</p>
+<p>When working out what to do, remember that Unix internal time is based
+upon Greenwich Mean Time (GMT), it is the <em>display</em> which changes, so
+that the effect of moving the clocks forward is to make the times
+(held as GMT) appear later than they did before.</p>
+<p>A negative adjustment is <em>subtracted</em> from the time, making jobs run
+sooner. This is therefore appropriate when the clocks go forward at
+the start of the summer time. Likewise a positive adjustment should be
+used at the end of summer time.</p>
+<p>The optional argument <strong>-R</strong> tries to apply the option to all exported
+remote jobs, but this really is not recommended as the local jobs on
+those hosts will be unaffected probably leaving the users on those
+machines confused.</p>
+<p>
+</p>
+<hr />
+<h1><a name="options">OPTIONS</a></h1>
+<p>Note that everything in this section only applies to <strong>gbch-start</strong>.</p>
+<p>Note that the order of treatment, letters and keywords described below
+may be modified by editing the file <em>btrest.help</em> -
+see btsyntax(5).</p>
+<p>The environment variable on which options are supplied is <a href="#item_gbch_start"><code>GBCH_START</code></a> and the
+environment variable to specify the help file is <a href="#item_btrestconf"><code>BTRESTCONF</code></a>.</p>
+<dl>
+<dt><strong><a name="item__2d_3f_or__2bexplain">-? or +explain</a></strong>
+
+<dd>
+<p>causes a summary of the other options to be displayed without taking
+further action.</p>
+</dd>
+</li>
+<dt><strong><a name="item__2dl_number_or__2binitial_2dload_2dlevel_number">-l <em>number</em> or +initial-load-level <em>number</em></a></strong>
+
+<dd>
+<p>set the initial value of the <code>LOADLEVEL</code> variable, which controls the
+total load level of running jobs to the specified number (usually
+zero). If this option is not specified, then the value is unchanged
+from its initial value saved by the scheduler when it was last shut
+down.</p>
+</dd>
+<dd>
+<p>If the <strong>GNUbatch</strong> scheduler is already running, this option has no
+effect.</p>
+</dd>
+</li>
+<dt><strong><a name="item__2dj_number_or__2binitial_2djob_2dsize_number">-j <em>number</em> or +initial-job-size <em>number</em></a></strong>
+
+<dd>
+<p>Allocate shared memory initially for the specified <em>number</em> of
+jobs. This is necessary in some situations where other applications
+use up the system limit of shared memory and it is not possible to
+allocate further after the system has been running for some time.</p>
+</dd>
+<dd>
+<p>If the <strong>gnubatch</strong> scheduler is already running, this option has no
+effect.</p>
+</dd>
+</li>
+<dt><strong><a name="item__2dv_number_or__2binitial_2dvar_2dsize_number">-v <em>number</em> or +initial-var-size <em>number</em></a></strong>
+
+<dd>
+<p>Allocate shared memory initially for the specified <em>number</em> of
+variables. This is necessary in some situations where other
+applications use up the system limit of shared memory and it is not
+possible to allocate further after the system has been running for
+some time.</p>
+</dd>
+<dd>
+<p>If the <strong>GNUbatch</strong> scheduler is already running, this option has no
+effect.</p>
+</dd>
+</li>
+<dt><strong><a name="item__2bfreeze_2dcurrent">+freeze-current</a></strong>
+
+<dd>
+<p>Save all the current options in a <em>.gnubatch</em> file in the current
+directory. If this option is specified, there is no further action.</p>
+</dd>
+</li>
+<dt><strong><a name="item__2bfreeze_2dhome">+freeze-home</a></strong>
+
+<dd>
+<p>Save all the current options in a <em>.gnubatch</em> file in the user's home
+directory. If this option is specified, there is no further action.</p>
+</dd>
+</li>
+</dl>
+<p>
+</p>
+<hr />
+<h1><a name="files">FILES</a></h1>
+<p><em>~/.gnubatch</em>
+configuration file (home directory)</p>
+<p><em>.gnubatch</em>
+configuration file (current directory)</p>
+<p><em>btrest.help</em>
+message file</p>
+<p>
+</p>
+<hr />
+<h1><a name="environment">ENVIRONMENT</a></h1>
+<dl>
+<dt><strong><a name="item_gbch_start">GBCH_START</a></strong>
+
+<dd>
+<p>space-separated options to override defaults for <strong>gbch-start</strong></p>
+</dd>
+</li>
+<dt><strong><a name="item_btrestconf">BTRESTCONF</a></strong>
+
+<dd>
+<p>location of alternative help file.</p>
+</dd>
+</li>
+</dl>
+<p>
+</p>
+<hr />
+<h1><a name="see_also">SEE ALSO</a></h1>
+<p>gbch-quit(1),
+btsyntax(5),
+gnubatch.conf(5),
+gnubatch.hosts(5),
+btsched(8),
+xbnetserv(8).</p>
+<p>
+</p>
+<hr />
+<h1><a name="diagnostics">DIAGNOSTICS</a></h1>
+<p>Various diagnostics are read and printed as required from the message
+file <em>btrest.help</em>.</p>
+<p>
+</p>
+<hr />
+<h1><a name="copyright">COPYRIGHT</a></h1>
+<p>Copyright (c) 2009 Free Software Foundation, Inc.
+This is free software. You may redistribute copies of it under the
+terms of the GNU General Public License
+&lt;http://www.gnu.org/licenses/gpl.html&gt;.
+There is NO WARRANTY, to the extent permitted by law.</p>
+<p>
+</p>
+<hr />
+<h1><a name="author">AUTHOR</a></h1>
+<p>John M Collins, Xi Software Ltd.</p>
+
+</body>
+
+</html>

@@ -1,0 +1,55 @@
+=head1 NAME
+
+gbch-quit - cancel batch scheduler
+
+=head1 SYNOPSIS
+
+B<gbch-quit>
+[ I<-y> ]
+
+=head1 DESCRIPTION
+
+B<gbch-quit> is a program which should be invoked to bring the
+B<GNUbatch> batch system to an orderly halt prior to system shutdown. Any jobs
+and variables will be saved.
+
+Only a user with the I<stop scheduler> privilege may successfully
+invoke it, and confirmation is requested unless the B<-y> option is
+given.
+
+=head1 FILES
+
+F<btrest.help>
+message file
+
+=head1 SEE ALSO
+
+gbch-start(1),
+btsched(8),
+xbnetserv(8).
+
+=head1 DIAGNOSTICS
+
+Various diagnostics may be issued, read as required from the message file
+F<btrest.help>.
+
+The most important ones are that it is not running and that the user
+is not permitted to invoke the command.
+
+=head1 COPYRIGHT
+
+Copyright (c) 2009 Free Software Foundation, Inc.
+This is free software. You may redistribute copies of it under the
+terms of the GNU General Public License
+<http://www.gnu.org/licenses/gpl.html>.
+There is NO WARRANTY, to the extent permitted by law.
+
+=head1 AUTHOR
+
+John M Collins, Xi Software Ltd.
+
+=cut
+
+## Local Variables:
+## mode: nroff
+## End:

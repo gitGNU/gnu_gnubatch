@@ -1,0 +1,80 @@
+=head1 NAME
+
+gnubatch.conf - master configuration file
+
+=head1 DESCRIPTION
+
+F<gnubatch.conf> is an optional file for reconfiguring the B<GNUbatch>
+batch management system.
+
+This may be useful for relocating standard files and directories, such
+as B<SPOOLDIR> so that a different spool directory is used. However
+completely arbitrary environment variable assignments may be made so
+as to pass the resulting environment on to various subprocesses
+invoked by the scheduler.
+
+Note that as the environment is assigned early within gbch-r(1),
+then any jobs created will have these environment variables assigned.
+However there is an alternative syntax (see below) to avoid this.
+
+The format of the file consists of two different forms of
+assignment.
+
+=over 4
+
+=item C<SPOOLDIR=/usr2/spooldir>
+
+Sets up the given environment variable in all programs and jobs
+invoked by B<GNUbatch>.
+
+=item C<SPOOLDIR:/usr2/spooldir>
+
+Denotes environment variables which should not be passed on to
+subprocesses, or to jobs created by gbch-r(1).
+
+=back
+
+Comment lines may be included, introduced by a B<#> sign, and blank
+lines are ignored.
+
+The latter environment assignment format is used by default in the
+installation process for B<GNUbatch>.
+
+Every component program of B<GNUbatch> examines this file and resets
+its environment from this file as the first step of execution.
+
+=head1 FILES
+
+F<gnubatch.conf>
+
+=head1 SEE ALSO
+
+gbch-r(1)
+gbch-q(1),
+gbch-var(1),
+gbch-jdel(1),
+gbch-jlist(1),
+gbch-vlist(1),
+gbch-jchange(1),
+gbch-user(1),
+gbch-charge(1),
+gbch-start(1),
+gbch-quit(1).
+
+=head1 COPYRIGHT
+
+Copyright (c) 2009 Free Software Foundation, Inc.
+This is free software. You may redistribute copies of it under the
+terms of the GNU General Public License
+<http://www.gnu.org/licenses/gpl.html>.
+There is NO WARRANTY, to the extent permitted by law.
+
+=head1 AUTHOR
+
+John M Collins, Xi Software Ltd.
+
+=cut
+
+## Local Variables:
+## mode: nroff
+## End:

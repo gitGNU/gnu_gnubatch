@@ -1,0 +1,283 @@
+<?xml version="1.0" ?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<title>gbch-jdel - delete batch jobs</title>
+<meta http-equiv="content-type" content="text/html; charset=utf-8" />
+<link rev="made" href="mailto:root@localhost" />
+</head>
+
+<body style="background-color: white">
+
+<p><a name="__index__"></a></p>
+<!-- INDEX BEGIN -->
+<!--
+
+<ul>
+
+	<li><a href="#name">NAME</a></li>
+	<li><a href="#synopsis">SYNOPSIS</a></li>
+	<li><a href="#description">DESCRIPTION</a></li>
+	<li><a href="#options">OPTIONS</a></li>
+	<li><a href="#files">FILES</a></li>
+	<li><a href="#environment">ENVIRONMENT</a></li>
+	<li><a href="#examples">EXAMPLES</a></li>
+	<li><a href="#see_also">SEE ALSO</a></li>
+	<li><a href="#diagnostics">DIAGNOSTICS</a></li>
+	<li><a href="#copyright">COPYRIGHT</a></li>
+	<li><a href="#author">AUTHOR</a></li>
+</ul>
+-->
+<!-- INDEX END -->
+
+<p>
+</p>
+<h1><a name="name">NAME</a></h1>
+<p>gbch-jdel - delete batch jobs</p>
+<p>gbch-jgo - force <code>job(s)</code> to run ignoring time</p>
+<p>gbch-goadv - force <code>job(s)</code> to run ignoring time and advance time.</p>
+<p>gbch-adv - advance <code>job(s)</code> to next time without running.</p>
+<p>
+</p>
+<hr />
+<h1><a name="synopsis">SYNOPSIS</a></h1>
+<p><strong>gbch-jdel</strong>
+[ <em>-options</em> ]
+job number ...</p>
+<p>
+</p>
+<hr />
+<h1><a name="description">DESCRIPTION</a></h1>
+<p><strong>gbch-jdel</strong> provides a means of deleting batch jobs from the shell or a program,
+optionally killing running jobs if required.</p>
+<p><strong>gbch-jgo</strong> forces a job or jobs to run, ignoring the ``next run time''. Conditions
+and load level constraints are however still enforced. The ``next run
+time'' will not be affected when the job completes. This inserts an
+extra run of the job.</p>
+<p><strong>gbch-jgoadv</strong> forces a job or jobs to run, ignoring the ``next run
+time''. Conditions and load level constraints are however still
+enforced. The ``next run time'' is advanced to the next time. This
+brings forward the next run, thereafter resuming the sequence.</p>
+<p><strong>gbch-jadv</strong> advances the run time on each job specified to the next run
+time according to its repeat time without running the job or looking
+at conditions.</p>
+<p>The four programs are all hard links to the same file.</p>
+<p>Jobs are specified by using the job number, as displayed by gbch-r(1)
+with the <strong>-v</strong> (verbose) option, or as in the output of the first
+column of the gbch-jlist(1) command with default format.</p>
+<p>Remote jobs should be specified by prefixing the job numbers with the
+host name thus:</p>
+<pre>
+        host:1234</pre>
+<p>It is not necessary to specify any leading zeros.</p>
+<p>Appropriate error messages are displayed if the user attempts to
+delete a job which is either running or if the user does not have the
+necessary permissions.</p>
+<p>
+</p>
+<hr />
+<h1><a name="options">OPTIONS</a></h1>
+<p>Only <strong>gbch-jdel</strong> takes any options.</p>
+<p>Note that the order of treatment, letters and keywords described below
+may be modified by editing the file <em>btrest.help</em> -
+see btsyntax(5).</p>
+<p>The environment variable on which options are supplied is <a href="#item_gbch_jdel"><code>GBCH_JDEL</code></a>
+etc and the environment variable to specify the help file is
+<a href="#item_btrestconf"><code>BTRESTCONF</code></a>.</p>
+<dl>
+<dt><strong><a name="item__2d_3f_or__2bexplain">-? or +explain</a></strong>
+
+<dd>
+<p>causes a summary of the other options to be displayed without taking
+further action.</p>
+</dd>
+</li>
+<dt><strong><a name="item__2dc_name_or__2bcommand_2dprefix_name">-C <em>name</em> or +command-prefix <em>name</em></a></strong>
+
+<dd>
+<p>specify the given <em>name</em> as the prefix for the command file, followed
+by the job number, to be used by the <strong>-u</strong> option rather than the
+default of <strong>C</strong> (which in turn may be changed by editing the
+message file).</p>
+</dd>
+<dd>
+<p>The command file is a shell script, typically containing a gbch-r(1)
+command, which when run via the shell will attempt to create a job
+equivalent to the one ``unqueued''. Obviously the user is at liberty to
+amend this or the job file before doing so.</p>
+</dd>
+</li>
+<dt><strong><a name="item__2dd_name_or__2bdirectory_name">-D <em>name</em> or +directory <em>name</em></a></strong>
+
+<dd>
+<p>Save unqueued jobs to <em>name</em> rather than the current directory when
+<strong>gbch-jdel</strong> is invoked.</p>
+</dd>
+</li>
+<dt><strong><a name="item__2dd_or__2bdelete">-d or +delete</a></strong>
+
+<dd>
+<p>Cancel any previous <strong>-k</strong> option to be the default of deleting jobs.</p>
+</dd>
+</li>
+<dt><strong><a name="item__2de_or__2bdo_2dnot_2dunqueue">-e or +do-not-unqueue</a></strong>
+
+<dd>
+<p>Cancel the effect of a previous <strong>-u</strong> option.</p>
+</dd>
+</li>
+<dt><strong><a name="item__2dj_name_or__2bjob_2dprefix_name">-J <em>name</em> or +job-prefix <em>name</em></a></strong>
+
+<dd>
+<p>specify the given <em>name</em> as the prefix for the job file, followed
+by the job number, to be used by the <strong>-u</strong> option rather than the
+default of <strong>J</strong> (which in turn may be changed by editing the
+message file).</p>
+</dd>
+</li>
+<dt><strong><a name="item__2dk_signalnumber_or__2bsignal_2dnumber_signalnumb">-K <em>signalnumber</em> or +signal-number <em>signalnumber</em></a></strong>
+
+<dd>
+<p>Apply <em>signalnumber</em> given to kill running job. Default is 15 (<code>SIGTERM</code>).</p>
+</dd>
+</li>
+<dt><strong><a name="item__2dk_or__2bdo_2dnot_2ddelete">-k or +do-not-delete</a></strong>
+
+<dd>
+<p>Kill jobs only where applicable, do not delete.</p>
+</dd>
+</li>
+<dt><strong><a name="item__2dn_or__2dn_or__2bno_2dforce">-n or -N or +no-force</a></strong>
+
+<dd>
+<p>Do not kill or delete running jobs (default).</p>
+</dd>
+</li>
+<dt><strong><a name="item__2ds_seconds_or__2bsleep_2dtime_seconds">-S <em>seconds</em> or +sleep-time <em>seconds</em></a></strong>
+
+<dd>
+<p>Monitor process state for <em>seconds</em> seconds after killing (default 10
+seconds).</p>
+</dd>
+</li>
+<dt><strong><a name="item__2du_or__2bunqueue">-u or +unqueue</a></strong>
+
+<dd>
+<p>unqueue <code>job(s)</code> to the current directory. Do not delete if <strong>-k</strong> given.</p>
+</dd>
+</li>
+<dt><strong><a name="item__2dy_or__2dy_or__2bforce">-y or -Y or +force</a></strong>
+
+<dd>
+<p>Kill and delete running jobs.</p>
+</dd>
+</li>
+<dt><strong><a name="item__2bfreeze_2dcurrent">+freeze-current</a></strong>
+
+<dd>
+<p>Save all the current options in a <em>.gnubatch</em> file in the current
+directory.</p>
+</dd>
+</li>
+<dt><strong><a name="item__2bfreeze_2dhome">+freeze-home</a></strong>
+
+<dd>
+<p>Save all the current options in a <em>.gnubatch</em> file in the user's home
+directory.</p>
+</dd>
+</li>
+</dl>
+<p>
+</p>
+<hr />
+<h1><a name="files">FILES</a></h1>
+<p><em>~/.gnubatch</em>
+configuration file (home directory)</p>
+<p><em>.gnubatch</em>
+configuration file (current directory)</p>
+<p><em>btrest.help</em>
+message file</p>
+<p>
+</p>
+<hr />
+<h1><a name="environment">ENVIRONMENT</a></h1>
+<dl>
+<dt><strong><a name="item_gbch_jdel">GBCH_JDEL</a></strong>
+
+<dd>
+<p>space-separated options to override defaults for gbch_jdel</p>
+</dd>
+</li>
+<dt><strong><a name="item_gbch_jgo">GBCH_JGO</a></strong>
+
+<dd>
+<p>space-separated options to override defaults for gbch_jgo</p>
+</dd>
+</li>
+<dt><strong><a name="item_gbch_jgoadv">GBCH_JGOADV</a></strong>
+
+<dd>
+<p>space-separated options to override defaults for gbch_jgoadv</p>
+</dd>
+</li>
+<dt><strong><a name="item_gbch_jadv">GBCH_JADV</a></strong>
+
+<dd>
+<p>space-separated options to override defaults for gbch_jadv</p>
+</dd>
+</li>
+<dt><strong><a name="item_btrestconf">BTRESTCONF</a></strong>
+
+<dd>
+<p>location of alternative help file.</p>
+</dd>
+</li>
+</dl>
+<p>
+</p>
+<hr />
+<h1><a name="examples">EXAMPLES</a></h1>
+<p>To delete jobs even if running:</p>
+<pre>
+        gbch-jdel -y 1237 avon:9371</pre>
+<p>Kill a job without deleting it with signal 2 (SIGINT).</p>
+<pre>
+        gbch-jdel -K 2 -k 9120</pre>
+<p>Take a copy of the job in a work directory without deleting it.</p>
+<pre>
+        gbch-jdel -u -k -D ~/work -C spec -J script 9123</pre>
+<p>
+</p>
+<hr />
+<h1><a name="see_also">SEE ALSO</a></h1>
+<p>btsyntax(5),
+gnubatch.conf(5),
+gnubatch.hosts(5),
+gbch-r(1),
+gbch-rr(1),
+gbch-jchange(1),
+gbch-jlist(1).</p>
+<p>
+</p>
+<hr />
+<h1><a name="diagnostics">DIAGNOSTICS</a></h1>
+<p>Various diagnostics are read and printed as required from the message
+file <em>btrest.help</em>.</p>
+<p>
+</p>
+<hr />
+<h1><a name="copyright">COPYRIGHT</a></h1>
+<p>Copyright (c) 2009 Free Software Foundation, Inc.
+This is free software. You may redistribute copies of it under the
+terms of the GNU General Public License
+&lt;http://www.gnu.org/licenses/gpl.html&gt;.
+There is NO WARRANTY, to the extent permitted by law.</p>
+<p>
+</p>
+<hr />
+<h1><a name="author">AUTHOR</a></h1>
+<p>John M Collins, Xi Software Ltd.</p>
+
+</body>
+
+</html>

@@ -1,0 +1,42 @@
+<!--
+   Copyright 2009 Free Software Foundation, Inc.
+
+  This program is free software: you can redistribute it and/or modify
+  it under the terms of the GNU General Public License as published by
+  the Free Software Foundation, either version 3 of the License, or
+  (at your option) any later version.
+
+  This program is distributed in the hope that it will be useful,
+  but WITHOUT ANY WARRANTY; without even the implied warranty of
+  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+  GNU General Public License for more details.
+
+   You should have received a copy of the GNU General Public License
+  along with this program.  If not, see <http://www.gnu.org/licenses/>.
+  -->	
+<html>
+<head>
+<title>Stale Login ID</title>
+</head>
+<body>
+<script SRC="/gbjsfunc.js"></script>
+<script language="JavaScript">
+var prog = urlnoarg(document.location);
+var pname = nosuffix(basename(document.location.pathname));
+</script>
+<H1>Stale Login ID</H1>
+Your login ID looks like it is stale, i.e. it has exceeded the maximum
+lifetime on the server ($Z days).
+<p>
+You will have to try again.
+<p>
+If you just want to return to the previous document,
+<a href="javascript:window.history.go(-2);">click here</a>.
+<br>
+If you want to log in again,
+<a href="javascript:dologinform(prog);">click here</a>.
+<script language="JavaScript">
+defloginopt($Y, prog);
+</script>
+</body>
+</html>

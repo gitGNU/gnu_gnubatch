@@ -1,0 +1,55 @@
+<!--
+   Copyright 2009 Free Software Foundation, Inc.
+
+  This program is free software: you can redistribute it and/or modify
+  it under the terms of the GNU General Public License as published by
+  the Free Software Foundation, either version 3 of the License, or
+  (at your option) any later version.
+
+  This program is distributed in the hope that it will be useful,
+  but WITHOUT ANY WARRANTY; without even the implied warranty of
+  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+  GNU General Public License for more details.
+
+   You should have received a copy of the GNU General Public License
+  along with this program.  If not, see <http://www.gnu.org/licenses/>.
+  -->	
+<table border=2>
+<tr align=center>
+<th>Variables<th>Action<th>Options<th>Display
+<tr align=left>
+<td>
+<input type=submit value="Create" name="Action" onClick="return gbv_create();">
+<td>
+<input type=submit value="Assign" name="Action" onclick="return gbv_assign();">
+<td>
+<input type=submit value="Options" name="Action" onClick="return do_options();">
+<td>
+<input type=reset value="Refresh" onClick="document.location.reload();">
+<tr align=left>
+<td>
+<input type=submit value="Delete" name="Action" onClick="return gbv_delete();">
+<td>
+<input type=submit value="Increment" name="Action" onclick="return gbv_incrdecr(1);">
+<td>
+<input type=submit value="Format" name="Action" onClick="return do_formats();">
+<td>
+<input type=reset onClick="return clearboxes();">
+<tr align=left>
+<td>
+<input type=submit value="Network" name="Action" onClick="return gbv_network();">
+<td>
+<input type=submit value="Decrement" name="Action" onclick="return gbv_incrdecr(-1);">
+<td><td>
+<input type=submit value="Re-login" name="Action" onclick="return relogin();">
+<tr align=left>
+<td>
+<input type=submit value="Permissions" name="Action" onClick="return gbv_perms();">
+<td>
+<input type=submit value="Comment" name="Action" onclick="return gbv_comment();">
+<td><td>
+<input type=submit value="Job list" name="Action" onclick="return gbv_joblist();">
+</table>
+</form>
+</body>
+</html>

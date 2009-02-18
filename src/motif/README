@@ -1,0 +1,31 @@
+  Copyright 2009 Free Software Foundation, Inc.
+
+  Copying and distribution of this file, with or without modification,
+  are permitted in any medium without royalty provided the copyright
+  notice and this notice are preserved.
+
+----------------------------------------------------------------------
+
+Motif toolkit programs "gbch-xmq", "gbch-xmr", "gbch-xmuser" and
+"gbch-xmfilemon"
+
+These programs actually do work with the Motif toolkit but not with
+LessTif which has some mysterious bugs in.
+
+The programs were originally developed (back in 1993) to use Motif and
+were amongst my first ever such programs (and it shows).
+
+By all means build this if you want to but remember that GNU software
+doesn't support Motif. Motif isn't really desirable because.
+
+1.  Keyboard accelerators don't work if "num lock" is on. (Not just
+    some of them don't work, all of them such as ctrl-q or whatever).
+2.  Things like mouse wheels don't work.
+3.  It can't do drag and drop like the rest of the world.
+4.  You have to have esoteric things in resource files to do things
+    like popup menus.
+
+To generate lumps of resource files I use m4 and the macro library xres.m4
+
+John Collins
+February 2009

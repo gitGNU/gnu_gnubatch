@@ -1,0 +1,114 @@
+<?xml version="1.0" ?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<title>gbatch_vardel - is used to delete a variable</title>
+<meta http-equiv="content-type" content="text/html; charset=utf-8" />
+<link rev="made" href="mailto:root@localhost" />
+</head>
+
+<body style="background-color: white">
+
+<p><a name="__index__"></a></p>
+<!-- INDEX BEGIN -->
+<!--
+
+<ul>
+
+	<li><a href="#name">NAME</a></li>
+	<li><a href="#synopsis">SYNOPSIS</a></li>
+	<li><a href="#description">DESCRIPTION</a></li>
+	<li><a href="#return_values">RETURN VALUES</a></li>
+	<li><a href="#example">EXAMPLE</a></li>
+	<li><a href="#see_also">SEE ALSO</a></li>
+	<li><a href="#copyright">COPYRIGHT</a></li>
+	<li><a href="#author">AUTHOR</a></li>
+</ul>
+-->
+<!-- INDEX END -->
+
+<p>
+</p>
+<h1><a name="name">NAME</a></h1>
+<p>gbatch_vardel - is used to delete a variable</p>
+<p>
+</p>
+<hr />
+<h1><a name="synopsis">SYNOPSIS</a></h1>
+<STRONG>#include &lt;gbatch.h&gt;</STRONG>
+<br><p><strong>int gbatch_vardel(const int</strong>
+<em>fd</em><strong>, const unsigned</strong>
+<em>flags</em><strong>, const slotno_t</strong>
+<em>slot</em><strong>)</strong></p>
+<p>
+</p>
+<hr />
+<h1><a name="description">DESCRIPTION</a></h1>
+<p>The function <strong>gbatch_vardel()</strong> is used to delete a variable from the variable list.</p>
+<p><em>fd</em> is a file descriptor which was previously returned by a
+successful call to gbatch_open(3).</p>
+<p><em>flags</em> is 0 or <code>GBATCH_FLAG_IGNORESEQ</code> to attempt to ignore recent
+changes to the variable list.</p>
+<p><em>slot</em> is the slot number corresponding to the variable as returned
+by <code>gbatch_varlist(3)</code> or xb_varfindslot(3).</p>
+<p>
+</p>
+<hr />
+<h1><a name="return_values">RETURN VALUES</a></h1>
+<p>The function returns 0 if successful, otherwise an error code as
+defined in the include file \fBgbatch.h\fR.</p>
+<p>
+</p>
+<hr />
+<h1><a name="example">EXAMPLE</a></h1>
+<p>This example deletes all the variables owned by the user.</p>
+<pre>
+ int fd, ret, cnt;
+ int numvars;
+ slotno_t *list;</pre>
+<pre>
+ fd = gbatch_open(&quot;myhost&quot;, (char *)0);
+ ret = gbatch_varlist(fd, GBATCH_FLAG_USERONLY, &amp;numvars, &amp;list);
+ if (fd &lt; 0)  { /* process error */
+     . . .
+ }</pre>
+<pre>
+ for (cnt = 0; cnt &lt; numvars, cnt++) {
+     if  ((ret = gbatch_vardel(fd, 0, list[cnt])) &lt; 0)   {
+         /* process error */
+         . . .
+     }
+ }</pre>
+<p>
+</p>
+<hr />
+<h1><a name="see_also">SEE ALSO</a></h1>
+<p>gbatch_varadd(3),
+gbatch_varchcomm(3),
+gbatch_varchgrp(3),
+gbatch_varchmod(3),
+gbatch_varchown(3),
+gbatch_varfind(3),
+gbatch_varlist(3),
+gbatch_varmon(3),
+gbatch_varread(3),
+gbatch_varrename(3),
+gbatch_varupd(3).</p>
+<p>
+</p>
+<hr />
+<h1><a name="copyright">COPYRIGHT</a></h1>
+<p>Copyright (c) 2009 Free Software Foundation, Inc.
+This is free software. You may redistribute copies of it under the
+terms of the GNU General Public License
+&lt;http://www.gnu.org/licenses/gpl.html&gt;.
+There is NO WARRANTY, to the extent permitted by law.</p>
+<p>
+</p>
+<hr />
+<h1><a name="author">AUTHOR</a></h1>
+<p>John M Collins, Xi Software Ltd.</p>
+
+</body>
+
+</html>

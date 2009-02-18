@@ -1,0 +1,51 @@
+GNUbatch Release 1.0
+====================
+
+  Copyright 2009 Free Software Foundation, Inc.
+
+  Copying and distribution of this file, with or without modification,
+  are permitted in any medium without royalty provided the copyright
+  notice and this notice are preserved.
+
+----------------------------------------------------------------------
+Welcome to GNUbatch. This is a product formerly known as Xi-Batch
+written by John Collins who has a company called Xi Software Ltd in
+the UK. This became an official GNU package on 17th February 2009.
+
+The intention is to provide a comprehensive batch scheduling system
+for UNIX systems and GNU/Linux with transparently shared jobs and
+job control variables across the network.
+
+The first version of the product was written in 1990 and it has been
+added to and refined ever since. However please read TODO regarding
+future ideas for the product.
+
+This has been edited so as to talk about GNUbatch rather than Xi-Batch
+and names suitably changed. It should be able to talk to other
+machines running Xi-Batch although the port numbers are different and
+will have to be changed on one.
+
+To build and install the product, please see INSTALL first.
+
+Please also see the manuals in subdirectories of "doc", which were in
+OpenOffice 1 format, but have been rather hastily edited and converted
+to ODF in OODoc. Please send bug reports as you find them. I
+haven't altered the pictures which currently talk about Xi-Batch and Xi
+Software rather than GNUbatch and FSF. I've also put some rather
+out-of-date man pages (done in Perl POD) in poddoc. Prominent in the
+TODO list is translating this to TexInfo format.
+
+Also included is the MS-Windows sources for the MS Windows client
+software using MFC and on MS Visual C++ which needs converting to Free
+Software. This does actually work and people use it but MFC is about
+as far from Free Software as you can get. Also it's vastly inferior to
+the standard C++ library which is available as Free Software.
+
+I also include the web interface software which does work using Free
+Software but I concede needs rewriting probably using PHP.
+
+I hope you will find this useful and help develop the product beyond
+what I imagined.
+
+John Collins
+February 2009

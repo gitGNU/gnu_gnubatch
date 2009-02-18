@@ -1,0 +1,131 @@
+<?xml version="1.0" ?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<title>gbatch_open - open a connection to GNUbatch</title>
+<meta http-equiv="content-type" content="text/html; charset=utf-8" />
+<link rev="made" href="mailto:root@localhost" />
+</head>
+
+<body style="background-color: white">
+
+<p><a name="__index__"></a></p>
+<!-- INDEX BEGIN -->
+<!--
+
+<ul>
+
+	<li><a href="#name">NAME</a></li>
+	<li><a href="#synopsis">SYNOPSIS</a></li>
+	<li><a href="#description">DESCRIPTION</a></li>
+	<li><a href="#return_values">RETURN VALUES</a></li>
+	<li><a href="#example">EXAMPLE</a></li>
+	<li><a href="#see_also">SEE ALSO</a></li>
+	<li><a href="#copyright">COPYRIGHT</a></li>
+</ul>
+-->
+<!-- INDEX END -->
+
+<p>
+</p>
+<h1><a name="name">NAME</a></h1>
+<p>gbatch_open - open a connection to GNUbatch</p>
+<p>gbatch_login - open a connection to GNUbatch with password</p>
+<p>
+</p>
+<hr />
+<h1><a name="synopsis">SYNOPSIS</a></h1>
+<STRONG>#include &lt;gbatch.h&gt;</STRONG>
+<br><p><strong>int gbatch_open(const char *</strong><em>hostname</em><strong>, const char *</strong><em>servname</em><strong>)</strong></p>
+<p><strong>int gbatch_open(const char *</strong><em>hostname</em><strong>, const char *</strong><em>servname</em><strong>,
+const char *</strong><em>username</em><strong>)</strong></p>
+<p><strong>int gbatch_login(const char *</strong><em>hostname</em><strong>, const char *</strong><em>servname</em><strong>,
+const char *</strong><em>username</em><strong>, char *</strong><em>passwd</em><strong>, const int</strong>
+<em>rereg</em><strong>)</strong></p>
+<p>
+</p>
+<hr />
+<h1><a name="description">DESCRIPTION</a></h1>
+<p>The function <strong>gbatch_open</strong> is used to open a connection to the
+<strong>GNUbatch</strong> API. It has two slightly different variants on Windows
+clients.</p>
+<p>The first format, with two arguments, applies to Unix and Linux
+applications. The username used is that of the effective userid at the
+time of the call.</p>
+<p>The second format, with three arguments is used on Windows clients and
+specifies the Unix user name in the call. This may not be acceptable
+unless the user is on a static IP address client with a default user
+either matching the user name given or being a user with <em>Write Admin
+File</em> privilege. So if the <em>/etc/</em> file has the
+following in:</p>
+<pre>
+ mypc  -  client(myuser)</pre>
+<p>then <code>myuser</code> can invoke this call from client <code>mypc</code>, or some other
+user if <code>myuser</code> has <em>write admin file</em> privilege. The final
+privilege will be that of the user logged-in as.</p>
+<p>The third format, which should probably be used if in any doubt,
+supplies a password.</p>
+<p>In all cases, <em>hostname</em> is the name of the host being connected to.
+This may be in any format which can be recognised by the network
+library routine gethostbyname(3). <code>localhost</code> is acceptable if the
+local server is to be used.</p>
+<p><em>servname</em> may be <code>NULL</code> to use a standard service name, otherwise
+an alternative service may be specified.</p>
+<p><em>username</em> should be a valid user on the server.</p>
+<p><em>passwd</em> should be the Unix password on the server or an alternate
+<em>interface password</em> set up by gbch-passwd(8).
+If this is not required it may be nulls. Note that this is a non-<code>const</code> array; it
+will be deliberately filled with nulls as soon as possible after
+entering the routine to minimise the length of time during which
+clear-text passwords are on the stack.</p>
+<p><em>rereg</em>, if non-zero, only applies to DHCP clients, and denotes that
+the Unix host should register the user as the ``primary'' user for the
+given client. The main effect of this is to override the user
+permissions for operations being performed by a concurrent <strong>gbch-qw</strong>
+session.</p>
+<p>Note that more than one connection can be open at
+any time with various combinations of user names and hosts.</p>
+<p>When finished, close the conection with a call to gbatch_close(3).</p>
+<p>
+</p>
+<hr />
+<h1><a name="return_values">RETURN VALUES</a></h1>
+<p>The function a non-negative value if successful, which is the <em>file
+descriptor</em> used in various other calls, otherwise an error code as
+defined in the include file <em>gbatch.h</em>.</p>
+<p>
+</p>
+<hr />
+<h1><a name="example">EXAMPLE</a></h1>
+<pre>
+ int fd;
+ fd = gbatch_open(&quot;myhost&quot;, (char *) 0);
+ if (fd &lt; 0)  { /* handle error */
+ ...
+ }
+ ...
+ gbatch_close(fd)</pre>
+<p>
+</p>
+<hr />
+<h1><a name="see_also">SEE ALSO</a></h1>
+<p>gbatch_close(3),
+gbatch_newgrp(3),
+gbatch_setqueue(3),
+gbatch_jobmon(3),
+gbatch_varmon(3).</p>
+<p>
+</p>
+<hr />
+<h1><a name="copyright">COPYRIGHT</a></h1>
+<p>Copyright (c) 2009 Free Software Foundation, Inc.
+This is free software. You may redistribute copies of it under the
+terms of the GNU General Public License
+&lt;http://www.gnu.org/licenses/gpl.html&gt;.
+There is NO WARRANTY, to the extent permitted by law.</p>
+<p>head1 AUTHOR</p>
+<p>John M Collins, Xi Software Ltd.</p>
+
+</body>
+
+</html>

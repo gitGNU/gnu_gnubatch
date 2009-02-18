@@ -1,0 +1,506 @@
+=head1 NAME
+
+gbch-jchange - change batch jobs
+
+=head1 SYNOPSIS
+
+B<gbch-jchange>
+[ I<-options> ]
+I<job number> ...
+
+=head1 DESCRIPTION
+
+B<gbch-jchange> is a program to modify details of a job or jobs from a
+shell script or another program. Jobs are specified by using the job
+number, as displayed by gbch-r(1) with the B<-v> (verbose) option, or as
+in the output of the first column of the gbch-jlist(1) command with
+default format.
+
+Remote jobs should be specified by prefixing the job numbers with the
+host name thus:
+
+	host:1234
+
+It is not necessary to specify any leading zeros.
+
+Several jobs may be specified at once to apply the same set of changes
+to all of them at once.
+
+=head1 OPTIONS
+
+As supplied, the options to B<gbch-jchange> are more or less identical to
+those for B<gbch-r>, except that existing jobs have their parameters
+changed from whatever they are to the specified parameters, and there
+is no "default", in that mentioning an option means that the user
+requires an existing parameter for the job or jobs changed. For
+details of the syntax and much of the meaning of the options, please
+see the documentation of gbch-r(1) at the corresponding option.
+
+It is a mistake not to specify any options at all.
+
+Note that the order of treatment, letters and keywords described below
+may be modified by editing the file F<btrest.help> - see
+btsyntax(5).
+
+The environment variable on which options are supplied is C<GBCH_JCHANGE> and the
+environment variable to specify the help file is C<BTRESTCONF>.
+
+=over 4
+
+=item -? or +explain
+
+causes a summary of the other options to be displayed without taking
+further action.
+
+=item -2 I<time> or +grace-time I<time>
+
+change the secondary maximum run time to I<time> seconds (I<time> may
+be a number of seconds, or I<mm:ss> for minutes and seconds).
+
+=item -9 or +catch-up
+
+change the "if not possible" action of the job or jobs to "catch up".
+
+=item -A I<days> or +avoiding-days I<days>
+
+signifies days to avoid when the job or jobs are repeated. The
+interpretation of the option syntax, and default days is just the same
+as for gbch-r(1), but the existing "days to avoid" in each job is
+replaced completely with the result. For example, the default days are
+C<Sat> and C<Sun>, so
+
+	-A ,Wed
+
+Will incorporate the default days to avoid taken from the help file,
+adding Wednesday and change the days to avoid in the job or jobs to
+Saturday, Sunday and Wednesday.
+
+=item -a I<string> or +argument I<string>
+
+Specify an argument for the job or jobs. The argument will be added to
+the end of the arguments already in the job or jobs or added by
+previous B<-a> arguments to B<gbch-jchange> unless the B<-e> option is
+used, which will discard any pre-existing arguments in the job or
+jobs as well as any previously-specified B<-a> arguments.
+
+=item -B or +assignment-not-critical
+
+Marks subsequently specified assignments as "not critical", i.e. an
+assignment of a variable on an inaccessible remote host will be
+ignored. Existing assignments are not affected.
+
+=item -b or +assignment-critical
+
+Marks subsequent assignments as "critical", i.e. an assignment of a
+variable on an inaccessible remote host will cause the job to be held
+up. Existing assignments are not affected.
+
+=item -C or +cancelled
+
+Sets the job or jobs to "cancelled" state.
+
+=item -c I<condition> or +condition I<condition>
+
+Sets a condition on the job or jobs. This will add an extra condition
+to existing conditions in the job or jobs or preceding B<-c> unless
+the B<-y> option is given to discard any previously-specified conditions.
+
+=item -D I<directory> or +directory I<directory>
+
+Sets the working directory for the job or jobs.
+
+=item -d or +delete-at-end
+
+Cancels any repeat option of the job or jobs so that they will be deleted at
+the end of the next run.
+
+=item -E or +reset-environment
+
+Resets the environment for the job or jobs to be that of the
+environment of the B<gbch-jchange> command.
+
+=item -e or +cancel-arguments
+
+Deletes any existing arguments for the job or jobs.
+
+=item -F or +export
+
+Marks the job or jobs to be visible throughout the network, but only
+liable to run on the machine which they are on.
+
+=item -f I<flags> or +flags-for-set I<flags>
+
+Sets the flags which determine when an assignment is performed for
+subsequent B<-s> options. Will not affect any existing assigments.
+
+=item -G or +full-export
+
+Marks the job or jobs to be visible throughout the network and
+potentially available to run on any machine.
+
+=item -g I<group> or +set-group I<group>
+
+Resets the group owner of the job or jobs to I<group>.
+
+Note that the setting of the group is done as a separate operation
+from any other changes. Depending upon whether the pre-existing and
+new modes and ownership permit the various operations, this may need
+to be done before, after or interleaved with other changes for it to
+succeed.
+
+=item -H or +hold-current
+
+sets the "if not possible" action of the job or jobs to hold current - the
+run is done when it is possible without affecting subsequent runs.
+
+=item -h I<title> or +title I<title>
+
+Sets the title of the job or jobs to I<title>. Note that this may be
+done whilst the job or jobs are running.
+
+=item -I I<redirection> or +input-output I<redirection>
+
+Sets a redirection for the job or jobs. This will add the redirection
+to any existing redirections for the job or jobs unless they are all
+reset first using the B<-Z> option.
+
+=item -i I<name> or +interpreter I<name>
+
+Sets the command interpreter for the job or jobs to be I<name>. This
+will also reset the load level of the job or jobs to be that of the
+command interpreter. If the load level is to be different from this
+value, use the B<-l> option after this option.
+
+=item -J or +no-advance-time-error
+
+Sets the flag so that if the job or jobs exit with an error, the next time to
+run is not advanced.
+
+=item -j or +advance-time-error
+
+Sets the flag so that if the job or jobs exit with an error, the next
+time to run is still advanced if applicable.
+
+=item -K or +condition-not-critical
+
+Marks subsequent conditions as "not critical", i.e. a condition dependent
+on a variable on an inaccessible remote host will be ignored. Does not
+affect any conditions already defined.
+
+=item -k or +condition-critical
+
+Marks subsequent conditions as "critical", i.e. a condition dependent
+on a variable on an inaccessible remote host will cause the job to be
+held up. Does not affect any conditions already defined.
+
+=item -L I<value> or +ulimit I<value>
+
+Sets the ulimit value of the job or jobs to the value given.
+
+=item -l I<number> or +loadlev I<number>
+
+Sets the load level of the job or jobs to be I<number>. The user must
+have I<special create permission> for this to differ from that of the
+command interpreter.
+
+=item -M I<modes> or +mode I<modes>
+
+Sets the permissions of the job or jobs to be I<modes>. The format of
+the I<modes> argument is defined in more detail below.
+
+Note that the setting of the mode is done as a separate operation from
+any other changes. Depending upon whether the pre-existing and new
+modes and ownership permit the various operations, this may need to be
+done before, after or interleaved with other changes to succeed.
+
+=item -m or +mail-message
+
+Sets the flag whereby completion messages are mailed to the owner of
+the job or jobs.
+
+=item -N or +normal
+
+Sets the job or jobs to normal "ready to run" state.
+
+=item -n or +local-only
+
+Marks the job or jobs to be local only to the machines which they are
+on.
+
+=item -o or +no-repeat
+
+Cancels any repeat option of the job or jobs, so that the they will be
+run and retained on the queue marked "done" at the end.
+
+=item -P I<value> or +umask I<value>
+
+Sets the umask value of the job or jobs to the I<octal> value given.
+The value should be up to 3 octal digits as per the shell.
+
+=item -p I<number> or +priority I<number>
+
+Sets the priority of the job or jobs to be I<number>. Note that the
+specified priority must be in the range given by the user's minimum
+and maximum priority.
+
+=item -q I<queuename> or +job-queue I<queuename>
+
+Sets a job queue name as specified on the job or jobs.
+
+=item -R or +reschedule-all
+
+Sets the "if not possible" action of the job or jobs to reschedule
+all - the run is done when it is possible and subsequent runs are rescheduled.
+
+=item -r I<repeat option> or +repeat I<repeat option>
+
+Sets the repeat option of the jobs as specified.
+
+=item -S or +skip-if-held
+
+Sets the "if not possible" action of the job or jobs to skip - the run
+is skipped if it could not be done at the specified time.
+
+=item -s I<assignment> or +set I<assignment>
+
+Sets an assignment on the job or jobs. The assignment will be added to
+those already defined unless the existing assignments are cleared
+first with the B<-z> option.
+
+=item -T I<time> or +time I<time>
+
+Sets the next run time of the job or jobs as specified.
+
+=item -t I<time> or +delete-time I<time>
+
+Sets a delete time for the specified job or jobs as a time in hours
+after which it will be automatically deleted.
+
+=item -U or +no-time
+
+Cancels any time setting on the job or jobs.
+
+=item -u I<user> or +set-owner I<user>
+
+Resets the owner of the job or jobs to I<user>.
+
+Note that the setting of the user is done as a separate operation from
+any other changes. Depending upon whether the pre-existing and new
+modes and ownership permit the various operations, this may need to be
+done before, after or interleaved with other changes to succeed.
+
+=item -W I<sig> or +which-signal I<sig>
+
+Sets the signal to kill the job or jobs after the maximum run time has
+been exceeded.
+
+=item -w or +write-message
+
+Sets the flag whereby completion messages are written to the owner's
+terminal if available.
+
+=item -X I<range> or +exit-code I<range>
+
+Sets the normal or error exit code ranges for the job or jobs. The
+format of the I<range> argument is C<N> or C<E> followed by a range in
+the form C<nn:nn>, thus for example
+
+	-X N0:9
+
+=item -x or +no-message
+
+Resets both flags as set by B<-m> and B<-w>.
+
+=item -Y I<time> or +run-time I<time>
+
+Sets a maximum run time for the specified job or jobs. I<time> is in
+seconds, which may be expressed as I<hh:mm:ss>.
+
+=item -y or +cancel-condition
+
+Deletes any existing conditions in the job or jobs.
+
+=item -Z or +cancel-io
+
+Deletes any existing redirections in the job or jobs.
+
+=item -z or +cancel-set
+
+Deletes any existing assignments in the job or jobs.
+
+=item +freeze-current
+
+Save all the current options in a F<.gnubatch> file in the current
+directory. If no jobs are specified, this will not be treated as an
+error and the program will exit after saving the options.
+
+=item +freeze-home
+
+Save all the current options in a F<.gnubatch> file in the user's home
+directory. If no jobs are specified, this will not be treated as an
+error and the program will exit after saving the options.
+
+=back
+
+=head2 Mode arguments
+
+<a name="Change_mode_argument"></a>
+The argument to the B<-M> option provides for a wide variety of
+operations.
+
+Each permission is represented by a letter, as follows:
+
+=over 4
+
+=item R
+
+read permission
+
+=item W
+
+write permission
+
+=item S
+
+reveal permission
+
+=item M
+
+read mode
+
+=item P
+
+set mode
+
+=item U
+
+give away owner
+
+=item V
+
+assume owner
+
+=item G
+
+give away group
+
+=item H
+
+assume group
+
+=item D
+
+delete
+
+=item K
+
+kill
+
+=back
+
+Each section of the mode (user, group, others) is represented by the
+prefixes C<U:>, C<G:> and C<O:> and separated by commas.
+
+For example:
+
+	-M U:RWSMPDK,G:RWSDK,O:RS
+
+would set the permissions for the user, group and others as given. If
+the prefixes are omitted, as in
+
+	-M RWSDK
+
+then all of the job, group and other permissions are set to the same
+value.
+
+An alternative format allows permissions to be added to the existing
+permissions, thus
+
+	-M U:+WD,G:+D
+
+will add the relevant permissions to whatever is currently set.
+
+Similarly permissions may be cancelled individually by constructs of
+the form:
+
+	-M G:-W,O:-RS
+
+If the same operation is to be done with two or more of C<U>, C<G> or
+C<O>, the letters may be run together, for example
+
+	-M GO:+W
+
+=head2 Note on mode and owner changes
+
+Changing various parameters, the mode (permissions), the owner and the
+group are done as separate operations.
+
+In some cases changing the mode may prevent the next operation from
+taking place. In other cases it may need to be done first.
+
+Similar considerations apply to changes of the owner and the group.
+
+B<Btjchange> does not attempt to work out the appropriate order to
+perform the operations, the user should execute separate B<gbch-jchange>
+commands in sequence to achieve the desired effect.
+
+=head1 FILES
+
+F<~/.gnubatch>
+configuration file (home directory)
+
+F<.gnubatch>
+configuration file (current directory)
+
+F<btrest.help>
+message file
+
+=head1 ENVIRONMENT
+
+=over 4
+
+=item GBCH_JCHANGE
+
+space-separated options to override defaults.
+
+=item BTRESTCONF
+
+path name of alternative message file.
+
+=back
+
+=head1 SEE ALSO
+
+btsyntax(5),
+gnubatch.conf(5),
+gnubatch.hosts(5),
+gbch-r(1),
+gbch-jlist(1),
+gbch-jdel(1),
+gbch-user(1),
+gbch-rr(1).
+
+=head1 DIAGNOSTICS
+
+Various diagnostics may be issued if the user attempts operations
+which are not permitted to him or her, or if various errors are
+detected. The diagnostics are read as required from the message file
+F<rest.help>.
+
+=head1 COPYRIGHT
+
+Copyright (c) 2009 Free Software Foundation, Inc.
+This is free software. You may redistribute copies of it under the
+terms of the GNU General Public License
+<http://www.gnu.org/licenses/gpl.html>.
+There is NO WARRANTY, to the extent permitted by law.
+
+=head1 AUTHOR
+
+John M Collins, Xi Software Ltd.
+
+=cut
+
+# Local Variables:
+# mode: nroff
+# End:

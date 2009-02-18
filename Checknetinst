@@ -1,0 +1,171 @@
+#! /usr/bin/perl
+#
+#   Copyright 2009 Free Software Foundation, Inc.
+#
+#  This program is free software: you can redistribute it and/or modify
+#  it under the terms of the GNU General Public License as published by
+#  the Free Software Foundation, either version 3 of the License, or
+#  (at your option) any later version.
+#
+#  This program is distributed in the hope that it will be useful,
+#  but WITHOUT ANY WARRANTY; without even the implied warranty of
+#  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#  GNU General Public License for more details.
+#
+#   You should have received a copy of the GNU General Public License
+#  along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+use Socket;
+
+# Initialise network setup for GNUbatch
+# This assumes that network code is compiled in which it usually is
+
+# First set up services (see services.h)
+
+# Services for GNUbatch
+
+#gnubatch		48104/tcp        # Connection port
+#gnubatch		48104/udp        # Probe port
+#gnubatch-feeder        48105/tcp        # Feeder port for GNUbatch
+#gnubatch-netsrv	48106/tcp        # External job submission
+#gnubatch-netsrv	48106/udp        # Client access
+#gnubatch-api		48107/tcp        # API
+#gnubatch-api		48107/udp        # API (for wakeup messages)
+
+#            Name                pnum  t/u    comment                     alternative names
+
+@Portlist = ([gnubatch		=>	[48104, 'tcp', 'GNUbatch connection port', [qw/xibatch btsched batch/]]],
+	     [gnubatch		=>	[48104, 'udp', 'GNUbatch probe port', [qw/xibatch btsched batch/]]],
+	     ["gnubatch-feeder"	=>	[48105, 'tcp', 'GNUbatch feeder port', [qw/btq/]]],
+	     ["gnubatch-netsrv"	=>	[48106, 'tcp', 'GNUbatch external job submission', [qw/xbnetsrv/]]],
+	     ["gnubatch-netsrv"	=>	[48106, 'udp', 'GNUbatch client access', [qw/xbnetsrv/]]],
+	     ["gnubatch-api"	=>	[48107, 'tcp', 'GNUbatch API', [qw/xbapi/]]],
+	     ["gnubatch-api"	=>	[48107, 'udp', 'GNUbatch API wakeup', [qw/xbapi/]]]);
+
+# Make lookup for that lot
+
+for my $p (@Portlist)  {
+    my $name = $p->[0];
+    my $dets = $p->[1];
+    my $pnum = $dets->[0];
+    my $istcp = $dets->[1] eq 'tcp';
+    my @altnames = @{$dets->[3]};
+
+    my $v = { NAME => $name, PORT => $pnum, LIST => $p, COMMENT => $dets->[2], ALIAS => \@altnames };
+
+    if  ($istcp)  {
+	$mtcpnames{$name} = $v;
+	$mtcpports{$pnum} = $v;
+	for my $a (@altnames) {
+	    $mtcpnames{$a} = $v;
+	}
+    }
+    else  {
+	$mudpnames{$name} = $v;
+	$mudpports{$pnum} = $v;
+	for my $a (@altnames) {
+	    $mudpnames{$a} = $v;
+	}
+    }
+}
+
+# Read in the services file
+
+while (my ($name,$aliases,$port,$proto) = getservent)  {
+    if  ((lc $proto) eq 'tcp')  {
+	my $mp = $mtcpnames{$name};
+	if  ($mp)  {
+	    $mp->{HAD} = 1;
+	    $had++;
+	    push @tcpnconflict, {EXP => $mp, READ => $port} if $port != $mp->{PORT};
+	}
+	else  {
+	    $mp = $mtcpports{$port};
+	    push @tcppconflict, {EXP => $mp, READ => $name} if $mp;
+	}
+    }
+    else  {
+	my $mp = $mudpnames{$name};
+	if  ($mp)  {
+	    $mp->{HAD} = 1;
+	    $had++;
+	    push @udpnconflict, {EXP => $mp, READ => $port} if $port != $mp->{PORT};
+	}
+	else  {
+	    $mp = $mudpports{$port};
+	    push @udppconflict, {EXP => $mp, READ => $name} if $mp;
+	}
+    }
+}
+endservent;
+
+# If we had any check we had all of them
+
+if  ($had != 0)  {
+    if  ($had != $#Portlist + 1)  {
+	$errors++;
+	print "Warning - service(s) are missing\n";
+	for my $p (@Portlist)  {
+	    my $name = $p->[0];
+	    my $dets = $p->[1];
+	    my $pnum = $dets->[0];
+	    my $istcp = $dets->[1] eq 'tcp';
+	    if  ($istcp)  {
+		my $mp = $mtcpnames{$name};
+		print "Tcp port $name\n" unless $mp->{HAD};
+	    }
+	    else  {
+		my $mp = $mudpnames{$name};
+		print "Udp port $name\n" unless $mp->{HAD};
+	    }
+	}
+    }
+}
+
+if  (@tcpnconflict || @tcppconflict || @udpnconflict || @udppconflict)  {
+    for my $c (@tcpnconflict)  {
+	my $name = $c->{EXP}->{NAME};
+	my $eport = $c->{EXP}->{PORT};
+	my $rport = $c->{READ};
+	print "Unexpected TCP port number $rport for $name expecting $eport\n";
+	$warnings++;
+    }
+    for my $c (@tcppconflict)  {
+	my $name = $c->{EXP}->{NAME};
+	my $eport = $c->{EXP}->{PORT};
+	my $rname = $c->{READ};
+	print "TCP port $eport in use by $rname expecting to use it for $name\n";
+	$warnings++;
+    }
+    for my $c (@udpnconflict)  {
+	my $name = $c->{EXP}->{NAME};
+	my $eport = $c->{EXP}->{PORT};
+	my $rport = $c->{READ};
+	print "Unexpected UDP port number $rport for $name expecting $eport\n";
+	$warnings++;
+    }
+    for my $c (@udppconflict)  {
+	my $name = $c->{EXP}->{NAME};
+	my $eport = $c->{EXP}->{PORT};
+	my $rname = $c->{READ};
+	print "UDP port $eport in use by $rname expecting to use it for $name\n";
+	$warnings++;
+    }
+}
+
+if ($errors)  {
+    print "Aborting due to $errors error(s)\n";
+    exit 10;
+}
+
+exit 0 if $had;
+
+print <<EOM;
+========================== NOTE ===========================
+
+You need to install the network services entries.
+
+You may find "make install-net" helpful.
+
+========================== NOTE ===========================
+EOM

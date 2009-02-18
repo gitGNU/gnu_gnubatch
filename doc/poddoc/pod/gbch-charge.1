@@ -1,0 +1,179 @@
+=head1 NAME
+
+gbch-charge - display/update user charges
+
+=head1 SYNOPSIS
+
+B<gbch-charge>
+[ I<-options> ]
+[ user ] ...
+
+=head1 DESCRIPTION
+
+B<gbch-charge> displays and/or updates the charges recorded by
+B<GNUbatch> against various users specified on the command line, or
+all users if none are specified.
+
+It is only available to users with the I<Write admin file> privilege.
+
+Charges relate to jobs which have originated on the machine on which
+B<gbch-charge> was invoked. The actual charging rate is determined by the
+machine on which the job is run.
+
+=head1 OPTIONS
+
+Note that the order of treatment, letters and keywords described below
+may be modified by editing the file F<btrest.help> - see btsyntax(5).
+
+The environment variable on which options are supplied is C<GBCH_CHARGE> and the
+environment variable to specify the help file is C<BTRESTCONF>.
+
+=over 4
+
+=item -? or +explain
+
+causes a summary of the other options to be displayed without taking
+further action.
+
+=item -C or +consolidate
+
+Causes a consolidation record or "current balance" to be written in
+the file for each user, which summarises the charges to date for each
+user. The previous records remain in the file.
+
+=item -c I<fee> or +add-charge I<fee>
+
+Causes the specified I<fee> to be added to the charge for the
+specified user or users, or all users if none are given.
+
+If combined with a print option (B<-p> or B<-P>), the print is done
+after the charge is applied, so the charge will be included in the
+output.
+
+=item -K or +cancel-flags
+
+Cancels all previously-set options B<-p>, B<-P>, B<-z>, B<-C> and
+B<-R>. Useful if you want to start again from some indeterminate state
+in a configuration file.
+
+=item -P or +print-full
+
+causes the full log of charges for the specified user or users, or all
+users if none are given, to be displayed on standard output.
+
+=item -p or +print-users
+
+(the default if no other options are specified) causes the charge
+summary for the specified user or users, or all users if none are
+given, to be displayed on standard output.
+
+=item -R or +reset-file
+
+Causes all records to be deleted from the file except for
+consolidation records for each user with a non-zero charge. If the
+charge for each user is zero (as a result of applying the B<-z> option
+perhaps), then the file will be left empty.
+
+Note that the batch scheduler btsched(8) should not be running when
+this option is invoked, otherwise this option is ignored.
+
+=item -z or +zero-charge
+
+Clears to zero the charges for the specified user or users, or all
+users if none are given. This is done by appending an appropriate
+record or records to the charge file, the previous information (as
+displayed by B<-P> will still be available.
+
+If combined with a print option (B<-p> or B<-P>), the print is done
+before the option is applied.
+
+=item +freeze-current
+
+Save all the current options in a F<.gnubatch> file in the current
+directory with keyword C<GBCH_CHARGE>. If this option is supplied, and no
+users are specified, then no further action is taken.
+
+=item +freeze-home
+
+Save all the current options in a F<.gnubatch> file in the user's home
+directory with keyword C<GBCH_CHARGE>. If this option is supplied, and no
+users are specified, then no further action is taken.
+
+=back
+
+=head1 EXAMPLES
+
+Print charges for all users
+
+	gbch-charge
+
+Add a fee of 9.1 units to user C<sec> and print the result
+
+	gbch-charge -p -c 9.1
+
+Print charges for all users and zero them
+
+	gbch-charge -z -p
+
+=head1 FILES
+
+F<~/.gnubatch>
+configuration file (home directory)
+
+F<.gnubatch>
+configuration file (current directory)
+
+F<btrest.help>
+message file
+
+F<gbch-chargesn.n>
+charges file (with version number suffix)
+
+=head1 ENVIRONMENT
+
+=over 4
+
+=item GBCH_CHARGE
+
+space-separated options to override defaults.
+
+=item BTRESTCONF
+
+location of alternative help file.
+
+=back
+
+=head1 SEE ALSO
+
+btsyntax(5),
+gbch-user(1),
+gnubatch.conf(5),
+(5).
+
+=head1 DIAGNOSTICS
+
+Various diagnostics are read and printed as required from the message
+file, by default F<btrest.help>.
+
+=head1 NOTE
+
+No one seems to use charges and the file of charges takes up
+increasing space so this program is deprecated.
+
+=head1 COPYRIGHT
+
+Copyright (c) 2009 Free Software Foundation, Inc.
+This is free software. You may redistribute copies of it under the
+terms of the GNU General Public License
+<http://www.gnu.org/licenses/gpl.html>.
+There is NO WARRANTY, to the extent permitted by law.
+
+=head1 AUTHOR
+
+John M Collins, Xi Software Ltd.
+
+=cut
+
+## Local Variables:
+## mode: nroff
+## End:

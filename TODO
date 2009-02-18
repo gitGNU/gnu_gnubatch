@@ -1,0 +1,252 @@
+  Copyright 2009 Free Software Foundation, Inc.
+
+  Copying and distribution of this file, with or without modification,
+  are permitted in any medium without royalty provided the copyright
+  notice and this notice are preserved.
+
+----------------------------------------------------------------------
+
+To-Do List for GNUBATCH 1.0
+===========================
+
+This is the product distributed as Xi-Batch Release 6
+
+PLEASE NOTE
+===========
+
+=====================================================================
+| Much of what follows I have already implemented in a "ground-up"
+| rewrite of the product (Release 7)  written between 2001 and 2008
+| and almost complete. Hopefully this version will become GNUBATCH2.
+|
+| Before you do any extensive hacking on this please consider helping me
+| get the new version off the ground and making sure I don't make
+| too many errors therein!!
+|
+|		Thanks  John Collins February 2009
+=====================================================================
+
+(I know that a computer based to do list is patented by Micro$oft and
+I don't care).
+
+General Comments and History
+----------------------------
+
+I include the history as it explains why much is the way it
+is. Possibly my incompetence or laziness is another reason.
+
+I wrote the first version of this back in 1990 struggling on a
+68000-based system with a few MB of memory, no VM without proper
+debugging (remember ADB?) and everything. Much of the original code
+was copied from Xi-Text (now GNUspool).
+
+Then in 1993 I added networking. The trouble was that System V-based
+systems didn't really understand networking and it was a layer on the
+horrible not-invented-here socket replacement called Transport Layer
+Interface and the ghastly "streams". A lot of people were running SCO
+(that's the old SCO not the current outfit that sues everyone for
+making better stuff than they do) which had weird security rules.
+
+Then in 1994 I added X-Motif. I also wrote the Windows Client stuff
+and developed the API.
+
+I got bogged down for the next few years as someone was suing me
+claiming they had rights to what I had written. It took over 10 years
+to see that case off and not before the taxman lept in claiming I was
+claiming the lawyers fees incorrectly as a business expense. A guided
+tour of half the courts in England followed.
+
+In the intervening years I added the web browser interface stuff. It
+was my first venture into such things and it probably shows. Actually
+it does show. It all wants rewriting in PHP.
+
+So here we are today with the product as it stands. Yes it's showing
+its history in lots of ways. But the core product is (I think) pretty
+stable and solid.
+
+TO-DO Part 1 - Overall look and feel
+====================================
+
+1. Networking
+-------------
+
+I think that it's fine when you have half a dozen machines in one
+building and it nicely shares stuff between them. But if you
+network in a remote machine, then that machine gets all the messages
+about jobs being added and deleted, jobs starting and stopping etc
+which are of no interest or concern to it.
+
+I think we want to be able to configure the networking so there are
+much looser levels of coupling available whilst still maintaining
+something of the the current look and feel.
+
+2. Users
+--------
+
+At the moment user access is tied to Unix user ids as found in the
+password file.
+
+A frequent request is that there shouldn't have to be a user name and
+user id as given in the password file to decide user access as in many
+cases jobs are generated from some server process receiving data
+from elsewhere which knows nothing about the users on the machine
+running this server process.
+
+We need to have a mechanism to map external user names onto Unix ones
+but preserve the original user names for mailing of reports.
+
+Actually what we should do is have just "default" and a list of
+exceptions rather than storing mostly identical permissions for nearly
+everyone. Maybe this should be held as XML and read into shared memory
+when anything starts up.
+
+**** Most of this has been implemented in Xi-Batch R7
+
+3. Charging
+-----------
+
+No one ever uses that so we'll get rid of it. We'll just have optional
+log files showing what got run where at the instigation of whom.
+
+4. Job Heirarchy
+----------------
+
+Rather than a single flat job queue I want to implement a heirarchy of
+jobs and "super-jobs" or "queues" holding inferior jobs. At each level
+there is a separate namespace of variables.
+
+This has been implemented in Xi-Batch R7
+
+5. Conditions and Assignments
+-----------------------------
+
+I want to remove the limit on the number of conditions and
+assignments. I also want to be able to combine time and variable
+conditions and link in a nested structure with AND OR and NOT.
+
+I also think conditions and assignments should be part of a new kind
+of object separate from jobs and variables which can be referred to
+with parts overridden.
+
+Conditions and assignments should have arbitrary expressions in and
+should be able to access bits of jobs like the last run time.
+
+**** This has been implemented in Xi-Batch R7.
+
+
+TO-DO Part 2 - Internals
+========================
+
+1. Get rid of the message queue
+-------------------------------
+
+Message queues are evil because:
+
+1. They are quite slow. This is because messages are sorted into an
+   order given by the message type field to implement the full
+   semantics. Unix kernels sort them on sending and Linux ones on
+   receiving and both take far too long doing it (unnecessarily most
+   of the time).
+
+2. Some other application using message queues can clog up all the
+   available buffer space for message queues system-wide causing us to
+   fall over. This happens sufficiently often to be
+   embarrassing. Recent Linux kernels have a way round this but I
+   haven't tried it yet.
+
+3. Security is poor - you just need the message queue id to start
+   accessing it, you don't have file system permission semantics (not
+   that they're perfect) stopping someone stomping on it.
+
+4. You don't have any means of telling someone that a message has
+   arrived so you end up with the signal mechanism currently in use to
+   wake up a process with all the problems that causes.
+
+I intend to replace it with a Unix Domain socket for local requests
+and an Internet socket for remote requests. This actually has quite
+far-reaching consequences apart from overcoming the above problems as:
+
+1. You can just use "select" incorporating any required timeouts and
+   kiss goodbye to all the signal stuff.
+
+2. We don't need the separate process to handle incoming network
+   requests any more. (But it would be a good candidate for threads).
+
+3. Requests to remote machines can go straight to those machines
+   rather through the local scheduler as at present (and then get sent
+   to the network-handling process and put on the message queue
+   there).
+
+4. We can get rid of "xtnetserv" to handle remote requests, the API
+   and the Windows Clients. Everything now talks directly to the
+   scheduler. And all the client process code can be replaced by calls to
+   the API. This gets rid of mountains of code all duplicated and
+   doing nearly (but not quite) the same thing.
+
+5. All the above will actually reduce the Internet port numbers
+   requirement to 2 from 4.
+
+6. We can get rid of the hand-coded curses "inch" etc done as the signal
+   mechanism causes chaos on some platforms.
+
+**** All of the above has been implemented in Xi-Batch R7
+
+2. Re-think the message file handling stuff
+-------------------------------------------
+
+It was such a nice idea at the time that people could hand-tailor
+their message files to make the display say what they want, possibly
+in another language. They could also configure the keys and even the
+order in which some questions were asked. Then could also change what
+letters and keywords did what on command line arguments.
+
+However there was a problem - almost no one ever used it. And the few
+people that did had problems if a new release came out wiping all
+their changes.
+
+And it meant a two-stage build to build the message files and edit the
+source code.
+
+We don't have to worry about strings clogging up the source code any
+more (one of the original reasons for doing it) and most sensible
+compilers stick that in the text these days.
+
+I think we'll strip all that out and use getopt for argument handling
+like other humans. And we'll use gettext to do messages properly.
+
+I wrote most of Xi-Batch R7 with a different way of handling messages
+that doesn't generate new source files but I'll rewrite it to use
+gettext.
+
+3. MS-Windows clients
+---------------------
+
+This needs all re-writing not to use the hideous MFC which as well as
+being hideous is about as non-Free as you can get.
+
+Please can someone who knows how to do this do it! The MFC sources are
+enclosed - please grab those and the GTK stuff and start hacking.
+
+4. Browser client in PHP
+------------------------
+
+This was my first ever effort at a Web Browser interface and it shows.
+
+It all wants rewriting in PHP and just run the standard command line
+utilities - so deprecate the CGI programs or cut them down a bit and
+make PHP do all the work.
+
+5. Documentation
+----------------
+
+This needs to be translated to Texinfo format to conform to GNU
+standards.
+
+I'd be inclined to merge all the manuals together into one big happy
+manual to save lots of duplicated stuff in different places to
+update.
+
+Oh yes and the new version documentation needs "de-nonexistent-ifying"
+
+John Collins
+February 2009

@@ -1,0 +1,98 @@
+#! /usr/bin/perl
+
+#
+#   Copyright 2009 Free Software Foundation, Inc.
+#
+#  This program is free software: you can redistribute it and/or modify
+#  it under the terms of the GNU General Public License as published by
+#  the Free Software Foundation, either version 3 of the License, or
+#  (at your option) any later version.
+#
+#  This program is distributed in the hope that it will be useful,
+#  but WITHOUT ANY WARRANTY; without even the implied warranty of
+#  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#  GNU General Public License for more details.
+#
+#   You should have received a copy of the GNU General Public License
+#  along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+# Checkuserinst.pl - verify that the system user is installed.
+# Configure script sets the user name usually "gnubatch"
+# We have a user ID which defaults to 50 which is normally used.
+# Args are user name and spool directory (used as base directory)
+# This is intended to run on all systems I have heard of but IBM AIX
+# users may prefer to use "SMIT".
+
+sub findpath {
+    my $prog = shift;
+    for my $p (split(':', $ENV{'PATH'}), '/sbin', '/usr/sbin')  {
+	return "$p/$prog" if -x "$p/$prog";
+    }
+    undef;
+}
+
+$USERNAME = shift @ARGV;
+$SPOOLDIR = shift @ARGV;
+
+$USERNAME = "@BATCHUSER@" unless $USERNAME;
+$SPOOLDIR = "/usr/local/var/gnubatch" unless $SPOOLDIR;
+$UID = 51;
+
+exit 0 if getpwnam($USERNAME);
+
+$UID++ while  getpwuid($UID);
+
+# Find a suitable group id - if "daemon" is avaiable use that
+
+for my $g (qw/daemon root sys bin/)  {
+    my $gid = getgrnam $g;
+    if ($gid)  {
+	$GID = $gid;
+	last;
+    }
+}
+
+# If we have useradd available, use that.
+# Otherwise we may have to edit the password files ourself
+# Don't use "adduser" as the spec of that is different between various
+# Linuxes e.g RH/Mandriva is different from Ubuntu/Debian
+
+$useradd = findpath('useradd');
+
+if  ($useradd)  {
+    print "Attempting to create user $USERNAME uid $UID\n";
+    exit 0 if system ($useradd, '-c', 'GNUbatch system user', '-d', $SPOOLDIR, '-g', $GID, '-r', '-u', $UID, $USERNAME) == 0;
+    print "Sorry failed to create user $USERNAME\n";
+    exit 10;
+}
+
+print <<EOM;
+I am going to edit your password file to include user $USERNAME with user id $UID.
+If this is not a good idea please abort me in the next 10 seconds.
+EOM
+
+system("sleep 10");
+
+open(PWF, ">>/etc/passwd");
+print PWF "$USERNAME::$UID:$GID:GNUbatch system user:$SPOOLDIR:\n";
+close PWF;
+
+# If we have a shadow password file, add the user to it, using "pwconv"
+# if it exists which it does on things like Solaris.
+
+if (-f "/etc/shadow")  {
+    my $pwc = findpath('pwconv');
+    if  ($pwc)  {
+	system($pwc);
+    }
+    else  {
+	open(SHF, ">>/etc/shadow");
+	print SHF "$USERNAME:!!:13521::::::\n";
+	close SHF;
+    }
+}
+
+print <<EOM;
+You will probably need to set a password for user $USERNAME
+Please remember to do this!!
+EOM

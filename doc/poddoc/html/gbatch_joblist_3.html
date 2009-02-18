@@ -1,0 +1,132 @@
+<?xml version="1.0" ?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<title>gbatch_joblist - obtain a list of jobs</title>
+<meta http-equiv="content-type" content="text/html; charset=utf-8" />
+<link rev="made" href="mailto:root@localhost" />
+</head>
+
+<body style="background-color: white">
+
+<p><a name="__index__"></a></p>
+<!-- INDEX BEGIN -->
+<!--
+
+<ul>
+
+	<li><a href="#name">NAME</a></li>
+	<li><a href="#synopsis">SYNOPSIS</a></li>
+	<li><a href="#description">DESCRIPTION</a></li>
+	<li><a href="#return_values">RETURN VALUES</a></li>
+	<li><a href="#example">EXAMPLE</a></li>
+	<li><a href="#see_also">SEE ALSO</a></li>
+	<li><a href="#copyright">COPYRIGHT</a></li>
+	<li><a href="#author">AUTHOR</a></li>
+</ul>
+-->
+<!-- INDEX END -->
+
+<p>
+</p>
+<h1><a name="name">NAME</a></h1>
+<p>gbatch_joblist - obtain a list of jobs</p>
+<p>
+</p>
+<hr />
+<h1><a name="synopsis">SYNOPSIS</a></h1>
+<STRONG>#include &lt;gbatch.h&gt;</STRONG>
+<br><p><strong>int gbatch_joblist(const int</strong>
+<em>fd</em><strong>, const unsigned</strong>
+<em>flags</em><strong>, int *</strong><em>numjobs</em><strong>, slotno_t **</strong><em>slots</em><strong>)</strong></p>
+<p>
+</p>
+<hr />
+<h1><a name="description">DESCRIPTION</a></h1>
+<p>The function <strong>gbatch_joblist()</strong> si used to get a list of jobs from the API.</p>
+<p><em>fd</em> is a file descriptor which was previously returned by a
+successful call to gbatch_open(3).</p>
+<p><em>flags</em> is zero, or a logical OR of one or more of the following values</p>
+<dl>
+<dt><strong><a name="item_gbatch_flag_localonly">GBATCH_FLAG_LOCALONLY</a></strong>
+
+<dd>
+<p>Ignore remote jobs/hosts, i.e. not local to the server, not the client.</p>
+</dd>
+</li>
+<dt><strong><a name="item_gbatch_flag_queueonly">GBATCH_FLAG_QUEUEONLY</a></strong>
+
+<dd>
+<p>Restrict to the selected queue (with <code>gbatch_setqueue(3))</code> only.</p>
+</dd>
+</li>
+<dt><strong><a name="item_gbatch_flag_useronly">GBATCH_FLAG_USERONLY</a></strong>
+
+<dd>
+<p>Restrict to the user only.</p>
+</dd>
+</li>
+<dt><strong><a name="item_gbatch_flag_grouponly">GBATCH_FLAG_GROUPONLY</a></strong>
+
+<dd>
+<p>Restrict to the current group (possibly as selected by <code>gbatch_newgrp(3))</code>
+only.</p>
+</dd>
+</li>
+</dl>
+<p><em>numjobs</em> is a pointer to an integer which upon return will contain
+the number of jobs in the list.</p>
+<p><em>slots</em> will upon return contain a list of slot numbers, each of
+which can be used to access an individual job.  The memory used by
+this array is owned by the API and therefore the user should not
+attempt to deallocate it.</p>
+<p>
+</p>
+<hr />
+<h1><a name="return_values">RETURN VALUES</a></h1>
+<p>The function returns 0 if successful, otherwise an error code as
+defined in the include file \fBgbatch.h\fR.</p>
+<p>
+</p>
+<hr />
+<h1><a name="example">EXAMPLE</a></h1>
+<pre>
+ int fd, ret, cnt, numjobs;</pre>
+<pre>
+ ret = gbatch_joblist(fd, 0, &amp;numjobs, &amp;list);
+ if (ret &lt; 0) {  /* handle error */
+     . . .
+ }</pre>
+<pre>
+ for (cnt = 0; cnt &lt; numjobs; cnt++)  {
+     slotno_t this_slot = list[cnt];
+     /* process this_slot */
+ }</pre>
+<pre>
+ /* do not try to deallocate the list</pre>
+<p>
+</p>
+<hr />
+<h1><a name="see_also">SEE ALSO</a></h1>
+<p>gbatch_jobdata(3),
+gbatch_jobfind(3),
+gbatch_jobread(3),
+gbatch_setqueue(3).</p>
+<p>
+</p>
+<hr />
+<h1><a name="copyright">COPYRIGHT</a></h1>
+<p>Copyright (c) 2009 Free Software Foundation, Inc.
+This is free software. You may redistribute copies of it under the
+terms of the GNU General Public License
+&lt;http://www.gnu.org/licenses/gpl.html&gt;.
+There is NO WARRANTY, to the extent permitted by law.</p>
+<p>
+</p>
+<hr />
+<h1><a name="author">AUTHOR</a></h1>
+<p>John M Collins, Xi Software Ltd.</p>
+
+</body>
+
+</html>

@@ -1,0 +1,175 @@
+=head1 NAME
+
+gbch-user - list batch user details.
+
+=head1 SYNOPSIS
+
+B<gbch-user>
+[ I<-options> ]
+
+=head1 DESCRIPTION
+
+B<gbch-user> provides 4 functions:
+
+With no arguments it lists the permissions for the invoking user and
+exits.
+
+With the B<-m> option it enables the invoking user to edit his own
+default job and variable permissions. The user must have I<change
+default modes> permission to do this.
+
+With the B<-v> option it enables the invoking user to interactively
+review the list of permissions for all users. The user must have
+I<read admin file> permission to do this.
+
+With the B<-i> option it enables the invoking user to interactively
+review and update the list of permissions for all users. The user must
+have I<write admin file> permission to do this.
+
+=for man
+For more information about the details of the interactive commands,
+please see the on-line help information, obtained by pressing ?
+(although this may be changed on your site). This section focuses on
+the command-line options which may be used to control the initial
+display.
+
+=head1 OPTIONS
+
+Note that the order of treatment, letters and keywords described below
+may be modified by editing the file F<btrest.help> - see btsyntax(5).
+
+The environment variable on which options are supplied is C<GBCH_USER> and the
+environment variable to specify the help file is C<BTUSERCONF>.
+
+Certain commands available on-screen enable many of these options to
+be changed and saved in configuration files.
+
+=over 4
+
+=item -? or +explain
+
+Causes a summary of the other options to be displayed without taking
+further action.
+
+=item -B or +no-help-box
+
+Put help messages in inverse video rather than in a box when operating
+in interactive mode. This is the default case.
+
+=item -b or +help-box
+
+Put help messages in a box rather than displaying inverse video when
+operating in interactive mode.
+
+=item -d or +display-only
+
+Is the default. A list of permissions is output to the standard
+output.
+
+=item -E or +no-error-box
+
+Put error messages in inverse video rather than in a box when
+operating in interactive mode. This is the default case.
+
+=item -e or +error-box
+
+Put error messages in a box rather than displaying inverse video when
+operating in interactive mode.
+
+=item -g or +group-name-sort
+
+Sort users by group name, then user name within primary group. This is
+only relevant to B<-v> or B<-i> options.
+
+=item -H or +keep-char-help
+
+When displaying a help screen in interactive mode, interpret the next
+key press as a command as well as clearing the help screen.
+
+=item -h or +lose-char-help
+
+Discard whatever key press is made to clear a help screen when in
+interactive mode.
+
+=item -i or +update-users
+
+View and update the list of users. This option requires I<write admin
+file> privilege.
+
+=item -m or +set-default-modes
+
+Interactively set the default modes for the invoking user. This option
+requires I<change default modes> privilege.
+
+=item -n or +numeric-user-sort
+
+Sort users by numeric userid (default).
+
+=item -u or +user-name-sort
+
+Sort users by user name.
+
+=item -v or +view-users
+
+View in read-only mode the list of users and permissions. This
+requires I<read admin file> privilege.
+
+=back
+
+=head1 FILES
+
+F<~/.gnubatch>
+configuration file (home directory)
+
+F<.gnubatch>
+configuration file (current directory)
+
+F<btuser.help>
+message file
+
+F<btufile>
+user control file.
+
+=head1 ENVIRONMENT
+
+=over 4
+
+=item GBCH_USER
+
+space-separated options to override defaults.
+
+=item BTUSERCONF
+
+location of alternative help file.
+
+=back
+
+=head1 SEE ALSO
+
+gbch-uchange(1),
+gbch-ulist(1),
+btsyntax(5)
+gbch-uconv(8).
+
+=head1 DIAGNOSTICS
+
+Various diagnostics are read and printed as required from the message
+file F<btuser.help>.
+
+=head1 COPYRIGHT
+
+Copyright (c) 2009 Free Software Foundation, Inc.
+This is free software. You may redistribute copies of it under the
+terms of the GNU General Public License
+<http://www.gnu.org/licenses/gpl.html>.
+There is NO WARRANTY, to the extent permitted by law.
+
+=head1 AUTHOR
+
+John M Collins, Xi Software Ltd.
+
+=cut
+
+## Local Variables:
+## mode: nroff
+## End:

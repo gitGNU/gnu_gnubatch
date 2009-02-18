@@ -1,0 +1,113 @@
+#
+#   Copyright 2009 Free Software Foundation, Inc.
+#
+#  This program is free software: you can redistribute it and/or modify
+#  it under the terms of the GNU General Public License as published by
+#  the Free Software Foundation, either version 3 of the License, or
+#  (at your option) any later version.
+#
+#  This program is distributed in the hope that it will be useful,
+#  but WITHOUT ANY WARRANTY; without even the implied warranty of
+#  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#  GNU General Public License for more details.
+#
+#   You should have received a copy of the GNU General Public License
+#  along with this program.  If not, see <http://www.gnu.org/licenses/>.
+#
+#	Makefile for Motif-based routines
+#	Note that GNU does not support Motif.
+#	There are things in LessTif which don't quite work right (Combox Boxes and Spin boxes mainly)
+#	so I don't recommend you try to use it.
+#	Please note you have to find the Motif includes and library and a home for the resource files
+#	"Findappdefloc" may help with the latter
+#
+
+SHELL		=	/bin/sh
+prefix		=	@prefix@
+exec_prefix	=	@exec_prefix@
+PARENT		=	..
+BASE		=	../..
+HDRS		=	$(PARENT)/hdrs
+CC		=	@CC@
+CCFLAGS		=	-O @gcc_useful_options@ @funny_compiler_options@
+CFLAGS		=	$(CCFLAGS) -I$(HDRS) -I$(PARENT) -I$(BASE)
+LDFLAGS		=
+PARENT		=	..
+MYLIBDIR	=	$(PARENT)/lib
+LIB		=	$(MYLIBDIR)/libgnubatch_int.a
+SHLIB		=	$(MYLIBDIR)/libgnubatch_int.so
+SHLIBCLIENT	=	$(MYLIBDIR)/libgnubatch_client.so
+LIBS		=	@LIBS@
+LIBNET		=	@SOCKLIBS@
+XLIBS		=	@XWIN_LIBS@
+RM		=	rm -f
+INSTALL		=	@INSTALL@
+INSTALL_DATA	=	@INSTALL_DATA@
+BATCHUSER	=	@BATCHUSER@
+USERMODES	=	-o $(BATCHUSER) -g root -m 4755
+NOSETMODES	=	-o $(BATCHUSER) -g root
+BINDIR		=	@bindir@
+INTBINDIR	=	@pkgexecdir@
+HELPFILEDIR	=	@sphelpdir@
+USERBINS	=	gbch-xmfilemon gbch-xmq gbch-xmr gbch-xmuser
+NOSETUBINS	=	gbch-xmfilemon
+XMFILEMONOBS	=	xmfilemon.o
+APPDEFLOC	=	`./Findappdefloc`
+
+XMBTQOBS=xmbtq.o xmbq_jlist.o xmbq_vlist.o xmbq_cbs.o xmbq_jcall.o xmbq_jobpar.o xmbq_cmdint.o xmbq_vcall.o xmbq_view.o xm_commlib.o
+XMBTUSEROBS=xmbtuser.o xmbtu_cbs.o xm_commlib.o
+XMBTROBS=xmbtr.o xmbr_jlist.o xmbr_cbs.o xmbr_jcall.o xmbr_jobpar.o xmbr_remsub.o xmbr_vlist.o xmbr_files.o xmbr_jldsv.o xm_commlib.o
+
+all:	@main_target@
+
+nonshared:	$(USERBINS) $(NOSETUBINS)
+
+shared:		xmbtuser_s xmbtq_s xmbtr_s xmfilemon_s
+
+gbch-xmq:	$(XMBTQOBS)
+		$(CC) -o $@ $(LDFLAGS) $(XMBTQOBS) $(LIB) $(XLIBS) $(LIBNET) $(LIBS)
+
+xmbtq_s:	$(XMBTQOBS)
+		$(CC) -o gbch-xmq $(LDFLAGS) $(XMBTQOBS) $(SHLIB) $(SHLIBCLIENT) $(XLIBS) $(LIBNET) $(LIBS)
+		touch $@
+
+gbch-xmuser:	$(XMBTUSEROBS)
+		$(CC) -o $@ $(LDFLAGS) $(XMBTUSEROBS) $(LIB) $(XLIBS) $(LIBNET) $(LIBS)
+
+xmbtuser_s:	$(XMBTUSEROBS)
+		$(CC) -o gbch-xmuser $(LDFLAGS) $(XMBTUSEROBS) $(SHLIB) $(SHLIBCLIENT) $(XLIBS) $(LIBNET) $(LIBS)
+		touch $@
+
+gbch-xmr:	$(XMBTROBS)
+		$(CC) -o $@ $(LDFLAGS) $(XMBTROBS) $(LIB) $(XLIBS) $(LIBNET) $(LIBS)
+
+xmbtr_s:	$(XMBTROBS)
+		$(CC) -o gbch-xmr $(LDFLAGS) $(XMBTROBS) $(SHLIB) $(SHLIBCLIENT)  $(XLIBS) $(LIBNET) $(LIBS)
+		touch $@
+
+gbch-xmfilemon:	$(XMFILEMONOBS)
+		$(CC) -o $@ $(LDFLAGS) $(XMFILEMONOBS) $(LIB) $(XLIBS) $(LIBNET) $(LIBS)
+
+xmfilemon_s:	$(XMFILEMONOBS)
+		-$(CC) -o gbch-xmfilemon $(LDFLAGS) $(XMFILEMONOBS) $(SHLIB) $(SHLIBCLIENT) $(XLIBS) $(LIBNET) $(LIBS)
+		touch $@
+
+install:	all
+		$(INSTALL) $(USERMODES) $(USERBINS) $(BINDIR)
+		$(INSTALL) $(NOSETMODES) $(NOSETUBINS) $(BINDIR)
+		(m4 xmbtq.m4;m4 xmbtr.m4;m4 xmbtuser.m4;m4 xmfilemon.m4) >GBATCH
+		$(INSTALL_DATA) GBATCH $(APPDEFLOC)
+		$(RM) GBATCH
+
+install-strip:	all
+		$(INSTALL) -s $(USERMODES) $(USERBINS) $(BINDIR)
+		$(INSTALL) -s $(NOSETMODES) $(NOSETUBINS) $(BINDIR)
+		(m4 xmbtq.m4;m4 xmbtr.m4;m4 xmbtuser.m4;m4 xmfilemon.m4) >GBATCH
+		$(INSTALL_DATA) GBATCH $(APPDEFLOC)
+		$(RM) GBATCH
+
+clean:
+		$(RM) *.o gbch-xmq gbch-xmuser gbch-xmr gbch-xmfilemon *_s
+
+distclean:	clean
+		$(RM) Makefile

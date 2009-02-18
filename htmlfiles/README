@@ -1,0 +1,25 @@
+HTML Template Directory
+=======================
+
+  Copyright 2009 Free Software Foundation, Inc.
+
+  Copying and distribution of this file, with or without modification,
+  are permitted in any medium without royalty provided the copyright
+  notice and this notice are preserved.
+
+----------------------------------------------------------------------
+
+This lot actually does work but I accept that the whole thing should
+be recoded in PHP using the standard shell utilities rather than CGI
+programs.
+
+The general idea is that each web page is generated from pieces with
+some parameter substitution.
+
+Various parameters, including symbolic names for the HTML template
+files, are given in DATADIR/gbhtml.ini.
+
+The actual startups are in gbframe.html and gbrframe.html depending on
+which CGI library is in use.
+
+Some JavaScript functions are in gbjsfunc.js

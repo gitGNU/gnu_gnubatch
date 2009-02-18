@@ -1,0 +1,117 @@
+=head1 NAME
+
+gbch-ciconv - dump out GNUbatch command interpreters to a shell script
+
+=head1 SYNOPSIS
+
+B<gbch-ciconv>
+[ I<-D dir> ]
+[ I<-v n> ]
+[ I<-e n> ]
+[ I<-u> ]
+[ I<-s> ]
+[ I<-f> ]
+I<ci file> I<outfile>
+
+=head1 DESCRIPTION
+
+B<gbch-ciconv> converts B<GNUbatch> command interpreters held in the batch
+spool directory to an executable shell script which may be used to
+re-install them. This may be useful for backup purposes or for one
+stage in upgrade from one release of B<GNUbatch> to another.
+
+B<gbch-ciconv> understands the format of the saved job file for versions of
+B<GNUbatch> going back to release 4, and when presented with a saved
+file, will attempt to work out from the format which release it
+relates to.
+
+In addition to options, two arguments are always supplied to
+B<gbch-cvlist>.
+
+=over 4
+
+=item Command interpreter list file
+
+This is the file containing the attributes of the variables, F<cifile>
+in the batch spool directory, or as relocated by re-specifying
+C<SPOOLDIR>.
+
+=item Output file
+
+This file is created by B<gbch-ciconv> to contain the executable shell
+script, containing gbch-cichange(1) commands, which may be used to
+recreate the command interpreters.
+
+=back
+
+=head1 OPTIONS
+
+=over 4
+
+=item -D I<directory>
+
+specifies the source directory for the command interpreter file. It
+can be specified as C<$SPOOLDIR> or C<${SPOOLDIR-/var/spool/gnubatch}>
+etc and the environment and/or F<gnubatch.conf> will be interrogated
+to interpolate the value of the environment variable given.
+
+If you use this, don't forget to put single quotes around it thus:
+
+ gbch-ciconv -D '${SPOOLDIR-/var/spool/gnubatch}' ...
+
+otherwise the shell will try to interpret the C<$> construct and not
+B<gbch-ciconv>.
+
+=item -e I<n>
+
+Tolerate I<n> errors of the kinds denoted by the other options before
+giving up trying to convert the file.
+
+=item -f
+
+Ignore format errors in the saved command interpreter file up to the
+limit of errors given in the B<-e> option.
+
+=item -s
+
+Ignore file size errors in the saved command interpreter file (up to
+the number of total errors given by the B<-e> option).
+
+=item -u
+
+Do not check user names (not used, but included for consistency with
+gbch-cjlist(8) and gbch-cvlist(8)).
+
+=item -v I<number>
+
+Tell B<gbch-ciconv> that the job file is for release I<number> of
+B<GNUbatch>, where I<number> is 4 to 6.
+
+This may be necessary where the command interpreter file is corrupted
+and B<gbch-ciconv> cannot guess what is meant.
+
+=back
+
+=head1 SEE ALSO
+
+gbch-cjlist(8),
+gbch-cvlist(8),
+gbch-uconv(8).
+
+=head1 COPYRIGHT
+
+Copyright (c) 2009 Free Software Foundation, Inc.
+This is free software. You may redistribute copies of it under the
+terms of the GNU General Public License
+<http://www.gnu.org/licenses/gpl.html>.
+There is NO WARRANTY, to the extent permitted by law.
+
+=head1 AUTHOR
+
+John M Collins, Xi Software Ltd.
+
+=cut
+
+## Local Variables:
+## mode: nroff
+## End:

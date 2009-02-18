@@ -1,0 +1,321 @@
+<?xml version="1.0" ?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<title>gbch-vlist - list B&lt;GNUbatch&gt; variables</title>
+<meta http-equiv="content-type" content="text/html; charset=utf-8" />
+<link rev="made" href="mailto:root@localhost" />
+</head>
+
+<body style="background-color: white">
+
+<p><a name="__index__"></a></p>
+<!-- INDEX BEGIN -->
+<!--
+
+<ul>
+
+	<li><a href="#name">NAME</a></li>
+	<li><a href="#synopsis">SYNOPSIS</a></li>
+	<li><a href="#description">DESCRIPTION</a></li>
+	<li><a href="#options">OPTIONS</a></li>
+	<ul>
+
+		<li><a href="#format_codes">Format codes</a></li>
+	</ul>
+
+	<li><a href="#files">FILES</a></li>
+	<li><a href="#environment">ENVIRONMENT</a></li>
+	<li><a href="#see_also">SEE ALSO</a></li>
+	<li><a href="#diagnostics">DIAGNOSTICS</a></li>
+	<li><a href="#copyright">COPYRIGHT</a></li>
+	<li><a href="#author">AUTHOR</a></li>
+</ul>
+-->
+<!-- INDEX END -->
+
+<p>
+</p>
+<h1><a name="name">NAME</a></h1>
+<p>gbch-vlist - list <strong>GNUbatch</strong> variables</p>
+<p>
+</p>
+<hr />
+<h1><a name="synopsis">SYNOPSIS</a></h1>
+<p><strong>gbch-vlist</strong>
+[ <em>-options</em> ]
+[ <em>variable names</em> ]</p>
+<p>
+</p>
+<hr />
+<h1><a name="description">DESCRIPTION</a></h1>
+<p><strong>gbch-vlist</strong> is a program to display <strong>GNUbatch</strong> variables on the
+standard output. It can be used in both shell scripts and other
+programs. Each line of the output corresponds to a single variable,
+and by default the output is generally similar to the default format
+of the variables screen of the gbch-q(1) command. The first field on each
+line is the variable name prefixed by a machine name and colon thus:</p>
+<pre>
+        macha:v1
+        machb:xyz</pre>
+<p>if the variable is on a remote machine. This is the required format of the
+variable name which should be passed to gbch-var(1) and other shell
+interface commands.</p>
+<p>An example of the output of <strong>gbch-vlist</strong> is as follows:</p>
+<pre>
+        CLOAD         0                # Current value of load level
+        Dell:CLOAD    0         Export # Current value of load level
+        arnie:CLOAD   1000      Export # Current value of load level
+        LOADLEVEL     20000            # Maximum value of load level
+        LOGJOBS                        # File to save job record in
+        LOGVARS                        # File to save variable record in
+        MACHINE       sisko            # Name of current host
+        Dell:Neterr   0         Export # Exit code from polling
+        STARTLIM      5                # Number of jobs to start at once
+        STARTWAIT     30               # Wait time in seconds for job start
+        Dell:Two      2         Export # 
+        bar           1                # 
+        foo           123       Export # Testing</pre>
+<p>If the user has <em>reveal</em> but not <em>read</em> permission on a variable,
+the name only is displayed.</p>
+<p>Various options allow the user to control the output in various ways
+as described below. The user can limit the output to specific
+variables by giving the variable names as arguments following the options.</p>
+<p>
+</p>
+<hr />
+<h1><a name="options">OPTIONS</a></h1>
+<p>Note that the order of treatment, letters and keywords described below
+may be modified by editing the file <em>btrest.help</em> - see btsyntax(5).</p>
+<p>The environment variable on which options are supplied is <a href="#item_gbch_vlist"><code>GBCH_VLIST</code></a> and the
+environment variable to specify the help file is <a href="#item_btrestconf"><code>BTRESTCONF</code></a>.</p>
+<dl>
+<dt><strong><a name="item__2d_3f_or__2bexplain">-? or +explain</a></strong>
+
+<dd>
+<p>causes a summary of the other options to be displayed without taking
+further action.</p>
+</dd>
+</li>
+<dt><strong><a name="item__2db_or__2bbypass_2dmodes">-B or +bypass-modes</a></strong>
+
+<dd>
+<p>Disregard all modes etc and print full details. This is provided for
+dump/restore scripts. It is only available to users with <em>Write Admin
+File</em> permission, otherwise it is silently ignored. This option is now
+deprecated as gbch-cvlist(8) is now provided for the purpose for which this
+option was implemented.</p>
+</dd>
+</li>
+<dt><strong><a name="item__2dd_or__2bdefault_2dformat">-D or +default-format</a></strong>
+
+<dd>
+<p>Revert to the default display format, cancelling the <strong>-F</strong> option.</p>
+</dd>
+</li>
+<dt><strong><a name="item__2df_string_or__2bformat_string">-F <em>string</em> or +format <em>string</em></a></strong>
+
+<dd>
+<p>Change the display format to <em>string</em> as defined below.</p>
+</dd>
+</li>
+<dt><strong><a name="item__2dg_group_or__2bjust_2dgroup_group">-g <em>group</em> or +just-group <em>group</em></a></strong>
+
+<dd>
+<p>Restrict the output to variables owned by the <em>group</em> specified. The
+group name may be a pattern with shell-like wild cards. To cancel this
+argument, give a single <strong>-</strong> sign as a group name.</p>
+</dd>
+</li>
+<dt><strong><a name="item__2dh_or__2bheader">-H or +header</a></strong>
+
+<dd>
+<p>generate a header for each column of output.</p>
+</dd>
+</li>
+<dt><strong><a name="item__2dl_or__2blocal_2donly">-L or +local-only</a></strong>
+
+<dd>
+<p>list only variables local to the current host.</p>
+</dd>
+</li>
+<dt><strong><a name="item__2dn_or__2bno_2dheader">-N or +no-header</a></strong>
+
+<dd>
+<p>cancel the <strong>-H</strong> option.</p>
+</dd>
+</li>
+<dt><strong><a name="item__2dr_or__2binclude_2dremotes">-R or +include-remotes</a></strong>
+
+<dd>
+<p>list all variables, including those on connected remote hosts.</p>
+</dd>
+</li>
+<dt><strong><a name="item__2du_user__2bjust_2duser_user">-u <em>user</em> +just-user <em>user</em></a></strong>
+
+<dd>
+<p>Restrict the output to variables owned by the <em>user</em> specified. The
+user name may be a pattern with shell-like wild cards.</p>
+</dd>
+<dd>
+<p>To cancel this argument, give a single <strong>-</strong> sign as a user name.</p>
+</dd>
+</li>
+<dt><strong><a name="item__2bfreeze_2dcurrent">+freeze-current</a></strong>
+
+<dd>
+<p>Save all the current options in a <em>.gnubatch</em> file in the current
+directory with keyword <a href="#item_gbch_vlist"><code>GBCH_VLIST</code></a>. There is no output if this is
+specified, the options are just saved.</p>
+</dd>
+</li>
+<dt><strong><a name="item__2bfreeze_2dhome">+freeze-home</a></strong>
+
+<dd>
+<p>Save all the current options in a <em>.gnubatch</em> file in the user's home
+directory with keyword <a href="#item_gbch_vlist"><code>GBCH_VLIST</code></a>. There is no output if this is
+specified, the options are just saved.</p>
+</dd>
+</li>
+</dl>
+<p>
+</p>
+<h2><a name="format_codes">Format codes</a></h2>
+<p>The format string consists of a string containing the following character
+sequences, which are replaced by the following variable parameters. The
+string may contain various other printing characters or spaces as
+required.</p>
+<p>Each column is padded on the right to the length of the longest
+entry.</p>
+<p>If a header is requested, the appropriate abbreviation is obtained
+from the message file and inserted.</p>
+<dl>
+<dt><strong><a name="item___">%%</a></strong>
+
+<dd>
+<p>Insert a single <code>%</code>.</p>
+</dd>
+</li>
+<dt><strong><a name="item__c">%C</a></strong>
+
+<dd>
+<p>Comment field.</p>
+</dd>
+</li>
+<dt><strong><a name="item__e">%E</a></strong>
+
+<dd>
+<p><code>Export</code> if variable is exported</p>
+</dd>
+</li>
+<dt><strong><a name="item__g">%G</a></strong>
+
+<dd>
+<p>Group owner of variable.</p>
+</dd>
+</li>
+<dt><strong><a name="item__k">%K</a></strong>
+
+<dd>
+<p><code>Cluster</code> if the variable is marked clustered</p>
+</dd>
+</li>
+<dt><strong><a name="item__m">%M</a></strong>
+
+<dd>
+<p>Mode as a string of letters with <code>U:</code>, <code>G:</code> or <code>O:</code> prefixes as in
+<code>U:RWSMPUVGHD,G:RSMG,O:SM</code>.</p>
+</dd>
+</li>
+<dt><strong><a name="item__n">%N</a></strong>
+
+<dd>
+<p>Name</p>
+</dd>
+</li>
+<dt><strong><a name="item__u">%U</a></strong>
+
+<dd>
+<p>User name of owner.</p>
+</dd>
+</li>
+<dt><strong><a name="item__v">%V</a></strong>
+
+<dd>
+<p>Value</p>
+</dd>
+</li>
+</dl>
+<p>Note that the various strings such as <code>export</code> etc are read from the
+message file also, so it is possible to modify them as required by the
+user.</p>
+<p>Only the name, user, group, <code>export</code> and <code>cluster</code> fields will be
+non-blank if the user may not read the relevant variable. The mode
+field will be blank if the user cannot read the modes.</p>
+<p>The default format is</p>
+<pre>
+        %N %V %E # %C</pre>
+<p>
+</p>
+<hr />
+<h1><a name="files">FILES</a></h1>
+<p><em>~/.gnubatch</em>
+configuration file (home directory)</p>
+<p><em>.gnubatch</em>
+configuration file (current directory)</p>
+<p><em>btrest.help</em>
+message file</p>
+<p>
+</p>
+<hr />
+<h1><a name="environment">ENVIRONMENT</a></h1>
+<dl>
+<dt><strong><a name="item_gbch_vlist">GBCH_VLIST</a></strong>
+
+<dd>
+<p>space-separated options to override defaults.</p>
+</dd>
+</li>
+<dt><strong><a name="item_btrestconf">BTRESTCONF</a></strong>
+
+<dd>
+<p>location of alternative help file.</p>
+</dd>
+</li>
+</dl>
+<p>
+</p>
+<hr />
+<h1><a name="see_also">SEE ALSO</a></h1>
+<p>gbch-jlist(1),
+gbch-q(1),
+gbch-var(1),
+btsyntax(5),
+gnubatch.conf(5),
+(5),
+gbch-cjlist(8),
+gbch-cvlist(8).</p>
+<p>
+</p>
+<hr />
+<h1><a name="diagnostics">DIAGNOSTICS</a></h1>
+<p>Various diagnostics are read and printed as required from the message
+file <em>btrest.help</em>.</p>
+<p>
+</p>
+<hr />
+<h1><a name="copyright">COPYRIGHT</a></h1>
+<p>Copyright (c) 2009 Free Software Foundation, Inc.
+This is free software. You may redistribute copies of it under the
+terms of the GNU General Public License
+&lt;http://www.gnu.org/licenses/gpl.html&gt;.
+There is NO WARRANTY, to the extent permitted by law.</p>
+<p>
+</p>
+<hr />
+<h1><a name="author">AUTHOR</a></h1>
+<p>John M Collins, Xi Software Ltd.</p>
+
+</body>
+
+</html>

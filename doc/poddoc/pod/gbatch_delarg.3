@@ -1,0 +1,71 @@
+=head1 NAME
+
+gbatch_delarg - delete an argument from a job structure
+
+=head1 SYNOPSIS
+
+=for man
+\&\fB#include <gbatch.h>\fR
+.PP
+
+=for html
+<STRONG>#include &lt;gbatch.h&gt;</STRONG>
+<br>
+
+B<int gbatch_delarg(apiBtjob *>I<jobp>B<, const unsigned>
+I<indx>B<)>
+
+=head1 DESCRIPTION
+
+The function B<gbatch_delarg> is used to delete an argument from a job
+structure string table.
+
+I<jobp> is a pointer to a structure containing the details of the job.
+
+I<indx> is the number of the argument being deleted. Note that all the
+following arguments are "moved up" the list and their index numbers
+will be reduced by one.
+
+=head1 RETURN VALUES
+
+The result is non-zero if successful, or zero if the string table
+overflowed, an likely event in the case of B<gbatch_delarg>.
+
+=head1 SEE ALSO
+
+gbatch_delenv(3),
+gbatch_delredir(3),
+gbatch_getarg(3),
+gbatch_getdirect(3),
+gbatch_getenv(3),
+gbatch_getenvlist(3),
+gbatch_gethenv(3),
+gbatch_getredir(3),
+gbatch_gettitle(3),
+gbatch_putarg(3),
+gbatch_putarglist(3),
+gbatch_putdirect(3),
+gbatch_putenv(3),
+gbatch_putenvlist(3),
+gbatch_putredir(3),
+gbatch_putredirlist(3),
+gbatch_puttitle(3),
+gbatch_setqueue(3).
+
+=head1 COPYRIGHT
+
+Copyright (c) 2009 Free Software Foundation, Inc.
+This is free software. You may redistribute copies of it under the
+terms of the GNU General Public License
+<http://www.gnu.org/licenses/gpl.html>.
+There is NO WARRANTY, to the extent permitted by law.
+
+=head1 AUTHOR
+
+John M Collins, Xi Software Ltd.
+
+=cut
+
+## Local Variables:
+## mode: nroff
+## End:

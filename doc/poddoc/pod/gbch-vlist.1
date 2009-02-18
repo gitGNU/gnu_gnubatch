@@ -1,0 +1,247 @@
+=head1 NAME
+
+gbch-vlist - list B<GNUbatch> variables
+
+=head1 SYNOPSIS
+
+B<gbch-vlist>
+[ I<-options> ]
+[ I<variable names> ]
+
+=head1 DESCRIPTION
+
+B<gbch-vlist> is a program to display B<GNUbatch> variables on the
+standard output. It can be used in both shell scripts and other
+programs. Each line of the output corresponds to a single variable,
+and by default the output is generally similar to the default format
+of the variables screen of the gbch-q(1) command. The first field on each
+line is the variable name prefixed by a machine name and colon thus:
+
+	macha:v1
+	machb:xyz
+
+if the variable is on a remote machine. This is the required format of the
+variable name which should be passed to gbch-var(1) and other shell
+interface commands.
+
+An example of the output of B<gbch-vlist> is as follows:
+
+	CLOAD         0                # Current value of load level
+	Dell:CLOAD    0         Export # Current value of load level
+	arnie:CLOAD   1000      Export # Current value of load level
+	LOADLEVEL     20000            # Maximum value of load level
+	LOGJOBS                        # File to save job record in
+	LOGVARS                        # File to save variable record in
+	MACHINE       sisko            # Name of current host
+	Dell:Neterr   0         Export # Exit code from polling
+	STARTLIM      5                # Number of jobs to start at once
+	STARTWAIT     30               # Wait time in seconds for job start
+	Dell:Two      2         Export # 
+	bar           1                # 
+	foo           123       Export # Testing
+
+If the user has I<reveal> but not I<read> permission on a variable,
+the name only is displayed.
+
+Various options allow the user to control the output in various ways
+as described below. The user can limit the output to specific
+variables by giving the variable names as arguments following the options.
+
+=head1 OPTIONS
+
+Note that the order of treatment, letters and keywords described below
+may be modified by editing the file F<btrest.help> - see btsyntax(5).
+
+The environment variable on which options are supplied is C<GBCH_VLIST> and the
+environment variable to specify the help file is C<BTRESTCONF>.
+
+=over 4
+
+=item -? or +explain
+
+causes a summary of the other options to be displayed without taking
+further action.
+
+=item -B or +bypass-modes
+
+Disregard all modes etc and print full details. This is provided for
+dump/restore scripts. It is only available to users with I<Write Admin
+File> permission, otherwise it is silently ignored. This option is now
+deprecated as gbch-cvlist(8) is now provided for the purpose for which this
+option was implemented.
+
+=item -D or +default-format
+
+Revert to the default display format, cancelling the B<-F> option.
+
+=item -F I<string> or +format I<string>
+
+Change the display format to I<string> as defined below.
+
+=item -g I<group> or +just-group I<group>
+
+Restrict the output to variables owned by the I<group> specified. The
+group name may be a pattern with shell-like wild cards. To cancel this
+argument, give a single B<-> sign as a group name.
+
+=item -H or +header
+
+generate a header for each column of output.
+
+=item -L or +local-only
+
+list only variables local to the current host.
+
+=item -N or +no-header
+
+cancel the B<-H> option.
+
+=item -R or +include-remotes
+
+list all variables, including those on connected remote hosts.
+
+=item -u I<user> +just-user I<user>
+
+Restrict the output to variables owned by the I<user> specified. The
+user name may be a pattern with shell-like wild cards.
+
+To cancel this argument, give a single B<-> sign as a user name.
+
+=item +freeze-current
+
+Save all the current options in a F<.gnubatch> file in the current
+directory with keyword C<GBCH_VLIST>. There is no output if this is
+specified, the options are just saved.
+
+=item +freeze-home
+
+Save all the current options in a F<.gnubatch> file in the user's home
+directory with keyword C<GBCH_VLIST>. There is no output if this is
+specified, the options are just saved.
+
+=back
+
+=head2 Format codes
+
+The format string consists of a string containing the following character
+sequences, which are replaced by the following variable parameters. The
+string may contain various other printing characters or spaces as
+required.
+
+Each column is padded on the right to the length of the longest
+entry.
+
+If a header is requested, the appropriate abbreviation is obtained
+from the message file and inserted.
+
+=over 4
+
+=item %%
+
+Insert a single C<%>.
+
+=item %C
+
+Comment field.
+
+=item %E
+
+C<Export> if variable is exported
+
+=item %G
+
+Group owner of variable.
+
+=item %K
+
+C<Cluster> if the variable is marked clustered
+
+=item %M
+
+Mode as a string of letters with C<U:>, C<G:> or C<O:> prefixes as in
+C<U:RWSMPUVGHD,G:RSMG,O:SM>.
+
+=item %N
+
+Name
+
+=item %U
+
+User name of owner.
+
+=item %V
+
+Value
+
+=back
+
+Note that the various strings such as C<export> etc are read from the
+message file also, so it is possible to modify them as required by the
+user.
+
+Only the name, user, group, C<export> and C<cluster> fields will be
+non-blank if the user may not read the relevant variable. The mode
+field will be blank if the user cannot read the modes.
+
+The default format is
+
+	%N %V %E # %C
+
+=head1 FILES
+
+F<~/.gnubatch>
+configuration file (home directory)
+
+F<.gnubatch>
+configuration file (current directory)
+
+F<btrest.help>
+message file
+
+=head1 ENVIRONMENT
+
+=over 4
+
+=item GBCH_VLIST
+
+space-separated options to override defaults.
+
+=item BTRESTCONF
+
+location of alternative help file.
+
+=back
+
+=head1 SEE ALSO
+
+gbch-jlist(1),
+gbch-q(1),
+gbch-var(1),
+btsyntax(5),
+gnubatch.conf(5),
+(5),
+gbch-cjlist(8),
+gbch-cvlist(8).
+
+=head1 DIAGNOSTICS
+
+Various diagnostics are read and printed as required from the message
+file F<btrest.help>.
+
+=head1 COPYRIGHT
+
+Copyright (c) 2009 Free Software Foundation, Inc.
+This is free software. You may redistribute copies of it under the
+terms of the GNU General Public License
+<http://www.gnu.org/licenses/gpl.html>.
+There is NO WARRANTY, to the extent permitted by law.
+
+=head1 AUTHOR
+
+John M Collins, Xi Software Ltd.
+
+=cut
+
+## Local Variables:
+## mode: nroff
+## End:

@@ -1,0 +1,158 @@
+#   Makefile.in -- Makefile for API library
+#
+#   Copyright 2009 Free Software Foundation, Inc.
+#
+#   This program is free software: you can redistribute it and/or modify
+#   it under the terms of the GNU General Public License as published by
+#   the Free Software Foundation, either version 3 of the License, or
+#   (at your option) any later version.
+#
+#   This program is distributed in the hope that it will be useful,
+#   but WITHOUT ANY WARRANTY; without even the implied warranty of
+#   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#   GNU General Public License for more details.
+#
+#   You should have received a copy of the GNU General Public License
+#   along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
+#
+#	Makefile for API library
+#
+
+prefix		=	@prefix@
+exec_prefix	=	@exec_prefix@
+SHELL		=	/bin/sh
+PARENT		=	..
+BASE		=	../..
+AR		=	ar
+CC		=	@CC@
+RM		=	rm -f
+HDRS		=	$(PARENT)/hdrs
+CCFLAGS		=	-O @gcc_useful_options@ @funny_compiler_options@ @lib_pic@
+CFLAGS		=	$(CCFLAGS) -I$(HDRS)
+LIBDIR		=	@libdir@
+LDSHARED	=	ld -shared -o
+APILIB		=	libgnubatch.a
+APISHLIB	=	libgnubatch.so
+INSTALL		=	@INSTALL@
+INSTALL_DATA	=	@INSTALL_DATA@
+
+OBJECTS=gbatch_ciadd.o\
+	gbatch_cidel.o\
+	gbatch_ciread.o\
+	gbatch_ciupd.o\
+	gbatch_getbtd.o\
+	gbatch_getbtu.o\
+	gbatch_gethenv.o\
+	gbatch_holread.o\
+	gbatch_holupd.o\
+	gbatch_jobadd.o\
+	gbatch_jobchgrp.o\
+	gbatch_jobchmod.o\
+	gbatch_jobchown.o\
+	gbatch_jobdata.o\
+	gbatch_jobdel.o\
+	gbatch_joblist.o\
+	gbatch_jobop.o\
+	gbatch_jobread.o\
+	gbatch_jobupd.o\
+	gbatch_jobswap.o\
+	gbatch_putbtd.o\
+	gbatch_putbtu.o\
+	gbatch_setqueue.o\
+	gbatch_strings.o\
+	gbatch_varadd.o\
+	gbatch_varchcomm.o\
+	gbatch_varchgrp.o\
+	gbatch_varchmod.o\
+	gbatch_varchown.o\
+	gbatch_vardel.o\
+	gbatch_varlist.o\
+	gbatch_varread.o\
+	gbatch_modepack.o\
+	gbatch_varrename.o\
+	gbatch_varupd.o\
+	gbatch_open.o
+
+all:	@main_target@
+
+nonshared:	$(APILIB)
+	$(AR) crv $(APILIB) $(OBJECTS)
+	@RANLIB@ $(APILIB)
+	$(RM) $(OBJECTS)
+
+shared:		$(APISHLIB)
+
+$(APILIB):	gbatch.h \
+		$(APILIB)(gbatch_ciadd.o)\
+		$(APILIB)(gbatch_cidel.o)\
+		$(APILIB)(gbatch_ciread.o)\
+		$(APILIB)(gbatch_ciupd.o)\
+		$(APILIB)(gbatch_getbtd.o)\
+		$(APILIB)(gbatch_getbtu.o)\
+		$(APILIB)(gbatch_gethenv.o)\
+		$(APILIB)(gbatch_holread.o)\
+		$(APILIB)(gbatch_holupd.o)\
+		$(APILIB)(gbatch_jobadd.o)\
+		$(APILIB)(gbatch_jobchgrp.o)\
+		$(APILIB)(gbatch_jobchmod.o)\
+		$(APILIB)(gbatch_jobchown.o)\
+		$(APILIB)(gbatch_jobdata.o)\
+		$(APILIB)(gbatch_jobdel.o)\
+		$(APILIB)(gbatch_joblist.o)\
+		$(APILIB)(gbatch_jobop.o)\
+		$(APILIB)(gbatch_jobread.o)\
+		$(APILIB)(gbatch_jobupd.o)\
+		$(APILIB)(gbatch_jobswap.o)\
+		$(APILIB)(gbatch_putbtd.o)\
+		$(APILIB)(gbatch_putbtu.o)\
+		$(APILIB)(gbatch_setqueue.o)\
+		$(APILIB)(gbatch_strings.o)\
+		$(APILIB)(gbatch_varadd.o)\
+		$(APILIB)(gbatch_varchcomm.o)\
+		$(APILIB)(gbatch_varchgrp.o)\
+		$(APILIB)(gbatch_varchmod.o)\
+		$(APILIB)(gbatch_varchown.o)\
+		$(APILIB)(gbatch_vardel.o)\
+		$(APILIB)(gbatch_varlist.o)\
+		$(APILIB)(gbatch_varread.o)\
+		$(APILIB)(gbatch_modepack.o)\
+		$(APILIB)(gbatch_varrename.o)\
+		$(APILIB)(gbatch_varupd.o)\
+		$(APILIB)(gbatch_open.o)
+
+# Build shared and non-shared version.
+# TODO - build alternative 32-bit and 64-bit versions on some machines
+
+$(APISHLIB):	gbatch.h $(OBJECTS)
+	$(LDSHARED) $(APISHLIB) -h $(APISHLIB) $(OBJECTS)
+	$(AR) crv $(APILIB) $(OBJECTS)
+	@RANLIB@ $(APILIB)
+	$(RM) $(OBJECTS)
+
+# Build header out of the bits
+
+gbatch.h:	gbatch.pre\
+		gbatch.post\
+		$(BASE)/config.h\
+		$(HDRS)/defaults.h\
+		$(HDRS)/bjparam.h\
+		$(HDRS)/btconst.h\
+		$(HDRS)/btmode.h\
+		$(HDRS)/timecon.h
+	sh ./Hdrmake.sh $(BASE)/config.h $(HDRS)
+
+install:
+	$(INSTALL) -d $(LIBDIR)
+	$(INSTALL_DATA) $(APILIB) $(LIBDIR)
+	if test -f $(APISHLIB); then $(INSTALL) $(APISHLIB) $(LIBDIR); fi
+
+install_strip:
+	$(INSTALL) -d $(LIBDIR)
+	$(INSTALL_DATA) $(APILIB) $(LIBDIR)
+	if test -f $(APISHLIB); then $(INSTALL) $(APISHLIB) $(LIBDIR); fi
+
+clean:
+	$(RM) gbatch.h *.[oa] *.ln *.so
+
+distclean:	clean
+	$(RM) Makefile

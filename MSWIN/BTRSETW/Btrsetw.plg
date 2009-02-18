@@ -1,0 +1,144 @@
+<html>
+<body>
+<pre>
+<h1>Build Log</h1>
+<h3>
+--------------------Configuration: Btrsetw - Win32 Release--------------------
+</h3>
+<h3>Command Lines</h3>
+Creating command line "rc.exe /l 0x809 /fo"Release/Btrsetw.res" /d "NDEBUG" "C:\Sourcecode\Batch\BTRSETW\Btrsetw.rc"" 
+Creating temporary file "c:\windows\TEMP\RSP43A1.TMP" with contents
+[
+/nologo /G3 /MT /W3 /GX /O2 /Ob2 /I "..\btrw" /I "..\include" /I "..\BTRSETW" /D "WIN32" /D "NDEBUG" /D "_WINDOWS" /D "BTRSETW" /FR"Release/" /Fp"Release/Btrsetw.pch" /Yu"STDAFX.H" /Fo"Release/" /Fd"Release/" /FD /c 
+"C:\Sourcecode\Batch\BTRSETW\Btrsedoc.cpp"
+"C:\Sourcecode\Batch\BTRSETW\Btrsetw.cpp"
+"C:\Sourcecode\Batch\BTRSETW\Btrsevw.cpp"
+"C:\Sourcecode\Batch\Winlib\conthelp.cpp"
+"C:\Sourcecode\Batch\BTRSETW\Defass.cpp"
+"C:\Sourcecode\Batch\BTRSETW\Defcond.cpp"
+"C:\Sourcecode\Batch\Winlib\Getregdata.cpp"
+"C:\Sourcecode\Batch\BTRSETW\Hostdlg.cpp"
+"C:\Sourcecode\Batch\BTRSETW\Jobmode.cpp"
+"C:\Sourcecode\Batch\Winlib\LoadHost.cpp"
+"C:\Sourcecode\Batch\BTRSETW\LoginHost.cpp"
+"C:\Sourcecode\Batch\BTRSETW\LoginOut.cpp"
+"C:\Sourcecode\Batch\BTRSETW\Mainfrm.cpp"
+"C:\Sourcecode\Batch\Winlib\netrouts.cpp"
+"C:\Sourcecode\Batch\BTRSETW\NewGrpDlg.cpp"
+"C:\Sourcecode\Batch\BTRSETW\Portnums.cpp"
+"C:\Sourcecode\Batch\BTRSETW\Procpar.cpp"
+"C:\Sourcecode\Batch\BTRSETW\Progopts.cpp"
+"C:\Sourcecode\Batch\BTRSETW\Queuedef.cpp"
+"C:\Sourcecode\Batch\BTRSETW\Timedflt.cpp"
+"C:\Sourcecode\Batch\BTRSETW\Timelim.cpp"
+"C:\Sourcecode\Batch\BTRSETW\Ulist.cpp"
+"C:\Sourcecode\Batch\Winlib\userops.cpp"
+]
+Creating command line "cl.exe @c:\windows\TEMP\RSP43A1.TMP" 
+Creating temporary file "c:\windows\TEMP\RSP43A2.TMP" with contents
+[
+/nologo /G3 /MT /W3 /GX /O2 /Ob2 /I "..\btrw" /I "..\include" /I "..\BTRSETW" /D "WIN32" /D "NDEBUG" /D "_WINDOWS" /D "BTRSETW" /FR"Release/" /Fp"Release/Btrsetw.pch" /Yc"STDAFX.H" /Fo"Release/" /Fd"Release/" /FD /c 
+"C:\Sourcecode\Batch\BTRSETW\Stdafx.cpp"
+]
+Creating command line "cl.exe @c:\windows\TEMP\RSP43A2.TMP" 
+Creating temporary file "c:\windows\TEMP\RSP43A3.TMP" with contents
+[
+wsock32.lib oldnames.lib /nologo /stack:0x2800 /subsystem:windows /incremental:no /pdb:"Release/Btrsetw.pdb" /machine:IX86 /def:".\Btrsetw.def" /out:"Release/Btrsetw.exe" 
+.\Release\Btrsedoc.obj
+.\Release\Btrsetw.obj
+.\Release\Btrsevw.obj
+.\Release\conthelp.obj
+.\Release\Defass.obj
+.\Release\Defcond.obj
+.\Release\Getregdata.obj
+.\Release\Hostdlg.obj
+.\Release\Jobmode.obj
+.\Release\LoadHost.obj
+.\Release\LoginHost.obj
+.\Release\LoginOut.obj
+.\Release\Mainfrm.obj
+.\Release\netrouts.obj
+.\Release\NewGrpDlg.obj
+.\Release\Portnums.obj
+.\Release\Procpar.obj
+.\Release\Progopts.obj
+.\Release\Queuedef.obj
+.\Release\Stdafx.obj
+.\Release\Timedflt.obj
+.\Release\Timelim.obj
+.\Release\Ulist.obj
+.\Release\userops.obj
+.\Release\Btrsetw.res
+]
+Creating command line "link.exe @c:\windows\TEMP\RSP43A3.TMP"
+<h3>Output Window</h3>
+Compiling resources...
+Compiling...
+Stdafx.cpp
+Compiling...
+Btrsedoc.cpp
+Btrsetw.cpp
+Btrsevw.cpp
+conthelp.cpp
+Defass.cpp
+Defcond.cpp
+Getregdata.cpp
+Hostdlg.cpp
+Jobmode.cpp
+LoadHost.cpp
+LoginHost.cpp
+LoginOut.cpp
+Mainfrm.cpp
+netrouts.cpp
+NewGrpDlg.cpp
+Portnums.cpp
+Procpar.cpp
+Progopts.cpp
+Queuedef.cpp
+Timedflt.cpp
+Generating Code...
+Compiling...
+Timelim.cpp
+Ulist.cpp
+userops.cpp
+Generating Code...
+Linking...
+   Creating library Release/Btrsetw.lib and object Release/Btrsetw.exp
+Creating temporary file "c:\windows\TEMP\RSP5160.TMP" with contents
+[
+/nologo /o"Release/Btrsetw.bsc" 
+.\Release\Stdafx.sbr
+.\Release\Btrsedoc.sbr
+.\Release\Btrsetw.sbr
+.\Release\Btrsevw.sbr
+.\Release\conthelp.sbr
+.\Release\Defass.sbr
+.\Release\Defcond.sbr
+.\Release\Getregdata.sbr
+.\Release\Hostdlg.sbr
+.\Release\Jobmode.sbr
+.\Release\LoadHost.sbr
+.\Release\LoginHost.sbr
+.\Release\LoginOut.sbr
+.\Release\Mainfrm.sbr
+.\Release\netrouts.sbr
+.\Release\NewGrpDlg.sbr
+.\Release\Portnums.sbr
+.\Release\Procpar.sbr
+.\Release\Progopts.sbr
+.\Release\Queuedef.sbr
+.\Release\Timedflt.sbr
+.\Release\Timelim.sbr
+.\Release\Ulist.sbr
+.\Release\userops.sbr]
+Creating command line "bscmake.exe @c:\windows\TEMP\RSP5160.TMP"
+Creating browse info file...
+<h3>Output Window</h3>
+
+
+
+<h3>Results</h3>
+Btrsetw.exe - 0 error(s), 0 warning(s)
+</pre>
+</body>
+</html>

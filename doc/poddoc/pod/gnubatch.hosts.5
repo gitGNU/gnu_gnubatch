@@ -1,0 +1,152 @@
+=head1 NAME
+
+gnubatch.hosts - hosts description file
+
+=head1 DESCRIPTION
+
+F<gnubatch.hosts> is used to inform the B<GNUbatch> batch
+scheduling system, and in particular btsched(8) and xbnetserv(8),
+which other host machines are to be attached.
+
+The host machines should in general be provided for in the standard
+file F</etc/hosts>.
+
+The file consists of comment lines introduced by the B<#> character,
+and of lines consisting of up to 4 fields, of which only
+the first is mandatory. These fields are as follows:
+
+=head2 Host name
+
+This is the name of the host.
+
+Alternatively an internet address of the form C<193.112.238.10> may be
+given if necessary and an alias is provided on the next field,
+but this is not recommended.
+
+=head2 Alias name
+
+This is the name of an alias to be used in preference to the host name
+to refer to the machine. To be particularly beneficial, this should be
+shorter than the host name.
+
+If this field is not required, but subsequent fields are required,
+then the alias name may be replaced by a single B<-> sign.
+
+=head2 Flags
+
+This is a comma-separated list of markers to denote information about
+the connection. The currently-supported markers are B<probe>,
+B<dos(>I<username>B<)> and B<manual>, any or all of which may be
+specified.
+
+=over 8
+
+=item probe
+
+Indicates that a datagram should be sent, and a reply
+awaited, from the host, before a full-blown connection is
+attempted. This is recommended wherever possible, or it is not sure in
+which order machines are booted.
+
+=item manual
+
+indicates that no connection at all is attempted. To connect to the
+machine in question, then btconn(1) should be invoked.
+
+=item trusted
+
+indicates that the host is "trusted" by the current machine, which
+transmits information about Windows clients and their password
+validations, so the other host need not make such enquiries.
+
+=item client
+
+=item clientI<(username)>
+
+indicates that no connection is attempted; the current machine is
+acting as a server for Windows clients. The specified I<username> is to be
+considered as the owner of any jobs submitted, and the user to whom
+charges should be applied and to which privileges apply; see
+gbch-user(1).
+
+If I<(username)> is omitted, then the Windows user is assumed, which
+should correspond to a user name on the host system.
+
+=item clientuser
+
+=item clientuserI<(machine)>
+
+Indicates that the whole entry identifies a "roaming user" who might
+be using one of several Windows clients, possibly with C<IP> addresses
+assigned via C<DHCP>. The host name in this case is replaced by the
+Windows user name, and the alias gives the Unix user name if
+different.
+
+If I<(machine)> is specified, then a password is demanded at the
+Windows client if the client's C<IP> address does not match that of
+I<machine>.
+
+=item dosI<(username)>
+
+Is a synonym for B<client>I<(username)> kept for historical reasons.
+
+=item dosuserI<(username)>
+
+Is a synonym for B<clientuser>I<(username)> kept for historical
+reasons.
+
+=item external
+
+Is a synonym for B<client> (no username) kept for future extensions.
+
+=item pwchk
+
+Always demand the user's Unix password when first starting up.
+
+=back
+
+=head2 Timeout
+
+This gives a timeout value in seconds after which the interface is to
+be considered closed following a connection or alternatively to await
+a connection after a B<probe> request.
+
+A default of 1000 seconds applies if none is specified.
+
+In the case of Windows clients, the "login" is considered to be
+dropped after this time, and the user may be asked for a password
+again.
+
+=head1 LOCAL ADDRESS
+
+On some machines, the "local" host address may be different from that
+obtained by looking at the result of I<gethostname>(3). To specify a
+different address for "this" machine, a line of the form:
+
+ localaddress 193.112.238.112
+
+may be specified, but this B<must> precede all other host names in the
+file.
+
+=head1 FILES
+
+F<gnubatch.hosts>
+hosts description file
+
+=head1 COPYRIGHT
+
+Copyright (c) 2009 Free Software Foundation, Inc.
+This is free software. You may redistribute copies of it under the
+terms of the GNU General Public License
+<http://www.gnu.org/licenses/gpl.html>.
+There is NO WARRANTY, to the extent permitted by law.
+
+=head1 AUTHOR
+
+John M Collins, Xi Software Ltd.
+
+=cut
+
+## Local Variables:
+## mode: nroff
+## End:

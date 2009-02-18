@@ -1,0 +1,374 @@
+<?xml version="1.0" ?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<title>btsyntax - option handling for GNUbatch programs</title>
+<meta http-equiv="content-type" content="text/html; charset=utf-8" />
+<link rev="made" href="mailto:root@localhost" />
+</head>
+
+<body style="background-color: white">
+
+<p><a name="__index__"></a></p>
+<!-- INDEX BEGIN -->
+<!--
+
+<ul>
+
+	<li><a href="#name">NAME</a></li>
+	<li><a href="#description">DESCRIPTION</a></li>
+	<ul>
+
+		<li><a href="#option_types">Option types</a></li>
+		<li><a href="#option_syntax">Option syntax</a></li>
+		<li><a href="#configuration_files">Configuration files</a></li>
+		<li><a href="#option_path">Option path</a></li>
+		<li><a href="#message_files">Message files</a></li>
+		<li><a href="#location_of_message_files">Location of message files</a></li>
+		<li><a href="#path_to_locate_message_files">Path to locate message files</a></li>
+	</ul>
+
+	<li><a href="#files">FILES</a></li>
+	<li><a href="#environment">ENVIRONMENT</a></li>
+	<li><a href="#copyright">COPYRIGHT</a></li>
+	<li><a href="#author">AUTHOR</a></li>
+</ul>
+-->
+<!-- INDEX END -->
+
+<p>
+</p>
+<h1><a name="name">NAME</a></h1>
+<p>btsyntax - option handling for GNUbatch programs</p>
+<p>
+</p>
+<hr />
+<h1><a name="description">DESCRIPTION</a></h1>
+<p>All of the options referred to in the descriptions of the shell-level
+programs for <strong>GNUbatch</strong> below may be supplied in a <em>configuration
+file</em> (q.v.), or in an environment variable whose name is the same as
+the calling program, except that it is in lower case.</p>
+<p>This may enable defaults to be supplied according to the application
+from which the program is invoked. However any options and arguments
+supplied on the command line usually take priority.</p>
+<p>Additionally by editing the appropriate <em>message file</em> (q.v.) it is
+possible to change the option letters and keywords from those
+described.</p>
+<p>
+</p>
+<h2><a name="option_types">Option types</a></h2>
+<p>In nearly all cases there are two alternative ways of supplying
+options:</p>
+<ul>
+<li>
+<p>Via a traditional Unix-style <strong>-</strong><em>letter</em> option, for example as
+<strong>-z</strong>. In some cases, such as in gbch-r(1) and gbch-jchange(1) we ran out of
+letters and had to use other a few other characters, such as digits.</p>
+</li>
+<li>
+<p>Via a keyword-style option, such as <code>+zero-charge</code>. Keywords are
+case-insensitive.</p>
+</li>
+</ul>
+<p>
+</p>
+<h2><a name="option_syntax">Option syntax</a></h2>
+<p>The syntax of options is intended to be as flexible as
+possible. Options which do not take arguments may be grouped together
+as in</p>
+<pre>
+        -Nwm</pre>
+<p>or they may be given separately as in</p>
+<pre>
+        -N -w -m</pre>
+<p>White space is optional in the case of options which do take
+arguments, thus both</p>
+<pre>
+        -p150</pre>
+<p>and</p>
+<pre>
+        -p 150</pre>
+<p>are acceptable and have the same effect.</p>
+<p>If the keyword version of an option is given, then it must be
+separated from its argument by white space thus</p>
+<pre>
+        +priority 150</pre>
+<p>
+</p>
+<h2><a name="configuration_files">Configuration files</a></h2>
+<p>To save the user from having to specify commonly-used combinations of
+options, there are mechanisms enabling these to be supplied to each
+program automatically.</p>
+<p>One mechanism is the use of a <em>configuration file</em>, <em>.gnubatch</em> in the
+current or user's home directory. The other is the use of an
+environment variable.</p>
+<p>These files may also be used to specify alternative <em>message files</em>.</p>
+<p>The format of configuration files is akin to a set of environment
+variable assignments, with empty lines and lines beginning with <code>#</code>
+being ignored.</p>
+<p>The name assigned to is the same as that of the calling program but in
+upper case and hyphens changed to underscores, for example that
+corresponding to <strong>gbch-r</strong> is <code>GBCH_R</code> etc. This is the same as for the
+corresponding environment variable.</p>
+<p>Usually options are taken from the following places in order, so that
+later-processed ones override earlier ones:</p>
+<dl>
+<dt><strong><a name="item_standard_defaults">Standard defaults</a></strong>
+
+<dd>
+<p>Each program has a set of standard defaults which are used to
+initialise the parmaters when the program is invoked.</p>
+</dd>
+</li>
+<dt><strong><a name="item_user_profile">User profile</a></strong>
+
+<dd>
+<p>In some cases, for example default priority, the user's profile as
+displayed by gbch-user(1) is used to initialise the defaults.</p>
+</dd>
+</li>
+<dt><strong><a name="item_home_directory">Home directory</a></strong>
+
+<dd>
+<p>The file <em>~/.gnubatch</em> is read, and any options specified therein
+(i.e. with an assignment to the appropriate name) are interpreted.</p>
+</dd>
+</li>
+<dt><strong><a name="item_environment">Environment</a></strong>
+
+<dd>
+<p>Any options specified in the appropriate environment variable (you
+will almost certainly have to use quotes when setting it via the shell
+in order to preserve the white space) are read and interpreted.</p>
+</dd>
+</li>
+<dt><strong><a name="item_current_directory">Current Directory</a></strong>
+
+<dd>
+<p>The file <em>.gnubatch</em> is read, and any options specified therein
+(i.e. with an assignment to the appropriate name) are interpreted.</p>
+</dd>
+<dd>
+<p>Note that this may mean that the <em>.gnubatch</em> file is read twice if the
+command is run from the home directory. Beware therefore of options
+which are cumulative, such as arguments and redirections, and use the
+``cancel existing'' options.</p>
+</dd>
+</li>
+<dt><strong><a name="item_command_line">Command line</a></strong>
+
+<dd>
+<p>Any options specified on the command line are interpreted last.</p>
+</dd>
+</li>
+</dl>
+<p>Most options have inverses so that it is possible to reset anything
+which may have been set by previously-read options. Extra care should
+be taken with cumulative options, notably arguments and redirections,
+so that these are not doubled, especially in the case where the home
+directory is also the current directory.</p>
+<p>
+</p>
+<h2><a name="option_path">Option path</a></h2>
+<p>The above description of the order of selection of configuration
+files, environment and command-line options is the default.</p>
+<p>It may be desirable to change the order of selection of options, in
+to eliminate some alternative locations or to include others.</p>
+<p>The environment variable <a href="#item_gb_configpath"><code>GB_CONFIGPATH</code></a> may be set to a
+colon-separated list of directories (environment variables and
+<code>~</code><em>user</em> constructs are appropriately interpreted).</p>
+<p>The symbol <code>!</code> is used to represent the relevant environment
+variable, and <code>-</code> is used to represent option arguments.</p>
+<p>The default value of <a href="#item_gb_configpath"><code>GB_CONFIGPATH</code></a> is</p>
+<pre>
+        ~:!:.:-</pre>
+<p>This provides the interpretation of options in various configuration
+files and the environment which is documented above.</p>
+<p>Note that it is possible to eliminate or override the interpretation
+of options on the command line by removing or relocating the <code>-</code>. This
+may have very surprising effects especially where configuration files
+wipe out the effects of options which may have been set on the command
+line. Where the interpretation of options has been removed altogether,
+then any options supplied will probably be objected to or
+misinterpreted as file names or similar.</p>
+<p>The commands</p>
+<pre>
+        +freeze-home</pre>
+<p>and</p>
+<pre>
+        +freeze-current</pre>
+<p>and equivalents do not take into account the value of <a href="#item_gb_configpath"><code>GB_CONFIGPATH</code></a>
+in any way.</p>
+<p>Finally please note that any non-existent or inaccessible directories
+and files will (usually) be silently ignored. If a configuration file
+appears to exist but is inaccessible, a diagnostic may be given;
+however in some cases this may be misleading due to the fact that
+various versions of Unix are misleading or inconsistent with regard to
+the error codes reported from an attempt to open a non-existent or
+inaccessible file in a non-existent or inaccessible directory.</p>
+<p>
+</p>
+<h2><a name="message_files">Message files</a></h2>
+<p>As well as providing help and error messages, screen key assignments
+etc, message files also provide the option letters and keyword names
+used to specify the options.</p>
+<p>For each command, there is a default message file. For most of the
+shell-based commands, this is <em>btrest.help</em>. Alternative message
+files may be specified using an environment variable or configuration
+file assigning values to a name. For most of the shell-based commands,
+this is <code>BTRESTCONF</code>.</p>
+<p>Within the message file itself, the option letters and keywords are
+set up using sequences of the form</p>
+<pre>
+        A300:?,explain</pre>
+<p>Comments and the context should make clear which commands these
+options relate to.</p>
+<p>These sequences define</p>
+<dl>
+<dt><strong><a name="item_a_state_number">A state number</a></strong>
+
+<dd>
+<p>The state number, in the above example <code>300</code>, which is used internally
+to denote the argument.</p>
+</dd>
+</li>
+<dt><strong><a name="item_option_letters">option letters</a></strong>
+
+<dd>
+<p>A single character, often a letter, but in the above example <code>?</code>,
+which is the single-character variant of the option, thus <code>-?</code>.</p>
+</dd>
+<dd>
+<p>Several option letters, each separated by commas may be defined. To
+define &lt;,&gt; itself as an option ``letter'', use <code>\,</code>.</p>
+</dd>
+</li>
+<dt><strong><a name="item_option_keywords">option keywords</a></strong>
+
+<dd>
+<p>A string of alphanumerics, possibly including hyphens and underscores,
+is used to denote an option keyword, in the above example
+<code>+explain</code>. Several such keywords may be defined, each separated by
+commas. Note that the case of letters in the keywords is discarded.</p>
+</dd>
+</li>
+</dl>
+<p>
+</p>
+<h2><a name="location_of_message_files">Location of message files</a></h2>
+<p>It is possible to specify alternative locations for message files so
+that alternatives are selected according to the application being run
+etc.</p>
+<p>The location may be specified using configuration files in a similar
+fashion to the search for options, except that the search runs the
+other way.</p>
+<p>The search is in the following order:</p>
+<dl>
+<dt><strong>Current Directory</strong>
+
+<dd>
+<p>If a configuration file in the current directory specifies a location
+for the message file, by means of an assignment to the relevant
+variable (for most shell-based commands this is <code>BTRESTCONF</code>), then
+this file is taken.</p>
+</dd>
+<dd>
+<p>Environment variables in the form <code>$ABC</code> and users' home directories
+in the form <code>~</code><em>user</em> are appropriately expanded. The sequence <code>$0</code>
+is replaced by the name of the program being invoked. (This process
+may run recursively up to a level of 10).</p>
+</dd>
+</li>
+<dt><strong>Environment</strong>
+
+<dd>
+<p>If the relevant environment variable (for most shell-based commands
+this is <code>BTRESTCONF</code>) specifies a location, then this is taken.</p>
+</dd>
+</li>
+<dt><strong><a name="item_home_directory">Home Directory</a></strong>
+
+<dd>
+<p>A configuration file in the home directory may specify a location for
+the message file.</p>
+</dd>
+</li>
+<dt><strong><a name="item_default_location">Default Location</a></strong>
+
+<dd>
+<p>If none of the above specify a replacment message file then the
+default location is taken.</p>
+</dd>
+</li>
+</dl>
+<p>If a file is specified but does not exist, then this is a fatal
+error.</p>
+<p>However there is an additional step to assist the user to set up some
+alternative files with a default name.</p>
+<p>Should the file not exist, then the search falls back to a name
+generated by taking the last part of the default file name (for
+example <em>btrest.conf</em>) and substituting this for the last part of the
+file name specified.</p>
+<p>For example if the normal message file for the command were</p>
+<pre>
+        /var/lib/gnubatch/btrest.help</pre>
+<p>and the user had specified in a configuration file</p>
+<pre>
+        BTRESTCONF=~/$0.help</pre>
+<p>then if he or she were to run, say, <strong>gbch-r</strong>, then the file</p>
+<pre>
+        ~/gbch-r.help</pre>
+<p>would be searched for. If this did not exist, then a search would be
+made for</p>
+<pre>
+        ~/btrest.help</pre>
+<p>
+</p>
+<h2><a name="path_to_locate_message_files">Path to locate message files</a></h2>
+<p>The above search path may be modified using the environment variable
+<a href="#item_gb_helppath"><code>GB_HELPPATH</code></a>. The interpretation is very similar to the description
+above for <a href="#item_gb_configpath"><code>GB_CONFIGPATH</code></a>, except that <code>-</code> fields are ignored.</p>
+<p>
+</p>
+<hr />
+<h1><a name="files">FILES</a></h1>
+<p><em>~/.gnubatch</em>
+configuration file (home directory)</p>
+<p><em>.gnubatch</em>
+configuration file (current directory)</p>
+<p>
+</p>
+<hr />
+<h1><a name="environment">ENVIRONMENT</a></h1>
+<dl>
+<dt><strong><a name="item_gb_configpath">GB_CONFIGPATH</a></strong>
+
+<dd>
+<p>Path to search for options in.</p>
+</dd>
+</li>
+<dt><strong><a name="item_gb_helppath">GB_HELPPATH</a></strong>
+
+<dd>
+<p>Path to search for location of message files in.</p>
+</dd>
+</li>
+</dl>
+<p>
+</p>
+<hr />
+<h1><a name="copyright">COPYRIGHT</a></h1>
+<p>Copyright (c) 2009 Free Software Foundation, Inc.
+This is free software. You may redistribute copies of it under the
+terms of the GNU General Public License
+&lt;http://www.gnu.org/licenses/gpl.html&gt;.
+There is NO WARRANTY, to the extent permitted by law.</p>
+<p>
+</p>
+<hr />
+<h1><a name="author">AUTHOR</a></h1>
+<p>John M Collins, Xi Software Ltd.</p>
+
+</body>
+
+</html>

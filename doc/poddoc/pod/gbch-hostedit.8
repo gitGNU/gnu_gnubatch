@@ -1,0 +1,122 @@
+=head1 NAME
+
+gbch-hostedit - edit GNUbatch host table
+
+=head1 SYNOPSIS
+
+B<gbch-hostedit>
+[ -I<o file> ]
+[ -I<s arg> ]
+[ -I<I> ]
+[ I<file> ]
+
+=head1 DESCRIPTION
+
+B<gbch-hostedit> is a simple curses-based program to edit host tables for
+F<gnubatch.hosts>, the host table for GNUbatch.
+
+It knows about local addresses (selecting the correct IP address for a
+machine with different IPs on different networks), Windows clients,
+DHCP, trusted hosts, manual connections, probes and timeouts.
+
+Input is taken from standard input unless a file name is given, and
+output is to standard output unless the B<-o> option is given.
+
+Normally this would be run as follows:
+
+	gbch-hostedit -o /tmp/hostfile /usr/local/etc/
+	cp /tmp/hostfile /usr/local/etc/
+	rm /tmp/hostfile
+
+You will usually have to stop and restart GNUbatch after you have
+done this so that all parts of the system "know" about the new hosts,
+however this may not be necessary in all cases, you may only have to
+"C<kill -1>" the process id of the xbnetserv process.
+
+=head1 OPTIONS
+
+=over 8
+
+=item B<-o> I<file>
+
+Output to the named file rather than Standard Output 
+
+=item B<-s> I<char>
+
+Where I<char> is C<h> or C<i>, sort display by host name or by IP
+address.
+
+=item B<-I>
+
+Edit in place; a file argument must be given.
+
+=back
+
+=head1 COMMANDS
+
+The following command keys are used from within the screen displayed
+by B<gbch-hostedit>. As with other GNUbatch commands, any commands which
+operate upon an existing item will do so with the item to which the
+cursor is moved.
+
+=over 4
+
+=item k or I<cursor up>
+
+Move cursor up.
+
+=item j or I<cursor down>
+
+Move cursor down.
+
+=item N or I<next page>
+
+Scroll down a screenful.
+
+=item P or I<previous page>
+
+Scroll up a screenful.
+
+=item q
+
+Quit and write hosts file.
+
+=item a
+
+Create a new hosts entry.
+
+=item c
+
+Edit the selected hosts entry.
+
+=item d
+
+Delete the selected hosts entry.
+
+=item l
+
+Edit the local hosts entry.
+
+=item u
+
+Set the default user name for DHCP clients.
+
+=back
+
+=head1 COPYRIGHT
+
+Copyright (c) 2009 Free Software Foundation, Inc.
+This is free software. You may redistribute copies of it under the
+terms of the GNU General Public License
+<http://www.gnu.org/licenses/gpl.html>.
+There is NO WARRANTY, to the extent permitted by law.
+
+=head1 AUTHOR
+
+John M Collins, Xi Software Ltd.
+
+=cut
+
+## Local Variables:
+## mode: nroff
+## End:

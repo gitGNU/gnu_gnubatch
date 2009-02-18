@@ -1,0 +1,89 @@
+=head1 NAME
+
+gbatch_varadd - create a variable
+
+=head1 SYNOPSIS
+
+=for man
+\&\fB#include <gbatch.h>\fR
+.PP
+
+=for html
+<STRONG>#include &lt;gbatch.h&gt;</STRONG>
+<br>
+
+B<int gbatch_varadd(const int>
+I<fd>B<, apiBtvar *>I<vard>B<)>
+
+=head1 DESCRIPTION
+
+The function B<gbatch_varadd> is used to create a new variable.
+
+I<fd> is a file descriptor which was previously returned by a
+successful call to gbatch_open(3).
+
+I<vard> is a pointer to a structure which contains the details of the
+new variable.
+
+=head1 RETURN VALUES
+
+The function returns 0 if successful, otherwise an error code as
+defined in the include file \fBgbatch.h\fR.
+
+=head1 EXAMPLE
+
+ int fd, ret
+ int apiBtvar outv;
+
+ fd = gbatch_open("myhost", (char *) 0);
+ if (fd < 0)  { /* error handling */
+     ...
+ }
+ memset((void *)&outv, '\0', sizeof(outv));
+ strcpy(outv.var_name, "var1");
+ strcpy(outv.var_comment, "A comment");
+ outv.var_value.const_type = CON_LONG;
+ outv.var_value.con_un.con_long = 1;
+ outv.var_mode.u_flags = VALLMODES;
+ ret = gbatch_varadd(fd, &outv);
+ if (ret < 0) { /* error handling */
+     ...
+ }
+ gbatch_close(fd);
+
+=head1 SEE ALSO
+
+gbatch_jobadd(3),
+gbatch_jobchgrp(3),
+gbatch_jobchmod(3),
+gbatch_jobchown(3),
+gbatch_jobdel(3),
+gbatch_jobupd(3),
+gbatch_varchcomm(3),
+gbatch_varchgrp(3),
+gbatch_varchmod(3),
+gbatch_varchown(3),
+gbatch_vardel(3),
+gbatch_varfind(3),
+gbatch_varlist(3),
+gbatch_varread(3),
+gbatch_varrename(3),
+gbatch_varupd(3).
+
+=head1 COPYRIGHT
+
+Copyright (c) 2009 Free Software Foundation, Inc.
+This is free software. You may redistribute copies of it under the
+terms of the GNU General Public License
+<http://www.gnu.org/licenses/gpl.html>.
+There is NO WARRANTY, to the extent permitted by law.
+
+=head1 AUTHOR
+
+John M Collins, Xi Software Ltd.
+
+=cut
+
+## Local Variables:
+## mode: nroff
+## End:

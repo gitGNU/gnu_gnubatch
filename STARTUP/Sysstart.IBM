@@ -1,0 +1,51 @@
+#! /bin/sh
+#
+#   Copyright 2009 Free Software Foundation, Inc.
+#
+#  This program is free software: you can redistribute it and/or modify
+#  it under the terms of the GNU General Public License as published by
+#  the Free Software Foundation, either version 3 of the License, or
+#  (at your option) any later version.
+#
+#  This program is distributed in the hope that it will be useful,
+#  but WITHOUT ANY WARRANTY; without even the implied warranty of
+#  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#  GNU General Public License for more details.
+#
+#   You should have received a copy of the GNU General Public License
+#  along with this program.  If not, see <http://www.gnu.org/licenses/>.
+#
+# Insert system start for IBM
+
+. ./Startdirs
+
+sysname=`uname`
+
+if [ "$sysname" != "AIX" ]
+then
+    cat <<EOF
+This setup is for an AIX system not $sysname.
+
+If your system is an IBM one please would you tell us about the problem
+installing you system startup routine so we can cater for this type in future.
+
+Better still please give us fixes!
+Thank you
+EOF
+else
+    if [ "$forceme" = "Y" ] || grep "^gnubatch:" /etc/inittab >/dev/null 2>&1;[ $? -ne 0 ]
+    then
+	if grep "^gnubatch:" /etc/inittab >/dev/null 2>&1
+	then
+	    ed -s /etc/inittab <<EOE
+/^gnubatch:/d
+w
+q
+EOE
+	fi
+	defaultstate=`sed -e '/:initdefault:/!d
+s/^[^:]*:\([^:]*\):.*:/\1/' /etc/inittab`
+	: ${defaultstate:=2}
+	echo "gnubatch:$defaultstate:once:$USERPATH/gbch-start -j 200 -v 500" >>/etc/inittab
+    fi
+fi

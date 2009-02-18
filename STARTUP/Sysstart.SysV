@@ -1,0 +1,102 @@
+#! /bin/sh
+#
+#   Copyright 2009 Free Software Foundation, Inc.
+#
+#  This program is free software: you can redistribute it and/or modify
+#  it under the terms of the GNU General Public License as published by
+#  the Free Software Foundation, either version 3 of the License, or
+#  (at your option) any later version.
+#
+#  This program is distributed in the hope that it will be useful,
+#  but WITHOUT ANY WARRANTY; without even the implied warranty of
+#  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#  GNU General Public License for more details.
+#
+#   You should have received a copy of the GNU General Public License
+#  along with this program.  If not, see <http://www.gnu.org/licenses/>.
+#
+# System V startup
+
+. ./Startdirs
+
+defaultstate=`sed -e '/:initdefault:/!d
+s/^[^:]*:\([^:]*\):.*:/\1/' /etc/inittab`
+
+for loc in /etc/rc.d /etc
+  do
+  if [ -d $loc ]
+  then
+      rcloc=$loc
+      break
+  fi
+done
+
+if [ -z "$defaultstate" ] && [ -d $rcloc/rc3.d ]
+then
+    echo "Assuming default startup state is 3...."
+    defaultstate=3
+fi
+	
+for loc in /etc/rc.d/init.d /etc/init.d
+  do
+  if [ -d $loc ]
+  then
+      initdir=$loc
+      break
+  fi
+done
+
+if [ -z "$rcloc" ] || [ -z "$initdir" ] || [ -z "$defaultstate" ]
+then
+    cat <<EOF
+Sorry but this machine does not have a System V boot setup as expected.
+You will have to insert the startup procedures yourself.
+
+Please note - startup:
+
+	gbch-start -j 200 -v 500
+
+(In this example space is reserved for 200 jobs and 500 variables but
+you'll probably want to adjust those).
+
+Shutdown:
+
+	gbch-quit -y
+EOF
+elif [ "$forceme" = "Y" ] || [ ! -f $initdir/gnubatch ]
+then
+    rm -f $initdir/gnubatch $rcloc/rc?.d/*gnubatch
+    Scriptfile=$initdir/gnubatch
+    cat <<EOF >$Scriptfile
+#
+#	Startup of GNUbatch
+#
+
+case "\$1" in
+start)
+	# Start GNUbatch.
+	# Delete previous memory-mapped stuff which might have got left behind
+
+	rm -f $SPOOLDIR/btmm*	
+
+	# This allocates space for amaximum of 200 jobs and 500 variables
+	# but please adjust as needed
+
+	$USERPATH/gbch-start -j 200 -v 500
+	echo GNUbatch Started
+	;;
+stop)
+	$USERPATH/gbch-quit -y
+	echo GNUbatch stopped
+	;;
+*)
+	echo "Usage: \$0 { start | stop }"
+        exit 1
+	;;
+esac
+EOF
+    chmod 744 $Scriptfile
+    ln $Scriptfile $rcloc/rc0.d/K01gnubatch
+    ln $Scriptfile $rcloc/rc$defaultstate.d/S80gnubatch
+    ln $Scriptfile $rcloc/rc$defaultstate.d/K01gnubatch
+fi

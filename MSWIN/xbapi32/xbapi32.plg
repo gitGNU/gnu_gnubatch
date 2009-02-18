@@ -1,0 +1,70 @@
+<html>
+<body>
+<pre>
+<h1>Build Log</h1>
+<h3>
+--------------------Configuration: xbapi32 - Win32 Release--------------------
+</h3>
+<h3>Command Lines</h3>
+Creating temporary file "c:\windows\TEMP\RSP22E2.TMP" with contents
+[
+/nologo /MT /W3 /GX /O2 /I "../include" /D "WIN32" /D "NDEBUG" /D "_WINDOWS" /Fp"Release/xbapi32.pch" /YX /Fo"Release/" /Fd"Release/" /FD /c 
+"C:\Sourcecode\Batch\xbapi32\Xb_gethe.c"
+"C:\Sourcecode\Batch\xbapi32\Xb_jobre.c"
+]
+Creating command line "cl.exe @c:\windows\TEMP\RSP22E2.TMP" 
+Creating temporary file "c:\windows\TEMP\RSP22E3.TMP" with contents
+[
+kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib wsock32.lib /nologo /subsystem:windows /dll /incremental:no /pdb:"Release/xbapi32.pdb" /machine:I386 /def:".\xbapi32.def" /out:"Release/xbapi32.dll" /implib:"Release/xbapi32.lib" 
+.\Release\Xb_ciadd.obj
+.\Release\Xb_cidel.obj
+.\Release\Xb_cirea.obj
+.\Release\Xb_ciupd.obj
+.\Release\Xb_gbtd.obj
+.\Release\Xb_gbtu.obj
+.\Release\Xb_gethe.obj
+.\Release\Xb_holre.obj
+.\Release\Xb_holup.obj
+.\Release\Xb_jchgr.obj
+.\Release\Xb_jchmo.obj
+.\Release\Xb_jchow.obj
+.\Release\Xb_jobad.obj
+.\Release\Xb_jobda.obj
+.\Release\Xb_jobde.obj
+.\Release\Xb_jobli.obj
+.\Release\Xb_jobop.obj
+.\Release\Xb_jobre.obj
+.\Release\Xb_jobsw.obj
+.\Release\Xb_jobup.obj
+.\Release\Xb_modep.obj
+.\Release\Xb_open.obj
+.\Release\Xb_pbtd.obj
+.\Release\Xb_pbtu.obj
+.\Release\Xb_setqu.obj
+.\Release\Xb_strin.obj
+.\Release\Xb_varad.obj
+.\Release\Xb_varde.obj
+.\Release\Xb_varli.obj
+.\Release\Xb_varrd.obj
+.\Release\Xb_varre.obj
+.\Release\Xb_varup.obj
+.\Release\Xb_vchco.obj
+.\Release\Xb_vchgr.obj
+.\Release\Xb_vchmo.obj
+.\Release\Xb_vchow.obj
+]
+Creating command line "link.exe @c:\windows\TEMP\RSP22E3.TMP"
+<h3>Output Window</h3>
+Compiling...
+Xb_gethe.c
+Xb_jobre.c
+Linking...
+   Creating library Release/xbapi32.lib and object Release/xbapi32.exp
+
+
+
+<h3>Results</h3>
+xbapi32.dll - 0 error(s), 0 warning(s)
+</pre>
+</body>
+</html>

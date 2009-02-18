@@ -1,0 +1,135 @@
+=head1 NAME
+
+gbatch_jobdata - read a job's job script
+
+=head1 SYNOPSIS
+
+=for man
+\&\fB#include <stdio.h>\fR
+.br
+\&\fB#include <gbatch.h>\fR
+.PP
+
+=for html
+<STRONG>#include &lt;stdio.h&gt;</STRONG>
+<br>
+<STRONG>#include &lt;gbatch.h&gt;</STRONG>
+<br>
+
+B<FILE *gbatch_jobdata(const int>
+I<fd>B<, const int>
+I<flags>B<, const slotno_t>
+I<slot>B<)>
+
+B<int gbatch_jobdata(const int>
+I<fd>B<, const int>
+I<outfile>B<, int(*>I<fn>B<)(int,void*,unsigned), const unsigned,>
+I<flags>B<, const slotno_t>
+I<slotno>B<)>
+
+=head1 DESCRIPTION
+
+The function B<gbatch_jobdata> is used to retrieve the job script of a
+job. There are two versions, one for the Unix and GNU/Linux API and
+one for the Windows API. The second form is used under Windows as
+there is no acceptable substitute for the pipe(2) system call.
+
+In both forms of the call, I<fd> is a file descriptor which was
+previously returned by a successful call to gbatch_open(3).
+
+I<flags> is zero or C<GBATCH_FLAG_IGNORESEQ> to ignore recent changes
+to the job list.
+
+I<slot> is the slot number corresponding to the job as returned by
+gbatch_joblist(3) or xb_jobfindslot(3).
+
+The difference between the two versions of B<gbatch_jobadd> is in the
+method of passing the job script.
+
+=head2 Unix and GNU/Linux
+
+The Unix and GNU/Linux API version returns a I<stdio> file descriptor
+which may be used with the standard I/O functions getc(3), fread(3)
+etc to read the job script. The job script should always be read to
+the end and then using fclose(3) to ensure that all incoming data on
+the socket is collected.
+
+If there is any kind of error, then B<gbatch_jobdata> will return C<NULL>,
+leaving the error code in the external variable B<gbatch_dataerror>.
+
+=head2 Windows
+
+In the case of the Windows version, the specified function I<fn> is
+invoked with parameters similar to B<write> to read data to pass across
+as the job script, the argument I<outfile> being passed as a file
+handle as the first argument to I<fn>.
+
+I<fn> may very well be B<write>. The reason for the routine not
+invoking B<write> itself is partly flexibility but mostly because some
+versions of Windows DLLs do not allow B<read> to be invoked directly
+from within it.
+
+B<N.B. This routine is particularly susceptible to peculiar effects
+due to assignment of insufficient stack space.>
+
+The return value is zero for success, or an error code. The error code
+is also assigned to the external variable C<gbatch_dataerror> for
+consistency with the Unix version.
+
+=head1 RETURN VALUES
+
+The Unix version of B<gbatch_jobdata> returns C<NULL> if unsuccessful,
+placing the error code in the external variable C<gbatch_dataerror>.
+
+The Windows version of B<gbatch_jobdata> returns zero if successful,
+otherwise an error code.
+
+The error codes which may be returned are defined in the include file
+\fBgbatch.h\fR.
+
+=head1 EXAMPLE
+
+ int fd, ret, ch;
+ FILE *inf;
+ slotno_t slot;
+
+ /*  select a job assign it to slot */
+
+ inf = gbatch_jobdata(fd, XBABI_IGNORESEQ, slot);
+
+ if (!inf) { /* error in gbatch_dataerror */ 
+     . . .
+ }
+ 
+ while ((ch = getc(inf)) != EOF)
+     putchar(ch);
+
+ fclose(inf);
+
+=head1 SEE ALSO
+
+gbatch_jobadd(3),
+gbatch_jobfind(3),
+gbatch_joblist(3),
+gbatch_jobmon(3),
+gbatch_jobop(3),
+gbatch_jobread(3),
+gbatch_open(3)
+
+=head1 COPYRIGHT
+
+Copyright (c) 2009 Free Software Foundation, Inc.
+This is free software. You may redistribute copies of it under the
+terms of the GNU General Public License
+<http://www.gnu.org/licenses/gpl.html>.
+There is NO WARRANTY, to the extent permitted by law.
+
+=head1 AUTHOR
+
+John M Collins, Xi Software Ltd.
+
+=cut
+
+## Local Variables:
+## mode: nroff
+## End:

@@ -1,0 +1,78 @@
+<!--
+   Copyright 2009 Free Software Foundation, Inc.
+
+  This program is free software: you can redistribute it and/or modify
+  it under the terms of the GNU General Public License as published by
+  the Free Software Foundation, either version 3 of the License, or
+  (at your option) any later version.
+
+  This program is distributed in the hope that it will be useful,
+  but WITHOUT ANY WARRANTY; without even the implied warranty of
+  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+  GNU General Public License for more details.
+
+   You should have received a copy of the GNU General Public License
+  along with this program.  If not, see <http://www.gnu.org/licenses/>.
+  -->	
+<table border=2>
+<tr align=center>
+<th>Jobs<th>Action<th>Changes<th>Sequencing<th>Options<th>Display
+<tr align=center>
+<td>
+<input type=submit value="View" name="Action" onClick="return viewclicked('btjvcgi');">
+<td>
+<input type=submit value="Cancel" name="Action" onclick="return gbj_cancel();">
+<td>
+<input type=submit value="Title etc" name="Action" onClick="return gbj_titprill();">
+<td>
+<input type=submit value="Times" name="Action" onClick="return gbj_times();">
+<td>
+<input type=submit value="Options" name="Action" onClick="return do_options();">
+<td>
+<input type=reset value="Refresh" onClick="document.location.reload();">
+<tr align=center>
+<td>
+<input type=submit value="Create" name="Action" onClick="return gbj_create();">
+<td>
+<input type=submit value="Runnable" name="Action" onclick="return gbj_runnable();">
+<td>
+<input type=submit value="Proc par" name="Action" onclick="return gbj_procpar();">
+<td>
+<input type=submit value="Conditions" name="Action" onclick="return gbj_conds();">
+<td>
+<input type=submit value="Format" name="Action" onClick="return do_formats();">
+<td>
+<input type=reset onClick="return clearboxes();">
+<tr align=center>
+<td>
+<input type=submit value="Delete" name="Action" onClick="return gbj_delete();">
+<td>
+<input type=submit value="Force" name="Action" onclick="return gbj_force(0);">
+<td>
+<input type=submit value="Args" name="Action" onclick="return gbj_args();">
+<td>
+<input type=submit value="Assigns" name="Action" onclick="return gbj_asses();">
+<td><td>
+<input type=submit value="Re-login" name="Action" onclick="return relogin();">
+<tr align=center>
+<td>
+<input type=submit value="Advance" name="Action" onClick="return gbj_advance();">
+<td>
+<input type=submit value="Force/adv" name="Action" onclick="return gbj_force(1);">
+<td>
+<input type=submit value="I/O" name="Action" onclick="return gbj_io();">
+<tr align=center>
+<td>
+<input type=submit value="Perms" name="Action" onclick="return gbj_perms();">
+<td>
+<input type=submit value="Kill" name="Action" onclick="return gbj_kill();">
+<td>
+<input type=submit value="Mail/write" name="Action" onclick="return gbj_mailwrt();">
+<td>
+<td>
+<td>
+<input type=submit value="View vars" name="Action" onclick="return gbj_viewvars();">
+</table>
+</form>
+</body>
+</html>

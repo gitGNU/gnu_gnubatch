@@ -1,0 +1,140 @@
+<?xml version="1.0" ?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<title>gbatch_jobmon - monitor changes to the job queue</title>
+<meta http-equiv="content-type" content="text/html; charset=utf-8" />
+<link rev="made" href="mailto:root@localhost" />
+</head>
+
+<body style="background-color: white">
+
+<p><a name="__index__"></a></p>
+<!-- INDEX BEGIN -->
+<!--
+
+<ul>
+
+	<li><a href="#name">NAME</a></li>
+	<li><a href="#synopsis">SYNOPSIS</a></li>
+	<li><a href="#description">DESCRIPTION</a></li>
+	<ul>
+
+		<li><a href="#unix_and_linux">Unix and Linux</a></li>
+		<li><a href="#windows">Windows</a></li>
+	</ul>
+
+	<li><a href="#return_values">RETURN VALUES</a></li>
+	<li><a href="#example">EXAMPLE</a></li>
+	<li><a href="#see_also">SEE ALSO</a></li>
+	<li><a href="#copyright">COPYRIGHT</a></li>
+	<li><a href="#author">AUTHOR</a></li>
+</ul>
+-->
+<!-- INDEX END -->
+
+<p>
+</p>
+<h1><a name="name">NAME</a></h1>
+<p>gbatch_jobmon - monitor changes to the job queue</p>
+<p>
+</p>
+<hr />
+<h1><a name="synopsis">SYNOPSIS</a></h1>
+<STRONG>#include &lt;gbatch.h&gt;</STRONG>
+<br><p><strong>int gbatch_jobmon(const int</strong>
+<em>fd</em><strong>, void (*</strong><em>fn</em><strong>)(const int))</strong></p>
+<p><strong>int gbatch_setmon(const int</strong>
+<em>fd</em><strong>, HWND</strong>
+<em>hWnd</em><strong>, UINT</strong>
+<em>wMsg</em><strong>)</strong></p>
+<p><strong>int gbatch_procmon(const int</strong>
+<em>fd</em><strong>)</strong></p>
+<p><strong>void gbatch_unsetmon(const int</strong> <em>fd</em><strong>)</strong></p>
+<p>
+</p>
+<hr />
+<h1><a name="description">DESCRIPTION</a></h1>
+<p>
+</p>
+<h2><a name="unix_and_linux">Unix and Linux</a></h2>
+<p>The function <strong>gbatch_jobmon()</strong> is used to set a function to monitor
+changes to the job queue.</p>
+<p><em>fd</em> is a file descriptor which was previously returned by a
+successful call to gbatch_open(3).</p>
+<p><em>fn</em> is a pointer to a function which must be declared as returning
+void and taking one <code>const int</code> argument. Alternatively, this may be
+<code>NULL</code> to cancel monitoring.</p>
+<p>The function <em>fn</em> will be called upon each change to the job
+list. The argument passed will be <em>fd</em>. Note that any changes to the
+job queue are reported (including changes on other hosts whose details
+are passed through) as the API does not record which jobs the user is
+interested in.</p>
+<p>
+</p>
+<h2><a name="windows">Windows</a></h2>
+<p>The <strong>gbatch_setmon</strong> routine may be used to monitor changes to the job
+queue or variable list. Its parameters are as follows.</p>
+<p><em>fd</em> is a file descriptor previously returned by <strong>gbatch_open</strong>.</p>
+<p><em>hWnd</em> is a windows handle to which messages should be sent.</p>
+<p><em>wMsg</em> is the message id to be passed to the window (<code>WM_USER</code> or a
+constant based on this is suggested).</p>
+<p>To decode the message, the <strong>gbatch_procmon</strong> is provided. This returns
+<code>XBWINAPI_JOBPROD</code> to indicate a change or changes to the job queue
+and <code>XBWINAPI_VARPROD</code> to indicate a change or changes to the variable
+list. If there are changes to both, two or more messages will be sent,
+each of which should be decoded via separate <strong>gbatch_procmon</strong> calls.</p>
+<p>To cancel monitoring, invoke the routine</p>
+<pre>
+ gbatch_unsetmon(fd)</pre>
+<p>If no monitoring is in progress, or the descriptor is invalid, this
+call is just ignored.</p>
+<p>
+</p>
+<hr />
+<h1><a name="return_values">RETURN VALUES</a></h1>
+<p>The function <strong>gbatch_jobmon()</strong> returns 0 if successful otherwise the
+error code <code>XBAPI_INVALID_FD</code> if the file descriptor is
+invalid. Invalid <em>fn</em> parameters will not be detected and the
+application program will probably crash.</p>
+<p>
+</p>
+<hr />
+<h1><a name="example">EXAMPLE</a></h1>
+<pre>
+ void note_mod(const int fd)  {
+     job_changes++;
+ }
+ . . .</pre>
+<pre>
+ gbatch_jobmon(fd, note_mod);
+ . . .</pre>
+<pre>
+ if (job_changes) { /* handle changes */
+ . . .
+ }</pre>
+<p>
+</p>
+<hr />
+<h1><a name="see_also">SEE ALSO</a></h1>
+<p>gbatch_close(3),
+gbatch_open(3),
+gbatch_varmon(3).</p>
+<p>
+</p>
+<hr />
+<h1><a name="copyright">COPYRIGHT</a></h1>
+<p>Copyright (c) 2009 Free Software Foundation, Inc.
+This is free software. You may redistribute copies of it under the
+terms of the GNU General Public License
+&lt;http://www.gnu.org/licenses/gpl.html&gt;.
+There is NO WARRANTY, to the extent permitted by law.</p>
+<p>
+</p>
+<hr />
+<h1><a name="author">AUTHOR</a></h1>
+<p>John M Collins, Xi Software Ltd.</p>
+
+</body>
+
+</html>

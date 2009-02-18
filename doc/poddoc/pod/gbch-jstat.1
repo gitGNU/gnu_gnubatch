@@ -1,0 +1,197 @@
+=head1 NAME
+
+gbch-jstat - report job status as exit code
+
+=head1 SYNOPSIS
+
+B<gbch-jstat>
+[ I<-options> ]
+jobnumber
+
+=head1 DESCRIPTION
+
+B<gbch-jstat> is provided to enable shell scripts to determine the status
+of a single job.
+
+The jobs is specified by using the job number, as displayed by gbch-r(1)
+with the B<-v> (verbose) option, or as in the output of the first
+column of the gbch-jlist(1) command with default format.
+
+A remote job should be specified by prefixing the job number with the
+host name thus:
+
+	host:1234
+
+It is not necessary to include any leading zeroes.
+
+By default, the job is checked to see if it is running, just starting
+or just finishing, but by means of the B<-s> option, the user can
+specify which states to test for.
+
+B<Btjstat> returns an exit code of 0 (true to shells) if the job is in
+the given state, 1 if it is not, and some other exit code (and a
+diagnostic) if some other error occurs, e.g. the job does not exist.
+
+=head1 OPTIONS
+
+=for man
+Note that the order of treatment, letters and keywords described below
+may be modified by editing the file F<btrest.help> -
+see btsyntax(5).
+
+The environment variable on which options are supplied is C<BTJSTAT> and the
+environment variable to specify the help file is C<BTRESTCONF>.
+
+=over 4
+
+=item -? or +explain
+
+Causes a summary of the other options to be displayed without taking
+further action.
+
+=item -d or +default-states
+
+Cancel a B<-s> option and revert to checking whether the job is
+running, just starting or just finishing.
+
+=item -s I<statecodes> or +state I<statecodes>
+
+Specify I<statecodes> as the states to be tested for. I<statecodes> is
+a comma-separated list of states exactly as reported by
+gbch-jlist(1). (The strings are read from the message file, and can be
+altered if required). As distributed, they are
+
+=over 4
+
+=item I<empty string>
+
+Ready to run, represented if necessary by two quotes, or an empty
+field preceding a comma, as in
+
+	gbch-jstat -s '' 1234
+	gbch-jstat -s ,Done 1234
+
+=item Done
+
+Normal exit
+
+=item Err
+
+Error exit
+
+=item Abrt
+
+Aborted
+
+=item Canc
+
+Cancelled
+
+=item Init
+
+Startup stage 1 (included in the default case)
+
+=item Strt
+
+Startup stage 2 (included in the default case)
+
+=item Run
+
+Running (included in the default case)
+
+=item Fin
+
+Terminating (included in the default case)
+
+=back
+
+The state names are case insensitive. If one (typically the "ready to
+run" state) is a null string, then this can be tested for by using a
+null string or two consecutive commas, thus:
+
+	-s ''
+	-s ,canc
+
+=item +freeze-current
+
+Save all the current options in a F<.gnubatch> file in the current
+directory.
+
+=item +freeze-home
+
+Save all the current options in a F<.gnubatch> file in the user's home
+directory.
+
+=back
+
+=head1 EXAMPLE
+
+The following shell script displays a list of the titles of jobs ready
+to run or running
+
+	gbch-jlist -F '%N %H'|while read num title
+	do
+	if gbch-jstat -s '' $num
+	then
+		echo $title is ready to run
+	elif gbch-jstat $num
+	then
+		echo $title is running
+	fi
+	done
+
+=head1 FILES
+
+F<~/.gnubatch>
+configuration file (home directory)
+
+F<.gnubatch>
+configuration file (current directory)
+
+F</usr/spool/progs/btrest.help>
+message file
+
+=head1 ENVIRONMENT
+
+=over 4
+
+=item GBCH_JSTAT
+
+space-separated options to override defaults.
+
+=item BTRESTCONF
+
+location of alternative help file.
+
+=back
+
+=head1 SEE ALSO
+
+gbch-jlist(1),
+gbch-jchange(1),
+btsyntax(5),
+gnubatch.conf(5),
+gnubach.hosts(5).
+
+=head1 DIAGNOSTICS
+
+Various diagnostics are read and printed as required from the message
+file F<btrest.help>.
+
+=head1 COPYRIGHT
+
+Copyright (c) 2009 Free Software Foundation, Inc.
+This is free software. You may redistribute copies of it under the
+terms of the GNU General Public License
+<http://www.gnu.org/licenses/gpl.html>.
+There is NO WARRANTY, to the extent permitted by law.
+
+=head1 AUTHOR
+
+John M Collins, Xi Software Ltd.
+
+=cut
+
+## Local Variables:
+## mode: nroff
+## End:

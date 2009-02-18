@@ -1,0 +1,415 @@
+=head1 NAME
+
+gbch-filemon - monitor for changes to files
+
+=head1 SYNOPSIS
+
+B<gbch-filemon>
+[ I<-options> ]
+
+=head1 DESCRIPTION
+
+B<gbch-filemon> executes a given program or script when specified files
+change in specified ways in a specified directory.
+
+It is intentionally not integrated with the B<GNUbatch> core product,
+as there is no automatic mechanism within Unix for signalling changes
+to files, and it is therefore necessary to "poll" or monitor the files
+aaat a given interval. B<gbch-filemon> is made as small as possible so
+that the "polling" does not have a large impact on the system.
+
+The rest of B<GNUbatch> is made to be "event-driven", as this has
+minimal impact on the system when the product is inactive.
+
+The "action" of B<gbch-filemon> may be to run a B<GNUbatch> job, set a
+variable, or perform some completely unrelated task.
+
+B<Gbch-filemon> may optionally be used to list or terminate running
+copies of itself.
+
+=head1 OPTIONS
+
+The GTK program gbch-xfilemon(1) or the X/Motif program
+gbch-xmfilemon(1) may be used to set up the options to and run
+B<gbch-filemon> rather than remembering them here.
+
+Note that the order of treatment, letters and keywords described below
+may be modified by editing the file F<filemon.help> -
+see btsyntax(5).
+
+The environment variable on which options are supplied is C<GBCH_FILEMON>
+and the environment variable to specify the help file is C<FILEMONCONF>.
+
+=over 8
+
+=item -? or +explain
+
+causes a summary of the other options to be displayed without taking
+further action.
+
+=item -A or +file-arrives
+
+Perform the required action when a new file is detected in the
+directory.
+
+=item -a or +any-file
+
+Perform the required action for any file name.
+
+=item -C or +continue-running
+
+Continue B<gbch-filemon> after a matching file and condition has been
+found, looking for further files.
+
+=item -c I<command>
+
+Specify I<command> to execute when one of the monitored events
+occurs. This is an alternative to B<-X>, which runs a named shell
+script.
+
+In the I<command> the sequence B<%f> is replaced by the name of the
+file whose activity has provoked the action, and B<%d> by the
+directory.
+
+To use this option, be sure to enclose the whole shell command in
+quotes so that it is passed as one argument, thus:
+
+ -c "xmessage -bg red 'Found %f'"
+
+=item -D I<dir> or +directory I<dir>
+
+Specify the given I<dir> as the directory to monitor rather than the
+current directory.
+
+=item -d or +daemon-process
+
+Detach a futher B<gbch-filemon> as a daemon process, and return to the
+user.
+
+=item -e or +include-existing
+
+Include existing files in the scan, and report changes etc to
+those. If the B<-A> option (watch for file arriving), this will have
+no effect unless an existing file is deleted and is recreated.
+
+=item -G I<secs> or +file-stops-growing I<secs>
+
+Activate command when a file has appeared, and has not grown further
+for at least I<secs>. Distinguish this from the B<-M> option, which
+will check for any change, possibly in the middle of a file.
+
+=item -I I<secs> or +file-stops-changing I<secs>
+
+Activate command when a file has appeared, and has not been changed
+for at least I<secs>. This is more inclusive than B<-M>, as it
+includes activities such as changing the ownership or mode of the
+file, or making hard links.
+
+=item -i or +ignore-existing
+
+Ignore existing files (default). However if an existing file is noted
+to have been deleted, and then re-created, the new version will be
+treated as a new file.
+
+=item -K or +kill-all
+
+Kill all B<gbch-filemon> daemon processes belonging to the user, or all
+processes if invoked by C<root>.
+
+=item -k I<dir> or +kill-processes I<dir>
+
+Kill any B<gbch-filemon> daemon processes left running which are scanning
+the given directory. Processes must belong to the invoking user, or
+B<gbch-filemon> be invoked by C<root>.
+
+=item -L or +follow-links
+
+Follow symbolic links to files (and subdirectories with the B<-R>
+option).
+
+=item -l or +list-processes
+
+List running B<gbch-filemon> processes and which directories they are
+accessing.
+
+=item -M I<secs> or +file-stops-writing I<secs>
+
+Activate command when a file has appeared, and has not been written to
+for at least I<secs>.  This is more inclusive than B-G>, as it
+includes writes other than to the end of the file. It is less
+inclusive than B<-I>, which also monitors for linking and
+permission-changing.
+
+=item -m or +run-monitor
+
+Run as a file monitor program (default) rather than B<-l>, B<-k> or
+B<-K>.
+
+=item -n or +not-daemon
+
+Do not detach B<gbch-filemon> as a daemon process (default), wait and
+only return to the user when a file event has been detected.
+
+=item -P I<secs> or +poll-time I<secs>
+
+Poll directory every I<secs> seconds. This should be sufficiently
+small not to "miss" events for a long time, but large enough to not
+load the system. The default if this is not specified is 20 seconds.
+
+=item -p I<pattern> or +pattern-file I<pattern>
+
+Perform action on a file name matching I<pattern>.
+
+I<Pattern> may take the form of wild-card matching given by the shell,
+with C<*>, C<?>, C<[a-z]>, C<[!a-z]> having the same meanings as with
+the shell, and possible alternative patterns separated by commas, for
+example:
+
+ -p '*.[chyl],*.obj'
+
+Remember to enclose the argument in quotes so that it is interpreted
+by B<gbch-filemon> and not the shell.
+
+=item -R or +recursive
+
+Recursively follow subdirectories of the starting directory.
+
+=item -r or +file-deleted
+
+Perform action when a file matching the criteria has been deleted.
+
+=item -S or +halt-when-found
+
+Halt B<gbch-filemon> once a matching file and condition has been found.
+
+=item -s I<file> or +specific-file I<file>
+
+Perform action only with a specific named file, not a pattern.
+
+=item -u I<secs> or +file-stops-use I<secs>
+
+Perform action when a file has appeared, and has not been read
+for at least I<secs>.
+
+=item -X I<script>
+
+Specify the given I<script> as a shell script to execute when one of
+the monitored events occurs. This is an alternative to B<-c>. The
+existence of the shell script is checked, and B<gbch-filemon> will fail
+with an error message if it does not exist.
+
+The shell script is passed the following arguments:
+
+=over 4
+
+=item 1
+
+File name
+
+=item 2
+
+Directory path
+
+=item 3
+
+File size (or last file size if file deleted).
+
+=item 4
+
+Date of file modification, change or access as YYYY/MM/DD, but only
+for those type of changes.
+
+=item 5
+
+Time of file modification, change or access as HH:MM:SS, but only
+for those type of changes.
+
+=back
+
+=item +freeze-current
+
+Save all the current options in a F<.gnubatch> file in the current
+directory with keyword C<BTFILEMON>. If this is specified,
+B<gbch-filemon> will terminate after saving the file.
+
+=item +freeze-home
+
+Save all the current options in a F<.gnubatch> file in the user's home
+directory. If this is specified, B<gbch-filemon> will terminate after
+saving the file.
+
+=back
+
+=head2 File matching
+
+What to look for may be made to depend upon something happening to
+
+=over 8
+
+=item Any file
+
+With the B<-a> option. Any file that meets the other criteria will
+trigger the event.
+
+=item Specific file
+
+With the B<-s> option, B<gbch-filemon> will watch for the specific file
+named.
+
+=item Pattern
+
+With the B<-p> option, a file which matches the pattern and the other
+criteria will trigger the action.
+
+=back
+
+=head2 Criteria
+
+There are 6 criteria to watch for.
+
+=over 8
+
+=item File arriving
+
+This is probably the most common case. If you want to wait for a file
+being written and trigger an event, the B<-A> option will look for
+this.
+
+=item File removal
+
+This will watch for files being deleted, for example some applications
+use a "lock file" to denote that they are being run, and you might
+wish to start something else when it has gone.
+
+Remember that you might want to include existing files in the scan
+with B<-e> if the file in question existed when you started
+B<gbch-filemon>.
+
+=item File stopped growing
+
+What this watches for is for a file being having been created, or with
+the B<-e> option starting to "grow", and then apparently no longer
+grown for the given time.
+
+If files are arriving from FTP, for example, then when they are
+complete, they will cease to "grow" in size.
+
+=item File no longer written
+
+A file not used sequentially may be written to internally rather than
+have additional data appended. This often occurs with database files,
+where records are updated somewhere in the middle of the file. If a
+series of database transactions is made and then completed, the file
+will no longer be written to for some time, and B<gbch-filemon> can be
+made to trigger an action after that time.
+
+You will often want to include the B<-e> option if the file existed
+already on entry.
+
+=item File no longer changed
+
+This goes a stage further than "no longer written" as it includes any
+kind of change to the file, such as permissions, owner, hard links or
+change of access and write times.
+
+=item File no longer used
+
+This monitors the access time of the file, updated whenever the file
+is read, and proceeds when this has gone unchanged for the specified
+time.
+
+You will often want to include the B<-e> option with this if the file
+existed already on entry.
+
+=back
+
+=head2 Pre-existing files
+
+If the B<-i> (ignore existing) option is specified, which is the
+default, then no changes to existing files which would otherwise match
+the criteria will be considered, except where an existing file is
+deleted and then recreated and B<gbch-filemon> "notices" this happen, in
+that the file is deleted before one "poll" of the directory and
+recreated before another. In other words, if the poll time is 20
+seconds, then the deletion and recreation will have to be 20 seconds
+apart.
+
+If the B<-e> option to include existing files is specified, the B<-G>,
+B<-u>, B<-M>, B<-I> and B<-r> options will work as for new files but
+not B<-A>, as the file has already "arrived". However, if it is
+deleted, this is "noticed" and then recreated, it will be treated as a
+"new" file.
+
+=head2 Recursive searches
+
+If recursive searches are specified using the B<-R> option, a separate
+B<gbch-filemon> process will be invoked for each subdirectory, for
+each further subdirectory within each of those subdirectories, and for
+each new subdirectory created within one of those whilst each process
+is running, unless the B<-r> option is being used to watch for file
+removal, whereupon only those subdirectories which existed to begin
+with will be considered.
+
+If the B<-S> option is specified to stop once a file has been found,
+each process will continue until a file is found in its particular
+subdirectory.
+
+=head1 EXAMPLES
+
+Monitor the FTP directories for new files which have finished
+arriving, sending a message to the user: 
+
+ gbch-filemon -aRC -D /var/spool/ftp -G 30 -c "xmessage '%f in %d'"
+
+Set a B<GNUbatch> variable to an appropriate value when a file
+arrives in the current directory
+
+ gbch-filemon -aAC -c "gbch-var -s '%f arrived' file_var"
+
+=head1 FILES
+
+F<~/.gnubatch>
+configuration file (home directory)
+
+F<.gnubatch>
+configuration file (current directory)
+
+F<filemon.help>
+message file
+
+=head1 ENVIRONMENT
+
+=over 4
+
+=item GBCH_FILEMON
+
+space-separated options to override defaults.
+
+=item FILEMONCONF
+
+location of alternative help file.
+
+=back
+
+=head1 DIAGNOSTICS
+
+Various diagnostics are read and printed as required from the message
+file F<filemon.help>.
+
+=head1 COPYRIGHT
+
+Copyright (c) 2009 Free Software Foundation, Inc.
+This is free software. You may redistribute copies of it under the
+terms of the GNU General Public License
+<http://www.gnu.org/licenses/gpl.html>.
+There is NO WARRANTY, to the extent permitted by law.
+
+=head1 AUTHOR
+
+John M Collins, Xi Software Ltd.
+
+=cut
+
+## Local Variables:
+## mode: nroff
+## End:

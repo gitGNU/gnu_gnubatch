@@ -1,0 +1,219 @@
+<?xml version="1.0" ?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<title>gbch-ripc - trace and clean GNUbatch IPC facilities</title>
+<meta http-equiv="content-type" content="text/html; charset=utf-8" />
+<link rev="made" href="mailto:root@localhost" />
+</head>
+
+<body style="background-color: white">
+
+<p><a name="__index__"></a></p>
+<!-- INDEX BEGIN -->
+<!--
+
+<ul>
+
+	<li><a href="#name">NAME</a></li>
+	<li><a href="#synopsis">SYNOPSIS</a></li>
+	<li><a href="#description">DESCRIPTION</a></li>
+	<li><a href="#options">OPTIONS</a></li>
+	<li><a href="#example">EXAMPLE</a></li>
+	<li><a href="#see_also">SEE ALSO</a></li>
+	<li><a href="#copyright">COPYRIGHT</a></li>
+	<li><a href="#author">AUTHOR</a></li>
+</ul>
+-->
+<!-- INDEX END -->
+
+<p>
+</p>
+<h1><a name="name">NAME</a></h1>
+<p>gbch-ripc - trace and clean GNUbatch IPC facilities</p>
+<p>
+</p>
+<hr />
+<h1><a name="synopsis">SYNOPSIS</a></h1>
+<p><strong>gbch-ripc</strong>
+[ <em>-d</em> ]
+[ <em>-r</em> ]
+[ <em>-F</em> ]
+[ <em>-A</em> ]
+[ <em>-D secs</em> ]
+[ <em>-P psarg</em> ]
+[ <em>-G</em> ]
+[ <em>-n</em> ]
+[ <em>-o file</em> ]
+[ <em>-S dir</em> ]
+[ <em>-x</em> ]
+[ <em>-B n</em> ]
+[ <em>-N char</em> ]</p>
+<p>
+</p>
+<hr />
+<h1><a name="description">DESCRIPTION</a></h1>
+<p><strong>gbch-ripc</strong> traces, and/or optionally monitors or deletes IPC facilities
+for <strong>GNUbatch</strong>. Many of the facilities are used for debugging, but it
+also serves as a quick method of deleting the IPC facilities, being
+easier to use than <strong>ipcs</strong> and <strong>ipcrm</strong>, in the event that the
+scheduler has crashed or been killed without deleting the IPC
+facilities.</p>
+<p>To use this facility, just run <strong>gbch-ripc</strong> thus:</p>
+<pre>
+        gbch-ripc -d &gt;/dev/null</pre>
+<p>The diagnostic output may be useful as it reports any inconsistencies.</p>
+<p>The monitoring option can be used to diagnose processes, possibly not
+<strong>GNUbatch</strong> ones, which are interfering with <strong>GNUbatch</strong> shared memory
+segments, in cases where a third-party application is suspected of
+damaging the shared memory.</p>
+<p><strong>Gbch-ripc</strong> also checks for errors in memory-mapped files where the
+version of <strong>GNUbatch</strong> is using those rather than shared memory.</p>
+<p>
+</p>
+<hr />
+<h1><a name="options">OPTIONS</a></h1>
+<dl>
+<dt><strong><a name="item__2da">-A</a></strong>
+
+<dd>
+<p>Display details of jobs and variables. This often generates a lot of
+output and is not really necessary.</p>
+</dd>
+</li>
+<dt><strong><a name="item__2dd_secs">-D <em>secs</em></a></strong>
+
+<dd>
+<p>Monitor which process has last attached to the job shared memory
+segment and report apparent corruption, polling every <em>secs</em> seconds.</p>
+</dd>
+</li>
+<dt><strong><a name="item__2dd">-d</a></strong>
+
+<dd>
+<p>Delete the IPC facilities after printing out contents. This saves
+messing with arguments to ipcrm(1).</p>
+</dd>
+</li>
+<dt><strong><a name="item__2df">-f</a></strong>
+
+<dd>
+<p>Display the free chains for jobs and variables. This generates a lot of
+output and isn't usually necessary.</p>
+</dd>
+</li>
+<dt><strong><a name="item__2dn">-n</a></strong>
+
+<dd>
+<p>Suppress display from <strong>-D</strong> option if everything is OK.</p>
+</dd>
+</li>
+<dt><strong><a name="item__2do_outfile">-o <em>outfile</em></a></strong>
+
+<dd>
+<p>Output to <em>outfile</em> rather than standard output. Set it to
+<em>/dev/null</em> if you don't want to see any output.</p>
+</dd>
+</li>
+<dt><strong><a name="item__2dp_psarg">-P <em>psarg</em></a></strong>
+
+<dd>
+<p>Specify argument to <code>ps(1)</code> to invoke if corruption detected when
+monitoring with <strong>-D</strong> option. The output is passed through <code>fgrep(1)</code> to
+find the line (if any) with the process id of the process which last
+attached to the shared memory.</p>
+</dd>
+</li>
+<dt><strong><a name="item__2dg">-G</a></strong>
+
+<dd>
+<p>Used in conjunction with the <strong>-P</strong> option, the output from <code>ps(1)</code> is
+displayed in full, without passing it through fgrep(1).</p>
+</dd>
+</li>
+<dt><strong><a name="item__2dr">-r</a></strong>
+
+<dd>
+<p>Read and display the entries on the message queue. This is normally
+suppressed because they can't be ``peeked at'' or ``unread''.</p>
+</dd>
+</li>
+<dt><strong><a name="item__2ds_dir">-S <em>dir</em></a></strong>
+
+<dd>
+<p>This is only relevant for versions of <strong>GNUbatch</strong> which use
+memory-mapped files rather than shared memory. It specifies the
+location of the spool directory. If this is not specified, then the
+master configuration file <em>gnubatch.conf</em> is consulted to find
+the spool directory location, or failing that, the default directory
+is used.</p>
+</dd>
+</li>
+<dt><strong><a name="item__2dx">-x</a></strong>
+
+<dd>
+<p>Dump the contents of shared memory or memory-mapped files in
+hexadecimal and ASCII characters.</p>
+</dd>
+</li>
+<dt><strong><a name="item__2db_n">-B <em>n</em></a></strong>
+
+<dd>
+<p>Where <em>n</em> may be 1 to 8, specify the width of the hexadecimal dump
+output as a number of 32-bit words.</p>
+</dd>
+</li>
+<dt><strong><a name="item__2dn__3cchar_3e">-N &lt;char&gt;</a></strong>
+
+<dd>
+<p>Replace the character in the ASCII part of the hexadecimal dump to
+represent non-ASCII characters with the specified character (the first
+character of the argument). The default is <code>.</code>.</p>
+</dd>
+<dd>
+<p>To specify a space, you may need to use quotes thus:</p>
+</dd>
+<dd>
+<pre>
+        -N ' '</pre>
+</dd>
+</li>
+</dl>
+<p>
+</p>
+<hr />
+<h1><a name="example">EXAMPLE</a></h1>
+<p>To delete all IPC facilities after <strong>GNUbatch</strong> has crashed.</p>
+<pre>
+        gbch-ripc -d -o /dev/null</pre>
+<p>To monitor the job shared memory segment for errors, printing out the
+<code>ps(1)</code> output (where the full listing is obtained with <code>-ef</code>) search
+for the process id of the last process to attach to the segment. Print
+out the contents of the segment including in hexadecimal after
+corruption is detected.</p>
+<pre>
+        gbch-ripc -D 30 -P -ef -o joblog -A -x</pre>
+<p>
+</p>
+<hr />
+<h1><a name="see_also">SEE ALSO</a></h1>
+<p>gbch-start(1).
+btsched(8).</p>
+<p>
+</p>
+<hr />
+<h1><a name="copyright">COPYRIGHT</a></h1>
+<p>Copyright (c) 2009 Free Software Foundation, Inc.
+This is free software. You may redistribute copies of it under the
+terms of the GNU General Public License
+&lt;http://www.gnu.org/licenses/gpl.html&gt;.
+There is NO WARRANTY, to the extent permitted by law.</p>
+<p>
+</p>
+<hr />
+<h1><a name="author">AUTHOR</a></h1>
+<p>John M Collins, Xi Software Ltd.</p>
+
+</body>
+
+</html>

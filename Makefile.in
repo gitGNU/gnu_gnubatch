@@ -1,0 +1,79 @@
+#
+#	Top-level Makefile
+#
+#   Copyright 2009 Free Software Foundation, Inc.
+#
+#  This program is free software: you can redistribute it and/or modify
+#  it under the terms of the GNU General Public License as published by
+#  the Free Software Foundation, either version 3 of the License, or
+#  (at your option) any later version.
+#
+#  This program is distributed in the hope that it will be useful,
+#  but WITHOUT ANY WARRANTY; without even the implied warranty of
+#  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#  GNU General Public License for more details.
+#
+#   You should have received a copy of the GNU General Public License
+#  along with this program.  If not, see <http://www.gnu.org/licenses/>.
+#
+
+SHELL		=	/bin/sh
+@SET_MAKE@
+BASE		=	.
+PARENT		=	.
+UTILDIR		=	util
+SRCDIR		=	src
+BUILDDIR	=	build
+MSGFILE		=	GNUBATCH.msg
+HELPPARSE	=	$(UTILDIR)/helpparse
+prefix		=	@prefix@
+exec_prefix	=	@exec_prefix@
+BINDIR		=	@bindir@
+SBINDIR		=	@sbindir@
+INTBINDIR	=	@pkgexecdir@
+DATADIR		=	@pkgdatadir@
+INSTALL		=	@INSTALL@
+INSTALL_DATA	=	@INSTALL_DATA@
+
+all:	buildd build-src
+
+buildd:	utild
+	$(HELPPARSE) $(MSGFILE) $(SRCDIR) $(BUILDDIR)
+	touch $@
+
+build-src:
+	cd $(BUILDDIR);$(MAKE) all
+	touch $@
+
+utild:
+	cd $(UTILDIR);$(MAKE) all
+	touch $@
+
+install:	all
+	cd $(UTILDIR);make install
+	cd $(BUILDDIR);$(MAKE) install prefix="$(prefix)" exec_prefix="$(exec_prefix)"
+	$(BINDIR)/gbch-uchange -R
+	$(BINDIR)/gbch-uchange -p ALL `who am i|sed -e 's/ .*//'`
+
+install-strip:	all
+	cd $(UTILDIR);make install-strip
+	cd $(BUILDDIR);$(MAKE) install-strip prefix="$(prefix)" exec_prefix="$(exec_prefix)"
+	$(BINDIR)/gbch-uchange -R
+	$(BINDIR)/gbch-uchange -p ALL `who am i|sed -e 's/ .*//'`
+
+install-user user-install:
+	@perlbin@ $(BASE)/Userinst
+
+install-net:
+	@perlbin@ $(BASE)/Netinst
+
+clean:
+	cd $(UTILDIR);$(MAKE) clean
+	rm -fr $(BUILDDIR) buildd utild build-src
+
+distclean:	clean
+	cd $(UTILDIR);$(MAKE) distclean
+	cd $(SRCDIR);$(MAKE) distclean
+	$(RM) $(SRCDIR)/hdrs/files.h $(SRCDIR)/hdrs/infiles.h 
+	$(RM) config.cache config.h config.status config.log Makefile
+	$(RM) Checkuserinst Userinst Netinst

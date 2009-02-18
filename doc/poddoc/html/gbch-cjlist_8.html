@@ -1,0 +1,177 @@
+<?xml version="1.0" ?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<title>gbch-cjlist - dump out GNUbatch jobs to directory</title>
+<meta http-equiv="content-type" content="text/html; charset=utf-8" />
+<link rev="made" href="mailto:root@localhost" />
+</head>
+
+<body style="background-color: white">
+
+<p><a name="__index__"></a></p>
+<!-- INDEX BEGIN -->
+<!--
+
+<ul>
+
+	<li><a href="#name">NAME</a></li>
+	<li><a href="#synopsis">SYNOPSIS</a></li>
+	<li><a href="#description">DESCRIPTION</a></li>
+	<li><a href="#options">OPTIONS</a></li>
+	<li><a href="#see_also">SEE ALSO</a></li>
+	<li><a href="#copyright">COPYRIGHT</a></li>
+	<li><a href="#author">AUTHOR</a></li>
+</ul>
+-->
+<!-- INDEX END -->
+
+<p>
+</p>
+<h1><a name="name">NAME</a></h1>
+<p>gbch-cjlist - dump out GNUbatch jobs to directory</p>
+<p>
+</p>
+<hr />
+<h1><a name="synopsis">SYNOPSIS</a></h1>
+<p><strong>gbch-cjlist</strong>
+[ <em>-D dir</em> ]
+[ <em>-v n</em> ]
+[ <em>-e n</em> ]
+[ <em>-u</em> ]
+[ <em>-s</em> ]
+[ <em>-f</em> ]
+<em>job file</em> <em>outfile</em> <em>workdir</em></p>
+<p>
+</p>
+<hr />
+<h1><a name="description">DESCRIPTION</a></h1>
+<p><strong>gbch-cjlist</strong> converts <strong>GNUbatch</strong> job files held in the batch spool
+directory to an executable shell script which may be used to recreate
+them. This may be useful for backup purposes or for one stage in
+upgrading from one release of <strong>GNUbatch</strong> to another.</p>
+<p>The jobs are copied into the backup directory <em>workdir</em>, and the
+generated shell script file <em>outfile</em> refers to files in that
+directory.</p>
+<p><strong>gbch-cjlist</strong> understands the format of the saved job file for
+versions of <strong>GNUbatch</strong> and Xi-Batch going back to release 5, and when
+presented with a saved file, will attempt to work out from the format
+which release it relates to. If required, it will skip apparent errors
+in the job file.</p>
+<p>In addition to options, three arguments are always supplied to
+<strong>gbch-cjlist</strong>.</p>
+<dl>
+<dt><strong><a name="item_job_list_file">Job list file</a></strong>
+
+<dd>
+<p>This is the file containing the attributes of the jobs,
+<em>btsched_jfile</em> in the spool directory.</p>
+</dd>
+</li>
+<dt><strong><a name="item_output_file">Output file</a></strong>
+
+<dd>
+<p>This file is created by <strong>gbch-cjlist</strong> to contain the executable shell
+script which may be used to create the jobs.</p>
+</dd>
+</li>
+<dt><strong><a name="item_backup_directory">Backup directory</a></strong>
+
+<dd>
+<p>This directory is used to hold the job data.</p>
+</dd>
+</li>
+</dl>
+<p>Note that saved jobs make use of the <strong>-U</strong> option to gbch-r(1) to set the
+ownership correctly.</p>
+<p>
+</p>
+<hr />
+<h1><a name="options">OPTIONS</a></h1>
+<dl>
+<dt><strong><a name="item__2dd_directory">-D <em>directory</em></a></strong>
+
+<dd>
+<p>Specifies the source directory for the jobs and <em>job file</em> rather
+than the current directory. It can be specified as <code>$SPOOLDIR</code> or
+<code>${SPOOLDIR-/var/spool/gnubatch}</code> etc and the environment and/or
+<em>gnubatch.conf</em> will be interrogated to interpolate the value
+of the environment variable given.</p>
+</dd>
+<dd>
+<p>If you use this, don't forget to put single quotes around it thus:</p>
+</dd>
+<dd>
+<pre>
+ gbch-cjlist -D '${SPOOLDIR-/var/spool/gnubatch}' ...</pre>
+</dd>
+<dd>
+<p>otherwise the shell will try to interpret the <code>$</code> construct and not
+<strong>gbch-cjlist</strong>.</p>
+</dd>
+</li>
+<dt><strong><a name="item__2de_n">-e <em>n</em></a></strong>
+
+<dd>
+<p>Tolerate <em>n</em> errors of the kinds denoted by the other options before
+giving up trying to convert the file.</p>
+</dd>
+</li>
+<dt><strong><a name="item__2df">-f</a></strong>
+
+<dd>
+<p>Ignore format errors (invalid strings etc) in the saved job file up to
+the number of total errors given by the <strong>-e</strong> option. Offending jobs
+are skipped.</p>
+</dd>
+</li>
+<dt><strong><a name="item__2ds">-s</a></strong>
+
+<dd>
+<p>Ignore file size errors in the saved job file (up to the number of
+total errors given by the <strong>-e</strong> option.</p>
+</dd>
+</li>
+<dt><strong><a name="item__2du">-u</a></strong>
+
+<dd>
+<p>Do not check user names in the saved job file.</p>
+</dd>
+</li>
+<dt><strong><a name="item__2dv_number">-v <em>number</em></a></strong>
+
+<dd>
+<p>Tell <strong>gbch-cjlist</strong> that the job file is for release <em>number</em> of
+<strong>Xi-Batch</strong>, where <em>number</em> is 5 to 6.</p>
+</dd>
+<dd>
+<p>This may be necessary where the job file is corrupted and <strong>gbch-cjlist</strong>
+cannot guess what is meant.</p>
+</dd>
+</li>
+</dl>
+<p>
+</p>
+<hr />
+<h1><a name="see_also">SEE ALSO</a></h1>
+<p>gbch-ciconv(8),
+gbch-cvlist(8),
+gbch-uconv(8).</p>
+<p>
+</p>
+<hr />
+<h1><a name="copyright">COPYRIGHT</a></h1>
+<p>Copyright (c) 2009 Free Software Foundation, Inc.
+This is free software. You may redistribute copies of it under the
+terms of the GNU General Public License
+&lt;http://www.gnu.org/licenses/gpl.html&gt;.
+There is NO WARRANTY, to the extent permitted by law.</p>
+<p>
+</p>
+<hr />
+<h1><a name="author">AUTHOR</a></h1>
+<p>John M Collins, Xi Software Ltd.</p>
+
+</body>
+
+</html>

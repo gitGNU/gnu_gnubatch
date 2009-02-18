@@ -1,0 +1,325 @@
+<?xml version="1.0" ?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<title>gbch-var - access batch variables from shell</title>
+<meta http-equiv="content-type" content="text/html; charset=utf-8" />
+<link rev="made" href="mailto:root@localhost" />
+</head>
+
+<body style="background-color: white">
+
+<p><a name="__index__"></a></p>
+<!-- INDEX BEGIN -->
+<!--
+
+<ul>
+
+	<li><a href="#name">NAME</a></li>
+	<li><a href="#synopsis">SYNOPSIS</a></li>
+	<li><a href="#description">DESCRIPTION</a></li>
+	<li><a href="#options">OPTIONS</a></li>
+	<li><a href="#conditions">CONDITIONS</a></li>
+	<ul>
+
+		<li><a href="#use_of_options">Use of options</a></li>
+		<li><a href="#note_on_mode_and_owner_changes">Note on mode and owner changes</a></li>
+	</ul>
+
+	<li><a href="#files">FILES</a></li>
+	<li><a href="#environment">ENVIRONMENT</a></li>
+	<li><a href="#see_also">SEE ALSO</a></li>
+	<li><a href="#diagnostics">DIAGNOSTICS</a></li>
+	<li><a href="#copyright">COPYRIGHT</a></li>
+	<li><a href="#author">AUTHOR</a></li>
+</ul>
+-->
+<!-- INDEX END -->
+
+<p>
+</p>
+<h1><a name="name">NAME</a></h1>
+<p>gbch-var - access batch variables from shell</p>
+<p>
+</p>
+<hr />
+<h1><a name="synopsis">SYNOPSIS</a></h1>
+<p><strong>gbch-var</strong>
+[ <em>-options</em> ]
+<em>variable name</em></p>
+<p>
+</p>
+<hr />
+<h1><a name="description">DESCRIPTION</a></h1>
+<p><strong>gbch-var</strong> is a shell level tool to display, create, delete, modify or test the
+values of <strong>GNUbatch</strong> variables. Testing may be ``atomic'', in the sense
+that if two or more users attempt to assign new values to the same variable
+conditional on a test, only one will ``win''.</p>
+<p>
+</p>
+<hr />
+<h1><a name="options">OPTIONS</a></h1>
+<p>Note that the order of treatment, letters and keywords described below
+may be modified by editing the file <em>btrest.help</em> - see btsyntax(5).</p>
+<p>The environment variable on which options are supplied is <a href="#item_gbch_var"><code>GBCH_VAR</code></a> and the
+environment variable to specify the help file is <a href="#item_btrestconf"><code>BTRESTCONF</code></a>.</p>
+<dl>
+<dt><strong><a name="item__2d_3f_or__2bexplain">-? or +explain</a></strong>
+
+<dd>
+<p>causes a summary of the other options to be displayed without taking
+further action.</p>
+</dd>
+</li>
+<dt><strong><a name="item__2dc_or__2bcreate">-C or +create</a></strong>
+
+<dd>
+<p>Create the variable if it doesn't exist. An initial value should be
+supplied using the <strong>-s</strong> option.</p>
+</dd>
+</li>
+<dt><strong><a name="item__2dc_string_or__2bcomment_string">-c <em>string</em> or +comment <em>string</em></a></strong>
+
+<dd>
+<p>Assign or update the given comment field of the variable to be
+<em>string</em>.</p>
+</dd>
+</li>
+<dt><strong><a name="item__2dd_or__2bdelete">-D or +delete</a></strong>
+
+<dd>
+<p>Delete the variable.</p>
+</dd>
+</li>
+<dt><strong><a name="item__2de_or__2bset_2dexport">-E or +set-export</a></strong>
+
+<dd>
+<p>Mark the variable as ``exported'', i.e. visible to other hosts.</p>
+</dd>
+</li>
+<dt><strong><a name="item__2dg_group_or__2bset_2dgroup_group">-G <em>group</em> or +set-group <em>group</em></a></strong>
+
+<dd>
+<p>Change the group ownership of the variable to <em>group</em>.</p>
+</dd>
+</li>
+<dt><strong><a name="item__2dk_or__2bcluster">-K or +cluster</a></strong>
+
+<dd>
+<p>Set the ``clustered'' marker on the variable. When used in conditions or
+assignments, the local version is used.</p>
+</dd>
+</li>
+<dt><strong><a name="item__2dk_or__2bno_2dcluster">-k or +no-cluster</a></strong>
+
+<dd>
+<p>Reset the ``clustered'' marker on the variable.</p>
+</dd>
+</li>
+<dt><strong><a name="item__2dl_or__2bset_2dlocal">-L or +set-local</a></strong>
+
+<dd>
+<p>Mark the variable as local to the host only. This is the default for
+new variables, for existing variables it will turn off the export flag
+if it is specified. To leave existing variables unaffected, invoke the
+<strong>-N</strong> flag.</p>
+</dd>
+</li>
+<dt><strong><a name="item__2dm_mode_or__2bset_2dmode_mode">-M <em>mode</em> or +set-mode <em>mode</em></a></strong>
+
+<dd>
+<p>Set the mode (permissions) on the variable.</p>
+</dd>
+</li>
+<dt><strong><a name="item__2dn_or__2breset_2dexport">-N or +reset-export</a></strong>
+
+<dd>
+<p>Reset the <strong>-L</strong> and <strong>-E</strong> options. For new variables this will restore
+to the default of local only. For existing variables this will mean
+that the export flag is left unchanged.</p>
+</dd>
+</li>
+<dt><strong><a name="item__2do_or__2breset_2dcluster">-o or +reset-cluster</a></strong>
+
+<dd>
+<p>Reset the <strong>-k</strong> and <strong>-K</strong> options. For new variables this will restore
+to the default of not clustered. For existing variables this will mean
+that the cluster flag is left unchanged.</p>
+</dd>
+</li>
+<dt><strong><a name="item__2ds_or__2bforce_2dstring">-S or +force-string</a></strong>
+
+<dd>
+<p>Force all set values to string even if they appear numeric.</p>
+</dd>
+</li>
+<dt><strong><a name="item__2ds_value_or__2bset_2dvalue_value">-s <em>value</em> or +set-value <em>value</em></a></strong>
+
+<dd>
+<p>Assign the given <em>value</em> to the variable.</p>
+</dd>
+</li>
+<dt><strong><a name="item__2du_user_or__2bset_2downer_user">-U <em>user</em> or +set-owner <em>user</em></a></strong>
+
+<dd>
+<p>Change the ownership of the variable to <em>user</em>.</p>
+</dd>
+</li>
+<dt><strong><a name="item__2du_value_or__2bundefined_2dvalue_value">-u <em>value</em> or +undefined-value <em>value</em></a></strong>
+
+<dd>
+<p>In the test operations, if the variable does not exist, treat it as if
+it did exist and had the given <em>value</em>.</p>
+</dd>
+</li>
+<dt><strong><a name="item__2dx_or__2bcancel">-X or +cancel</a></strong>
+
+<dd>
+<p>cancel options <strong>-S</strong>, <strong>-C</strong>, <strong>-D</strong>, <strong>-s</strong> and <strong>-u</strong>.</p>
+</dd>
+</li>
+<dt><strong><a name="item__2bfreeze_2dcurrent">+freeze-current</a></strong>
+
+<dd>
+<p>Save the current options in a <em>.gnubatch</em> file in the current
+directory with keyword <code>BTVAR</code>. Comparison options are not included.</p>
+</dd>
+</li>
+<dt><strong><a name="item__2bfreeze_2dhome">+freeze-home</a></strong>
+
+<dd>
+<p>Save all the current options in a <em>.gnubatch</em> file in the user's home
+directory with keyword <code>BTVAR</code>. Comparison options are not included.</p>
+</dd>
+</li>
+</dl>
+<p>
+</p>
+<hr />
+<h1><a name="conditions">CONDITIONS</a></h1>
+<p>The six conditions <code>+eq</code>, <code>+ne</code>, <code>+gt</code>, <code>+ge</code>, <code>+lt</code> <code>+le</code>
+followed by a constant compare the variable value with the constant
+specified. The constant is assumed to be on the right of the
+comparison, for example:</p>
+<pre>
+        gbch-var +gt 4 myvar</pre>
+<p>Returns an exit code of zero (``true'' to the shell) if <code>myvar</code> is
+greater than 4, or 1 (``false'' to the shell) if it is less than or
+equal to 4. (Some other exit code would be returned if <code>myvar</code> did
+not exist.</p>
+<p>This may be combined with other options, for example</p>
+<pre>
+        gbch-var -D +gt 100 myvar</pre>
+<p>Would delete <code>myvar</code> only if its value was greater than 100.</p>
+<pre>
+        gbch-var -s 1 +le 0 myvar</pre>
+<p>Would assign 1 to <code>myvar</code> only if its previous value was less than or
+equal to 0. Exit code 0 (shell ``true'') would be returned if the test
+succeeded and the other operation was completed successfully, exit
+code 1 (shell ``false'') would be returned if the test failed and
+nothing was done, or some other error if the variable did not exist or
+the operation was not permitted.</p>
+<p>The test is ``atomic'' in the sense that a diagnostic will occur,
+and no assignment made, if some other process sets the value in
+between the test and the assignment (or other change).</p>
+<p>The condition <em>must</em> follow all other options.</p>
+<p><strong>+eq</strong>, <strong>+ne</strong>, <strong>+lt</strong> and <strong>+gt</strong> may be represented as <strong>-e</strong>, <strong>-n</strong>,
+<strong>-l</strong> and <strong>-g</strong> but this is not particularly recommended, especially
+for the last two.</p>
+<p>
+</p>
+<h2><a name="use_of_options">Use of options</a></h2>
+<p>With no options, then the current value of the variable is printed,
+for example:</p>
+<pre>
+        gbch-var abc</pre>
+<p>prints out the value of variable <code>abc</code>.</p>
+<p>To assign a value, the <strong>-s</strong> option should be used, thus</p>
+<pre>
+        gbch-var -s 29 abc</pre>
+<p>assigns the numeric value 29 to <code>abc</code>.</p>
+<p>Remote variables are referred to as follows:</p>
+<pre>
+        gbch-var -s 32 host2:def</pre>
+<p>assigns 32 to variable <code>def</code> on <code>host2</code>.</p>
+<p>The conditional options should be the last to be specified.</p>
+<p>The <strong>-u</strong> option may be used to specify a value to substitute for a
+non-existent variable in a test rather than reporting an error, for
+example:</p>
+<pre>
+        gbch-var -u 10 -gt 5 myvar</pre>
+<p>will compare <code>myvar</code> with 5 if it exists. If it does not exist, then
+it will compare the given value, in this case 10, with 5, and in this
+case return ``true''. There should not be a diagnostic unless there is a
+completely different error.</p>
+<p>
+</p>
+<h2><a name="note_on_mode_and_owner_changes">Note on mode and owner changes</a></h2>
+<p>Changing various parameters, the mode (permissions), the owner and the
+group are done as separate operations.</p>
+<p>In some cases changing the mode may prevent the next operation from
+taking place. In other cases it may need to be done first.</p>
+<p>Similar considerations apply to changes of the owner and the group.</p>
+<p><strong>Btvar</strong> does not attempt to work out the appropriate order to
+perform the operations, the user should execute separate <strong>gbch-var</strong>
+commands in sequence to achieve the desired effect.</p>
+<p>
+</p>
+<hr />
+<h1><a name="files">FILES</a></h1>
+<p><em>~/.gnubatch</em>
+configuration file (home directory)</p>
+<p><em>.gnubatch</em>
+configuration file (current directory)</p>
+<p><em>btrest.help</em>
+message file</p>
+<p>
+</p>
+<hr />
+<h1><a name="environment">ENVIRONMENT</a></h1>
+<dl>
+<dt><strong><a name="item_gbch_var">GBCH_VAR</a></strong>
+
+<dd>
+<p>space-separated options to override defaults.</p>
+</dd>
+</li>
+<dt><strong><a name="item_btrestconf">BTRESTCONF</a></strong>
+
+<dd>
+<p>location of alternative help file.</p>
+</dd>
+</li>
+</dl>
+<p>
+</p>
+<hr />
+<h1><a name="see_also">SEE ALSO</a></h1>
+<p>gbch-q(1),
+gbch-vlist(1),
+btsyntax(5),
+gbch-cvlist(8).</p>
+<p>
+</p>
+<hr />
+<h1><a name="diagnostics">DIAGNOSTICS</a></h1>
+<p>Various diagnostics are read and printed as required from the message
+file <em>btrest.help</em>.</p>
+<p>
+</p>
+<hr />
+<h1><a name="copyright">COPYRIGHT</a></h1>
+<p>Copyright (c) 2009 Free Software Foundation, Inc.
+This is free software. You may redistribute copies of it under the
+terms of the GNU General Public License
+&lt;http://www.gnu.org/licenses/gpl.html&gt;.
+There is NO WARRANTY, to the extent permitted by law.</p>
+<p>
+</p>
+<hr />
+<h1><a name="author">AUTHOR</a></h1>
+<p>John M Collins, Xi Software Ltd.</p>
+
+</body>
+
+</html>
