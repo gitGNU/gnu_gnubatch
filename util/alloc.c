@@ -15,12 +15,10 @@
    You should have received a copy of the GNU General Public License
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
+#include "config.h"
 #include <stdio.h>
-#include <malloc.h>
 #include <setjmp.h>
-#include <string.h>
-#include <unistd.h>
-#include <stdlib.h>
+#include "incl_unix.h"
 #include "hdefs.h"
 
 extern	int		errors, line_count;
@@ -34,17 +32,11 @@ struct	macro	*macrohashtab[MACROHASHMOD];
 struct	module	*modhashtab[MACROHASHMOD];
 struct	valname	*valhash[VALHASHMOD];
 
-void	nomem()
-{
-	fprintf(stderr, "Ran out of memory\n");
-	exit(255);
-}
-
 char	*stracpy(const char *str)
 {
 	char	*result;
 	if  (!(result = malloc((unsigned) (strlen(str) + 1))))
-		nomem();
+		abort();
 	strcpy(result, str);
 	return  result;
 }
@@ -66,7 +58,7 @@ struct	valname	*lookupname(const char * name)
 		if  (strcmp(hp->vn_string, name) == 0)
 			return  hp;
 	if  (!(hp = (struct valname *) malloc(sizeof(struct valname))))
-		nomem();
+		abort();
 	hp->vn_next = valhash[hashval];
 	valhash[hashval] = hp;
 	hp->vn_string = stracpy(name);
@@ -80,7 +72,7 @@ struct	valexpr	*alloc_expr()
 {
 	struct	valexpr	*result = (struct valexpr *) malloc(sizeof(struct valexpr));
 	if  (!result)
-		nomem();
+		abort();
 	return  result;
 }
 
@@ -201,7 +193,7 @@ void	macro_define(char *name, char *subdir, struct module_list *mlist)
 
 	mp = (struct macro *) malloc(sizeof(struct macro));
 	if  (!mp)
-		nomem();
+		abort();
 	mp->macro_next = macrohashtab[mhash];
 	macrohashtab[mhash] = mp;
 	mp->macro_name = name;
@@ -217,7 +209,7 @@ struct	module_list	*alloc_modlist()
 	struct	module_list	*res = (struct module_list *) malloc(sizeof(struct module_list));
 
 	if  (!res)
-		nomem();
+		abort();
 	res->ml_next = (struct module_list *) 0;
 	res->ml_mod = (struct module *) 0;
 	return  res;
@@ -239,7 +231,7 @@ struct	module_list	*alloc_module(char *name, char *subdir)
 
 	mp = (struct module *) malloc(sizeof(struct module));
 	if  (!mp)
-		nomem();
+		abort();
 	mp->mod_next = modhashtab[mhash];
 	modhashtab[mhash] = mp;
 	mp->mod_name = name;
@@ -359,7 +351,7 @@ struct	program_list	*alloc_pl()
 {
 	struct	program_list	*res = (struct program_list *) malloc(sizeof(struct program_list));
 	if  (!res)
-		nomem();
+		abort();
 	res->pl_next = (struct program_list *) 0;
 	res->pl_prog = (struct program *) 0;
 	return  res;

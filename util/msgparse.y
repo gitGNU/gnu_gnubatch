@@ -15,12 +15,11 @@
    You should have received a copy of the GNU General Public License
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 %{
+#include "config.h"
 #include <stdio.h>
-#include <malloc.h>
-#include <string.h>
+#include "incl_unix.h"
 #include "hdefs.h"
 
-extern	void	nomem();
 extern	int	yylex();
 extern	void	valname_usage(struct valexpr *, const unsigned);
 extern	void	apphelps(char *, struct valexpr *, char *, struct valexpr *, struct filelist *, struct textlist *);
@@ -376,7 +375,7 @@ reqlist:	req
 req:		FILENAME
 		{
 			if  (!($$ = (struct filelist *) malloc(sizeof(struct filelist))))
-				nomem();
+				abort();
 			$$->next = (struct filelist *) 0;
 			$$->name = $1;
 			if  (pass1)  {

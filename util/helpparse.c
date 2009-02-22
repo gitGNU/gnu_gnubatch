@@ -15,15 +15,13 @@
    You should have received a copy of the GNU General Public License
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
+#include "config.h"
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <limits.h>
 #include <stdio.h>
-#include <string.h>
-#include <malloc.h>
-#include <dirent.h>
-#include <unistd.h>
-#include <stdlib.h>
+#include "incl_unix.h"
+#include "incl_dir.h"
 #include "hdefs.h"
 
 static  char  codelst[] = "EHPQAKNSX";
@@ -36,7 +34,6 @@ static	FILE	*kdescrfile;
 #define	VP_PL_MAX	5
 
 extern	void	resetlex();
-extern	void	nomem();
 extern	int	yyparse();
 
 void	add_helpref(struct valname *vp, struct module *mp, unsigned flags)
@@ -58,7 +55,7 @@ void	add_helpref(struct valname *vp, struct module *mp, unsigned flags)
 			}
 		hfl = (struct helpfile_list *) malloc(sizeof(struct helpfile_list));
 		if  (!hfl)
-			nomem();
+			abort();
 		hfl->hfl_hf = hf;
 		hfl->hfl_next = vp->vn_hlist;
 		hfl->hfl_flags = flags;
@@ -80,7 +77,7 @@ void	record_help(struct helpfile *hf, const char htype, const long h1, const lon
 		}
 
 	if  (!(hv = (struct hadhelp *) malloc(sizeof(struct hadhelp))))
-		nomem();
+		abort();
 	hv->had_next = hf->hf_hash[hashval];
 	hf->hf_hash[hashval] = hv;
 	hv->had_value = h1;

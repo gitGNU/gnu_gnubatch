@@ -14,7 +14,7 @@ dnl   You should have received a copy of the GNU General Public License
 dnl  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 dnl  Process this file with autoconf to produce a configure script.
 
-AC_INIT(src/btsched.c, 1.0)
+AC_INIT(src/btsched.c, 1.1)
 AC_SUBST(MAJOR_PACKAGE_VERSION)
 
 changequote(<<, >>)dnl
@@ -250,12 +250,13 @@ esac
 
 if test "$GCC" = "yes"
 then
-	gcc_useful_options='-g -Wall -fno-stack-protector'
+	gcc_useful_options='-g -Wall'
 	case "$ac_shared_libs" in
 	[[yY]]*)
 		AC_DEFINE(SHAREDLIBS)
 		main_target=shared
 		lib_pic=-fPIC
+		gcc_useful_options='-g -Wall -fno-stack-protector'
 		;;
 	*)	: ;;
 	esac

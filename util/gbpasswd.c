@@ -18,7 +18,17 @@
 #include "config.h"
 #include <stdio.h>
 #include <pwd.h>
+#include <sys/types.h>
 #include "incl_unix.h"
+#ifdef	TIME_WITH_SYS_TIME
+#include <sys/time.h>
+#include <time.h>
+#elif	defined(HAVE_SYS_TIME_H)
+#include <sys/time.h>
+#else
+#include <time.h>
+#endif
+#include <sys/stat.h>
 
 unsigned  vcount = 0, vmax = 0;
 char	**vlist;
