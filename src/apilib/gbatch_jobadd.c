@@ -134,6 +134,7 @@ FILE *gbatch_jobadd(const int fd, apiBtjob *newjob)
 		msg.code = API_DATAEND;
 		gbatch_wmsg(fdp, &msg);
 		exit(0);
+		return  0;		/* Silence compilers */
 	}
 }
 

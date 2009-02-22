@@ -294,33 +294,6 @@ void  niceend(int signum)
 	do_exit(0);
 }
 
-#if  	defined(HAVE_SIGACTION) && defined(SA_SIGINFO)
-void  trap_loop(int signum, siginfo_t *sit, void *p)
-{
-	unsigned  long  pc = 0;
-	FILE	*fp = fopen("loop.trap", "a");
-#ifdef	OS_LINUX
-	struct  ucontext  *uc = (struct ucontext *) p;
-	pc = uc->uc_mcontext.gregs[14];
-#endif
-#ifdef	OS_OSF1
-	struct  sigcontext  *sc = (struct sigcontext *) p;
-	pc = sc->sc_pc;
-#endif
-#ifdef  OS_AIX_4_3
-	unsigned *addr = (unsigned *) p;
-	pc = addr[10];		/* I'm sure it's declared somewhere but I can't find it */
-#endif
-#if  	defined(OS_SOLARIS) && !defined(i386)
-	struct ucontext *uc = (struct ucontext *) p;
-	pc = uc->uc_mcontext.gregs[REG_PC];
-#endif
-	fprintf(fp, "Pid = %d:\tSignal %d pc = %lx addr = %lx\n", getpid(), sit->si_signo, pc, (unsigned long) sit->si_addr);
-	fclose(fp);
-	_exit(0);
-}
-#endif
-
 /* Try to exit gracefully and quickly....
    Return error code if you can't do it.  */
 
@@ -329,6 +302,7 @@ int  o_niceend(ShreqRef sr)
 	if  (sr->param == $E{Scheduler normal exit}  &&  !ppermitted(sr->uuid, BTM_SSTOP))
 		return  O_NOPERM;
 	niceend((int) sr->param);
+	return  0;		/* Silence compilers */
 }
 
 /* Open IPC channel.  */
@@ -1368,7 +1342,7 @@ MAINFN_TYPE  main(int argc, char **argv)
 	struct rlimit  rlt;
 #endif
 
-	versionprint(argv, "$Revision: 1.1 $", 1);
+	versionprint(argv, "$Revision: 1.2 $", 1);
 
 	if  ((progname = strrchr(argv[0], '/')))
 		progname++;
@@ -1505,41 +1479,11 @@ MAINFN_TYPE  main(int argc, char **argv)
 	sigact_routine(SIGQUIT, &zign, (struct sigstruct_name *) 0);
 	zign.sighandler_el = niceend;
 	sigact_routine(SIGTERM, &zign, (struct sigstruct_name *) 0);
-#ifndef	DEBUG
-#if  	defined(HAVE_SIGACTION) && defined(SA_SIGINFO)
-	zign.sigflags_el = SA_SIGINFO;
-#ifdef	NO_SA_SIGACTION
-	zign.sighandler_el = trap_loop;
-#else
-	zign.sa_sigaction = trap_loop;
-#endif
-#endif
-	sigact_routine(SIGFPE, &zign, (struct sigstruct_name *) 0);
-	sigact_routine(SIGBUS, &zign, (struct sigstruct_name *) 0);
-	sigact_routine(SIGSEGV, &zign, (struct sigstruct_name *) 0);
-	sigact_routine(SIGILL, &zign, (struct sigstruct_name *) 0);
-#ifdef	SIGSYS
-	sigact_routine(SIGSYS, &zign, (struct sigstruct_name *) 0);
-#endif /* SIGSYS */
-#ifdef	HAVE_SIGACTION
-	zign.sigflags_el = SIGVEC_INTFLAG;
-	zign.sighandler_el = niceend;
-#endif
-#endif /* !DEBUG */
 #else  /* !STRUCT_SIG */
 	signal(SIGHUP, SIG_IGN);
 	signal(SIGINT, SIG_IGN);
 	signal(SIGQUIT, SIG_IGN);
 	signal(SIGTERM, niceend);
-#ifndef	DEBUG
-	signal(SIGFPE, niceend);
-	signal(SIGBUS, niceend);
-	signal(SIGSEGV, niceend);
-	signal(SIGILL, niceend);
-#ifdef	SIGSYS
-	signal(SIGSYS, niceend);
-#endif /* SIGSYS */
-#endif /* !DEBUG */
 #endif /* !STRUCT_SIG */
 
 	/* Must open var file first as it's needed by job file */

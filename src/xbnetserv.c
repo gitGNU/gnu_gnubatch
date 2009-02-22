@@ -471,8 +471,8 @@ static void  lognprocess()
 
 unsigned unpack_job(BtjobRef to, const struct nijobmsg *from, const unsigned length, const netid_t whofrom)
 {
-	unsigned	cnt;
 #ifndef	WORDS_BIGENDIAN
+	unsigned	cnt;
 	JargRef	darg;	EnvirRef denv;	RedirRef dred;
 	const	Jarg  *sarg;	const	Envir *senv;	const	Redir *sred;
 #endif
@@ -1259,7 +1259,7 @@ MAINFN_TYPE  main(int argc, char **argv)
 	struct	sigstruct_name	zign;
 #endif
 
-	versionprint(argv, "$Revision: 1.1 $", 1);
+	versionprint(argv, "$Revision: 1.2 $", 1);
 
 	if  ((progname = strrchr(argv[0], '/')))
 		progname++;

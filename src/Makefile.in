@@ -305,16 +305,20 @@ apilibd:
 #	cd motif;$(MAKE)
 
 gtkd:		$(LIB)
-		-cd gtk;$(MAKE)
+		@if cd gtk;$(MAKE); then echo GTK built OK; else echo;echo;echo "******** GTK build failed - not critical but please install recent GTK (incl devel libs)";echo;echo; fi
+		touch $@
 
-loccgid:$(LIB)
+loccgid:	$(LIB)
 		cd loccgi;$(MAKE)
+		touch $@
 
-remcgid:$(LIB)
+remcgid:	$(LIB)
 		cd remcgi;$(MAKE)
+		touch $@
 
 insd:		$(LIB)
 		cd ins;$(MAKE)
+		touch $@
 
 $(LIB):
 		cd lib;$(MAKE)

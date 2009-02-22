@@ -75,11 +75,8 @@ int	Ctrl_chan;
 long	mymtype;
 struct	jshm_info	Job_seg;
 struct	vshm_info	Var_seg;
-extern	netid_t		Out_host;
-#else
-netid_t	Out_host;
 #endif
-
+extern	netid_t		Out_host;
 char	*realuname;
 char	realgname[UIDSIZE+1];
 
@@ -132,6 +129,7 @@ OPTION(o_explain)
 {
 	print_error($E{btr explain});
 	exit(0);
+	return  0;		/* Silence compilers */
 }
 
 OPTION(o_noverbose)
@@ -481,7 +479,7 @@ MAINFN_TYPE  main(int argc, char **argv)
 	int_ugid_t	chk_uid;
 #endif
 
-	versionprint(argv, "$Revision: 1.1 $", 0);
+	versionprint(argv, "$Revision: 1.2 $", 0);
 
 	if  ((progname = strrchr(argv[0], '/')))
 		progname++;

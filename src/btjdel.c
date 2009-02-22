@@ -73,7 +73,6 @@ gid_t	Realgid,
 	Effgid;
 
 ULONG		indx;
-BtjobRef	JREQ;
 
 BtuserRef	mypriv;
 
@@ -363,6 +362,7 @@ OPTION(o_explain)
 {
 	print_error($E{btjdel explain});
 	exit(0);
+	return  0;		/* Silence compilers */
 }
 
 OPTION(o_noforce)
@@ -503,7 +503,7 @@ MAINFN_TYPE  main(int argc, char **argv)
 #endif
 	enum	cmdtype	which = CMD_DELETE;
 
-	versionprint(argv, "$Revision: 1.1 $", 0);
+	versionprint(argv, "$Revision: 1.2 $", 0);
 
 	if  ((progname = strrchr(argv[0], '/')))
 		progname++;

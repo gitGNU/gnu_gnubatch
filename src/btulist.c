@@ -459,6 +459,7 @@ OPTION(o_explain)
 {
 	print_error($E{btulist explain});
 	exit(0);
+	return  0;		/* Silence compilers */
 }
 
 OPTION(o_usort)
@@ -605,7 +606,7 @@ MAINFN_TYPE  main(int argc, char **argv)
 	int_ugid_t	chk_uid;
 #endif
 
-	versionprint(argv, "$Revision: 1.1 $", 0);
+	versionprint(argv, "$Revision: 1.2 $", 0);
 
 	if  ((progname = strrchr(argv[0], '/')))
 		progname++;

@@ -962,6 +962,7 @@ OPTION(o_explain)
 {
 	print_error($E{btfilemon explain});
 	exit(0);
+	return  0;		/* Silence compilers */
 }
 
 DEOPTION(o_freezecd);
@@ -1372,7 +1373,7 @@ MAINFN_TYPE  main(int argc, char **argv)
 	struct	sigstruct_name	z;
 #endif
 
-	versionprint(argv, "$Revision: 1.1 $", 0);
+	versionprint(argv, "$Revision: 1.2 $", 0);
 
 	if  ((progname = strrchr(argv[0], '/')))
 		progname++;

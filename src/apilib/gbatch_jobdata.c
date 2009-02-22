@@ -125,5 +125,6 @@ FILE *gbatch_jobdata(const int fd, const unsigned flags, const slotno_t slotno)
 		}
 		close(pfd[1]);
 		_exit(0);
+		return  0;		/* Silence compilers */
 	}
 }

@@ -257,6 +257,7 @@ static time_t  g_time(const char *arg)
  badtime:
 	print_error($E{Bad time spec});
 	exit(E_USAGE);
+	return  0;		/* Silence compilers */
 }
 
 static LONG  g_adj(const char *arg)
@@ -396,23 +397,17 @@ void  spit_options(FILE *dest, const char *name)
 
 MAINFN_TYPE  main(int argc, char **argv)
 {
-	char	*Varname, *str;
 	char	*Curr_pwd = (char *) 0;
 #if	defined(NHONSUID) || defined(DEBUG)
 	int_ugid_t	chk_uid;
 #endif
 
-	versionprint(argv, "$Revision: 1.1 $", 0);
+	versionprint(argv, "$Revision: 1.2 $", 0);
 
 	if  ((progname = strrchr(argv[0], '/')))
 		progname++;
 	else
 		progname = argv[0];
-	str = Varname = stracpy(progname);
-	while  (*str) {
-		*str = toupper(*str);
-		str++;
-	}
 
 	init_mcfile();
 

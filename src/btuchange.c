@@ -132,6 +132,7 @@ OPTION(o_explain)
 {
 	print_error($E{btuchange explain});
 	exit(0);
+	return  0;		/* Silence compilers */
 }
 
 OPTION(o_defaults)
@@ -755,7 +756,7 @@ MAINFN_TYPE  main(int argc, char **argv)
 #endif
 	BtuserRef	mypriv;
 
-	versionprint(argv, "$Revision: 1.1 $", 0);
+	versionprint(argv, "$Revision: 1.2 $", 0);
 
 	if  ((progname = strrchr(argv[0], '/')))
 		progname++;

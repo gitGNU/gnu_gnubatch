@@ -98,6 +98,7 @@ OPTION(o_explain)
 {
 	print_error($E{btcichange explain});
 	exit(0);
+	return  0;		/* Silence compilers */
 }
 
 OPTION(o_addci)
@@ -297,7 +298,7 @@ MAINFN_TYPE  main(int argc, char **argv)
 	CmdintRef	Cientry;
 	int		ret;
 
-	versionprint(argv, "$Revision: 1.1 $", 0);
+	versionprint(argv, "$Revision: 1.2 $", 0);
 
 	if  ((progname = strrchr(argv[0], '/')))
 		progname++;
