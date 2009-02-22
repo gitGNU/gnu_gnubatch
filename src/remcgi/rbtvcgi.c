@@ -407,6 +407,7 @@ $P{Kill mode name}	$N{Kill mode name}
 	}
 	html_out_or_err("perm_post", 0);
 	exit(0);
+	return  0;
 }
 
 int  perf_listformat(char *notused)
@@ -427,6 +428,7 @@ int  perf_listformat(char *notused)
 	printf("existing_formats(\"%s\");\n", formatstring);
 	html_out_param_file("listfmt_post", 0, 0, html_cookexpiry());
 	exit(0);
+	return  0;
 }
 
 extern int  perf_optselect(char *);
@@ -493,6 +495,7 @@ int  perf_optselect(char *notused)
 {
 	html_out_param_file("setopts", 1, 0, html_cookexpiry());
 	exit(0);
+	return  0;
 }
 
 void  interp_args(char **args)
@@ -527,7 +530,7 @@ MAINFN_TYPE  main(int argc, char **argv)
 	char	**newargs;
 	int_ugid_t	chku;
 
-	versionprint(argv, "$Revision: 1.1 $", 0);
+	versionprint(argv, "$Revision: 1.2 $", 0);
 
 	if  ((progname = strrchr(argv[0], '/')))
 		progname++;
