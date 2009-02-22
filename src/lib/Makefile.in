@@ -138,9 +138,98 @@ SHLIBCURS_OBJS=\
 	whexnum.o \
 	wnum.o\
 
-# OBJECTS needs to be "lordered and tsorted"
+# These objects are in "lorder *.o|tsort" order in case the system we are building
+# on doesn't have a ranlib or equivalent in "ar"
 
-OBJECTS=$(SHLIB_OBJS) $(SHLIBCLIENT_OBJS) $(SHLIBCURS_OBJS)
+OBJECTS=altlen.o\
+	calcharge.o\
+	cgifndjb.o\
+	cgiuser.o\
+	cgiutil.o\
+	chkfuture.o\
+	dumpargs.o\
+	dumpconds.o\
+	dumpecrun.o\
+	dumpemode.o\
+	dumpmode.o\
+	dumpnstr.o\
+	dumpredirs.o\
+	dumptime.o\
+	envgetserv.o\
+	galts.o\
+	getbtuser.o\
+	gprompt.o\
+	helphdr.o\
+	helpnstate.o\
+	lookup_alt.o\
+	mkspid.o\
+	net_feed.o\
+	op_icf.o\
+	open_cfile.o\
+	optdisp.o\
+	optpparm.o\
+	optprocess.o\
+	opttime.o\
+	optvars.o\
+	produser.o\
+	readreply.o\
+	repmnthfix.o\
+	runpwd.o\
+	rvfile.o\
+	setkey.o\
+	shutilmsg.o\
+	spath.o\
+	spit_cond.o\
+	spit_msg.o\
+	spit_pparm.o\
+	spit_redir.o\
+	spit_time.o\
+	stringsch.o\
+	stringvec.o\
+	versionprint.o\
+	wgets.o\
+	whdrstr.o\
+	whexnum.o\
+	wnum.o\
+	rjfile.o\
+	htmllib.o\
+	spitbtrstr.o\
+	helprdalt.o\
+	readu.o\
+	insertu.o\
+	helpprmpt.o\
+	open_ci.o\
+	makeovec.o\
+	helpargs.o\
+	doenv.o\
+	rdoptfile.o\
+	calchash.o\
+	make_km.o\
+	getxbuf.o\
+	dumpcon.o\
+	condname.o\
+	saveopts.o\
+	advtime.o\
+	disp_alt.o\
+	packjstring.o\
+	getkey.o\
+	qmatch.o\
+	mpermitted.o\
+	makevec.o\
+	doopts.o\
+	dumpstr.o\
+	disperror.o\
+	helpvec.o\
+	mmangle.o\
+	help_readl.o\
+	helprdn.o\
+	prin_gname.o\
+	look_host.o\
+	ncstrncmp.o\
+	prin_uname.o\
+	envprocess.o\
+	strread.o\
+	stracpy.o
 
 all:	@main_target@
 

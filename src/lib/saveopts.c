@@ -166,4 +166,5 @@ int	proc_save_opts(const char *direc, const char *varname, void (*fn)(FILE *, co
 	(*fn)(ifl, varname);
 	fclose(ifl);
 	_exit(0);
+	return  0;		/* To shut up fussy compilers */
 }
