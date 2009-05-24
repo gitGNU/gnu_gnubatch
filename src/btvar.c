@@ -69,7 +69,7 @@ gid_t	Realgid,
 BtuserRef	mypriv;
 
 Shipc		Oreq;
-long		mymtype;
+extern	long	mymtype;
 
 ULONG			Saveseq;
 
@@ -96,12 +96,10 @@ char	forcestring,
 
 char		*Restru, *Restrg, *jobqueue, *Args[1];
 
-#ifdef	SHAREDLIBS
-#include "helpalt.h"
-HelpaltRef	repunit, ifnposses, days_abbrev;
+/* Satisfy sharedlibs dependencies */
 char		*exitcodename, *signalname;
 struct	jshm_info	Job_seg;
-#endif
+/* End of shared libs dependencies */
 
 char	*Curr_pwd;
 

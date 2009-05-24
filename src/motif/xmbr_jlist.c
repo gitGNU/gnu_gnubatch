@@ -78,7 +78,7 @@ struct	pend_job	*pend_list;
 
 extern	BtuserRef	mypriv;
 
-HelpaltRef	days_abbrev, daynames_full, monnames, repunit, ifnposses;
+HelpaltRef	daynames_full, monnames;
 #ifdef HAVE_XM_SPINB_H
 XmStringTable	timezerof, stdaynames, stmonnames;
 #endif
@@ -783,7 +783,6 @@ void  cb_submit(Widget w, int notused)
 	static	jobno_t		jn;
 	Shipc			Oreq;
 	Repmess			rr;
-	extern	long		mymtype;
 
 	if  ((indx = getselectedjob(1)) < 0)
 		return;

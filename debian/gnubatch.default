@@ -1,0 +1,10 @@
+# Defaults for gnubatch initscript
+# sourced by /etc/init.d/gnubatch
+# installed at /etc/default/gnubatch by the maintainer scripts
+
+#
+# This is a POSIX shell fragment
+#
+
+# Additional options that are passed to the Daemon.
+DAEMON_OPTS="-j 1000 -v 500"

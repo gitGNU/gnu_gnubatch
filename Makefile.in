@@ -28,12 +28,15 @@ MSGFILE		=	GNUBATCH.msg
 HELPPARSE	=	$(UTILDIR)/helpparse
 prefix		=	@prefix@
 exec_prefix	=	@exec_prefix@
-BINDIR		=	@bindir@
-SBINDIR		=	@sbindir@
-INTBINDIR	=	@pkgexecdir@
-DATADIR		=	@pkgdatadir@
+BINDIR		=	$(DESTDIR)@bindir@
+SBINDIR		=	$(DESTDIR)@sbindir@
+INTBINDIR	=	$(DESTDIR)@pkgexecdir@
+DATADIR		=	$(DESTDIR)@pkgdatadir@
+MANDIR		=	$(DESTDIR)@mandir@
+PDFDIR		=	$(DESTDIR)@pdfdir@
 INSTALL		=	@INSTALL@
 INSTALL_DATA	=	@INSTALL_DATA@
+STAGED_INSTALL	=	false
 
 all:	buildd build-src
 
@@ -52,14 +55,16 @@ utild:
 install:	all
 	cd $(UTILDIR);make install
 	cd $(BUILDDIR);$(MAKE) install prefix="$(prefix)" exec_prefix="$(exec_prefix)"
-	$(BINDIR)/gbch-uchange -R
-	$(BINDIR)/gbch-uchange -p ALL `who am i|sed -e 's/ .*//'`
+	cd doc;$(MAKE) install
+	$(STAGED_INSTALL) || $(BINDIR)/gbch-uchange -R
+	$(STAGED_INSTALL) || $(BINDIR)/gbch-uchange -p ALL `who am i|sed -e 's/ .*//'`
 
 install-strip:	all
 	cd $(UTILDIR);make install-strip
 	cd $(BUILDDIR);$(MAKE) install-strip prefix="$(prefix)" exec_prefix="$(exec_prefix)"
-	$(BINDIR)/gbch-uchange -R
-	$(BINDIR)/gbch-uchange -p ALL `who am i|sed -e 's/ .*//'`
+	cd doc;$(MAKE) install
+	$(STAGED_INSTALL) || $(BINDIR)/gbch-uchange -R
+	$(STAGED_INSTALL) || $(BINDIR)/gbch-uchange -p ALL `who am i|sed -e 's/ .*//'`
 
 install-user user-install:
 	@perlbin@ $(BASE)/Userinst
@@ -70,6 +75,7 @@ install-net:
 clean:
 	cd $(UTILDIR);$(MAKE) clean
 	rm -fr $(BUILDDIR) buildd utild build-src
+	cd doc;$(MAKE) clean
 
 distclean:	clean
 	cd $(UTILDIR);$(MAKE) distclean
@@ -77,3 +83,4 @@ distclean:	clean
 	$(RM) $(SRCDIR)/hdrs/files.h $(SRCDIR)/hdrs/infiles.h 
 	$(RM) config.cache config.h config.status config.log Makefile
 	$(RM) Checkuserinst Userinst Netinst
+	cd doc;$(MAKE) distclean

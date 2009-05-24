@@ -40,7 +40,10 @@
 #include "optflags.h"
 
 extern	BtjobRef	JREQ;
-extern	HelpaltRef	repunit, days_abbrev;
+
+/* Define these here */
+
+HelpaltRef	repunit, days_abbrev, ifnposses;
 
 EOPTION(o_notime)
 {

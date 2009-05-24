@@ -67,20 +67,17 @@ FILE	*Cfile;
 
 char	*Restru, *Restrg, *jobqueue;		/* Resolution only */
 
-#ifdef	SHAREDLIBS
+/* Satisfy sharedlibs dependencies */
 #include "timecon.h"
 #include "btjob.h"
 #include "q_shm.h"
 int		Ctrl_chan;
-long		mymtype;
-HelpaltRef	repunit, ifnposses, days_abbrev;
 char		*Args[1], *exitcodename, *signalname;
 BtuserRef	mypriv;
 struct	jshm_info	Job_seg;
 extern	netid_t	Out_host;
-#else
-netid_t	Out_host;
-#endif
+
+/* end of shared library dependencies */
 
 /* For when we run out of memory.....  */
 

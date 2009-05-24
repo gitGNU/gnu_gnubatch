@@ -1,0 +1,25 @@
+Source: gnubatch
+Section: net
+Priority: optional
+Maintainer: John M Collins <jmc@xisl.com>
+Build-Depends: debhelper (>= 7), autotools-dev
+Standards-Version: 3.7.3
+Homepage: http://www.gnu.org/software/gnubatch
+
+Package: gnubatch
+Architecture: any
+Depends: ${shlibs:Depends}, ${misc:Depends}
+Description: A network-based print spooler
+ This is a fast, network-enabled and reliable batch scheduler
+ for GNU/Linux and UNIX systems.
+
+Package: gnubatch-doc
+Architecture: all
+Description: Documentation for Gnubatch
+ PDF documentation for Gnubatch
+
+Package: gnubatch-dev
+Architecture: any
+Description: API development library for GNUbatch
+ Consists of API library and include
+

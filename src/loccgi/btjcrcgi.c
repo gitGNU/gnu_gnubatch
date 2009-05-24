@@ -97,14 +97,9 @@ char	*jobqueue;		/* Dummy one to read file reqd by rjobfile */
 
 ULONG	indx;
 
-#ifdef	SHAREDLIBS
-HelpaltRef	repunit, ifnposses, days_abbrev;
-#endif
-
 unsigned	defavoid;
 
 BtuserRef	mypriv;
-long		mymtype;
 
 char		*Job_data,
 		*Job_filename,

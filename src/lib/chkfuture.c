@@ -38,8 +38,6 @@
 #include "ecodes.h"
 #include "incl_unix.h"
 
-extern	HelpaltRef	days_abbrev;
-
 void  chkfuture(BtjobRef jp, const int verb)
 {
 	if  (jp->h.bj_times.tc_istime  &&  jp->h.bj_times.tc_nexttime <= jp->h.bj_time)  {

@@ -25,15 +25,14 @@ HDRS		=	$(PARENT)/hdrs
 INLINE		=	$(PARENT)/inline
 CC		=	@CC@
 CCFLAGS		=	-O @gcc_useful_options@ @funny_compiler_options@
+SHLIBCC		=	libtool --mode=link $(CC) $(CCFLAGS)
 LDFLAGS		=
 GTKINCL		=	`pkg-config --cflags gtk+-2.0`
 CFLAGS		=	$(CCFLAGS) -I$(HDRS) -I$(BASE) -I$(PARENT) $(GTKINCL)
-SHLIBDIR	=	@shlibdir@
-LIBDIR		=	@libdir@
 MYLIBDIR	=	$(PARENT)/lib
-LIB		=	$(MYLIBDIR)/libgnubatch_int.a
-SHLIB		=	$(MYLIBDIR)/libgnubatch_int.so
-SHLIBCLIENT	=	$(MYLIBDIR)/libgnubatch_client.so
+LIB		=	$(MYLIBDIR)/.libs/libgnubatch_int.a
+SHLIB		=	$(MYLIBDIR)/libgnubatch_int.la
+SHLIBCLIENT	=	$(MYLIBDIR)/libgnubatch_client.la
 LIBS		=	@LIBS@
 LIBNET		=	@SOCKLIBS@
 GTKLIBS		=	`pkg-config --libs gtk+-2.0`
@@ -44,9 +43,9 @@ BATCHUSER	=	@BATCHUSER@
 USERMODES	=	-o $(BATCHUSER) -g root -m 4755
 NOSETMODES	=	-o $(BATCHUSER) -g root
 SUIDROOT	=	-o root -g root -m 4755
-BINDIR		=	@bindir@
-INTBINDIR	=	@pkgexecdir@
-HELPFILEDIR	=	@sphelpdir@
+BINDIR		=	$(DESTDIR)@bindir@
+INTBINDIR	=	$(DESTDIR)@pkgexecdir@
+HELPFILEDIR	=	$(DESTDIR)@sphelpdir@
 USERBINS	=	gbch-xq gbch-xr gbch-xuser
 NOSETUBINS	=	gbch-xfilemon
 SETUROOTSYSBINS	=	bgtkldsv
@@ -60,39 +59,19 @@ XBTROBJS=xbtr.o xbr_jlist.o xbr_cbs.o xbr_jcall.o xbr_jobpar.o xbr_remsub.o xbr_
 BGTKSAVEOBJS=bgtksave.o
 BGTKLDSVOBJS=bgtkldsv.o
 
-all:	@main_target@
-
-nonshared:	gbch-xfilemon gbch-xq gbch-xr gbch-xuser bgtksave bgtkldsv
-
-shared:		xfilemon_s xbtq_s xbtr_s xbtuser_s bgtksave bgtkldsv
+all:	gbch-xfilemon gbch-xq gbch-xr gbch-xuser bgtksave bgtkldsv
 
 gbch-xfilemon:	$(XFILEMONOBJS)
-		$(CC) -o $@ $(LDFLAGS) $(XFILEMONOBJS) $(LIB) $(GTKLIBS) $(LIBNET) $(LIBS)
-
-xfilemon_s:	$(XFILEMONOBJS)
-		$(CC) -o gbch-xfilemon $(LDFLAGS) $(XFILEMONOBJS) $(SHLIB) $(SHLIBCLIENT) $(GTKLIBS) $(LIBNET) $(LIBS)
-		touch $@
+		$(SHLIBCC) -o gbch-xfilemon $(LDFLAGS) $(XFILEMONOBJS) $(SHLIB) $(SHLIBCLIENT) $(GTKLIBS) $(LIBNET) $(LIBS)
 
 gbch-xq:	$(XBTQOBJS)
-		$(CC) -o $@ $(LDFLAGS) $(XBTQOBJS) $(LIB) $(GTKLIBS) $(LIBNET) $(LIBS)
-
-xbtq_s:		$(XBTQOBJS)
-		$(CC) -o gbch-xq $(LDFLAGS) $(XBTQOBJS) $(SHLIB) $(SHLIBCLIENT) $(GTKLIBS) $(LIBNET) $(LIBS)
-		touch $@
+		$(SHLIBCC) -o gbch-xq $(LDFLAGS) $(XBTQOBJS) $(SHLIB) $(SHLIBCLIENT) $(GTKLIBS) $(LIBNET) $(LIBS)
 
 gbch-xr:	$(XBTROBJS)
-		$(CC) -o $@ $(LDFLAGS) $(XBTROBJS) $(LIB) $(GTKLIBS) $(LIBNET) $(LIBS)
-
-xbtr_s:		$(XBTROBJS)
-		$(CC) -o gbch-xr $(LDFLAGS) $(XBTROBJS) $(SHLIB) $(SHLIBCLIENT) $(GTKLIBS) $(LIBNET) $(LIBS)
-		touch $@
+		$(SHLIBCC) -o gbch-xr $(LDFLAGS) $(XBTROBJS) $(SHLIB) $(SHLIBCLIENT) $(GTKLIBS) $(LIBNET) $(LIBS)
 
 gbch-xuser:	$(XBTUSEROBJS)
-		$(CC) -o $@ $(LDFLAGS) $(XBTUSEROBJS) $(LIB) $(GTKLIBS) $(LIBNET) $(LIBS)
-
-xbtuser_s:	$(XBTUSEROBJS)
-		$(CC) -o gbch-xuser $(LDFLAGS) $(XBTUSEROBJS) $(SHLIB) $(SHLIBCLIENT) $(GTKLIBS) $(LIBNET) $(LIBS)
-		touch $@
+		$(SHLIBCC) -o gbch-xuser $(LDFLAGS) $(XBTUSEROBJS) $(SHLIB) $(SHLIBCLIENT) $(GTKLIBS) $(LIBNET) $(LIBS)
 
 xbr_jcall.o:	xbq_jcall.c
 	$(CC) -c -o $@ $(CFLAGS) -DIN_XBTR xbq_jcall.c
@@ -101,7 +80,7 @@ xbr_jobpar.o:	xbq_jobpar.c
 	$(CC) -c -o $@ $(CFLAGS) -DIN_XBTR xbq_jobpar.c
 
 # bgtksave and bgtkldsv don't use any library routines (apart from versionprint) so
-# we don't have different shlib versions
+# we don't bother with shared libraries
 
 bgtksave: bgtksave.o
 		$(CC) -o $@ $(BGTKSAVEOBJS) $(LDFLAGS) $(LIB) $(LIBS)
@@ -110,21 +89,21 @@ bgtkldsv: bgtkldsv.o
 		$(CC) -o $@ $(BGTKLDSVOBJS) $(LDFLAGS) $(LIB) $(LIBS)
 
 install:	all
-		$(INSTALL) $(USERMODES) $(USERBINS) $(BINDIR)
-		$(INSTALL) $(NOSETMODES) $(NOSETUBINS) $(BINDIR)
+		libtool --mode=install $(INSTALL) $(USERMODES) $(USERBINS) $(BINDIR)
+		libtool --mode=install $(INSTALL) $(NOSETMODES) $(NOSETUBINS) $(BINDIR)
 		$(INSTALL) $(SUIDROOT) $(SETUROOTSYSBINS) $(INTBINDIR)
 		$(INSTALL) $(NOSETMODES) $(NOSETUSYSBINS) $(INTBINDIR)
 		$(INSTALL_DATA) $(XRES) $(HELPFILEDIR)
 
 install-strip:	all
-		$(INSTALL) -s $(USERMODES) $(USERBINS) $(BINDIR)
-		$(INSTALL) -s $(NOSETMODES) $(NOSETUBINS) $(BINDIR)
-		$(INSTALL) -s $(SUIDROOT) $(SETUROOTSYSBINS) $(INTBINDIR)
-		$(INSTALL) -s $(NOSETMODES) $(NOSETUSYSBINS) $(INTBINDIR)
+		libtool --mode=install $(INSTALL) -s $(USERMODES) $(USERBINS) $(BINDIR)
+		libtool --mode=install $(INSTALL) -s $(NOSETMODES) $(NOSETUBINS) $(BINDIR)
+		$(INSTALL) $(SUIDROOT) $(SETUROOTSYSBINS) $(INTBINDIR)
+		$(INSTALL) $(NOSETMODES) $(NOSETUSYSBINS) $(INTBINDIR)
 		$(INSTALL_DATA) $(XRES) $(HELPFILEDIR)
 
 clean:
-	$(RM) *.o xbtq xbtuser xbtr xbtr xfilemon *_s bgtksave bgtkldsv
+	$(RM) *.o xbtq xbtuser xbtr xbtr xfilemon bgtksave bgtkldsv
 
 distclean:	clean
 	$(RM) Makefile

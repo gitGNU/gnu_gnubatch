@@ -62,7 +62,7 @@ gid_t	Realgid,
 FILE	*Cfile;
 char	Confvarname[] = "FILEMONCONF";
 
-#ifdef	SHAREDLIBS
+/* Satisfy sharedlibs dependencies */
 #include "helpalt.h"
 #include "bjparam.h"
 #include "cmdint.h"
@@ -75,15 +75,13 @@ char	Confvarname[] = "FILEMONCONF";
 #include "q_shm.h"
 
 int		Ctrl_chan;
-long		mymtype;
 uid_t		Daemuid;
 ULONG		Fileprivs;
-HelpaltRef	repunit, ifnposses, days_abbrev;
 char		*Args[1], *exitcodename, *signalname;
 BtuserRef	mypriv;
 struct		jshm_info	Job_seg;
 char		*Restru, *Restrg, *jobqueue;
-#endif
+/* End of shared libs dependencies */
 
 enum  wot_mode	wotact = WM_STOP_FOUND;
 enum  wot_form	wotf = WF_APPEARS;

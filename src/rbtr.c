@@ -69,13 +69,13 @@ gid_t	Realgid,
 	Effgid,
 	Replgid;		/* Replacement if requested */
 
-#ifdef	SHAREDLIBS
+/* Satisfy sharedlibs dependencies */
 #include "q_shm.h"
 int	Ctrl_chan;
-long	mymtype;
 struct	jshm_info	Job_seg;
 struct	vshm_info	Var_seg;
-#endif
+/* End of shared libs dependencies */
+
 extern	netid_t		Out_host;
 char	*realuname;
 char	realgname[UIDSIZE+1];
@@ -100,8 +100,6 @@ char	*Out_interp;
 
 char	*exitcodename,
 	*signalname;
-
-HelpaltRef	repunit, ifnposses, days_abbrev;
 
 Menvir	Envs[MAXJENVIR];
 

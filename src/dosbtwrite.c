@@ -42,7 +42,7 @@
 
 SHORT	uaportnum;
 
-#ifdef	SHAREDLIBS
+/* Satisfy sharedlibs dependencies */
 #include "cmdint.h"
 #include "timecon.h"
 #include "btjob.h"
@@ -52,7 +52,8 @@ uid_t	Realuid;
 gid_t	Realgid;
 ULONG	Fileprivs;
 struct	jshm_info	Job_seg;
-#endif
+/* End of shared libs dependencies */
+
 FILE	*Cfile;
 
 static	char	Filename[] = __FILE__;
@@ -223,10 +224,9 @@ MAINFN_TYPE  main(int argc, char **argv)
 	else
 		progname = argv[0];
 
-#ifdef	SHAREDLIBS
 	Realuid = getuid();
 	Realgid = getgid();
-#endif
+
 	init_mcfile();
 
 	/* Slurp message into buffer */

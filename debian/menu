@@ -1,0 +1,2 @@
+?package(gnubatch):needs="X11" section="Applications/System Tools"\
+  title="gnubatch queue" command="/usr/bin/gbch-xq"

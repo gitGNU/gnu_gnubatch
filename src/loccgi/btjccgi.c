@@ -73,10 +73,9 @@
 char	*exitcodename,
 	*signalname;
 
-#ifdef	SHAREDLIBS
-HelpaltRef	repunit, ifnposses, days_abbrev;
+/* Satisfy sharedlibs dependencies */
 char	*Args[1];
-#endif
+/* End of shared libs dependencies */
 
 FILE	*Cfile;
 
@@ -105,7 +104,6 @@ int	exit_code;
 char	*Args[1];
 
 BtuserRef	mypriv;
-long		mymtype;
 
 extern int  extractvar(const char **, struct vdescr *);
 

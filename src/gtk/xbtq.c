@@ -77,11 +77,9 @@ char	*spdir,
 	*Curr_pwd,
 	*jobqueue;
 
-#ifdef	SHAREDLIBS
+/* Satisfy sharedlibs dependencies */
 char	*Args[1];
-#else
-ULONG	Dispflags;
-#endif
+/* End of shared libs dependencies */
 
 uid_t	Daemuid,
 	Realuid,
@@ -100,7 +98,7 @@ int	Sem_chan;
 int	poll_time;
 
 Shipc		Oreq;
-long		mymtype;
+extern	long	mymtype;
 BtuserRef	mypriv;
 
 char	*Restru, *Restrg;

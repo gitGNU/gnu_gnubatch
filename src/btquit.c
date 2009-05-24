@@ -50,17 +50,15 @@ uid_t	Realuid,
 gid_t	Realgid,
 	Effgid;
 
-#ifdef	SHAREDLIBS
+/* Satisfy sharedlibs dependencies */
 #include "helpalt.h"
 #include "q_shm.h"
 #include "btuser.h"
-long		mymtype;
-HelpaltRef	repunit, ifnposses, days_abbrev;
 char		*Args[1], *exitcodename, *signalname;
 char		*Restru, *Restrg, *jobqueue;
 BtuserRef	mypriv;
 struct	jshm_info	Job_seg;
-#endif
+/* End of shared libs dependencies */
 
 void  nomem(const char *fl, const int ln)
 {

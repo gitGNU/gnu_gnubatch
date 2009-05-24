@@ -71,13 +71,10 @@ gid_t	Realgid,
 
 BtuserRef	mypriv;
 
-#ifdef	SHAREDLIBS
-#include "helpalt.h"
-long	mymtype;
-HelpaltRef	repunit, ifnposses, days_abbrev;
+/* Satisfy sharedlibs dependencies */
 char		*Args[1], *exitcodename, *signalname;
 struct	jshm_info	Job_seg;
-#endif
+/* End of shared libs dependencies */
 
 FILE	*Cfile;
 

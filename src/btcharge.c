@@ -109,8 +109,7 @@ char	*Restru, *Restrg, *jobqueue;
 uid_t	Realuid, Effuid, Daemuid;
 gid_t	Realgid, Effgid;
 
-#ifdef	SHAREDLIBS
-#include "helpalt.h"
+/* Satisfy sharedlibs dependencies */
 #include "bjparam.h"
 #include "cmdint.h"
 #include "btconst.h"
@@ -120,12 +119,10 @@ gid_t	Realgid, Effgid;
 #include "q_shm.h"
 
 int		Ctrl_chan;
-long		mymtype;
-HelpaltRef	repunit, ifnposses, days_abbrev;
 char		*Args[1], *exitcodename, *signalname;
 BtuserRef	mypriv;
 struct		jshm_info	Job_seg;
-#endif
+/* end of shared libs dependencies */
 
 char	*file_name;
 

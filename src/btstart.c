@@ -64,16 +64,12 @@ float	decpri = 0.0;
 
 char	*Restru, *Restrg, *jobqueue;
 
-#ifdef	SHAREDLIBS
-#include "helpalt.h"
+/* Satisfy sharedlibs dependencies */
 #include "q_shm.h"
-
-long		mymtype;
-HelpaltRef	repunit, ifnposses, days_abbrev;
 char		*Args[1], *exitcodename, *signalname;
 BtuserRef	mypriv;
 struct	jshm_info	Job_seg;
-#endif
+/* End of shared libs dependencies */
 
 /* For when we run out of memory.....  */
 

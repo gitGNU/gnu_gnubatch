@@ -60,13 +60,11 @@ gid_t	Realgid,
 
 BtuserRef	mypriv;
 
-#ifdef	SHAREDLIBS
+/* Satisfy sharedlibs dependencies */
 #include "q_shm.h"
-long		mymtype;
-HelpaltRef	repunit, ifnposses, days_abbrev;
 char		*Args[1], *exitcodename, *signalname;
 struct	jshm_info	Job_seg;
-#endif
+/* End of shared libs dependencies */
 
 FILE	*Cfile;
 

@@ -1,0 +1,15 @@
+etc
+usr/bin
+usr/sbin
+usr/include
+usr/lib
+usr/lib/gnubatch
+usr/sbin
+usr/share/doc/gnubatch
+usr/share/gnubatch
+usr/share/gnubatch/help
+usr/share/man/man1
+usr/share/man/man3
+usr/share/man/man5
+usr/share/man/man8
+var/spool/gnubatch

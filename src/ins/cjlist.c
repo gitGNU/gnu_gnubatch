@@ -344,7 +344,7 @@ static void  conv_time(TimeconRef tc)
 {
 	unsigned	nd;
 	struct	tm	*t;
-	static	char	*days_abbrev[] = { "Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Hday" };
+	static	char	*days_abbrevf[] = { "Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Hday" };
 	static	char	*timnames[] = { "Minutes", "Hours", "Days", "Weeks", "Monthsb", "Monthse", "Years" };
 	if  (!tc->tc_istime)
 		return;
@@ -376,7 +376,7 @@ static void  conv_time(TimeconRef tc)
 	fputs(" -A -", stdout);
 	for  (nd = 0;  nd < TC_NDAYS;  nd++)
 		if  (tc->tc_nvaldays & (1 << nd))
-			printf(",%s", days_abbrev[nd]);
+			printf(",%s", days_abbrevf[nd]);
 	printf(" -%c", "SHR9"[tc->tc_nposs]);
 }
 

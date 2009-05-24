@@ -73,10 +73,10 @@ int	Ctrl_chan;
 int	Sem_chan;
 #endif
 
-#ifdef	SHAREDLIBS
+/* Satisfy sharedlibs dependencies */
 char	*Args[1];
 BtuserRef	mypriv;
-#endif
+/* End of shared libs dependencies */
 
 BtjobRef		Wj;
 
@@ -86,11 +86,9 @@ char		*Dirname;
 char		*Xfile, *Jfile;
 
 Shipc		Oreq;
-long		mymtype;
+extern		long  mymtype;
 uid_t		Realuid, Effuid, Daemuid;
 gid_t		Realgid, Effgid;
-
-HelpaltRef	repunit, ifnposses, days_abbrev;
 
 char		*Restru, *Restrg, *jobqueue, *job_title; /* Name resolution */
 

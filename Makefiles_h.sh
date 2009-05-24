@@ -21,4 +21,5 @@ do
 done
 
 sed -e 's,${prefix},'$prefix',
-s,${exec_prefix},'$exec_prefix',' src/hdrs/infiles.h >src/hdrs/files.h
+s,${exec_prefix},'$exec_prefix',
+s,${datarootdir},'$datarootdir',' src/hdrs/infiles.h >src/hdrs/files.h

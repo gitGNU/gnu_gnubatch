@@ -72,8 +72,6 @@ gid_t	Realgid,
 
 BtuserRef	mypriv;
 
-long		mymtype;
-
 /* The following are just to resolve names used in library routines
    which we steal.  */
 
@@ -84,12 +82,10 @@ char	*Restru,
 
 Btvar	newvar;
 
-#ifdef	SHAREDLIBS
-#include "helpalt.h"
-HelpaltRef	repunit, ifnposses, days_abbrev;
+/* Satisfy sharedlibs dependencies */
 char		*exitcodename, *signalname;
 struct	jshm_info	Job_seg;
-#endif
+/* End of shared libs dependencies */
 
 /* For when we run out of memory.....  */
 

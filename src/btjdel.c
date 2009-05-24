@@ -76,8 +76,6 @@ ULONG		indx;
 
 BtuserRef	mypriv;
 
-long		mymtype;
-
 int	killtype = SIGTERM;
 unsigned	sleeptime = DEFSLEEP;
 
@@ -95,11 +93,9 @@ char	*jobqueue,		/* Not actually used */
 
 enum	cmdtype	{ CMD_DELETE, CMD_GO, CMD_GOADV, CMD_ADV };
 
-#ifdef	SHAREDLIBS
-#include "helpalt.h"
-HelpaltRef	repunit, ifnposses, days_abbrev;
+/* Satisfy sharedlibs dependencies */
 char		*exitcodename, *signalname;
-#endif
+/* End of shared libs dependencies */
 
 void  nomem(const char *fl, const int ln)
 {

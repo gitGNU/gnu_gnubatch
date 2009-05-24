@@ -72,7 +72,7 @@ static	ULONG	set_flags = 0,
 
 char	*Restru, *Restrg, *jobqueue;
 
-#ifdef	SHAREDLIBS
+/* Satisfy sharedlibs dependencies */
 #include "bjparam.h"
 #include "cmdint.h"
 #include "helpalt.h"
@@ -82,13 +82,11 @@ char	*Restru, *Restrg, *jobqueue;
 #include "btjob.h"
 #include "q_shm.h"
 int		Ctrl_chan;
-long		mymtype;
-HelpaltRef	repunit, ifnposses, days_abbrev;
 char		*Args[1], *exitcodename, *signalname;
 BtuserRef	mypriv;
 struct	jshm_info	Job_seg;
 struct	vshm_info	Var_seg;
-#endif
+/* End of shared libs dependencies */
 
 struct	perm	{
 	int	number;

@@ -43,6 +43,8 @@
 void  sync_xfermmap();
 #endif
 
+long	mymtype;				/* Define this here */
+
 /* Send params job message to scheduler */
 
 int  wjimsg_param(const unsigned code, const LONG param, CBtjobRef jp)

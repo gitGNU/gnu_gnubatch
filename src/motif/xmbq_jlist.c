@@ -98,7 +98,6 @@ char		*ccritmark, *cnonavail, *cunread,
 char	*exportmark, *clustermark;		/* Actually these are for variables */
 
 static	HelpaltRef	progresslist;
-HelpaltRef		repunit, ifnposses, days_abbrev;
 char			*exitcodename, *signalname;
 
 extern const char * const condname[];

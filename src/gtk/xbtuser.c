@@ -58,7 +58,7 @@ uid_t	Daemuid,
 gid_t	Realgid,
 	Effgid;
 
-#ifdef	SHAREDLIBS
+/* Satisfy sharedlibs dependencies */
 #include "helpalt.h"
 #include "timecon.h"
 #include "btconst.h"
@@ -66,13 +66,12 @@ gid_t	Realgid,
 #include "btjob.h"
 #include "q_shm.h"
 int	Ctrl_chan;
-long	mymtype;
-HelpaltRef	repunit, days_abbrev;
+extern	long	mymtype;
 char	*Args[1], *exitcodename, *signalname;
 BtuserRef	mypriv;
 char	*Restru, *Restrg, *jobqueue;
 struct	jshm_info	Job_seg;
-#endif
+/* End of shared libs dependencies */
 
 int	hchanges,	/* Had changes to default */
 	uchanges;	/* Had changes to user(s) */

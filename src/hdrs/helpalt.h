@@ -32,3 +32,7 @@ extern	HelpaltRef	helprdalt(const int);
 #ifdef	refresh			/* Assumed to be #defined in curses.h */
 extern	HelpaltRef	galts(WINDOW *, const int, const int);
 #endif
+
+/* Some standard ones */
+
+extern	HelpaltRef	repunit, days_abbrev, ifnposses;

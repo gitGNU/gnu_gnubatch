@@ -89,16 +89,13 @@ int	Ctrl_chan = -1;
 int	Sem_chan;
 #endif
 
-#ifdef	SHAREDLIBS
+/* Satisfy sharedlibs dependencies */
 #include "helpalt.h"
 uid_t		Effuid;
 gid_t		Effgid;
 char		*Args[1], *exitcodename, *signalname;
-HelpaltRef	repunit, ifnposses, days_abbrev;
 BtuserRef	mypriv;
-#else
-ULONG		Dispflags;	/* Resolution only */
-#endif
+/* End of shared libs dependencies */
 char		*jobqueue;
 
 /* We don't use these fields as the API strips out users and groups
@@ -108,8 +105,6 @@ char		*jobqueue;
 
 char		*Restru,
 		*Restrg;
-
-long	mymtype;
 
 static	char	*spdir;
 

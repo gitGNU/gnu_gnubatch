@@ -36,8 +36,8 @@ LEXLIB		=	@LEXLIB@
 RM		=	rm -f
 PROGS		=	gbch-pmenu gbch-hostedit gbch-passwd
 BUILDPROGS	=	helpparse
-BINDIR		=	@bindir@
-SBINDIR		=	@sbindir@
+BINDIR		=	$(DESTDIR)@bindir@
+SBINDIR		=	$(DESTDIR)@sbindir@
 INSTALL		=	@INSTALL@
 INSTALL_DATA	=	@INSTALL_DATA@
 

@@ -1,5 +1,3 @@
-#  bjparam.h -- memory allocation for helpfile parsing
-
 #  Copyright 2009 Free Software Foundation, Inc.
 
 #  This program is free software: you can redistribute it and/or modify
@@ -29,7 +27,8 @@ LDFLAGS		=
 LIBS		=	@LIBS@
 LIBNET		=	@SOCKLIBS@
 MYLIBDIR	=	$(PARENT)/lib
-LIB		=	$(MYLIBDIR)/libgnubatch_int.a
+LIB		=	$(MYLIBDIR)/.libs/libgnubatch_int.a
+LIBCLIENT	=	$(MYLIBDIR)/.libs/libgnubatch_client.a
 HDRS		=	$(PARENT)/hdrs
 CFLAGS		=	$(CCFLAGS) -I$(HDRS) -I$(BASE)
 RM		=	rm -f
@@ -37,42 +36,43 @@ INSTALL		=	@INSTALL@
 INSTALL_DATA	=	@INSTALL_DATA@
 BATCHUSER	=	@BATCHUSER@
 USERMODES	=	-o $(BATCHUSER) -g root -m 755
-BINDIR		=	@bindir@
-SBINDIR		=	@sbindir@
-INTBINDIR	=	@pkgexecdir@
+BINDIR		=	$(DESTDIR)@bindir@
+SBINDIR		=	$(DESTDIR)@sbindir@
+INTBINDIR	=	$(DESTDIR)@pkgexecdir@
 USERPROGS	=	gbch-atcover
 PROGS		=	gbch-btuconv gbch-ciconv gbch-cjlist gbch-cvlist gbch-ripc
+STAGED_INSTALL	=	false
 
-all shared nonshared:	gbch-atcover gbch-btuconv gbch-ciconv gbch-cjlist gbch-cvlist gbch-ripc
+all:	gbch-atcover gbch-btuconv gbch-ciconv gbch-cjlist gbch-cvlist gbch-ripc
 
 gbch-atcover:	atcover.o
 	$(CC) $(LDFLAGS) -o $@ atcover.o $(LIB) $(LIBS)
 
 gbch-btuconv:	btuconv.o convcomm.o
-	$(CC) $(LDFLAGS) -o $@ btuconv.o convcomm.o $(LIB) $(LIBNET) $(LIBS)
+	$(CC) $(LDFLAGS) -o $@ btuconv.o convcomm.o $(LIB) $(LIBCLIENT) $(LIBNET) $(LIBS)
 
 gbch-ciconv:	ciconv.o convcomm.o
-	$(CC) $(LDFLAGS) -o $@ ciconv.o convcomm.o $(LIB) $(LIBS)
+	$(CC) $(LDFLAGS) -o $@ ciconv.o convcomm.o $(LIB) $(LIBCLIENT) $(LIBS)
 
 gbch-cjlist:	cjlist.o convcomm.o
-	$(CC) $(LDFLAGS) -o $@ cjlist.o convcomm.o $(LIB) $(LIBNET) $(LIBS)
+	$(CC) $(LDFLAGS) -o $@ cjlist.o convcomm.o $(LIB) $(LIBCLIENT) $(LIBNET) $(LIBS)
 
 gbch-cvlist:	cvlist.o convcomm.o
-	$(CC) $(LDFLAGS) -o $@ cvlist.o convcomm.o $(LIB) $(LIBNET) $(LIBS)
+	$(CC) $(LDFLAGS) -o $@ cvlist.o convcomm.o $(LIB) $(LIBCLIENT) $(LIBNET) $(LIBS)
 
 gbch-ripc:	ripc.o
 	$(CC) $(LDFLAGS) -o $@ ripc.o $(LIB) $(LIBNET) $(LIBS) -lm
 
 install:	all
 	$(INSTALL) $(PROGS) $(SBINDIR)
-	$(INSTALL) $(USERMODES) $(USERPROGS) $(SBINDIR)
+	$(INSTALL) $(USERPROGS) $(BINDIR)
 
 install-strip:	all
 	$(INSTALL) -s $(PROGS) $(SBINDIR)
-	$(INSTALL) -s $(USERMODES) $(USERPROGS) $(SBINDIR)
+	$(INSTALL) -s $(USERPROGS) $(BINDIR)
 
 clean:
-	$(RM) *.o gbch-atcover gbch-btuconv gbch-ciconv gbch-cjlist gbch-cvlist gbch-ripc y.tab.?
+	$(RM) *.o gbch-*
 
 distclean: clean
 	$(RM) Makefile

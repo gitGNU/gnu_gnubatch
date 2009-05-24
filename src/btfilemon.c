@@ -197,7 +197,7 @@ char	*Restru,
 	*Restrg,
 	*jobqueue;				/* Resolution only */
 
-#ifdef	SHAREDLIBS
+/* Satisfy sharedlibs dependencies */
 #include "bjparam.h"
 #include "cmdint.h"
 #include "btconst.h"
@@ -209,14 +209,12 @@ char	*Restru,
 #include "q_shm.h"
 
 int		Ctrl_chan;
-long		mymtype;
 uid_t		Daemuid;
 ULONG		Fileprivs;
-HelpaltRef	repunit, ifnposses, days_abbrev;
 char		*Args[1], *exitcodename, *signalname;
 BtuserRef	mypriv;
 struct		jshm_info	Job_seg;
-#endif
+/* end of shared lib dependencies */
 
 int	sem_chan, shm_chan;
 struct	fm_shm_entry	*shm_list,

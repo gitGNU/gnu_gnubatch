@@ -86,7 +86,7 @@ int	Ctrl_chan = -1;
 int	Sem_chan;
 #endif
 
-long	mymtype;
+extern	long	mymtype;
 
 BtuserRef	mypriv;
 char	*Restru, *Restrg;

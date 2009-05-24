@@ -90,7 +90,7 @@ BtuserRef	mypriv;
 jobno_t		job_num;
 
 Shipc		Oreq;
-long		mymtype;
+extern	long	mymtype;
 ULONG		Saveseq;
 
 FILE	*Cfile;
@@ -112,8 +112,6 @@ char	*spdir,
 	*exitcodename,
 	*signalname,
 	*tmpfl;
-
-HelpaltRef	repunit, ifnposses, days_abbrev;
 
 Menvir	Envs[MAXJENVIR];
 

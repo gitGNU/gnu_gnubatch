@@ -56,15 +56,14 @@ uid_t	Daemuid,
 gid_t	Effgid,
 	Realgid;
 
+char	*Args[1];
+
 int		xbapi_fd = -1;
 apiBtuser	mypriv;
 
 FILE	*Cfile;
 
-HelpaltRef	progresslist,
-		repunit,
-		ifnposses,
-		days_abbrev;
+HelpaltRef	progresslist;
 
 char		*exitcodename,
 		*signalname,
@@ -81,8 +80,8 @@ char		sortflag, hadhdrarg;
 
 unsigned	Jaccess_flags = 0;
 
-extern const char * const condname[];
-extern const char * const assname[];
+extern const char *const condname[];
+extern const char *const assname[];
 
 char	*formatstring;
 char	sdefaultfmt[] = "LN LU LH LI Lp LL Lt Lc LP";

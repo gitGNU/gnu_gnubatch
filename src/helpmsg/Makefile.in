@@ -22,7 +22,7 @@
 SHELL		=	/bin/sh
 prefix		=	@prefix@
 exec_prefix	=	@exec_prefix@
-HELPFILEDIR	=	@sphelpdir@
+HELPFILEDIR	=	$(DESTDIR)@sphelpdir@
 RM		=	rm -f
 INSTALL		=	@INSTALL@
 INSTALL_DATA	=	@INSTALL_DATA@

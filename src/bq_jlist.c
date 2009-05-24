@@ -97,10 +97,6 @@ static	HelpaltRef	progresslist,
 			sproglist,
 			killlist;
 
-HelpaltRef		repunit,
-			ifnposses,
-			days_abbrev;
-
 extern const char * const condname[];
 extern const char * const assname[];
 

@@ -77,7 +77,6 @@ gid_t	Effgid,
 	Realgid;
 
 BtuserRef	mypriv;
-long		mymtype;
 
 FILE	*Cfile;
 
@@ -88,10 +87,7 @@ int	Ctrl_chan;
 int	Sem_chan;
 #endif
 
-HelpaltRef	progresslist,
-		repunit,
-		ifnposses,
-		days_abbrev;
+HelpaltRef	progresslist;
 
 char		*exitcodename,
 		*signalname,
@@ -108,9 +104,9 @@ char		sortflag, hadhdrarg;
 extern const char * const condname[];
 extern const char * const assname[];
 
-#ifdef	SHAREDLIBS
+/* Satisfy sharedlibs dependencies */
 char		*Args[1];
-#endif
+/* End of shared libs dependencies */
 
 char		*formatstring;
 char	sdefaultfmt[] = "LN LU LH LI Lp LL Lt Lc LP";

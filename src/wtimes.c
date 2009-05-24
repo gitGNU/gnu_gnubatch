@@ -122,8 +122,6 @@ static	HelpaltRef	Roalts,
 			Npalts,
 			Monthnames;
 
-extern	HelpaltRef	days_abbrev;
-
 void  endhe(WINDOW *, WINDOW **);
 void  dochelp(WINDOW *, int);
 void  doerror(WINDOW *, int);

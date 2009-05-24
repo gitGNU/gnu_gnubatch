@@ -80,7 +80,7 @@ extern	BtuserRef	mypriv;
 extern	char		*Curr_pwd;
 
 char		*execprog, *ldsvprog, *gtkprog;
-HelpaltRef	days_abbrev, daynames_full, monnames, repunit, ifnposs_names, repunit_full;
+HelpaltRef	daynames_full, monnames, ifnposs_names, repunit_full;
 char		*exitcodename, *signalname, *delend_full, *retend_full;
 char		*no_title, *no_name;
 #ifdef	SUFFIXES

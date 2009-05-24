@@ -156,7 +156,7 @@ int	Sem_chan;
 #endif
 
 Shipc		Oreq;
-long		mymtype;
+extern	long	mymtype;
 BtuserRef	mypriv;
 
 char	*Args[1];		/* Just to resolve library refs */

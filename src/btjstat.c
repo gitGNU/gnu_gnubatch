@@ -84,11 +84,9 @@ char		*jobqueue,
 
 static	char	*stat_codes;
 
-#ifdef	SHAREDLIBS
-long		mymtype;
-HelpaltRef	days_abbrev, repunit, ifnposses;
+/* Satisfy sharedlibs dependencies */
 char		*Args[1], *signalname, *exitcodename;
-#endif
+/* End of shared libs dependencies */
 
 /* For when we run out of memory.....  */
 

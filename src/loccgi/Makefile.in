@@ -23,6 +23,7 @@ prefix		=	@prefix@
 exec_prefix	=	@exec_prefix@
 CC		=	@CC@
 CCFLAGS		=	-O @gcc_useful_options@ @funny_compiler_options@
+SHLIBCC		=	libtool --mode=link $(CC) $(CCFLAGS)
 LDFLAGS		=
 LIBS		=	@LIBS@
 LIBDIR		=	@libdir@
@@ -34,89 +35,56 @@ BASE		=	../..
 INLINE		=	$(PARENT)/inline
 HDRS		=	$(PARENT)/hdrs
 MYLIBDIR	=	$(PARENT)/lib
-LIB		=	$(MYLIBDIR)/libgnubatch_int.a
-SHLIB		=	$(MYLIBDIR)/libgnubatch_int.so
-SHLIBCLIENT	=	$(MYLIBDIR)/libgnubatch_client.so
+LIB		=	$(MYLIBDIR)/.libs/libgnubatch_int.a
+SHLIB		=	$(MYLIBDIR)/libgnubatch_int.la
+SHLIBCLIENT	=	$(MYLIBDIR)/libgnubatch_client.la
 CFLAGS		=	$(CCFLAGS) -I$(HDRS) -I$(PARENT) -I$(BASE)
 INSTALL		=	@INSTALL@
 INSTALL_DATA	=	@INSTALL_DATA@
 BATCHUSER	=	@BATCHUSER@
 USERMODES	=	-o $(BATCHUSER) -g root -m 4755
 CGIMODES	=	-o $(BATCHUSER) -g root -m 6755
-BINDIR		=	@bindir@
-INTBINDIR	=	@pkgexecdir@
+BINDIR		=	$(DESTDIR)@bindir@
+INTBINDIR	=	$(DESTDIR)@pkgexecdir@
 CGIBINDIR	=	$(INTBINDIR)/cgi-bin
 
 PROGS=btjccgi btjcgi btjcrcgi btjdcgi btjvcgi btvccgi btvcgi
-SHPROGS=btjccgi_s btjcgi_s btjcrcgi_s btjdcgi_s btjvcgi_s btvccgi_s btvcgi_s
 
-all:	@main_target@
-
-nonshared:	$(PROGS)
-
-shared:	$(SHPROGS)
+all:	$(PROGS)
 
 btjcgi:		btjcgi.o $(LIB)
-	$(CC) -o $@ $(LDFLAGS) btjcgi.o $(LIB) $(LIBNET) $(LIBS)
-
-btjcgi_s:	btjcgi.o $(LIB)
-	$(CC) -o btjcgi $(LDFLAGS) btjcgi.o $(SHLIB) $(SHLIBCLIENT) $(LIBNET) $(LIBS)
-	touch $@
+	$(SHLIBCC) -o btjcgi $(LDFLAGS) btjcgi.o $(SHLIB) $(SHLIBCLIENT) $(LIBNET) $(LIBS)
 
 btjccgi:		btjccgi.o $(LIB)
-	$(CC) -o $@ $(LDFLAGS) btjccgi.o $(LIB) $(LIBNET) $(LIBS)
-
-btjccgi_s:	btjccgi.o $(LIB)
-	$(CC) -o btjccgi $(LDFLAGS) btjccgi.o $(SHLIB) $(SHLIBCLIENT) $(LIBNET) $(LIBS)
-	touch $@
+	$(SHLIBCC) -o btjccgi $(LDFLAGS) btjccgi.o $(SHLIB) $(SHLIBCLIENT) $(LIBNET) $(LIBS)
 
 btjcrcgi:		btjcrcgi.o $(LIB)
-	$(CC) -o $@ $(LDFLAGS) btjcrcgi.o $(LIB) $(LIBNET) $(LIBS)
-
-btjcrcgi_s:	btjcrcgi.o $(LIB)
-	$(CC) -o btjcrcgi $(LDFLAGS) btjcrcgi.o $(SHLIB) $(SHLIBCLIENT) $(LIBNET) $(LIBS)
-	touch $@
+	$(SHLIBCC) -o btjcrcgi $(LDFLAGS) btjcrcgi.o $(SHLIB) $(SHLIBCLIENT) $(LIBNET) $(LIBS)
 
 btjdcgi:		btjdcgi.o $(LIB)
-	$(CC) -o $@ $(LDFLAGS) btjdcgi.o $(LIB) $(LIBNET) $(LIBS)
-
-btjdcgi_s:	btjdcgi.o $(LIB)
-	$(CC) -o btjdcgi $(LDFLAGS) btjdcgi.o $(SHLIB) $(SHLIBCLIENT) $(LIBNET) $(LIBS)
-	touch $@
+	$(SHLIBCC) -o btjdcgi $(LDFLAGS) btjdcgi.o $(SHLIB) $(SHLIBCLIENT) $(LIBNET) $(LIBS)
 
 btjvcgi:		btjvcgi.o $(LIB)
-	$(CC) -o $@ $(LDFLAGS) btjvcgi.o $(LIB) $(LIBNET) $(LIBS)
+	$(SHLIBCC) -o btjvcgi $(LDFLAGS) btjvcgi.o $(SHLIB) $(SHLIBCLIENT) $(LIBNET) $(LIBS)
 
-btjvcgi_s:	btjvcgi.o $(LIB)
-	$(CC) -o btjvcgi $(LDFLAGS) btjvcgi.o $(SHLIB) $(SHLIBCLIENT) $(LIBNET) $(LIBS)
-	touch $@
+btvcgi:	btvcgi.o $(LIB)
+	$(SHLIBCC) -o btvcgi $(LDFLAGS) btvcgi.o $(SHLIB) $(SHLIBCLIENT) $(LIBNET) $(LIBS)
 
-btvccgi:	btvccgi.o $(LIB)
-	$(CC) -o $@ $(LDFLAGS) btvccgi.o $(LIB) $(LIBNET) $(LIBS)
-
-btvccgi_s:	btvccgi.o $(LIB)
-	$(CC) -o btvccgi $(LDFLAGS) btvccgi.o $(SHLIB) $(SHLIBCLIENT) $(LIBNET) $(LIBS)
-	touch $@
-
-btvcgi:		btvcgi.o $(LIB)
-	$(CC) -o $@ $(LDFLAGS) btvcgi.o $(LIB) $(LIBNET) $(LIBS)
-
-btvcgi_s:	btvcgi.o $(LIB)
-	$(CC) -o btvcgi $(LDFLAGS) btvcgi.o $(SHLIB) $(SHLIBCLIENT) $(LIBNET) $(LIBS)
-	touch $@
+btvccgi:btvccgi.o $(LIB)
+	$(SHLIBCC) -o btvccgi $(LDFLAGS) btvccgi.o $(SHLIB) $(SHLIBCLIENT) $(LIBNET) $(LIBS)
 
 install:
 	$(INSTALL) -d $(CGIBINDIR)
-	$(INSTALL) $(CGIMODES) $(PROGS) $(CGIBINDIR)
+	libtool --mode=install $(INSTALL) $(CGIMODES) $(PROGS) $(CGIBINDIR)
 
 install-strip:
 	$(INSTALL) -d $(CGIBINDIR)
-	$(INSTALL) -s $(CGIMODES) $(PROGS) $(CGIBINDIR)
+	libtool --mode=install $(INSTALL) -s $(CGIMODES) $(PROGS) $(CGIBINDIR)
 
 #	Clean-ups.
 
 clean:
-	$(RM) *.o $(PROGS) *_s
+	$(RM) *.o $(PROGS)
 
 distclean:	clean
 	$(RM) Makefile

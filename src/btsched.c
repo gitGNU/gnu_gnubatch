@@ -121,12 +121,9 @@ struct	vshm_info	Var_seg;
 int	qchanges;
 
 uid_t	Daemuid,
-	Daemgid;
-
-#ifdef	SHAREDLIBS
-uid_t	Realuid;
+	Daemgid,
+	Realuid;
 gid_t	Realgid;
-#endif
 
 unsigned	Startlim,
 		Startwait;
@@ -1430,10 +1427,9 @@ MAINFN_TYPE  main(int argc, char **argv)
 		exit(E_NOCHDIR);
 	}
 
-#ifdef	SHAREDLIBS
 	Realuid = getuid();
 	Realgid = getgid();
-#endif
+
 #ifdef	HAVE_GETGROUPS
 	Requires_suppgrps = 1;
 	setgroups(0, &dumm); /* Zap any existing supp groups */

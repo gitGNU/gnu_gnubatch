@@ -75,7 +75,6 @@ char	*Args[MAXJARGS];
 static	HelpargRef	btr_avec;
 static	char	Varname[] = "GBCH_R";
 
-extern	HelpaltRef	days_abbrev; /* These are abbreviated in saved jobs */
 extern	char	*exitcodename, *signalname;
 
 char *rdoptfile(const char *, const char *);

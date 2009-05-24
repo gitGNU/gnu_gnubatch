@@ -14,7 +14,7 @@ dnl   You should have received a copy of the GNU General Public License
 dnl  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 dnl  Process this file with autoconf to produce a configure script.
 
-AC_INIT(src/btsched.c, 1.1)
+AC_INIT(src/btsched.c, 1.2)
 AC_SUBST(MAJOR_PACKAGE_VERSION)
 
 changequote(<<, >>)dnl
@@ -80,15 +80,6 @@ case "$ac_run_as_root" in
 *)	: ;;
 esac
 
-AC_SUBST(main_target)
-AC_SUBST(lib_pic)
-main_target=nonshared
-lib_pic=
-
-AC_ARG_ENABLE(sharedlibs,[--enable-sharedlibs	Build internal libraries as shared],
-[ac_shared_libs="$enableval"],
-[ac_shared_libs=n])
-
 AC_ARG_ENABLE(sco-security,[--enable-sco-secuirty	Turn on broken C2-security],
 [ac_sco_security="$enableval"],
 [ac_sco_security=n])
@@ -123,12 +114,13 @@ dnl Checks on host type
 AC_CANONICAL_SYSTEM
 
 dnl Checks for programs.
+AC_CONFIG_MACRO_DIR([m4])
 AC_PROG_MAKE_SET
 AC_PROG_INSTALL
 AC_PROG_YACC
 AC_PROG_CC
 AC_PROG_LEX
-AC_PROG_RANLIB
+LT_INIT
 AC_PATH_PROG(mailer, mail)
 AC_PATH_PROG(shell, sh)
 AC_PATH_PROG(perlbin, perl)
@@ -245,21 +237,11 @@ case "$target" in
 	;;
 esac
 
-# If (still) using GCC and shared libs then set -fPIC for libraries
-# Also turn on -g -Wall
+# If (still) using GCC turn on -g -Wall and -fno-stack-protector
 
 if test "$GCC" = "yes"
 then
-	gcc_useful_options='-g -Wall'
-	case "$ac_shared_libs" in
-	[[yY]]*)
-		AC_DEFINE(SHAREDLIBS)
-		main_target=shared
-		lib_pic=-fPIC
-		gcc_useful_options='-g -Wall -fno-stack-protector'
-		;;
-	*)	: ;;
-	esac
+	gcc_useful_options='-g -Wall -fno-stack-protector'
 fi
 
 # Check fairly early for socket libraries because we need these for the X stuff
@@ -428,6 +410,8 @@ AC_TRY_RUN([#include <curses.h>
 main()
 {
 	int	ch, r, c;
+	r = open("/dev/null", 1);
+	dup2(r, 1);
 	initscr();
 	for  (r = 0;  r < LINES;  r++)
 		for  (c = 0;  c < COLS;  c++)
@@ -727,10 +711,11 @@ AC_DEFINE(HAVE_DD_FD),
 AC_MSG_RESULT(No directory fd macro or structure element found)))
 
 AC_CONFIG_HEADER(config.h)
-AC_CONFIG_COMMANDS([src/hdrs/files.h], [ ./Makefiles_h.sh prefix=$prefix exec_prefix=$exec_prefix], [prefix=$prefix exec_prefix=$exec_prefix])
+AC_CONFIG_COMMANDS([src/hdrs/files.h], [ ./Makefiles_h.sh prefix=$prefix exec_prefix=$exec_prefix datarootdir=$datarootdir],
+				       [prefix=$prefix exec_prefix=$exec_prefix datarootdir=$datarootdir])
 
 AC_OUTPUT(Makefile util/Makefile src/Makefile src/helpmsg/Makefile src/hdrs/infiles.h src/lib/Makefile src/ins/Makefile src/gtk/Makefile
-src/motif/Makefile src/apilib/Makefile src/loccgi/Makefile src/remcgi/Makefile Netinst Checkuserinst Userinst STARTUP/Startdirs)
+src/motif/Makefile src/apilib/Makefile src/loccgi/Makefile src/remcgi/Makefile doc/Makefile Netinst Checkuserinst Userinst STARTUP/Startdirs)
 
 AH_TEMPLATE([BROKEN_COMBOBOX], [Define if Motif combo boxes don't work])
 AH_TEMPLATE([BROKEN_RENDITION], [Define if Motif renditions don't work])
@@ -780,7 +765,6 @@ AH_TEMPLATE([POLLSOCKETS], [Indicate that the poll(2) call is available on socke
 AH_TEMPLATE([RUN_AS_ROOT], [Indicate that scheduler must run as root - funny "kill" sematics])
 AH_TEMPLATE([SCO_SECURITY], [Define to turn on SCO-style C2 security stuff])
 AH_TEMPLATE([SHADOW_PW], [Indicate that we are using shadow password files])
-AH_TEMPLATE([SHAREDLIBS], [Define if holding libraries as shared])
 AH_TEMPLATE([SOCKLEN_T], [Define type for final arg of accept etc thanq HP])
 AH_TEMPLATE([SYS_ERRLIST_IN_STDIO_H], [Define if stdio.h defines sys_errlist])
 AH_TEMPLATE([USING_FLOCK], [Define to use file locking instead of semaphores])

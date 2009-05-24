@@ -54,7 +54,7 @@ struct	ostr	{
 int	fcnt, initfiles;
 int	utmp = -1;
 
-#ifdef	SHAREDLIBS
+/* Satisfy sharedlibs dependencies */
 #include "btmode.h"
 #include "bjparam.h"
 #include "cmdint.h"
@@ -67,7 +67,7 @@ uid_t	Realuid;
 gid_t	Realgid;
 ULONG	Fileprivs;
 struct	jshm_info	Job_seg;
-#endif
+/* End of shared libs dependencies */
 
 static	char	Filename[] = __FILE__;
 
@@ -190,10 +190,8 @@ MAINFN_TYPE  main(int argc, char **argv)
 
 	init_mcfile();
 
-#ifdef	SHAREDLIBS
 	Realuid = getuid();
 	Realgid = getgid();
-#endif
 
 	if  ((Cfile = open_icfile()) == (FILE *) 0)
 		exit(E_NOCONFIG);

@@ -23,7 +23,7 @@ prefix		=	@prefix@
 exec_prefix	=	@exec_prefix@
 CC		=	@CC@
 CCFLAGS		=	-O @gcc_useful_options@ @funny_compiler_options@
-LDFLAGS		=
+SHLIBCC		=	libtool --mode=link $(CC) $(CCFLAGS)
 LIBS		=	@LIBS@
 LIBDIR		=	@libdir@
 LIBNET		=	@SOCKLIBS@
@@ -35,14 +35,14 @@ HDRS		=	$(PARENT)/hdrs
 MYLIBDIR	=	$(PARENT)/lib
 APILIBDIR	=	$(PARENT)/apilib
 CFLAGS		=	$(CCFLAGS) -I$(HDRS) -I$(PARENT) -I$(APILIBDIR)
-LIB		=	$(MYLIBDIR)/libgnubatch_int.a
-APILIB		=	$(APILIBDIR)/libgnubatch.a
-APISHLIB	=	$(APILIBDIR)/libgnubatch.so
+LIB		=	$(MYLIBDIR)/.libs/libgnubatch_int.a
+LIBCLIENT	=	$(MYLIBDIR)/.libs/libgnubatch_client.a
+APISHLIB	=	$(APILIBDIR)/libgnubatch.la
 INSTALL		=	@INSTALL@
 INSTALL_DATA	=	@INSTALL_DATA@
 RCGIMODES	=	-o root -g root -m 6755
-BINDIR		=	@bindir@
-INTBINDIR	=	@pkgexecdir@
+BINDIR		=	$(DESTDIR)@bindir@
+INTBINDIR	=	$(DESTDIR)@pkgexecdir@
 CGIBINDIR	=	$(INTBINDIR)/cgi-bin
 
 RBTJCGIOBS	=	rbtjcgi.o rcgilib.o
@@ -53,71 +53,39 @@ RBTJCRCGIOBS	=	rbtjcrcgi.o rcgilib.o
 RBTVCGIOBS	=	rbtvcgi.o rcgilib.o
 RBTVCCGIOBS	=	rbtvccgi.o rcgilib.o
 
-all:	@main_target@
-
-nonshared:	rbtjcgi rbtjccgi rbtjdcgi rbtjvcgi rbtjcrcgi rbtvcgi rbtvccgi
-
-shared:		rbtjcgi_s rbtjccgi_s rbtjdcgi_s rbtjvcgi_s rbtjcrcgi_s rbtvcgi_s rbtvccgi_s
+all:		rbtjcgi rbtjccgi rbtjdcgi rbtjvcgi rbtjcrcgi rbtvcgi rbtvccgi
 
 rbtjcgi:	$(RBTJCGIOBS)
-	$(CC) -o $@ $(LDFLAGS) $(RBTJCGIOBS) $(APILIB) $(LIB) $(LIBNET) $(LIBS)
+	$(SHLIBCC) -o $@ $(LDFLAGS) $(RBTJCGIOBS) $(APISHLIB) $(LIBCLIENT) $(LIB) $(LIBNET) $(LIBS)
 
 rbtjccgi:	$(RBTJCCGIOBS)
-	$(CC) -o $@ $(LDFLAGS) $(RBTJCCGIOBS) $(APILIB) $(LIB) $(LIBNET) $(LIBS)
+	$(SHLIBCC) -o $@ $(LDFLAGS) $(RBTJCCGIOBS) $(APISHLIB) $(LIBCLIENT) $(LIB) $(LIBNET) $(LIBS)
 
 rbtjdcgi:	$(RBTJDCGIOBS)
-	$(CC) -o $@ $(LDFLAGS) $(RBTJDCGIOBS) $(APILIB) $(LIB) $(LIBNET) $(LIBS)
+	$(SHLIBCC) -o $@ $(LDFLAGS) $(RBTJDCGIOBS) $(APISHLIB) $(LIBCLIENT) $(LIB) $(LIBNET) $(LIBS)
 
 rbtjvcgi:	$(RBTJVCGIOBS)
-	$(CC) -o $@ $(LDFLAGS) $(RBTJVCGIOBS) $(APILIB) $(LIB) $(LIBNET) $(LIBS)
+	$(SHLIBCC) -o $@ $(LDFLAGS) $(RBTJVCGIOBS) $(APISHLIB) $(LIBCLIENT) $(LIB) $(LIBNET) $(LIBS)
 
 rbtjcrcgi:	$(RBTJCRCGIOBS)
-	$(CC) -o $@ $(LDFLAGS) $(RBTJCRCGIOBS) $(APILIB) $(LIB) $(LIBNET) $(LIBS)
+	$(SHLIBCC) -o $@ $(LDFLAGS) $(RBTJCRCGIOBS) $(APISHLIB) $(LIBCLIENT) $(LIB) $(LIBNET) $(LIBS)
 
 rbtvcgi:	$(RBTVCGIOBS)
-	$(CC) -o $@ $(LDFLAGS) $(RBTVCGIOBS) $(APILIB) $(LIB) $(LIBNET) $(LIBS)
+	$(SHLIBCC) -o $@ $(LDFLAGS) $(RBTVCGIOBS) $(APISHLIB) $(LIBCLIENT) $(LIB) $(LIBNET) $(LIBS)
 
 rbtvccgi:	$(RBTVCCGIOBS)
-	$(CC) -o $@ $(LDFLAGS) $(RBTVCCGIOBS) $(APILIB) $(LIB) $(LIBNET) $(LIBS)
-
-rbtjcgi_s:	$(RBTJCGIOBS)
-	$(CC) -o rbtjcgi $(LDFLAGS) $(RBTJCGIOBS) $(APISHLIB) $(LIB) $(LIBNET) $(LIBS)
-	touch $@
-
-rbtjccgi_s:	$(RBTJCCGIOBS)
-	$(CC) -o rbtjccgi $(LDFLAGS) $(RBTJCCGIOBS) $(APISHLIB) $(LIB) $(LIBNET) $(LIBS)
-	touch $@
-
-rbtjdcgi_s:	$(RBTJDCGIOBS)
-	$(CC) -o rbtjdcgi $(LDFLAGS) $(RBTJDCGIOBS) $(APISHLIB) $(LIB) $(LIBNET) $(LIBS)
-	touch $@
-
-rbtjvcgi_s:	$(RBTJVCGIOBS)
-	$(CC) -o rbtjvcgi $(LDFLAGS) $(RBTJVCGIOBS) $(APISHLIB) $(LIB) $(LIBNET) $(LIBS)
-	touch $@
-
-rbtjcrcgi_s:	$(RBTJCRCGIOBS)
-	$(CC) -o rbtjcrcgi $(LDFLAGS) $(RBTJCRCGIOBS) $(APISHLIB) $(LIB) $(LIBNET) $(LIBS)
-	touch $@
-
-rbtvcgi_s:	$(RBTVCGIOBS)
-	$(CC) -o rbtvcgi $(LDFLAGS) $(RBTVCGIOBS) $(APISHLIB) $(LIB) $(LIBNET) $(LIBS)
-	touch $@
-
-rbtvccgi_s:	$(RBTVCCGIOBS)
-	$(CC) -o rbtvccgi $(LDFLAGS) $(RBTVCCGIOBS) $(APISHLIB) $(LIB) $(LIBNET) $(LIBS)
-	touch $@
+	$(SHLIBCC) -o $@ $(LDFLAGS) $(RBTVCCGIOBS) $(APISHLIB) $(LIBCLIENT) $(LIB) $(LIBNET) $(LIBS)
 
 install:
 	$(INSTALL) -d $(CGIBINDIR)
-	$(INSTALL) $(RCGIMODES) rbtjcgi rbtjccgi rbtjcrcgi rbtjdcgi rbtjvcgi rbtvcgi rbtvccgi $(CGIBINDIR)
+	libtool --mode=install $(INSTALL) $(RCGIMODES) rbtjcgi rbtjccgi rbtjcrcgi rbtjdcgi rbtjvcgi rbtvcgi rbtvccgi $(CGIBINDIR)
 
 install-strip:
 	$(INSTALL) -d $(CGIBINDIR)
-	$(INSTALL) -s $(RCGIMODES) rbtjcgi rbtjccgi rbtjcrcgi rbtjdcgi rbtjvcgi rbtvcgi rbtvccgi $(CGIBINDIR)
+	libtool --mode=install $(INSTALL) -s $(RCGIMODES) rbtjcgi rbtjccgi rbtjcrcgi rbtjdcgi rbtjvcgi rbtvcgi rbtvccgi $(CGIBINDIR)
 
 clean:
-	$(RM) *.o rbtjcgi rbtjccgi rbtjcrcgi rbtjdcgi rbtjvcgi rbtvcgi rbtvccgi *_s
+	$(RM) *.o rbtjcgi rbtjccgi rbtjcrcgi rbtjdcgi rbtjvcgi rbtvcgi rbtvccgi
 
 distclean:	clean
 	$(RM) Makefile

@@ -83,10 +83,7 @@ int	Ctrl_chan;
 int	Sem_chan;
 #endif
 
-HelpaltRef	progresslist,
-		repunit,
-		ifnposses,
-		days_abbrev;
+HelpaltRef	progresslist;
 
 char		*exitcodename,
 		*signalname,
@@ -106,10 +103,9 @@ char		Viewj = 0,
 extern const char * const condname[];
 extern const char * const assname[];
 
-#ifdef	SHAREDLIBS
-long		mymtype;
+/* Satisfy sharedlibs dependencies */
 char		*Args[1];
-#endif
+/* End of shared libs dependencies */
 
 char		*formatstring;
 

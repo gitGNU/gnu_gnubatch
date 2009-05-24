@@ -23,7 +23,7 @@ prefix		=	@prefix@
 exec_prefix	=	@exec_prefix@
 CC		=	@CC@
 CCFLAGS		=	-O @gcc_useful_options@ @funny_compiler_options@
-LDFLAGS		=	-s
+SHLIBCC		=	libtool --mode=link $(CC) $(CCFLAGS)
 LIBS		=	@LIBS@
 LIBCURSES	=	@LIBCURSES@
 LIBDIR		=	@libdir@
@@ -33,12 +33,12 @@ RM		= 	rm -f
 HDRS		=	hdrs
 PARENT		=	.
 BASE		=	..
-LIB		=	lib/libgnubatch_int.a
-SHLIB		=	lib/libgnubatch_int.so
-SHLIBCLIENT	=	lib/libgnubatch_client.so
-SHLIBCURS	=	lib/libgnubatch_curs.so
+LIB		=	lib/.libs/libgnubatch_int.a
+LIBCLIENT	=	lib/.libs/libgnubatch_client.a
+SHLIB		=	lib/libgnubatch_int.la
+SHLIBCLIENT	=	lib/libgnubatch_client.la
+SHLIBCURS	=	lib/libgnubatch_curs.la
 CFLAGS		=	$(CCFLAGS) -I$(HDRS) -I$(BASE)
-LDFLAGS		=
 INSTALL		=	@INSTALL@
 INSTALL_DATA	=	@INSTALL_DATA@
 BATCHUSER	=	@BATCHUSER@
@@ -46,8 +46,10 @@ USERMODES	=	-o $(BATCHUSER) -g root -m 4755
 NOSETMODES	=	-o $(BATCHUSER) -g root
 SUIDROOT	=	-o root -g root -m 4755
 TTYGROUP	=	-o $(BATCHUSER) -g tty -m 2755
-BINDIR		=	@bindir@
-INTBINDIR	=	@pkgexecdir@
+SPOOLDIR	=	$(DESTDIR)@spooldir@
+BINDIR		=	$(DESTDIR)@bindir@
+INTBINDIR	=	$(DESTDIR)@pkgexecdir@
+SPHELPDIR	=	$(DESTDIR)@sphelpdir@
 USERBINS	=	gbch-charge gbch-cichange gbch-cilist gbch-hols gbch-jchange \
 			gbch-jdel gbch-jlist gbch-jstat gbch-q gbch-quit gbch-r \
 			gbch-rr gbch-start gbch-uchange gbch-ulist gbch-user gbch-var \
@@ -57,15 +59,7 @@ SUIDROOTBINS	=	btsched btexec btpwchk btmdisp xbnetserv
 SUIDBTBINS	=	jobdump
 TTYGRPBINS	=	btwrite dosbtwrite
 
-PROGS		=	$(USERBINS) $(NOSETUBINS) $(SUIDROOTBINS) $(SUIDBTBINS) $(TTYGRPBINS)
-
-SHPROGS		=	btcharge_s btcichange_s btcilist_s bthols_s btjchange_s \
-			btjdel_s btjlist_s btjstat_s btq_s btquit_s btr_s \
-			rbtr_s btstart_s btuchange_s btulist_s btuser_s btvar_s \
-			btvlist_s \
-			btfilemon_s \
-			btsched_s btexec btpwchk btmdisp xbnetserv_s \
-			jobdump_s btwrite_s dosbtwrite_s
+PROGS		=	$(USERBINS) $(NOSETUBINS) $(SUIDROOTBINS) $(SUIDBTBINS) $(TTYGRPBINS) insd gtkd loccgid @netsubdirs@
 
 BTSTARTLNKS	=	gbch-disconn gbch-conn gbch-dst
 BTJDELLNKS	=	gbch-go gbch-goadv
@@ -99,201 +93,92 @@ JOBDUMPOBJS	=	jobdump.o
 BTWRITEOBJS	=	btwrite.o
 DOSBTWRITEOBJS	=	dosbtwrite.o
 
-all:	@main_target@
+STAGED_INSTALL	=	false
 
-# netsubdirs is set to apilibd and remcgid if building for networks
+all:	$(PROGS)
 
-nonshared:	$(PROGS) insd gtkd loccgid @netsubdirs@
+gbch-charge:	$(BTCHARGEOBJS) $(SHLIB)
+		$(SHLIBCC) -o $@ $(LDFLAGS) $(BTCHARGEOBJS) $(SHLIB) $(SHLIBCLIENT) $(LIBNET) $(LIBS)
 
-shared:		$(SHPROGS) insd gtkd loccgid @netsubdirs@
+gbch-cichange:	$(BTCICHANGEOBJS) $(SHLIB)
+		$(SHLIBCC) -o $@ $(LDFLAGS) $(BTCICHANGEOBJS) $(SHLIB) $(SHLIBCLIENT) $(LIBNET) $(LIBS)
 
-# Each target is nonshared and shared version with _s which we create as a "touched file"
-# (Keeping pre-GNU names for _s files)
+gbch-cilist:	$(BTCILISTOBJS) $(SHLIB)
+		$(SHLIBCC) -o $@ $(LDFLAGS) $(BTCILISTOBJS) $(SHLIB) $(SHLIBCLIENT) $(LIBNET) $(LIBS)
 
-gbch-charge:	$(BTCHARGEOBJS) $(LIB)
-		$(CC) -o $@ $(LDFLAGS) $(BTCHARGEOBJS) $(LIB) $(LIBNET) $(LIBS)
+gbch-hols:	$(BTHOLSOBJS) $(SHLIB)
+		$(SHLIBCC) -o $@ $(LDFLAGS) $(BTHOLSOBJS) $(SHLIB) $(SHLIBCLIENT) $(LIBNET) $(LIBS)
 
-btcharge_s:	$(BTCHARGEOBJS) $(LIB)
-		$(CC) -o gbch-charge $(LDFLAGS) $(BTCHARGEOBJS) $(SHLIB) $(SHLIBCLIENT) $(LIBNET) $(LIBS)
-		touch $@
+gbch-jchange:	$(BTJCHANGEOBJS) $(SHLIB)
+		$(SHLIBCC) -o $@ $(LDFLAGS) $(BTJCHANGEOBJS) $(SHLIB) $(SHLIBCLIENT) $(LIBNET) $(LIBS)
 
-gbch-cichange:	$(BTCICHANGEOBJS) $(LIB)
-		$(CC) -o $@ $(LDFLAGS) $(BTCICHANGEOBJS) $(LIB) $(LIBNET) $(LIBS)
+gbch-jdel:	$(BTJDELOBJS) $(SHLIB)
+		$(SHLIBCC) -o $@ $(LDFLAGS) $(BTJDELOBJS) $(SHLIB) $(SHLIBCLIENT) $(LIBNET) $(LIBS)
 
-btcichange_s:	$(BTCICHANGEOBJS) $(LIB)
-		$(CC) -o gbch-cichange $(LDFLAGS) $(BTCICHANGEOBJS) $(SHLIB) $(SHLIBCLIENT) $(LIBNET) $(LIBS)
-		touch $@
+gbch-jlist:	$(BTJLISTOBJS) $(SHLIB)
+		$(SHLIBCC) -o $@ $(LDFLAGS) $(BTJLISTOBJS) $(SHLIB) $(SHLIBCLIENT) $(LIBNET) $(LIBS)
 
-gbch-cilist:	$(BTCILISTOBJS) $(LIB)
-		$(CC) -o $@ $(LDFLAGS) $(BTCILISTOBJS) $(LIB) $(LIBNET) $(LIBS)
+gbch-jstat:	$(BTJSTATOBJS) $(SHLIB)
+		$(SHLIBCC) -o $@ $(LDFLAGS) $(BTJSTATOBJS) $(SHLIB) $(SHLIBCLIENT) $(LIBNET) $(LIBS)
 
-btcilist_s:	$(BTCILISTOBJS) $(LIB)
-		$(CC) -o gbch-cilist $(LDFLAGS) $(BTCILISTOBJS) $(SHLIB) $(SHLIBCLIENT) $(LIBNET) $(LIBS)
-		touch $@
+gbch-q:		$(BTQOBJS) $(SHLIB)
+		$(SHLIBCC) -o $@ $(LDFLAGS) $(BTQOBJS) $(SHLIB) $(SHLIBCLIENT) $(SHLIBCURS) $(LIBCURSES) $(LIBNET) $(LIBS)
 
-gbch-hols:	$(BTHOLSOBJS) $(LIB)
-		$(CC) -o $@ $(LDFLAGS) $(BTHOLSOBJS) $(LIB) $(LIBNET) $(LIBS)
+gbch-quit:		$(BTQUITOBJS) $(SHLIB)
+		$(SHLIBCC) -o $@ $(LDFLAGS) $(BTQUITOBJS) $(SHLIB) $(SHLIBCLIENT) $(LIBNET) $(LIBS)
 
-bthols_s:	$(BTHOLSOBJS) $(LIB)
-		$(CC) -o gbch-hols $(LDFLAGS) $(BTHOLSOBJS) $(SHLIB) $(SHLIBCLIENT) $(LIBNET) $(LIBS)
-		touch $@
+gbch-r:		$(BTROBJS) $(SHLIB)
+		$(SHLIBCC) -o $@ $(LDFLAGS) $(BTROBJS) $(SHLIB) $(SHLIBCLIENT) $(LIBNET) $(LIBS)
 
-gbch-jchange:	$(BTJCHANGEOBJS) $(LIB)
-		$(CC) -o $@ $(LDFLAGS) $(BTJCHANGEOBJS) $(LIB) $(LIBNET) $(LIBS)
+gbch-rr:	$(RBTROBJS) $(SHLIB)
+		$(SHLIBCC) -o $@ $(LDFLAGS) $(RBTROBJS) $(SHLIB) $(SHLIBCLIENT) $(LIBNET) $(LIBS)
 
-btjchange_s:	$(BTJCHANGEOBJS) $(LIB)
-		$(CC) -o gbch-jchange $(LDFLAGS) $(BTJCHANGEOBJS) $(SHLIB) $(SHLIBCLIENT) $(LIBNET) $(LIBS)
-		touch $@
+gbch-start:	$(BTSTARTOBJS) $(SHLIB)
+		$(SHLIBCC) -o $@ $(LDFLAGS) $(BTSTARTOBJS) $(SHLIB) $(SHLIBCLIENT) $(LIBNET) $(LIBS)
 
-gbch-jdel:	$(BTJDELOBJS) $(LIB)
-		$(CC) -o $@ $(LDFLAGS) $(BTJDELOBJS) $(LIB) $(LIBNET) $(LIBS)
+gbch-uchange:	$(BTUCHANGEOBJS) $(SHLIB)
+		$(SHLIBCC) -o $@ $(LDFLAGS) $(BTUCHANGEOBJS) $(SHLIB) $(SHLIBCLIENT) $(LIBNET) $(LIBS)
 
-btjdel_s:	$(BTJDELOBJS) $(LIB)
-		$(CC) -o gbch-jdel $(LDFLAGS) $(BTJDELOBJS) $(SHLIB) $(SHLIBCLIENT) $(LIBNET) $(LIBS)
-		touch $@
+gbch-ulist:	$(BTULISTOBJS) $(SHLIB)
+		$(SHLIBCC) -o $@ $(LDFLAGS) $(BTULISTOBJS) $(SHLIB) $(SHLIBCLIENT) $(LIBNET) $(LIBS)
 
-gbch-jlist:	$(BTJLISTOBJS) $(LIB)
-		$(CC) -o $@ $(LDFLAGS) $(BTJLISTOBJS) $(LIB) $(LIBNET) $(LIBS)
+gbch-user:	$(BTUSEROBJS) $(SHLIB)
+		$(SHLIBCC) -o $@ $(LDFLAGS) $(BTUSEROBJS) $(SHLIB) $(SHLIBCLIENT) $(SHLIBCURS) $(LIBCURSES) $(LIBNET) $(LIBS)
 
-btjlist_s:	$(BTJLISTOBJS) $(LIB)
-		$(CC) -o gbch-jlist $(LDFLAGS) $(BTJLISTOBJS) $(SHLIB) $(SHLIBCLIENT) $(LIBNET) $(LIBS)
-		touch $@
+gbch-var:	$(BTVAROBJS) $(SHLIB)
+		$(SHLIBCC) -o $@ $(LDFLAGS) $(BTVAROBJS) $(SHLIB) $(SHLIBCLIENT) $(LIBNET) $(LIBS)
 
-gbch-jstat:	$(BTJSTATOBJS) $(LIB)
-		$(CC) -o $@ $(LDFLAGS) $(BTJSTATOBJS) $(LIB) $(LIBNET) $(LIBS)
-
-btjstat_s:	$(BTJSTATOBJS) $(LIB)
-		$(CC) -o gbch-jstat $(LDFLAGS) $(BTJSTATOBJS) $(SHLIB) $(SHLIBCLIENT) $(LIBNET) $(LIBS)
-		touch $@
-
-gbch-q:		$(BTQOBJS) $(LIB)
-		$(CC) -o $@ $(LDFLAGS) $(BTQOBJS) $(LIB) $(LIBCURSES) $(LIBNET) $(LIBS)
-
-btq_s:		$(BTQOBJS) $(LIB)
-		$(CC) -o gbch-q $(LDFLAGS) $(BTQOBJS) $(SHLIB) $(SHLIBCLIENT) $(SHLIBCURS) $(LIBCURSES) $(LIBNET) $(LIBS)
-		touch $@
-
-gbch-quit:		$(BTQUITOBJS) $(LIB)
-		$(CC) -o $@ $(LDFLAGS) $(BTQUITOBJS) $(LIB) $(LIBNET) $(LIBS)
-
-btquit_s:		$(BTQUITOBJS) $(LIB)
-		$(CC) -o gbch-quit $(LDFLAGS) $(BTQUITOBJS) $(SHLIB) $(SHLIBCLIENT) $(LIBNET) $(LIBS)
-		touch $@
-
-gbch-r:		$(BTROBJS) $(LIB)
-		$(CC) -o $@ $(LDFLAGS) $(BTROBJS) $(LIB) $(LIBNET) $(LIBS)
-
-btr_s:		$(BTROBJS) $(LIB)
-		$(CC) -o gbch-r $(LDFLAGS) $(BTROBJS) $(SHLIB) $(SHLIBCLIENT) $(LIBNET) $(LIBS)
-		touch $@
-
-gbch-rr:	$(RBTROBJS) $(LIB)
-		$(CC) -o $@ $(LDFLAGS) $(RBTROBJS) $(LIB) $(LIBNET) $(LIBS)
-
-rbtr_s:		$(RBTROBJS) $(LIB)
-		$(CC) -o gbch-rr $(LDFLAGS) $(RBTROBJS) $(SHLIB) $(SHLIBCLIENT) $(LIBNET) $(LIBS)
-		touch $@
-
-gbch-start:	$(BTSTARTOBJS) $(LIB)
-		$(CC) -o $@ $(LDFLAGS) $(BTSTARTOBJS) $(LIB) $(LIBNET) $(LIBS)
-
-btstart_s:	$(BTSTARTOBJS) $(LIB)
-		$(CC) -o gbch-start $(LDFLAGS) $(BTSTARTOBJS) $(SHLIB) $(SHLIBCLIENT) $(LIBNET) $(LIBS)
-		touch $@
-
-gbch-uchange:	$(BTUCHANGEOBJS) $(LIB)
-		$(CC) -o $@ $(LDFLAGS) $(BTUCHANGEOBJS) $(LIB) $(LIBNET) $(LIBS)
-
-btuchange_s:	$(BTUCHANGEOBJS) $(LIB)
-		$(CC) -o gbch-uchange $(LDFLAGS) $(BTUCHANGEOBJS) $(SHLIB) $(SHLIBCLIENT) $(LIBNET) $(LIBS)
-		touch $@
-
-gbch-ulist:	$(BTULISTOBJS) $(LIB)
-		$(CC) -o $@ $(LDFLAGS) $(BTULISTOBJS) $(LIB) $(LIBNET) $(LIBS)
-
-btulist_s:	$(BTULISTOBJS) $(LIB)
-		$(CC) -o gbch-ulist $(LDFLAGS) $(BTULISTOBJS) $(SHLIB) $(SHLIBCLIENT) $(LIBNET) $(LIBS)
-		touch $@
-
-gbch-user:	$(BTUSEROBJS) $(LIB)
-		$(CC) -o $@ $(LDFLAGS) $(BTUSEROBJS) $(LIB) $(LIBCURSES) $(LIBNET) $(LIBS)
-
-btuser_s:	$(BTUSEROBJS) $(LIB)
-		$(CC) -o gbch-user $(LDFLAGS) $(BTUSEROBJS) $(SHLIB) $(SHLIBCLIENT) $(SHLIBCURS) $(LIBCURSES) $(LIBNET) $(LIBS)
-		touch $@
-
-gbch-var:	$(BTVAROBJS) $(LIB)
-		$(CC) -o $@ $(LDFLAGS) $(BTVAROBJS) $(LIB) $(LIBNET) $(LIBS)
-
-btvar_s:	$(BTVAROBJS) $(LIB)
-		$(CC) -o gbch-var $(LDFLAGS) $(BTVAROBJS) $(SHLIB) $(SHLIBCLIENT) $(LIBNET) $(LIBS)
-		touch $@
-
-gbch-vlist:	$(BTVLISTOBJS) $(LIB)
-		$(CC) -o $@ $(LDFLAGS) $(BTVLISTOBJS) $(LIB) $(LIBNET) $(LIBS)
-
-btvlist_s:	$(BTVLISTOBJS) $(LIB)
-		$(CC) -o gbch-vlist $(LDFLAGS) $(BTVLISTOBJS) $(SHLIB) $(SHLIBCLIENT) $(LIBNET) $(LIBS)
-		touch $@
+gbch-vlist:	$(BTVLISTOBJS) $(SHLIB)
+		$(SHLIBCC) -o $@ $(LDFLAGS) $(BTVLISTOBJS) $(SHLIB) $(SHLIBCLIENT) $(LIBNET) $(LIBS)
 
 gbch-filemon:	$(BTFILEMONOBJS)
-		$(CC) -o $@ $(LDFLAGS) $(BTFILEMONOBJS) $(LIB) $(LIBNET) $(LIBS)
-
-btfilemon_s:	$(BTFILEMONOBJS)
-		$(CC) -o gbch-filemon $(LDFLAGS) $(BTFILEMONOBJS) $(SHLIB) $(SHLIBCLIENT) $(LIBNET) $(LIBS)
-		touch $@
+		$(SHLIBCC) -o $@ $(LDFLAGS) $(BTFILEMONOBJS) $(SHLIB) $(SHLIBCLIENT) $(LIBNET) $(LIBS)
 
 # The rest are all internal programs so they don't need to have gbch- stuck in fron
 
-btsched:	$(BTSCHEDOBJS) $(LIB)
-		$(CC) -o $@ $(LDFLAGS) $(BTSCHEDOBJS) $(LIB) $(LIBNET) $(LIBS)
+btsched:	$(BTSCHEDOBJS) $(SHLIB)
+		$(SHLIBCC) -o $@ $(LDFLAGS) $(BTSCHEDOBJS) $(SHLIB) $(LIBNET) $(LIBS)
 
-btsched_s:	$(BTSCHEDOBJS) $(LIB)
-		$(CC) -o btsched $(LDFLAGS) $(BTSCHEDOBJS) $(SHLIB) $(LIBNET) $(LIBS)
-		touch $@
-
-# We don't do a shared library version of btexec because it doesn't use any library routines (apart from versionprint)
-
-btexec:		$(BTEXECOBJS) $(LIB)
+btexec:		$(BTEXECOBJS) $(SHLIB)
 		$(CC) -o $@ $(LDFLAGS) $(BTEXECOBJS) $(LIB)
 
-# Ditto btpwchk
-
-btpwchk:	$(BTPWCHKOBJS) $(LIB)
+btpwchk:	$(BTPWCHKOBJS) $(SHLIB)
 		$(CC) -o $@ $(LDFLAGS) $(BTPWCHKOBJS) $(LIB) $(LIBNET) @LIBSHAD@ @CRYPTLIB@ $(LIBS)
 
-# Ditto btmdisp - uses some but not enough to be worth including all libs
+btmdisp:	$(BTMDISPOBJS) $(SHLIB)
+		$(CC) -o $@ $(LDFLAGS) $(BTMDISPOBJS) $(LIB) $(LIBCLIENT) $(LIBNET) $(LIBS)
 
-btmdisp:	$(BTMDISPOBJS) $(LIB)
-		$(CC) -o $@ $(LDFLAGS) $(BTMDISPOBJS) $(LIB) $(LIBNET) $(LIBS)
+xbnetserv:	$(XBNETSERVOBJS) $(SHLIB)
+		$(SHLIBCC) -o $@ $(LDFLAGS) $(XBNETSERVOBJS) $(SHLIB) $(SHLIBCLIENT) $(LIBNET) $(LIBS)
 
-xbnetserv:	$(XBNETSERVOBJS) $(LIB)
-		$(CC) -o $@ $(LDFLAGS) $(XBNETSERVOBJS) $(LIB) $(LIBNET) $(LIBS)
+jobdump:	$(JOBDUMPOBJS) $(SHLIB)
+		$(SHLIBCC) -o $@ $(LDFLAGS) $(JOBDUMPOBJS) $(SHLIB) $(SHLIBCLIENT) $(LIBNET) $(LIBS)
 
-xbnetserv_s:	$(XBNETSERVOBJS) $(LIB)
-		$(CC) -o xbnetserv $(LDFLAGS) $(XBNETSERVOBJS) $(SHLIB) $(SHLIBCLIENT) $(LIBNET) $(LIBS)
-		touch $@
+btwrite:	$(BTWRITEOBJS) $(SHLIB)
+		$(SHLIBCC) -o $@ $(LDFLAGS) $(BTWRITEOBJS) $(SHLIB) $(LIBNET) $(LIBS)
 
-jobdump:	$(JOBDUMPOBJS) $(LIB)
-		$(CC) -o $@ $(LDFLAGS) $(JOBDUMPOBJS) $(LIB) $(LIBNET) $(LIBS)
-
-jobdump_s:	$(JOBDUMPOBJS) $(LIB)
-		$(CC) -o jobdump $(LDFLAGS) $(JOBDUMPOBJS) $(SHLIB) $(SHLIBCLIENT) $(LIBNET) $(LIBS)
-		touch $@
-
-btwrite:	$(BTWRITEOBJS) $(LIB)
-		$(CC) -o $@ $(LDFLAGS) $(BTWRITEOBJS) $(LIB) $(LIBNET) $(LIBS)
-
-btwrite_s:	$(BTWRITEOBJS) $(LIB)
-		$(CC) -o btwrite $(LDFLAGS) $(BTWRITEOBJS) $(SHLIB) $(LIBNET) $(LIBS)
-		touch $@
-
-dosbtwrite:	$(DOSBTWRITEOBJS) $(LIB)
-		$(CC) -o $@ $(LDFLAGS) $(DOSBTWRITEOBJS) $(LIB) $(LIBNET) $(LIBS)
-
-dosbtwrite_s:	$(DOSBTWRITEOBJS) $(LIB)
-		$(CC) -o dosbtwrite $(LDFLAGS) $(DOSBTWRITEOBJS) $(SHLIB) $(LIBNET) $(LIBS)
-		touch $@
+dosbtwrite:	$(DOSBTWRITEOBJS) $(SHLIB)
+		$(SHLIBCC) -o $@ $(LDFLAGS) $(DOSBTWRITEOBJS) $(SHLIB) $(LIBNET) $(LIBS)
 
 apilibd:
 		cd apilib;$(MAKE)
@@ -301,26 +186,26 @@ apilibd:
 
 # Commenting out Motif stuff
 # This should work if you have a Motif Library and #includes but Motif is not supported by GNU
-#motifd:$(LIB)
+#motifd:$(SHLIB)
 #	cd motif;$(MAKE)
 
-gtkd:		$(LIB)
+gtkd:		$(SHLIB)
 		@if cd gtk;$(MAKE); then echo GTK built OK; else echo;echo;echo "******** GTK build failed - not critical but please install recent GTK (incl devel libs)";echo;echo; fi
 		touch $@
 
-loccgid:	$(LIB)
+loccgid:	$(SHLIB)
 		cd loccgi;$(MAKE)
 		touch $@
 
-remcgid:	$(LIB)
+remcgid:	$(SHLIB)
 		cd remcgi;$(MAKE)
 		touch $@
 
-insd:		$(LIB)
+insd:		$(SHLIB)
 		cd ins;$(MAKE)
 		touch $@
 
-$(LIB):
+$(SHLIB):
 		cd lib;$(MAKE)
 
 ##################################################################################
@@ -333,18 +218,18 @@ $(LIB):
 ##################################################################################
 
 install: all
-	@perlbin@ $(BASE)/Checkuserinst $(BATCHUSER) @spooldir@
-	$(INSTALL) -d -o $(BATCHUSER) -g root -m 755 @spooldir@
-	$(INSTALL) -d -o $(BATCHUSER) -g root -m 755 @pkgexecdir@
-	$(INSTALL) -d -o $(BATCHUSER) -g root -m 755 @sphelpdir@
+	$(STAGED_INSTALL) || @perlbin@ $(BASE)/Checkuserinst $(BATCHUSER) @spooldir@
+	$(INSTALL) -d -o $(BATCHUSER) -g root -m 755 $(SPOOLDIR)
+	$(INSTALL) -d -o $(BATCHUSER) -g root -m 755 $(INTBINDIR)
+	$(INSTALL) -d -o $(BATCHUSER) -g root -m 755 $(SPHELPDIR)
 	cd lib;$(MAKE) install prefix="$(prefix)" exec_prefix="$(exec_prefix)"
-	$(INSTALL) $(USERMODES) $(USERBINS) $(BINDIR)
-	$(INSTALL) $(NOSETMODES) $(NOSETUBINS) $(BINDIR)
+	libtool --mode=install $(INSTALL) $(USERMODES) $(USERBINS) $(BINDIR)
+	libtool --mode=install $(INSTALL) $(NOSETMODES) $(NOSETUBINS) $(BINDIR)
 	cd $(BINDIR);for p in $(BTSTARTLNKS); do ln -f gbch-start $$p; done
 	cd $(BINDIR);for p in $(BTJDELLNKS); do ln -f gbch-jdel $$p; done
-	$(INSTALL) $(SUIDROOT) $(SUIDROOTBINS) $(INTBINDIR)
-	$(INSTALL) $(USERMODES) $(SUIDBTBINS) $(INTBINDIR)
-	$(INSTALL) $(TTYGROUP) $(TTYGRPBINS) $(INTBINDIR)
+	libtool --mode=install $(INSTALL) $(SUIDROOT) $(SUIDROOTBINS) $(INTBINDIR)
+	libtool --mode=install $(INSTALL) $(USERMODES) $(SUIDBTBINS) $(INTBINDIR)
+	libtool --mode=install $(INSTALL) $(TTYGROUP) $(TTYGRPBINS) $(INTBINDIR)
 	cd helpmsg;$(MAKE) install prefix="$(prefix)" exec_prefix="$(exec_prefix)"
 	cd loccgi;$(MAKE) install prefix="$(prefix)" exec_prefix="$(exec_prefix)"
 	cd ins;$(MAKE) install prefix="$(prefix)" exec_prefix="$(exec_prefix)"
@@ -352,36 +237,36 @@ install: all
 	cd remcgi;$(MAKE) install prefix="$(prefix)" exec_prefix="$(exec_prefix)"
 	-cd gtk;$(MAKE) install prefix="$(prefix)" exec_prefix="$(exec_prefix)"
 ##	-cd motif;$(MAKE) install prefix="$(prefix)" exec_prefix="$(exec_prefix)"
-	@perlbin@ $(BASE)/Checknetinst
+	$(STAGED_INSTALL) || @perlbin@ $(BASE)/Checknetinst
 
-install-strip:
-	@perlbin@ $(BASE)/Checkuserinst $(BATCHUSER) @spooldir@
-	$(INSTALL) -d -o $(BATCHUSER) -g root -m 755 @spooldir@
-	$(INSTALL) -d -o $(BATCHUSER) -g root -m 755 @pkgexecdir@
-	$(INSTALL) -d -o $(BATCHUSER) -g root -m 755 @sphelpdir@
+install-strip: all
+	$(STAGED_INSTALL) || @perlbin@ $(BASE)/Checkuserinst $(BATCHUSER) @spooldir@
+	$(INSTALL) -d -o $(BATCHUSER) -g root -m 755 $(SPOOLDIR)
+	$(INSTALL) -d -o $(BATCHUSER) -g root -m 755 $(INTBINDIR)
+	$(INSTALL) -d -o $(BATCHUSER) -g root -m 755 $(SPHELPDIR)
 	cd lib;$(MAKE) install prefix="$(prefix)" exec_prefix="$(exec_prefix)"
-	$(INSTALL) -s $(USERMODES) $(USERBINS) $(BINDIR)
-	$(INSTALL) -s $(NOSETMODES) $(NOSETUBINS) $(BINDIR)
+	libtool --mode=install $(INSTALL) -s $(USERMODES) $(USERBINS) $(BINDIR)
+	libtool --mode=install $(INSTALL) -s $(NOSETMODES) $(NOSETUBINS) $(BINDIR)
 	cd $(BINDIR);for p in $(BTSTARTLNKS); do ln -f gbch-start $$p; done
 	cd $(BINDIR);for p in $(BTJDELLNKS); do ln -f gbch-jdel $$p; done
-	$(INSTALL) -s $(SUIDROOT) $(SUIDROOTBINS) $(INTBINDIR)
-	$(INSTALL) -s $(USERMODES) $(SUIDBTBINS) $(INTBINDIR)
-	$(INSTALL) -s $(TTYGROUP) $(TTYGRPBINS) $(INTBINDIR)
-	cd helpmsg;$(MAKE) install-strip prefix="$(prefix)" exec_prefix="$(exec_prefix)"
-	cd loccgi;$(MAKE) install-strip prefix="$(prefix)" exec_prefix="$(exec_prefix)"
-	cd ins;$(MAKE) install-strip prefix="$(prefix)" exec_prefix="$(exec_prefix)"
-	cd apilib;$(MAKE) install-strip prefix="$(prefix)" exec_prefix="$(exec_prefix)"
-	cd remcgi;$(MAKE) install-strip prefix="$(prefix)" exec_prefix="$(exec_prefix)"
-	-cd gtk;$(MAKE) install-strip prefix="$(prefix)" exec_prefix="$(exec_prefix)"
-##	-cd motif;$(MAKE) install-strip prefix="$(prefix)" exec_prefix="$(exec_prefix)"
-	@perlbin@ $(BASE)/Checknetinst
+	libtool --mode=install $(INSTALL) -s $(SUIDROOT) $(SUIDROOTBINS) $(INTBINDIR)
+	libtool --mode=install $(INSTALL) -s $(USERMODES) $(SUIDBTBINS) $(INTBINDIR)
+	libtool --mode=install $(INSTALL) -s $(TTYGROUP) $(TTYGRPBINS) $(INTBINDIR)
+	cd helpmsg;$(MAKE) install prefix="$(prefix)" exec_prefix="$(exec_prefix)"
+	cd loccgi;$(MAKE) install prefix="$(prefix)" exec_prefix="$(exec_prefix)"
+	cd ins;$(MAKE) install prefix="$(prefix)" exec_prefix="$(exec_prefix)"
+	cd apilib;$(MAKE) install prefix="$(prefix)" exec_prefix="$(exec_prefix)"
+	cd remcgi;$(MAKE) install prefix="$(prefix)" exec_prefix="$(exec_prefix)"
+	-cd gtk;$(MAKE) install prefix="$(prefix)" exec_prefix="$(exec_prefix)"
+##	-cd motif;$(MAKE) install prefix="$(prefix)" exec_prefix="$(exec_prefix)"
+	$(STAGED_INSTALL) || @perlbin@ $(BASE)/Checknetinst
 
 #
 #	Clean-ups.
 #
 
 clean:
-	$(RM) $(USERBINS) $(NOSETUBINS) $(SUIDROOTBINS) $(SUIDBTBINS) $(TTYGRPBINS) *.o *_s
+	$(RM) $(USERBINS) $(NOSETUBINS) $(SUIDROOTBINS) $(SUIDBTBINS) $(TTYGRPBINS) *.o
 	cd lib;$(MAKE) clean
 	cd apilib;$(MAKE) clean
 	cd loccgi;$(MAKE) clean

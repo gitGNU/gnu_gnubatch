@@ -1,0 +1,6 @@
+usr/include/gbatch.h
+usr/lib/libgnubatch.a
+usr/lib/libgnubatch-*.so.*
+usr/lib/libgnubatch.la
+usr/lib/libgnubatch.so
+usr/share/man/man3/*

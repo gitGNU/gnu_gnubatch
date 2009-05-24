@@ -24,15 +24,14 @@ SHELL		=	/bin/sh
 PARENT		=	..
 BASE		=	../..
 AR		=	ar
-CC		=	@CC@
+CC		=	libtool --mode=compile @CC@
 RM		=	rm -f
 HDRS		=	$(PARENT)/hdrs
-CCFLAGS		=	-O @gcc_useful_options@ @funny_compiler_options@ @lib_pic@
+CCFLAGS		=	-O @gcc_useful_options@ @funny_compiler_options@
 CFLAGS		=	$(CCFLAGS) -I$(HDRS)
-LIBDIR		=	@libdir@
-LDSHARED	=	ld -shared -o
-APILIB		=	libgnubatch.a
-APISHLIB	=	libgnubatch.so
+LIBDIR		=	$(DESTDIR)@libdir@
+INCLUDEDIR	=	$(DESTDIR)@includedir@
+APILIB		=	libgnubatch.la
 INSTALL		=	@INSTALL@
 INSTALL_DATA	=	@INSTALL_DATA@
 
@@ -73,61 +72,10 @@ OBJECTS=gbatch_ciadd.o\
 	gbatch_varupd.o\
 	gbatch_open.o
 
-all:	@main_target@
+LIBOBJECTS=$(OBJECTS:.o=.lo)
 
-nonshared:	$(APILIB)
-	$(AR) crv $(APILIB) $(OBJECTS)
-	@RANLIB@ $(APILIB)
-	$(RM) $(OBJECTS)
-
-shared:		$(APISHLIB)
-
-$(APILIB):	gbatch.h \
-		$(APILIB)(gbatch_ciadd.o)\
-		$(APILIB)(gbatch_cidel.o)\
-		$(APILIB)(gbatch_ciread.o)\
-		$(APILIB)(gbatch_ciupd.o)\
-		$(APILIB)(gbatch_getbtd.o)\
-		$(APILIB)(gbatch_getbtu.o)\
-		$(APILIB)(gbatch_gethenv.o)\
-		$(APILIB)(gbatch_holread.o)\
-		$(APILIB)(gbatch_holupd.o)\
-		$(APILIB)(gbatch_jobadd.o)\
-		$(APILIB)(gbatch_jobchgrp.o)\
-		$(APILIB)(gbatch_jobchmod.o)\
-		$(APILIB)(gbatch_jobchown.o)\
-		$(APILIB)(gbatch_jobdata.o)\
-		$(APILIB)(gbatch_jobdel.o)\
-		$(APILIB)(gbatch_joblist.o)\
-		$(APILIB)(gbatch_jobop.o)\
-		$(APILIB)(gbatch_jobread.o)\
-		$(APILIB)(gbatch_jobupd.o)\
-		$(APILIB)(gbatch_jobswap.o)\
-		$(APILIB)(gbatch_putbtd.o)\
-		$(APILIB)(gbatch_putbtu.o)\
-		$(APILIB)(gbatch_setqueue.o)\
-		$(APILIB)(gbatch_strings.o)\
-		$(APILIB)(gbatch_varadd.o)\
-		$(APILIB)(gbatch_varchcomm.o)\
-		$(APILIB)(gbatch_varchgrp.o)\
-		$(APILIB)(gbatch_varchmod.o)\
-		$(APILIB)(gbatch_varchown.o)\
-		$(APILIB)(gbatch_vardel.o)\
-		$(APILIB)(gbatch_varlist.o)\
-		$(APILIB)(gbatch_varread.o)\
-		$(APILIB)(gbatch_modepack.o)\
-		$(APILIB)(gbatch_varrename.o)\
-		$(APILIB)(gbatch_varupd.o)\
-		$(APILIB)(gbatch_open.o)
-
-# Build shared and non-shared version.
-# TODO - build alternative 32-bit and 64-bit versions on some machines
-
-$(APISHLIB):	gbatch.h $(OBJECTS)
-	$(LDSHARED) $(APISHLIB) -h $(APISHLIB) $(OBJECTS)
-	$(AR) crv $(APILIB) $(OBJECTS)
-	@RANLIB@ $(APILIB)
-	$(RM) $(OBJECTS)
+all:	gbatch.h $(OBJECTS)
+	libtool --mode=link @CC@ $(CCFLAGS) -o $(APILIB) $(LIBOBJECTS) -rpath $(LIBDIR) -version-info 1:2:0 -release 1
 
 # Build header out of the bits
 
@@ -141,18 +89,19 @@ gbatch.h:	gbatch.pre\
 		$(HDRS)/timecon.h
 	sh ./Hdrmake.sh $(BASE)/config.h $(HDRS)
 
-install:
-	$(INSTALL) -d $(LIBDIR)
+install: all
+	libtool --mode=install $(INSTALL) $(APILIB) $(LIBDIR)
+	$(INSTALL_DATA) gbatch.h $(INCLUDEDIR)
 	$(INSTALL_DATA) $(APILIB) $(LIBDIR)
-	if test -f $(APISHLIB); then $(INSTALL) $(APISHLIB) $(LIBDIR); fi
 
-install_strip:
-	$(INSTALL) -d $(LIBDIR)
+install_strip: all
+	libtool --mode=install $(INSTALL) -s $(APILIB) $(LIBDIR)
+	$(INSTALL_DATA) gbatch.h $(INCLUDEDIR)
 	$(INSTALL_DATA) $(APILIB) $(LIBDIR)
-	if test -f $(APISHLIB); then $(INSTALL) $(APISHLIB) $(LIBDIR); fi
 
 clean:
-	$(RM) gbatch.h *.[oa] *.ln *.so
+	$(RM) gbatch.h *.[oa] *.ln *.so *.la *.lo
+	$(RM) -r .libs
 
 distclean:	clean
 	$(RM) Makefile

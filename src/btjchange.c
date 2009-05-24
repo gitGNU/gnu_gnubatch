@@ -75,8 +75,6 @@ char	*exitcodename,
 	*signalname,
 	*Curr_pwd;
 
-HelpaltRef	repunit, ifnposses, days_abbrev;
-
 FILE	*Cfile;
 
 #define	IPC_MODE	0600
@@ -111,8 +109,6 @@ char	*Args[MAXJARGS];
 unsigned	defavoid;
 
 BtuserRef	mypriv;
-
-long		mymtype;
 
 extern char **remread_envir(const netid_t);
 void  checksetmode(const int, const ushort *, const ushort, USHORT *);

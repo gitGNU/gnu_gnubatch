@@ -29,8 +29,6 @@
 #include "helpalt.h"
 #include "timecon.h"
 
-extern	HelpaltRef	repunit, days_abbrev;
-
 void  spitbtrstr(const int, FILE *, const int);
 
 void  dumptime(FILE *ofl, CTimeconRef tcr)

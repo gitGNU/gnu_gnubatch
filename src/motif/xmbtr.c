@@ -99,8 +99,7 @@ int	Ctrl_chan = -1;
 int	Sem_chan;
 #endif
 
-long	mymtype;
-
+extern	long	mymtype;
 BtuserRef	mypriv;
 
 struct	pend_job	default_pend;

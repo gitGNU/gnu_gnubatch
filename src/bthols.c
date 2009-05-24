@@ -66,7 +66,7 @@ BtuserRef	mypriv;
 
 FILE	*Cfile;
 
-#ifdef	SHAREDLIBS
+/* Satisfy sharedlibs dependencies */
 #include "bjparam.h"
 #include "cmdint.h"
 #include "btconst.h"
@@ -75,11 +75,9 @@ FILE	*Cfile;
 #include "q_shm.h"
 
 int		Ctrl_chan;
-long		mymtype;
-HelpaltRef	repunit, ifnposses, days_abbrev;
 char		*Args[1], *exitcodename, *signalname;
 struct		jshm_info	Job_seg;
-#endif
+/* end of shared libs dependencies */
 
 void  nomem(const char *fl, const int ln)
 {

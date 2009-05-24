@@ -73,18 +73,16 @@ int		s0flag = -1, expflag = -1;	/* -1 means untouched */
 
 char	*Restru, *Restrg, *jobqueue;		/* Resolution */
 
-#ifdef	SHAREDLIBS
+/* Satisfy sharedlibs dependencies */
 #include "timecon.h"
 #include "btconst.h"
 #include "btjob.h"
 #include "q_shm.h"
 int		Ctrl_chan;
-long		mymtype;
-HelpaltRef	repunit, ifnposses, days_abbrev;
 char		*Args[1], *exitcodename, *signalname;
 BtuserRef	mypriv;
 struct	jshm_info	Job_seg;
-#endif
+/* end of shared library dependencies */
 
 /* For when we run out of memory.....  */
 

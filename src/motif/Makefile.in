@@ -30,13 +30,13 @@ BASE		=	../..
 HDRS		=	$(PARENT)/hdrs
 CC		=	@CC@
 CCFLAGS		=	-O @gcc_useful_options@ @funny_compiler_options@
+SHLIBCC		=	libtool --mode=link $(CC) $(CCFLAGS)
 CFLAGS		=	$(CCFLAGS) -I$(HDRS) -I$(PARENT) -I$(BASE)
 LDFLAGS		=
 PARENT		=	..
 MYLIBDIR	=	$(PARENT)/lib
-LIB		=	$(MYLIBDIR)/libgnubatch_int.a
-SHLIB		=	$(MYLIBDIR)/libgnubatch_int.so
-SHLIBCLIENT	=	$(MYLIBDIR)/libgnubatch_client.so
+SHLIB		=	$(MYLIBDIR)/libgnubatch_int.la
+SHLIBCLIENT	=	$(MYLIBDIR)/libgnubatch_client.la
 LIBS		=	@LIBS@
 LIBNET		=	@SOCKLIBS@
 XLIBS		=	@XWIN_LIBS@
@@ -46,68 +46,48 @@ INSTALL_DATA	=	@INSTALL_DATA@
 BATCHUSER	=	@BATCHUSER@
 USERMODES	=	-o $(BATCHUSER) -g root -m 4755
 NOSETMODES	=	-o $(BATCHUSER) -g root
-BINDIR		=	@bindir@
-INTBINDIR	=	@pkgexecdir@
-HELPFILEDIR	=	@sphelpdir@
+BINDIR		=	$(DESTDIR)@bindir@
+INTBINDIR	=	$(DESTDIR)@pkgexecdir@
+HELPFILEDIR	=	$(DESTDIR)@sphelpdir@
 USERBINS	=	gbch-xmfilemon gbch-xmq gbch-xmr gbch-xmuser
 NOSETUBINS	=	gbch-xmfilemon
 XMFILEMONOBS	=	xmfilemon.o
-APPDEFLOC	=	`./Findappdefloc`
+APPDEFLOC	=	$(DESTDIR)`./Findappdefloc`
 
 XMBTQOBS=xmbtq.o xmbq_jlist.o xmbq_vlist.o xmbq_cbs.o xmbq_jcall.o xmbq_jobpar.o xmbq_cmdint.o xmbq_vcall.o xmbq_view.o xm_commlib.o
 XMBTUSEROBS=xmbtuser.o xmbtu_cbs.o xm_commlib.o
 XMBTROBS=xmbtr.o xmbr_jlist.o xmbr_cbs.o xmbr_jcall.o xmbr_jobpar.o xmbr_remsub.o xmbr_vlist.o xmbr_files.o xmbr_jldsv.o xm_commlib.o
 
-all:	@main_target@
-
-nonshared:	$(USERBINS) $(NOSETUBINS)
-
-shared:		xmbtuser_s xmbtq_s xmbtr_s xmfilemon_s
+all:	$(USERBINS) $(NOSETUBINS)
 
 gbch-xmq:	$(XMBTQOBS)
-		$(CC) -o $@ $(LDFLAGS) $(XMBTQOBS) $(LIB) $(XLIBS) $(LIBNET) $(LIBS)
-
-xmbtq_s:	$(XMBTQOBS)
-		$(CC) -o gbch-xmq $(LDFLAGS) $(XMBTQOBS) $(SHLIB) $(SHLIBCLIENT) $(XLIBS) $(LIBNET) $(LIBS)
-		touch $@
+		$(SHLIBCC) -o gbch-xmq $(LDFLAGS) $(XMBTQOBS) $(SHLIB) $(SHLIBCLIENT) $(XLIBS) $(LIBNET) $(LIBS)
 
 gbch-xmuser:	$(XMBTUSEROBS)
-		$(CC) -o $@ $(LDFLAGS) $(XMBTUSEROBS) $(LIB) $(XLIBS) $(LIBNET) $(LIBS)
-
-xmbtuser_s:	$(XMBTUSEROBS)
-		$(CC) -o gbch-xmuser $(LDFLAGS) $(XMBTUSEROBS) $(SHLIB) $(SHLIBCLIENT) $(XLIBS) $(LIBNET) $(LIBS)
-		touch $@
+		$(SHLIBCC) -o gbch-xmuser $(LDFLAGS) $(XMBTUSEROBS) $(SHLIB) $(SHLIBCLIENT) $(XLIBS) $(LIBNET) $(LIBS)
 
 gbch-xmr:	$(XMBTROBS)
-		$(CC) -o $@ $(LDFLAGS) $(XMBTROBS) $(LIB) $(XLIBS) $(LIBNET) $(LIBS)
-
-xmbtr_s:	$(XMBTROBS)
-		$(CC) -o gbch-xmr $(LDFLAGS) $(XMBTROBS) $(SHLIB) $(SHLIBCLIENT)  $(XLIBS) $(LIBNET) $(LIBS)
-		touch $@
+		$(SHLIBCC) -o gbch-xmr $(LDFLAGS) $(XMBTROBS) $(SHLIB) $(SHLIBCLIENT) $(XLIBS) $(LIBNET) $(LIBS)
 
 gbch-xmfilemon:	$(XMFILEMONOBS)
-		$(CC) -o $@ $(LDFLAGS) $(XMFILEMONOBS) $(LIB) $(XLIBS) $(LIBNET) $(LIBS)
-
-xmfilemon_s:	$(XMFILEMONOBS)
-		-$(CC) -o gbch-xmfilemon $(LDFLAGS) $(XMFILEMONOBS) $(SHLIB) $(SHLIBCLIENT) $(XLIBS) $(LIBNET) $(LIBS)
-		touch $@
+		$(SHLIBCC) -o gbch-xmfilemon $(LDFLAGS) $(XMFILEMONOBS) $(SHLIB) $(SHLIBCLIENT) $(XLIBS) $(LIBNET) $(LIBS)
 
 install:	all
-		$(INSTALL) $(USERMODES) $(USERBINS) $(BINDIR)
-		$(INSTALL) $(NOSETMODES) $(NOSETUBINS) $(BINDIR)
+		libtool --mode=install $(INSTALL) $(USERMODES) $(USERBINS) $(BINDIR)
+		libtool --mode=install $(INSTALL) $(NOSETMODES) $(NOSETUBINS) $(BINDIR)
 		(m4 xmbtq.m4;m4 xmbtr.m4;m4 xmbtuser.m4;m4 xmfilemon.m4) >GBATCH
 		$(INSTALL_DATA) GBATCH $(APPDEFLOC)
 		$(RM) GBATCH
 
 install-strip:	all
-		$(INSTALL) -s $(USERMODES) $(USERBINS) $(BINDIR)
-		$(INSTALL) -s $(NOSETMODES) $(NOSETUBINS) $(BINDIR)
+		libtool --mode=install $(INSTALL) -s $(USERMODES) $(USERBINS) $(BINDIR)
+		libtool --mode=install $(INSTALL) -s $(NOSETMODES) $(NOSETUBINS) $(BINDIR)
 		(m4 xmbtq.m4;m4 xmbtr.m4;m4 xmbtuser.m4;m4 xmfilemon.m4) >GBATCH
 		$(INSTALL_DATA) GBATCH $(APPDEFLOC)
 		$(RM) GBATCH
 
 clean:
-		$(RM) *.o gbch-xmq gbch-xmuser gbch-xmr gbch-xmfilemon *_s
+		$(RM) *.o gbch-xmq gbch-xmuser gbch-xmr gbch-xmfilemon
 
 distclean:	clean
 		$(RM) Makefile

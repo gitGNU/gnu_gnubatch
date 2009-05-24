@@ -31,8 +31,6 @@
 #include "helpalt.h"
 #include "optflags.h"
 
-extern	HelpaltRef	repunit, days_abbrev;
-
 int  spit_time(FILE *dest, CTimeconRef tcr, int cancont, const ULONG davset, const int mdset)
 {
 	int	jn;

@@ -213,7 +213,7 @@ static	char	*localrun;
 
 static	HelpaltRef	progresslist;
 char			*rdeletemsg, *rretainmsg;
-HelpaltRef		repunit, ifnposses, days_abbrev, varexport_types;
+HelpaltRef		varexport_types;
 char			*exitcodename, *signalname;
 
 extern const char * const condname[];

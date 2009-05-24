@@ -1,0 +1,306 @@
+#!/bin/sh
+# postinst script for gnubatch
+#
+# see: dh_installdeb(1)
+
+set -e
+
+# summary of how this script can be called:
+#        * <postinst> `configure' <most-recently-configured-version>
+#        * <old-postinst> `abort-upgrade' <new version>
+#        * <conflictor's-postinst> `abort-remove' `in-favour' <package>
+#          <new-version>
+#        * <postinst> `abort-remove'
+#        * <deconfigured's-postinst> `abort-deconfigure' `in-favour'
+#          <failed-install-package> <version> `removing'
+#          <conflicting-package> <version>
+# for details, see http://www.debian.org/doc/debian-policy/ or
+# the debian-policy package
+
+perm_gnubatch() {
+    chown gnubatch:daemon $*
+    chmod 755 $*
+}
+
+perm_suid_gnubatch() {
+    chown gnubatch:daemon $*
+    chmod 4755 $*
+}
+
+perm_suid_root() {
+    chown root:root $*
+    chmod 4755 $*
+}
+
+perm_sgid_tty() {
+    chown gnubatch:tty $*
+    chmod 2755 $*
+}
+
+perm_sugid_gnubatch() {
+    chown gnubatch:daemon $*
+    chmod 6755 $*
+}
+
+perm_sugid_root() {
+    chown root:daemon $*
+    chmod 6755 $*
+}
+
+fixperms() {
+    origdir=`pwd`
+
+    cd /var/spool
+    perm_gnubatch gnubatch
+
+    cd /usr/bin
+    perm_suid_gnubatch  gbch-charge gbch-cichange gbch-cilist gbch-hols gbch-jchange \
+			gbch-jdel gbch-jlist gbch-jstat gbch-q gbch-quit gbch-r \
+			gbch-rr gbch-start gbch-uchange gbch-ulist gbch-user gbch-var \
+			gbch-vlist gbch-xq gbch-xr gbch-xuser
+
+    perm_gnubatch gbch-filemon gbch-xfilemon gbch-atcover
+
+    cd /usr/sbin
+    perm_gnubatch gspl-pmenu gspl-hostedit gspl-passwd
+    perm_suid_gnubatch gspl-lpcover gspl-lpstatc
+    perm_gnubatch gbch-btuconv gbch-ciconv gbch-cjlist gbch-cvlist gbch-ripc
+
+    cd /usr/lib/gnubatch
+    perm_gnubatch .
+    perm_suid_root btsched btexec btpwchk btmdisp xbnetserv bgtkldsv
+    perm_suid_gnubatch jobdump
+    perm_sgid_tty btwrite dosbtwrite
+    perm_gnubatch bgtksave
+
+    cd /usr/lib/gnubatch/cgi-bin
+    perm_gnubatch .
+    perm_sugid_gnubatch btjccgi btjcgi btjcrcgi btjdcgi btjvcgi btvccgi btvcgi
+    #perm_sugid_root rbtjcgi rbtjccgi rbtjdcgi rbtjvcgi rbtjcrcgi rbtvcgi rbtvccgi
+    
+    cd /usr/share/gnubatch
+    chown -R gnubatch:daemon .
+
+    cd $origdir
+}
+
+installnet() {
+perl <<'EOF'
+use Socket;
+
+$prefix = "/usr";
+$exec_prefix = "${prefix}";
+$bindir = "${exec_prefix}/bin";
+$sbindir = "${exec_prefix}/sbin";
+
+# Initialise network setup for GNUbatch
+# This assumes that network code is compiled in which it usually is
+
+# First set up services (see services.h)
+
+# Services for GNUbatch
+
+#gnubatch		48104/tcp        # Connection port
+#gnubatch		48104/udp        # Probe port
+#gnubatch-feeder        48105/tcp        # Feeder port for GNUbatch
+#gnubatch-netsrv	48106/tcp        # External job submission
+#gnubatch-netsrv	48106/udp        # Client access
+#gnubatch-api		48107/tcp        # API
+#gnubatch-api		48107/udp        # API (for wakeup messages)
+
+#            Name                pnum  t/u    comment                     alternative names
+
+@Portlist = ([gnubatch		=>	[48104, 'tcp', 'GNUbatch connection port', [qw/xibatch btsched batch/]]],
+	     [gnubatch		=>	[48104, 'udp', 'GNUbatch probe port', [qw/xibatch btsched batch/]]],
+	     ["gnubatch-feeder"	=>	[48105, 'tcp', 'GNUbatch feeder port', [qw/btq/]]],
+	     ["gnubatch-netsrv"	=>	[48106, 'tcp', 'GNUbatch external job submission', [qw/xbnetsrv/]]],
+	     ["gnubatch-netsrv"	=>	[48106, 'udp', 'GNUbatch client access', [qw/xbnetsrv/]]],
+	     ["gnubatch-api"	=>	[48107, 'tcp', 'GNUbatch API', [qw/xbapi/]]],
+	     ["gnubatch-api"	=>	[48107, 'udp', 'GNUbatch API wakeup', [qw/xbapi/]]]);
+
+# Make lookup for that lot
+
+for my $p (@Portlist)  {
+    my $name = $p->[0];
+    my $dets = $p->[1];
+    my $pnum = $dets->[0];
+    my $istcp = $dets->[1] eq 'tcp';
+    my @altnames = @{$dets->[3]};
+
+    my $v = { NAME => $name, PORT => $pnum, LIST => $p, COMMENT => $dets->[2], ALIAS => \@altnames };
+
+    if  ($istcp)  {
+	$mtcpnames{$name} = $v;
+	$mtcpports{$pnum} = $v;
+	for my $a (@altnames) {
+	    $mtcpnames{$a} = $v;
+	}
+    }
+    else  {
+	$mudpnames{$name} = $v;
+	$mudpports{$pnum} = $v;
+	for my $a (@altnames) {
+	    $mudpnames{$a} = $v;
+	}
+    }
+}
+
+# Read in the services file
+
+while (my ($name,$aliases,$port,$proto) = getservent)  {
+    if  ((lc $proto) eq 'tcp')  {
+	my $mp = $mtcpnames{$name};
+	if  ($mp)  {
+	    $mp->{HAD} = 1;
+	    $had++;
+	    push @tcpnconflict, {EXP => $mp, READ => $port} if $port != $mp->{PORT};
+	}
+	else  {
+	    $mp = $mtcpports{$port};
+	    push @tcppconflict, {EXP => $mp, READ => $name} if $mp;
+	}
+    }
+    else  {
+	my $mp = $mudpnames{$name};
+	if  ($mp)  {
+	    $mp->{HAD} = 1;
+	    $had++;
+	    push @udpnconflict, {EXP => $mp, READ => $port} if $port != $mp->{PORT};
+	}
+	else  {
+	    $mp = $mudpports{$port};
+	    push @udppconflict, {EXP => $mp, READ => $name} if $mp;
+	}
+    }
+}
+endservent;
+
+# If we had any check we had all of them
+
+if  ($had != 0)  {
+    if  ($had != $#Portlist + 1)  {
+	$errors++;
+	print "Warning - service(s) are missing\n";
+	for my $p (@Portlist)  {
+	    my $name = $p->[0];
+	    my $dets = $p->[1];
+	    my $pnum = $dets->[0];
+	    my $istcp = $dets->[1] eq 'tcp';
+	    if  ($istcp)  {
+		my $mp = $mtcpnames{$name};
+		print "Tcp port $name\n" unless $mp->{HAD};
+	    }
+	    else  {
+		my $mp = $mudpnames{$name};
+		print "Udp port $name\n" unless $mp->{HAD};
+	    }
+	}
+    }
+}
+
+if  (@tcpnconflict || @tcppconflict || @udpnconflict || @udppconflict)  {
+    for my $c (@tcpnconflict)  {
+	my $name = $c->{EXP}->{NAME};
+	my $eport = $c->{EXP}->{PORT};
+	my $rport = $c->{READ};
+	print "Unexpected TCP port number $rport for $name expecting $eport\n";
+	$warnings++;
+    }
+    for my $c (@tcppconflict)  {
+	my $name = $c->{EXP}->{NAME};
+	my $eport = $c->{EXP}->{PORT};
+	my $rname = $c->{READ};
+	print "TCP port $eport in use by $rname expecting to use it for $name\n";
+	$warnings++;
+    }
+    for my $c (@udpnconflict)  {
+	my $name = $c->{EXP}->{NAME};
+	my $eport = $c->{EXP}->{PORT};
+	my $rport = $c->{READ};
+	print "Unexpected UDP port number $rport for $name expecting $eport\n";
+	$warnings++;
+    }
+    for my $c (@udppconflict)  {
+	my $name = $c->{EXP}->{NAME};
+	my $eport = $c->{EXP}->{PORT};
+	my $rname = $c->{READ};
+	print "UDP port $eport in use by $rname expecting to use it for $name\n";
+	$warnings++;
+    }
+}
+
+if ($errors)  {
+    print "Aborting due to $errors error(s)\n";
+    exit 10;
+}
+
+unless  ($had)  {
+    open(SRV, ">>/etc/services") or die "Cannot open services file\n";
+    print SRV "# GNUbatch services\n";
+    for my $p (@Portlist)  {
+	my $name = $p->[0];
+	my $dets = $p->[1];
+	my $pnum = $dets->[0];
+	my $proto = $dets->[1];
+	my $comment = $dets->[2];
+	my @altnames = @{$dets->[3]};
+	print SRV "$name\t$pnum/$proto ", join(' ', @altnames), " #$comment\n";
+    }
+    close SRV;
+}
+
+unless (-f "@sysconfdir@/gnubatch-hosts")  {
+    my $hn = `hostname`;
+    chop($hn);
+    my $he = gethostbyname($hn);
+    my $ha = inet_ntoa($he);
+    unless ($ha =~ /^127\./)  {
+	if  (open(HF, ">/@sysconfdir@/gnubatch-hosts"))  {
+	    my $lt = localtime;
+	    print HF "# Host file created on $lt\n\n";
+	    print HF "localaddress\t$ha\n";
+	    close HF;
+	}
+    }
+}
+
+
+system("/usr/bin/gbch-uchange -R");
+$wai=`who am i`;
+chop $wai;
+$wai =~ s/ .*//;
+system("/usr/bin/gbch-uchange -p ALL $wai");
+
+EOF
+if [ $? -ne 0 ]
+then
+    ec=$?
+    echo Exiting as perl script failed.
+    exit $ec
+fi
+}
+
+case "$1" in
+    configure)
+	ldconfig
+	fixperms
+	installnet
+    ;;
+
+    abort-upgrade|abort-remove|abort-deconfigure)
+    ;;
+
+    *)
+        echo "postinst called with unknown argument \`$1'" >&2
+        exit 1
+    ;;
+esac
+
+# dh_installdeb will replace this with shell code automatically
+# generated by other debhelper scripts.
+
+#DEBHELPER#
+
+exit 0
+
+

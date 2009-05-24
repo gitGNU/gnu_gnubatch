@@ -51,7 +51,7 @@ FILE	*Cfile;
 
 HelpaltRef	montypes, filetypes;
 
-#ifdef	SHAREDLIBS
+/* Satisfy sharedlibs dependencies */
 #include "bjparam.h"
 #include "cmdint.h"
 #include "btconst.h"
@@ -64,15 +64,13 @@ HelpaltRef	montypes, filetypes;
 #include "gtk_lib.h"
 
 int		Ctrl_chan;
-long		mymtype;
 uid_t		Daemuid;
 ULONG		Fileprivs;
-HelpaltRef	repunit, ifnposses, days_abbrev;
 char		*Args[1], *exitcodename, *signalname;
 BtuserRef	mypriv;
 struct		jshm_info	Job_seg;
 char		*Restru, *Restrg, *jobqueue;
-#endif
+/* End of shared libs dependencies */
 
 void  nomem(const char *fl, const int ln)
 {

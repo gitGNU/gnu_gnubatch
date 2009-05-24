@@ -67,17 +67,14 @@ uid_t	Daemuid,
 gid_t	Realgid;
 
 BtuserRef	mypriv;
-long		mymtype;
 
 char	*jobqueue,		/* Not actually used */
 	*Restru,
 	*Restrg;
 
-#ifdef	SHAREDLIBS
-#include "helpalt.h"
-HelpaltRef	repunit, ifnposses, days_abbrev;
+/* Satisfy sharedlibs dependencies */
 char		*exitcodename, *signalname, *Args[1];
-#endif
+/* End of shared libs dependencies */
 
 void  nomem(const char *fl, const int ln)
 {

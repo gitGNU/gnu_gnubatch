@@ -1,0 +1,54 @@
+#
+#	Doc files Makefile
+#
+#   Copyright 2009 Free Software Foundation, Inc.
+#
+#  This program is free software: you can redistribute it and/or modify
+#  it under the terms of the GNU General Public License as published by
+#  the Free Software Foundation, either version 3 of the License, or
+#  (at your option) any later version.
+#
+#  This program is distributed in the hope that it will be useful,
+#  but WITHOUT ANY WARRANTY; without even the implied warranty of
+#  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#  GNU General Public License for more details.
+#
+#   You should have received a copy of the GNU General Public License
+#  along with this program.  If not, see <http://www.gnu.org/licenses/>.
+#
+
+SHELL		=	/bin/sh
+@SET_MAKE@
+BASE		=	..
+PARENT		=	..
+prefix		=	@prefix@
+exec_prefix	=	@exec_prefix@
+MANDIR		=	$(DESTDIR)@mandir@
+PDFDIR		=	$(DESTDIR)@pdfdir@
+INSTALL		=	@INSTALL@
+INSTALL_DATA	=	@INSTALL_DATA@
+STARTLINKS	=	conn disconn dst
+
+all:  manpages pdfdocs
+
+manpages:
+	# Currently don't do anything
+
+pdfdocs:
+	# Currently don't do anything
+
+install install-strip: all
+	$(INSTALL_DATA) poddoc/man/*.1 $(MANDIR)/man1
+	$(INSTALL_DATA) poddoc/man/*.3 $(MANDIR)/man3
+	$(INSTALL_DATA) poddoc/man/*.5 $(MANDIR)/man5
+	$(INSTALL_DATA) poddoc/man/*.8 $(MANDIR)/man8
+	cd $(MANDIR)/man1; for p in $(STARTLINKS); do ln -s gbch-start.1 gbch-$$p.1; done
+	cd $(MANDIR)/man3; ln -s gbatch_jobfind.3 gbatch_jobfindslot.3
+	cd $(MANDIR)/man3; ln -s gbatch_varfind.3 gbatch_varfindslot.3
+	$(INSTALL_DATA) pdf/*.pdf $(PDFDIR)
+
+clean:
+	# Currently don't do anything
+
+distclean:	clean
+	$(RM) Makefile
