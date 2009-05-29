@@ -2,7 +2,7 @@ Source: gnubatch
 Section: net
 Priority: optional
 Maintainer: John M Collins <jmc@xisl.com>
-Build-Depends: debhelper (>= 7), autotools-dev
+Build-Depends: debhelper (>= 7), autotools-dev, libtool
 Standards-Version: 3.7.3
 Homepage: http://www.gnu.org/software/gnubatch
 
@@ -15,11 +15,12 @@ Description: A network-based print spooler
 
 Package: gnubatch-doc
 Architecture: all
+Section: doc
 Description: Documentation for Gnubatch
  PDF documentation for Gnubatch
 
 Package: gnubatch-dev
 Architecture: any
+Depends: gnubatch (= ${binary:Version})
 Description: API development library for GNUbatch
  Consists of API library and include
-
