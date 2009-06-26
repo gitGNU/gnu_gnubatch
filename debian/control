@@ -3,7 +3,7 @@ Section: net
 Priority: optional
 Maintainer: John M Collins <jmc@xisl.com>
 Build-Depends: debhelper (>= 7), autotools-dev, libtool
-Standards-Version: 3.7.3
+Standards-Version: 3.8.0
 Homepage: http://www.gnu.org/software/gnubatch
 
 Package: gnubatch
