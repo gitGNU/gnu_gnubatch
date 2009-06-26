@@ -68,28 +68,25 @@ install: build
 	dh_testdir
 	dh_testroot
 	dh_clean -k 
-	dh_installdirs
+	dh_installdirs -Pdebian/tmp -pgnubatch
 
 	# Add here commands to install the package into debian/gnubatch.
-	$(MAKE) DESTDIR=$(CURDIR)/debian/gnubatch BATCHUSER=root datarootdir=/usr/share STAGED_INSTALL=true install
+	$(MAKE) DESTDIR=$(CURDIR)/debian/tmp BATCHUSER=root datarootdir=/usr/share STAGED_INSTALL=true install
+	# Get rid of remote CGI bins for now as they depend on separated API library.
+	rm -f $(CURDIR)/debian/gnubatch/usr/lib/gnubatch/cgi-bin/r*
 
 # Build architecture-independent files here.
 binary-indep: build install
-	$(CURDIR)/debian/cppack gnubatch-doc
+	:
 
 # Build architecture-dependent files here.
 binary-arch: build install
-	$(CURDIR)/debian/cppack gnubatch-dev
-# Remove directories now empty
-	rmdir $(CURDIR)/debian/gnubatch/usr/include $(CURDIR)/debian/gnubatch/usr/share/man/man3
-# Get rid of remote CGI bins for now as they depend on separated API library.
-	rm -f $(CURDIR)/debian/gnubatch/usr/lib/gnubatch/cgi-bin/r*
 	dh_testdir
 	dh_testroot
 	dh_installchangelogs 
 	dh_installdocs
 	dh_installexamples
-#	dh_install
+	dh_install --fail-missing
 #	dh_installmenu
 #	dh_installdebconf	
 #	dh_installlogrotate
@@ -106,11 +103,9 @@ binary-arch: build install
 	dh_compress
 	dh_fixperms
 #	dh_perl
-#	dh_makeshlibs
+	dh_makeshlibs
 	dh_installdeb
 	dh_shlibdeps
-	install -m 644 $(CURDIR)/debian/shlibs.gnubatch $(CURDIR)/debian/gnubatch/DEBIAN/shlibs
-	install -m 644 $(CURDIR)/debian/shlibs.gnubatch-dev $(CURDIR)/debian/gnubatch-dev/DEBIAN/shlibs
 	dh_gencontrol
 	dh_md5sums
 	dh_builddeb
