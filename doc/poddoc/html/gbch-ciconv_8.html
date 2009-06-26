@@ -9,8 +9,10 @@
 
 <body style="background-color: white">
 
-<p><a name="__index__"></a></p>
+
 <!-- INDEX BEGIN -->
+<div name="index">
+<p><a name="__index__"></a></p>
 <!--
 
 <ul>
@@ -23,7 +25,11 @@
 	<li><a href="#copyright">COPYRIGHT</a></li>
 	<li><a href="#author">AUTHOR</a></li>
 </ul>
+
 -->
+
+
+</div>
 <!-- INDEX END -->
 
 <p>
@@ -57,87 +63,71 @@ relates to.</p>
 <p>In addition to options, two arguments are always supplied to
 <strong>gbch-cvlist</strong>.</p>
 <dl>
-<dt><strong><a name="item_command_interpreter_list_file">Command interpreter list file</a></strong>
+<dt><strong><a name="command_interpreter_list_file" class="item">Command interpreter list file</a></strong></dt>
 
 <dd>
-<p>This is the file containing the attributes of the variables, <em>cifile</em>
+<p>This is the file containing the attributes of the variables, <em class="file">cifile</em>
 in the batch spool directory, or as relocated by re-specifying
 <code>SPOOLDIR</code>.</p>
 </dd>
-</li>
-<dt><strong><a name="item_output_file">Output file</a></strong>
+<dt><strong><a name="output_file" class="item">Output file</a></strong></dt>
 
 <dd>
 <p>This file is created by <strong>gbch-ciconv</strong> to contain the executable shell
 script, containing gbch-cichange(1) commands, which may be used to
 recreate the command interpreters.</p>
 </dd>
-</li>
 </dl>
 <p>
 </p>
 <hr />
 <h1><a name="options">OPTIONS</a></h1>
 <dl>
-<dt><strong><a name="item__2dd_directory">-D <em>directory</em></a></strong>
+<dt><strong><a name="d_directory" class="item">-D <em>directory</em></a></strong></dt>
 
 <dd>
 <p>specifies the source directory for the command interpreter file. It
 can be specified as <code>$SPOOLDIR</code> or <code>${SPOOLDIR-/var/spool/gnubatch}</code>
-etc and the environment and/or <em>gnubatch.conf</em> will be interrogated
+etc and the environment and/or <em class="file">gnubatch.conf</em> will be interrogated
 to interpolate the value of the environment variable given.</p>
-</dd>
-<dd>
 <p>If you use this, don't forget to put single quotes around it thus:</p>
-</dd>
-<dd>
 <pre>
  gbch-ciconv -D '${SPOOLDIR-/var/spool/gnubatch}' ...</pre>
-</dd>
-<dd>
 <p>otherwise the shell will try to interpret the <code>$</code> construct and not
 <strong>gbch-ciconv</strong>.</p>
 </dd>
-</li>
-<dt><strong><a name="item__2de_n">-e <em>n</em></a></strong>
+<dt><strong><a name="e_n" class="item">-e <em>n</em></a></strong></dt>
 
 <dd>
 <p>Tolerate <em>n</em> errors of the kinds denoted by the other options before
 giving up trying to convert the file.</p>
 </dd>
-</li>
-<dt><strong><a name="item__2df">-f</a></strong>
+<dt><strong><a name="f" class="item">-f</a></strong></dt>
 
 <dd>
 <p>Ignore format errors in the saved command interpreter file up to the
 limit of errors given in the <strong>-e</strong> option.</p>
 </dd>
-</li>
-<dt><strong><a name="item__2ds">-s</a></strong>
+<dt><strong><a name="s" class="item">-s</a></strong></dt>
 
 <dd>
 <p>Ignore file size errors in the saved command interpreter file (up to
 the number of total errors given by the <strong>-e</strong> option).</p>
 </dd>
-</li>
-<dt><strong><a name="item__2du">-u</a></strong>
+<dt><strong><a name="u" class="item">-u</a></strong></dt>
 
 <dd>
 <p>Do not check user names (not used, but included for consistency with
 gbch-cjlist(8) and gbch-cvlist(8)).</p>
 </dd>
-</li>
-<dt><strong><a name="item__2dv_number">-v <em>number</em></a></strong>
+<dt><strong><a name="v_number" class="item">-v <em>number</em></a></strong></dt>
 
 <dd>
 <p>Tell <strong>gbch-ciconv</strong> that the job file is for release <em>number</em> of
 <strong>GNUbatch</strong>, where <em>number</em> is 4 to 6.</p>
-</dd>
-<dd>
 <p>This may be necessary where the command interpreter file is corrupted
 and <strong>gbch-ciconv</strong> cannot guess what is meant.</p>
 </dd>
-</li>
 </dl>
 <p>
 </p>

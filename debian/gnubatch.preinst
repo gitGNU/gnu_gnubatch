@@ -20,8 +20,8 @@ Uid=51
 
 case "$1" in
     install|upgrade)
-	if grep -q "^$Username:" /etc/passwd; then :; else
-	    if grep -q "^$Groupname:" /etc/group; then :; else Groupname=root; fi
+	if ! grep -q "^$Username:" /etc/passwd; then
+	    grep -q "^$Groupname:" /etc/group || Groupname=root
 	    while grep -q "^[^:]*:[^:]*:$Uid:" /etc/passwd; do Uid=`expr $Uid + 1`; done
 	    useradd -c 'GNUbatch system user' -d $Homedir -g $Groupname -u $Uid -r -o $Username
 	fi

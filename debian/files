@@ -1,3 +1,3 @@
 gnubatch_1.2-1_amd64.deb net optional
-gnubatch-doc_1.2-1_all.deb net optional
-gnubatch-dev_1.2-1_amd64.deb net optional
+gnubatch-doc_1.2-1_all.deb doc optional
+libgnubatch-1-1_1.2-1_amd64.deb net optional

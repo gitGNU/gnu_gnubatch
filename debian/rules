@@ -32,13 +32,15 @@ endif
 
 config.status: configure
 	dh_testdir
+# Commented this out as the config.sub and config.guess copied are older
+# than the ones we have
 	# Add here commands to configure the package.
-ifneq "$(wildcard /usr/share/misc/config.sub)" ""
-	cp -f /usr/share/misc/config.sub config.sub
-endif
-ifneq "$(wildcard /usr/share/misc/config.guess)" ""
-	cp -f /usr/share/misc/config.guess config.guess
-endif
+#ifneq "$(wildcard /usr/share/misc/config.sub)" ""
+#	cp -f /usr/share/misc/config.sub config.sub
+#endif
+#ifneq "$(wildcard /usr/share/misc/config.guess)" ""
+#	cp -f /usr/share/misc/config.guess config.guess
+#endif
 	./configure $(CROSS) --prefix=/usr --enable-sharedlibs --sysconfdir=/etc --localstatedir=/var/spool \
 	--libexecdir='$${exec_prefix}/lib' --datarootdir=/usr/share --pdfdir=/usr/share/doc/gnubatch CFLAGS="$(CFLAGS)" LDFLAGS="-Wl,-z,defs"
 
@@ -60,7 +62,8 @@ clean:
 
 	# Add here commands to clean up after the build process.
 	[ ! -f Makefile ] || $(MAKE) distclean
-	rm -f config.sub config.guess
+#	Remove this
+#	rm -f config.sub config.guess
 
 	dh_clean 
 
@@ -72,8 +75,6 @@ install: build
 
 	# Add here commands to install the package into debian/gnubatch.
 	$(MAKE) DESTDIR=$(CURDIR)/debian/tmp BATCHUSER=root datarootdir=/usr/share STAGED_INSTALL=true install
-	# Get rid of remote CGI bins for now as they depend on separated API library.
-	rm -f $(CURDIR)/debian/gnubatch/usr/lib/gnubatch/cgi-bin/r*
 
 # Build architecture-independent files here.
 binary-indep: build install
@@ -81,6 +82,8 @@ binary-indep: build install
 
 # Build architecture-dependent files here.
 binary-arch: build install
+# Get rid of remote CGI bins for now as they depend on separated API library.
+	rm -f $(CURDIR)/debian/gnubatch/usr/lib/gnubatch/cgi-bin/r*
 	dh_testdir
 	dh_testroot
 	dh_installchangelogs 

@@ -9,8 +9,10 @@
 
 <body style="background-color: white">
 
-<p><a name="__index__"></a></p>
+
 <!-- INDEX BEGIN -->
+<div name="index">
+<p><a name="__index__"></a></p>
 <!--
 
 <ul>
@@ -26,7 +28,11 @@
 	<li><a href="#copyright">COPYRIGHT</a></li>
 	<li><a href="#author">AUTHOR</a></li>
 </ul>
+
 -->
+
+
+</div>
 <!-- INDEX END -->
 
 <p>
@@ -60,138 +66,122 @@ have <em>write admin file</em> permission to do this.</p>
 <hr />
 <h1><a name="options">OPTIONS</a></h1>
 <p>Note that the order of treatment, letters and keywords described below
-may be modified by editing the file <em>btrest.help</em> - see btsyntax(5).</p>
-<p>The environment variable on which options are supplied is <a href="#item_gbch_user"><code>GBCH_USER</code></a> and the
-environment variable to specify the help file is <a href="#item_btuserconf"><code>BTUSERCONF</code></a>.</p>
+may be modified by editing the file <em class="file">btrest.help</em> - see <code>btsyntax(5)</code>.</p>
+<p>The environment variable on which options are supplied is <a href="#gbch_user"><code>GBCH_USER</code></a> and the
+environment variable to specify the help file is <a href="#btuserconf"><code>BTUSERCONF</code></a>.</p>
 <p>Certain commands available on-screen enable many of these options to
 be changed and saved in configuration files.</p>
 <dl>
-<dt><strong><a name="item__2d_3f_or__2bexplain">-? or +explain</a></strong>
+<dt><strong><a name="or_explain" class="item">-? or +explain</a></strong></dt>
 
 <dd>
 <p>Causes a summary of the other options to be displayed without taking
 further action.</p>
 </dd>
-</li>
-<dt><strong><a name="item__2db_or__2bno_2dhelp_2dbox">-B or +no-help-box</a></strong>
+<dt><strong><a name="b_or_no_help_box" class="item">-B or +no-help-box</a></strong></dt>
 
 <dd>
 <p>Put help messages in inverse video rather than in a box when operating
 in interactive mode. This is the default case.</p>
 </dd>
-</li>
-<dt><strong><a name="item__2db_or__2bhelp_2dbox">-b or +help-box</a></strong>
+<dt><strong><a name="b_or_help_box" class="item">-b or +help-box</a></strong></dt>
 
 <dd>
 <p>Put help messages in a box rather than displaying inverse video when
 operating in interactive mode.</p>
 </dd>
-</li>
-<dt><strong><a name="item__2dd_or__2bdisplay_2donly">-d or +display-only</a></strong>
+<dt><strong><a name="d_or_display_only" class="item">-d or +display-only</a></strong></dt>
 
 <dd>
 <p>Is the default. A list of permissions is output to the standard
 output.</p>
 </dd>
-</li>
-<dt><strong><a name="item__2de_or__2bno_2derror_2dbox">-E or +no-error-box</a></strong>
+<dt><strong><a name="e_or_no_error_box" class="item">-E or +no-error-box</a></strong></dt>
 
 <dd>
 <p>Put error messages in inverse video rather than in a box when
 operating in interactive mode. This is the default case.</p>
 </dd>
-</li>
-<dt><strong><a name="item__2de_or__2berror_2dbox">-e or +error-box</a></strong>
+<dt><strong><a name="e_or_error_box" class="item">-e or +error-box</a></strong></dt>
 
 <dd>
 <p>Put error messages in a box rather than displaying inverse video when
 operating in interactive mode.</p>
 </dd>
-</li>
-<dt><strong><a name="item__2dg_or__2bgroup_2dname_2dsort">-g or +group-name-sort</a></strong>
+<dt><strong><a name="g_or_group_name_sort" class="item">-g or +group-name-sort</a></strong></dt>
 
 <dd>
 <p>Sort users by group name, then user name within primary group. This is
 only relevant to <strong>-v</strong> or <strong>-i</strong> options.</p>
 </dd>
-</li>
-<dt><strong><a name="item__2dh_or__2bkeep_2dchar_2dhelp">-H or +keep-char-help</a></strong>
+<dt><strong><a name="h_or_keep_char_help" class="item">-H or +keep-char-help</a></strong></dt>
 
 <dd>
 <p>When displaying a help screen in interactive mode, interpret the next
 key press as a command as well as clearing the help screen.</p>
 </dd>
-</li>
-<dt><strong><a name="item__2dh_or__2blose_2dchar_2dhelp">-h or +lose-char-help</a></strong>
+<dt><strong><a name="h_or_lose_char_help" class="item">-h or +lose-char-help</a></strong></dt>
 
 <dd>
 <p>Discard whatever key press is made to clear a help screen when in
 interactive mode.</p>
 </dd>
-</li>
-<dt><strong><a name="item__2di_or__2bupdate_2dusers">-i or +update-users</a></strong>
+<dt><strong><a name="i_or_update_users" class="item">-i or +update-users</a></strong></dt>
 
 <dd>
 <p>View and update the list of users. This option requires <em>write admin
 file</em> privilege.</p>
 </dd>
-</li>
-<dt><strong><a name="item__2dm_or__2bset_2ddefault_2dmodes">-m or +set-default-modes</a></strong>
+<dt><strong><a name="m_or_set_default_modes" class="item">-m or +set-default-modes</a></strong></dt>
 
 <dd>
 <p>Interactively set the default modes for the invoking user. This option
 requires <em>change default modes</em> privilege.</p>
 </dd>
-</li>
-<dt><strong><a name="item__2dn_or__2bnumeric_2duser_2dsort">-n or +numeric-user-sort</a></strong>
+<dt><strong><a name="n_or_numeric_user_sort" class="item">-n or +numeric-user-sort</a></strong></dt>
 
 <dd>
 <p>Sort users by numeric userid (default).</p>
 </dd>
-</li>
-<dt><strong><a name="item__2du_or__2buser_2dname_2dsort">-u or +user-name-sort</a></strong>
+<dt><strong><a name="u_or_user_name_sort" class="item">-u or +user-name-sort</a></strong></dt>
 
 <dd>
 <p>Sort users by user name.</p>
 </dd>
-</li>
-<dt><strong><a name="item__2dv_or__2bview_2dusers">-v or +view-users</a></strong>
+<dt><strong><a name="v_or_view_users" class="item">-v or +view-users</a></strong></dt>
 
 <dd>
 <p>View in read-only mode the list of users and permissions. This
 requires <em>read admin file</em> privilege.</p>
 </dd>
-</li>
 </dl>
 <p>
 </p>
 <hr />
 <h1><a name="files">FILES</a></h1>
-<p><em>~/.gnubatch</em>
+<p><em class="file">~/.gnubatch</em>
 configuration file (home directory)</p>
-<p><em>.gnubatch</em>
+<p><em class="file">.gnubatch</em>
 configuration file (current directory)</p>
-<p><em>btuser.help</em>
+<p><em class="file">btuser.help</em>
 message file</p>
-<p><em>btufile</em>
+<p><em class="file">btufile</em>
 user control file.</p>
 <p>
 </p>
 <hr />
 <h1><a name="environment">ENVIRONMENT</a></h1>
 <dl>
-<dt><strong><a name="item_gbch_user">GBCH_USER</a></strong>
+<dt><strong><a name="gbch_user" class="item">GBCH_USER</a></strong></dt>
 
 <dd>
 <p>space-separated options to override defaults.</p>
 </dd>
-</li>
-<dt><strong><a name="item_btuserconf">BTUSERCONF</a></strong>
+<dt><strong><a name="btuserconf" class="item">BTUSERCONF</a></strong></dt>
 
 <dd>
 <p>location of alternative help file.</p>
 </dd>
-</li>
 </dl>
 <p>
 </p>
@@ -206,7 +196,7 @@ gbch-uconv(8).</p>
 <hr />
 <h1><a name="diagnostics">DIAGNOSTICS</a></h1>
 <p>Various diagnostics are read and printed as required from the message
-file <em>btuser.help</em>.</p>
+file <em class="file">btuser.help</em>.</p>
 <p>
 </p>
 <hr />

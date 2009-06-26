@@ -9,8 +9,10 @@
 
 <body style="background-color: white">
 
-<p><a name="__index__"></a></p>
+
 <!-- INDEX BEGIN -->
+<div name="index">
+<p><a name="__index__"></a></p>
 <!--
 
 <ul>
@@ -23,7 +25,11 @@
 	<li><a href="#copyright">COPYRIGHT</a></li>
 	<li><a href="#author">AUTHOR</a></li>
 </ul>
+
 -->
+
+
+</div>
 <!-- INDEX END -->
 
 <p>
@@ -46,28 +52,25 @@
 <p>The function <strong>gbatch_varlist</strong> is used to obtain a vector of slots which
 can be used to access the details of variables readable by the user.</p>
 <p><em>fd</em> is a file descriptor which was previously returned by a
-successful call to gbatch_open(3).</p>
+successful call to <code>gbatch_open(3)</code>.</p>
 <p><em>flags</em> is zero, or a logical OR of one or more of the following values</p>
 <dl>
-<dt><strong><a name="item_gbatch_flag_localonly">GBATCH_FLAG_LOCALONLY</a></strong>
+<dt><strong><a name="gbatch_flag_localonly" class="item">GBATCH_FLAG_LOCALONLY</a></strong></dt>
 
 <dd>
 <p>Ignore remote variables/hosts, i.e. not local to the server, not the client.</p>
 </dd>
-</li>
-<dt><strong><a name="item_gbatch_flag_useronly">GBATCH_FLAG_USERONLY</a></strong>
+<dt><strong><a name="gbatch_flag_useronly" class="item">GBATCH_FLAG_USERONLY</a></strong></dt>
 
 <dd>
 <p>Restrict to the user only.</p>
 </dd>
-</li>
-<dt><strong><a name="item_gbatch_flag_grouponly">GBATCH_FLAG_GROUPONLY</a></strong>
+<dt><strong><a name="gbatch_flag_grouponly" class="item">GBATCH_FLAG_GROUPONLY</a></strong></dt>
 
 <dd>
-<p>Restrict to the current group (possibly as selected by <code>gbatch_newgrp(3))</code>
+<p>Restrict to the current group (possibly as selected by gbatch_newgrp(3))
 only.</p>
 </dd>
-</li>
 </dl>
 <p><em>numvars</em> is a pointer to an integer which will contain the number of variables in the list.</p>
 <p><em>slots</em> is a pointer to an array of slots. The memory used by this
@@ -82,19 +85,19 @@ defined in the include file \fBgbatch.h\fR.</p>
 </p>
 <hr />
 <h1><a name="see_also">SEE ALSO</a></h1>
-<p>gbatch_joblist(3),
-gbatch_newgrp(3),
-gbatch_varadd(3),
-gbatch_varchcomm(3),
-gbatch_varchgrp(3),
-gbatch_varchmod(3),
-gbatch_varchown(3),
-gbatch_vardel(3),
-gbatch_varfind(3),
-gbatch_varmon(3),
-gbatch_varread(3),
-gbatch_varrename(3),
-gbatch_varupd(3).</p>
+<p><code>gbatch_joblist(3)</code>,
+<code>gbatch_newgrp(3)</code>,
+<code>gbatch_varadd(3)</code>,
+<code>gbatch_varchcomm(3)</code>,
+<code>gbatch_varchgrp(3)</code>,
+<code>gbatch_varchmod(3)</code>,
+<code>gbatch_varchown(3)</code>,
+<code>gbatch_vardel(3)</code>,
+<code>gbatch_varfind(3)</code>,
+<code>gbatch_varmon(3)</code>,
+<code>gbatch_varread(3)</code>,
+<code>gbatch_varrename(3)</code>,
+<code>gbatch_varupd(3)</code>.</p>
 <p>
 </p>
 <hr />

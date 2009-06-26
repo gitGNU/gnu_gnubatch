@@ -1,5 +1,5 @@
 #!/bin/sh
-# postinst script for gnubatch-dev
+# postinst script for libgnubatch
 #
 #   Copyright 2009 Free Software Foundation, Inc.
 #

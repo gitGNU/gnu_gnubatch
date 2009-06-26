@@ -75,8 +75,11 @@ case "$1" in
 
   stop)
 	echo -n "Stopping $DESC: "
-	/usr/bin/gbch-quit -y 2>/dev/null
-	echo "$NAME."
+	if /usr/bin/gbch-quit -y 2>/dev/null; then
+	    echo "$NAME."
+	else
+	    echo " ERROR."
+	fi
 	;;
 
   force-stop)

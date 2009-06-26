@@ -9,8 +9,10 @@
 
 <body style="background-color: white">
 
-<p><a name="__index__"></a></p>
+
 <!-- INDEX BEGIN -->
+<div name="index">
+<p><a name="__index__"></a></p>
 <!--
 
 <ul>
@@ -33,7 +35,11 @@
 	<li><a href="#copyright">COPYRIGHT</a></li>
 	<li><a href="#author">AUTHOR</a></li>
 </ul>
+
 -->
+
+
+</div>
 <!-- INDEX END -->
 
 <p>
@@ -73,19 +79,18 @@ giving the job numbers as additional arguments.</p>
 <hr />
 <h1><a name="options">OPTIONS</a></h1>
 <p>Note that the order of treatment, letters and keywords described below
-may be modified by editing the file <em>btrest.help</em> -
-see btsyntax(5).</p>
-<p>The environment variable on which options are supplied is <a href="#item_gbch_jlist"><code>GBCH_JLIST</code></a> and the
-environment variable to specify the help file is <a href="#item_btrestconf"><code>BTRESTCONF</code></a>.</p>
+may be modified by editing the file <em class="file">btrest.help</em> -
+see <code>btsyntax(5)</code>.</p>
+<p>The environment variable on which options are supplied is <a href="#gbch_jlist"><code>GBCH_JLIST</code></a> and the
+environment variable to specify the help file is <a href="#btrestconf"><code>BTRESTCONF</code></a>.</p>
 <dl>
-<dt><strong><a name="item__2d_3f_or__2bexplain">-? or +explain</a></strong>
+<dt><strong><a name="or_explain" class="item">-? or +explain</a></strong></dt>
 
 <dd>
 <p>causes a summary of the other options to be displayed without taking
 further action.</p>
 </dd>
-</li>
-<dt><strong><a name="item__2db_or__2bbypass_2dmodes">-B or +bypass-modes</a></strong>
+<dt><strong><a name="b_or_bypass_modes" class="item">-B or +bypass-modes</a></strong></dt>
 
 <dd>
 <p>Disregard all modes etc and print full details. This is provided for
@@ -94,109 +99,92 @@ File</em> permission, otherwise it is silently ignored. This option is now
 deprecated as gbch-cjlist(8) is now provided for the purpose for which this
 option was implemented.</p>
 </dd>
-</li>
-<dt><strong><a name="item__2dd_or__2bdefault_2dformat">-D or +default-format</a></strong>
+<dt><strong><a name="d_or_default_format" class="item">-D or +default-format</a></strong></dt>
 
 <dd>
 <p>Revert the output format to the default format.</p>
 </dd>
-</li>
-<dt><strong><a name="item__2df_format_string_or__2bformat_format_string">-F <em>format string</em> or +format <em>format string</em></a></strong>
+<dt><strong><a name="f_format_string_or_format_format_string" class="item">-F <em>format string</em> or +format <em>format string</em></a></strong></dt>
 
 <dd>
 <p>Changes the output format to conform to the pattern given by the
 <em>format string</em>. This is further described below.</p>
 </dd>
-</li>
-<dt><strong><a name="item__2dg_group_or__2bjust_2dgroup_group">-g <em>group</em> or +just-group <em>group</em></a></strong>
+<dt><strong><a name="g_group_or_just_group_group" class="item">-g <em>group</em> or +just-group <em>group</em></a></strong></dt>
 
 <dd>
 <p>Restrict the output to jobs owned by the <em>group</em> specified, or groups
 specified with shell-like wild cards as described below. To cancel
 this argument, give a single <strong>-</strong> sign as a group name.</p>
 </dd>
-</li>
-<dt><strong><a name="item__2dh_or__2bheader">-H or +header</a></strong>
+<dt><strong><a name="h_or_header" class="item">-H or +header</a></strong></dt>
 
 <dd>
 <p>Generate a header for each column in the output.</p>
 </dd>
-</li>
-<dt><strong><a name="item__2dl_or__2blocal_2donly">-L or +local-only</a></strong>
+<dt><strong><a name="l_or_local_only" class="item">-L or +local-only</a></strong></dt>
 
 <dd>
 <p>Display only jobs local to the current host.</p>
 </dd>
-</li>
-<dt><strong><a name="item__2dl_or__2bno_2dview_2djobs">-l or +no-view-jobs</a></strong>
+<dt><strong><a name="l_or_no_view_jobs" class="item">-l or +no-view-jobs</a></strong></dt>
 
 <dd>
 <p>Cancel the <strong>-V</strong> option and view job parameters rather than job scripts.</p>
 </dd>
-</li>
-<dt><strong><a name="item__2dn_or__2bno_2dheader">-N or +no-header</a></strong>
+<dt><strong><a name="n_or_no_header" class="item">-N or +no-header</a></strong></dt>
 
 <dd>
 <p>Cancel the <strong>-H</strong> option. Do not print a header.</p>
 </dd>
-</li>
-<dt><strong><a name="item__2dn_or__2bno_2dsort">-n or +no-sort</a></strong>
+<dt><strong><a name="n_or_no_sort" class="item">-n or +no-sort</a></strong></dt>
 
 <dd>
 <p>Cancel the <strong>-s</strong> option. Do not sort the jobs into the order in which
 they will run.</p>
 </dd>
-</li>
-<dt><strong><a name="item__2dq_name_or__2bjob_2dqueue_name">-q <em>name</em> or +job-queue <em>name</em></a></strong>
+<dt><strong><a name="q_name_or_job_queue_name" class="item">-q <em>name</em> or +job-queue <em>name</em></a></strong></dt>
 
 <dd>
 <p>Restricts attention to jobs with the queue prefix <em>name</em>. The queue
 may be specified as a pattern with shell-like wild cards as described
 below. To cancel this argument, give a single <strong>-</strong> sign as a queue name.</p>
-</dd>
-<dd>
 <p>The queue prefix is deleted from the titles of jobs which are
 displayed.</p>
 </dd>
-</li>
-<dt><strong><a name="item__2dr_or__2binclude_2dall_2dremotes">-R or +include-all-remotes</a></strong>
+<dt><strong><a name="r_or_include_all_remotes" class="item">-R or +include-all-remotes</a></strong></dt>
 
 <dd>
 <p>displays jobs local to the current host and exported jobs on remote
 machines.</p>
 </dd>
-</li>
-<dt><strong><a name="item__2dr_or__2binclude_2dexec_2dremotes">-r or +include-exec-remotes</a></strong>
+<dt><strong><a name="r_or_include_exec_remotes" class="item">-r or +include-exec-remotes</a></strong></dt>
 
 <dd>
 <p>displays jobs local to the current host and jobs on remote machines
 which are remote-executable, i.e. which might <em>possibly</em> be executed
 by the current machine.</p>
 </dd>
-</li>
-<dt><strong><a name="item__2ds_or__2bshort_2dtimes">-S or +short-times</a></strong>
+<dt><strong><a name="s_or_short_times" class="item">-S or +short-times</a></strong></dt>
 
 <dd>
 <p>Displays times and dates in abbreviated form, i.e. times within the
 next 24 hours as times, otherwise dates. This option is ignored if the
 <strong>-F</strong> option is specified.</p>
 </dd>
-</li>
-<dt><strong><a name="item__2ds_or__2bsort">-s or +sort</a></strong>
+<dt><strong><a name="s_or_sort" class="item">-s or +sort</a></strong></dt>
 
 <dd>
 <p>causes the output to be sorted so that the jobs whose next execution time
 is soonest comes at the top of the list.</p>
 </dd>
-</li>
-<dt><strong><a name="item__2dt_or__2bfull_2dtimes">-T or +full-times</a></strong>
+<dt><strong><a name="t_or_full_times" class="item">-T or +full-times</a></strong></dt>
 
 <dd>
 <p>Displays times and dates in full. This option is ignored if the
 <strong>-F</strong> option is specified.</p>
 </dd>
-</li>
-<dt><strong><a name="item__2du_user__2bjust_2duser_user">-u <em>user</em> +just-user <em>user</em></a></strong>
+<dt><strong><a name="u_user_just_user_user" class="item">-u <em>user</em> +just-user <em>user</em></a></strong></dt>
 
 <dd>
 <p>Restrict the output to jobs owned by the <em>user</em> specified. The user
@@ -204,44 +192,38 @@ name may be a pattern with shell-like wild cards as described
 below. To cancel this argument, give a single <strong>-</strong> sign as a user
 name.</p>
 </dd>
-</li>
-<dt><strong><a name="item__2dv_or__2bview_2djobs">-V or +view-jobs</a></strong>
+<dt><strong><a name="v_or_view_jobs" class="item">-V or +view-jobs</a></strong></dt>
 
 <dd>
 <p>Do not display job details at all, output the scripts (input to the
 command interpreter) on standard output.</p>
 </dd>
-</li>
-<dt><strong><a name="item__2dz_or__2bno_2dnull_2dqueues">-Z or +no-null-queues</a></strong>
+<dt><strong><a name="z_or_no_null_queues" class="item">-Z or +no-null-queues</a></strong></dt>
 
 <dd>
 <p>In conjunction with the <strong>-q</strong> parameter, do not include jobs with no
 queue prefix in the list.</p>
 </dd>
-</li>
-<dt><strong><a name="item__2dz_or__2bnull_2dqueues">-z or +null-queues</a></strong>
+<dt><strong><a name="z_or_null_queues" class="item">-z or +null-queues</a></strong></dt>
 
 <dd>
 <p>In conjunction with the <strong>-q</strong> parameter, include jobs with no queue
 prefix in the list.</p>
 </dd>
-</li>
-<dt><strong><a name="item__2bfreeze_2dcurrent">+freeze-current</a></strong>
+<dt><strong><a name="freeze_current" class="item">+freeze-current</a></strong></dt>
 
 <dd>
-<p>Save all the current options in a <em>.gnubatch</em> file in the current
+<p>Save all the current options in a <em class="file">.gnubatch</em> file in the current
 directory with keyword <code>BTJLIST</code>. There is no output if this is
 specified, the options are just saved.</p>
 </dd>
-</li>
-<dt><strong><a name="item__2bfreeze_2dhome">+freeze-home</a></strong>
+<dt><strong><a name="freeze_home" class="item">+freeze-home</a></strong></dt>
 
 <dd>
-<p>Save all the current options in a <em>.gnubatch</em> file in the user's home
+<p>Save all the current options in a <em class="file">.gnubatch</em> file in the user's home
 directory with keyword <code>BTJLIST</code>. There is no output if this is
 specified, the options are just saved.</p>
 </dd>
-</li>
 </dl>
 <p>
 </p>
@@ -295,259 +277,218 @@ or spaces as required.</p>
 entry. If a header is requested, the appropriate abbreviation is
 obtained from the message file and inserted.</p>
 <dl>
-<dt><strong><a name="item___">%%</a></strong>
+<dt><strong><a name="__" class="item">%%</a></strong></dt>
 
 <dd>
 <p>Insert a single <code>%</code> character.</p>
 </dd>
-</li>
-<dt><strong><a name="item__a">%A</a></strong>
+<dt><strong><a name="_a" class="item">%A</a></strong></dt>
 
 <dd>
 <p>Insert the argument list for job separated by commas.</p>
 </dd>
-</li>
-<dt><strong><a name="item__a">%a</a></strong>
+<dt><strong><a name="_a" class="item">%a</a></strong></dt>
 
 <dd>
-<p>Insert the ``days to avoid'' separated by commas.</p>
+<p>Insert the &quot;days to avoid&quot; separated by commas.</p>
 </dd>
-</li>
-<dt><strong><a name="item__b">%b</a></strong>
+<dt><strong><a name="_b" class="item">%b</a></strong></dt>
 
 <dd>
 <p>Display job start time or time job last started.</p>
 </dd>
-</li>
-<dt><strong><a name="item__c">%C</a></strong>
+<dt><strong><a name="_c" class="item">%C</a></strong></dt>
 
 <dd>
 <p>Display conditions for job in full, showing operations and constants.</p>
 </dd>
-</li>
-<dt><strong><a name="item__c">%c</a></strong>
+<dt><strong><a name="_c" class="item">%c</a></strong></dt>
 
 <dd>
 <p>Display conditions for job with variable names only.</p>
 </dd>
-</li>
-<dt><strong><a name="item__d">%D</a></strong>
+<dt><strong><a name="_d" class="item">%D</a></strong></dt>
 
 <dd>
 <p>Working directory for job.</p>
 </dd>
-</li>
-<dt><strong><a name="item__d">%d</a></strong>
+<dt><strong><a name="_d" class="item">%d</a></strong></dt>
 
 <dd>
 <p>Delete time for job (in hours).</p>
 </dd>
-</li>
-<dt><strong><a name="item__e">%E</a></strong>
+<dt><strong><a name="_e" class="item">%E</a></strong></dt>
 
 <dd>
 <p>Environment variables for job. Note that this may make the output
 lines extremely long.</p>
 </dd>
-</li>
-<dt><strong><a name="item__e">%e</a></strong>
+<dt><strong><a name="_e" class="item">%e</a></strong></dt>
 
 <dd>
 <p><strong>Export</strong> or <strong>Rem-runnable</strong> for exported jobs.</p>
 </dd>
-</li>
-<dt><strong><a name="item__f">%f</a></strong>
+<dt><strong><a name="_f" class="item">%f</a></strong></dt>
 
 <dd>
 <p>Last time job finished, or blank if it has not run yet.</p>
 </dd>
-</li>
-<dt><strong><a name="item__g">%G</a></strong>
+<dt><strong><a name="_g" class="item">%G</a></strong></dt>
 
 <dd>
 <p>Group owner of job.</p>
 </dd>
-</li>
-<dt><strong><a name="item__g">%g</a></strong>
+<dt><strong><a name="_g" class="item">%g</a></strong></dt>
 
 <dd>
 <p>Grace time for job (time after maximum run time to allow job to finish
 before final kill) in minutes and seconds.</p>
 </dd>
-</li>
-<dt><strong><a name="item__h">%H</a></strong>
+<dt><strong><a name="_h" class="item">%H</a></strong></dt>
 
 <dd>
 <p>Title of job including queue name (unless queue name restricted with
 <strong>-q</strong> option).</p>
 </dd>
-</li>
-<dt><strong><a name="item__h">%h</a></strong>
+<dt><strong><a name="_h" class="item">%h</a></strong></dt>
 
 <dd>
 <p>Title of job excluding queue name.</p>
 </dd>
-</li>
-<dt><strong><a name="item__i">%I</a></strong>
+<dt><strong><a name="_i" class="item">%I</a></strong></dt>
 
 <dd>
 <p>Command interpreter.</p>
 </dd>
-</li>
-<dt><strong><a name="item__i">%i</a></strong>
+<dt><strong><a name="_i" class="item">%i</a></strong></dt>
 
 <dd>
 <p>Process identifier if job running, otherwise blank. This is the
 process identifier on whichever processor is running the job.</p>
 </dd>
-</li>
-<dt><strong><a name="item__k">%k</a></strong>
+<dt><strong><a name="_k" class="item">%k</a></strong></dt>
 
 <dd>
 <p>Kill signal number at end of maximum run time.</p>
 </dd>
-</li>
-<dt><strong><a name="item__l">%L</a></strong>
+<dt><strong><a name="_l" class="item">%L</a></strong></dt>
 
 <dd>
 <p>Load level</p>
 </dd>
-</li>
-<dt><strong><a name="item__l">%l</a></strong>
+<dt><strong><a name="_l" class="item">%l</a></strong></dt>
 
 <dd>
 <p>Maximum run time for job, blank if not set.</p>
 </dd>
-</li>
-<dt><strong><a name="item__m">%M</a></strong>
+<dt><strong><a name="_m" class="item">%M</a></strong></dt>
 
 <dd>
 <p>Mode as a string of letters with <code>U:</code>, <code>G:</code> or <code>O:</code> prefixes as in
 <code>U:RWSMPUVGHDK,G:RSMG,O:SM</code>.</p>
 </dd>
-</li>
-<dt><strong><a name="item__m">%m</a></strong>
+<dt><strong><a name="_m" class="item">%m</a></strong></dt>
 
 <dd>
 <p>Umask as 3 octal digits.</p>
 </dd>
-</li>
-<dt><strong><a name="item__n">%N</a></strong>
+<dt><strong><a name="_n" class="item">%N</a></strong></dt>
 
 <dd>
 <p>Job number, prefixed by host name if remote.</p>
 </dd>
-</li>
-<dt><strong><a name="item__o">%O</a></strong>
+<dt><strong><a name="_o" class="item">%O</a></strong></dt>
 
 <dd>
 <p>Originating host name, possibly different if submitted via gbch-rr(1) or
 the API.</p>
 </dd>
-</li>
-<dt><strong><a name="item__o">%o</a></strong>
+<dt><strong><a name="_o" class="item">%o</a></strong></dt>
 
 <dd>
 <p>Original date or time job submitted.</p>
 </dd>
-</li>
-<dt><strong><a name="item__p">%P</a></strong>
+<dt><strong><a name="_p" class="item">%P</a></strong></dt>
 
 <dd>
 <p>Job progress code, <code>Run</code>, <code>Done</code> etc.</p>
 </dd>
-</li>
-<dt><strong><a name="item__p">%p</a></strong>
+<dt><strong><a name="_p" class="item">%p</a></strong></dt>
 
 <dd>
 <p>Priority.</p>
 </dd>
-</li>
-<dt><strong><a name="item__q">%q</a></strong>
+<dt><strong><a name="_q" class="item">%q</a></strong></dt>
 
 <dd>
 <p>Job queue name.</p>
 </dd>
-</li>
-<dt><strong><a name="item__r">%R</a></strong>
+<dt><strong><a name="_r" class="item">%R</a></strong></dt>
 
 <dd>
 <p>Redirections.</p>
 </dd>
-</li>
-<dt><strong><a name="item__r">%r</a></strong>
+<dt><strong><a name="_r" class="item">%r</a></strong></dt>
 
 <dd>
 <p>Repeat specification.</p>
 </dd>
-</li>
-<dt><strong><a name="item__s">%S</a></strong>
+<dt><strong><a name="_s" class="item">%S</a></strong></dt>
 
 <dd>
 <p>Assignments in full with operator and constant.</p>
 </dd>
-</li>
-<dt><strong><a name="item__s">%s</a></strong>
+<dt><strong><a name="_s" class="item">%s</a></strong></dt>
 
 <dd>
 <p>Assignments (variable names only).</p>
 </dd>
-</li>
-<dt><strong><a name="item__t">%T</a></strong>
+<dt><strong><a name="_t" class="item">%T</a></strong></dt>
 
 <dd>
 <p>Date and time of next execution.</p>
 </dd>
-</li>
-<dt><strong><a name="item__t">%t</a></strong>
+<dt><strong><a name="_t" class="item">%t</a></strong></dt>
 
 <dd>
 <p>Abbreviated date or time if in next 24 hours.</p>
 </dd>
-</li>
-<dt><strong><a name="item__u">%U</a></strong>
+<dt><strong><a name="_u" class="item">%U</a></strong></dt>
 
 <dd>
 <p>User name of owner.</p>
 </dd>
-</li>
-<dt><strong><a name="item__u">%u</a></strong>
+<dt><strong><a name="_u" class="item">%u</a></strong></dt>
 
 <dd>
 <p>Ulimit (hexadecimal).</p>
 </dd>
-</li>
-<dt><strong><a name="item__w">%W</a></strong>
+<dt><strong><a name="_w" class="item">%W</a></strong></dt>
 
 <dd>
 <p>Start time if running, end time if just finished, otherwise next time
 to run.</p>
 </dd>
-</li>
-<dt><strong><a name="item__x">%X</a></strong>
+<dt><strong><a name="_x" class="item">%X</a></strong></dt>
 
 <dd>
 <p>Exit code ranges</p>
 </dd>
-</li>
-<dt><strong><a name="item__x">%x</a></strong>
+<dt><strong><a name="_x" class="item">%x</a></strong></dt>
 
 <dd>
 <p>Last exit code for job.</p>
 </dd>
-</li>
-<dt><strong><a name="item__y">%Y</a></strong>
+<dt><strong><a name="_y" class="item">%Y</a></strong></dt>
 
 <dd>
-<p>If ``avoiding holidays'' is set, display holiday dates for the next year.</p>
+<p>If &quot;avoiding holidays&quot; is set, display holiday dates for the next year.</p>
 </dd>
-</li>
-<dt><strong><a name="item__y">%y</a></strong>
+<dt><strong><a name="_y" class="item">%y</a></strong></dt>
 
 <dd>
 <p>Last signal number for job.</p>
 </dd>
-</li>
 </dl>
 <p>Note that the various strings such as <strong>export</strong> etc are read from the
 message file also, so it is possible to modify them as required by the
@@ -587,35 +528,33 @@ limited information is displayed.</p>
 </p>
 <hr />
 <h1><a name="files">FILES</a></h1>
-<p><em>~/.gnubatch</em>
+<p><em class="file">~/.gnubatch</em>
 configuration file (home directory)</p>
-<p><em>.gnubatch</em>
+<p><em class="file">.gnubatch</em>
 configuration file (current directory)</p>
-<p><em>btrest.help</em>
+<p><em class="file">btrest.help</em>
 message file</p>
 <p>
 </p>
 <hr />
 <h1><a name="environment">ENVIRONMENT</a></h1>
 <dl>
-<dt><strong><a name="item_gbch_jlist">GBCH_JLIST</a></strong>
+<dt><strong><a name="gbch_jlist" class="item">GBCH_JLIST</a></strong></dt>
 
 <dd>
 <p>space-separated options to override defaults.</p>
 </dd>
-</li>
-<dt><strong><a name="item_btrestconf">BTRESTCONF</a></strong>
+<dt><strong><a name="btrestconf" class="item">BTRESTCONF</a></strong></dt>
 
 <dd>
 <p>location of alternative help file.</p>
 </dd>
-</li>
 </dl>
 <p>
 </p>
 <hr />
 <h1><a name="see_also">SEE ALSO</a></h1>
-<p>btsyntax(5),
+<p><code>btsyntax(5)</code>,
 gnubatch.conf(5),
 gnubatch.hosts(5),
 gbch-r(1),
@@ -631,7 +570,7 @@ gbch-cvlist(8).</p>
 <hr />
 <h1><a name="diagnostics">DIAGNOSTICS</a></h1>
 <p>Various diagnostics are read and printed as required from the message
-file <em>btrest.help</em>.</p>
+file <em class="file">btrest.help</em>.</p>
 <p>
 </p>
 <hr />

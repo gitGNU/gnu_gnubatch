@@ -9,8 +9,10 @@
 
 <body style="background-color: white">
 
-<p><a name="__index__"></a></p>
+
 <!-- INDEX BEGIN -->
+<div name="index">
+<p><a name="__index__"></a></p>
 <!--
 
 <ul>
@@ -28,7 +30,11 @@
 	<li><a href="#copyright">COPYRIGHT</a></li>
 	<li><a href="#author">AUTHOR</a></li>
 </ul>
+
 -->
+
+
+</div>
 <!-- INDEX END -->
 
 <p>
@@ -69,60 +75,51 @@ and 1 less than the number of redirections as given by the field
 <p>In this structure <code>fd</code> represents the file descriptor, and <code>action</code>
 gives the action required as follows:</p>
 <dl>
-<dt><strong><a name="item_rd_act_rd">RD_ACT_RD</a></strong>
+<dt><strong><a name="rd_act_rd" class="item">RD_ACT_RD</a></strong></dt>
 
 <dd>
 <p>Open file name given in <code>un.buffer</code> for reading.</p>
 </dd>
-</li>
-<dt><strong><a name="item_rd_act_wrt">RD_ACT_WRT</a></strong>
+<dt><strong><a name="rd_act_wrt" class="item">RD_ACT_WRT</a></strong></dt>
 
 <dd>
 <p>Open file name given in <code>un.buffer</code> for writing.</p>
 </dd>
-</li>
-<dt><strong><a name="item_rd_act_append">RD_ACT_APPEND</a></strong>
+<dt><strong><a name="rd_act_append" class="item">RD_ACT_APPEND</a></strong></dt>
 
 <dd>
 <p>Append to file name given in <code>un.buffer</code>, opened for writing.</p>
 </dd>
-</li>
-<dt><strong><a name="item_rd_act_rdwr">RD_ACT_RDWR</a></strong>
+<dt><strong><a name="rd_act_rdwr" class="item">RD_ACT_RDWR</a></strong></dt>
 
 <dd>
 <p>Open file name given in <code>un.buffer</code> for read/write.</p>
 </dd>
-</li>
-<dt><strong><a name="item_rd_act_rdwrapp">RD_ACT_RDWRAPP</a></strong>
+<dt><strong><a name="rd_act_rdwrapp" class="item">RD_ACT_RDWRAPP</a></strong></dt>
 
 <dd>
 <p>Open file name given in <code>un.buffer</code> for read/write and append.</p>
 </dd>
-</li>
-<dt><strong><a name="item_rd_act_pipeo">RD_ACT_PIPEO</a></strong>
+<dt><strong><a name="rd_act_pipeo" class="item">RD_ACT_PIPEO</a></strong></dt>
 
 <dd>
 <p>Open pipe to shell command given in <code>un.buffer</code> for output.</p>
 </dd>
-</li>
-<dt><strong><a name="item_rd_act_pipei">RD_ACT_PIPEI</a></strong>
+<dt><strong><a name="rd_act_pipei" class="item">RD_ACT_PIPEI</a></strong></dt>
 
 <dd>
 <p>Open pipe from shell command given in <code>un.buffer</code> for input.</p>
 </dd>
-</li>
-<dt><strong><a name="item_rd_act_close">RD_ACT_CLOSE</a></strong>
+<dt><strong><a name="rd_act_close" class="item">RD_ACT_CLOSE</a></strong></dt>
 
 <dd>
 <p>Close file descriptor.</p>
 </dd>
-</li>
-<dt><strong><a name="item_rd_act_dup">RD_ACT_DUP</a></strong>
+<dt><strong><a name="rd_act_dup" class="item">RD_ACT_DUP</a></strong></dt>
 
 <dd>
 <p>Duplicate file descriptor given in <code>un.arg</code>.</p>
 </dd>
-</li>
 </dl>
 <p>
 </p>
@@ -137,24 +134,24 @@ required.</p>
 </p>
 <hr />
 <h1><a name="see_also">SEE ALSO</a></h1>
-<p>gbatch_delarg(3),
-gbatch_delenv(3),
-gbatch_delredir(3),
-gbatch_getarg(3),
-gbatch_getdirect(3),
-gbatch_getenv(3),
-gbatch_getenvlist(3),
-gbatch_gethenv(3),
-gbatch_gettitle(3),
-gbatch_putarg(3),
-gbatch_putarglist(3),
-gbatch_putdirect(3),
-gbatch_putenv(3),
-gbatch_putenvlist(3),
-gbatch_putredir(3),
-gbatch_putredirlist(3),
-gbatch_puttitle(3),
-gbatch_setqueue(3).</p>
+<p><code>gbatch_delarg(3)</code>,
+<code>gbatch_delenv(3)</code>,
+<code>gbatch_delredir(3)</code>,
+<code>gbatch_getarg(3)</code>,
+<code>gbatch_getdirect(3)</code>,
+<code>gbatch_getenv(3)</code>,
+<code>gbatch_getenvlist(3)</code>,
+<code>gbatch_gethenv(3)</code>,
+<code>gbatch_gettitle(3)</code>,
+<code>gbatch_putarg(3)</code>,
+<code>gbatch_putarglist(3)</code>,
+<code>gbatch_putdirect(3)</code>,
+<code>gbatch_putenv(3)</code>,
+<code>gbatch_putenvlist(3)</code>,
+<code>gbatch_putredir(3)</code>,
+<code>gbatch_putredirlist(3)</code>,
+<code>gbatch_puttitle(3)</code>,
+<code>gbatch_setqueue(3)</code>.</p>
 <p>
 </p>
 <hr />

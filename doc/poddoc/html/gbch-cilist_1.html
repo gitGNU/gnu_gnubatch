@@ -9,8 +9,10 @@
 
 <body style="background-color: white">
 
-<p><a name="__index__"></a></p>
+
 <!-- INDEX BEGIN -->
+<div name="index">
+<p><a name="__index__"></a></p>
 <!--
 
 <ul>
@@ -26,7 +28,11 @@
 	<li><a href="#copyright">COPYRIGHT</a></li>
 	<li><a href="#author">AUTHOR</a></li>
 </ul>
+
 -->
+
+
+</div>
 <!-- INDEX END -->
 
 <p>
@@ -50,78 +56,70 @@ remote host, to be output on standard output.</p>
 <hr />
 <h1><a name="options">OPTIONS</a></h1>
 <p>Note that the order of treatment, letters and keywords described below
-may be modified by editing the file <em>btrest.help</em> - see btsyntax(5).</p>
-<p>The environment variable on which options are supplied is <a href="#item_gbch_cilist"><code>GBCH_CILIST</code></a> and the
-environment variable to specify the help file is <a href="#item_btrestconf"><code>BTRESTCONF</code></a>.</p>
+may be modified by editing the file <em class="file">btrest.help</em> - see <code>btsyntax(5)</code>.</p>
+<p>The environment variable on which options are supplied is <a href="#gbch_cilist"><code>GBCH_CILIST</code></a> and the
+environment variable to specify the help file is <a href="#btrestconf"><code>BTRESTCONF</code></a>.</p>
 <dl>
-<dt><strong><a name="item__2d_3f_or__2bexplain">-? or +explain</a></strong>
+<dt><strong><a name="or_explain" class="item">-? or +explain</a></strong></dt>
 
 <dd>
 <p>causes a summary of the other options to be displayed without taking
 further action.</p>
 </dd>
-</li>
-<dt><strong><a name="item__2dq_host_or__2bhost_host">-Q <em>host</em> or +host <em>host</em></a></strong>
+<dt><strong><a name="q_host_or_host_host" class="item">-Q <em>host</em> or +host <em>host</em></a></strong></dt>
 
 <dd>
 <p>specifies the host name, defaulting to the host being run, for which
 the listing is required.</p>
-</dd>
-<dd>
 <p>To cancel a previously-specified host name, use a single minus sign as
 an argument, or the local host name.</p>
 </dd>
-</li>
-<dt><strong><a name="item__2bfreeze_2dcurrent">+freeze-current</a></strong>
+<dt><strong><a name="freeze_current" class="item">+freeze-current</a></strong></dt>
 
 <dd>
-<p>Save all the current options in a <em>.gnubatch</em> file in the current
-directory using the keyword <a href="#item_gbch_cilist"><code>GBCH_CILIST</code></a>. No output will take place is
+<p>Save all the current options in a <em class="file">.gnubatch</em> file in the current
+directory using the keyword <a href="#gbch_cilist"><code>GBCH_CILIST</code></a>. No output will take place is
 this is specified.</p>
 </dd>
-</li>
-<dt><strong><a name="item__2bfreeze_2dhome">+freeze-home</a></strong>
+<dt><strong><a name="freeze_home" class="item">+freeze-home</a></strong></dt>
 
 <dd>
-<p>Save all the current options in a <em>.gnubatch</em> file in the user's home
-directory using the keyword <a href="#item_gbch_cilist"><code>GBCH_CILIST</code></a>. No output will take place is
+<p>Save all the current options in a <em class="file">.gnubatch</em> file in the user's home
+directory using the keyword <a href="#gbch_cilist"><code>GBCH_CILIST</code></a>. No output will take place is
 this is specified.</p>
 </dd>
-</li>
 </dl>
 <p>
 </p>
 <hr />
 <h1><a name="files">FILES</a></h1>
-<p><em>~/.gnubatch</em>
+<p><em class="file">~/.gnubatch</em>
 configuration file (home directory)
-<em>.gnubatch</em>
+<em class="file">.gnubatch</em>
 configureation file (current directory)
-<em>btrest.help</em>
+<em class="file">btrest.help</em>
 message file</p>
 <p>
 </p>
 <hr />
 <h1><a name="environment">ENVIRONMENT</a></h1>
 <dl>
-<dt><strong><a name="item_gbch_cilist">GBCH_CILIST</a></strong>
+<dt><strong><a name="gbch_cilist" class="item">GBCH_CILIST</a></strong></dt>
 
 <dd>
 <p>space-separated options to override defaults.</p>
 </dd>
-</li>
-<dt><strong><a name="item_btrestconf">BTRESTCONF</a></strong>
+<dt><strong><a name="btrestconf" class="item">BTRESTCONF</a></strong></dt>
 
 <dd>
 <p>location of alternative help file.</p>
 </dd>
-</li>
 </dl>
 <p>
 </p>
 <hr />
 <h1><a name="see_also">SEE ALSO</a></h1>
-<p>btsyntax(5),
+<p><code>btsyntax(5)</code>,
 gbch-cichange(1),
 gnubatch.conf(5),
 gnubatch.hosts(5).</p>
@@ -130,7 +128,7 @@ gnubatch.hosts(5).</p>
 <hr />
 <h1><a name="diagnostics">DIAGNOSTICS</a></h1>
 <p>Various diagnostics are read and printed as required from the message
-file, by <em>btrest.help</em>.</p>
+file, by <em class="file">btrest.help</em>.</p>
 <p>
 </p>
 <hr />

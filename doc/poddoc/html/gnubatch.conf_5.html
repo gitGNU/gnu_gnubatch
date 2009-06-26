@@ -9,8 +9,10 @@
 
 <body style="background-color: white">
 
-<p><a name="__index__"></a></p>
+
 <!-- INDEX BEGIN -->
+<div name="index">
+<p><a name="__index__"></a></p>
 <!--
 
 <ul>
@@ -22,7 +24,11 @@
 	<li><a href="#copyright">COPYRIGHT</a></li>
 	<li><a href="#author">AUTHOR</a></li>
 </ul>
+
 -->
+
+
+</div>
 <!-- INDEX END -->
 
 <p>
@@ -33,7 +39,7 @@
 </p>
 <hr />
 <h1><a name="description">DESCRIPTION</a></h1>
-<p><em>gnubatch.conf</em> is an optional file for reconfiguring the <strong>GNUbatch</strong>
+<p><em class="file">gnubatch.conf</em> is an optional file for reconfiguring the <strong>GNUbatch</strong>
 batch management system.</p>
 <p>This may be useful for relocating standard files and directories, such
 as <strong>SPOOLDIR</strong> so that a different spool directory is used. However
@@ -46,20 +52,18 @@ However there is an alternative syntax (see below) to avoid this.</p>
 <p>The format of the file consists of two different forms of
 assignment.</p>
 <dl>
-<dt><strong><a name="item_spooldir_3d_2fusr2_2fspooldir"><code>SPOOLDIR=/usr2/spooldir</code></a></strong>
+<dt><strong><a name="spooldir_usr2_spooldir" class="item"><code>SPOOLDIR=/usr2/spooldir</code></a></strong></dt>
 
 <dd>
 <p>Sets up the given environment variable in all programs and jobs
 invoked by <strong>GNUbatch</strong>.</p>
 </dd>
-</li>
-<dt><strong><a name="item_spooldir_3a_2fusr2_2fspooldir"><code>SPOOLDIR:/usr2/spooldir</code></a></strong>
+<dt><strong><a name="spooldir_usr2_spooldir2" class="item"><a href="#spooldir_usr2_spooldir"><code>SPOOLDIR:/usr2/spooldir</code></a></a></strong></dt>
 
 <dd>
 <p>Denotes environment variables which should not be passed on to
 subprocesses, or to jobs created by gbch-r(1).</p>
 </dd>
-</li>
 </dl>
 <p>Comment lines may be included, introduced by a <strong>#</strong> sign, and blank
 lines are ignored.</p>
@@ -71,7 +75,7 @@ its environment from this file as the first step of execution.</p>
 </p>
 <hr />
 <h1><a name="files">FILES</a></h1>
-<p><em>gnubatch.conf</em></p>
+<p><em class="file">gnubatch.conf</em></p>
 <p>
 </p>
 <hr />

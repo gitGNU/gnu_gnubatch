@@ -9,8 +9,10 @@
 
 <body style="background-color: white">
 
-<p><a name="__index__"></a></p>
+
 <!-- INDEX BEGIN -->
+<div name="index">
+<p><a name="__index__"></a></p>
 <!--
 
 <ul>
@@ -30,7 +32,11 @@
 	<li><a href="#copyright">COPYRIGHT</a></li>
 	<li><a href="#author">AUTHOR</a></li>
 </ul>
+
 -->
+
+
+</div>
 <!-- INDEX END -->
 
 <p>
@@ -41,11 +47,11 @@
 </p>
 <hr />
 <h1><a name="description">DESCRIPTION</a></h1>
-<p><em>gnubatch.hosts</em> is used to inform the <strong>GNUbatch</strong> batch
-scheduling system, and in particular <code>btsched(8)</code> and xbnetserv(8),
+<p><em class="file">gnubatch.hosts</em> is used to inform the <strong>GNUbatch</strong> batch
+scheduling system, and in particular <code>btsched(8)</code> and <code>xbnetserv(8)</code>,
 which other host machines are to be attached.</p>
 <p>The host machines should in general be provided for in the standard
-file <em>/etc/hosts</em>.</p>
+file <em class="file">/etc/hosts</em>.</p>
 <p>The file consists of comment lines introduced by the <strong>#</strong> character,
 and of lines consisting of up to 4 fields, of which only
 the first is mandatory. These fields are as follows:</p>
@@ -72,7 +78,7 @@ the connection. The currently-supported markers are <strong>probe</strong>,
 <strong>dos(</strong><em>username</em><strong>)</strong> and <strong>manual</strong>, any or all of which may be
 specified.</p>
 <dl>
-<dt><strong><a name="item_probe">probe</a></strong>
+<dt><strong><a name="probe" class="item">probe</a></strong></dt>
 
 <dd>
 <p>Indicates that a datagram should be sent, and a reply
@@ -80,25 +86,22 @@ awaited, from the host, before a full-blown connection is
 attempted. This is recommended wherever possible, or it is not sure in
 which order machines are booted.</p>
 </dd>
-</li>
-<dt><strong><a name="item_manual">manual</a></strong>
+<dt><strong><a name="manual" class="item">manual</a></strong></dt>
 
 <dd>
 <p>indicates that no connection at all is attempted. To connect to the
 machine in question, then <code>btconn(1)</code> should be invoked.</p>
 </dd>
-</li>
-<dt><strong><a name="item_trusted">trusted</a></strong>
+<dt><strong><a name="trusted" class="item">trusted</a></strong></dt>
 
 <dd>
-<p>indicates that the host is ``trusted'' by the current machine, which
+<p>indicates that the host is &quot;trusted&quot; by the current machine, which
 transmits information about Windows clients and their password
 validations, so the other host need not make such enquiries.</p>
 </dd>
-</li>
-<dt><strong><a name="item_client">client</a></strong>
+<dt><strong><a name="client" class="item">client</a></strong></dt>
 
-<dt><strong>client<em>(username)</em></strong>
+<dt><strong>client<em>(username)</em></strong></dt>
 
 <dd>
 <p>indicates that no connection is attempted; the current machine is
@@ -106,54 +109,44 @@ acting as a server for Windows clients. The specified <em>username</em> is to be
 considered as the owner of any jobs submitted, and the user to whom
 charges should be applied and to which privileges apply; see
 gbch-user(1).</p>
-</dd>
-<dd>
 <p>If <em>(username)</em> is omitted, then the Windows user is assumed, which
 should correspond to a user name on the host system.</p>
 </dd>
-</li>
-<dt><strong><a name="item_clientuser">clientuser</a></strong>
+<dt><strong><a name="clientuser" class="item">clientuser</a></strong></dt>
 
-<dt><strong>clientuser<em>(machine)</em></strong>
+<dt><strong>clientuser<em>(machine)</em></strong></dt>
 
 <dd>
-<p>Indicates that the whole entry identifies a ``roaming user'' who might
+<p>Indicates that the whole entry identifies a &quot;roaming user&quot; who might
 be using one of several Windows clients, possibly with <code>IP</code> addresses
 assigned via <code>DHCP</code>. The host name in this case is replaced by the
 Windows user name, and the alias gives the Unix user name if
 different.</p>
-</dd>
-<dd>
 <p>If <em>(machine)</em> is specified, then a password is demanded at the
 Windows client if the client's <code>IP</code> address does not match that of
 <em>machine</em>.</p>
 </dd>
-</li>
-<dt><strong><a name="item_dos">dos<em>(username)</em></a></strong>
+<dt><strong><a name="dos" class="item">dos<em>(username)</em></a></strong></dt>
 
 <dd>
 <p>Is a synonym for <strong>client</strong><em>(username)</em> kept for historical reasons.</p>
 </dd>
-</li>
-<dt><strong><a name="item_dosuser">dosuser<em>(username)</em></a></strong>
+<dt><strong><a name="dosuser" class="item">dosuser<em>(username)</em></a></strong></dt>
 
 <dd>
 <p>Is a synonym for <strong>clientuser</strong><em>(username)</em> kept for historical
 reasons.</p>
 </dd>
-</li>
-<dt><strong><a name="item_external">external</a></strong>
+<dt><strong><a name="external" class="item">external</a></strong></dt>
 
 <dd>
 <p>Is a synonym for <strong>client</strong> (no username) kept for future extensions.</p>
 </dd>
-</li>
-<dt><strong><a name="item_pwchk">pwchk</a></strong>
+<dt><strong><a name="pwchk" class="item">pwchk</a></strong></dt>
 
 <dd>
 <p>Always demand the user's Unix password when first starting up.</p>
 </dd>
-</li>
 </dl>
 <p>
 </p>
@@ -162,16 +155,16 @@ reasons.</p>
 be considered closed following a connection or alternatively to await
 a connection after a <strong>probe</strong> request.</p>
 <p>A default of 1000 seconds applies if none is specified.</p>
-<p>In the case of Windows clients, the ``login'' is considered to be
+<p>In the case of Windows clients, the &quot;login&quot; is considered to be
 dropped after this time, and the user may be asked for a password
 again.</p>
 <p>
 </p>
 <hr />
 <h1><a name="local_address">LOCAL ADDRESS</a></h1>
-<p>On some machines, the ``local'' host address may be different from that
+<p>On some machines, the &quot;local&quot; host address may be different from that
 obtained by looking at the result of <em>gethostname</em>(3). To specify a
-different address for ``this'' machine, a line of the form:</p>
+different address for &quot;this&quot; machine, a line of the form:</p>
 <pre>
  localaddress 193.112.238.112</pre>
 <p>may be specified, but this <strong>must</strong> precede all other host names in the
@@ -180,7 +173,7 @@ file.</p>
 </p>
 <hr />
 <h1><a name="files">FILES</a></h1>
-<p><em>gnubatch.hosts</em>
+<p><em class="file">gnubatch.hosts</em>
 hosts description file</p>
 <p>
 </p>

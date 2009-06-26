@@ -9,8 +9,10 @@
 
 <body style="background-color: white">
 
-<p><a name="__index__"></a></p>
+
 <!-- INDEX BEGIN -->
+<div name="index">
+<p><a name="__index__"></a></p>
 <!--
 
 <ul>
@@ -35,7 +37,11 @@
 	<li><a href="#copyright">COPYRIGHT</a></li>
 	<li><a href="#author">AUTHOR</a></li>
 </ul>
+
 -->
+
+
+</div>
 <!-- INDEX END -->
 
 <p>
@@ -56,10 +62,10 @@
 <p><strong>gbch-uchange</strong> is a shell tool that may be used to update the user
 permissions file giving the user profiles of various users and the
 operations which they may be permitted to perform within the
-<strong>GNUbatch</strong> system. Alternatively the ``default permissions'' may be
+<strong>GNUbatch</strong> system. Alternatively the &quot;default permissions&quot; may be
 updated. These are the permissions which are assigned by default to
 new <strong>GNUbatch</strong> users.</p>
-<p>Further options allow for a ``password dump'' file to be
+<p>Further options allow for a &quot;password dump&quot; file to be
 maintained. This is for the benefit of NIS-type environments where
 reading through most of the password database can take an unacceptably
 long time, the user name and userid hash table is maintained in a file
@@ -70,156 +76,133 @@ and updated as necessary.</p>
 <hr />
 <h1><a name="options">OPTIONS</a></h1>
 <p>Note that the order of treatment, letters and keywords described below
-may be modified by editing the file <em>btrest.help</em> - see
-btsyntax(5).</p>
-<p>The environment variable on which options are supplied is <a href="#item_gbch_uchange"><code>GBCH_UCHANGE</code></a> and the
-environment variable to specify the help file is <a href="#item_btrestconf"><code>BTRESTCONF</code></a>.</p>
+may be modified by editing the file <em class="file">btrest.help</em> - see
+<code>btsyntax(5)</code>.</p>
+<p>The environment variable on which options are supplied is <a href="#gbch_uchange"><code>GBCH_UCHANGE</code></a> and the
+environment variable to specify the help file is <a href="#btrestconf"><code>BTRESTCONF</code></a>.</p>
 <dl>
-<dt><strong><a name="item__2d_3f_or__2bexplain">-? or +explain</a></strong>
+<dt><strong><a name="or_explain" class="item">-? or +explain</a></strong></dt>
 
 <dd>
 <p>Causes a summary of the other options to be displayed without taking
 further action.</p>
 </dd>
-</li>
-<dt><strong><a name="item__2da_or__2bcopy_2ddefaults">-A or +copy-defaults</a></strong>
+<dt><strong><a name="a_or_copy_defaults" class="item">-A or +copy-defaults</a></strong></dt>
 
 <dd>
 <p>Copy the default profile to all users <em>before</em> setting other
 permissions on the named users (with the <strong>-u</strong> option) or after
 setting the defaults (with the <strong>-D</strong> option).</p>
-</dd>
-<dd>
 <p>The privileges of the invoking user are not changed by this operation.</p>
 </dd>
-</li>
-<dt><strong><a name="item__2dd_or__2bset_2ddefaults">-D or +set-defaults</a></strong>
+<dt><strong><a name="d_or_set_defaults" class="item">-D or +set-defaults</a></strong></dt>
 
 <dd>
 <p>Indicate that the other options are to apply to the default
 profile for new users.</p>
 </dd>
-</li>
-<dt><strong><a name="item__2dd_num_or__2bdefault_2dpriority_num">-d <em>num</em> or +default-priority <em>num</em></a></strong>
+<dt><strong><a name="d_num_or_default_priority_num" class="item">-d <em>num</em> or +default-priority <em>num</em></a></strong></dt>
 
 <dd>
 <p>Set the default job priority to <em>num</em>, which must be between 1 and
 255.</p>
 </dd>
-</li>
-<dt><strong><a name="item__2dj_modes_or__2bjob_2dmode_modes">-J <em>modes</em> or +job-mode <em>modes</em></a></strong>
+<dt><strong><a name="j_modes_or_job_mode_modes" class="item">-J <em>modes</em> or +job-mode <em>modes</em></a></strong></dt>
 
 <dd>
 <p>Set the default permissions on jobs according to the format of the
 <em>modes</em> argument.</p>
 </dd>
-</li>
-<dt><strong><a name="item__2dl_num_or__2bmin_2dpriority_num">-l <em>num</em> or +min-priority <em>num</em></a></strong>
+<dt><strong><a name="l_num_or_min_priority_num" class="item">-l <em>num</em> or +min-priority <em>num</em></a></strong></dt>
 
 <dd>
 <p>Set the minimum job priority to <em>num</em>, which must be between 1 and 255.</p>
 </dd>
-</li>
-<dt><strong><a name="item__2dm_num_or__2bmax_2dload_2dlevel_num">-M <em>num</em> or +max-load-level <em>num</em></a></strong>
+<dt><strong><a name="m_num_or_max_load_level_num" class="item">-M <em>num</em> or +max-load-level <em>num</em></a></strong></dt>
 
 <dd>
 <p>Set the maximum load level for any one job to <em>num</em>, which must be
 between 1 and 32767.</p>
 </dd>
-</li>
-<dt><strong><a name="item__2dm_num_or__2bmax_2dpriority_num">-m <em>num</em> or +max-priority <em>num</em></a></strong>
+<dt><strong><a name="m_num_or_max_priority_num" class="item">-m <em>num</em> or +max-priority <em>num</em></a></strong></dt>
 
 <dd>
 <p>Set the maximum job priority to <em>num</em>, which must be between 1 and 255.</p>
 </dd>
-</li>
-<dt><strong><a name="item__2dn_or__2bno_2drebuild">-N or +no-rebuild</a></strong>
+<dt><strong><a name="n_or_no_rebuild" class="item">-N or +no-rebuild</a></strong></dt>
 
 <dd>
 <p>Cancel the <strong>-R</strong> option.</p>
 </dd>
-</li>
-<dt><strong><a name="item__2dp_privileges_or__2bprivileges_privileges">-p <em>privileges</em> or +privileges <em>privileges</em></a></strong>
+<dt><strong><a name="p_privileges_or_privileges_privileges" class="item">-p <em>privileges</em> or +privileges <em>privileges</em></a></strong></dt>
 
 <dd>
-<p>Set the privileges of the <code>user(s)</code> as specified by the argument.</p>
+<p>Set the privileges of the user(s) as specified by the argument.</p>
 </dd>
-</li>
-<dt><strong><a name="item__2dr_or__2brebuild_2dfile">-R or +rebuild-file</a></strong>
+<dt><strong><a name="r_or_rebuild_file" class="item">-R or +rebuild-file</a></strong></dt>
 
 <dd>
-<p>Rebuild the user permissions file <em>btufile</em> incorporating any changes
+<p>Rebuild the user permissions file <em class="file">btufile</em> incorporating any changes
 in the password list.</p>
 </dd>
-</li>
-<dt><strong><a name="item__2ds_num_or__2bspecial_2dload_2dlevel_num">-S <em>num</em> or +special-load-level <em>num</em></a></strong>
+<dt><strong><a name="s_num_or_special_load_level_num" class="item">-S <em>num</em> or +special-load-level <em>num</em></a></strong></dt>
 
 <dd>
-<p>Set the special load level for the <code>user(s)</code> to <em>num</em>, which must be
+<p>Set the special load level for the user(s) to <em>num</em>, which must be
 between 1 and 32767.</p>
 </dd>
-</li>
-<dt><strong><a name="item__2ds_or__2bno_2dcopy_2ddefaults">-s or +no-copy-defaults</a></strong>
+<dt><strong><a name="s_or_no_copy_defaults" class="item">-s or +no-copy-defaults</a></strong></dt>
 
 <dd>
 <p>Cancel the effect of the <strong>-A</strong> option</p>
 </dd>
-</li>
-<dt><strong><a name="item__2dt_num_or__2btotal_2dload_2dlevel_num">-T <em>num</em> or +total-load-level <em>num</em></a></strong>
+<dt><strong><a name="t_num_or_total_load_level_num" class="item">-T <em>num</em> or +total-load-level <em>num</em></a></strong></dt>
 
 <dd>
-<p>Set the total load level for the <code>user(s)</code> to <em>num</em>, which must be
+<p>Set the total load level for the user(s) to <em>num</em>, which must be
 between 1 and 32767.</p>
 </dd>
-</li>
-<dt><strong><a name="item__2du_or__2bset_2dusers">-u or +set-users</a></strong>
+<dt><strong><a name="u_or_set_users" class="item">-u or +set-users</a></strong></dt>
 
 <dd>
 <p>Indicate that the other options are to apply to the users specified on
 the rest of the command line, resetting any previous <strong>-D</strong> option.</p>
 </dd>
-</li>
-<dt><strong><a name="item__2dv_or__2bvar_2dmode">-V or +var-mode</a></strong>
+<dt><strong><a name="v_or_var_mode" class="item">-V or +var-mode</a></strong></dt>
 
 <dd>
 <p>Set the default permissions on variables according to the format of the
 <em>modes</em> argument.</p>
 </dd>
-</li>
-<dt><strong><a name="item__2dx_or__2bdump_2dpasswd">-X or +dump-passwd</a></strong>
+<dt><strong><a name="x_or_dump_passwd" class="item">-X or +dump-passwd</a></strong></dt>
 
 <dd>
 <p>Dump out the hash table of the password file to avoid re-reading the
 password file within the other programs.</p>
 </dd>
-</li>
-<dt><strong><a name="item__2dy_or__2bdefault_2dpasswd">-Y or +default-passwd</a></strong>
+<dt><strong><a name="y_or_default_passwd" class="item">-Y or +default-passwd</a></strong></dt>
 
 <dd>
 <p>Default handling of password hash file dump - rebuild if it is already
 present and <strong>-R</strong> specified, otherwise not.</p>
 </dd>
-</li>
-<dt><strong><a name="item__2dz_or__2bkill_2ddump_2dpasswd">-Z or +kill-dump-passwd</a></strong>
+<dt><strong><a name="z_or_kill_dump_passwd" class="item">-Z or +kill-dump-passwd</a></strong></dt>
 
 <dd>
 <p>Delete any existing dumped password hash file.</p>
 </dd>
-</li>
-<dt><strong><a name="item__2bfreeze_2dcurrent">+freeze-current</a></strong>
+<dt><strong><a name="freeze_current" class="item">+freeze-current</a></strong></dt>
 
 <dd>
-<p>Save all the current options in a <em>.gnubatch</em> file in the current
+<p>Save all the current options in a <em class="file">.gnubatch</em> file in the current
 directory.</p>
 </dd>
-</li>
-<dt><strong><a name="item__2bfreeze_2dhome">+freeze-home</a></strong>
+<dt><strong><a name="freeze_home" class="item">+freeze-home</a></strong></dt>
 
 <dd>
-<p>Save all the current options in a <em>.gnubatch</em> file in the user's home
+<p>Save all the current options in a <em class="file">.gnubatch</em> file in the user's home
 directory.</p>
 </dd>
-</li>
 </dl>
 <p>
 </p>
@@ -244,9 +227,9 @@ control file by running</p>
 <p>On a system with a large number of users, this can take a long time,
 so the previous method of adding new users as they were encountered
 meant that various hold-ups occurred in standard utilities or the
-scheduler, whichever was the first to ``notice'' the changes, which
+scheduler, whichever was the first to &quot;notice&quot; the changes, which
 might, in the event, be half-complete.</p>
-<p>We suggest that this command be added to the ``add new user'' procedure
+<p>We suggest that this command be added to the &quot;add new user&quot; procedure
 for your installation.</p>
 <p>
 </p>
@@ -258,7 +241,7 @@ to build the appropriate hash tables. This may take some time if there
 are a large number of user names, especially if NIS (a.k.a. <em>yellow
 pages</em>) is in use.</p>
 <p>A short cut is to dump out the password file into a hash table file,
-by default <em>pwdump6</em>, which may be quickly read in by the relevant
+by default <em class="file">pwdump6</em>, which may be quickly read in by the relevant
 programs instead of rebuilding the hash table each time.</p>
 <p>You may opt to create the dumped password file by running</p>
 <pre>
@@ -270,7 +253,7 @@ will also be rebuilt. <strong>-X</strong> does not have to be specified again.</
 <p>If you ever decide you want to dispense with this file, run
 <strong>gbch-uchange</strong> with the <strong>-Z</strong> option.</p>
 <p>For completeness, the <strong>-Y</strong> option is provided to cancel <strong>-X</strong> or
-<strong>-Z</strong> in case they are provided in the environment or a <em>.gnubatch</em>
+<strong>-Z</strong> in case they are provided in the environment or a <em class="file">.gnubatch</em>
 file, an extremely bad idea.</p>
 <p>
 </p>
@@ -280,60 +263,51 @@ more (comma-separated) of argument may be one or more of the following
 codes, optionally preceded by a minus to turn off the corresponding
 privilege.</p>
 <dl>
-<dt><strong><a name="item_ra">RA</a></strong>
+<dt><strong><a name="ra" class="item">RA</a></strong></dt>
 
 <dd>
 <p>read admin file</p>
 </dd>
-</li>
-<dt><strong><a name="item_wa">WA</a></strong>
+<dt><strong><a name="wa" class="item">WA</a></strong></dt>
 
 <dd>
 <p>write admin file</p>
 </dd>
-</li>
-<dt><strong><a name="item_cr">CR</a></strong>
+<dt><strong><a name="cr" class="item">CR</a></strong></dt>
 
 <dd>
 <p>create</p>
 </dd>
-</li>
-<dt><strong><a name="item_spc">SPC</a></strong>
+<dt><strong><a name="spc" class="item">SPC</a></strong></dt>
 
 <dd>
 <p>special create</p>
 </dd>
-</li>
-<dt><strong><a name="item_st">ST</a></strong>
+<dt><strong><a name="st" class="item">ST</a></strong></dt>
 
 <dd>
 <p>stop scheduler</p>
 </dd>
-</li>
-<dt><strong><a name="item_cdft">Cdft</a></strong>
+<dt><strong><a name="cdft" class="item">Cdft</a></strong></dt>
 
 <dd>
 <p>change default</p>
 </dd>
-</li>
-<dt><strong><a name="item_ug">UG</a></strong>
+<dt><strong><a name="ug" class="item">UG</a></strong></dt>
 
 <dd>
 <p>or user and group modes</p>
 </dd>
-</li>
-<dt><strong><a name="item_uo">UO</a></strong>
+<dt><strong><a name="uo" class="item">UO</a></strong></dt>
 
 <dd>
 <p>or user and other modes</p>
 </dd>
-</li>
-<dt><strong><a name="item_go">GO</a></strong>
+<dt><strong><a name="go" class="item">GO</a></strong></dt>
 
 <dd>
 <p>or group and other modes.</p>
 </dd>
-</li>
 </dl>
 <p><code>ALL</code> may be used to denote all of the permissions, and then perhaps
 to cancel some. For example:</p>
@@ -349,75 +323,64 @@ the benefit of the installation routines.</p>
 operations.</p>
 <p>Each permission is represented by a letter, as follows:</p>
 <dl>
-<dt><strong><a name="item_r">R</a></strong>
+<dt><strong><a name="r" class="item">R</a></strong></dt>
 
 <dd>
 <p>read permission</p>
 </dd>
-</li>
-<dt><strong><a name="item_w">W</a></strong>
+<dt><strong><a name="w" class="item">W</a></strong></dt>
 
 <dd>
 <p>write permission</p>
 </dd>
-</li>
-<dt><strong><a name="item_s">S</a></strong>
+<dt><strong><a name="s" class="item">S</a></strong></dt>
 
 <dd>
 <p>reveal permission</p>
 </dd>
-</li>
-<dt><strong><a name="item_m">M</a></strong>
+<dt><strong><a name="m" class="item">M</a></strong></dt>
 
 <dd>
 <p>read mode</p>
 </dd>
-</li>
-<dt><strong><a name="item_p">P</a></strong>
+<dt><strong><a name="p" class="item">P</a></strong></dt>
 
 <dd>
 <p>set mode</p>
 </dd>
-</li>
-<dt><strong><a name="item_u">U</a></strong>
+<dt><strong><a name="u" class="item">U</a></strong></dt>
 
 <dd>
 <p>give away owner</p>
 </dd>
-</li>
-<dt><strong><a name="item_v">V</a></strong>
+<dt><strong><a name="v" class="item">V</a></strong></dt>
 
 <dd>
 <p>assume owner</p>
 </dd>
-</li>
-<dt><strong><a name="item_g">G</a></strong>
+<dt><strong><a name="g" class="item">G</a></strong></dt>
 
 <dd>
 <p>give away group</p>
 </dd>
-</li>
-<dt><strong><a name="item_h">H</a></strong>
+<dt><strong><a name="h" class="item">H</a></strong></dt>
 
 <dd>
 <p>assume group</p>
 </dd>
-</li>
-<dt><strong><a name="item_d">D</a></strong>
+<dt><strong><a name="d" class="item">D</a></strong></dt>
 
 <dd>
 <p>delete</p>
 </dd>
-</li>
-<dt><strong><a name="item_k">K</a></strong>
+<dt><strong><a name="k" class="item">K</a></strong></dt>
 
 <dd>
 <p>kill (only valid for jobs)</p>
 </dd>
-</li>
 </dl>
 <p>Each section of the mode (job, group, others) is represented by the
-prefixes <code>U:</code>, <code>G:</code> and <code>O:</code> and separated by commas.</p>
+prefixes <a href="#u"><code>U:</code></a>, <a href="#g"><code>G:</code></a> and <code>O:</code> and separated by commas.</p>
 <p>For example:</p>
 <pre>
         -J U:RWSMPDK,G:RWSDK,O:RS</pre>
@@ -426,42 +389,40 @@ the prefixes are omitted, as in</p>
 <pre>
         -J RWSDK</pre>
 <p>then all of the user, group and other permissions are set to the same
-value. Alternatively two of the <code>J</code>, <a href="#item_g"><code>G</code></a> or <code>O</code> may be run together
+value. Alternatively two of the <code>J</code>, <a href="#g"><code>G</code></a> or <code>O</code> may be run together
 as in</p>
 <pre>
         -J U:RWSKD,GO:RWS</pre>
-<p>if ``group'' or ``other'' (in this case) are to have the same permissions.</p>
+<p>if &quot;group&quot; or &quot;other&quot; (in this case) are to have the same permissions.</p>
 <p>
 </p>
 <hr />
 <h1><a name="files">FILES</a></h1>
-<p><em>~/.gnubatch</em>
+<p><em class="file">~/.gnubatch</em>
 configuration file (home directory)</p>
-<p><em>.gnubatch</em>
+<p><em class="file">.gnubatch</em>
 configuration file (current directory)</p>
-<p><em>btrest.help</em>
+<p><em class="file">btrest.help</em>
 message file</p>
-<p><em>btufile</em>
+<p><em class="file">btufile</em>
 user permissions file</p>
-<p><em>pwdump</em>
+<p><em class="file">pwdump</em>
 saved password file</p>
 <p>
 </p>
 <hr />
 <h1><a name="environment">ENVIRONMENT</a></h1>
 <dl>
-<dt><strong><a name="item_gbch_uchange">GBCH_UCHANGE</a></strong>
+<dt><strong><a name="gbch_uchange" class="item">GBCH_UCHANGE</a></strong></dt>
 
 <dd>
 <p>space-separated options to override defaults.</p>
 </dd>
-</li>
-<dt><strong><a name="item_btrestconf">BTRESTCONF</a></strong>
+<dt><strong><a name="btrestconf" class="item">BTRESTCONF</a></strong></dt>
 
 <dd>
 <p>location of alternative help file.</p>
 </dd>
-</li>
 </dl>
 <p>
 </p>
@@ -469,13 +430,13 @@ saved password file</p>
 <h1><a name="see_also">SEE ALSO</a></h1>
 <p>gbch-ulist(1),
 gbch-user(1),
-btsyntax(5).</p>
+<code>btsyntax(5)</code>.</p>
 <p>
 </p>
 <hr />
 <h1><a name="diagnostics">DIAGNOSTICS</a></h1>
 <p>Various diagnostics are read and printed as required from the message
-file <em>btrest.help</em>.</p>
+file <em class="file">btrest.help</em>.</p>
 <p>
 </p>
 <hr />

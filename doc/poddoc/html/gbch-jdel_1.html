@@ -9,8 +9,10 @@
 
 <body style="background-color: white">
 
-<p><a name="__index__"></a></p>
+
 <!-- INDEX BEGIN -->
+<div name="index">
+<p><a name="__index__"></a></p>
 <!--
 
 <ul>
@@ -27,16 +29,20 @@
 	<li><a href="#copyright">COPYRIGHT</a></li>
 	<li><a href="#author">AUTHOR</a></li>
 </ul>
+
 -->
+
+
+</div>
 <!-- INDEX END -->
 
 <p>
 </p>
 <h1><a name="name">NAME</a></h1>
 <p>gbch-jdel - delete batch jobs</p>
-<p>gbch-jgo - force <code>job(s)</code> to run ignoring time</p>
-<p>gbch-goadv - force <code>job(s)</code> to run ignoring time and advance time.</p>
-<p>gbch-adv - advance <code>job(s)</code> to next time without running.</p>
+<p>gbch-jgo - force job(s) to run ignoring time</p>
+<p>gbch-goadv - force job(s) to run ignoring time and advance time.</p>
+<p>gbch-adv - advance job(s) to next time without running.</p>
 <p>
 </p>
 <hr />
@@ -50,13 +56,13 @@ job number ...</p>
 <h1><a name="description">DESCRIPTION</a></h1>
 <p><strong>gbch-jdel</strong> provides a means of deleting batch jobs from the shell or a program,
 optionally killing running jobs if required.</p>
-<p><strong>gbch-jgo</strong> forces a job or jobs to run, ignoring the ``next run time''. Conditions
-and load level constraints are however still enforced. The ``next run
-time'' will not be affected when the job completes. This inserts an
+<p><strong>gbch-jgo</strong> forces a job or jobs to run, ignoring the &quot;next run time&quot;. Conditions
+and load level constraints are however still enforced. The &quot;next run
+time&quot; will not be affected when the job completes. This inserts an
 extra run of the job.</p>
-<p><strong>gbch-jgoadv</strong> forces a job or jobs to run, ignoring the ``next run
-time''. Conditions and load level constraints are however still
-enforced. The ``next run time'' is advanced to the next time. This
+<p><strong>gbch-jgoadv</strong> forces a job or jobs to run, ignoring the &quot;next run
+time&quot;. Conditions and load level constraints are however still
+enforced. The &quot;next run time&quot; is advanced to the next time. This
 brings forward the next run, thereafter resuming the sequence.</p>
 <p><strong>gbch-jadv</strong> advances the run time on each job specified to the next run
 time according to its repeat time without running the job or looking
@@ -79,54 +85,47 @@ necessary permissions.</p>
 <h1><a name="options">OPTIONS</a></h1>
 <p>Only <strong>gbch-jdel</strong> takes any options.</p>
 <p>Note that the order of treatment, letters and keywords described below
-may be modified by editing the file <em>btrest.help</em> -
-see btsyntax(5).</p>
-<p>The environment variable on which options are supplied is <a href="#item_gbch_jdel"><code>GBCH_JDEL</code></a>
+may be modified by editing the file <em class="file">btrest.help</em> -
+see <code>btsyntax(5)</code>.</p>
+<p>The environment variable on which options are supplied is <a href="#gbch_jdel"><code>GBCH_JDEL</code></a>
 etc and the environment variable to specify the help file is
-<a href="#item_btrestconf"><code>BTRESTCONF</code></a>.</p>
+<a href="#btrestconf"><code>BTRESTCONF</code></a>.</p>
 <dl>
-<dt><strong><a name="item__2d_3f_or__2bexplain">-? or +explain</a></strong>
+<dt><strong><a name="or_explain" class="item">-? or +explain</a></strong></dt>
 
 <dd>
 <p>causes a summary of the other options to be displayed without taking
 further action.</p>
 </dd>
-</li>
-<dt><strong><a name="item__2dc_name_or__2bcommand_2dprefix_name">-C <em>name</em> or +command-prefix <em>name</em></a></strong>
+<dt><strong><a name="c_name_or_command_prefix_name" class="item">-C <em>name</em> or +command-prefix <em>name</em></a></strong></dt>
 
 <dd>
 <p>specify the given <em>name</em> as the prefix for the command file, followed
 by the job number, to be used by the <strong>-u</strong> option rather than the
 default of <strong>C</strong> (which in turn may be changed by editing the
 message file).</p>
-</dd>
-<dd>
 <p>The command file is a shell script, typically containing a gbch-r(1)
 command, which when run via the shell will attempt to create a job
-equivalent to the one ``unqueued''. Obviously the user is at liberty to
+equivalent to the one &quot;unqueued&quot;. Obviously the user is at liberty to
 amend this or the job file before doing so.</p>
 </dd>
-</li>
-<dt><strong><a name="item__2dd_name_or__2bdirectory_name">-D <em>name</em> or +directory <em>name</em></a></strong>
+<dt><strong><a name="d_name_or_directory_name" class="item">-D <em>name</em> or +directory <em>name</em></a></strong></dt>
 
 <dd>
 <p>Save unqueued jobs to <em>name</em> rather than the current directory when
 <strong>gbch-jdel</strong> is invoked.</p>
 </dd>
-</li>
-<dt><strong><a name="item__2dd_or__2bdelete">-d or +delete</a></strong>
+<dt><strong><a name="d_or_delete" class="item">-d or +delete</a></strong></dt>
 
 <dd>
 <p>Cancel any previous <strong>-k</strong> option to be the default of deleting jobs.</p>
 </dd>
-</li>
-<dt><strong><a name="item__2de_or__2bdo_2dnot_2dunqueue">-e or +do-not-unqueue</a></strong>
+<dt><strong><a name="e_or_do_not_unqueue" class="item">-e or +do-not-unqueue</a></strong></dt>
 
 <dd>
 <p>Cancel the effect of a previous <strong>-u</strong> option.</p>
 </dd>
-</li>
-<dt><strong><a name="item__2dj_name_or__2bjob_2dprefix_name">-J <em>name</em> or +job-prefix <em>name</em></a></strong>
+<dt><strong><a name="j_name_or_job_prefix_name" class="item">-J <em>name</em> or +job-prefix <em>name</em></a></strong></dt>
 
 <dd>
 <p>specify the given <em>name</em> as the prefix for the job file, followed
@@ -134,104 +133,90 @@ by the job number, to be used by the <strong>-u</strong> option rather than the
 default of <strong>J</strong> (which in turn may be changed by editing the
 message file).</p>
 </dd>
-</li>
-<dt><strong><a name="item__2dk_signalnumber_or__2bsignal_2dnumber_signalnumb">-K <em>signalnumber</em> or +signal-number <em>signalnumber</em></a></strong>
+<dt><strong><a name="k_signalnumber_or_signal_number_signalnumber" class="item">-K <em>signalnumber</em> or +signal-number <em>signalnumber</em></a></strong></dt>
 
 <dd>
 <p>Apply <em>signalnumber</em> given to kill running job. Default is 15 (<code>SIGTERM</code>).</p>
 </dd>
-</li>
-<dt><strong><a name="item__2dk_or__2bdo_2dnot_2ddelete">-k or +do-not-delete</a></strong>
+<dt><strong><a name="k_or_do_not_delete" class="item">-k or +do-not-delete</a></strong></dt>
 
 <dd>
 <p>Kill jobs only where applicable, do not delete.</p>
 </dd>
-</li>
-<dt><strong><a name="item__2dn_or__2dn_or__2bno_2dforce">-n or -N or +no-force</a></strong>
+<dt><strong><a name="n_or_n_or_no_force" class="item">-n or -N or +no-force</a></strong></dt>
 
 <dd>
 <p>Do not kill or delete running jobs (default).</p>
 </dd>
-</li>
-<dt><strong><a name="item__2ds_seconds_or__2bsleep_2dtime_seconds">-S <em>seconds</em> or +sleep-time <em>seconds</em></a></strong>
+<dt><strong><a name="s_seconds_or_sleep_time_seconds" class="item">-S <em>seconds</em> or +sleep-time <em>seconds</em></a></strong></dt>
 
 <dd>
 <p>Monitor process state for <em>seconds</em> seconds after killing (default 10
 seconds).</p>
 </dd>
-</li>
-<dt><strong><a name="item__2du_or__2bunqueue">-u or +unqueue</a></strong>
+<dt><strong><a name="u_or_unqueue" class="item">-u or +unqueue</a></strong></dt>
 
 <dd>
-<p>unqueue <code>job(s)</code> to the current directory. Do not delete if <strong>-k</strong> given.</p>
+<p>unqueue job(s) to the current directory. Do not delete if <strong>-k</strong> given.</p>
 </dd>
-</li>
-<dt><strong><a name="item__2dy_or__2dy_or__2bforce">-y or -Y or +force</a></strong>
+<dt><strong><a name="y_or_y_or_force" class="item">-y or -Y or +force</a></strong></dt>
 
 <dd>
 <p>Kill and delete running jobs.</p>
 </dd>
-</li>
-<dt><strong><a name="item__2bfreeze_2dcurrent">+freeze-current</a></strong>
+<dt><strong><a name="freeze_current" class="item">+freeze-current</a></strong></dt>
 
 <dd>
-<p>Save all the current options in a <em>.gnubatch</em> file in the current
+<p>Save all the current options in a <em class="file">.gnubatch</em> file in the current
 directory.</p>
 </dd>
-</li>
-<dt><strong><a name="item__2bfreeze_2dhome">+freeze-home</a></strong>
+<dt><strong><a name="freeze_home" class="item">+freeze-home</a></strong></dt>
 
 <dd>
-<p>Save all the current options in a <em>.gnubatch</em> file in the user's home
+<p>Save all the current options in a <em class="file">.gnubatch</em> file in the user's home
 directory.</p>
 </dd>
-</li>
 </dl>
 <p>
 </p>
 <hr />
 <h1><a name="files">FILES</a></h1>
-<p><em>~/.gnubatch</em>
+<p><em class="file">~/.gnubatch</em>
 configuration file (home directory)</p>
-<p><em>.gnubatch</em>
+<p><em class="file">.gnubatch</em>
 configuration file (current directory)</p>
-<p><em>btrest.help</em>
+<p><em class="file">btrest.help</em>
 message file</p>
 <p>
 </p>
 <hr />
 <h1><a name="environment">ENVIRONMENT</a></h1>
 <dl>
-<dt><strong><a name="item_gbch_jdel">GBCH_JDEL</a></strong>
+<dt><strong><a name="gbch_jdel" class="item">GBCH_JDEL</a></strong></dt>
 
 <dd>
 <p>space-separated options to override defaults for gbch_jdel</p>
 </dd>
-</li>
-<dt><strong><a name="item_gbch_jgo">GBCH_JGO</a></strong>
+<dt><strong><a name="gbch_jgo" class="item">GBCH_JGO</a></strong></dt>
 
 <dd>
 <p>space-separated options to override defaults for gbch_jgo</p>
 </dd>
-</li>
-<dt><strong><a name="item_gbch_jgoadv">GBCH_JGOADV</a></strong>
+<dt><strong><a name="gbch_jgoadv" class="item">GBCH_JGOADV</a></strong></dt>
 
 <dd>
 <p>space-separated options to override defaults for gbch_jgoadv</p>
 </dd>
-</li>
-<dt><strong><a name="item_gbch_jadv">GBCH_JADV</a></strong>
+<dt><strong><a name="gbch_jadv" class="item">GBCH_JADV</a></strong></dt>
 
 <dd>
 <p>space-separated options to override defaults for gbch_jadv</p>
 </dd>
-</li>
-<dt><strong><a name="item_btrestconf">BTRESTCONF</a></strong>
+<dt><strong><a name="btrestconf" class="item">BTRESTCONF</a></strong></dt>
 
 <dd>
 <p>location of alternative help file.</p>
 </dd>
-</li>
 </dl>
 <p>
 </p>
@@ -250,7 +235,7 @@ message file</p>
 </p>
 <hr />
 <h1><a name="see_also">SEE ALSO</a></h1>
-<p>btsyntax(5),
+<p><code>btsyntax(5)</code>,
 gnubatch.conf(5),
 gnubatch.hosts(5),
 gbch-r(1),
@@ -262,7 +247,7 @@ gbch-jlist(1).</p>
 <hr />
 <h1><a name="diagnostics">DIAGNOSTICS</a></h1>
 <p>Various diagnostics are read and printed as required from the message
-file <em>btrest.help</em>.</p>
+file <em class="file">btrest.help</em>.</p>
 <p>
 </p>
 <hr />

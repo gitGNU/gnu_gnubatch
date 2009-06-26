@@ -9,8 +9,10 @@
 
 <body style="background-color: white">
 
-<p><a name="__index__"></a></p>
+
 <!-- INDEX BEGIN -->
+<div name="index">
+<p><a name="__index__"></a></p>
 <!--
 
 <ul>
@@ -23,7 +25,11 @@
 	<li><a href="#copyright">COPYRIGHT</a></li>
 	<li><a href="#author">AUTHOR</a></li>
 </ul>
+
 -->
+
+
+</div>
 <!-- INDEX END -->
 
 <p>
@@ -45,7 +51,7 @@ environment file</em> for the server. This will provide the environment
 variables which a job running on that server would have unless
 overridden by separate environment variables in the job.</p>
 <p><em>fd</em> is a file descriptor which was previously returned by a
-successful call to gbatch_open(3).</p>
+successful call to <code>gbatch_open(3)</code>.</p>
 <p>The result is a vector of character pointers containing environment
 variable assignments of the form <code>NAME=VALUE</code>. This list is
 terminated by a null pointer. If there is no static environment file,
@@ -66,11 +72,11 @@ defined in the include file \fBgbatch.h\fR is placed in
 </p>
 <hr />
 <h1><a name="see_also">SEE ALSO</a></h1>
-<p>gbatch_delenv(3),
-gbatch_getenv(3),
-gbatch_getenvlist(3),
-gbatch_putenv(3),
-gbatch_putenvlist(3).</p>
+<p><code>gbatch_delenv(3)</code>,
+<code>gbatch_getenv(3)</code>,
+<code>gbatch_getenvlist(3)</code>,
+<code>gbatch_putenv(3)</code>,
+<code>gbatch_putenvlist(3)</code>.</p>
 <p>
 </p>
 <hr />

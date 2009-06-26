@@ -9,8 +9,10 @@
 
 <body style="background-color: white">
 
-<p><a name="__index__"></a></p>
+
 <!-- INDEX BEGIN -->
+<div name="index">
+<p><a name="__index__"></a></p>
 <!--
 
 <ul>
@@ -20,7 +22,7 @@
 	<li><a href="#description">DESCRIPTION</a></li>
 	<ul>
 
-		<li><a href="#unix_and_linux">Unix and Linux</a></li>
+		<li><a href="#unix_and_gnu_linux">Unix and GNU/Linux</a></li>
 		<li><a href="#windows">Windows</a></li>
 	</ul>
 
@@ -30,7 +32,11 @@
 	<li><a href="#copyright">COPYRIGHT</a></li>
 	<li><a href="#author">AUTHOR</a></li>
 </ul>
+
 -->
+
+
+</div>
 <!-- INDEX END -->
 
 <p>
@@ -58,22 +64,22 @@
 <hr />
 <h1><a name="description">DESCRIPTION</a></h1>
 <p>The function <strong>gbatch_jobdata</strong> is used to retrieve the job script of a
-job. There are two versions, one for the Unix and Linux API and one
-for the Windows API. The second form is used under Windows as there is
-no acceptable substitute for the <code>pipe(2)</code> system call.</p>
+job. There are two versions, one for the Unix and GNU/Linux API and
+one for the Windows API. The second form is used under Windows as
+there is no acceptable substitute for the <code>pipe(2)</code> system call.</p>
 <p>In both forms of the call, <em>fd</em> is a file descriptor which was
-previously returned by a successful call to gbatch_open(3).</p>
+previously returned by a successful call to <code>gbatch_open(3)</code>.</p>
 <p><em>flags</em> is zero or <code>GBATCH_FLAG_IGNORESEQ</code> to ignore recent changes
 to the job list.</p>
 <p><em>slot</em> is the slot number corresponding to the job as returned by
-<code>gbatch_joblist(3)</code> or xb_jobfindslot(3).</p>
+<code>gbatch_joblist(3)</code> or <code>xb_jobfindslot(3)</code>.</p>
 <p>The difference between the two versions of <strong>gbatch_jobadd</strong> is in the
 method of passing the job script.</p>
 <p>
 </p>
-<h2><a name="unix_and_linux">Unix and Linux</a></h2>
-<p>The Unix and Linux API version returns a <em>stdio</em> file descriptor
-which may be used with the standard I/O functions getc(3), <code>fread(3)</code>
+<h2><a name="unix_and_gnu_linux">Unix and GNU/Linux</a></h2>
+<p>The Unix and GNU/Linux API version returns a <em>stdio</em> file descriptor
+which may be used with the standard I/O functions <code>getc(3)</code>, <code>fread(3)</code>
 etc to read the job script. The job script should always be read to
 the end and then using <code>fclose(3)</code> to ensure that all incoming data on
 the socket is collected.</p>
@@ -130,12 +136,12 @@ otherwise an error code.</p>
 </p>
 <hr />
 <h1><a name="see_also">SEE ALSO</a></h1>
-<p>gbatch_jobadd(3),
-gbatch_jobfind(3),
-gbatch_joblist(3),
-gbatch_jobmon(3),
-gbatch_jobop(3),
-gbatch_jobread(3),
+<p><code>gbatch_jobadd(3)</code>,
+<code>gbatch_jobfind(3)</code>,
+<code>gbatch_joblist(3)</code>,
+<code>gbatch_jobmon(3)</code>,
+<code>gbatch_jobop(3)</code>,
+<code>gbatch_jobread(3)</code>,
 <code>gbatch_open(3)</code></p>
 <p>
 </p>

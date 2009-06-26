@@ -84,12 +84,14 @@ install: all
 	libtool --mode=install $(INSTALL) $(LIB) $(LIBDIR)
 	libtool --mode=install $(INSTALL) $(LIBCLIENT) $(LIBDIR)
 	libtool --mode=install $(INSTALL) $(LIBCURS) $(LIBDIR)
+	$(RM) $(LIBDIR)/libgnubatch_int.a $(LIBDIR)/libgnubatch_client.a $(LIBDIR)/libgnubatch_curs.a
 	$(INSTALL_DATA) $(LIB) $(LIBCLIENT) $(LIBCURS) $(LIBDIR)
 
 install_strip:
 	libtool --mode=install $(INSTALL) -s $(LIB) $(LIBDIR)
 	libtool --mode=install $(INSTALL) -s $(LIBCLIENT) $(LIBDIR)
 	libtool --mode=install $(INSTALL) -s $(LIBCURS) $(LIBDIR)
+	$(RM) $(LIBDIR)/libgnubatch_int.a $(LIBDIR)/libgnubatch_client.a $(LIBDIR)/libgnubatch_curs.a
 	$(INSTALL_DATA) $(LIB) $(LIBCLIENT) $(LIBCURS) $(LIBDIR)
 
 clean:

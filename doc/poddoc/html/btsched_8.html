@@ -9,8 +9,10 @@
 
 <body style="background-color: white">
 
-<p><a name="__index__"></a></p>
+
 <!-- INDEX BEGIN -->
+<div name="index">
+<p><a name="__index__"></a></p>
 <!--
 
 <ul>
@@ -27,7 +29,11 @@
 	<li><a href="#copyright">COPYRIGHT</a></li>
 	<li><a href="#author">AUTHOR</a></li>
 </ul>
+
 -->
+
+
+</div>
 <!-- INDEX END -->
 
 <p>
@@ -54,48 +60,47 @@ they are part of the internal interfaces of <strong>GNUbatch</strong> and are
 subject to change.</p>
 <p>Information, either in respect of other machines to connect
 to, or pre-existing jobs and variables on the current machine, are
-read respectively from the files <em>gnubatch.hosts</em> and the spool directory.</p>
-<p>A ``slave'' <strong>btsched</strong> process is spawned to control running jobs, and
+read respectively from the files <em class="file">gnubatch.hosts</em> and the spool directory.</p>
+<p>A &quot;slave&quot; <strong>btsched</strong> process is spawned to control running jobs, and
 if a networked version of <strong>GNUbatch</strong> is being run, then an additional
-``slave'' <strong>btsched</strong> process is spawned to monitor and process incoming
+&quot;slave&quot; <strong>btsched</strong> process is spawned to monitor and process incoming
 network messages.</p>
 <p>Incoming remotely-submitted jobs and API interfaces are handled via a
-separate process (also invoked by gbch-start(1)), xbnetserv(8).</p>
+separate process (also invoked by gbch-start(1)), <code>xbnetserv(8)</code>.</p>
 <p>
 </p>
 <hr />
 <h1><a name="files">FILES</a></h1>
-<p><em>gnubatch.hosts</em>
+<p><em class="file">gnubatch.hosts</em>
 host names and descriptions</p>
-<p><em>gnubatch.conf</em>
+<p><em class="file">gnubatch.conf</em>
 master configuration file</p>
-<p><em>btint-config</em>
+<p><em class="file">btint-config</em>
 message file</p>
-<p><em>btsched_jfile</em>
+<p><em class="file">btsched_jfile</em>
 job file</p>
-<p><em>btsched_vfile</em>
+<p><em class="file">btsched_vfile</em>
 variables file</p>
-<p><em>btsched_reps</em>
+<p><em class="file">btsched_reps</em>
 error log file</p>
-<p><em>btufile</em>
+<p><em class="file">btufile</em>
 user data</p>
-<p><em>btmm_jobs</em>
+<p><em class="file">btmm_jobs</em>
 job memory-mapped file</p>
-<p><em>btmm_vars</em>
+<p><em class="file">btmm_vars</em>
 variables memory-mapped file</p>
-<p><em>btmm_xfer</em>
+<p><em class="file">btmm_xfer</em>
 communication buffer memory-mapped file</p>
 <p>
 </p>
 <hr />
 <h1><a name="environment">ENVIRONMENT</a></h1>
 <dl>
-<dt><strong><a name="item_spooldir">SPOOLDIR</a></strong>
+<dt><strong><a name="spooldir" class="item">SPOOLDIR</a></strong></dt>
 
 <dd>
 <p>alternative location for spool directory</p>
 </dd>
-</li>
 </dl>
 <p>
 </p>
@@ -117,7 +122,7 @@ segment.</p>
 and ascend upwards to <code>0x5869b064</code> before wrapping around.</p>
 <p>Some versions of <strong>btsched</strong> may use memory-mapped files rather than
 shared memory. The files are held in the spool directory and have the
-names <em>btmm_jobs</em>, <em>btmm_vars</em> and <em>btmm_xfer</em>.</p>
+names <em class="file">btmm_jobs</em>, <em class="file">btmm_vars</em> and <em class="file">btmm_xfer</em>.</p>
 <p>A set of 10 semaphores, with the key <code>0x5869b001</code> is created to
 interlock access to the shared memory segments, and a further set of 3
 semaphores with the key <code>0x5869b003</code> is created to interlock network
@@ -133,8 +138,8 @@ to delete these IPC facilities before <strong>btsched</strong> can be restarted.
 <h1><a name="internet_ports">INTERNET PORTS</a></h1>
 <p><strong>btsched</strong> accepts and sends interconnections from other machines on
 TCP port, passes the contents of batch jobs on a further TCP port, and
-undertakes ``probes'' on a UDP port.</p>
-<p>The port numbers are set up in the <em>/etc/services</em> file when
+undertakes &quot;probes&quot; on a UDP port.</p>
+<p>The port numbers are set up in the <em class="file">/etc/services</em> file when
 <strong>GNUbatch</strong> is first installed.</p>
 <p>
 </p>
@@ -150,15 +155,15 @@ gbch-quit(1),
 gbch-ripc(8),
 gnubatch.conf(5),
 (5),
-xbnetserv(8).</p>
+<code>xbnetserv(8)</code>.</p>
 <p>
 </p>
 <hr />
 <h1><a name="diagnostics">DIAGNOSTICS</a></h1>
 <p><strong>btsched</strong> is usually invoked from system startup procedures or
 gbch-start(1).</p>
-<p>Thereafter it runs as a ``daemon process'' and diagnostics are not
-written to any terminal but to the file <em>btsched_reps</em>.</p>
+<p>Thereafter it runs as a &quot;daemon process&quot; and diagnostics are not
+written to any terminal but to the file <em class="file">btsched_reps</em>.</p>
 <p>In the event of any problems this file should be examined.</p>
 <p>
 </p>

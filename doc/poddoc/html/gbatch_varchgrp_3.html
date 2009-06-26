@@ -9,8 +9,10 @@
 
 <body style="background-color: white">
 
-<p><a name="__index__"></a></p>
+
 <!-- INDEX BEGIN -->
+<div name="index">
+<p><a name="__index__"></a></p>
 <!--
 
 <ul>
@@ -23,7 +25,11 @@
 	<li><a href="#copyright">COPYRIGHT</a></li>
 	<li><a href="#author">AUTHOR</a></li>
 </ul>
+
 -->
+
+
+</div>
 <!-- INDEX END -->
 
 <p>
@@ -46,11 +52,11 @@
 <h1><a name="description">DESCRIPTION</a></h1>
 <p>The function <strong>gbatch_varchgrp</strong> is used to attempt to change the group ownership of a variable.</p>
 <p><em>fd</em> is a file descriptor which was previously returned by a
-successful call to gbatch_open(3).</p>
+successful call to <code>gbatch_open(3)</code>.</p>
 <p><em>flags</em> is 0 or <code>GBATCH_FLAG_IGNORESEQ</code> to ignore recent changes to
 the variable list if possible.</p>
 <p><em>slot</em> is the slot number corresponding to the variable as returned
-by <code>gbatch_varlist(3)</code> or xb_varfindslot(3).</p>
+by <code>gbatch_varlist(3)</code> or <code>xb_varfindslot(3)</code>.</p>
 <p>
 </p>
 <hr />
@@ -61,12 +67,12 @@ defined in the include file \fBgbatch.h\fR.</p>
 </p>
 <hr />
 <h1><a name="see_also">SEE ALSO</a></h1>
-<p>gbatch_jobchown(3),
-gbatch_jobchgrp(3),
-gbatch_jobchmod(3),
-gbatch_newgrp(3),
-gbatch_varchown(3),
-gbatch_varchmod(3).</p>
+<p><code>gbatch_jobchown(3)</code>,
+<code>gbatch_jobchgrp(3)</code>,
+<code>gbatch_jobchmod(3)</code>,
+<code>gbatch_newgrp(3)</code>,
+<code>gbatch_varchown(3)</code>,
+<code>gbatch_varchmod(3)</code>.</p>
 <p>
 </p>
 <hr />

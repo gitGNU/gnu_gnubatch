@@ -9,8 +9,10 @@
 
 <body style="background-color: white">
 
-<p><a name="__index__"></a></p>
+
 <!-- INDEX BEGIN -->
+<div name="index">
+<p><a name="__index__"></a></p>
 <!--
 
 <ul>
@@ -23,7 +25,11 @@
 	<li><a href="#copyright">COPYRIGHT</a></li>
 	<li><a href="#author">AUTHOR</a></li>
 </ul>
+
 -->
+
+
+</div>
 <!-- INDEX END -->
 
 <p>
@@ -45,11 +51,11 @@
 <h1><a name="description">DESCRIPTION</a></h1>
 <p>The function <strong>gbatch_varchcomm</strong> is used to change the comment which is associated with a variable</p>
 <p><em>fd</em> is a file descriptor which was previously returned by a
-successful call to gbatch_open(3).</p>
+successful call to <code>gbatch_open(3)</code>.</p>
 <p><em>flags</em> is 0 or <code>GBATCH_FLAG_IGNORESEQ</code> to ignore recent changes to
 the variable list if possible.</p>
 <p><em>slot</em> is the slot number corresponding to the variable as returned
-by <code>gbatch_varlist(3)</code> or xb_varfindslot(3).</p>
+by <code>gbatch_varlist(3)</code> or <code>xb_varfindslot(3)</code>.</p>
 <p><em>newcomment</em> is the proposed new comment for the variable.</p>
 <p>
 </p>
@@ -61,16 +67,16 @@ defined in the include file \fBgbatch.h\fR.</p>
 </p>
 <hr />
 <h1><a name="see_also">SEE ALSO</a></h1>
-<p>vb_varfind(3),
-gbatch_varadd(3),
-gbatch_varchgrp(3),
-gbatch_varchmod(3),
-gbatch_varchown(3),
-gbatch_vardel(3),
-gbatch_varlist(3),
-gbatch_varread(3),
-gbatch_varrename(3),
-gbatch_varupd(3).</p>
+<p><code>vb_varfind(3)</code>,
+<code>gbatch_varadd(3)</code>,
+<code>gbatch_varchgrp(3)</code>,
+<code>gbatch_varchmod(3)</code>,
+<code>gbatch_varchown(3)</code>,
+<code>gbatch_vardel(3)</code>,
+<code>gbatch_varlist(3)</code>,
+<code>gbatch_varread(3)</code>,
+<code>gbatch_varrename(3)</code>,
+<code>gbatch_varupd(3)</code>.</p>
 <p>
 </p>
 <hr />

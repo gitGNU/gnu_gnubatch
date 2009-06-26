@@ -9,8 +9,10 @@
 
 <body style="background-color: white">
 
-<p><a name="__index__"></a></p>
+
 <!-- INDEX BEGIN -->
+<div name="index">
+<p><a name="__index__"></a></p>
 <!--
 
 <ul>
@@ -26,7 +28,11 @@
 	<li><a href="#copyright">COPYRIGHT</a></li>
 	<li><a href="#author">AUTHOR</a></li>
 </ul>
+
 -->
+
+
+</div>
 <!-- INDEX END -->
 
 <p>
@@ -59,190 +65,158 @@ display.</p>
 <hr />
 <h1><a name="options">OPTIONS</a></h1>
 <p>Note that the order of treatment, letters and keywords described below
-may be modified by editing the file <em>btrest.help</em> -
-see btsyntax(5).</p>
-<p>The environment variable on which options are supplied is <a href="#item_gbch_q"><code>GBCH_Q</code></a> and the
-environment variable to specify the help file is <a href="#item_btqconf"><code>BTQCONF</code></a>.</p>
+may be modified by editing the file <em class="file">btrest.help</em> -
+see <code>btsyntax(5)</code>.</p>
+<p>The environment variable on which options are supplied is <a href="#gbch_q"><code>GBCH_Q</code></a> and the
+environment variable to specify the help file is <a href="#btqconf"><code>BTQCONF</code></a>.</p>
 <p>Certain commands available on-screen enable many of these options to
 be changed and saved in configuration files.</p>
 <dl>
-<dt><strong><a name="item__2d_3f_or__2bexplain">-? or +explain</a></strong>
+<dt><strong><a name="or_explain" class="item">-? or +explain</a></strong></dt>
 
 <dd>
 <p>Causes a summary of the other options to be displayed without taking
 further action or entering the interactive display.</p>
 </dd>
-</li>
-<dt><strong><a name="item__2da_or__2bno_2dconfirm_2ddelete">-A or +no-confirm-delete</a></strong>
+<dt><strong><a name="a_or_no_confirm_delete" class="item">-A or +no-confirm-delete</a></strong></dt>
 
 <dd>
 <p>Suppress confirmation request for delete operations.</p>
 </dd>
-</li>
-<dt><strong><a name="item__2da_or__2bconfirm_2ddelete">-a or +confirm-delete</a></strong>
+<dt><strong><a name="a_or_confirm_delete" class="item">-a or +confirm-delete</a></strong></dt>
 
 <dd>
 <p>Ask confirmation of delete operations (this is the default).</p>
 </dd>
-</li>
-<dt><strong><a name="item__2db_or__2bno_2dhelp_2dbox">-B or +no-help-box</a></strong>
+<dt><strong><a name="b_or_no_help_box" class="item">-B or +no-help-box</a></strong></dt>
 
 <dd>
 <p>Put help messages in inverse video rather than in a box (this is the default).</p>
 </dd>
-</li>
-<dt><strong><a name="item__2db_or__2bhelp_2dbox">-b or +help-box</a></strong>
+<dt><strong><a name="b_or_help_box" class="item">-b or +help-box</a></strong></dt>
 
 <dd>
 <p>Put help messages in a box rather than displaying inverse video.</p>
 </dd>
-</li>
-<dt><strong><a name="item__2de_or__2bno_2derror_2dbox">-E or +no-error-box</a></strong>
+<dt><strong><a name="e_or_no_error_box" class="item">-E or +no-error-box</a></strong></dt>
 
 <dd>
 <p>Put error messages in inverse video rather than in a box.</p>
 </dd>
-</li>
-<dt><strong><a name="item__2de_or__2berror_2dbox">-e or +error-box</a></strong>
+<dt><strong><a name="e_or_error_box" class="item">-e or +error-box</a></strong></dt>
 
 <dd>
 <p>Put error messages in a box rather than displaying inverse video.</p>
 </dd>
-</li>
-<dt><strong><a name="item__2dg_group_or__2bjust_2dgroup_group">-g <em>group</em> or +just-group <em>group</em></a></strong>
+<dt><strong><a name="g_group_or_just_group_group" class="item">-g <em>group</em> or +just-group <em>group</em></a></strong></dt>
 
 <dd>
 <p>Restrict the output to jobs owned by the <em>group</em> specified. Cancel
 this argument by giving a single <code>-</code> sign as an argument. The group
 name may be a pattern with shell-like wild cards.</p>
-</dd>
-<dd>
 <p>The wild card options are as described in the documentation of gbch-jlist(1).</p>
 </dd>
-</li>
-<dt><strong><a name="item__2dh_or__2bkeep_2dchar_2dhelp">-H or +keep-char-help</a></strong>
+<dt><strong><a name="h_or_keep_char_help" class="item">-H or +keep-char-help</a></strong></dt>
 
 <dd>
 <p>When displaying a help screen, interpret the next key press as a
 command as well as clearing the help screen. This is the default.</p>
 </dd>
-</li>
-<dt><strong><a name="item__2dh_or__2blose_2dchar_2dhelp">-h or +lose-char-help</a></strong>
+<dt><strong><a name="h_or_lose_char_help" class="item">-h or +lose-char-help</a></strong></dt>
 
 <dd>
 <p>Discard whatever key press is made to clear a help screen.</p>
 </dd>
-</li>
-<dt><strong><a name="item__2dj_or__2bjobs_2dscreen">-j or +jobs-screen</a></strong>
+<dt><strong><a name="j_or_jobs_screen" class="item">-j or +jobs-screen</a></strong></dt>
 
 <dd>
 <p>Commence display in jobs screen. This is the default unless there are
 no jobs to be viewed.</p>
 </dd>
-</li>
-<dt><strong><a name="item__2dl_or__2blocal_2donly">-l or +local-only</a></strong>
+<dt><strong><a name="l_or_local_only" class="item">-l or +local-only</a></strong></dt>
 
 <dd>
 <p>Only display jobs local to the machine.</p>
 </dd>
-</li>
-<dt><strong><a name="item__2dn_or__2bfollow_2djob">-N or +follow-job</a></strong>
+<dt><strong><a name="n_or_follow_job" class="item">-N or +follow-job</a></strong></dt>
 
 <dd>
 <p>If a job or variable moves on the screen, try to follow it and do not
 try to retain relative screen positions.</p>
 </dd>
-</li>
-<dt><strong><a name="item__2dq_name_or__2bjob_2dqueue_name">-q <em>name</em> or +job-queue <em>name</em></a></strong>
+<dt><strong><a name="q_name_or_job_queue_name" class="item">-q <em>name</em> or +job-queue <em>name</em></a></strong></dt>
 
 <dd>
 <p>Restricts attention to jobs with the queue prefix <em>name</em>. Cancel
 this argument by giving a single <code>-</code> sign as an argument. The queue
 name may be a pattern with shell-like wild cards.</p>
-</dd>
-<dd>
 <p>The wild card options are as described in the documentation of gbch-jlist(1).</p>
-</dd>
-<dd>
 <p>The queue prefix is deleted from the titles of jobs which are
 displayed.</p>
 </dd>
-</li>
-<dt><strong><a name="item__2dr_or__2bnetwork_2dwide">-r or +network-wide</a></strong>
+<dt><strong><a name="r_or_network_wide" class="item">-r or +network-wide</a></strong></dt>
 
 <dd>
 <p>Display jobs on all connected hosts.</p>
 </dd>
-</li>
-<dt><strong><a name="item__2ds_or__2bkeep_2dcursor">-s or +keep-cursor</a></strong>
+<dt><strong><a name="s_or_keep_cursor" class="item">-s or +keep-cursor</a></strong></dt>
 
 <dd>
 <p>If a job or variable moves on the screen, try to preserve the relative
 position of the cursor on the screen rather than following the job or
 variable.</p>
 </dd>
-</li>
-<dt><strong><a name="item__2du_user_or__2bjust_2duser_user">-u <em>user</em> or +just-user <em>user</em></a></strong>
+<dt><strong><a name="u_user_or_just_user_user" class="item">-u <em>user</em> or +just-user <em>user</em></a></strong></dt>
 
 <dd>
 <p>Restrict the output to jobs owned by the <em>user</em> specified. Cancel
 this argument by giving a <code>-</code> parameter.</p>
-</dd>
-<dd>
 <p>The user name may be a pattern with shell-like wild cards.</p>
-</dd>
-<dd>
 <p>The wild card options are as described in the documentation of gbch-jlist(1).</p>
 </dd>
-</li>
-<dt><strong><a name="item__2dv_or__2bvars_2dscreen">-v or +vars-screen</a></strong>
+<dt><strong><a name="v_or_vars_screen" class="item">-v or +vars-screen</a></strong></dt>
 
 <dd>
 <p>Commence display in variables screen.</p>
 </dd>
-</li>
-<dt><strong><a name="item__2dz_or__2bno_2dnull_2dqueues">-Z or +no-null-queues</a></strong>
+<dt><strong><a name="z_or_no_null_queues" class="item">-Z or +no-null-queues</a></strong></dt>
 
 <dd>
 <p>In conjunction with the <strong>-q</strong> parameter, do not include jobs with no
 queue prefix in the list.</p>
 </dd>
-</li>
-<dt><strong><a name="item__2dz_or__2bnull_2dqueues">-z or +null-queues</a></strong>
+<dt><strong><a name="z_or_null_queues" class="item">-z or +null-queues</a></strong></dt>
 
 <dd>
 <p>In conjunction with the <strong>-q</strong> parameter, include jobs with no queue
 prefix in the list.</p>
 </dd>
-</li>
 </dl>
 <p>
 </p>
 <hr />
 <h1><a name="files">FILES</a></h1>
-<p><em>~/.gnubatch</em>
+<p><em class="file">~/.gnubatch</em>
 configuration file (home directory)</p>
-<p><em>.gnubatch</em>
+<p><em class="file">.gnubatch</em>
 configuration file (current directory)</p>
-<p><em>btq.help</em>
+<p><em class="file">btq.help</em>
 message file</p>
 <p>
 </p>
 <hr />
 <h1><a name="environment">ENVIRONMENT</a></h1>
 <dl>
-<dt><strong><a name="item_gbch_q">GBCH_Q</a></strong>
+<dt><strong><a name="gbch_q" class="item">GBCH_Q</a></strong></dt>
 
 <dd>
 <p>space-separated options to override defaults.</p>
 </dd>
-</li>
-<dt><strong><a name="item_btqconf">BTQCONF</a></strong>
+<dt><strong><a name="btqconf" class="item">BTQCONF</a></strong></dt>
 
 <dd>
 <p>location of alternative help file.</p>
 </dd>
-</li>
 </dl>
 <p>
 </p>
@@ -250,13 +224,13 @@ message file</p>
 <h1><a name="see_also">SEE ALSO</a></h1>
 <p>gbch-jlist(1),
 gbch-vlist(1),
-btsyntax(5),</p>
+<code>btsyntax(5)</code>,</p>
 <p>
 </p>
 <hr />
 <h1><a name="diagnostics">DIAGNOSTICS</a></h1>
 <p>Various diagnostics are read and printed as required from the message
-file  <em>btqq.help</em>.</p>
+file  <em class="file">btqq.help</em>.</p>
 <p>Messages about key conflicts are probably because entries in your
 <em>terminfo</em> file contain duplications. Please see the <em>GNUbatch
 Administration Guide</em>.</p>

@@ -9,8 +9,10 @@
 
 <body style="background-color: white">
 
-<p><a name="__index__"></a></p>
+
 <!-- INDEX BEGIN -->
+<div name="index">
+<p><a name="__index__"></a></p>
 <!--
 
 <ul>
@@ -23,7 +25,11 @@
 	<li><a href="#copyright">COPYRIGHT</a></li>
 	<li><a href="#author">AUTHOR</a></li>
 </ul>
+
 -->
+
+
+</div>
 <!-- INDEX END -->
 
 <p>
@@ -47,51 +53,45 @@
 <h1><a name="description">DESCRIPTION</a></h1>
 <p>The function <strong>gbatch_jobop()</strong> is used to perform an operation on a job.</p>
 <p><em>fd</em> is a file descriptor which was previously returned by a
-successful call to gbatch_open(3).</p>
+successful call to <code>gbatch_open(3)</code>.</p>
 <p><em>flags</em> is zero or <code>GBATCH_FLAG_IGNORESEQ</code> to ignore recent changes
 to the job list.</p>
 <p><em>slot</em> is the slot number corresponding to the job as returned by
-<code>gbatch_joblist(3)</code> or xb_jobfindslot(3).</p>
+<code>gbatch_joblist(3)</code> or <code>xb_jobfindslot(3)</code>.</p>
 <p><em>op</em> is one of the following:</p>
 <dl>
-<dt><strong><a name="item_xbapi_jop_setrun">XBAPI_JOP_SETRUN</a></strong>
+<dt><strong><a name="xbapi_jop_setrun" class="item">XBAPI_JOP_SETRUN</a></strong></dt>
 
 <dd>
 <p>Set job running</p>
 </dd>
-</li>
-<dt><strong><a name="item_xbapi_jop_setcanc">XBAPI_JOP_SETCANC</a></strong>
+<dt><strong><a name="xbapi_jop_setcanc" class="item">XBAPI_JOP_SETCANC</a></strong></dt>
 
 <dd>
 <p>Cancel a job</p>
 </dd>
-</li>
-<dt><strong><a name="item_xbapi_jop_force">XBAPI_JOP_FORCE</a></strong>
+<dt><strong><a name="xbapi_jop_force" class="item">XBAPI_JOP_FORCE</a></strong></dt>
 
 <dd>
 <p>Force a job to start</p>
 </dd>
-</li>
-<dt><strong><a name="item_xbapi_jop_forceadv">XBAPI_JOP_FORCEADV</a></strong>
+<dt><strong><a name="xbapi_jop_forceadv" class="item">XBAPI_JOP_FORCEADV</a></strong></dt>
 
 <dd>
 <p>Force to start and advance time</p>
 </dd>
-</li>
-<dt><strong><a name="item_xbapi_jop_advtime">XBAPI_JOP_ADVTIME</a></strong>
+<dt><strong><a name="xbapi_jop_advtime" class="item">XBAPI_JOP_ADVTIME</a></strong></dt>
 
 <dd>
 <p>Advance to next repeat</p>
 </dd>
-</li>
-<dt><strong><a name="item_xbapi_jop_kill">XBAPI_JOP_KILL</a></strong>
+<dt><strong><a name="xbapi_jop_kill" class="item">XBAPI_JOP_KILL</a></strong></dt>
 
 <dd>
 <p>Kill job</p>
 </dd>
-</li>
 </dl>
-<p><em>param</em> is only relevant to <a href="#item_xbapi_jop_kill"><code>XBAPI_JOP_KILL</code></a>, in which case it gives
+<p><em>param</em> is only relevant to <a href="#xbapi_jop_kill"><code>XBAPI_JOP_KILL</code></a>, in which case it gives
 the signal number to kill the job.</p>
 <p>
 </p>
@@ -103,14 +103,14 @@ defined in the include file \fBgbatch.h\fR.</p>
 </p>
 <hr />
 <h1><a name="see_also">SEE ALSO</a></h1>
-<p>gbatch_jobadd(3),
-gbatch_jobdata(3),
-gbatch_jobdel(3),
-gbatch_jobfind(3),
-gbatch_joblist(3),
-gbatch_jobmon(3),
-gbatch_jobread(3),
-gbatch_jobupd(3).</p>
+<p><code>gbatch_jobadd(3)</code>,
+<code>gbatch_jobdata(3)</code>,
+<code>gbatch_jobdel(3)</code>,
+<code>gbatch_jobfind(3)</code>,
+<code>gbatch_joblist(3)</code>,
+<code>gbatch_jobmon(3)</code>,
+<code>gbatch_jobread(3)</code>,
+<code>gbatch_jobupd(3)</code>.</p>
 <p>
 </p>
 <hr />

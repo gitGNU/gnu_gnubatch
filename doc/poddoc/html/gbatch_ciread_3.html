@@ -9,8 +9,10 @@
 
 <body style="background-color: white">
 
-<p><a name="__index__"></a></p>
+
 <!-- INDEX BEGIN -->
+<div name="index">
+<p><a name="__index__"></a></p>
 <!--
 
 <ul>
@@ -23,7 +25,11 @@
 	<li><a href="#copyright">COPYRIGHT</a></li>
 	<li><a href="#author">AUTHOR</a></li>
 </ul>
+
 -->
+
+
+</div>
 <!-- INDEX END -->
 
 <p>
@@ -46,7 +52,7 @@
 interpreters from the given server. This may be invoked by any user,
 no special permission is required.</p>
 <p><em>fd</em> is a file descriptor which was previously returned by a
-successful call to gbatch_open(3).</p>
+successful call to <code>gbatch_open(3)</code>.</p>
 <p><em>flags</em> is currently unsused, but is reserved for future use.</p>
 <p><em>numcis</em> is a pointer to an integer which upon return will contain
 the number of command interpreter structures returned in
@@ -55,7 +61,7 @@ if some have been deleted).</p>
 <p><em>cilist</em> is a pointer to which a vector of command interpreter
 structures will be assigned by this routine. The user should not
 attempt to free the memory used by this structure as it is owned by
-the API. The list returned may possibly have ``holes'' in it where
+the API. The list returned may possibly have &quot;holes&quot; in it where
 previously-created command interpreters have been deleted. These holes
 can be identified by having a null <code>ci_name</code> field.</p>
 <p>The index number of each element in the vector is the number which
@@ -70,9 +76,9 @@ calls.</p>
 </p>
 <hr />
 <h1><a name="see_also">SEE ALSO</a></h1>
-<p>gbatch_ciadd(3),
-gbatch_cidel(3),
-gbatch_ciupd(3).</p>
+<p><code>gbatch_ciadd(3)</code>,
+<code>gbatch_cidel(3)</code>,
+<code>gbatch_ciupd(3)</code>.</p>
 <p>
 </p>
 <hr />

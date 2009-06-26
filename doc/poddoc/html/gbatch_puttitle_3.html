@@ -9,8 +9,10 @@
 
 <body style="background-color: white">
 
-<p><a name="__index__"></a></p>
+
 <!-- INDEX BEGIN -->
+<div name="index">
+<p><a name="__index__"></a></p>
 <!--
 
 <ul>
@@ -23,7 +25,11 @@
 	<li><a href="#copyright">COPYRIGHT</a></li>
 	<li><a href="#author">AUTHOR</a></li>
 </ul>
+
 -->
+
+
+</div>
 <!-- INDEX END -->
 
 <p>
@@ -42,10 +48,10 @@
 <h1><a name="description">DESCRIPTION</a></h1>
 <p>The function <strong>gbatch_puttitle</strong> is used to insert a new or replacement
 title into the string table of a job structure, possibly automatically
-inserting the current queue name as set by gbatch_setqueue(3).</p>
+inserting the current queue name as set by <code>gbatch_setqueue(3)</code>.</p>
 <p><em>fd</em> is a file descriptor which was previously returned by a
-successful call to gbatch_open(3), or <code>-1</code> to disregard any queue name
-set by gbatch_setqueue(3).</p>
+successful call to <code>gbatch_open(3)</code>, or <code>-1</code> to disregard any queue name
+set by <code>gbatch_setqueue(3)</code>.</p>
 <p><em>jobp</em> is a pointer which contains the details of the job.</p>
 <p><em>title</em> is the required new title or <code>NULL</code> if the title is to be
 deleted. If <em>fd</em> is a valid API descriptor, then any queue name set
@@ -62,24 +68,24 @@ in doubt.</p>
 </p>
 <hr />
 <h1><a name="see_also">SEE ALSO</a></h1>
-<p>gbatch_delarg(3),
-gbatch_delenv(3),
-gbatch_delredir(3),
-gbatch_getarg(3),
-gbatch_getdirect(3),
-gbatch_getenv(3),
-gbatch_getenvlist(3),
-gbatch_gethenv(3),
-gbatch_getredir(3),
-gbatch_gettitle(3),
-gbatch_putarg(3),
-gbatch_putarglist(3),
-gbatch_putdirect(3),
-gbatch_putenv(3),
-gbatch_putenvlist(3),
-gbatch_putredir(3),
-gbatch_putredirlist(3),
-gbatch_setqueue(3).</p>
+<p><code>gbatch_delarg(3)</code>,
+<code>gbatch_delenv(3)</code>,
+<code>gbatch_delredir(3)</code>,
+<code>gbatch_getarg(3)</code>,
+<code>gbatch_getdirect(3)</code>,
+<code>gbatch_getenv(3)</code>,
+<code>gbatch_getenvlist(3)</code>,
+<code>gbatch_gethenv(3)</code>,
+<code>gbatch_getredir(3)</code>,
+<code>gbatch_gettitle(3)</code>,
+<code>gbatch_putarg(3)</code>,
+<code>gbatch_putarglist(3)</code>,
+<code>gbatch_putdirect(3)</code>,
+<code>gbatch_putenv(3)</code>,
+<code>gbatch_putenvlist(3)</code>,
+<code>gbatch_putredir(3)</code>,
+<code>gbatch_putredirlist(3)</code>,
+<code>gbatch_setqueue(3)</code>.</p>
 <p>
 </p>
 <hr />

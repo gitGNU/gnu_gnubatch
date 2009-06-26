@@ -9,8 +9,10 @@
 
 <body style="background-color: white">
 
-<p><a name="__index__"></a></p>
+
 <!-- INDEX BEGIN -->
+<div name="index">
+<p><a name="__index__"></a></p>
 <!--
 
 <ul>
@@ -24,7 +26,11 @@
 	<li><a href="#copyright">COPYRIGHT</a></li>
 	<li><a href="#author">AUTHOR</a></li>
 </ul>
+
 -->
+
+
+</div>
 <!-- INDEX END -->
 
 <p>
@@ -43,12 +49,12 @@
 <hr />
 <h1><a name="description">DESCRIPTION</a></h1>
 <p>Note that this routine is not available in the Windows
-version, please see &lt;a href=``#Xb_setmon_def''&gt;the section on
+version, please see &lt;a href=&quot;#Xb_setmon_def&quot;&gt;the section on
 gbatch_setmon&lt;/a&gt; which covers both jobs and variables.</p>
 <p>The function <strong>gbatch_varmon</strong> is used to set a function to monitor changes
 to the variables list.</p>
 <p><em>fd</em> is a file descriptor which was previously returned by a
-successful call to gbatch_open(3).</p>
+successful call to <code>gbatch_open(3)</code>.</p>
 <p><em>fn</em> is a pointer to a function which will handle the changes to the
 list or <code>NULL</code>, which cancels any previous call. This function will
 be called with <em>fd</em> as an argument when any change is noted. The API
@@ -86,9 +92,9 @@ defined in the include file \fBgbatch.h\fR.</p>
 </p>
 <hr />
 <h1><a name="see_also">SEE ALSO</a></h1>
-<p>gbatch_open(3),
-gbatch_close(3),
-gbatch_jobmon(3).</p>
+<p><code>gbatch_open(3)</code>,
+<code>gbatch_close(3)</code>,
+<code>gbatch_jobmon(3)</code>.</p>
 <p>
 </p>
 <hr />

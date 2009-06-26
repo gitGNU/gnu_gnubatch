@@ -9,8 +9,10 @@
 
 <body style="background-color: white">
 
-<p><a name="__index__"></a></p>
+
 <!-- INDEX BEGIN -->
+<div name="index">
+<p><a name="__index__"></a></p>
 <!--
 
 <ul>
@@ -23,7 +25,11 @@
 	<li><a href="#copyright">COPYRIGHT</a></li>
 	<li><a href="#author">AUTHOR</a></li>
 </ul>
+
 -->
+
+
+</div>
 <!-- INDEX END -->
 
 <p>
@@ -47,7 +53,7 @@
 interpreter on a <strong>GNUbatch</strong> server. The invoking user must have
 <em>special create</em> permission or the call will be rejected.</p>
 <p><em>fd</em> is a file descriptor which was previously returned by a
-successful call to gbatch_open(3).</p>
+successful call to <code>gbatch_open(3)</code>.</p>
 <p><em>flags</em> is currently unused, but is reserved for future extensions.</p>
 <p><em>indx</em> is the number of the command interpreter to be updated (see gbatch_ciread(3)).</p>
 <p><em>newci</em> is a pointer to a structure containing the new command
@@ -62,9 +68,9 @@ defined in the include file \fBgbatch.h\fR.</p>
 </p>
 <hr />
 <h1><a name="see_also">SEE ALSO</a></h1>
-<p>gbatch_ciadd(3),
-gbatch_cidel(3),
-gbatch_ciread(3).</p>
+<p><code>gbatch_ciadd(3)</code>,
+<code>gbatch_cidel(3)</code>,
+<code>gbatch_ciread(3)</code>.</p>
 <p>
 </p>
 <hr />

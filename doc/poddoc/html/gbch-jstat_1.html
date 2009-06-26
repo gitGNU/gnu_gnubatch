@@ -9,8 +9,10 @@
 
 <body style="background-color: white">
 
-<p><a name="__index__"></a></p>
+
 <!-- INDEX BEGIN -->
+<div name="index">
+<p><a name="__index__"></a></p>
 <!--
 
 <ul>
@@ -27,7 +29,11 @@
 	<li><a href="#copyright">COPYRIGHT</a></li>
 	<li><a href="#author">AUTHOR</a></li>
 </ul>
+
 -->
+
+
+</div>
 <!-- INDEX END -->
 
 <p>
@@ -66,112 +72,97 @@ diagnostic) if some other error occurs, e.g. the job does not exist.</p>
 <hr />
 <h1><a name="options">OPTIONS</a></h1>
 <p>The environment variable on which options are supplied is <code>BTJSTAT</code> and the
-environment variable to specify the help file is <a href="#item_btrestconf"><code>BTRESTCONF</code></a>.</p>
+environment variable to specify the help file is <a href="#btrestconf"><code>BTRESTCONF</code></a>.</p>
 <dl>
-<dt><strong><a name="item__2d_3f_or__2bexplain">-? or +explain</a></strong>
+<dt><strong><a name="or_explain" class="item">-? or +explain</a></strong></dt>
 
 <dd>
 <p>Causes a summary of the other options to be displayed without taking
 further action.</p>
 </dd>
-</li>
-<dt><strong><a name="item__2dd_or__2bdefault_2dstates">-d or +default-states</a></strong>
+<dt><strong><a name="d_or_default_states" class="item">-d or +default-states</a></strong></dt>
 
 <dd>
 <p>Cancel a <strong>-s</strong> option and revert to checking whether the job is
 running, just starting or just finishing.</p>
 </dd>
-</li>
-<dt><strong><a name="item__2ds_statecodes_or__2bstate_statecodes">-s <em>statecodes</em> or +state <em>statecodes</em></a></strong>
+<dt><strong><a name="s_statecodes_or_state_statecodes" class="item">-s <em>statecodes</em> or +state <em>statecodes</em></a></strong></dt>
 
 <dd>
 <p>Specify <em>statecodes</em> as the states to be tested for. <em>statecodes</em> is
 a comma-separated list of states exactly as reported by
 gbch-jlist(1). (The strings are read from the message file, and can be
 altered if required). As distributed, they are</p>
-</dd>
 <dl>
-<dt><strong><a name="item_empty_string"><em>empty string</em></a></strong>
+<dt><strong><a name="empty_string" class="item"><em>empty string</em></a></strong></dt>
 
 <dd>
 <p>Ready to run, represented if necessary by two quotes, or an empty
 field preceding a comma, as in</p>
-</dd>
-<dd>
 <pre>
         gbch-jstat -s '' 1234
         gbch-jstat -s ,Done 1234</pre>
 </dd>
-</li>
-<dt><strong><a name="item_done">Done</a></strong>
+<dt><strong><a name="done" class="item">Done</a></strong></dt>
 
 <dd>
 <p>Normal exit</p>
 </dd>
-</li>
-<dt><strong><a name="item_err">Err</a></strong>
+<dt><strong><a name="err" class="item">Err</a></strong></dt>
 
 <dd>
 <p>Error exit</p>
 </dd>
-</li>
-<dt><strong><a name="item_abrt">Abrt</a></strong>
+<dt><strong><a name="abrt" class="item">Abrt</a></strong></dt>
 
 <dd>
 <p>Aborted</p>
 </dd>
-</li>
-<dt><strong><a name="item_canc">Canc</a></strong>
+<dt><strong><a name="canc" class="item">Canc</a></strong></dt>
 
 <dd>
 <p>Cancelled</p>
 </dd>
-</li>
-<dt><strong><a name="item_init">Init</a></strong>
+<dt><strong><a name="init" class="item">Init</a></strong></dt>
 
 <dd>
 <p>Startup stage 1 (included in the default case)</p>
 </dd>
-</li>
-<dt><strong><a name="item_strt">Strt</a></strong>
+<dt><strong><a name="strt" class="item">Strt</a></strong></dt>
 
 <dd>
 <p>Startup stage 2 (included in the default case)</p>
 </dd>
-</li>
-<dt><strong><a name="item_run">Run</a></strong>
+<dt><strong><a name="run" class="item">Run</a></strong></dt>
 
 <dd>
 <p>Running (included in the default case)</p>
 </dd>
-</li>
-<dt><strong><a name="item_fin">Fin</a></strong>
+<dt><strong><a name="fin" class="item">Fin</a></strong></dt>
 
 <dd>
 <p>Terminating (included in the default case)</p>
 </dd>
-</li>
 </dl>
-<p>The state names are case insensitive. If one (typically the ``ready to
-run'' state) is a null string, then this can be tested for by using a
+<p>The state names are case insensitive. If one (typically the &quot;ready to
+run&quot; state) is a null string, then this can be tested for by using a
 null string or two consecutive commas, thus:</p>
 <pre>
         -s ''
         -s ,canc</pre>
-<dt><strong><a name="item__2bfreeze_2dcurrent">+freeze-current</a></strong>
+</dd>
+<dt><strong><a name="freeze_current" class="item">+freeze-current</a></strong></dt>
 
 <dd>
-<p>Save all the current options in a <em>.gnubatch</em> file in the current
+<p>Save all the current options in a <em class="file">.gnubatch</em> file in the current
 directory.</p>
 </dd>
-</li>
-<dt><strong><a name="item__2bfreeze_2dhome">+freeze-home</a></strong>
+<dt><strong><a name="freeze_home" class="item">+freeze-home</a></strong></dt>
 
 <dd>
-<p>Save all the current options in a <em>.gnubatch</em> file in the user's home
+<p>Save all the current options in a <em class="file">.gnubatch</em> file in the user's home
 directory.</p>
 </dd>
-</li>
 </dl>
 <p>
 </p>
@@ -194,29 +185,27 @@ to run or running</p>
 </p>
 <hr />
 <h1><a name="files">FILES</a></h1>
-<p><em>~/.gnubatch</em>
+<p><em class="file">~/.gnubatch</em>
 configuration file (home directory)</p>
-<p><em>.gnubatch</em>
+<p><em class="file">.gnubatch</em>
 configuration file (current directory)</p>
-<p><em>/usr/spool/progs/btrest.help</em>
+<p><em class="file">/usr/spool/progs/btrest.help</em>
 message file</p>
 <p>
 </p>
 <hr />
 <h1><a name="environment">ENVIRONMENT</a></h1>
 <dl>
-<dt><strong><a name="item_gbch_jstat">GBCH_JSTAT</a></strong>
+<dt><strong><a name="gbch_jstat" class="item">GBCH_JSTAT</a></strong></dt>
 
 <dd>
 <p>space-separated options to override defaults.</p>
 </dd>
-</li>
-<dt><strong><a name="item_btrestconf">BTRESTCONF</a></strong>
+<dt><strong><a name="btrestconf" class="item">BTRESTCONF</a></strong></dt>
 
 <dd>
 <p>location of alternative help file.</p>
 </dd>
-</li>
 </dl>
 <p>
 </p>
@@ -224,7 +213,7 @@ message file</p>
 <h1><a name="see_also">SEE ALSO</a></h1>
 <p>gbch-jlist(1),
 gbch-jchange(1),
-btsyntax(5),
+<code>btsyntax(5)</code>,
 gnubatch.conf(5),
 gnubach.hosts(5).</p>
 <p>
@@ -232,7 +221,7 @@ gnubach.hosts(5).</p>
 <hr />
 <h1><a name="diagnostics">DIAGNOSTICS</a></h1>
 <p>Various diagnostics are read and printed as required from the message
-file <em>btrest.help</em>.</p>
+file <em class="file">btrest.help</em>.</p>
 <p>
 </p>
 <hr />

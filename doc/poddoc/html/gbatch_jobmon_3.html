@@ -9,8 +9,10 @@
 
 <body style="background-color: white">
 
-<p><a name="__index__"></a></p>
+
 <!-- INDEX BEGIN -->
+<div name="index">
+<p><a name="__index__"></a></p>
 <!--
 
 <ul>
@@ -20,7 +22,7 @@
 	<li><a href="#description">DESCRIPTION</a></li>
 	<ul>
 
-		<li><a href="#unix_and_linux">Unix and Linux</a></li>
+		<li><a href="#unix_and_gnu_linux">Unix and GNU/Linux</a></li>
 		<li><a href="#windows">Windows</a></li>
 	</ul>
 
@@ -30,7 +32,11 @@
 	<li><a href="#copyright">COPYRIGHT</a></li>
 	<li><a href="#author">AUTHOR</a></li>
 </ul>
+
 -->
+
+
+</div>
 <!-- INDEX END -->
 
 <p>
@@ -57,11 +63,11 @@
 <h1><a name="description">DESCRIPTION</a></h1>
 <p>
 </p>
-<h2><a name="unix_and_linux">Unix and Linux</a></h2>
+<h2><a name="unix_and_gnu_linux">Unix and GNU/Linux</a></h2>
 <p>The function <strong>gbatch_jobmon()</strong> is used to set a function to monitor
 changes to the job queue.</p>
 <p><em>fd</em> is a file descriptor which was previously returned by a
-successful call to gbatch_open(3).</p>
+successful call to <code>gbatch_open(3)</code>.</p>
 <p><em>fn</em> is a pointer to a function which must be declared as returning
 void and taking one <code>const int</code> argument. Alternatively, this may be
 <code>NULL</code> to cancel monitoring.</p>
@@ -117,9 +123,9 @@ application program will probably crash.</p>
 </p>
 <hr />
 <h1><a name="see_also">SEE ALSO</a></h1>
-<p>gbatch_close(3),
-gbatch_open(3),
-gbatch_varmon(3).</p>
+<p><code>gbatch_close(3)</code>,
+<code>gbatch_open(3)</code>,
+<code>gbatch_varmon(3)</code>.</p>
 <p>
 </p>
 <hr />

@@ -9,8 +9,10 @@
 
 <body style="background-color: white">
 
-<p><a name="__index__"></a></p>
+
 <!-- INDEX BEGIN -->
+<div name="index">
+<p><a name="__index__"></a></p>
 <!--
 
 <ul>
@@ -23,7 +25,11 @@
 	<li><a href="#copyright">COPYRIGHT</a></li>
 	<li><a href="#author">AUTHOR</a></li>
 </ul>
+
 -->
+
+
+</div>
 <!-- INDEX END -->
 
 <p>
@@ -53,33 +59,30 @@ variable, starting from its name, in one operation.</p>
 <p>The function <strong>gbatch_varfindslot</strong> is used to retrieve just the slot number of
 a variable, starting from its name.</p>
 <p><em>fd</em> is a file descriptor which was previously returned by a
-successful call to gbatch_open(3).</p>
+successful call to <code>gbatch_open(3)</code>.</p>
 <p><em>flags</em> is zero or the logical OR of one or more of the following
 bits:</p>
 <dl>
-<dt><strong><a name="item_gbatch_flag_localonly">GBATCH_FLAG_LOCALONLY</a></strong>
+<dt><strong><a name="gbatch_flag_localonly" class="item">GBATCH_FLAG_LOCALONLY</a></strong></dt>
 
 <dd>
 <p>Search for variables local to the server only.</p>
 </dd>
-</li>
-<dt><strong><a name="item_gbatch_flag_useronly">GBATCH_FLAG_USERONLY</a></strong>
+<dt><strong><a name="gbatch_flag_useronly" class="item">GBATCH_FLAG_USERONLY</a></strong></dt>
 
 <dd>
 <p>Search for variables owned by the user only.</p>
 </dd>
-</li>
-<dt><strong><a name="item_gbatch_flag_grouponly">GBATCH_FLAG_GROUPONLY</a></strong>
+<dt><strong><a name="gbatch_flag_grouponly" class="item">GBATCH_FLAG_GROUPONLY</a></strong></dt>
 
 <dd>
 <p>Search for variables owned by the group only.</p>
 </dd>
-</li>
 </dl>
 <p><em>vname</em> is the variable name to be searched for.</p>
 <p><em>nid</em> is the IP address (in network byte order) of the host on which
 the searched-for variable is to be located. It should be correct even if
-<a href="#item_gbatch_flag_localonly"><code>GBATCH_FLAG_LOCALONLY</code></a> is specified.</p>
+<a href="#gbatch_flag_localonly"><code>GBATCH_FLAG_LOCALONLY</code></a> is specified.</p>
 <p><em>slot</em> is assigned the slot number corresponding to the variable. It
 may be null is not required, but this would be nearly pointless with
 <strong>gbatch_varfindslot</strong> (other than reporting that the variable was unknown).</p>
@@ -95,17 +98,17 @@ defined in the include file \fBgbatch.h\fR.</p>
 </p>
 <hr />
 <h1><a name="see_also">SEE ALSO</a></h1>
-<p>gbatch_varadd(3),
-gbatch_varchcomm(3),
-gbatch_varchgrp(3),
-gbatch_varchmod(3),
-gbatch_varchown(3),
-gbatch_vardel(3),
-gbatch_varlist(3),
-gbatch_varmon(3),
-gbatch_varread(3),
-gbatch_varrename(3),
-gbatch_varupd(3).</p>
+<p><code>gbatch_varadd(3)</code>,
+<code>gbatch_varchcomm(3)</code>,
+<code>gbatch_varchgrp(3)</code>,
+<code>gbatch_varchmod(3)</code>,
+<code>gbatch_varchown(3)</code>,
+<code>gbatch_vardel(3)</code>,
+<code>gbatch_varlist(3)</code>,
+<code>gbatch_varmon(3)</code>,
+<code>gbatch_varread(3)</code>,
+<code>gbatch_varrename(3)</code>,
+<code>gbatch_varupd(3)</code>.</p>
 <p>
 </p>
 <hr />

@@ -9,8 +9,10 @@
 
 <body style="background-color: white">
 
-<p><a name="__index__"></a></p>
+
 <!-- INDEX BEGIN -->
+<div name="index">
+<p><a name="__index__"></a></p>
 <!--
 
 <ul>
@@ -33,7 +35,11 @@
 	<li><a href="#copyright">COPYRIGHT</a></li>
 	<li><a href="#author">AUTHOR</a></li>
 </ul>
+
 -->
+
+
+</div>
 <!-- INDEX END -->
 
 <p>
@@ -99,7 +105,7 @@ separated from its argument by white space thus</p>
 <p>To save the user from having to specify commonly-used combinations of
 options, there are mechanisms enabling these to be supplied to each
 program automatically.</p>
-<p>One mechanism is the use of a <em>configuration file</em>, <em>.gnubatch</em> in the
+<p>One mechanism is the use of a <em>configuration file</em>, <em class="file">.gnubatch</em> in the
 current or user's home directory. The other is the use of an
 environment variable.</p>
 <p>These files may also be used to specify alternative <em>message files</em>.</p>
@@ -113,54 +119,46 @@ corresponding environment variable.</p>
 <p>Usually options are taken from the following places in order, so that
 later-processed ones override earlier ones:</p>
 <dl>
-<dt><strong><a name="item_standard_defaults">Standard defaults</a></strong>
+<dt><strong><a name="standard_defaults" class="item">Standard defaults</a></strong></dt>
 
 <dd>
 <p>Each program has a set of standard defaults which are used to
 initialise the parmaters when the program is invoked.</p>
 </dd>
-</li>
-<dt><strong><a name="item_user_profile">User profile</a></strong>
+<dt><strong><a name="user_profile" class="item">User profile</a></strong></dt>
 
 <dd>
 <p>In some cases, for example default priority, the user's profile as
 displayed by gbch-user(1) is used to initialise the defaults.</p>
 </dd>
-</li>
-<dt><strong><a name="item_home_directory">Home directory</a></strong>
+<dt><strong><a name="home_directory" class="item">Home directory</a></strong></dt>
 
 <dd>
-<p>The file <em>~/.gnubatch</em> is read, and any options specified therein
+<p>The file <em class="file">~/.gnubatch</em> is read, and any options specified therein
 (i.e. with an assignment to the appropriate name) are interpreted.</p>
 </dd>
-</li>
-<dt><strong><a name="item_environment">Environment</a></strong>
+<dt><strong><a name="environment" class="item">Environment</a></strong></dt>
 
 <dd>
 <p>Any options specified in the appropriate environment variable (you
 will almost certainly have to use quotes when setting it via the shell
 in order to preserve the white space) are read and interpreted.</p>
 </dd>
-</li>
-<dt><strong><a name="item_current_directory">Current Directory</a></strong>
+<dt><strong><a name="current_directory" class="item">Current Directory</a></strong></dt>
 
 <dd>
-<p>The file <em>.gnubatch</em> is read, and any options specified therein
+<p>The file <em class="file">.gnubatch</em> is read, and any options specified therein
 (i.e. with an assignment to the appropriate name) are interpreted.</p>
-</dd>
-<dd>
-<p>Note that this may mean that the <em>.gnubatch</em> file is read twice if the
+<p>Note that this may mean that the <em class="file">.gnubatch</em> file is read twice if the
 command is run from the home directory. Beware therefore of options
 which are cumulative, such as arguments and redirections, and use the
-``cancel existing'' options.</p>
+&quot;cancel existing&quot; options.</p>
 </dd>
-</li>
-<dt><strong><a name="item_command_line">Command line</a></strong>
+<dt><strong><a name="command_line" class="item">Command line</a></strong></dt>
 
 <dd>
 <p>Any options specified on the command line are interpreted last.</p>
 </dd>
-</li>
 </dl>
 <p>Most options have inverses so that it is possible to reset anything
 which may have been set by previously-read options. Extra care should
@@ -174,12 +172,12 @@ directory is also the current directory.</p>
 files, environment and command-line options is the default.</p>
 <p>It may be desirable to change the order of selection of options, in
 to eliminate some alternative locations or to include others.</p>
-<p>The environment variable <a href="#item_gb_configpath"><code>GB_CONFIGPATH</code></a> may be set to a
+<p>The environment variable <a href="#gb_configpath"><code>GB_CONFIGPATH</code></a> may be set to a
 colon-separated list of directories (environment variables and
 <code>~</code><em>user</em> constructs are appropriately interpreted).</p>
 <p>The symbol <code>!</code> is used to represent the relevant environment
 variable, and <code>-</code> is used to represent option arguments.</p>
-<p>The default value of <a href="#item_gb_configpath"><code>GB_CONFIGPATH</code></a> is</p>
+<p>The default value of <a href="#gb_configpath"><code>GB_CONFIGPATH</code></a> is</p>
 <pre>
         ~:!:.:-</pre>
 <p>This provides the interpretation of options in various configuration
@@ -197,7 +195,7 @@ misinterpreted as file names or similar.</p>
 <p>and</p>
 <pre>
         +freeze-current</pre>
-<p>and equivalents do not take into account the value of <a href="#item_gb_configpath"><code>GB_CONFIGPATH</code></a>
+<p>and equivalents do not take into account the value of <a href="#gb_configpath"><code>GB_CONFIGPATH</code></a>
 in any way.</p>
 <p>Finally please note that any non-existent or inaccessible directories
 and files will (usually) be silently ignored. If a configuration file
@@ -213,7 +211,7 @@ inaccessible file in a non-existent or inaccessible directory.</p>
 etc, message files also provide the option letters and keyword names
 used to specify the options.</p>
 <p>For each command, there is a default message file. For most of the
-shell-based commands, this is <em>btrest.help</em>. Alternative message
+shell-based commands, this is <em class="file">btrest.help</em>. Alternative message
 files may be specified using an environment variable or configuration
 file assigning values to a name. For most of the shell-based commands,
 this is <code>BTRESTCONF</code>.</p>
@@ -225,25 +223,21 @@ set up using sequences of the form</p>
 options relate to.</p>
 <p>These sequences define</p>
 <dl>
-<dt><strong><a name="item_a_state_number">A state number</a></strong>
+<dt><strong><a name="a_state_number" class="item">A state number</a></strong></dt>
 
 <dd>
 <p>The state number, in the above example <code>300</code>, which is used internally
 to denote the argument.</p>
 </dd>
-</li>
-<dt><strong><a name="item_option_letters">option letters</a></strong>
+<dt><strong><a name="option_letters" class="item">option letters</a></strong></dt>
 
 <dd>
 <p>A single character, often a letter, but in the above example <code>?</code>,
 which is the single-character variant of the option, thus <code>-?</code>.</p>
-</dd>
-<dd>
 <p>Several option letters, each separated by commas may be defined. To
-define &lt;,&gt; itself as an option ``letter'', use <code>\,</code>.</p>
+define &lt;,&gt; itself as an option &quot;letter&quot;, use <code>\,</code>.</p>
 </dd>
-</li>
-<dt><strong><a name="item_option_keywords">option keywords</a></strong>
+<dt><strong><a name="option_keywords" class="item">option keywords</a></strong></dt>
 
 <dd>
 <p>A string of alphanumerics, possibly including hyphens and underscores,
@@ -251,7 +245,6 @@ is used to denote an option keyword, in the above example
 <code>+explain</code>. Several such keywords may be defined, each separated by
 commas. Note that the case of letters in the keywords is discarded.</p>
 </dd>
-</li>
 </dl>
 <p>
 </p>
@@ -264,42 +257,36 @@ fashion to the search for options, except that the search runs the
 other way.</p>
 <p>The search is in the following order:</p>
 <dl>
-<dt><strong>Current Directory</strong>
+<dt><strong><a name="current_directory2" class="item">Current Directory</a></strong></dt>
 
 <dd>
 <p>If a configuration file in the current directory specifies a location
 for the message file, by means of an assignment to the relevant
 variable (for most shell-based commands this is <code>BTRESTCONF</code>), then
 this file is taken.</p>
-</dd>
-<dd>
 <p>Environment variables in the form <code>$ABC</code> and users' home directories
 in the form <code>~</code><em>user</em> are appropriately expanded. The sequence <code>$0</code>
 is replaced by the name of the program being invoked. (This process
 may run recursively up to a level of 10).</p>
 </dd>
-</li>
-<dt><strong>Environment</strong>
+<dt><strong><a name="environment2" class="item">Environment</a></strong></dt>
 
 <dd>
 <p>If the relevant environment variable (for most shell-based commands
 this is <code>BTRESTCONF</code>) specifies a location, then this is taken.</p>
 </dd>
-</li>
-<dt><strong><a name="item_home_directory">Home Directory</a></strong>
+<dt><strong><a name="home_directory" class="item">Home Directory</a></strong></dt>
 
 <dd>
 <p>A configuration file in the home directory may specify a location for
 the message file.</p>
 </dd>
-</li>
-<dt><strong><a name="item_default_location">Default Location</a></strong>
+<dt><strong><a name="default_location" class="item">Default Location</a></strong></dt>
 
 <dd>
 <p>If none of the above specify a replacment message file then the
 default location is taken.</p>
 </dd>
-</li>
 </dl>
 <p>If a file is specified but does not exist, then this is a fatal
 error.</p>
@@ -307,7 +294,7 @@ error.</p>
 alternative files with a default name.</p>
 <p>Should the file not exist, then the search falls back to a name
 generated by taking the last part of the default file name (for
-example <em>btrest.conf</em>) and substituting this for the last part of the
+example <em class="file">btrest.conf</em>) and substituting this for the last part of the
 file name specified.</p>
 <p>For example if the normal message file for the command were</p>
 <pre>
@@ -326,33 +313,31 @@ made for</p>
 </p>
 <h2><a name="path_to_locate_message_files">Path to locate message files</a></h2>
 <p>The above search path may be modified using the environment variable
-<a href="#item_gb_helppath"><code>GB_HELPPATH</code></a>. The interpretation is very similar to the description
-above for <a href="#item_gb_configpath"><code>GB_CONFIGPATH</code></a>, except that <code>-</code> fields are ignored.</p>
+<a href="#gb_helppath"><code>GB_HELPPATH</code></a>. The interpretation is very similar to the description
+above for <a href="#gb_configpath"><code>GB_CONFIGPATH</code></a>, except that <code>-</code> fields are ignored.</p>
 <p>
 </p>
 <hr />
 <h1><a name="files">FILES</a></h1>
-<p><em>~/.gnubatch</em>
+<p><em class="file">~/.gnubatch</em>
 configuration file (home directory)</p>
-<p><em>.gnubatch</em>
+<p><em class="file">.gnubatch</em>
 configuration file (current directory)</p>
 <p>
 </p>
 <hr />
 <h1><a name="environment">ENVIRONMENT</a></h1>
 <dl>
-<dt><strong><a name="item_gb_configpath">GB_CONFIGPATH</a></strong>
+<dt><strong><a name="gb_configpath" class="item">GB_CONFIGPATH</a></strong></dt>
 
 <dd>
 <p>Path to search for options in.</p>
 </dd>
-</li>
-<dt><strong><a name="item_gb_helppath">GB_HELPPATH</a></strong>
+<dt><strong><a name="gb_helppath" class="item">GB_HELPPATH</a></strong></dt>
 
 <dd>
 <p>Path to search for location of message files in.</p>
 </dd>
-</li>
 </dl>
 <p>
 </p>

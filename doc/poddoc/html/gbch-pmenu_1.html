@@ -9,8 +9,10 @@
 
 <body style="background-color: white">
 
-<p><a name="__index__"></a></p>
+
 <!-- INDEX BEGIN -->
+<div name="index">
+<p><a name="__index__"></a></p>
 <!--
 
 <ul>
@@ -27,7 +29,11 @@
 	<li><a href="#copyright">COPYRIGHT</a></li>
 	<li><a href="#author">AUTHOR</a></li>
 </ul>
+
 -->
+
+
+</div>
 <!-- INDEX END -->
 
 <p>
@@ -77,142 +83,102 @@ it. Alternatively press <strong>q</strong> to quit with no output.</p>
 <hr />
 <h1><a name="options">OPTIONS</a></h1>
 <dl>
-<dt><strong><a name="item__2dh_text"><strong>-h</strong> <em>text</em></a></strong>
+<dt><strong><a name="h_text" class="item"><strong>-h</strong> <em>text</em></a></strong></dt>
 
 <dd>
 <p>Display a heading to be centred at the top of the screen. The heading
 may consist of more than one line, each of which is centred
 separately. When <strong>gbch-pmenu</strong> is invoked from the shell, the heading should be
 enclosed in quotes.</p>
-</dd>
-<dd>
 <p>As an alternative, the header may be provided in the standard
 input. To signify this, the <em>text</em> should be a single <strong>=</strong> sign thus:</p>
-</dd>
-<dd>
 <pre>
  -h =</pre>
-</dd>
-<dd>
 <p>The standard input will be read up to the first blank line to constitute
 the header, and thereafter the selection rows.</p>
 </dd>
-</li>
-<dt><strong><a name="item__2dd_char"><strong>-d</strong> <em>char</em></a></strong>
+<dt><strong><a name="d_char" class="item"><strong>-d</strong> <em>char</em></a></strong></dt>
 
 <dd>
 <p>Use the specified <em>char</em> as a delimiter rather than tab.</p>
 </dd>
-</li>
-<dt><strong><a name="item__2ds_num"><strong>-s</strong> <em>num</em></a></strong>
+<dt><strong><a name="s_num" class="item"><strong>-s</strong> <em>num</em></a></strong></dt>
 
 <dd>
 <p>Initialise the display to select the given item rather than the first
 on entry.</p>
 </dd>
-</li>
-<dt><strong><a name="item__2df_file"><strong>-f</strong> <em>file</em></a></strong>
+<dt><strong><a name="f_file" class="item"><strong>-f</strong> <em>file</em></a></strong></dt>
 
 <dd>
 <p>Take input from the specified file rather than standard input.</p>
 </dd>
-</li>
-<dt><strong><a name="item__2dn_num"><strong>-N</strong> <em>num</em></a></strong>
+<dt><strong><a name="n_num" class="item"><strong>-N</strong> <em>num</em></a></strong></dt>
 
 <dd>
 <p>Enables multiple selection menus to be provided for in one file. The
 standard input is read up to the first line consisting of the given
 number (possibly negative) and a colon. Input is terminated by a blank
 line. Thus the input file might look like:</p>
-</dd>
-<dd>
 <pre>
  1:
  optiona1       description1
  optiona2       description2
  options3       description3</pre>
-</dd>
-<dd>
 <pre>
  2:
  optionb1       description4
  optionb2       description5
  optionb3       description6</pre>
-</dd>
-<dd>
 <p>With the appropriate set of options and descriptions selected by</p>
-</dd>
-<dd>
 <pre>
  -N 1</pre>
-</dd>
-<dd>
 <p>or</p>
-</dd>
-<dd>
 <pre>
  -N 2</pre>
-</dd>
-<dd>
 <p>If headers are to be supplied in the file using <code>-h =</code>, then these
 should follow the numbers with a blank line, thus:</p>
-</dd>
-<dd>
 <pre>
  1:
  Header for first group
  of selections</pre>
-</dd>
-<dd>
 <pre>
  optiona1       description1
  optiona2       description2
  options3       description3</pre>
-</dd>
-<dd>
 <pre>
  2:
  Header for second group</pre>
-</dd>
-<dd>
 <pre>
  optionb1       description4
  optionb2       description5
  optionb3       description6</pre>
 </dd>
-</li>
-<dt><strong><a name="item__2df"><strong>-F</strong></a></strong>
+<dt><strong><a name="f" class="item"><strong>-F</strong></a></strong></dt>
 
 <dd>
-<p>Just return the first field of the selection ``the option'' on exit, not
+<p>Just return the first field of the selection &quot;the option&quot; on exit, not
 the whole line.</p>
 </dd>
-</li>
-<dt><strong><a name="item__2dn"><strong>-n</strong></a></strong>
+<dt><strong><a name="n" class="item"><strong>-n</strong></a></strong></dt>
 
 <dd>
 <p>Return the number (starting at 1) of the row selected on exit, rather
 than the text of the line.</p>
 </dd>
-</li>
-<dt><strong><a name="item__2dm"><strong>-m</strong></a></strong>
+<dt><strong><a name="m" class="item"><strong>-m</strong></a></strong></dt>
 
 <dd>
 <p>Enable multi-selection mode. In this mode several lines may be
 selected, by moving to each line and pressing space. Pressing space
 again deselects the line. A plus sign appears against each choice to
 indicate selection.</p>
-</dd>
-<dd>
 <p>When all have been selected, press <strong>q</strong> to quit.</p>
-</dd>
-<dd>
 <p>The ENTER key behaves slightly differently. If the last action was to
 select or deselect an entry, then the program exits as if <strong>q</strong> had
 been pressed. If the last character was not a space, then the current
 line is selected or deselected.</p>
 </dd>
-</li>
 </dl>
 <p>
 </p>
@@ -223,7 +189,7 @@ files in the directory from which <strong>gbch-pmenu</strong> is run with names:
  item1.menuhelp
  item2/Menuhelp</pre>
 <p>where <code>item1</code> etc are the first field in each choice.</p>
-<p>To provide a ``catch all'' for items without help files, a help file
+<p>To provide a &quot;catch all&quot; for items without help files, a help file
 named</p>
 <pre>
  Menu-summary</pre>

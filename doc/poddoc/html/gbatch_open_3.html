@@ -9,8 +9,10 @@
 
 <body style="background-color: white">
 
-<p><a name="__index__"></a></p>
+
 <!-- INDEX BEGIN -->
+<div name="index">
+<p><a name="__index__"></a></p>
 <!--
 
 <ul>
@@ -23,7 +25,11 @@
 	<li><a href="#see_also">SEE ALSO</a></li>
 	<li><a href="#copyright">COPYRIGHT</a></li>
 </ul>
+
 -->
+
+
+</div>
 <!-- INDEX END -->
 
 <p>
@@ -49,14 +55,14 @@ const char *</strong><em>username</em><strong>, char *</strong><em>passwd</em><s
 <p>The function <strong>gbatch_open</strong> is used to open a connection to the
 <strong>GNUbatch</strong> API. It has two slightly different variants on Windows
 clients.</p>
-<p>The first format, with two arguments, applies to Unix and Linux
+<p>The first format, with two arguments, applies to Unix and GNU/Linux
 applications. The username used is that of the effective userid at the
 time of the call.</p>
 <p>The second format, with three arguments is used on Windows clients and
 specifies the Unix user name in the call. This may not be acceptable
 unless the user is on a static IP address client with a default user
 either matching the user name given or being a user with <em>Write Admin
-File</em> privilege. So if the <em>/etc/</em> file has the
+File</em> privilege. So if the <em class="file">/etc/</em> file has the
 following in:</p>
 <pre>
  mypc  -  client(myuser)</pre>
@@ -67,7 +73,7 @@ privilege will be that of the user logged-in as.</p>
 supplies a password.</p>
 <p>In all cases, <em>hostname</em> is the name of the host being connected to.
 This may be in any format which can be recognised by the network
-library routine gethostbyname(3). <code>localhost</code> is acceptable if the
+library routine <code>gethostbyname(3)</code>. <code>localhost</code> is acceptable if the
 local server is to be used.</p>
 <p><em>servname</em> may be <code>NULL</code> to use a standard service name, otherwise
 an alternative service may be specified.</p>
@@ -79,20 +85,20 @@ will be deliberately filled with nulls as soon as possible after
 entering the routine to minimise the length of time during which
 clear-text passwords are on the stack.</p>
 <p><em>rereg</em>, if non-zero, only applies to DHCP clients, and denotes that
-the Unix host should register the user as the ``primary'' user for the
+the Unix host should register the user as the &quot;primary&quot; user for the
 given client. The main effect of this is to override the user
 permissions for operations being performed by a concurrent <strong>gbch-qw</strong>
 session.</p>
 <p>Note that more than one connection can be open at
 any time with various combinations of user names and hosts.</p>
-<p>When finished, close the conection with a call to gbatch_close(3).</p>
+<p>When finished, close the conection with a call to <code>gbatch_close(3)</code>.</p>
 <p>
 </p>
 <hr />
 <h1><a name="return_values">RETURN VALUES</a></h1>
 <p>The function a non-negative value if successful, which is the <em>file
 descriptor</em> used in various other calls, otherwise an error code as
-defined in the include file <em>gbatch.h</em>.</p>
+defined in the include file <em class="file">gbatch.h</em>.</p>
 <p>
 </p>
 <hr />
@@ -109,11 +115,11 @@ defined in the include file <em>gbatch.h</em>.</p>
 </p>
 <hr />
 <h1><a name="see_also">SEE ALSO</a></h1>
-<p>gbatch_close(3),
-gbatch_newgrp(3),
-gbatch_setqueue(3),
-gbatch_jobmon(3),
-gbatch_varmon(3).</p>
+<p><code>gbatch_close(3)</code>,
+<code>gbatch_newgrp(3)</code>,
+<code>gbatch_setqueue(3)</code>,
+<code>gbatch_jobmon(3)</code>,
+<code>gbatch_varmon(3)</code>.</p>
 <p>
 </p>
 <hr />

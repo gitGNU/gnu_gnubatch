@@ -9,8 +9,10 @@
 
 <body style="background-color: white">
 
-<p><a name="__index__"></a></p>
+
 <!-- INDEX BEGIN -->
+<div name="index">
+<p><a name="__index__"></a></p>
 <!--
 
 <ul>
@@ -31,7 +33,11 @@
 	<li><a href="#copyright">COPYRIGHT</a></li>
 	<li><a href="#author">AUTHOR</a></li>
 </ul>
+
 -->
+
+
+</div>
 <!-- INDEX END -->
 
 <p>
@@ -86,18 +92,17 @@ variables by giving the variable names as arguments following the options.</p>
 <hr />
 <h1><a name="options">OPTIONS</a></h1>
 <p>Note that the order of treatment, letters and keywords described below
-may be modified by editing the file <em>btrest.help</em> - see btsyntax(5).</p>
-<p>The environment variable on which options are supplied is <a href="#item_gbch_vlist"><code>GBCH_VLIST</code></a> and the
-environment variable to specify the help file is <a href="#item_btrestconf"><code>BTRESTCONF</code></a>.</p>
+may be modified by editing the file <em class="file">btrest.help</em> - see <code>btsyntax(5)</code>.</p>
+<p>The environment variable on which options are supplied is <a href="#gbch_vlist"><code>GBCH_VLIST</code></a> and the
+environment variable to specify the help file is <a href="#btrestconf"><code>BTRESTCONF</code></a>.</p>
 <dl>
-<dt><strong><a name="item__2d_3f_or__2bexplain">-? or +explain</a></strong>
+<dt><strong><a name="or_explain" class="item">-? or +explain</a></strong></dt>
 
 <dd>
 <p>causes a summary of the other options to be displayed without taking
 further action.</p>
 </dd>
-</li>
-<dt><strong><a name="item__2db_or__2bbypass_2dmodes">-B or +bypass-modes</a></strong>
+<dt><strong><a name="b_or_bypass_modes" class="item">-B or +bypass-modes</a></strong></dt>
 
 <dd>
 <p>Disregard all modes etc and print full details. This is provided for
@@ -106,77 +111,64 @@ File</em> permission, otherwise it is silently ignored. This option is now
 deprecated as gbch-cvlist(8) is now provided for the purpose for which this
 option was implemented.</p>
 </dd>
-</li>
-<dt><strong><a name="item__2dd_or__2bdefault_2dformat">-D or +default-format</a></strong>
+<dt><strong><a name="d_or_default_format" class="item">-D or +default-format</a></strong></dt>
 
 <dd>
 <p>Revert to the default display format, cancelling the <strong>-F</strong> option.</p>
 </dd>
-</li>
-<dt><strong><a name="item__2df_string_or__2bformat_string">-F <em>string</em> or +format <em>string</em></a></strong>
+<dt><strong><a name="f_string_or_format_string" class="item">-F <em>string</em> or +format <em>string</em></a></strong></dt>
 
 <dd>
 <p>Change the display format to <em>string</em> as defined below.</p>
 </dd>
-</li>
-<dt><strong><a name="item__2dg_group_or__2bjust_2dgroup_group">-g <em>group</em> or +just-group <em>group</em></a></strong>
+<dt><strong><a name="g_group_or_just_group_group" class="item">-g <em>group</em> or +just-group <em>group</em></a></strong></dt>
 
 <dd>
 <p>Restrict the output to variables owned by the <em>group</em> specified. The
 group name may be a pattern with shell-like wild cards. To cancel this
 argument, give a single <strong>-</strong> sign as a group name.</p>
 </dd>
-</li>
-<dt><strong><a name="item__2dh_or__2bheader">-H or +header</a></strong>
+<dt><strong><a name="h_or_header" class="item">-H or +header</a></strong></dt>
 
 <dd>
 <p>generate a header for each column of output.</p>
 </dd>
-</li>
-<dt><strong><a name="item__2dl_or__2blocal_2donly">-L or +local-only</a></strong>
+<dt><strong><a name="l_or_local_only" class="item">-L or +local-only</a></strong></dt>
 
 <dd>
 <p>list only variables local to the current host.</p>
 </dd>
-</li>
-<dt><strong><a name="item__2dn_or__2bno_2dheader">-N or +no-header</a></strong>
+<dt><strong><a name="n_or_no_header" class="item">-N or +no-header</a></strong></dt>
 
 <dd>
 <p>cancel the <strong>-H</strong> option.</p>
 </dd>
-</li>
-<dt><strong><a name="item__2dr_or__2binclude_2dremotes">-R or +include-remotes</a></strong>
+<dt><strong><a name="r_or_include_remotes" class="item">-R or +include-remotes</a></strong></dt>
 
 <dd>
 <p>list all variables, including those on connected remote hosts.</p>
 </dd>
-</li>
-<dt><strong><a name="item__2du_user__2bjust_2duser_user">-u <em>user</em> +just-user <em>user</em></a></strong>
+<dt><strong><a name="u_user_just_user_user" class="item">-u <em>user</em> +just-user <em>user</em></a></strong></dt>
 
 <dd>
 <p>Restrict the output to variables owned by the <em>user</em> specified. The
 user name may be a pattern with shell-like wild cards.</p>
-</dd>
-<dd>
 <p>To cancel this argument, give a single <strong>-</strong> sign as a user name.</p>
 </dd>
-</li>
-<dt><strong><a name="item__2bfreeze_2dcurrent">+freeze-current</a></strong>
+<dt><strong><a name="freeze_current" class="item">+freeze-current</a></strong></dt>
 
 <dd>
-<p>Save all the current options in a <em>.gnubatch</em> file in the current
-directory with keyword <a href="#item_gbch_vlist"><code>GBCH_VLIST</code></a>. There is no output if this is
+<p>Save all the current options in a <em class="file">.gnubatch</em> file in the current
+directory with keyword <a href="#gbch_vlist"><code>GBCH_VLIST</code></a>. There is no output if this is
 specified, the options are just saved.</p>
 </dd>
-</li>
-<dt><strong><a name="item__2bfreeze_2dhome">+freeze-home</a></strong>
+<dt><strong><a name="freeze_home" class="item">+freeze-home</a></strong></dt>
 
 <dd>
-<p>Save all the current options in a <em>.gnubatch</em> file in the user's home
-directory with keyword <a href="#item_gbch_vlist"><code>GBCH_VLIST</code></a>. There is no output if this is
+<p>Save all the current options in a <em class="file">.gnubatch</em> file in the user's home
+directory with keyword <a href="#gbch_vlist"><code>GBCH_VLIST</code></a>. There is no output if this is
 specified, the options are just saved.</p>
 </dd>
-</li>
 </dl>
 <p>
 </p>
@@ -190,61 +182,52 @@ entry.</p>
 <p>If a header is requested, the appropriate abbreviation is obtained
 from the message file and inserted.</p>
 <dl>
-<dt><strong><a name="item___">%%</a></strong>
+<dt><strong><a name="__" class="item">%%</a></strong></dt>
 
 <dd>
 <p>Insert a single <code>%</code>.</p>
 </dd>
-</li>
-<dt><strong><a name="item__c">%C</a></strong>
+<dt><strong><a name="_c" class="item">%C</a></strong></dt>
 
 <dd>
 <p>Comment field.</p>
 </dd>
-</li>
-<dt><strong><a name="item__e">%E</a></strong>
+<dt><strong><a name="_e" class="item">%E</a></strong></dt>
 
 <dd>
 <p><code>Export</code> if variable is exported</p>
 </dd>
-</li>
-<dt><strong><a name="item__g">%G</a></strong>
+<dt><strong><a name="_g" class="item">%G</a></strong></dt>
 
 <dd>
 <p>Group owner of variable.</p>
 </dd>
-</li>
-<dt><strong><a name="item__k">%K</a></strong>
+<dt><strong><a name="_k" class="item">%K</a></strong></dt>
 
 <dd>
 <p><code>Cluster</code> if the variable is marked clustered</p>
 </dd>
-</li>
-<dt><strong><a name="item__m">%M</a></strong>
+<dt><strong><a name="_m" class="item">%M</a></strong></dt>
 
 <dd>
 <p>Mode as a string of letters with <code>U:</code>, <code>G:</code> or <code>O:</code> prefixes as in
 <code>U:RWSMPUVGHD,G:RSMG,O:SM</code>.</p>
 </dd>
-</li>
-<dt><strong><a name="item__n">%N</a></strong>
+<dt><strong><a name="_n" class="item">%N</a></strong></dt>
 
 <dd>
 <p>Name</p>
 </dd>
-</li>
-<dt><strong><a name="item__u">%U</a></strong>
+<dt><strong><a name="_u" class="item">%U</a></strong></dt>
 
 <dd>
 <p>User name of owner.</p>
 </dd>
-</li>
-<dt><strong><a name="item__v">%V</a></strong>
+<dt><strong><a name="_v" class="item">%V</a></strong></dt>
 
 <dd>
 <p>Value</p>
 </dd>
-</li>
 </dl>
 <p>Note that the various strings such as <code>export</code> etc are read from the
 message file also, so it is possible to modify them as required by the
@@ -259,29 +242,27 @@ field will be blank if the user cannot read the modes.</p>
 </p>
 <hr />
 <h1><a name="files">FILES</a></h1>
-<p><em>~/.gnubatch</em>
+<p><em class="file">~/.gnubatch</em>
 configuration file (home directory)</p>
-<p><em>.gnubatch</em>
+<p><em class="file">.gnubatch</em>
 configuration file (current directory)</p>
-<p><em>btrest.help</em>
+<p><em class="file">btrest.help</em>
 message file</p>
 <p>
 </p>
 <hr />
 <h1><a name="environment">ENVIRONMENT</a></h1>
 <dl>
-<dt><strong><a name="item_gbch_vlist">GBCH_VLIST</a></strong>
+<dt><strong><a name="gbch_vlist" class="item">GBCH_VLIST</a></strong></dt>
 
 <dd>
 <p>space-separated options to override defaults.</p>
 </dd>
-</li>
-<dt><strong><a name="item_btrestconf">BTRESTCONF</a></strong>
+<dt><strong><a name="btrestconf" class="item">BTRESTCONF</a></strong></dt>
 
 <dd>
 <p>location of alternative help file.</p>
 </dd>
-</li>
 </dl>
 <p>
 </p>
@@ -290,7 +271,7 @@ message file</p>
 <p>gbch-jlist(1),
 gbch-q(1),
 gbch-var(1),
-btsyntax(5),
+<code>btsyntax(5)</code>,
 gnubatch.conf(5),
 (5),
 gbch-cjlist(8),
@@ -300,7 +281,7 @@ gbch-cvlist(8).</p>
 <hr />
 <h1><a name="diagnostics">DIAGNOSTICS</a></h1>
 <p>Various diagnostics are read and printed as required from the message
-file <em>btrest.help</em>.</p>
+file <em class="file">btrest.help</em>.</p>
 <p>
 </p>
 <hr />

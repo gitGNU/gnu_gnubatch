@@ -9,8 +9,10 @@
 
 <body style="background-color: white">
 
-<p><a name="__index__"></a></p>
+
 <!-- INDEX BEGIN -->
+<div name="index">
+<p><a name="__index__"></a></p>
 <!--
 
 <ul>
@@ -22,7 +24,11 @@
 	<li><a href="#copyright">COPYRIGHT</a></li>
 	<li><a href="#author">AUTHOR</a></li>
 </ul>
+
 -->
+
+
+</div>
 <!-- INDEX END -->
 
 <p>
@@ -59,41 +65,36 @@ for and there is no confirmation.</p>
 <hr />
 <h1><a name="options">OPTIONS</a></h1>
 <dl>
-<dt><strong><a name="item__2du_user"><strong>-u</strong> <em>user</em></a></strong>
+<dt><strong><a name="u_user" class="item"><strong>-u</strong> <em>user</em></a></strong></dt>
 
 <dd>
 <p>Set password for given user. This may only be for other than the
 current user if <strong>gbch-passwd</strong> is invoked by <strong>root</strong>.</p>
 </dd>
-</li>
-<dt><strong><a name="item__2dp_password"><strong>-p</strong> <em>password</em></a></strong>
+<dt><strong><a name="p_password" class="item"><strong>-p</strong> <em>password</em></a></strong></dt>
 
 <dd>
 <p>Specify the password to be set other than prompting for it.</p>
 </dd>
-</li>
-<dt><strong><a name="item__2df"><strong>-f</strong></a></strong>
+<dt><strong><a name="f" class="item"><strong>-f</strong></a></strong></dt>
 
 <dd>
 <p>It is normally considered an error to include a password for <strong>root</strong>
 for the same reasons that the password file is separate. However this
 option may be set to insist upon it.</p>
 </dd>
-</li>
-<dt><strong><a name="item__2dd"><strong>-d</strong></a></strong>
+<dt><strong><a name="d" class="item"><strong>-d</strong></a></strong></dt>
 
 <dd>
 <p>Delete the user's password from the file.</p>
 </dd>
-</li>
-<dt><strong><a name="item__2df_file"><strong>-F</strong> <em>file</em></a></strong>
+<dt><strong><a name="f_file" class="item"><strong>-F</strong> <em>file</em></a></strong></dt>
 
 <dd>
 <p>Use <em>file</em> to hold the password. The default if no <em>file</em> is given
-is <em>gbch-passwd</em>. Any number of <strong>-F</strong> options may be
+is <em class="file">gbch-passwd</em>. Any number of <strong>-F</strong> options may be
 given to set up several password files at once.</p>
 </dd>
-</li>
 </dl>
 <p>
 </p>

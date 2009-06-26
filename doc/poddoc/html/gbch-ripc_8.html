@@ -9,8 +9,10 @@
 
 <body style="background-color: white">
 
-<p><a name="__index__"></a></p>
+
 <!-- INDEX BEGIN -->
+<div name="index">
+<p><a name="__index__"></a></p>
 <!--
 
 <ul>
@@ -24,7 +26,11 @@
 	<li><a href="#copyright">COPYRIGHT</a></li>
 	<li><a href="#author">AUTHOR</a></li>
 </ul>
+
 -->
+
+
+</div>
 <!-- INDEX END -->
 
 <p>
@@ -74,48 +80,42 @@ version of <strong>GNUbatch</strong> is using those rather than shared memory.</
 <hr />
 <h1><a name="options">OPTIONS</a></h1>
 <dl>
-<dt><strong><a name="item__2da">-A</a></strong>
+<dt><strong><a name="a" class="item">-A</a></strong></dt>
 
 <dd>
 <p>Display details of jobs and variables. This often generates a lot of
 output and is not really necessary.</p>
 </dd>
-</li>
-<dt><strong><a name="item__2dd_secs">-D <em>secs</em></a></strong>
+<dt><strong><a name="d_secs" class="item">-D <em>secs</em></a></strong></dt>
 
 <dd>
 <p>Monitor which process has last attached to the job shared memory
 segment and report apparent corruption, polling every <em>secs</em> seconds.</p>
 </dd>
-</li>
-<dt><strong><a name="item__2dd">-d</a></strong>
+<dt><strong><a name="d" class="item">-d</a></strong></dt>
 
 <dd>
 <p>Delete the IPC facilities after printing out contents. This saves
-messing with arguments to ipcrm(1).</p>
+messing with arguments to <code>ipcrm(1)</code>.</p>
 </dd>
-</li>
-<dt><strong><a name="item__2df">-f</a></strong>
+<dt><strong><a name="f" class="item">-f</a></strong></dt>
 
 <dd>
 <p>Display the free chains for jobs and variables. This generates a lot of
 output and isn't usually necessary.</p>
 </dd>
-</li>
-<dt><strong><a name="item__2dn">-n</a></strong>
+<dt><strong><a name="n" class="item">-n</a></strong></dt>
 
 <dd>
 <p>Suppress display from <strong>-D</strong> option if everything is OK.</p>
 </dd>
-</li>
-<dt><strong><a name="item__2do_outfile">-o <em>outfile</em></a></strong>
+<dt><strong><a name="o_outfile" class="item">-o <em>outfile</em></a></strong></dt>
 
 <dd>
 <p>Output to <em>outfile</em> rather than standard output. Set it to
-<em>/dev/null</em> if you don't want to see any output.</p>
+<em class="file">/dev/null</em> if you don't want to see any output.</p>
 </dd>
-</li>
-<dt><strong><a name="item__2dp_psarg">-P <em>psarg</em></a></strong>
+<dt><strong><a name="p_psarg" class="item">-P <em>psarg</em></a></strong></dt>
 
 <dd>
 <p>Specify argument to <code>ps(1)</code> to invoke if corruption detected when
@@ -123,61 +123,50 @@ monitoring with <strong>-D</strong> option. The output is passed through <code>f
 find the line (if any) with the process id of the process which last
 attached to the shared memory.</p>
 </dd>
-</li>
-<dt><strong><a name="item__2dg">-G</a></strong>
+<dt><strong><a name="g" class="item">-G</a></strong></dt>
 
 <dd>
 <p>Used in conjunction with the <strong>-P</strong> option, the output from <code>ps(1)</code> is
-displayed in full, without passing it through fgrep(1).</p>
+displayed in full, without passing it through <code>fgrep(1)</code>.</p>
 </dd>
-</li>
-<dt><strong><a name="item__2dr">-r</a></strong>
+<dt><strong><a name="r" class="item">-r</a></strong></dt>
 
 <dd>
 <p>Read and display the entries on the message queue. This is normally
-suppressed because they can't be ``peeked at'' or ``unread''.</p>
+suppressed because they can't be &quot;peeked at&quot; or &quot;unread&quot;.</p>
 </dd>
-</li>
-<dt><strong><a name="item__2ds_dir">-S <em>dir</em></a></strong>
+<dt><strong><a name="s_dir" class="item">-S <em>dir</em></a></strong></dt>
 
 <dd>
 <p>This is only relevant for versions of <strong>GNUbatch</strong> which use
 memory-mapped files rather than shared memory. It specifies the
 location of the spool directory. If this is not specified, then the
-master configuration file <em>gnubatch.conf</em> is consulted to find
+master configuration file <em class="file">gnubatch.conf</em> is consulted to find
 the spool directory location, or failing that, the default directory
 is used.</p>
 </dd>
-</li>
-<dt><strong><a name="item__2dx">-x</a></strong>
+<dt><strong><a name="x" class="item">-x</a></strong></dt>
 
 <dd>
 <p>Dump the contents of shared memory or memory-mapped files in
 hexadecimal and ASCII characters.</p>
 </dd>
-</li>
-<dt><strong><a name="item__2db_n">-B <em>n</em></a></strong>
+<dt><strong><a name="b_n" class="item">-B <em>n</em></a></strong></dt>
 
 <dd>
 <p>Where <em>n</em> may be 1 to 8, specify the width of the hexadecimal dump
 output as a number of 32-bit words.</p>
 </dd>
-</li>
-<dt><strong><a name="item__2dn__3cchar_3e">-N &lt;char&gt;</a></strong>
+<dt><strong><a name="n_char" class="item">-N &lt;char&gt;</a></strong></dt>
 
 <dd>
 <p>Replace the character in the ASCII part of the hexadecimal dump to
 represent non-ASCII characters with the specified character (the first
 character of the argument). The default is <code>.</code>.</p>
-</dd>
-<dd>
 <p>To specify a space, you may need to use quotes thus:</p>
-</dd>
-<dd>
 <pre>
         -N ' '</pre>
 </dd>
-</li>
 </dl>
 <p>
 </p>
@@ -198,7 +187,7 @@ corruption is detected.</p>
 <hr />
 <h1><a name="see_also">SEE ALSO</a></h1>
 <p>gbch-start(1).
-btsched(8).</p>
+<code>btsched(8)</code>.</p>
 <p>
 </p>
 <hr />

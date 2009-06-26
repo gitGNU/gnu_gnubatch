@@ -9,8 +9,10 @@
 
 <body style="background-color: white">
 
-<p><a name="__index__"></a></p>
+
 <!-- INDEX BEGIN -->
+<div name="index">
+<p><a name="__index__"></a></p>
 <!--
 
 <ul>
@@ -23,7 +25,11 @@
 	<li><a href="#copyright">COPYRIGHT</a></li>
 	<li><a href="#author">AUTHOR</a></li>
 </ul>
+
 -->
+
+
+</div>
 <!-- INDEX END -->
 
 <p>
@@ -44,7 +50,7 @@
 <hr />
 <h1><a name="description">DESCRIPTION</a></h1>
 <p><strong>gbch-hostedit</strong> is a simple curses-based program to edit host tables for
-<em>gnubatch.hosts</em>, the host table for GNUbatch.</p>
+<em class="file">gnubatch.hosts</em>, the host table for GNUbatch.</p>
 <p>It knows about local addresses (selecting the correct IP address for a
 machine with different IPs on different networks), Windows clients,
 DHCP, trusted hosts, manual connections, probes and timeouts.</p>
@@ -56,33 +62,30 @@ output is to standard output unless the <strong>-o</strong> option is given.</p>
         cp /tmp/hostfile /usr/local/etc/
         rm /tmp/hostfile</pre>
 <p>You will usually have to stop and restart GNUbatch after you have
-done this so that all parts of the system ``know'' about the new hosts,
+done this so that all parts of the system &quot;know&quot; about the new hosts,
 however this may not be necessary in all cases, you may only have to
-``<code>kill -1</code>'' the process id of the xbnetserv process.</p>
+&quot;<code>kill -1</code>&quot; the process id of the xbnetserv process.</p>
 <p>
 </p>
 <hr />
 <h1><a name="options">OPTIONS</a></h1>
 <dl>
-<dt><strong><a name="item__2do_file"><strong>-o</strong> <em>file</em></a></strong>
+<dt><strong><a name="o_file" class="item"><strong>-o</strong> <em>file</em></a></strong></dt>
 
 <dd>
 <p>Output to the named file rather than Standard Output</p>
 </dd>
-</li>
-<dt><strong><a name="item__2ds_char"><strong>-s</strong> <em>char</em></a></strong>
+<dt><strong><a name="s_char" class="item"><strong>-s</strong> <em>char</em></a></strong></dt>
 
 <dd>
 <p>Where <em>char</em> is <code>h</code> or <code>i</code>, sort display by host name or by IP
 address.</p>
 </dd>
-</li>
-<dt><strong><a name="item__2di"><strong>-I</strong></a></strong>
+<dt><strong><a name="i" class="item"><strong>-I</strong></a></strong></dt>
 
 <dd>
 <p>Edit in place; a file argument must be given.</p>
 </dd>
-</li>
 </dl>
 <p>
 </p>
@@ -93,66 +96,56 @@ by <strong>gbch-hostedit</strong>. As with other GNUbatch commands, any commands
 operate upon an existing item will do so with the item to which the
 cursor is moved.</p>
 <dl>
-<dt><strong><a name="item_k_or_cursor_up">k or <em>cursor up</em></a></strong>
+<dt><strong><a name="k_or_cursor_up" class="item">k or <em>cursor up</em></a></strong></dt>
 
 <dd>
 <p>Move cursor up.</p>
 </dd>
-</li>
-<dt><strong><a name="item_j_or_cursor_down">j or <em>cursor down</em></a></strong>
+<dt><strong><a name="j_or_cursor_down" class="item">j or <em>cursor down</em></a></strong></dt>
 
 <dd>
 <p>Move cursor down.</p>
 </dd>
-</li>
-<dt><strong><a name="item_n_or_next_page">N or <em>next page</em></a></strong>
+<dt><strong><a name="n_or_next_page" class="item">N or <em>next page</em></a></strong></dt>
 
 <dd>
 <p>Scroll down a screenful.</p>
 </dd>
-</li>
-<dt><strong><a name="item_p_or_previous_page">P or <em>previous page</em></a></strong>
+<dt><strong><a name="p_or_previous_page" class="item">P or <em>previous page</em></a></strong></dt>
 
 <dd>
 <p>Scroll up a screenful.</p>
 </dd>
-</li>
-<dt><strong><a name="item_q">q</a></strong>
+<dt><strong><a name="q" class="item">q</a></strong></dt>
 
 <dd>
 <p>Quit and write hosts file.</p>
 </dd>
-</li>
-<dt><strong><a name="item_a">a</a></strong>
+<dt><strong><a name="a" class="item">a</a></strong></dt>
 
 <dd>
 <p>Create a new hosts entry.</p>
 </dd>
-</li>
-<dt><strong><a name="item_c">c</a></strong>
+<dt><strong><a name="c" class="item">c</a></strong></dt>
 
 <dd>
 <p>Edit the selected hosts entry.</p>
 </dd>
-</li>
-<dt><strong><a name="item_d">d</a></strong>
+<dt><strong><a name="d" class="item">d</a></strong></dt>
 
 <dd>
 <p>Delete the selected hosts entry.</p>
 </dd>
-</li>
-<dt><strong><a name="item_l">l</a></strong>
+<dt><strong><a name="l" class="item">l</a></strong></dt>
 
 <dd>
 <p>Edit the local hosts entry.</p>
 </dd>
-</li>
-<dt><strong><a name="item_u">u</a></strong>
+<dt><strong><a name="u" class="item">u</a></strong></dt>
 
 <dd>
 <p>Set the default user name for DHCP clients.</p>
 </dd>
-</li>
 </dl>
 <p>
 </p>

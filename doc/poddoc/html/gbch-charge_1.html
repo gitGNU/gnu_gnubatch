@@ -9,8 +9,10 @@
 
 <body style="background-color: white">
 
-<p><a name="__index__"></a></p>
+
 <!-- INDEX BEGIN -->
+<div name="index">
+<p><a name="__index__"></a></p>
 <!--
 
 <ul>
@@ -28,7 +30,11 @@
 	<li><a href="#copyright">COPYRIGHT</a></li>
 	<li><a href="#author">AUTHOR</a></li>
 </ul>
+
 -->
+
+
+</div>
 <!-- INDEX END -->
 
 <p>
@@ -58,102 +64,86 @@ machine on which the job is run.</p>
 <hr />
 <h1><a name="options">OPTIONS</a></h1>
 <p>Note that the order of treatment, letters and keywords described below
-may be modified by editing the file <em>btrest.help</em> - see btsyntax(5).</p>
-<p>The environment variable on which options are supplied is <a href="#item_gbch_charge"><code>GBCH_CHARGE</code></a> and the
-environment variable to specify the help file is <a href="#item_btrestconf"><code>BTRESTCONF</code></a>.</p>
+may be modified by editing the file <em class="file">btrest.help</em> - see <code>btsyntax(5)</code>.</p>
+<p>The environment variable on which options are supplied is <a href="#gbch_charge"><code>GBCH_CHARGE</code></a> and the
+environment variable to specify the help file is <a href="#btrestconf"><code>BTRESTCONF</code></a>.</p>
 <dl>
-<dt><strong><a name="item__2d_3f_or__2bexplain">-? or +explain</a></strong>
+<dt><strong><a name="or_explain" class="item">-? or +explain</a></strong></dt>
 
 <dd>
 <p>causes a summary of the other options to be displayed without taking
 further action.</p>
 </dd>
-</li>
-<dt><strong><a name="item__2dc_or__2bconsolidate">-C or +consolidate</a></strong>
+<dt><strong><a name="c_or_consolidate" class="item">-C or +consolidate</a></strong></dt>
 
 <dd>
-<p>Causes a consolidation record or ``current balance'' to be written in
+<p>Causes a consolidation record or &quot;current balance&quot; to be written in
 the file for each user, which summarises the charges to date for each
 user. The previous records remain in the file.</p>
 </dd>
-</li>
-<dt><strong><a name="item__2dc_fee_or__2badd_2dcharge_fee">-c <em>fee</em> or +add-charge <em>fee</em></a></strong>
+<dt><strong><a name="c_fee_or_add_charge_fee" class="item">-c <em>fee</em> or +add-charge <em>fee</em></a></strong></dt>
 
 <dd>
 <p>Causes the specified <em>fee</em> to be added to the charge for the
 specified user or users, or all users if none are given.</p>
-</dd>
-<dd>
 <p>If combined with a print option (<strong>-p</strong> or <strong>-P</strong>), the print is done
 after the charge is applied, so the charge will be included in the
 output.</p>
 </dd>
-</li>
-<dt><strong><a name="item__2dk_or__2bcancel_2dflags">-K or +cancel-flags</a></strong>
+<dt><strong><a name="k_or_cancel_flags" class="item">-K or +cancel-flags</a></strong></dt>
 
 <dd>
 <p>Cancels all previously-set options <strong>-p</strong>, <strong>-P</strong>, <strong>-z</strong>, <strong>-C</strong> and
 <strong>-R</strong>. Useful if you want to start again from some indeterminate state
 in a configuration file.</p>
 </dd>
-</li>
-<dt><strong><a name="item__2dp_or__2bprint_2dfull">-P or +print-full</a></strong>
+<dt><strong><a name="p_or_print_full" class="item">-P or +print-full</a></strong></dt>
 
 <dd>
 <p>causes the full log of charges for the specified user or users, or all
 users if none are given, to be displayed on standard output.</p>
 </dd>
-</li>
-<dt><strong><a name="item__2dp_or__2bprint_2dusers">-p or +print-users</a></strong>
+<dt><strong><a name="p_or_print_users" class="item">-p or +print-users</a></strong></dt>
 
 <dd>
 <p>(the default if no other options are specified) causes the charge
 summary for the specified user or users, or all users if none are
 given, to be displayed on standard output.</p>
 </dd>
-</li>
-<dt><strong><a name="item__2dr_or__2breset_2dfile">-R or +reset-file</a></strong>
+<dt><strong><a name="r_or_reset_file" class="item">-R or +reset-file</a></strong></dt>
 
 <dd>
 <p>Causes all records to be deleted from the file except for
 consolidation records for each user with a non-zero charge. If the
 charge for each user is zero (as a result of applying the <strong>-z</strong> option
 perhaps), then the file will be left empty.</p>
-</dd>
-<dd>
 <p>Note that the batch scheduler <code>btsched(8)</code> should not be running when
 this option is invoked, otherwise this option is ignored.</p>
 </dd>
-</li>
-<dt><strong><a name="item__2dz_or__2bzero_2dcharge">-z or +zero-charge</a></strong>
+<dt><strong><a name="z_or_zero_charge" class="item">-z or +zero-charge</a></strong></dt>
 
 <dd>
 <p>Clears to zero the charges for the specified user or users, or all
 users if none are given. This is done by appending an appropriate
 record or records to the charge file, the previous information (as
 displayed by <strong>-P</strong> will still be available.</p>
-</dd>
-<dd>
 <p>If combined with a print option (<strong>-p</strong> or <strong>-P</strong>), the print is done
 before the option is applied.</p>
 </dd>
-</li>
-<dt><strong><a name="item__2bfreeze_2dcurrent">+freeze-current</a></strong>
+<dt><strong><a name="freeze_current" class="item">+freeze-current</a></strong></dt>
 
 <dd>
-<p>Save all the current options in a <em>.gnubatch</em> file in the current
-directory with keyword <a href="#item_gbch_charge"><code>GBCH_CHARGE</code></a>. If this option is supplied, and no
+<p>Save all the current options in a <em class="file">.gnubatch</em> file in the current
+directory with keyword <a href="#gbch_charge"><code>GBCH_CHARGE</code></a>. If this option is supplied, and no
 users are specified, then no further action is taken.</p>
 </dd>
-</li>
-<dt><strong><a name="item__2bfreeze_2dhome">+freeze-home</a></strong>
+<dt><strong><a name="freeze_home" class="item">+freeze-home</a></strong></dt>
 
 <dd>
-<p>Save all the current options in a <em>.gnubatch</em> file in the user's home
-directory with keyword <a href="#item_gbch_charge"><code>GBCH_CHARGE</code></a>. If this option is supplied, and no
+<p>Save all the current options in a <em class="file">.gnubatch</em> file in the user's home
+directory with keyword <a href="#gbch_charge"><code>GBCH_CHARGE</code></a>. If this option is supplied, and no
 users are specified, then no further action is taken.</p>
 </dd>
-</li>
 </dl>
 <p>
 </p>
@@ -172,37 +162,35 @@ users are specified, then no further action is taken.</p>
 </p>
 <hr />
 <h1><a name="files">FILES</a></h1>
-<p><em>~/.gnubatch</em>
+<p><em class="file">~/.gnubatch</em>
 configuration file (home directory)</p>
-<p><em>.gnubatch</em>
+<p><em class="file">.gnubatch</em>
 configuration file (current directory)</p>
-<p><em>btrest.help</em>
+<p><em class="file">btrest.help</em>
 message file</p>
-<p><em>gbch-chargesn.n</em>
+<p><em class="file">gbch-chargesn.n</em>
 charges file (with version number suffix)</p>
 <p>
 </p>
 <hr />
 <h1><a name="environment">ENVIRONMENT</a></h1>
 <dl>
-<dt><strong><a name="item_gbch_charge">GBCH_CHARGE</a></strong>
+<dt><strong><a name="gbch_charge" class="item">GBCH_CHARGE</a></strong></dt>
 
 <dd>
 <p>space-separated options to override defaults.</p>
 </dd>
-</li>
-<dt><strong><a name="item_btrestconf">BTRESTCONF</a></strong>
+<dt><strong><a name="btrestconf" class="item">BTRESTCONF</a></strong></dt>
 
 <dd>
 <p>location of alternative help file.</p>
 </dd>
-</li>
 </dl>
 <p>
 </p>
 <hr />
 <h1><a name="see_also">SEE ALSO</a></h1>
-<p>btsyntax(5),
+<p><code>btsyntax(5)</code>,
 gbch-user(1),
 gnubatch.conf(5),
 (5).</p>
@@ -211,7 +199,7 @@ gnubatch.conf(5),
 <hr />
 <h1><a name="diagnostics">DIAGNOSTICS</a></h1>
 <p>Various diagnostics are read and printed as required from the message
-file, by default <em>btrest.help</em>.</p>
+file, by default <em class="file">btrest.help</em>.</p>
 <p>
 </p>
 <hr />
