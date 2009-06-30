@@ -1,14 +1,5 @@
 #!/usr/bin/make -f
 # -*- makefile -*-
-# Sample debian/rules that uses debhelper.
-#
-# This file was originally written by Joey Hess and Craig Small.
-# As a special exception, when this file is copied by dh-make into a
-# dh-make output file, you may use that output file without restriction.
-# This special exception was added by Craig Small in version 0.37 of dh-make.
-#
-# Modified to make a template file for a multi-binary package with separated
-# build-arch and build-indep targets  by Bill Allombert 2001
 
 # Uncomment this to turn on verbose mode.
 #export DH_VERBOSE=1
@@ -73,8 +64,14 @@ install: build
 	dh_clean -k 
 	dh_installdirs -Pdebian/tmp -pgnubatch
 
-	# Add here commands to install the package into debian/gnubatch.
+	# Add here commands to install the package into debian/tmp.
 	$(MAKE) DESTDIR=$(CURDIR)/debian/tmp BATCHUSER=root datarootdir=/usr/share STAGED_INSTALL=true install
+# Get rid of remote CGI bins for now as they depend on separated API library.
+	rm -f $(CURDIR)/debian/gnubatch/usr/lib/gnubatch/cgi-bin/r*
+	# Remove .la files for internal only
+	rm -f $(CURDIR)/debian/tmp/usr/lib/libgnubatch_int.la
+	rm -f $(CURDIR)/debian/tmp/usr/lib/libgnubatch_client.la
+	rm -f $(CURDIR)/debian/tmp/usr/lib/libgnubatch_curs.la
 
 # Build architecture-independent files here.
 binary-indep: build install
@@ -82,8 +79,6 @@ binary-indep: build install
 
 # Build architecture-dependent files here.
 binary-arch: build install
-# Get rid of remote CGI bins for now as they depend on separated API library.
-	rm -f $(CURDIR)/debian/gnubatch/usr/lib/gnubatch/cgi-bin/r*
 	dh_testdir
 	dh_testroot
 	dh_installchangelogs 

@@ -76,9 +76,9 @@ LIBCLIENTOBJS=$(CLIENTOBJS:.o=.lo)
 LIBCURSOBJS=$(CURSOBJS:.o=.lo)
 
 all:	$(OBJECTS) $(CLIENTOBJS) $(CURSOBJS)
-	libtool --mode=link @CC@ $(CCFLAGS) -o $(LIB) $(LIBOBJECTS) -rpath $(LIBDIR) -version-info 1:2:0 -release 1
-	libtool --mode=link @CC@ $(CCFLAGS) -o $(LIBCLIENT) $(LIBCLIENTOBJS) -rpath $(LIBDIR) -version-info 1:2:0 -release 1
-	libtool --mode=link @CC@ $(CCFLAGS) -o $(LIBCURS) $(LIBCURSOBJS) -rpath $(LIBDIR) -version-info 1:2:0 -release 1
+	libtool --mode=link @CC@ $(CCFLAGS) -o $(LIB) $(LIBOBJECTS) -rpath $(LIBDIR) -version-info 0:0:0
+	libtool --mode=link @CC@ $(CCFLAGS) -o $(LIBCLIENT) $(LIBCLIENTOBJS) -rpath $(LIBDIR) -version-info 0:0:0
+	libtool --mode=link @CC@ $(CCFLAGS) -o $(LIBCURS) $(LIBCURSOBJS) -rpath $(LIBDIR) -version-info 0:0:0
 
 install: all
 	libtool --mode=install $(INSTALL) $(LIB) $(LIBDIR)

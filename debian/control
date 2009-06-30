@@ -19,8 +19,15 @@ Section: doc
 Description: Documentation for Gnubatch
  PDF documentation for Gnubatch
 
-Package: libgnubatch-1-1
+Package: libgnubatch0
 Architecture: any
 Depends: ${shlibs:Depends}, gnubatch (= ${binary:Version})
 Description: API development library for GNUbatch
- Consists of the static and shared API libraries and include file
+ Consists of the shared API library
+
+Package: libgnubatch-dev
+Section: libdevel
+Architecture: any
+Depends: libgnubatch0 (= ${binary:Version})
+Description: API development library for GNUbatch
+ Consists of static API library and include files
