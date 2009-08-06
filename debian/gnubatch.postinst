@@ -249,21 +249,19 @@ unless  ($had)  {
     close SRV;
 }
 
-unless (-f "@sysconfdir@/gnubatch-hosts")  {
+unless (-f "/etc/gnubatch.hosts")  {
     my $hn = `hostname`;
     chop($hn);
     my $he = gethostbyname($hn);
     my $ha = inet_ntoa($he);
-    unless ($ha =~ /^127\./)  {
-	if  (open(HF, ">/@sysconfdir@/gnubatch-hosts"))  {
-	    my $lt = localtime;
-	    print HF "# Host file created on $lt\n\n";
-	    print HF "localaddress\t$ha\n";
-	    close HF;
-	}
+    if  (open(HF, ">/etc/gnubatch.hosts"))  {
+	my $lt = localtime;
+	print HF "# Host file created on $lt\n\n";
+	print HF "# ****** FIXME need proper IP address here!!!\n" if $ha =~ /^127\./;
+	print HF "localaddress\t$ha\n";
+	close HF;
     }
 }
-
 
 system("/usr/bin/gbch-uchange -R");
 $wai=`who am i`;

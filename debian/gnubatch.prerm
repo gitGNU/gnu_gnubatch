@@ -30,7 +30,7 @@ g/gnubatch/d
 w
 q
 EOF
-rm -f /etc/gnubatch-hosts
+rm -f /etc/gnubatch.hosts
 }
 
 removefiles() {
