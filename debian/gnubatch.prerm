@@ -24,12 +24,15 @@ stopdaem() {
 }
 
 removenet() {
-ed /etc/services <<'EOF' >/dev/null 2>&1
-/GNUbatch/d
-g/gnubatch/d
-w
-q
-EOF
+#ed /etc/services <<'EOF' >/dev/null 2>&1
+#/GNUbatch/d
+#g/gnubatch/d
+#w
+#q
+#EOF
+if grep -qs '^gnubatch' /etc/services; then
+    echo "You may want to remove gnubatch entries from /etc/services"
+fi
 rm -f /etc/gnubatch.hosts
 }
 

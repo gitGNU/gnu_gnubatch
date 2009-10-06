@@ -1,0 +1,17 @@
+Before you attempt to start GNUbatch, you should include the following
+entries in /etc/services.
+
+(You can change the port numbers but all other servers/clients should
+also be changed identically).
+
+# Services for GNUbatch
+
+gnubatch		48104/tcp        # Connection port
+gnubatch		48104/udp        # Probe port
+gnubatch-feeder		48105/tcp        # Feeder port for GNUbatch
+gnubatch-netsrv		48106/tcp        # External job submission
+gnubatch-netsrv		48106/udp        # Client access
+gnubatch-api		48107/tcp        # API
+gnubatch-api		48107/udp        # API (for wakeup messages)
+
+Please note that the next release of GNUbatch will only use 2 ports.
