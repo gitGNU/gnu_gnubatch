@@ -56,36 +56,9 @@
 
 #define	SYNCMAX		5	/* Before we give up */
 
-FILE	*Cfile;
-
-int	Ctrl_chan;
-#ifndef	USING_FLOCK
-int	Sem_chan;
-#endif
-
-uid_t	Realuid,
-	Effuid,
-	Daemuid;
-
-gid_t	Realgid,
-	Effgid;
-
-BtuserRef	mypriv;
-
-/* The following are just to resolve names used in library routines
-   which we steal.  */
-
-char	*Restru,
-	*Restrg,
-	*jobqueue,
-	*Args[1];
+extern	int	Ctrl_chan;
 
 Btvar	newvar;
-
-/* Satisfy sharedlibs dependencies */
-char		*exitcodename, *signalname;
-struct	jshm_info	Job_seg;
-/* End of shared libs dependencies */
 
 /* For when we run out of memory.....  */
 

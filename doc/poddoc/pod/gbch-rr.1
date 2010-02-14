@@ -1,0 +1,936 @@
+=head1 NAME
+
+gbch-r - submit a job to batch scheduler
+
+gbch-rr - submit a job to remote batch scheduler
+
+=head1 SYNOPSIS
+
+B<gbch-r>
+[ I<-options> ]
+[ I<files> ]
+
+B<gbch-rr>
+[ I<-options> ]
+[ I<files> ]
+
+=head1 DESCRIPTION
+
+B<gbch-r> creates a B<GNUbatch> batch job from each of the supplied files
+or the standard input if no file names are given.
+
+B<gbch-rr> operates similarly, but creates the jobs on a remote host
+without the necessity of having to have B<GNUbatch> running on the
+submitting host.
+
+=head1 OPTIONS
+
+Except for the B<-Q> option, which must be specified, and the options
+keyword used to pick up default arguments and to save with the
+B<+freeze-current> and B<+freeze-home> options, the (standard - it
+would be possible to make them different by editing the option
+definitions in F<btrest.help> but this would not be
+sensible) options to B<gbch-rr> are identical in effect to those for
+B<gbch-r>.
+
+Note that the order of treatment, letters and keywords described below
+may be modified by editing the file F<btrest.help> -
+see btsyntax(5).
+
+The environment variable on which options are supplied is C<GBCH_R> for
+B<gbch-r>, C<GBCH_RR> for B<gbch-rr> and the environment variable to specify the
+help file is C<BTRESTCONF>.
+
+We regret having run out of single letters for options to B<gbch-r>
+and B<gbch-rr> and having had to resort in three cases to
+non-alphabetic options. The B<bts> command in B<GNUbatch2> (Xi-Batch
+Rel 7) introduces the new concept of I<templates> carrying most of the
+information supplied as options to B<gbch-r>.
+
+=over 4
+
+=item -? or +explain
+
+causes a summary of the other options to be displayed without taking
+further action.
+
+=item -2 I<time> or +grace-time I<time>
+
+Sets the second stage time of handling over-running jobs to I<time>,
+in seconds (the argument may be any number of seconds, or given as
+C<mm:ss> for minutes and seconds).
+
+This only applies if a maximum elapsed time for a job is set with the
+B<-Y> option. If a non-zero time is also given with this option, the
+job is first killed with the signal number given by the B<-W> option
+and then, if it continues to run for the time given by this argument,
+killed with C<SIGKILL> which cannot be caught or ignored.
+
+=item -9 or +catch-up
+
+sets the "if not possible" action of the job or jobs to catch up - one
+run of a series of missed runs is done when it is possible without
+affecting future runs.
+
+=item -. or +done
+
+sets the job or jobs to "done" state (this is mainly intended for
+resubmitting jobs which have been "unqueued").
+
+=item -A I<days> or +avoiding-days I<days>
+
+signifies days to avoid when the job or jobs are to be repeated
+automatically. The days to avoid option supersedes any preceding or
+default option, unless a leading comma is given. Thus if the existing
+days to avoid are C<Sat> and C<Sun>, the default when installed,
+
+ gbch-r -A Wed
+
+will change the days to avoid to be Wednesday only, whereas
+
+ gbch-r -A ,Wed
+
+will change the days to avoid to be Saturday, Sunday and Wednesday.
+
+A single C<-> argument cancels the days to avoid parameter altogether,
+thus C<-A->.
+
+Note that this parameter only affects I<automatic> repetitions, so if
+the date given by the B<-T> parameter falls on a day excluded by this
+argument, it will not be affected and the first run will be on the
+date specified.
+
+Upon installation the default abbreviations for the days are C<Sun>,
+C<Mon>, C<Tue>, C<Wed>, C<Thu>, C<Fri>, C<Sat> and C<Hday>, the last
+refers to holidays as specified in the holiday file. The days are
+interpreted case-insensitively, but on saving options with
+B<+freeze-current> or B<+freeze-home> will save the names in the
+initial capital format.
+
+=item -a I<string> or +argument I<string>
+
+Provide an argument string to the command interpreter. Successive
+B<-a> options are cumulative and append additional arguments to the
+list of arguments for the job or jobs. To clear previously-specified
+options (maybe set in F<.gnubatch> files) and start afresh, use the
+B<-e> option first.
+
+=item -B or +assignment-not-critical
+
+Marks subsequently-specified assignments (with the B<-s> option) as
+"not critical", meaning that the assignment will be ignored if it
+contains a reference to a variable on a remote host which is offline
+or inaccessible. This must precede the B<-s> options to which it is to
+be applied.
+
+=item -b or +assignment-critical
+
+Marks subsequently-specified assignments (with the B<-s> option) as
+"critical", meaning that the job or jobs will not start if the
+assignment contains a reference to a variable on a remote host which
+is offline or inaccessible. This must precede the B<-s> options to
+which is to be applied.
+
+=item -C or +cancelled
+
+Sets the job or jobs to be in "cancelled" state.
+
+=item -c I<condition> or +condition I<condition>
+
+Sets a I<condition> to be satisfied before the job or jobs may
+run. Successive B<-c> options cause further conditions to be appended
+to the list, up to a maximum of 10 conditions. To start from scratch,
+deleting any previously-specified conditions (in a F<.gnubatch> file
+perhaps), use the B<-y> option first.
+
+=item -D I<directory> or +directory I<directory>
+
+Sets the working directory for the job or jobs. This may include
+environment variable references preceded by C<$> to be expanded and
+constructs such as C<~user> to select the given user's home
+directory. (Remember, if using the shell, and using these constructs,
+to put quotes around the directory, otherwise the shell will expand
+the constructs and not B<GNUbatch>).
+
+If omitted, then the current directory at the time of invoking B<gbch-r>
+or B<gbch-rr> is used.
+
+=item -d or +delete-at-end
+
+cancels any repeat option of the jobs so that they will be deleted at
+the end of the run rather than repeated or kept. This is the default
+if no arguments are specified.
+
+=item -E or +local-environment
+
+set the environment variables to be as per the local environment
+rather than the remote environment. This applies to B<gbch-rr> only and
+is ignored in B<gbch-r>.
+
+=item -e or +cancel-arguments
+
+deletes any arguments set up by previous options.
+
+=item -F or +export
+
+marks the job or jobs to be visible throughout the network, but only
+available to run on the machine which they are queued on.
+
+=item -f I<letters> or +flags-for-set
+
+Precede B<-s> (set assignment) options with this and an argument
+consisting of some or all of C<SNEACR> (for respectively Start, Normal
+exit, Error exit, Abort, Cancel and Reverse) to set the flags which
+determine when an assignment is performed.
+
+=item -G or +full-export
+
+marks the job or jobs to be visible throughout the network and
+potentially available to run on any machine.
+
+=item -g I<group> or +set-group I<group>
+
+set the group owner of the job or jobs to be I<group>. The user must have
+I<write admin file> permission to invoke this argument.
+
+=item -H or +hold-current
+
+sets the "if not possible" action of the job or jobs to hold current - the
+run is done when it is possible without affecting subsequent runs.
+
+=item -h I<title> or +title I<title>
+
+sets the title of the job or jobs to I<title>. In the absence of this
+argument the title will be that of the last part of the file name, if
+any. The title may be a string of any length containing any printable
+characters.
+
+=item -I I<redirection> or +input-output I<redirection>
+
+sets a redirection for the job or jobs. Successive B<-I> options are
+cumulative and will append to the current list of redirections. To
+start the list of redirections from scratch, precede them with the
+B<-Z> option.
+
+=item -i I<name> or +interpreter I<name>
+
+sets the command interpreter for the job or jobs to be I<name>. The
+load level is also set to that for the interpreter, so if a B<-l>
+argument is to be specified, it should I<follow> the B<-i> argument.
+
+The command interpreter will be rejected if its load level exceeds the
+maximum per job for a user.
+
+=item -J or +no-advance-time-error
+
+sets the flag so that if the job exits with an error, the next time to
+run is not advanced according to the repeat specification.
+
+=item -j or +advance-time-error
+
+sets the flag so that if the job exits with an error, the next time to
+run is still advanced if applicable. This is the default if no arguments are specified.
+
+=item -K or +condition-not-critical
+
+marks subsequently specified conditions set with the B<-c> option as
+"not critical", i.e. a condition dependent on a variable on an offline
+or otherwise inaccessible remote host will be ignored in deciding
+whether a job may start. This is the default if no arguments are specified.
+
+=item -k or +condition-critical
+
+marks subsequently specified conditions set with the B<-c> option as
+"critical", i.e. a condition dependent on a variable on an offline or
+otherwise inaccessible remote host will cause the job to be held up.
+
+=item -L I<value> or +ulimit I<value>
+
+sets the I<ulimit> value of the job or jobs to the value given.
+
+=item -l I<number> or +loadlev I<number>
+
+sets the load level of the job or jobs to be I<number>. The user must
+have I<special create permission> for this to differ from that of the
+command interpreter and further the load level must be less than the
+maximum per job for a user. The load level is also reset by the B<-i>
+(set command interpreter) option, so this must be used before the
+B<-l> option.
+
+=item -M I<modes> or +mode I<modes>
+
+sets the permissions of the job or jobs to be I<modes>.
+
+=item -m or +mail-message
+
+sets the flag whereby completion messages are mailed to the owner of
+the job. (They may anyway if the jobs output to standard output or
+standard error and these are not redirected).
+
+=item -N or +normal
+
+sets the job or jobs to normal "ready to run" state, as opposed to
+"cancelled" as set by the B<-C> option.  This is the default if no
+arguments are specified.
+
+=item -n or +local-only
+
+marks the job or jobs to be local only to the machines which they are
+queued on. They will not be visible or runnable on remote hosts.
+
+=item -O or +remote-environment
+
+initialise the environment variables to be those from the remote
+environment. This applies to B<gbch-rr> only and is ignored in B<gbch-r>.
+This is the default if no arguments are specified.
+
+=item -o or +no-repeat
+
+cancels any repeat option of the job or jobs, so that the they will be
+run and retained on the queue marked C<done> at the end.
+
+=item -P I<value> or +umask I<value>
+
+sets the umask value of the job or jobs to the I<octal> value given.
+The value should be up to 3 octal digits as per the shell.
+
+=item -p I<number> or +priority I<number>
+
+sets the priority of the job or jobs to be I<number>, which must be in
+the range given by the user's minimum and maximum priority.
+
+=item -Q I<hostname> or +host I<hostname>
+
+send the job or jobs to the given I<hostname>. Note that I<hostname>
+must be in F<gnubatch.hosts> on the submitting machine and the
+submitting machine's hostname must be in F</etc/> on the
+receiving machine.
+
+If specified with B<gbch-r>, the effect is to invoke B<gbch-rr> with the
+same command-line options as were given to B<gbch-r>. Note that this does
+not include any options for B<gbch-r> extracted from the environment or
+F<.gnubatch> files.
+
+This option is I<mandatory> for B<gbch-rr> and it will fail if it is not
+specified. B<gbch-r> is not invoked as otherwise there might be an
+endless loop of calls (with B<-Q> specified in a F<.gnubatch> file for
+B<gbch-r> but not for B<gbch-rr> for example).
+
+=item -q I<queuename> or +job-queue I<queuename>
+
+sets a job queue name as specified on the job or jobs. This may be any
+sequence of printable characters.
+
+=item -R or +reschedule-all
+
+sets the "not possible" action of the job or jobs to reschedule all -
+the run is done when it is possible and subsequent runs are
+rescheduled by the amount delayed.
+
+=item -r I<repeat_spec> or +repeat I<repeat_spec>
+
+sets the repeat option of the jobs as specified.
+
+=item -S or +skip-if-held
+
+sets the "not possible" action of the job or jobs to skip - the run
+is skipped if it could not be done at the specified time.
+
+=item -s or +set
+
+sets an assignment on the job or jobs to be performed at the start
+and/or finish of the job or jobs as selected by a previously-specified
+B<-f> option. This option is cumulative, and will add to the list of
+assignments specified by previous B<-s> options. To start from
+scratch, precede the assignments with the B<-z> option.
+
+=item -T I<time> or +time I<time>
+
+sets the next run time or time and date of the job or jobs as
+specified.
+
+=item -t I<time> or +delete-time I<time>
+
+sets a delete time for the specified job or jobs as a time in hours,
+after which it will be automatically deleted if this time has elapsed
+since it was queued or last ran. Set to zero to retain the job or jobs
+indefinitely.
+
+=item -U or +no-time
+
+cancels any time setting on the job or jobs set with B<-T>, B<-r> or
+B<-o> options.
+
+=item -u I<user> or +set-owner I<user>
+
+set the owner of the job or jobs to be I<user>. The user must have
+I<write admin file> permission to invoke this argument.
+
+=item -V or +no-verbose
+
+cancel the effect of the B<-v> option, so that a message is not output
+giving the job number of each batch job successfully created
+
+=item -v or +verbose
+
+output a message on standard error containing the job number of each
+batch job successfully created.
+
+=item -W I<sig> or +which-signal I<sig>
+
+used in conjunction with B<-Y> and B<-2> options sets the signal
+number, e.g. B<1>, B<2>, B<15> to kill the job or jobs after the
+maximum run time has been exceeded.
+
+=item -w or +write-message
+
+sets the flag whereby completion messages are written to the owner's
+terminal if available.
+
+=item -X I<range> or +exit-code I<range>
+
+sets the normal or error exit code ranges for the job or jobs. The
+format of the I<range> argument is B<N> or B<E> followed by a range in
+the form C<nn:nn>, thus
+
+	-X N0:9
+
+and
+
+	-X E10:255
+
+Note that an exit code which falls inside both ranges will be handled
+by the setting of the smaller range, so
+
+	-X N0:10
+	-X E1:255
+
+will mean that exit codes 1 to 10 inclusive are treated as I<normal>
+as that is the smaller range. Unhandled exit codes are treated as
+I<abort>. The default is C<N0:0> and C<E1:255>.
+
+=item -x or +no-message
+
+resets both flags as set by B<-m> and B<-w>.
+
+=item -Y I<time> or +run-time I<time>
+
+sets a maximum elapsed run time for the specified job or jobs. The
+argument I<time> is in seconds, which may be written as I<mm:ss> or
+I<hh:mm:ss>. The job will be killed with C<SIGKILL> unless a different
+signal is specified with the B<-W> option and a further "grace time"
+specified with the B<-2> option.
+
+=item -y or +cancel-condition
+
+deletes any conditions set up by previous arguments.
+
+=item -z or +cancel-set
+
+deletes any assignments set up by previous arguments.
+
+=item -Z or +cancel-io
+
+deletes any redirections set up by previous arguments.
+
+=item +freeze-current
+
+Save all the current options in a F<.gnubatch> file in the current
+directory with keyword C<BTR> for B<gbch-r> or C<RBTR> for B<gbch-rr>.
+
+=item +freeze-home
+
+Save all the current options in a F<.gnubatch> file in the user's home
+directory with keyword C<BTR> for B<gbch-r> or C<RBTR> for B<gbch-rr>.
+
+=back
+
+=head2 Redirection format
+
+=for html
+<a name="Redirection_format"></a>
+
+The format of the argument to the B<-I> option is similar to that for
+the shell with some extensions. The argument should always be enclosed
+in quotes to avoid the shell interpreting it rather than B<gbch-r> or
+B<gbch-rr>.
+
+Environment variables and C<~user> constructs are expanded at run time
+in the strings.
+
+=for man
+Parameter substitutions, or "meta data" may be included in the
+argument strings for redirections, the most important of which is
+\fB%t\fR, which inserts the job title. See the Reference manual.
+
+=for html
+<P>Parameter substitutions, or "meta data" may be included in the
+argument strings for redirections, see <a
+href="BchRef-5.html#Meta_data_definition">meta data</a>.</P>
+
+=over 8
+
+=item I<n><I<file>
+
+For example
+
+	3<myfile
+	7</tmp/data
+	<input_file
+
+Opens the specified file descriptor for input connected to the
+specified file. The file descriptor may be omitted in the common case
+of file descriptor 0 (standard input).
+
+=item I<n>>I<file>
+
+For example
+
+	4>outfile
+	12>/tmp/out
+	2>errors.%t
+	>output_file
+
+Opens the specified file descriptor for output, possibly creating the
+file, or truncating it to zero length first if it exists. The file
+descriptor may be be omitted in the common case of file descriptor 1
+(standard output).
+
+=item I<n>>>I<file>
+
+For example
+
+	5>>Log
+	7>>Log.%t
+	>>output.%t
+
+As with the shell, this likewise creates the output file if it does
+not exists but appends new data to any previous data if it exists,
+rather than truncating it.
+
+=item I<n><>I<file>
+
+For example
+
+	8<>Data
+	<>Myfile
+
+Connect the file descriptor (or file descriptor 0 if not specified)
+for input and output, read-write mode.
+
+=item I<n><>>I<file>
+
+For example
+
+	8<>>Data
+	<>>Myfile
+
+Select read-write mode, appending to existing data.
+
+=item I<n><|program
+
+For example
+
+	7<|uname
+
+Run the specified program and take input from it on the given file
+descriptor (defaulting to standard input, file descriptor 0, if not specified).
+
+=item I<n>|program
+
+For example
+
+	2|log_errors
+	|log_output
+
+Run the specified program and send output to it on the given file
+descriptor (defaulting to standard output, file descriptor 1, if not
+specified).
+
+=item I<n>&I<n>
+
+Duplicate the second file descriptor as the first file descriptor
+
+=item I<n>&-
+
+Close the given file descriptor.
+
+=back
+
+=head2 Repeat periods
+
+The repeat period names for the B<-r> option are as follows:
+
+=over 8
+
+=item Minutes
+
+Period in minutes
+
+=item Hours
+
+Period in hours
+
+=item Days
+
+Period in days
+
+=item Weeks
+
+Period in weeks
+
+=item Monthsb
+
+Months relative to the beginning
+
+=item Monthse
+
+Months relative to the end of the month
+
+=item Years
+
+Period in years
+
+=back
+
+Each is followed by the number of the relevant periods after a
+colon. In the case of the month parameters, then this should be
+followed by a "target day" after a colon.
+
+Examples:
+
+	-r Days:4
+	-r Monthsb:1:4
+	-r Monthse:1:31
+	-r Years:2
+
+For C<Monthsb> the "target day" is the day of the month to aim for, in
+this case the 4th of the month. If this would be a "day to avoid",
+then the following day is tried and so on.
+
+For C<Monthse> the "target day" is selected from the day of the month given
+in the B<-T> option. So if the month in the B<-T> option has 31 days,
+then
+	-r Monthse:1:31
+
+will select the last day of each month and
+
+	-r Monthse:1;30
+
+will select the second last, but if the month in the B<-T> option has
+30 days, the first will be invalid and the second will select the last
+day of the month.
+
+If the selected day cannot be met for any reason, typically because it
+does not meet the "days to avoid" criteria, then the previous day is
+tried until an acceptable day is found. In this way you can select the
+"last working day of the month" or "next to last working day" etc.
+
+=head2 Conditions
+
+A condition must be of the form
+
+	[machine:]<varname><condop><constant>.
+
+where I<varname> is the name of an existing variable for which the
+user has read permission.
+
+I<condop> is one of the following:
+
+=over 8
+
+=item =
+
+equal to
+
+=item !=
+
+not equal
+
+=item <
+
+less than
+
+=item <=
+
+less than or equal
+
+=item >
+
+greater than
+
+=item >=
+
+greater than or equal
+
+=back
+
+I<constant> is either a string or a numeric value. If the
+string starts with a number then it should be preceded with a colon.
+
+B<N.B.> When invoked from a shell, quotation marks should surround the entire
+argument as shown above, otherwise the shell may attach its own
+interpretation on the various characters.
+
+Examples of conditions:
+
+	-c 'Count>3'
+	-c 'Lock=0'
+	-c 'Remote:Lock!=0'
+	-c 'Val=:3rd'
+
+=head2 Assignments
+
+Each assignment should normally be preceded by a B<-f> option to
+denote when the assignment is applied, apart from exit code and signal
+assignments.
+
+The argument to the B<-f> option is one or more of the following:
+
+=over 4
+
+=item S
+
+Perform assignment on startup
+
+=item N
+
+Perform assignment on normal exit
+
+=item E
+
+Perform assignment on error exit
+
+=item A
+
+Perform assignment on abort
+
+=item C
+
+Perform assignment on cancellation
+
+=item R
+
+Reverse assignment for C<N>, C<E>, C<A>, and C<C>.
+
+=back
+
+The default if no B<-f> options are specified is
+
+	-f SNEAR
+
+but the default for this may be changed by editing the message file.
+
+The format of the argument to the B<-s> option is in the format
+
+	[machine:]<varname><operator><constant>.
+
+I<varname> is the name of a variable to which the user has read and
+write permission.
+
+I<operator> is one of the following:
+
+=over 4
+
+=item =
+
+Assign value which may be a string or numeric constant. To indicate
+that a string starting with a digit is intended to be a string, prefix
+it with a colon. Exceptionally, the variable assigned to may have
+write permission and not read permission for the user.
+
+The effect of the "reverse" flag is to assign zero or the null
+string. Previous values are not recalled.
+
+=item +=
+
+Increment variable by numeric constant. The effect of the "reverse"
+flag is to decrement the variable by that constant.
+
+Arithmetic is as 32-bit signed integer.
+
+=item -=
+
+Decrement variable by numeric constant. The effect of the "reverse"
+flag is to increment the variable by that constant.
+
+Arithmetic is as 32-bit signed integer.
+
+=item STARHERE=
+
+Multiply variable by numeric constant. The effect of the "reverse"
+flag is to divide the variable by that constant.
+
+Arithmetic is as 32-bit signed integer and overflow is ignored.
+
+=item /=
+
+Divide variable by numeric constant. The effect of the "reverse"
+flag is to multiply the variable by that constant.
+
+Arithmetic is as 32-bit signed integer. Note that the remainder from
+division is ignored.
+
+The handling of negative numbers may be dependent on the hardware and
+should probably not be relied upon.
+
+=item %=
+
+Take the remainder (modulus) from division by the numeric
+constant. There is no "reverse" of the operation.
+
+Arithmetic is as 32-bit signed integer. The handling of negative
+numbers may be dependent on the hardware and should probably not be
+relied upon.
+
+=item =exitcode
+
+Assign the exit code of the job to the given variable. Flags are
+ignored and the operation only occurs when the job exits.
+
+=item =signal
+
+Assign the signal number with which the job terminated to the given
+variable, or zero if the job did not exit with a signal. Flags are
+ignored and the operation only occurs when the job exits.
+
+=back
+
+The following are examples of assignments:
+
+	-s 'myvar=7'
+	-s 'host2:hisvar+=1'
+	-s 'status=exitcode'
+	-s 'val=:3rd'
+
+Note the colon in the last assignment indicating that the value is a
+string, the colon is not included in the string.
+
+=head2 Mode arguments
+
+The argument to the B<-M> option provides for a wide variety of
+operations.
+
+Each permission is represented by a letter, as follows:
+
+=over 4
+
+=item R
+
+read permission
+
+=item W
+
+write permission
+
+=item S
+
+reveal permission
+
+=item M
+
+read mode
+
+=item P
+
+set mode
+
+=item U
+
+give away owner
+
+=item V
+
+assume owner
+
+=item G
+
+give away group
+
+=item H
+
+assume group
+
+=item D
+
+delete
+
+=item K
+
+kill
+
+=back
+
+Each section of the mode (user, group, others) is represented by the
+prefixes C<U:>, C<G:> and C<O:> and separated by commas.
+
+For example:
+
+	-M U:RWSMPDK,G:RWSDK,O:RS
+
+would set the permissions for the user, group and others as given. If
+the prefixes are omitted, as in
+
+	-M RWSDK
+
+then all of the user, group and other permissions are set to the same
+value.
+
+=head1 FILES
+
+F<~/.gnubatch>
+configuration file (home directory)
+
+F<.gnubatch>
+configuration file (current directory)
+
+F<btrest.help>
+message file
+
+=head1 ENVIRONMENT
+
+=over 4
+
+=item GBCH_R
+
+space-separated options to override defaults.
+
+=item BTRESTCONF
+
+location of alternative help file.
+
+=back
+
+=head1 SEE ALSO
+
+gbch-jchange(1),
+gbch-jlist(1),
+gbch-vlist(1),
+gbch-var(1),
+btsyntax(5),
+gnubatch.conf(5),
+gnubatch.hosts(5),
+xbnetserv(8).
+
+=head1 DIAGNOSTICS
+
+Various diagnostics are read and printed as required from the message
+file F<btrest.help>.
+
+=head1 COPYRIGHT
+
+Copyright (c) 2009 Free Software Foundation, Inc.
+This is free software. You may redistribute copies of it under the
+terms of the GNU General Public License
+<http://www.gnu.org/licenses/gpl.html>.
+There is NO WARRANTY, to the extent permitted by law.
+
+=head1 AUTHOR
+
+John M Collins, Xi Software Ltd.
+
+=cut
+
+## Local Variables:
+## mode: nroff
+## End:

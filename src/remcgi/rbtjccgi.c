@@ -43,29 +43,12 @@
 #include "xihtmllib.h"
 #include "cgiutil.h"
 #include "rcgilib.h"
+#include "optflags.h"
 
 #ifndef	_NFILE
 #define	_NFILE	64
 #endif
 
-char	*exitcodename,
-	*signalname;
-
-FILE	*Cfile;
-
-uid_t	Daemuid,
-	Realuid,
-	Effuid;
-gid_t	Realgid,
-	Effgid;
-
-char	*Restru,
-	*Restrg;
-
-char	*jobqueue;		/* Dummy one to read file reqd by rjobfile */
-
-int		xbapi_fd = -1;
-apiBtuser	mypriv;
 apiBtjob	JREQ;
 int		Nvars;
 struct	var_with_slot  *var_sl_list;
@@ -203,7 +186,7 @@ int  arg_ll(const struct argop *ao)	/* Pass 2 */
 	if  (num > 32767)
 		return  $E{Load level out of range};
 
-	if  (!(mypriv.btu_priv & BTM_SPCREATE)  &&  JREQ.h.bj_ll != num)
+	if  (!(userpriv.btu_priv & BTM_SPCREATE)  &&  JREQ.h.bj_ll != num)
 		return  $E{No special create};
 
 	JREQ.h.bj_ll = num;
@@ -213,10 +196,10 @@ int  arg_ll(const struct argop *ao)	/* Pass 2 */
 int  arg_pri(const struct argop *ao)
 {
 	unsigned  num = ao->ao_un.ao_uchar;
-	if  (num < (unsigned) mypriv.btu_minp || num > (unsigned) mypriv.btu_maxp)  {
+	if  (num < (unsigned) userpriv.btu_minp || num > (unsigned) userpriv.btu_maxp)  {
 		disp_arg[0] = num;
-		disp_arg[1] = mypriv.btu_minp;
-		disp_arg[2] = mypriv.btu_maxp;
+		disp_arg[1] = userpriv.btu_minp;
+		disp_arg[2] = userpriv.btu_maxp;
 		return  $E{Invalid priority};
 	}
 	JREQ.h.bj_pri = num;

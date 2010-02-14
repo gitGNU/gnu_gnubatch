@@ -1,0 +1,120 @@
+=head1 NAME
+
+gbch-hols - maintain holidays file
+
+=head1 SYNOPSIS
+
+B<gbch-hols>
+[ I<-options> ] year [ file ]
+
+=head1 DESCRIPTION
+
+B<gbch-hols> sets or displays the contents of the holidays file for
+the given year, as used by the "holiday" option of the "days to avoid"
+selection of repeats of B<GNUbatch> jobs.
+
+=head1 OPTIONS
+
+Note that the order of treatment, letters and keywords described below
+may be modified by editing the file F<btrest.help> -
+see btsyntax(5).
+
+The environment variable on which options are supplied is C<GBCH_HOLS> and the
+environment variable to specify the help file is C<BTRESTCONF>.
+
+=over 4
+
+=item -? or +explain
+
+causes a summary of the other options to be displayed without taking
+further action.
+
+=item -d or +display
+
+Display the holiday file contents for the given year. This option is
+selected by default.
+
+If a file name is given, it is created and output is to that file,
+otherwise output is to standard output.
+
+The format is as follows:
+
+ January:1
+ December:25
+
+=item -s or +set
+
+Set the holidays specified on standard input or the specified file if
+given. Month names may be given in abbreviated or full format.
+
+=item -C or +clear
+
+Clear the existing holidays before setting.
+
+=item -r or +no-clear
+
+Do not clear the existing holidays before setting.
+
+=item +freeze-current
+
+Save all the current options in a F<.gnubatch> file in the current
+directory. If this option is specified, there is no further action.
+
+=item +freeze-home
+
+Save all the current options in a F<.gnubatch> file in the user's home
+directory. If this option is specified, there is no further action.
+
+=back
+
+=head1 FILES
+
+F<~/.gnubatch>
+configuration file (home directory)
+
+F<.gnubatch>
+configuration file (current directory)
+
+F<btrest.help>
+message file
+
+=head1 ENVIRONMENT
+
+=over 4
+
+=item GBCH_HOLS
+
+space-separated options to override defaults for B<gbch-start>
+
+=back
+
+=head1 SEE ALSO
+
+btsyntax(5),
+gnubatch.conf(5),
+gnubatch.hosts(5),
+btsched(8),
+xbnetserv(8).
+
+=head1 DIAGNOSTICS
+
+Various diagnostics are read and printed as required from the message
+file F<btrest.help>.
+
+=head1 COPYRIGHT
+
+Copyright (c) 2009 Free Software Foundation, Inc.
+This is free software. You may redistribute copies of it under the
+terms of the GNU General Public License
+<http://www.gnu.org/licenses/gpl.html>.
+There is NO WARRANTY, to the extent permitted by law.
+
+=head1 AUTHOR
+
+John M Collins, Xi Software Ltd.
+
+=cut
+
+## Local Variables:
+## mode: nroff
+## End:

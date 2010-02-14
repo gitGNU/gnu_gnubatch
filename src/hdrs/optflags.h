@@ -84,6 +84,10 @@ extern	char	*Restru,
 		*Restrg,
 		*jobqueue,
 		*job_title,
-		*job_cwd;
+		*job_cwd,
+		*exitcodename,
+		*signalname;
 
 extern	char	Mode_set[];
+
+extern	char	*Args[];		/* Define this here for clients */

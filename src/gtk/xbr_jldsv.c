@@ -65,16 +65,11 @@ static	char	Filename[] = __FILE__;
 
 #define	XMBTR_INLINE	1
 
-Menvir	Envs[MAXJENVIR];
-char	*Args[MAXJARGS];
-
 static	HelpargRef	btr_avec;
 
 /* This is the var name which options get saved under */
 
 static	char	Varname[] = "GBCH_R";
-
-extern	char	*exitcodename, *signalname;
 
 char *rdoptfile(const char *, const char *);
 void  checksetmode(const int, const ushort *, const ushort, USHORT *);

@@ -37,3 +37,7 @@ typedef	const	USHORT	*CJargRef;
 #define	ARG_OF(jp, cnt)	&jp->bj_space[((JargRef) &jp->bj_space[jp->h.bj_arg])[cnt]]
 extern	void	unpackenv();
 #define	ENV_OF(jp, cnt, name, value)	unpackenv(jp, cnt, &name, &value)
+
+/* Only used by clients but define here */
+
+extern	Menvir	Envs[];

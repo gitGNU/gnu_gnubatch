@@ -130,7 +130,7 @@ static void  cb_vsrchfor(Widget);
 static void  cb_vrsrch(Widget, int);
 static void  endview(Widget, int);
 static void  clearlog(Widget);
-FILE *net_feed(const int, const netid_t, const jobno_t);
+FILE *net_feed(const int, const netid_t, const jobno_t, const int);
 
 static	casc_button
 job_casc[] = {
@@ -723,7 +723,7 @@ void  cb_view()
 	if  (cj->h.bj_hostid)  {
 		FILE	*ifl;
 		int	kch;
-		if  (!(ifl = net_feed(FEED_JOB, cj->h.bj_hostid, cj->h.bj_job)))  {
+		if  (!(ifl = net_feed(FEED_JOB, cj->h.bj_hostid, cj->h.bj_job, Job_seg.dptr->js_viewport)))  {
 			disp_arg[0] = cj->h.bj_job;
 			disp_str = qtitle_of(cj);
 			disp_str2 = look_host(cj->h.bj_hostid);

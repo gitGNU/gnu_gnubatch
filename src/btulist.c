@@ -32,20 +32,7 @@
 #include "cfile.h"
 #include "optflags.h"
 
-FILE	*Cfile;
-
 char	*Curr_pwd;
-
-char	*Restru,
-	*Restrg,
-	*jobqueue;
-
-uid_t	Realuid,
-	Effuid,
-	Daemuid;
-
-gid_t	Realgid,
-	Effgid;
 
 #define	SRT_NONE	0	/* Sort by numeric uid (default) */
 #define	SRT_USER	1	/* Sort by user name */
@@ -70,19 +57,6 @@ struct	perm	{
 	{ (char *) 0, BTM_ORP_UG	},
 	{ (char *) 0, BTM_ORP_UO	},
 	{ (char *) 0, BTM_ORP_GO	}};
-
-/* Satisfy sharedlibs dependencies */
-#include "timecon.h"
-#include "btconst.h"
-#include "bjparam.h"
-#include "btjob.h"
-#include "q_shm.h"
-#include "helpalt.h"
-int		Ctrl_chan;
-char		*Args[1], *exitcodename, *signalname;
-BtuserRef	mypriv;
-struct	jshm_info	Job_seg;
-/* End of shared libs dependencies */
 
 char	*formatstring;
 char	sdefaultfmt[] = "%u %g %d %l %m %x %t %s %p";
@@ -598,7 +572,7 @@ int  sort_g(BtuserRef a, BtuserRef b)
 
 MAINFN_TYPE  main(int argc, char **argv)
 {
-	BtuserRef	mypriv, ulist = (BtuserRef) 0;
+	BtuserRef	ulist = (BtuserRef) 0;
 	unsigned	Nu = 0, pn;
 #if	defined(NHONSUID) || defined(DEBUG)
 	int_ugid_t	chk_uid;

@@ -50,21 +50,9 @@ static	char	Filename[] = __FILE__;
 
 #define	MAXMODE	16
 
-uid_t	Daemuid,
-	Realuid,
-	Effuid;
-gid_t	Effgid,
-	Realgid;
-
-int		xbapi_fd = -1;
-apiBtuser	mypriv;
-
-FILE	*Cfile;
 char	hadhdrarg;
 
 char	*realuname,
-	*Restru,
-	*Restrg,
 	*formatstring;
 
 char	defaultformat[] = "LN LV LE LC";

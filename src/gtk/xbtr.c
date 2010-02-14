@@ -70,26 +70,9 @@ static	char	rcsid2[] = "@(#) $Revision: 1.1 $";
 void  initcifile();
 
 char	*spdir,
-	*Curr_pwd,
-	*jobqueue;
-
-uid_t	Daemuid,
-	Realuid,
-	Effuid;
-gid_t	Realgid,
-	Effgid;
-
-FILE	*Cfile;
-
-int	Ctrl_chan = -1;
-#ifndef	USING_FLOCK
-int	Sem_chan;
-#endif
+	*Curr_pwd;
 
 extern	long	mymtype;
-
-BtuserRef	mypriv;
-char	*Restru, *Restrg;
 
 struct	pend_job	default_pend;
 Btjob			default_job;

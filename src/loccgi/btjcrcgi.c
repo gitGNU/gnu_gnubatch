@@ -65,41 +65,19 @@
 #include "cgifndjb.h"
 #include "shutilmsg.h"
 #include "cgiutil.h"
+#include "optflags.h"
 
 static	char	Filename[] = __FILE__;
-
-char	*exitcodename,
-	*signalname;
-
-FILE	*Cfile;
 
 #define	IPC_MODE	0600
 #define	C_MASK		0377	/* Umask value */
 
-int	Ctrl_chan;
-#ifndef	USING_FLOCK
-int	Sem_chan;
-#endif
+extern	int	Ctrl_chan;
 
 ULONG	Saveseq;
-
-uid_t	Daemuid,
-	Realuid,
-	Effuid;
-gid_t	Realgid,
-	Effgid;
-
-char	*Restru,
-	*Restrg,
-	*Args[1];
-
-char	*jobqueue;		/* Dummy one to read file reqd by rjobfile */
-
 ULONG	indx;
 
 unsigned	defavoid;
-
-BtuserRef	mypriv;
 
 char		*Job_data,
 		*Job_filename,

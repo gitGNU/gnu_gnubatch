@@ -47,40 +47,16 @@
 #include "jvuprocs.h"
 #include "formats.h"
 #include "optflags.h"
+#include "shutilmsg.h"
 
 static	char	Filename[] = __FILE__;
 
 char	bypassflag;
 
-char	*Restru,
-	*Restrg,
-	*jobqueue;
-
 char	*formatstring;
 char	defaultformat[] = "%N %V %E # %C";
 
-uid_t	Daemuid,
-	Realuid,
-	Effuid;
-
-gid_t	Realgid,
-	Effgid;
-
-BtuserRef	mypriv;
-
-/* Satisfy sharedlibs dependencies */
-char		*Args[1], *exitcodename, *signalname;
-struct	jshm_info	Job_seg;
-/* End of shared libs dependencies */
-
-FILE	*Cfile;
-
 #define	IPC_MODE	0600
-
-int	Ctrl_chan;
-#ifndef	USING_FLOCK
-int	Sem_chan;
-#endif
 
 struct	varswanted	{
 	netid_t		host;

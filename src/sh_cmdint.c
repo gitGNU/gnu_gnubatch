@@ -24,6 +24,7 @@
 #include "incl_unix.h"
 #include "incl_net.h"
 #include "defaults.h"
+#include "incl_ugid.h"
 #include "files.h"
 #include "errnums.h"
 #include "bjparam.h"

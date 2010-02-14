@@ -45,18 +45,7 @@
 #include "cgiutil.h"
 #include "rcgilib.h"
 
-FILE	*Cfile;
-
 #define	C_MASK		0377	/* Umask value */
-
-uid_t	Daemuid,
-	Realuid,
-	Effuid;
-gid_t	Realgid,
-	Effgid;
-
-int		xbapi_fd = -1;
-apiBtuser	mypriv;
 
 int		Nvars, Ci_num;
 Cmdint		*ci_list;
@@ -249,7 +238,7 @@ MAINFN_TYPE  main(int argc, char **argv)
 	setgid(Realgid);
 	setuid(Realuid);
 	api_open(realuname);
-	if  ((mypriv.btu_priv & BTM_CREATE) == 0)  {
+	if  ((userpriv.btu_priv & BTM_CREATE) == 0)  {
 		html_disperror($E{No create perm});
 		return  E_NOPRIV;
 	}
@@ -271,10 +260,10 @@ MAINFN_TYPE  main(int argc, char **argv)
 	JREQ.h.bj_umask = umask(C_MASK);
 	JREQ.h.bj_ulimit = 0L;
 	time(&JREQ.h.bj_time);
-	JREQ.h.bj_pri = mypriv.btu_defp;
-	JREQ.h.bj_mode.u_flags = mypriv.btu_jflags[0];
-	JREQ.h.bj_mode.g_flags = mypriv.btu_jflags[1];
-	JREQ.h.bj_mode.o_flags = mypriv.btu_jflags[2];
+	JREQ.h.bj_pri = userpriv.btu_defp;
+	JREQ.h.bj_mode.u_flags = userpriv.btu_jflags[0];
+	JREQ.h.bj_mode.g_flags = userpriv.btu_jflags[1];
+	JREQ.h.bj_mode.o_flags = userpriv.btu_jflags[2];
 	/* bj_runtime = bj_autoksig = bj_runon = bj_deltime = 0 */
 	/* JREQ.h.bj_times.tc_istime = 0;	No time spec */
 	JREQ.h.bj_times.tc_repeat = TC_DELETE;

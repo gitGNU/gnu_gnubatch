@@ -43,6 +43,7 @@
 void  sync_xfermmap();
 #endif
 
+int	Ctrl_chan;				/* Define this here */
 long	mymtype;				/* Define this here */
 
 /* Send params job message to scheduler */

@@ -22,6 +22,9 @@
 #include "helpargs.h"
 #include "optflags.h"
 
+char	*Restru,				/* Define these here */
+	*Restrg;
+
 EOPTION(o_incnull)
 {
 	Dispflags &= ~DF_SUPPNULL;

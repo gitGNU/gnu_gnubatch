@@ -47,31 +47,7 @@ static	char	rcsid2[] = "@(#) $Revision: 1.1 $";
 #include "xbtu_ext.h"
 #include "gtk_lib.h"
 
-FILE	*Cfile;
-
 char	*Curr_pwd;
-
-uid_t	Daemuid,
-	Realuid,
-	Effuid;
-
-gid_t	Realgid,
-	Effgid;
-
-/* Satisfy sharedlibs dependencies */
-#include "helpalt.h"
-#include "timecon.h"
-#include "btconst.h"
-#include "bjparam.h"
-#include "btjob.h"
-#include "q_shm.h"
-int	Ctrl_chan;
-extern	long	mymtype;
-char	*Args[1], *exitcodename, *signalname;
-BtuserRef	mypriv;
-char	*Restru, *Restrg, *jobqueue;
-struct	jshm_info	Job_seg;
-/* End of shared libs dependencies */
 
 int	hchanges,	/* Had changes to default */
 	uchanges;	/* Had changes to user(s) */
@@ -483,7 +459,6 @@ void  defdisplay()
 
 MAINFN_TYPE  main(int argc, char **argv)
 {
-	BtuserRef	mypriv;
 	GtkWidget  *vbox;
 
 	versionprint(argv, "$Revision: 1.1 $", 0);

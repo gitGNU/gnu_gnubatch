@@ -30,6 +30,7 @@ HDRS		=	$(PARENT)/hdrs
 CCFLAGS		=	-O @gcc_useful_options@ @funny_compiler_options@
 CFLAGS		=	$(CCFLAGS) -I$(HDRS)
 LIBDIR		=	$(DESTDIR)@libdir@
+RPATH		=	@libdir@
 INCLUDEDIR	=	$(DESTDIR)@includedir@
 APILIB		=	libgnubatch.la
 INSTALL		=	@INSTALL@
@@ -75,7 +76,7 @@ OBJECTS=gbatch_ciadd.o\
 LIBOBJECTS=$(OBJECTS:.o=.lo)
 
 all:	gbatch.h $(OBJECTS)
-	libtool --mode=link @CC@ $(CCFLAGS) -o $(APILIB) $(LIBOBJECTS) -rpath $(LIBDIR) -version-info 0:0:0
+	libtool --mode=link @CC@ $(CCFLAGS) -o $(APILIB) $(LIBOBJECTS) -rpath $(RPATH) -version-info 0:0:0
 
 # Build header out of the bits
 

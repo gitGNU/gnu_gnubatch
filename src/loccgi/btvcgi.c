@@ -54,36 +54,13 @@ static	char	Filename[] = __FILE__;
 
 #define	MAXMODE	16		/* Max possible in USHORT */
 
-char	*Restru,
-	*Restrg,
-	*jobqueue;
-
 char	hadhdrarg;
 char	*formatstring;
 char	defaultformat[] = "LN LV LE LC";
 
-uid_t	Daemuid,
-	Realuid,
-	Effuid;
-
-gid_t	Realgid,
-	Effgid;
-
-BtuserRef	mypriv;
-
-/* Satisfy sharedlibs dependencies */
-char		*Args[1], *exitcodename, *signalname;
-struct	jshm_info	Job_seg;
-/* End of shared libs dependencies */
-
-FILE	*Cfile;
-
 #define	IPC_MODE	0600
 
-int	Ctrl_chan;
-#ifndef	USING_FLOCK
-int	Sem_chan;
-#endif
+extern	int	Ctrl_chan;
 
 char	bigbuff[BTC_VALUE * 2];
 

@@ -19,8 +19,6 @@
 extern	int	Network_ok;	/* 0=Networking turned off even though code there */
 #endif
 
-extern	uid_t	Daemuid, Daemgid;
-
 extern	PIDTYPE	child_pid;	/* Slave process pid */
 
 extern	int	jqpend,		/* Pending changes to job list */

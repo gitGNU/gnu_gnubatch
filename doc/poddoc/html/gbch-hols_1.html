@@ -1,0 +1,165 @@
+<?xml version="1.0" ?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<title>gbch-hols - maintain holidays file</title>
+<meta http-equiv="content-type" content="text/html; charset=utf-8" />
+<link rev="made" href="mailto:root@localhost" />
+</head>
+
+<body style="background-color: white">
+
+
+<!-- INDEX BEGIN -->
+<div name="index">
+<p><a name="__index__"></a></p>
+<!--
+
+<ul>
+
+	<li><a href="#name">NAME</a></li>
+	<li><a href="#synopsis">SYNOPSIS</a></li>
+	<li><a href="#description">DESCRIPTION</a></li>
+	<li><a href="#options">OPTIONS</a></li>
+	<li><a href="#files">FILES</a></li>
+	<li><a href="#environment">ENVIRONMENT</a></li>
+	<li><a href="#see_also">SEE ALSO</a></li>
+	<li><a href="#diagnostics">DIAGNOSTICS</a></li>
+	<li><a href="#copyright">COPYRIGHT</a></li>
+	<li><a href="#author">AUTHOR</a></li>
+</ul>
+
+-->
+
+
+</div>
+<!-- INDEX END -->
+
+<p>
+</p>
+<h1><a name="name">NAME</a></h1>
+<p>gbch-hols - maintain holidays file</p>
+<p>
+</p>
+<hr />
+<h1><a name="synopsis">SYNOPSIS</a></h1>
+<p><strong>gbch-hols</strong>
+[ <em>-options</em> ] year [ file ]</p>
+<p>
+</p>
+<hr />
+<h1><a name="description">DESCRIPTION</a></h1>
+<p><strong>gbch-hols</strong> sets or displays the contents of the holidays file for
+the given year, as used by the &quot;holiday&quot; option of the &quot;days to avoid&quot;
+selection of repeats of <strong>GNUbatch</strong> jobs.</p>
+<p>
+</p>
+<hr />
+<h1><a name="options">OPTIONS</a></h1>
+<p>Note that the order of treatment, letters and keywords described below
+may be modified by editing the file <em class="file">btrest.help</em> -
+see <code>btsyntax(5)</code>.</p>
+<p>The environment variable on which options are supplied is <a href="#gbch_hols"><code>GBCH_HOLS</code></a> and the
+environment variable to specify the help file is <code>BTRESTCONF</code>.</p>
+<dl>
+<dt><strong><a name="or_explain" class="item">-? or +explain</a></strong></dt>
+
+<dd>
+<p>causes a summary of the other options to be displayed without taking
+further action.</p>
+</dd>
+<dt><strong><a name="d_or_display" class="item">-d or +display</a></strong></dt>
+
+<dd>
+<p>Display the holiday file contents for the given year. This option is
+selected by default.</p>
+<p>If a file name is given, it is created and output is to that file,
+otherwise output is to standard output.</p>
+<p>The format is as follows:</p>
+<pre>
+ January:1
+ December:25</pre>
+</dd>
+<dt><strong><a name="s_or_set" class="item">-s or +set</a></strong></dt>
+
+<dd>
+<p>Set the holidays specified on standard input or the specified file if
+given. Month names may be given in abbreviated or full format.</p>
+</dd>
+<dt><strong><a name="c_or_clear" class="item">-C or +clear</a></strong></dt>
+
+<dd>
+<p>Clear the existing holidays before setting.</p>
+</dd>
+<dt><strong><a name="r_or_no_clear" class="item">-r or +no-clear</a></strong></dt>
+
+<dd>
+<p>Do not clear the existing holidays before setting.</p>
+</dd>
+<dt><strong><a name="freeze_current" class="item">+freeze-current</a></strong></dt>
+
+<dd>
+<p>Save all the current options in a <em class="file">.gnubatch</em> file in the current
+directory. If this option is specified, there is no further action.</p>
+</dd>
+<dt><strong><a name="freeze_home" class="item">+freeze-home</a></strong></dt>
+
+<dd>
+<p>Save all the current options in a <em class="file">.gnubatch</em> file in the user's home
+directory. If this option is specified, there is no further action.</p>
+</dd>
+</dl>
+<p>
+</p>
+<hr />
+<h1><a name="files">FILES</a></h1>
+<p><em class="file">~/.gnubatch</em>
+configuration file (home directory)</p>
+<p><em class="file">.gnubatch</em>
+configuration file (current directory)</p>
+<p><em class="file">btrest.help</em>
+message file</p>
+<p>
+</p>
+<hr />
+<h1><a name="environment">ENVIRONMENT</a></h1>
+<dl>
+<dt><strong><a name="gbch_hols" class="item">GBCH_HOLS</a></strong></dt>
+
+<dd>
+<p>space-separated options to override defaults for <strong>gbch-start</strong></p>
+</dd>
+</dl>
+<p>
+</p>
+<hr />
+<h1><a name="see_also">SEE ALSO</a></h1>
+<p><code>btsyntax(5)</code>,
+gnubatch.conf(5),
+gnubatch.hosts(5),
+<code>btsched(8)</code>,
+<code>xbnetserv(8)</code>.</p>
+<p>
+</p>
+<hr />
+<h1><a name="diagnostics">DIAGNOSTICS</a></h1>
+<p>Various diagnostics are read and printed as required from the message
+file <em class="file">btrest.help</em>.</p>
+<p>
+</p>
+<hr />
+<h1><a name="copyright">COPYRIGHT</a></h1>
+<p>Copyright (c) 2009 Free Software Foundation, Inc.
+This is free software. You may redistribute copies of it under the
+terms of the GNU General Public License
+&lt;http://www.gnu.org/licenses/gpl.html&gt;.
+There is NO WARRANTY, to the extent permitted by law.</p>
+<p>
+</p>
+<hr />
+<h1><a name="author">AUTHOR</a></h1>
+<p>John M Collins, Xi Software Ltd.</p>
+
+</body>
+
+</html>

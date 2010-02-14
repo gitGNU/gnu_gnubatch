@@ -65,45 +65,19 @@
 #include "cgifndjb.h"
 #include "shutilmsg.h"
 #include "cgiutil.h"
+#include "optflags.h"
 
 #ifndef	_NFILE
 #define	_NFILE	64
 #endif
 
-char	*exitcodename,
-	*signalname;
-
-/* Satisfy sharedlibs dependencies */
-char	*Args[1];
-/* End of shared libs dependencies */
-
-FILE	*Cfile;
-
 #define	IPC_MODE	0600
 
-int	Ctrl_chan;
-#ifndef	USING_FLOCK
-int	Sem_chan;
-#endif
+extern	int	Ctrl_chan;
 
 ULONG	Saveseq;
 
-uid_t	Daemuid,
-	Realuid,
-	Effuid;
-gid_t	Realgid,
-	Effgid;
-
-char	*Restru,
-	*Restrg;
-
-char	*jobqueue;		/* Dummy one to read file reqd by rjobfile */
-
 int	exit_code;
-
-char	*Args[1];
-
-BtuserRef	mypriv;
 
 extern int  extractvar(const char **, struct vdescr *);
 

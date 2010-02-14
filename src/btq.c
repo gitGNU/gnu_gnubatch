@@ -112,19 +112,8 @@ void  mvwhdrstr(WINDOW *, const int, const int, const char *);
 static	char	Filename[] = __FILE__;
 
 char	*spdir,
-	*Curr_pwd,
-	*jobqueue;
+	*Curr_pwd;
 
-char	*Restru,
-	*Restrg;
-
-uid_t	Daemuid,
-	Realuid,
-	Effuid;
-gid_t	Realgid,
-	Effgid;
-
-FILE	*Cfile;
 extern	LONG	Const_val;
 
 WINDOW	*hjscr,
@@ -151,15 +140,9 @@ int	HJLINES,
 	VLINES;
 
 int	Ctrl_chan = -1;
-#ifndef	USING_FLOCK
-int	Sem_chan;
-#endif
 
 Shipc		Oreq;
 extern	long	mymtype;
-BtuserRef	mypriv;
-
-char	*Args[1];		/* Just to resolve library refs */
 
 #ifdef	HAVE_TERMIOS_H
 struct	termios	orig_term;

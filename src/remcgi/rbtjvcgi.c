@@ -44,17 +44,8 @@
 #include "cgiutil.h"
 #include "rcgilib.h"
 
-FILE	*Cfile;
-
-uid_t	Daemuid,
-	Realuid,
-	Effuid;
-gid_t	Realgid,
-	Effgid;
-
-int	xbapi_fd = -1, Nvars;
+int	Nvars;
 struct	var_with_slot  *var_sl_list;
-apiBtuser	mypriv;
 
 void  nomem(const char *fl, const int ln)
 {

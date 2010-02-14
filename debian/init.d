@@ -121,8 +121,9 @@ case "$1" in
         fi
 
 	if ! grep -qs '^gnubatch' /etc/services ; then
-	    log_progress_msg "You need ports set up in /etc/services - see /usr/share/doc/gnubatch/README.Debian"
-            log_end_msg 0
+	    log_daemon_msg "You need ports set up in /etc/services"
+	    log_daemon_msg "- see /usr/share/doc/gnubatch/README.Debian"
+            log_end_msg 1
 	    exit 0
 	fi
 

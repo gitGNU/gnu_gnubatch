@@ -51,3 +51,7 @@ typedef	const	Mredir	*CMredirRef;
 /* Extract redirection from offset */
 
 #define	REDIR_OF(jp, cnt)	&((RedirRef) &jp->bj_space[jp->h.bj_redirs])[cnt]
+
+/* Only used by clients but define here */
+
+extern	Mredir	Redirs[];

@@ -38,8 +38,8 @@ static	char	Filename[] = __FILE__;
 #define	INITU	70
 #define	INCU	10
 
-void	uloop_over(int, void (*)(int, char *, int_ugid_t), char *);
-int  isvuser(const uid_t);
+extern	void	uloop_over(int, void (*)(int, char *, int_ugid_t), char *);
+extern	int  	isvuser(const uid_t);
 
 Btdef	Btuhdr;
 static	int	btuf_fid = -1;

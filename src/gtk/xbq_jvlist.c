@@ -205,8 +205,6 @@ struct	fielddef	jobflds = { NULL, jlist_els, NUM_JOB_ELS },
 
 extern	Shipc	Oreq;
 
-extern	BtuserRef	mypriv;
-
 #define	ppermitted(flg)	(mypriv->btu_priv & flg)
 
 static	char	*localrun;
@@ -214,7 +212,6 @@ static	char	*localrun;
 static	HelpaltRef	progresslist;
 char			*rdeletemsg, *rretainmsg;
 HelpaltRef		varexport_types;
-char			*exitcodename, *signalname;
 
 extern const char * const condname[];
 extern const char * const assname[];

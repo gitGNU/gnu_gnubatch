@@ -35,12 +35,13 @@
 #include "statenums.h"
 #include "files.h"
 #include "optflags.h"
+#include "q_shm.h"
 
 void  dochelp(WINDOW *, int);
 void  doerror(WINDOW *, int);
 void  endhe(WINDOW *, WINDOW **);
 const char *qtitle_of(CBtjobRef);
-FILE *net_feed(const int, const netid_t, const jobno_t);
+FILE *net_feed(const int, const netid_t, const jobno_t, const int);
 void  mvwhdrstr(WINDOW *, const int, const int, const char *);
 
 static	char	Filename[] = __FILE__;
@@ -263,7 +264,7 @@ void  viewfile(BtjobRef jp)
 		FILE	*ifl;
 		int	kch;
 
-		if  (!(ifl = net_feed(FEED_JOB, jp->h.bj_hostid, jp->h.bj_job)))  {
+		if  (!(ifl = net_feed(FEED_JOB, jp->h.bj_hostid, jp->h.bj_job, Job_seg.dptr->js_viewport)))  {
 			disp_arg[0] = jp->h.bj_job;
 			disp_str = qtitle_of(jp);
 			disp_str2 = look_host(jp->h.bj_hostid);

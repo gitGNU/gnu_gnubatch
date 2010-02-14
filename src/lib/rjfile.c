@@ -80,6 +80,8 @@ static void  setjhold(const int typ)
 
 #else
 
+int	Sem_chan;				/* Create this here */
+
 struct	sembuf
 jr[3] = {{	JQ_READING,	1,	SEM_UNDO	},
 	{	JQ_FIDDLE,	-1,	0		},

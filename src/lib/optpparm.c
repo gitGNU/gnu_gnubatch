@@ -42,7 +42,19 @@
 
 int		Argcnt,
 		Redircnt;
+
+/* Define these here */
+
+char		*Args[MAXJARGS];
 Mredir		Redirs[MAXJREDIRS];
+Menvir		Envs[MAXJENVIR];
+
+char		*jobqueue,
+		*exitcodename,
+		*signalname;
+
+BtuserRef	mypriv;
+
 BtmodeRef	Mode_arg;
 BtjobRef	JREQ;
 netid_t		Out_host;
@@ -51,10 +63,6 @@ char		*job_title,
 		*job_cwd;
 
 char		Mode_set[3];	/* 0,1,2 = U,G,O (may be vars) */
-
-extern	BtuserRef	mypriv;
-extern	Menvir		Envs[];
-extern	char		*Args[];
 
 EOPTION(o_advterr)
 {

@@ -89,35 +89,14 @@ void  allocate_colours();
 #endif
 
 char	*spdir,
-	*Curr_pwd,
-	*jobqueue;
+	*Curr_pwd;
 
-/* Satisfy sharedlibs dependencies */
-char	*Args[1];
-/* End of shared libs dependencies */
-
-uid_t	Daemuid,
-	Realuid,
-	Effuid;
-
-gid_t	Realgid,
-	Effgid;
-
-FILE	*Cfile;
 char	Confvarname[] = "XMBTQCONF";
-
-int	Ctrl_chan = -1;
-#ifndef	USING_FLOCK
-int	Sem_chan;
-#endif
 
 int	poll_time;
 
 Shipc		Oreq;
 extern	long	mymtype;
-BtuserRef	mypriv;
-
-char	*Restru, *Restrg;
 
 /* X Stuff */
 

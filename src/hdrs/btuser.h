@@ -113,3 +113,4 @@ extern BtuserRef  getbtulist(unsigned *);
 extern double  calccharge(const int_ugid_t);
 
 extern	int	btu_needs_rebuild;
+extern	BtuserRef	mypriv;

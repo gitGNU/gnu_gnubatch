@@ -76,13 +76,10 @@ static	char	*tmpfl;
 unsigned		pend_njobs, pend_max;
 struct	pend_job	*pend_list;
 
-extern	BtuserRef	mypriv;
-
 HelpaltRef	daynames_full, monnames;
 #ifdef HAVE_XM_SPINB_H
 XmStringTable	timezerof, stdaynames, stmonnames;
 #endif
-char	*exitcodename, *signalname;
 
 int	longest_day,
 	longest_mon;

@@ -62,8 +62,7 @@ fixperms() {
     perm_gnubatch gbch-filemon gbch-xfilemon gbch-atcover
 
     cd /usr/sbin
-    perm_gnubatch gspl-pmenu gspl-hostedit gspl-passwd
-    perm_suid_gnubatch gspl-lpcover gspl-lpstatc
+    perm_gnubatch gbch-pmenu gbch-hostedit gbch-passwd
     perm_gnubatch gbch-btuconv gbch-ciconv gbch-cjlist gbch-cvlist gbch-ripc
 
     cd /usr/lib/gnubatch
@@ -265,10 +264,16 @@ unless (-f "/etc/gnubatch.hosts")  {
 }
 
 system("/usr/bin/gbch-uchange -R");
-$wai=`who am i`;
-chop $wai;
-$wai =~ s/ .*//;
-system("/usr/bin/gbch-uchange -p ALL $wai");
+$wai = $ENV{'SUDO_USER'};
+unless (defined($wai))  {
+    $wai=`who am i`;
+    chop $wai;
+    $wai =~ s/ .*//;
+}
+unless (length($wai) == 0)  {
+    print "Setting user $wai to be fully privileged\n";
+    system("/usr/bin/gbch-uchange -p ALL $wai");
+}
 
 EOF
 if [ $? -ne 0 ]
@@ -303,7 +308,6 @@ EOF
 
 case "$1" in
     configure)
-	ldconfig
 	fixperms
 	installnet
 	installconfig

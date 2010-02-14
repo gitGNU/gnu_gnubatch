@@ -46,6 +46,9 @@
 
 static	char	Filename[] = __FILE__;
 
+int		xbapi_fd = -1;
+apiBtuser	userpriv;
+
 int  sort_j(apiBtjob *a, apiBtjob *b)
 {
 	apiBtjobh	*aj = &a->h, *bj = &b->h;
@@ -166,7 +169,7 @@ void  api_open(char *realuname)
 		exit(E_NETERR);
 	}
 
-	if  ((ret = gbatch_getbtu(xbapi_fd, realuname, gname, &mypriv)) < 0)  {
+	if  ((ret = gbatch_getbtu(xbapi_fd, realuname, gname, &userpriv)) < 0)  {
 		html_disperror($E{Base for API errors} + ret);
 		exit(E_NETERR);
 	}

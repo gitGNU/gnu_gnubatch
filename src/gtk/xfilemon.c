@@ -40,37 +40,12 @@
 static	char	Filename[] = __FILE__;
 
 char	*Curr_pwd;
-uid_t	Realuid,
-	Effuid;
-gid_t	Realgid,
-	Effgid;
 
 GtkWidget	*toplevel;
 
-FILE	*Cfile;
-
 HelpaltRef	montypes, filetypes;
 
-/* Satisfy sharedlibs dependencies */
-#include "bjparam.h"
-#include "cmdint.h"
-#include "btconst.h"
-#include "btmode.h"
-#include "btvar.h"
-#include "btuser.h"
-#include "timecon.h"
-#include "btjob.h"
-#include "q_shm.h"
-#include "gtk_lib.h"
-
-int		Ctrl_chan;
-uid_t		Daemuid;
 ULONG		Fileprivs;
-char		*Args[1], *exitcodename, *signalname;
-BtuserRef	mypriv;
-struct		jshm_info	Job_seg;
-char		*Restru, *Restrg, *jobqueue;
-/* End of shared libs dependencies */
 
 void  nomem(const char *fl, const int ln)
 {
@@ -375,14 +350,6 @@ MAINFN_TYPE  main(int argc, char **argv)
 
 	gtk_init(&argc, &argv);
 	init_mcfile();
-
-	/* We don't really need these but the shared libraries make us declare them so
-	   we might as well fill them in with something sensible */
-
-	Realuid = getuid();
-	Realgid = getgid();
-	Effuid = geteuid();
-	Effgid = getegid();
 
 	Cfile = open_cfile("FILEMONCONF", "filemon.help");
 

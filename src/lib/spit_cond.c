@@ -28,9 +28,7 @@
 #include "btjob.h"
 #include "helpargs.h"
 #include "spitrouts.h"
-
-extern	char	*exitcodename,
-		*signalname;
+#include "optflags.h"
 
 void spit_cond(FILE *dest, const unsigned comp, const unsigned crit, const netid_t vhost, char *vname, BtconRef	value)
 {

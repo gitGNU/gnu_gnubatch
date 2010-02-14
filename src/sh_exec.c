@@ -114,7 +114,7 @@ jru[1] ={{	JQ_READING,	-1,	0	}};
 #define	unholdjobs()	while  (semop(Sem_chan, &jru[0], 1) < 0 && errno == EINTR)
 #endif
 
-FILE *net_feed(const int, const netid_t, const jobno_t);
+FILE *net_feed(const int, const netid_t, const jobno_t, const int);
 
 static	char	Filename[] = __FILE__;
 
@@ -580,7 +580,7 @@ static void  connect_jobfile(BtjobRef jp)
 		jobno_t	jn = jp->h.bj_job;
 		int	fid, ch;
 
-		if  (!(netf = net_feed(FEED_JOB, jp->h.bj_hostid, jp->h.bj_job)))
+		if  (!(netf = net_feed(FEED_JOB, jp->h.bj_hostid, jp->h.bj_job, Job_seg.dptr->js_viewport)))
 			exit(E_EXENOJOB);
 
 		/* Loop until the file name is unique.  */

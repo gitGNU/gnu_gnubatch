@@ -28,6 +28,7 @@
 #endif
 #include "incl_unix.h"
 #include "defaults.h"
+#include "incl_ugid.h"
 #include "errnums.h"
 #include "ecodes.h"
 #include "files.h"
@@ -43,7 +44,7 @@ extern char *strread(FILE *, const char *);
 
 #define	INCFILES	10
 
-FILE	*Cfile;
+FILE	*Cfile;					/* Need to define this here as not using client lib */
 char	*dispatch;
 
 struct	ostr	{
@@ -63,9 +64,6 @@ int	utmp = -1;
 #include "timecon.h"
 #include "btjob.h"
 #include "q_shm.h"
-uid_t	Realuid;
-gid_t	Realgid;
-ULONG	Fileprivs;
 struct	jshm_info	Job_seg;
 /* End of shared libs dependencies */
 

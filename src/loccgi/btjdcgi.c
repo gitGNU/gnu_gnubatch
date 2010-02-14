@@ -51,30 +51,9 @@
 
 #define	DEFSLEEP	10
 
-FILE	*Cfile;
-
 #define	IPC_MODE	0600
 
-int	Ctrl_chan;
-#ifndef	USING_FLOCK
-int	Sem_chan;
-#endif
-
-uid_t	Daemuid,
-	Realuid,
-	Effuid,
-	Effgid;
-gid_t	Realgid;
-
-BtuserRef	mypriv;
-
-char	*jobqueue,		/* Not actually used */
-	*Restru,
-	*Restrg;
-
-/* Satisfy sharedlibs dependencies */
-char		*exitcodename, *signalname, *Args[1];
-/* End of shared libs dependencies */
+extern	int	Ctrl_chan;
 
 void  nomem(const char *fl, const int ln)
 {

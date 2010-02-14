@@ -1,0 +1,1010 @@
+<?xml version="1.0" ?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<title>gbch-r - submit a job to batch scheduler</title>
+<meta http-equiv="content-type" content="text/html; charset=utf-8" />
+<link rev="made" href="mailto:root@localhost" />
+</head>
+
+<body style="background-color: white">
+
+
+<!-- INDEX BEGIN -->
+<div name="index">
+<p><a name="__index__"></a></p>
+<!--
+
+<ul>
+
+	<li><a href="#name">NAME</a></li>
+	<li><a href="#synopsis">SYNOPSIS</a></li>
+	<li><a href="#description">DESCRIPTION</a></li>
+	<li><a href="#options">OPTIONS</a></li>
+	<ul>
+
+		<li><a href="#redirection_format">Redirection format</a></li>
+		<li><a href="#repeat_periods">Repeat periods</a></li>
+		<li><a href="#conditions">Conditions</a></li>
+		<li><a href="#assignments">Assignments</a></li>
+		<li><a href="#mode_arguments">Mode arguments</a></li>
+	</ul>
+
+	<li><a href="#files">FILES</a></li>
+	<li><a href="#environment">ENVIRONMENT</a></li>
+	<li><a href="#see_also">SEE ALSO</a></li>
+	<li><a href="#diagnostics">DIAGNOSTICS</a></li>
+	<li><a href="#copyright">COPYRIGHT</a></li>
+	<li><a href="#author">AUTHOR</a></li>
+</ul>
+
+-->
+
+
+</div>
+<!-- INDEX END -->
+
+<p>
+</p>
+<h1><a name="name">NAME</a></h1>
+<p>gbch-r - submit a job to batch scheduler</p>
+<p>gbch-rr - submit a job to remote batch scheduler</p>
+<p>
+</p>
+<hr />
+<h1><a name="synopsis">SYNOPSIS</a></h1>
+<p><strong>gbch-r</strong>
+[ <em>-options</em> ]
+[ <em>files</em> ]</p>
+<p><strong>gbch-rr</strong>
+[ <em>-options</em> ]
+[ <em>files</em> ]</p>
+<p>
+</p>
+<hr />
+<h1><a name="description">DESCRIPTION</a></h1>
+<p><strong>gbch-r</strong> creates a <strong>GNUbatch</strong> batch job from each of the supplied files
+or the standard input if no file names are given.</p>
+<p><strong>gbch-rr</strong> operates similarly, but creates the jobs on a remote host
+without the necessity of having to have <strong>GNUbatch</strong> running on the
+submitting host.</p>
+<p>
+</p>
+<hr />
+<h1><a name="options">OPTIONS</a></h1>
+<p>Except for the <strong>-Q</strong> option, which must be specified, and the options
+keyword used to pick up default arguments and to save with the
+<strong>+freeze-current</strong> and <strong>+freeze-home</strong> options, the (standard - it
+would be possible to make them different by editing the option
+definitions in <em class="file">btrest.help</em> but this would not be
+sensible) options to <strong>gbch-rr</strong> are identical in effect to those for
+<strong>gbch-r</strong>.</p>
+<p>Note that the order of treatment, letters and keywords described below
+may be modified by editing the file <em class="file">btrest.help</em> -
+see <code>btsyntax(5)</code>.</p>
+<p>The environment variable on which options are supplied is <a href="#gbch_r"><code>GBCH_R</code></a> for
+<strong>gbch-r</strong>, <code>GBCH_RR</code> for <strong>gbch-rr</strong> and the environment variable to specify the
+help file is <a href="#btrestconf"><code>BTRESTCONF</code></a>.</p>
+<p>We regret having run out of single letters for options to <strong>gbch-r</strong>
+and <strong>gbch-rr</strong> and having had to resort in three cases to
+non-alphabetic options. The <strong>bts</strong> command in <strong>GNUbatch2</strong> (Xi-Batch
+Rel 7) introduces the new concept of <em>templates</em> carrying most of the
+information supplied as options to <strong>gbch-r</strong>.</p>
+<dl>
+<dt><strong><a name="or_explain" class="item">-? or +explain</a></strong></dt>
+
+<dd>
+<p>causes a summary of the other options to be displayed without taking
+further action.</p>
+</dd>
+<dt><strong><a name="2_time_or_grace_time_time" class="item">-2 <em>time</em> or +grace-time <em>time</em></a></strong></dt>
+
+<dd>
+<p>Sets the second stage time of handling over-running jobs to <em>time</em>,
+in seconds (the argument may be any number of seconds, or given as
+<code>mm:ss</code> for minutes and seconds).</p>
+<p>This only applies if a maximum elapsed time for a job is set with the
+<strong>-Y</strong> option. If a non-zero time is also given with this option, the
+job is first killed with the signal number given by the <strong>-W</strong> option
+and then, if it continues to run for the time given by this argument,
+killed with <code>SIGKILL</code> which cannot be caught or ignored.</p>
+</dd>
+<dt><strong><a name="9_or_catch_up" class="item">-9 or +catch-up</a></strong></dt>
+
+<dd>
+<p>sets the &quot;if not possible&quot; action of the job or jobs to catch up - one
+run of a series of missed runs is done when it is possible without
+affecting future runs.</p>
+</dd>
+<dt><strong><a name="or_done" class="item">-. or +done</a></strong></dt>
+
+<dd>
+<p>sets the job or jobs to &quot;done&quot; state (this is mainly intended for
+resubmitting jobs which have been &quot;unqueued&quot;).</p>
+</dd>
+<dt><strong><a name="a_days_or_avoiding_days_days" class="item">-A <em>days</em> or +avoiding-days <em>days</em></a></strong></dt>
+
+<dd>
+<p>signifies days to avoid when the job or jobs are to be repeated
+automatically. The days to avoid option supersedes any preceding or
+default option, unless a leading comma is given. Thus if the existing
+days to avoid are <code>Sat</code> and <code>Sun</code>, the default when installed,</p>
+<pre>
+ gbch-r -A Wed</pre>
+<p>will change the days to avoid to be Wednesday only, whereas</p>
+<pre>
+ gbch-r -A ,Wed</pre>
+<p>will change the days to avoid to be Saturday, Sunday and Wednesday.</p>
+<p>A single <code>-</code> argument cancels the days to avoid parameter altogether,
+thus <a href="#a"><code>-A-</code></a>.</p>
+<p>Note that this parameter only affects <em>automatic</em> repetitions, so if
+the date given by the <strong>-T</strong> parameter falls on a day excluded by this
+argument, it will not be affected and the first run will be on the
+date specified.</p>
+<p>Upon installation the default abbreviations for the days are <code>Sun</code>,
+<code>Mon</code>, <code>Tue</code>, <code>Wed</code>, <code>Thu</code>, <code>Fri</code>, <code>Sat</code> and <code>Hday</code>, the last
+refers to holidays as specified in the holiday file. The days are
+interpreted case-insensitively, but on saving options with
+<strong>+freeze-current</strong> or <strong>+freeze-home</strong> will save the names in the
+initial capital format.</p>
+</dd>
+<dt><strong><a name="a_string_or_argument_string" class="item">-a <em>string</em> or +argument <em>string</em></a></strong></dt>
+
+<dd>
+<p>Provide an argument string to the command interpreter. Successive
+<strong>-a</strong> options are cumulative and append additional arguments to the
+list of arguments for the job or jobs. To clear previously-specified
+options (maybe set in <em class="file">.gnubatch</em> files) and start afresh, use the
+<strong>-e</strong> option first.</p>
+</dd>
+<dt><strong><a name="b_or_assignment_not_critical" class="item">-B or +assignment-not-critical</a></strong></dt>
+
+<dd>
+<p>Marks subsequently-specified assignments (with the <strong>-s</strong> option) as
+&quot;not critical&quot;, meaning that the assignment will be ignored if it
+contains a reference to a variable on a remote host which is offline
+or inaccessible. This must precede the <strong>-s</strong> options to which it is to
+be applied.</p>
+</dd>
+<dt><strong><a name="b_or_assignment_critical" class="item">-b or +assignment-critical</a></strong></dt>
+
+<dd>
+<p>Marks subsequently-specified assignments (with the <strong>-s</strong> option) as
+&quot;critical&quot;, meaning that the job or jobs will not start if the
+assignment contains a reference to a variable on a remote host which
+is offline or inaccessible. This must precede the <strong>-s</strong> options to
+which is to be applied.</p>
+</dd>
+<dt><strong><a name="c_or_cancelled" class="item">-C or +cancelled</a></strong></dt>
+
+<dd>
+<p>Sets the job or jobs to be in &quot;cancelled&quot; state.</p>
+</dd>
+<dt><strong><a name="c_condition_or_condition_condition" class="item">-c <em>condition</em> or +condition <em>condition</em></a></strong></dt>
+
+<dd>
+<p>Sets a <em>condition</em> to be satisfied before the job or jobs may
+run. Successive <strong>-c</strong> options cause further conditions to be appended
+to the list, up to a maximum of 10 conditions. To start from scratch,
+deleting any previously-specified conditions (in a <em class="file">.gnubatch</em> file
+perhaps), use the <strong>-y</strong> option first.</p>
+</dd>
+<dt><strong><a name="d_directory_or_directory_directory" class="item">-D <em>directory</em> or +directory <em>directory</em></a></strong></dt>
+
+<dd>
+<p>Sets the working directory for the job or jobs. This may include
+environment variable references preceded by <code>$</code> to be expanded and
+constructs such as <code>~user</code> to select the given user's home
+directory. (Remember, if using the shell, and using these constructs,
+to put quotes around the directory, otherwise the shell will expand
+the constructs and not <strong>GNUbatch</strong>).</p>
+<p>If omitted, then the current directory at the time of invoking <strong>gbch-r</strong>
+or <strong>gbch-rr</strong> is used.</p>
+</dd>
+<dt><strong><a name="d_or_delete_at_end" class="item">-d or +delete-at-end</a></strong></dt>
+
+<dd>
+<p>cancels any repeat option of the jobs so that they will be deleted at
+the end of the run rather than repeated or kept. This is the default
+if no arguments are specified.</p>
+</dd>
+<dt><strong><a name="e_or_local_environment" class="item">-E or +local-environment</a></strong></dt>
+
+<dd>
+<p>set the environment variables to be as per the local environment
+rather than the remote environment. This applies to <strong>gbch-rr</strong> only and
+is ignored in <strong>gbch-r</strong>.</p>
+</dd>
+<dt><strong><a name="e_or_cancel_arguments" class="item">-e or +cancel-arguments</a></strong></dt>
+
+<dd>
+<p>deletes any arguments set up by previous options.</p>
+</dd>
+<dt><strong><a name="f_or_export" class="item">-F or +export</a></strong></dt>
+
+<dd>
+<p>marks the job or jobs to be visible throughout the network, but only
+available to run on the machine which they are queued on.</p>
+</dd>
+<dt><strong><a name="f_letters_or_flags_for_set" class="item">-f <em>letters</em> or +flags-for-set</a></strong></dt>
+
+<dd>
+<p>Precede <strong>-s</strong> (set assignment) options with this and an argument
+consisting of some or all of <code>SNEACR</code> (for respectively Start, Normal
+exit, Error exit, Abort, Cancel and Reverse) to set the flags which
+determine when an assignment is performed.</p>
+</dd>
+<dt><strong><a name="g_or_full_export" class="item">-G or +full-export</a></strong></dt>
+
+<dd>
+<p>marks the job or jobs to be visible throughout the network and
+potentially available to run on any machine.</p>
+</dd>
+<dt><strong><a name="g_group_or_set_group_group" class="item">-g <em>group</em> or +set-group <em>group</em></a></strong></dt>
+
+<dd>
+<p>set the group owner of the job or jobs to be <em>group</em>. The user must have
+<em>write admin file</em> permission to invoke this argument.</p>
+</dd>
+<dt><strong><a name="h_or_hold_current" class="item">-H or +hold-current</a></strong></dt>
+
+<dd>
+<p>sets the &quot;if not possible&quot; action of the job or jobs to hold current - the
+run is done when it is possible without affecting subsequent runs.</p>
+</dd>
+<dt><strong><a name="h_title_or_title_title" class="item">-h <em>title</em> or +title <em>title</em></a></strong></dt>
+
+<dd>
+<p>sets the title of the job or jobs to <em>title</em>. In the absence of this
+argument the title will be that of the last part of the file name, if
+any. The title may be a string of any length containing any printable
+characters.</p>
+</dd>
+<dt><strong><a name="i_redirection_or_input_output_redirection" class="item">-I <em>redirection</em> or +input-output <em>redirection</em></a></strong></dt>
+
+<dd>
+<p>sets a redirection for the job or jobs. Successive <strong>-I</strong> options are
+cumulative and will append to the current list of redirections. To
+start the list of redirections from scratch, precede them with the
+<strong>-Z</strong> option.</p>
+</dd>
+<dt><strong><a name="i_name_or_interpreter_name" class="item">-i <em>name</em> or +interpreter <em>name</em></a></strong></dt>
+
+<dd>
+<p>sets the command interpreter for the job or jobs to be <em>name</em>. The
+load level is also set to that for the interpreter, so if a <strong>-l</strong>
+argument is to be specified, it should <em>follow</em> the <strong>-i</strong> argument.</p>
+<p>The command interpreter will be rejected if its load level exceeds the
+maximum per job for a user.</p>
+</dd>
+<dt><strong><a name="j_or_no_advance_time_error" class="item">-J or +no-advance-time-error</a></strong></dt>
+
+<dd>
+<p>sets the flag so that if the job exits with an error, the next time to
+run is not advanced according to the repeat specification.</p>
+</dd>
+<dt><strong><a name="j_or_advance_time_error" class="item">-j or +advance-time-error</a></strong></dt>
+
+<dd>
+<p>sets the flag so that if the job exits with an error, the next time to
+run is still advanced if applicable. This is the default if no arguments are specified.</p>
+</dd>
+<dt><strong><a name="k_or_condition_not_critical" class="item">-K or +condition-not-critical</a></strong></dt>
+
+<dd>
+<p>marks subsequently specified conditions set with the <strong>-c</strong> option as
+&quot;not critical&quot;, i.e. a condition dependent on a variable on an offline
+or otherwise inaccessible remote host will be ignored in deciding
+whether a job may start. This is the default if no arguments are specified.</p>
+</dd>
+<dt><strong><a name="k_or_condition_critical" class="item">-k or +condition-critical</a></strong></dt>
+
+<dd>
+<p>marks subsequently specified conditions set with the <strong>-c</strong> option as
+&quot;critical&quot;, i.e. a condition dependent on a variable on an offline or
+otherwise inaccessible remote host will cause the job to be held up.</p>
+</dd>
+<dt><strong><a name="l_value_or_ulimit_value" class="item">-L <em>value</em> or +ulimit <em>value</em></a></strong></dt>
+
+<dd>
+<p>sets the <em>ulimit</em> value of the job or jobs to the value given.</p>
+</dd>
+<dt><strong><a name="l_number_or_loadlev_number" class="item">-l <em>number</em> or +loadlev <em>number</em></a></strong></dt>
+
+<dd>
+<p>sets the load level of the job or jobs to be <em>number</em>. The user must
+have <em>special create permission</em> for this to differ from that of the
+command interpreter and further the load level must be less than the
+maximum per job for a user. The load level is also reset by the <strong>-i</strong>
+(set command interpreter) option, so this must be used before the
+<strong>-l</strong> option.</p>
+</dd>
+<dt><strong><a name="m_modes_or_mode_modes" class="item">-M <em>modes</em> or +mode <em>modes</em></a></strong></dt>
+
+<dd>
+<p>sets the permissions of the job or jobs to be <em>modes</em>.</p>
+</dd>
+<dt><strong><a name="m_or_mail_message" class="item">-m or +mail-message</a></strong></dt>
+
+<dd>
+<p>sets the flag whereby completion messages are mailed to the owner of
+the job. (They may anyway if the jobs output to standard output or
+standard error and these are not redirected).</p>
+</dd>
+<dt><strong><a name="n_or_normal" class="item">-N or +normal</a></strong></dt>
+
+<dd>
+<p>sets the job or jobs to normal &quot;ready to run&quot; state, as opposed to
+&quot;cancelled&quot; as set by the <strong>-C</strong> option.  This is the default if no
+arguments are specified.</p>
+</dd>
+<dt><strong><a name="n_or_local_only" class="item">-n or +local-only</a></strong></dt>
+
+<dd>
+<p>marks the job or jobs to be local only to the machines which they are
+queued on. They will not be visible or runnable on remote hosts.</p>
+</dd>
+<dt><strong><a name="o_or_remote_environment" class="item">-O or +remote-environment</a></strong></dt>
+
+<dd>
+<p>initialise the environment variables to be those from the remote
+environment. This applies to <strong>gbch-rr</strong> only and is ignored in <strong>gbch-r</strong>.
+This is the default if no arguments are specified.</p>
+</dd>
+<dt><strong><a name="o_or_no_repeat" class="item">-o or +no-repeat</a></strong></dt>
+
+<dd>
+<p>cancels any repeat option of the job or jobs, so that the they will be
+run and retained on the queue marked <code>done</code> at the end.</p>
+</dd>
+<dt><strong><a name="p_value_or_umask_value" class="item">-P <em>value</em> or +umask <em>value</em></a></strong></dt>
+
+<dd>
+<p>sets the umask value of the job or jobs to the <em>octal</em> value given.
+The value should be up to 3 octal digits as per the shell.</p>
+</dd>
+<dt><strong><a name="p_number_or_priority_number" class="item">-p <em>number</em> or +priority <em>number</em></a></strong></dt>
+
+<dd>
+<p>sets the priority of the job or jobs to be <em>number</em>, which must be in
+the range given by the user's minimum and maximum priority.</p>
+</dd>
+<dt><strong><a name="q_hostname_or_host_hostname" class="item">-Q <em>hostname</em> or +host <em>hostname</em></a></strong></dt>
+
+<dd>
+<p>send the job or jobs to the given <em>hostname</em>. Note that <em>hostname</em>
+must be in <em class="file">gnubatch.hosts</em> on the submitting machine and the
+submitting machine's hostname must be in <em class="file">/etc/</em> on the
+receiving machine.</p>
+<p>If specified with <strong>gbch-r</strong>, the effect is to invoke <strong>gbch-rr</strong> with the
+same command-line options as were given to <strong>gbch-r</strong>. Note that this does
+not include any options for <strong>gbch-r</strong> extracted from the environment or
+<em class="file">.gnubatch</em> files.</p>
+<p>This option is <em>mandatory</em> for <strong>gbch-rr</strong> and it will fail if it is not
+specified. <strong>gbch-r</strong> is not invoked as otherwise there might be an
+endless loop of calls (with <strong>-Q</strong> specified in a <em class="file">.gnubatch</em> file for
+<strong>gbch-r</strong> but not for <strong>gbch-rr</strong> for example).</p>
+</dd>
+<dt><strong><a name="q_queuename_or_job_queue_queuename" class="item">-q <em>queuename</em> or +job-queue <em>queuename</em></a></strong></dt>
+
+<dd>
+<p>sets a job queue name as specified on the job or jobs. This may be any
+sequence of printable characters.</p>
+</dd>
+<dt><strong><a name="r_or_reschedule_all" class="item">-R or +reschedule-all</a></strong></dt>
+
+<dd>
+<p>sets the &quot;not possible&quot; action of the job or jobs to reschedule all -
+the run is done when it is possible and subsequent runs are
+rescheduled by the amount delayed.</p>
+</dd>
+<dt><strong><a name="r_repeat_spec_or_repeat_repeat_spec" class="item">-r <em>repeat_spec</em> or +repeat <em>repeat_spec</em></a></strong></dt>
+
+<dd>
+<p>sets the repeat option of the jobs as specified.</p>
+</dd>
+<dt><strong><a name="s_or_skip_if_held" class="item">-S or +skip-if-held</a></strong></dt>
+
+<dd>
+<p>sets the &quot;not possible&quot; action of the job or jobs to skip - the run
+is skipped if it could not be done at the specified time.</p>
+</dd>
+<dt><strong><a name="s_or_set" class="item">-s or +set</a></strong></dt>
+
+<dd>
+<p>sets an assignment on the job or jobs to be performed at the start
+and/or finish of the job or jobs as selected by a previously-specified
+<strong>-f</strong> option. This option is cumulative, and will add to the list of
+assignments specified by previous <strong>-s</strong> options. To start from
+scratch, precede the assignments with the <strong>-z</strong> option.</p>
+</dd>
+<dt><strong><a name="t_time_or_time_time" class="item">-T <em>time</em> or +time <em>time</em></a></strong></dt>
+
+<dd>
+<p>sets the next run time or time and date of the job or jobs as
+specified.</p>
+</dd>
+<dt><strong><a name="t_time_or_delete_time_time" class="item">-t <em>time</em> or +delete-time <em>time</em></a></strong></dt>
+
+<dd>
+<p>sets a delete time for the specified job or jobs as a time in hours,
+after which it will be automatically deleted if this time has elapsed
+since it was queued or last ran. Set to zero to retain the job or jobs
+indefinitely.</p>
+</dd>
+<dt><strong><a name="u_or_no_time" class="item">-U or +no-time</a></strong></dt>
+
+<dd>
+<p>cancels any time setting on the job or jobs set with <strong>-T</strong>, <strong>-r</strong> or
+<strong>-o</strong> options.</p>
+</dd>
+<dt><strong><a name="u_user_or_set_owner_user" class="item">-u <em>user</em> or +set-owner <em>user</em></a></strong></dt>
+
+<dd>
+<p>set the owner of the job or jobs to be <em>user</em>. The user must have
+<em>write admin file</em> permission to invoke this argument.</p>
+</dd>
+<dt><strong><a name="v_or_no_verbose" class="item">-V or +no-verbose</a></strong></dt>
+
+<dd>
+<p>cancel the effect of the <strong>-v</strong> option, so that a message is not output
+giving the job number of each batch job successfully created</p>
+</dd>
+<dt><strong><a name="v_or_verbose" class="item">-v or +verbose</a></strong></dt>
+
+<dd>
+<p>output a message on standard error containing the job number of each
+batch job successfully created.</p>
+</dd>
+<dt><strong><a name="w_sig_or_which_signal_sig" class="item">-W <em>sig</em> or +which-signal <em>sig</em></a></strong></dt>
+
+<dd>
+<p>used in conjunction with <strong>-Y</strong> and <strong>-2</strong> options sets the signal
+number, e.g. <strong>1</strong>, <strong>2</strong>, <strong>15</strong> to kill the job or jobs after the
+maximum run time has been exceeded.</p>
+</dd>
+<dt><strong><a name="w_or_write_message" class="item">-w or +write-message</a></strong></dt>
+
+<dd>
+<p>sets the flag whereby completion messages are written to the owner's
+terminal if available.</p>
+</dd>
+<dt><strong><a name="x_range_or_exit_code_range" class="item">-X <em>range</em> or +exit-code <em>range</em></a></strong></dt>
+
+<dd>
+<p>sets the normal or error exit code ranges for the job or jobs. The
+format of the <em>range</em> argument is <strong>N</strong> or <strong>E</strong> followed by a range in
+the form <code>nn:nn</code>, thus</p>
+<pre>
+        -X N0:9</pre>
+<p>and</p>
+<pre>
+        -X E10:255</pre>
+<p>Note that an exit code which falls inside both ranges will be handled
+by the setting of the smaller range, so</p>
+<pre>
+        -X N0:10
+        -X E1:255</pre>
+<p>will mean that exit codes 1 to 10 inclusive are treated as <em>normal</em>
+as that is the smaller range. Unhandled exit codes are treated as
+<em>abort</em>. The default is <code>N0:0</code> and <code>E1:255</code>.</p>
+</dd>
+<dt><strong><a name="x_or_no_message" class="item">-x or +no-message</a></strong></dt>
+
+<dd>
+<p>resets both flags as set by <strong>-m</strong> and <strong>-w</strong>.</p>
+</dd>
+<dt><strong><a name="y_time_or_run_time_time" class="item">-Y <em>time</em> or +run-time <em>time</em></a></strong></dt>
+
+<dd>
+<p>sets a maximum elapsed run time for the specified job or jobs. The
+argument <em>time</em> is in seconds, which may be written as <em>mm:ss</em> or
+<em>hh:mm:ss</em>. The job will be killed with <code>SIGKILL</code> unless a different
+signal is specified with the <strong>-W</strong> option and a further &quot;grace time&quot;
+specified with the <strong>-2</strong> option.</p>
+</dd>
+<dt><strong><a name="y_or_cancel_condition" class="item">-y or +cancel-condition</a></strong></dt>
+
+<dd>
+<p>deletes any conditions set up by previous arguments.</p>
+</dd>
+<dt><strong><a name="z_or_cancel_set" class="item">-z or +cancel-set</a></strong></dt>
+
+<dd>
+<p>deletes any assignments set up by previous arguments.</p>
+</dd>
+<dt><strong><a name="z_or_cancel_io" class="item">-Z or +cancel-io</a></strong></dt>
+
+<dd>
+<p>deletes any redirections set up by previous arguments.</p>
+</dd>
+<dt><strong><a name="freeze_current" class="item">+freeze-current</a></strong></dt>
+
+<dd>
+<p>Save all the current options in a <em class="file">.gnubatch</em> file in the current
+directory with keyword <code>BTR</code> for <strong>gbch-r</strong> or <code>RBTR</code> for <strong>gbch-rr</strong>.</p>
+</dd>
+<dt><strong><a name="freeze_home" class="item">+freeze-home</a></strong></dt>
+
+<dd>
+<p>Save all the current options in a <em class="file">.gnubatch</em> file in the user's home
+directory with keyword <code>BTR</code> for <strong>gbch-r</strong> or <code>RBTR</code> for <strong>gbch-rr</strong>.</p>
+</dd>
+</dl>
+<p>
+</p>
+<h2><a name="redirection_format">Redirection format</a></h2>
+<a name="Redirection_format"></a><p>The format of the argument to the <strong>-I</strong> option is similar to that for
+the shell with some extensions. The argument should always be enclosed
+in quotes to avoid the shell interpreting it rather than <strong>gbch-r</strong> or
+<strong>gbch-rr</strong>.</p>
+<p>Environment variables and <code>~user</code> constructs are expanded at run time
+in the strings.</p>
+<P>Parameter substitutions, or "meta data" may be included in the
+argument strings for redirections, see <a
+href="BchRef-5.html#Meta_data_definition">meta data</a>.</P><dl>
+<dt><strong><a name="n_file" class="item"><em>n</em>&lt;<em>file</em></a></strong></dt>
+
+<dd>
+<p>For example</p>
+<pre>
+        3&lt;myfile
+        7&lt;/tmp/data
+        &lt;input_file</pre>
+<p>Opens the specified file descriptor for input connected to the
+specified file. The file descriptor may be omitted in the common case
+of file descriptor 0 (standard input).</p>
+</dd>
+<dt><strong><a name="n_file2" class="item"><em>n</em>&gt;<em>file</em></a></strong></dt>
+
+<dd>
+<p>For example</p>
+<pre>
+        4&gt;outfile
+        12&gt;/tmp/out
+        2&gt;errors.%t
+        &gt;output_file</pre>
+<p>Opens the specified file descriptor for output, possibly creating the
+file, or truncating it to zero length first if it exists. The file
+descriptor may be be omitted in the common case of file descriptor 1
+(standard output).</p>
+</dd>
+<dt><strong><a name="n_file3" class="item"><em>n</em>&gt;&gt;<em>file</em></a></strong></dt>
+
+<dd>
+<p>For example</p>
+<pre>
+        5&gt;&gt;Log
+        7&gt;&gt;Log.%t
+        &gt;&gt;output.%t</pre>
+<p>As with the shell, this likewise creates the output file if it does
+not exists but appends new data to any previous data if it exists,
+rather than truncating it.</p>
+</dd>
+<dt><strong><a name="n_file4" class="item"><em>n</em>&lt;&gt;<em>file</em></a></strong></dt>
+
+<dd>
+<p>For example</p>
+<pre>
+        8&lt;&gt;Data
+        &lt;&gt;Myfile</pre>
+<p>Connect the file descriptor (or file descriptor 0 if not specified)
+for input and output, read-write mode.</p>
+</dd>
+<dt><strong><a name="n_file5" class="item"><em>n</em>&lt;&gt;&gt;<em>file</em></a></strong></dt>
+
+<dd>
+<p>For example</p>
+<pre>
+        8&lt;&gt;&gt;Data
+        &lt;&gt;&gt;Myfile</pre>
+<p>Select read-write mode, appending to existing data.</p>
+</dd>
+<dt><strong><a name="n_program" class="item"><em>n</em>&lt;|program</a></strong></dt>
+
+<dd>
+<p>For example</p>
+<pre>
+        7&lt;|uname</pre>
+<p>Run the specified program and take input from it on the given file
+descriptor (defaulting to standard input, file descriptor 0, if not specified).</p>
+</dd>
+<dt><strong><a name="n_program2" class="item"><em>n</em>|program</a></strong></dt>
+
+<dd>
+<p>For example</p>
+<pre>
+        2|log_errors
+        |log_output</pre>
+<p>Run the specified program and send output to it on the given file
+descriptor (defaulting to standard output, file descriptor 1, if not
+specified).</p>
+</dd>
+<dt><strong><a name="n_n" class="item"><em>n</em>&amp;<em>n</em></a></strong></dt>
+
+<dd>
+<p>Duplicate the second file descriptor as the first file descriptor</p>
+</dd>
+<dt><strong><a name="n" class="item"><em>n</em>&amp;-</a></strong></dt>
+
+<dd>
+<p>Close the given file descriptor.</p>
+</dd>
+</dl>
+<p>
+</p>
+<h2><a name="repeat_periods">Repeat periods</a></h2>
+<p>The repeat period names for the <strong>-r</strong> option are as follows:</p>
+<dl>
+<dt><strong><a name="minutes" class="item">Minutes</a></strong></dt>
+
+<dd>
+<p>Period in minutes</p>
+</dd>
+<dt><strong><a name="hours" class="item">Hours</a></strong></dt>
+
+<dd>
+<p>Period in hours</p>
+</dd>
+<dt><strong><a name="days" class="item">Days</a></strong></dt>
+
+<dd>
+<p>Period in days</p>
+</dd>
+<dt><strong><a name="weeks" class="item">Weeks</a></strong></dt>
+
+<dd>
+<p>Period in weeks</p>
+</dd>
+<dt><strong><a name="monthsb" class="item">Monthsb</a></strong></dt>
+
+<dd>
+<p>Months relative to the beginning</p>
+</dd>
+<dt><strong><a name="monthse" class="item">Monthse</a></strong></dt>
+
+<dd>
+<p>Months relative to the end of the month</p>
+</dd>
+<dt><strong><a name="years" class="item">Years</a></strong></dt>
+
+<dd>
+<p>Period in years</p>
+</dd>
+</dl>
+<p>Each is followed by the number of the relevant periods after a
+colon. In the case of the month parameters, then this should be
+followed by a &quot;target day&quot; after a colon.</p>
+<p>Examples:</p>
+<pre>
+        -r Days:4
+        -r Monthsb:1:4
+        -r Monthse:1:31
+        -r Years:2</pre>
+<p>For <a href="#monthsb"><code>Monthsb</code></a> the &quot;target day&quot; is the day of the month to aim for, in
+this case the 4th of the month. If this would be a &quot;day to avoid&quot;,
+then the following day is tried and so on.</p>
+<p>For <a href="#monthse"><code>Monthse</code></a> the &quot;target day&quot; is selected from the day of the month given
+in the <strong>-T</strong> option. So if the month in the <strong>-T</strong> option has 31 days,
+then
+	-r Monthse:1:31</p>
+<p>will select the last day of each month and</p>
+<pre>
+        -r Monthse:1;30</pre>
+<p>will select the second last, but if the month in the <strong>-T</strong> option has
+30 days, the first will be invalid and the second will select the last
+day of the month.</p>
+<p>If the selected day cannot be met for any reason, typically because it
+does not meet the &quot;days to avoid&quot; criteria, then the previous day is
+tried until an acceptable day is found. In this way you can select the
+&quot;last working day of the month&quot; or &quot;next to last working day&quot; etc.</p>
+<p>
+</p>
+<h2><a name="conditions">Conditions</a></h2>
+<p>A condition must be of the form</p>
+<pre>
+        [machine:]&lt;varname&gt;&lt;condop&gt;&lt;constant&gt;.</pre>
+<p>where <em>varname</em> is the name of an existing variable for which the
+user has read permission.</p>
+<p><em>condop</em> is one of the following:</p>
+<dl>
+<dt><strong><a name="_" class="item">=</a></strong></dt>
+
+<dd>
+<p>equal to</p>
+</dd>
+<dt><strong><a name="__" class="item">!=</a></strong></dt>
+
+<dd>
+<p>not equal</p>
+</dd>
+<dt><strong><a name="_" class="item">&lt;</a></strong></dt>
+
+<dd>
+<p>less than</p>
+</dd>
+<dt><strong><a name="__" class="item">&lt;=</a></strong></dt>
+
+<dd>
+<p>less than or equal</p>
+</dd>
+<dt><strong><a name="_" class="item">&gt;</a></strong></dt>
+
+<dd>
+<p>greater than</p>
+</dd>
+<dt><strong><a name="__" class="item">&gt;=</a></strong></dt>
+
+<dd>
+<p>greater than or equal</p>
+</dd>
+</dl>
+<p><em>constant</em> is either a string or a numeric value. If the
+string starts with a number then it should be preceded with a colon.</p>
+<p><strong>N.B.</strong> When invoked from a shell, quotation marks should surround the entire
+argument as shown above, otherwise the shell may attach its own
+interpretation on the various characters.</p>
+<p>Examples of conditions:</p>
+<pre>
+        -c 'Count&gt;3'
+        -c 'Lock=0'
+        -c 'Remote:Lock!=0'
+        -c 'Val=:3rd'</pre>
+<p>
+</p>
+<h2><a name="assignments">Assignments</a></h2>
+<p>Each assignment should normally be preceded by a <strong>-f</strong> option to
+denote when the assignment is applied, apart from exit code and signal
+assignments.</p>
+<p>The argument to the <strong>-f</strong> option is one or more of the following:</p>
+<dl>
+<dt><strong><a name="s" class="item">S</a></strong></dt>
+
+<dd>
+<p>Perform assignment on startup</p>
+</dd>
+<dt><strong><a name="n" class="item">N</a></strong></dt>
+
+<dd>
+<p>Perform assignment on normal exit</p>
+</dd>
+<dt><strong><a name="e" class="item">E</a></strong></dt>
+
+<dd>
+<p>Perform assignment on error exit</p>
+</dd>
+<dt><strong><a name="a" class="item">A</a></strong></dt>
+
+<dd>
+<p>Perform assignment on abort</p>
+</dd>
+<dt><strong><a name="c" class="item">C</a></strong></dt>
+
+<dd>
+<p>Perform assignment on cancellation</p>
+</dd>
+<dt><strong><a name="r" class="item">R</a></strong></dt>
+
+<dd>
+<p>Reverse assignment for <a href="#n"><code>N</code></a>, <a href="#e"><code>E</code></a>, <a href="#a"><code>A</code></a>, and <a href="#c"><code>C</code></a>.</p>
+</dd>
+</dl>
+<p>The default if no <strong>-f</strong> options are specified is</p>
+<pre>
+        -f SNEAR</pre>
+<p>but the default for this may be changed by editing the message file.</p>
+<p>The format of the argument to the <strong>-s</strong> option is in the format</p>
+<pre>
+        [machine:]&lt;varname&gt;&lt;operator&gt;&lt;constant&gt;.</pre>
+<p><em>varname</em> is the name of a variable to which the user has read and
+write permission.</p>
+<p><em>operator</em> is one of the following:</p>
+<dl>
+<dt><strong><a name="_2" class="item">=</a></strong></dt>
+
+<dd>
+<p>Assign value which may be a string or numeric constant. To indicate
+that a string starting with a digit is intended to be a string, prefix
+it with a colon. Exceptionally, the variable assigned to may have
+write permission and not read permission for the user.</p>
+<p>The effect of the &quot;reverse&quot; flag is to assign zero or the null
+string. Previous values are not recalled.</p>
+</dd>
+<dt><strong><a name="__" class="item">+=</a></strong></dt>
+
+<dd>
+<p>Increment variable by numeric constant. The effect of the &quot;reverse&quot;
+flag is to decrement the variable by that constant.</p>
+<p>Arithmetic is as 32-bit signed integer.</p>
+</dd>
+<dt><strong><a name="__" class="item">-=</a></strong></dt>
+
+<dd>
+<p>Decrement variable by numeric constant. The effect of the &quot;reverse&quot;
+flag is to increment the variable by that constant.</p>
+<p>Arithmetic is as 32-bit signed integer.</p>
+</dd>
+<dt><strong><a name="starhere" class="item">STARHERE=</a></strong></dt>
+
+<dd>
+<p>Multiply variable by numeric constant. The effect of the &quot;reverse&quot;
+flag is to divide the variable by that constant.</p>
+<p>Arithmetic is as 32-bit signed integer and overflow is ignored.</p>
+</dd>
+<dt><strong><a name="__" class="item">/=</a></strong></dt>
+
+<dd>
+<p>Divide variable by numeric constant. The effect of the &quot;reverse&quot;
+flag is to multiply the variable by that constant.</p>
+<p>Arithmetic is as 32-bit signed integer. Note that the remainder from
+division is ignored.</p>
+<p>The handling of negative numbers may be dependent on the hardware and
+should probably not be relied upon.</p>
+</dd>
+<dt><strong><a name="__" class="item">%=</a></strong></dt>
+
+<dd>
+<p>Take the remainder (modulus) from division by the numeric
+constant. There is no &quot;reverse&quot; of the operation.</p>
+<p>Arithmetic is as 32-bit signed integer. The handling of negative
+numbers may be dependent on the hardware and should probably not be
+relied upon.</p>
+</dd>
+<dt><strong><a name="exitcode" class="item">=exitcode</a></strong></dt>
+
+<dd>
+<p>Assign the exit code of the job to the given variable. Flags are
+ignored and the operation only occurs when the job exits.</p>
+</dd>
+<dt><strong><a name="signal" class="item">=signal</a></strong></dt>
+
+<dd>
+<p>Assign the signal number with which the job terminated to the given
+variable, or zero if the job did not exit with a signal. Flags are
+ignored and the operation only occurs when the job exits.</p>
+</dd>
+</dl>
+<p>The following are examples of assignments:</p>
+<pre>
+        -s 'myvar=7'
+        -s 'host2:hisvar+=1'
+        -s 'status=exitcode'
+        -s 'val=:3rd'</pre>
+<p>Note the colon in the last assignment indicating that the value is a
+string, the colon is not included in the string.</p>
+<p>
+</p>
+<h2><a name="mode_arguments">Mode arguments</a></h2>
+<p>The argument to the <strong>-M</strong> option provides for a wide variety of
+operations.</p>
+<p>Each permission is represented by a letter, as follows:</p>
+<dl>
+<dt><strong><a name="r2" class="item">R</a></strong></dt>
+
+<dd>
+<p>read permission</p>
+</dd>
+<dt><strong><a name="w" class="item">W</a></strong></dt>
+
+<dd>
+<p>write permission</p>
+</dd>
+<dt><strong><a name="s2" class="item">S</a></strong></dt>
+
+<dd>
+<p>reveal permission</p>
+</dd>
+<dt><strong><a name="m" class="item">M</a></strong></dt>
+
+<dd>
+<p>read mode</p>
+</dd>
+<dt><strong><a name="p" class="item">P</a></strong></dt>
+
+<dd>
+<p>set mode</p>
+</dd>
+<dt><strong><a name="u" class="item">U</a></strong></dt>
+
+<dd>
+<p>give away owner</p>
+</dd>
+<dt><strong><a name="v" class="item">V</a></strong></dt>
+
+<dd>
+<p>assume owner</p>
+</dd>
+<dt><strong><a name="g" class="item">G</a></strong></dt>
+
+<dd>
+<p>give away group</p>
+</dd>
+<dt><strong><a name="h" class="item">H</a></strong></dt>
+
+<dd>
+<p>assume group</p>
+</dd>
+<dt><strong><a name="d" class="item">D</a></strong></dt>
+
+<dd>
+<p>delete</p>
+</dd>
+<dt><strong><a name="k" class="item">K</a></strong></dt>
+
+<dd>
+<p>kill</p>
+</dd>
+</dl>
+<p>Each section of the mode (user, group, others) is represented by the
+prefixes <a href="#u"><code>U:</code></a>, <a href="#g"><code>G:</code></a> and <code>O:</code> and separated by commas.</p>
+<p>For example:</p>
+<pre>
+        -M U:RWSMPDK,G:RWSDK,O:RS</pre>
+<p>would set the permissions for the user, group and others as given. If
+the prefixes are omitted, as in</p>
+<pre>
+        -M RWSDK</pre>
+<p>then all of the user, group and other permissions are set to the same
+value.</p>
+<p>
+</p>
+<hr />
+<h1><a name="files">FILES</a></h1>
+<p><em class="file">~/.gnubatch</em>
+configuration file (home directory)</p>
+<p><em class="file">.gnubatch</em>
+configuration file (current directory)</p>
+<p><em class="file">btrest.help</em>
+message file</p>
+<p>
+</p>
+<hr />
+<h1><a name="environment">ENVIRONMENT</a></h1>
+<dl>
+<dt><strong><a name="gbch_r" class="item">GBCH_R</a></strong></dt>
+
+<dd>
+<p>space-separated options to override defaults.</p>
+</dd>
+<dt><strong><a name="btrestconf" class="item">BTRESTCONF</a></strong></dt>
+
+<dd>
+<p>location of alternative help file.</p>
+</dd>
+</dl>
+<p>
+</p>
+<hr />
+<h1><a name="see_also">SEE ALSO</a></h1>
+<p>gbch-jchange(1),
+gbch-jlist(1),
+gbch-vlist(1),
+gbch-var(1),
+<code>btsyntax(5)</code>,
+gnubatch.conf(5),
+gnubatch.hosts(5),
+<code>xbnetserv(8)</code>.</p>
+<p>
+</p>
+<hr />
+<h1><a name="diagnostics">DIAGNOSTICS</a></h1>
+<p>Various diagnostics are read and printed as required from the message
+file <em class="file">btrest.help</em>.</p>
+<p>
+</p>
+<hr />
+<h1><a name="copyright">COPYRIGHT</a></h1>
+<p>Copyright (c) 2009 Free Software Foundation, Inc.
+This is free software. You may redistribute copies of it under the
+terms of the GNU General Public License
+&lt;http://www.gnu.org/licenses/gpl.html&gt;.
+There is NO WARRANTY, to the extent permitted by law.</p>
+<p>
+</p>
+<hr />
+<h1><a name="author">AUTHOR</a></h1>
+<p>John M Collins, Xi Software Ltd.</p>
+
+</body>
+
+</html>

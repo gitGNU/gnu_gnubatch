@@ -74,34 +74,12 @@ void  job_redisplay();
 void  var_redisplay();
 
 char	*spdir,
-	*Curr_pwd,
-	*jobqueue;
-
-/* Satisfy sharedlibs dependencies */
-char	*Args[1];
-/* End of shared libs dependencies */
-
-uid_t	Daemuid,
-	Realuid,
-	Effuid;
-
-gid_t	Realgid,
-	Effgid;
-
-FILE	*Cfile;
-
-int	Ctrl_chan = -1;
-#ifndef	USING_FLOCK
-int	Sem_chan;
-#endif
+	*Curr_pwd;
 
 int	poll_time;
 
 Shipc		Oreq;
 extern	long	mymtype;
-BtuserRef	mypriv;
-
-char	*Restru, *Restrg;
 
 /* X Stuff */
 

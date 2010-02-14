@@ -72,8 +72,6 @@ extern	char	*Curr_pwd;
 
 jobno_t	Cjobno = -1;
 
-extern	BtuserRef	mypriv;
-
 #define	ppermitted(flg)	(mypriv->btu_priv & flg)
 
 int	Jhline,
@@ -83,9 +81,6 @@ static	char	*more_amsg,
 		*more_bmsg,
 		*defcondstr,
 		*localrun;
-
-char		*exitcodename,
-		*signalname;
 
 char	*exportmark, *clustermark;	/* Actually these are for variables */
 

@@ -86,8 +86,6 @@ extern	WINDOW	*escr,
 extern	char	*Curr_pwd,
 		*spdir;
 
-extern	BtuserRef	mypriv;
-
 #define	NULLCP		(char *) 0
 #define	HELPLESS	((char **(*)()) 0)
 

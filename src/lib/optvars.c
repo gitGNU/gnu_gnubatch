@@ -38,8 +38,6 @@ unsigned	sflags = BJA_START|BJA_REVERSE|BJA_OK|BJA_ERROR|BJA_ABORT;
 struct	scond	Condlist[MAXCVARS];
 struct	Sass	Asslist[MAXSEVARS];
 
-extern	char	*exitcodename, *signalname;
-
 /*
  * Extract variable name or hostname:variable name from argument
  * Return 0 if OK otherwise winge by returning error code.

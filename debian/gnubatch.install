@@ -1,9 +1,10 @@
 usr/bin
+usr/lib/gnubatch
 usr/lib/libgnubatch_curs*.so*
 usr/lib/libgnubatch_client*.so*
 usr/lib/libgnubatch_int*.so*
-usr/lib/gnubatch
 usr/sbin
+debian/gbch-servinstall usr/sbin
 usr/share/gnubatch
 usr/share/man/man1
 usr/share/man/man3

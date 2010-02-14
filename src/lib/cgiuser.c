@@ -47,7 +47,6 @@ static	FILE	*user_file;
 static	char	*login_name, *login_pass;
 char		*dest_hostname;
 netid_t		dest_hostid;
-extern	gid_t	Effgid;
 
 netid_t  my_look_hostname(const char *name)
 {

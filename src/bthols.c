@@ -52,33 +52,6 @@ char	Clearex = 0;
 
 static	HelpaltRef Monthnames, Monthshort;
 
-uid_t	Daemuid,
-	Realuid,
-	Effuid;
-gid_t	Realgid,
-	Effgid;
-
-char	*Restru,
-	*Restrg,
-	*jobqueue;
-
-BtuserRef	mypriv;
-
-FILE	*Cfile;
-
-/* Satisfy sharedlibs dependencies */
-#include "bjparam.h"
-#include "cmdint.h"
-#include "btconst.h"
-#include "btvar.h"
-#include "btjob.h"
-#include "q_shm.h"
-
-int		Ctrl_chan;
-char		*Args[1], *exitcodename, *signalname;
-struct		jshm_info	Job_seg;
-/* end of shared libs dependencies */
-
 void  nomem(const char *fl, const int ln)
 {
 	fprintf(stderr, "%s:Mem alloc fault: %s line %d\n", progname, fl, ln);

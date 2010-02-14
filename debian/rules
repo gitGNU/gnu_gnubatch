@@ -2,10 +2,7 @@
 # -*- makefile -*-
 
 # Uncomment this to turn on verbose mode.
-#export DH_VERBOSE=1
-
-# This has to be exported to make some magic below work.
-export DH_OPTIONS
+export DH_VERBOSE=1
 
 # These are used for cross-compiling and for saving the configure script
 # from having to guess our platform (since we know it already)
@@ -17,96 +14,26 @@ else
 CROSS= --build $(DEB_BUILD_GNU_TYPE)
 endif
 
+%:
+	dh  $@
 
-
-
-
-config.status: configure
-	dh_testdir
-# Commented this out as the config.sub and config.guess copied are older
-# than the ones we have
-	# Add here commands to configure the package.
-#ifneq "$(wildcard /usr/share/misc/config.sub)" ""
-#	cp -f /usr/share/misc/config.sub config.sub
-#endif
-#ifneq "$(wildcard /usr/share/misc/config.guess)" ""
-#	cp -f /usr/share/misc/config.guess config.guess
-#endif
-	./configure $(CROSS) --prefix=/usr --sysconfdir=/etc --localstatedir=/var/spool \
+override_dh_auto_configure:
+	mailer=/usr/bin/mail ./configure $(CROSS) --prefix=/usr --sysconfdir=/etc/gnubatch --localstatedir=/var/spool \
 	--libexecdir='$${exec_prefix}/lib' --datarootdir=/usr/share --pdfdir=/usr/share/doc/gnubatch CFLAGS="$(CFLAGS)" LDFLAGS="-Wl,-z,defs"
 
-build: build-stamp
-
-build-stamp:  config.status 
-	dh_testdir
-
-	# Add here commands to compile the package.
-	$(MAKE)
-	#docbook-to-man debian/gnubatch.sgml > gnubatch.1
-
-	touch $@
-
-clean: 
-	dh_testdir
-	dh_testroot
-	rm -f build-stamp 
-
-	# Add here commands to clean up after the build process.
-	[ ! -f Makefile ] || $(MAKE) distclean
-#	Remove this
-#	rm -f config.sub config.guess
-
-	dh_clean 
-
-install: build
-	dh_testdir
-	dh_testroot
-	dh_clean -k 
+override_dh_installdirs:
 	dh_installdirs -Pdebian/tmp -pgnubatch
+	dh_installdirs -Ngnubatch
 
-	# Add here commands to install the package into debian/tmp.
+override_dh_auto_install:
 	$(MAKE) DESTDIR=$(CURDIR)/debian/tmp BATCHUSER=root datarootdir=/usr/share STAGED_INSTALL=true install
-# Get rid of remote CGI bins for now as they depend on separated API library.
-	rm -f $(CURDIR)/debian/gnubatch/usr/lib/gnubatch/cgi-bin/r*
+
+	# Get rid of remote CGI bins for now as they depend on separated API library.
+	rm -f debian/tmp/usr/lib/gnubatch/cgi-bin/r*
 	# Remove .la files for internal only
-	rm -f $(CURDIR)/debian/tmp/usr/lib/libgnubatch_int.la
-	rm -f $(CURDIR)/debian/tmp/usr/lib/libgnubatch_client.la
-	rm -f $(CURDIR)/debian/tmp/usr/lib/libgnubatch_curs.la
+	rm -f debian/tmp/usr/lib/libgnubatch_int.la
+	rm -f debian/tmp/usr/lib/libgnubatch_client.la
+	rm -f debian/tmp/usr/lib/libgnubatch_curs.la
 
-# Build architecture-independent files here.
-binary-indep: build install
-	:
-
-# Build architecture-dependent files here.
-binary-arch: build install
-	dh_testdir
-	dh_testroot
-	dh_installchangelogs 
-	dh_installdocs
-	dh_installexamples
+override_dh_install:
 	dh_install --fail-missing
-#	dh_installmenu
-#	dh_installdebconf	
-#	dh_installlogrotate
-#	dh_installemacsen
-#	dh_installpam
-#	dh_installmime
-#	dh_python
-	dh_installinit
-#	dh_installcron
-#	dh_installinfo
-	dh_installman
-	dh_link
-	dh_strip
-	dh_compress
-	dh_fixperms
-#	dh_perl
-	dh_makeshlibs
-	dh_installdeb
-	dh_shlibdeps
-	dh_gencontrol
-	dh_md5sums
-	dh_builddeb
-
-binary: binary-indep binary-arch
-.PHONY: build clean binary-indep binary-arch binary install 

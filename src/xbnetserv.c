@@ -85,40 +85,18 @@ const	char	Sname[] = GBNETSERV_PORT,
 int	had_alarm, hadrfresh;
 
 int	Ctrl_chan = -1;
-#ifndef	USING_FLOCK
-int	Sem_chan;
-#endif
-
-/* Satisfy sharedlibs dependencies */
-#include "helpalt.h"
-uid_t		Effuid;
-gid_t		Effgid;
-char		*Args[1], *exitcodename, *signalname;
-BtuserRef	mypriv;
-/* End of shared libs dependencies */
-char		*jobqueue;
 
 /* We don't use these fields as the API strips out users and groups
    itself, but we now incorporate the screening in the library
    routine because we want to avoid having so many rjobfiles
    everywhere.  */
 
-char		*Restru,
-		*Restrg;
-
 static	char	*spdir;
 
 static	char	tmpfl[NAMESIZE + 1];
 
-FILE	*Cfile;
-
 USHORT	err_which;		/* Which we are complaining about */
 USHORT	orig_umask;		/* Saved copy of original umask */
-
-uid_t	Daemuid,
-	Daemgid,
-	Realuid;
-gid_t	Realgid;		/* Need to be global to use xbmpermitted from look */
 
 unsigned	myhostl;	/* Length of ... */
 char		*myhostname;	/* We send our variables prefixed by this */
@@ -841,26 +819,26 @@ static void  tcpreply(const int sock, const int code, const LONG param)
 	}  while  (nbytes > 0);
 }
 
-int  validate_job(BtjobRef jp, const Btuser *mypriv)
+int  validate_job(BtjobRef jp, const Btuser *userpriv)
 {
 	int	cinum;
 
 	/* Can the geyser do anything at all */
 
-	if  ((mypriv->btu_priv & BTM_CREATE) == 0)
+	if  ((userpriv->btu_priv & BTM_CREATE) == 0)
 		return  XBNR_NOCRPERM;
 
 	/* Validate priority */
 
-	if  (jp->h.bj_pri < mypriv->btu_minp  ||  jp->h.bj_pri > mypriv->btu_maxp)
+	if  (jp->h.bj_pri < userpriv->btu_minp  ||  jp->h.bj_pri > userpriv->btu_maxp)
 		return  XBNR_BAD_PRIORITY;
 
 	/* Check that we are happy about the job modes */
 
-	if  (!(mypriv->btu_priv & BTM_UMASK)  &&
-	     (jp->h.bj_mode.u_flags != mypriv->btu_jflags[0] ||
-	      jp->h.bj_mode.g_flags != mypriv->btu_jflags[1] ||
-	      jp->h.bj_mode.o_flags != mypriv->btu_jflags[2]))
+	if  (!(userpriv->btu_priv & BTM_UMASK)  &&
+	     (jp->h.bj_mode.u_flags != userpriv->btu_jflags[0] ||
+	      jp->h.bj_mode.g_flags != userpriv->btu_jflags[1] ||
+	      jp->h.bj_mode.o_flags != userpriv->btu_jflags[2]))
 		return  XBNR_NOCMODE;
 
 	/* Validate load level */
@@ -871,9 +849,9 @@ int  validate_job(BtjobRef jp, const Btuser *mypriv)
 	if  (jp->h.bj_ll == 0)
 		jp->h.bj_ll = Ci_list[cinum].ci_ll;
 	else  {
-		if  (jp->h.bj_ll > mypriv->btu_maxll)
+		if  (jp->h.bj_ll > userpriv->btu_maxll)
 			return  XBNR_BAD_LL;
-		if  (!(mypriv->btu_priv & BTM_SPCREATE) && jp->h.bj_ll != Ci_list[cinum].ci_ll)
+		if  (!(userpriv->btu_priv & BTM_SPCREATE) && jp->h.bj_ll != Ci_list[cinum].ci_ll)
 			return  XBNR_BAD_LL;
 	}
 	return  0;
@@ -883,7 +861,7 @@ int  validate_job(BtjobRef jp, const Btuser *mypriv)
    eventually-decided user/group in Realuid/Realgid.  Return 0 if
    OK otherwise the error code.  */
 
-int convert_username(struct hhash *frp, struct ni_jobhdr *nih, BtjobRef jp, BtuserRef *myprivp)
+int convert_username(struct hhash *frp, struct ni_jobhdr *nih, BtjobRef jp, BtuserRef *userprivp)
 {
 	char		*repu, *repg;
 	int_ugid_t	nuid, ngid, possug;
@@ -924,7 +902,7 @@ int convert_username(struct hhash *frp, struct ni_jobhdr *nih, BtjobRef jp, Btus
 	if  (!(mp = getbtuentry(Realuid)))
 		return  XBNR_BAD_USER;
 
-	*myprivp = mp;
+	*userprivp = mp;
 
 	nuid = Realuid;
 	ngid = Realgid;
@@ -957,7 +935,7 @@ static void  process_q()
 	PIDTYPE		pid;
 	jobno_t		jn;
 	struct	hhash	*frp;
-	BtuserRef	mypriv;
+	BtuserRef	userpriv;
 	FILE		*outf;
 	Shipc		Oreq;
 	struct	ni_jobhdr	nih;
@@ -1029,7 +1007,7 @@ static void  process_q()
 		tcpreply(sock, ret, err_which);
 		exit(0);
 	}
-	if  ((ret = convert_username(frp, &nih, JREQ, &mypriv)) != 0)  {
+	if  ((ret = convert_username(frp, &nih, JREQ, &userpriv)) != 0)  {
 		freexbuf_serv(indx);
 		tcpreply(sock, ret, 0);
 		exit(0);
@@ -1039,7 +1017,7 @@ static void  process_q()
 		tcpreply(sock, ret, err_which);
 		exit(0);
 	}
-	if  ((ret = validate_job(JREQ, mypriv)) != 0)  {
+	if  ((ret = validate_job(JREQ, userpriv)) != 0)  {
 		freexbuf_serv(indx);
 		tcpreply(sock, XBNR_ERR, ret);
 		exit(0);

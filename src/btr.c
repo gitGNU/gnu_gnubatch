@@ -62,6 +62,7 @@
 #include "btrvar.h"
 #include "spitrouts.h"
 #include "optflags.h"
+#include "shutilmsg.h"
 
 #define	BTR_INLINE
 
@@ -78,45 +79,21 @@ static	unsigned  defavoid;
 
 extern	char	**environ, **xenviron;
 
-uid_t	Realuid,
-	Effuid,
-	Daemuid;
-gid_t	Realgid,
-	Effgid;
-
 char	*Curr_pwd;
 
-BtuserRef	mypriv;
 jobno_t		job_num;
 
 Shipc		Oreq;
 extern	long	mymtype;
 ULONG		Saveseq;
 
-FILE	*Cfile;
 char	Verbose,
 	Outside_env;
 
 extern	netid_t	Out_host;
 
-char	*Restru, *Restrg;	/* Resolution only */
-
-int	Ctrl_chan = -1;
-#ifndef	USING_FLOCK
-int	Sem_chan;
-#endif
-
-struct	jshm_info	Job_seg;
-
 char	*spdir,
-	*exitcodename,
-	*signalname,
 	*tmpfl;
-
-Menvir	Envs[MAXJENVIR];
-
-char	*Args[MAXJARGS],
-	*jobqueue;
 
 char *spath(const char *, const char *);
 void  chkfuture(BtjobRef, const int);

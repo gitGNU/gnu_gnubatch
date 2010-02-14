@@ -61,38 +61,22 @@
 #include "formats.h"
 #include "optflags.h"
 #include "cgifndjb.h"
+#include "shutilmsg.h"
 
 static	char	Filename[] = __FILE__;
 
 #define	BTJLIST_INLINE
 
-uid_t	Daemuid,
-	Realuid,
-	Effuid;
-gid_t	Realgid,
-	Effgid;
-
-BtuserRef	mypriv;
-
-FILE	*Cfile;
-
 #define	IPC_MODE	0600
 
-int	Ctrl_chan;
 #ifndef	USING_FLOCK
 int	Sem_chan;
 #endif
 
 HelpaltRef	progresslist;
 
-char		*exitcodename,
-		*signalname,
-		*localrun,
-		*jobqueue;
-
-char		*Restru,
-		*Restrg;
-
+char		*localrun;
+		
 unsigned  char	exportflag = BJ_REMRUNNABLE;
 
 char		Viewj = 0,
@@ -100,12 +84,8 @@ char		Viewj = 0,
 		fulltimeflag,
 		bypassflag;
 
-extern const char * const condname[];
-extern const char * const assname[];
-
-/* Satisfy sharedlibs dependencies */
-char		*Args[1];
-/* End of shared libs dependencies */
+extern const char *const condname[];
+extern const char *const assname[];
 
 char		*formatstring;
 
@@ -119,7 +99,7 @@ unsigned	jno_width;
 
 char	bigbuff[JOBSPACE];
 
-FILE *net_feed(const int, const netid_t, const jobno_t);
+FILE *net_feed(const int, const netid_t, const jobno_t, const int);
 
 /* For when we run out of memory.....  */
 
@@ -490,7 +470,7 @@ static void  viewj(CBtjobRef jp)
 	static	char	*spdir;
 
 	if  (jp->h.bj_hostid)
-		ifl = net_feed(FEED_JOB, jp->h.bj_hostid, jp->h.bj_job);
+		ifl = net_feed(FEED_JOB, jp->h.bj_hostid, jp->h.bj_job, Job_seg.dptr->js_viewport);
 	else  {
 		if  (!spdir)
 			spdir = envprocess(SPDIR);

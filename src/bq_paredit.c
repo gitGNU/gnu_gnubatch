@@ -868,7 +868,6 @@ int  editredir(BtjobRef jp)
 	HelpaltRef	actnames, stdinnames;
 	BtjobRef	bjp;
 	Mredir		save;
-	extern	Mredir	Redirs[];
 
 	/* Can the geyser do it?  */
 

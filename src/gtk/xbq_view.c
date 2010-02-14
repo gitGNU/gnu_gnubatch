@@ -87,7 +87,7 @@ static void  cb_vsearch(GtkAction *, struct view_data *);
 static void  cb_vrsearch(GtkAction *, struct view_data *);
 static void  clearlog(GtkAction *, GtkWidget *);
 static void  cb_quitsel(GtkAction *, GtkWidget *);
-FILE *net_feed(const int, const netid_t, const jobno_t);
+FILE *net_feed(const int, const netid_t, const jobno_t, const int);
 
 static GtkActionEntry ventries[] = {
 	{ "VFileMenu", NULL, "_File"  },
@@ -294,7 +294,7 @@ void  cb_view()
 	/* Check if remote host and grab it suitably */
 
 	if  (cj->h.bj_hostid)  {
-		if  (!(infile = net_feed(FEED_JOB, cj->h.bj_hostid, cj->h.bj_job)))  {
+		if  (!(infile = net_feed(FEED_JOB, cj->h.bj_hostid, cj->h.bj_job, Job_seg.dptr->js_viewport)))  {
 			disp_arg[0] = cj->h.bj_job;
 			disp_str = qtitle_of(cj);
 			disp_str2 = look_host(cj->h.bj_hostid);

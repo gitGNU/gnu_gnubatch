@@ -124,7 +124,7 @@
 .\" ========================================================================
 .\"
 .IX Title "GBCH-JDEL 1"
-.TH GBCH-JDEL 1 "2009-05-18" "GNUbatch Release 1" "GNUbatch Batch Scheduler"
+.TH GBCH-JDEL 1 "2010-02-13" "GNUbatch Release 1" "GNUbatch Batch Scheduler"
 .\" For nroff, turn off justification.  Always turn off hyphenation; it makes
 .\" way too many mistakes in technical documents.
 .if n .ad l
@@ -132,7 +132,7 @@
 .SH "NAME"
 gbch\-jdel \- delete batch jobs
 .PP
-gbch\-jgo \- force job(s) to run ignoring time
+gbch\-go \- force job(s) to run ignoring time
 .PP
 gbch\-goadv \- force job(s) to run ignoring time and advance time.
 .PP
@@ -147,7 +147,7 @@ job number ...
 \&\fBgbch-jdel\fR provides a means of deleting batch jobs from the shell or a program,
 optionally killing running jobs if required.
 .PP
-\&\fBgbch-jgo\fR forces a job or jobs to run, ignoring the \*(L"next run time\*(R". Conditions
+\&\fBgbch-go\fR forces a job or jobs to run, ignoring the \*(L"next run time\*(R". Conditions
 and load level constraints are however still enforced. The \*(L"next run
 time\*(R" will not be affected when the job completes. This inserts an
 extra run of the job.
@@ -157,7 +157,7 @@ time\*(R". Conditions and load level constraints are however still
 enforced. The \*(L"next run time\*(R" is advanced to the next time. This
 brings forward the next run, thereafter resuming the sequence.
 .PP
-\&\fBgbch-jadv\fR advances the run time on each job specified to the next run
+\&\fBgbch-adv\fR advances the run time on each job specified to the next run
 time according to its repeat time without running the job or looking
 at conditions.
 .PP
@@ -263,15 +263,15 @@ message file
 .IP "\s-1GBCH_JDEL\s0" 4
 .IX Item "GBCH_JDEL"
 space-separated options to override defaults for gbch_jdel
-.IP "\s-1GBCH_JGO\s0" 4
-.IX Item "GBCH_JGO"
-space-separated options to override defaults for gbch_jgo
-.IP "\s-1GBCH_JGOADV\s0" 4
-.IX Item "GBCH_JGOADV"
-space-separated options to override defaults for gbch_jgoadv
-.IP "\s-1GBCH_JADV\s0" 4
-.IX Item "GBCH_JADV"
-space-separated options to override defaults for gbch_jadv
+.IP "\s-1GBCH_GO\s0" 4
+.IX Item "GBCH_GO"
+space-separated options to override defaults for gbch_go
+.IP "\s-1GBCH_GOADV\s0" 4
+.IX Item "GBCH_GOADV"
+space-separated options to override defaults for gbch_goadv
+.IP "\s-1GBCH_ADV\s0" 4
+.IX Item "GBCH_ADV"
+space-separated options to override defaults for gbch_adv
 .IP "\s-1BTRESTCONF\s0" 4
 .IX Item "BTRESTCONF"
 location of alternative help file.

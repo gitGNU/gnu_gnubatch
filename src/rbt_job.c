@@ -46,12 +46,8 @@ static	SHORT	tcpportnum = -1;
 
 const	char	TSname[] = GBNETSERV_PORT;
 
-extern	uid_t	Realuid,
-		Effuid,
-		Daemuid,
-		Repluid;		/* Replacement if requested */
-extern	gid_t	Realgid,
-		Replgid;		/* Replacement if requested */
+extern	uid_t	Repluid;		/* Replacement if requested */
+extern	gid_t	Replgid;		/* Replacement if requested */
 
 extern	netid_t	Out_host;
 extern	char	*Out_interp, *realuname;

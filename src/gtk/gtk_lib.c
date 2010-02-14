@@ -39,7 +39,7 @@ extern	GtkWidget	*toplevel;
 /* Test it's not on before we force it on otherwise we could get an endless loop
    of signals. Used for mode and priv bits in cases where one implies others */
 
-void  setifnotset(GtkWidget *wid)
+void	setifnotset(GtkWidget *wid)
 {
 	if  (!gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(wid)))
 		gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(wid), TRUE);
@@ -47,13 +47,13 @@ void  setifnotset(GtkWidget *wid)
 
 /* Ditto for unsetting */
 
-void  unsetifset(GtkWidget *wid)
+void	unsetifset(GtkWidget *wid)
 {
 	if  (gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(wid)))
 		gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(wid), FALSE);
 }
 
-char *makebigvec(char **mat)
+char	*makebigvec(char **mat)
 {
 	unsigned  totlen = 0, len;
 	char	**ep, *newstr, *pos;
@@ -79,7 +79,7 @@ char *makebigvec(char **mat)
 	return  newstr;
 }
 
-void  doerror(int errnum)
+void	doerror(int errnum)
 {
 	char	**evec = helpvec(errnum, 'E'), *newstr;
 	GtkWidget  *msgw;
@@ -104,7 +104,7 @@ void  doerror(int errnum)
 	gtk_dialog_run(GTK_DIALOG(msgw));
 }
 
-int  Confirm(int code)
+int	Confirm(int code)
 {
 	int	ret;
 	char	*msg = gprompt(code), *secmsg = makebigvec(helpvec(code, 'H'));
@@ -117,7 +117,7 @@ int  Confirm(int code)
 	return  ret;
 }
 
-void  gtk_chk_uid()
+void	gtk_chk_uid()
 {
 	char	*hd = getenv("HOME");
 	struct	stat	sbuf;
@@ -128,7 +128,7 @@ void  gtk_chk_uid()
 	}
 }
 
-GtkWidget *gprompt_label(const int code)
+GtkWidget	*gprompt_label(const int code)
 {
 	char	*pr = gprompt(code);
 	GtkWidget  *lab = gtk_label_new(pr);
@@ -136,7 +136,7 @@ GtkWidget *gprompt_label(const int code)
 	return  lab;
 }
 
-GtkWidget *gprompt_button(const int code)
+GtkWidget 	*gprompt_button(const int code)
 {
 	char	*pr = gprompt(code);
 	GtkWidget  *butt = gtk_button_new_with_label(pr);
@@ -144,7 +144,7 @@ GtkWidget *gprompt_button(const int code)
 	return  butt;
 }
 
-GtkWidget *gprompt_checkbutton(const int code)
+GtkWidget	*gprompt_checkbutton(const int code)
 {
 	char	*pr = gprompt(code);
 	GtkWidget  *butt = gtk_check_button_new_with_label(pr);
@@ -152,7 +152,7 @@ GtkWidget *gprompt_checkbutton(const int code)
 	return  butt;
 }
 
-GtkWidget *gprompt_radiobutton(const int code)
+GtkWidget	*gprompt_radiobutton(const int code)
 {
 	char	*pr = gprompt(code);
 	GtkWidget  *butt = gtk_radio_button_new_with_label(NULL, pr);
@@ -160,7 +160,7 @@ GtkWidget *gprompt_radiobutton(const int code)
 	return  butt;
 }
 
-GtkWidget *gprompt_radiobutton_fromwidget(GtkWidget *w, const int code)
+GtkWidget	*gprompt_radiobutton_fromwidget(GtkWidget *w, const int code)
 {
 	char	*pr = gprompt(code);
 	GtkWidget  *butt = gtk_radio_button_new_with_label_from_widget(GTK_RADIO_BUTTON(w), pr);
@@ -186,7 +186,7 @@ GtkWidget *gprompt_dialog(GtkWidget *parent, const int code)
 	return  dlg;
 }
 
-static void  slidedown(GtkWidget *slide)
+static	void	slidedown(GtkWidget *slide)
 {
 	unsigned  val = gtk_range_get_value(GTK_RANGE(slide));
 	unsigned  round;
@@ -197,14 +197,16 @@ static void  slidedown(GtkWidget *slide)
 			val -= rem;
 			/* Don't need to check for zero as gtk_range_set_value does that */
 			gtk_range_set_value(GTK_RANGE(slide), (gdouble) val);
+			gtk_widget_queue_draw(GTK_WIDGET(slide));
 			return;
 		}
 	}
 	val -= round;
 	gtk_range_set_value(GTK_RANGE(slide), (gdouble) val);
+	gtk_widget_queue_draw(GTK_WIDGET(slide));
 }
 
-static void  slideup(GtkWidget *slide)
+static	void	slideup(GtkWidget *slide)
 {
 	unsigned  val = gtk_range_get_value(GTK_RANGE(slide));
 	unsigned  round;
@@ -215,11 +217,13 @@ static void  slideup(GtkWidget *slide)
 			val += round - rem;
 			/* Don't need to check for max as gtk_range_set_value does that */
 			gtk_range_set_value(GTK_RANGE(slide), (gdouble) val);
+			gtk_widget_queue_draw(GTK_WIDGET(slide));
 			return;
 		}
 	}
 	val += round;
 	gtk_range_set_value(GTK_RANGE(slide), (gdouble) val);
+	gtk_widget_queue_draw(GTK_WIDGET(slide));
 }
 
 GtkWidget *slider_with_buttons(GtkWidget *vbox, const int code, unsigned initv, const int insens)
@@ -236,6 +240,7 @@ GtkWidget *slider_with_buttons(GtkWidget *vbox, const int code, unsigned initv, 
 	gtk_box_pack_start(GTK_BOX(vbox), slide, FALSE, FALSE, DEF_DLG_VPAD);
 	gtk_scale_set_digits(GTK_SCALE(slide), 0);
 	gtk_range_set_value(GTK_RANGE(slide), (gdouble) initv);
+	gtk_widget_queue_draw(GTK_WIDGET(slide));
 	if  (insens)  {
 		gtk_widget_set_sensitive(slide, FALSE);
 		gtk_widget_set_sensitive(minb, FALSE);

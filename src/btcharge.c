@@ -92,7 +92,6 @@
 
 static	char	Filename[] = __FILE__;
 
-FILE	*Cfile;					/* open message file */
 char	*Curr_pwd;
 
 int	nerrors	= 0;				/* # errors */
@@ -103,26 +102,6 @@ int	zero_usage = 0,
 	reset_file = 0;
 
 double	chargefee = 0.0;
-
-char	*Restru, *Restrg, *jobqueue;
-
-uid_t	Realuid, Effuid, Daemuid;
-gid_t	Realgid, Effgid;
-
-/* Satisfy sharedlibs dependencies */
-#include "bjparam.h"
-#include "cmdint.h"
-#include "btconst.h"
-#include "btvar.h"
-#include "timecon.h"
-#include "btjob.h"
-#include "q_shm.h"
-
-int		Ctrl_chan;
-char		*Args[1], *exitcodename, *signalname;
-BtuserRef	mypriv;
-struct		jshm_info	Job_seg;
-/* end of shared libs dependencies */
 
 char	*file_name;
 
@@ -629,7 +608,6 @@ MAINFN_TYPE  main(int argc, char **argv)
 #if	defined(NHONSUID) || defined(DEBUG)
 	int_ugid_t	chk_uid;
 #endif
-	BtuserRef	mypriv;
 
 	versionprint(argv, "$Revision: 1.1 $", 0);
 

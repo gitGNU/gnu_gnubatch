@@ -50,29 +50,10 @@ static	char	Filename[] = __FILE__;
 
 #define	MAXMODE	16
 
-uid_t	Daemuid,
-	Realuid,
-	Effuid;
-gid_t	Effgid,
-	Realgid;
-
-char	*Args[1];
-
-int		xbapi_fd = -1;
-apiBtuser	mypriv;
-
-FILE	*Cfile;
-
 HelpaltRef	progresslist;
 
-char		*exitcodename,
-		*signalname,
-		*localrun,
-		*jobqueue,
+char		*localrun,
 		*realuname;
-
-char		*Restru,
-		*Restrg;
 
 unsigned  char	exportflag = BJ_EXPORT|BJ_REMRUNNABLE;
 
@@ -967,11 +948,11 @@ void  jdisplay()
 	}
 
 	pflgs |= GLV_ACCESSF | GLV_FREEZEF;
-	if  (mypriv.btu_priv & BTM_CREATE)
+	if  (userpriv.btu_priv & BTM_CREATE)
 		pflgs |= GLV_ANYCHANGES;
 	printf("</table>\n<input type=hidden name=privs value=%u>\n", pflgs);
 	printf("<input type=hidden name=prio value=\"%d,%d,%d\">\n",
-	       mypriv.btu_defp, mypriv.btu_minp, mypriv.btu_maxp);
+	       userpriv.btu_defp, userpriv.btu_minp, userpriv.btu_maxp);
 }
 
 struct	arginterp  {
@@ -1456,9 +1437,9 @@ int  perf_listtp(char *arg)
 		api_error(ret);
 	html_out_cparam_file("tpl_pre", 1, arg);
 	printf("xbj_titprill2(\"%s\",\"%s\",[%d,%d,%d,%d],%d,\"%s\",%s,",
-	       arg, gbatch_gettitle(-1, &jb), jb.h.bj_pri, mypriv.btu_defp,
-	       mypriv.btu_minp, mypriv.btu_maxp,
-	       jb.h.bj_ll, jb.h.bj_cmdinterp, tof(mypriv.btu_priv & BTM_SPCREATE));
+	       arg, gbatch_gettitle(-1, &jb), jb.h.bj_pri, userpriv.btu_defp,
+	       userpriv.btu_minp, userpriv.btu_maxp,
+	       jb.h.bj_ll, jb.h.bj_cmdinterp, tof(userpriv.btu_priv & BTM_SPCREATE));
 	put_jslist(gen_qlist());
 	putchar(',');
 	put_jslist(gen_cilist());

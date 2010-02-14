@@ -39,7 +39,7 @@ extern int  rjarg_title(apiBtjob *, char *);
 extern void  decode_permflags(USHORT *, char *, const int, const int);
 
 extern	int		xbapi_fd;
-extern	apiBtuser	mypriv;
+extern	apiBtuser	userpriv;
 
 extern	int			Nvars;
 extern	struct	var_with_slot	*var_sl_list;

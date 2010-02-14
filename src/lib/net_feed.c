@@ -39,7 +39,7 @@
 
 /* Grab hold of a spool file on a remote system.  */
 
-FILE *net_feed(const int type, const netid_t netid, const jobno_t jobno)
+FILE *net_feed(const int type, const netid_t netid, const jobno_t jobno, const int port)
 {
 	int			sock;
 	FILE			*result;
@@ -53,7 +53,7 @@ FILE *net_feed(const int type, const netid_t netid, const jobno_t jobno)
 	   shared memory segment.  */
 
 	sin.sin_family = AF_INET;
-	sin.sin_port = Job_seg.dptr->js_viewport;
+	sin.sin_port = port;
 	BLOCK_ZERO(sin.sin_zero, sizeof(sin.sin_zero));
 	sin.sin_addr.s_addr = netid;
 
@@ -91,7 +91,7 @@ FILE *net_feed(const int type, const netid_t netid, const jobno_t jobno)
 
 /* Dummy version to keep linker happy */
 
-FILE *net_feed(const int type, const netid_t netid, const jobno_t jobno)
+FILE *net_feed(const int type, const netid_t netid, const jobno_t jobno, const int port)
 {
 	return  (FILE *) 0;
 }

@@ -47,26 +47,11 @@
 #include "jvuprocs.h"
 #include "spitrouts.h"
 #include "optflags.h"
+#include "shutilmsg.h"
 
 #define	IPC_MODE	0
 
 #define	SYNCMAX		5	/* Before we give up */
-
-FILE	*Cfile;
-
-int	Ctrl_chan;
-#ifndef	USING_FLOCK
-int	Sem_chan;
-#endif
-
-uid_t	Realuid,
-	Effuid,
-	Daemuid;
-
-gid_t	Realgid,
-	Effgid;
-
-BtuserRef	mypriv;
 
 Shipc		Oreq;
 extern	long	mymtype;
@@ -93,13 +78,6 @@ char	forcestring,
 
 /* The following are just to resolve names used in library routines
    which we steal.  */
-
-char		*Restru, *Restrg, *jobqueue, *Args[1];
-
-/* Satisfy sharedlibs dependencies */
-char		*exitcodename, *signalname;
-struct	jshm_info	Job_seg;
-/* End of shared libs dependencies */
 
 char	*Curr_pwd;
 
@@ -394,7 +372,7 @@ int  mpermitted(CBtmodeRef md, const unsigned flag)
 
 /* Send var-type message to scheduler */
 
-void  wvmsg(unsigned code)
+void  wrt_vmsg(unsigned code)
 {
 	Oreq.sh_params.mcode = code;
 	if  (msgsnd(Ctrl_chan, (struct msgbuf *) &Oreq, sizeof(Shreq) + sizeof(Btvar), IPC_NOWAIT) < 0)  {
@@ -491,7 +469,7 @@ int  doexpset(vhash_t vp)
 		return  0;
 	Oreq.sh_un.sh_var.var_flags = newf;
 	Oreq.sh_un.sh_var.var_sequence = Saveseq++;
-	wvmsg(V_CHFLAGS);
+	wrt_vmsg(V_CHFLAGS);
 	if  ((retc = readreply()) != V_OK)
 		return  doverror(retc, &Oreq.sh_un.sh_var);
 	return  0;
@@ -519,7 +497,7 @@ int  doset(vhash_t vp)
 		strcpy(Oreq.sh_un.sh_var.var_value.con_un.con_string, Setvalue);
 	}
 	if  (vp >= 0)  {
-		wvmsg(V_ASSIGN);
+		wrt_vmsg(V_ASSIGN);
 		retc = readreply();
 		if  (retc != V_OK)
 			return  doverror(retc, &Oreq.sh_un.sh_var);
@@ -531,13 +509,13 @@ int  doset(vhash_t vp)
 		Oreq.sh_un.sh_var = Var_seg.vlist[vp].Vent;
 		Oreq.sh_un.sh_var.var_sequence = Saveseq++;
 		strcpy(Oreq.sh_un.sh_var.var_comment, Comment);
-		wvmsg(V_CHCOMM);
+		wrt_vmsg(V_CHCOMM);
 	}
 	else   {
 		checksetmode(0, mypriv->btu_vflags, mypriv->btu_vflags[0], &Oreq.sh_un.sh_var.var_mode.u_flags);
 		checksetmode(1, mypriv->btu_vflags, mypriv->btu_vflags[1], &Oreq.sh_un.sh_var.var_mode.g_flags);
 		checksetmode(2, mypriv->btu_vflags, mypriv->btu_vflags[2], &Oreq.sh_un.sh_var.var_mode.o_flags);
-		wvmsg(V_CREATE);
+		wrt_vmsg(V_CREATE);
 	}
 	retc = readreply();
 	if  (retc != V_OK)
@@ -553,7 +531,7 @@ int  dodelete(vhash_t vp)
 
 	Oreq.sh_un.sh_var = Var_seg.vlist[vp].Vent;
 	Oreq.sh_un.sh_var.var_sequence = Saveseq;
-	wvmsg(V_DELETE);
+	wrt_vmsg(V_DELETE);
 	if  ((retc = readreply()) == V_OK)
 		return  0;
 	return  doverror(retc, &Oreq.sh_un.sh_var);
@@ -576,7 +554,7 @@ int  domodeset(vhash_t vp)
 	checksetmode(0, mypriv->btu_vflags, varp->var_mode.u_flags, &Oreq.sh_un.sh_var.var_mode.u_flags);
 	checksetmode(1, mypriv->btu_vflags, varp->var_mode.g_flags, &Oreq.sh_un.sh_var.var_mode.g_flags);
 	checksetmode(2, mypriv->btu_vflags, varp->var_mode.o_flags, &Oreq.sh_un.sh_var.var_mode.o_flags);
-	wvmsg(V_CHMOD);
+	wrt_vmsg(V_CHMOD);
 	if  ((retc = readreply()) != V_OK)
 		return  doverror(retc, &Oreq.sh_un.sh_var);
 	return  0;
@@ -591,7 +569,7 @@ int  douset(vhash_t vp)
 	Oreq.sh_un.sh_var = Var_seg.vlist[vp].Vent;
 	Oreq.sh_un.sh_var.var_sequence = Saveseq++;
 	Oreq.sh_params.param = New_owner;
-	wvmsg(V_CHOWN);
+	wrt_vmsg(V_CHOWN);
 	if  ((retc = readreply()) != V_OK)
 		return  doverror(retc, &Oreq.sh_un.sh_var);
 	return  0;
@@ -606,7 +584,7 @@ int  dogset(vhash_t vp)
 	Oreq.sh_un.sh_var = Var_seg.vlist[vp].Vent;
 	Oreq.sh_un.sh_var.var_sequence = Saveseq++;
 	Oreq.sh_params.param = New_group;
-	wvmsg(V_CHGRP);
+	wrt_vmsg(V_CHGRP);
 	if  ((retc = readreply()) != V_OK)
 		return  doverror(retc, &Oreq.sh_un.sh_var);
 	return  0;

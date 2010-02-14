@@ -62,7 +62,7 @@ typedef	struct	{
 	double		btu_charge;	/* User's bill */
 }  Btuser_r4;
 
-FILE	*Cfile;
+extern	FILE	*Cfile;
 
 struct  {
 	char	*srcdir;	/* Directory we read from if not pwd */

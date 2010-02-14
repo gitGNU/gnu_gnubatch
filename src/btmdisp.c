@@ -57,8 +57,6 @@ int	repl_mail = 0, repl_write = 0, repl_doswrite = 0;
 int	msg_code = $PE{Job completed msg}, exit_stat;
 char	*orig_host;
 
-FILE	*Cfile;
-
 extern	char	*Helpfile_path;
 
 void  nomem(const char *fl, const int ln)

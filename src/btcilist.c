@@ -57,27 +57,7 @@
 
 static	char	Filename[] = __FILE__;
 
-uid_t	Daemuid,
-	Realuid,
-	Effuid;
-gid_t	Realgid,
-	Effgid;
-
-FILE	*Cfile;
-
-char	*Restru, *Restrg, *jobqueue;		/* Resolution only */
-
-/* Satisfy sharedlibs dependencies */
-#include "timecon.h"
-#include "btjob.h"
-#include "q_shm.h"
-int		Ctrl_chan;
-char		*Args[1], *exitcodename, *signalname;
-BtuserRef	mypriv;
-struct	jshm_info	Job_seg;
 extern	netid_t	Out_host;
-
-/* end of shared library dependencies */
 
 /* For when we run out of memory.....  */
 

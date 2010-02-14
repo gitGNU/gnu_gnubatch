@@ -102,8 +102,6 @@ LONG	Const_val = 1L;
 extern	Shipc	Oreq;
 extern	int	Ctrl_chan;
 
-extern	BtuserRef	mypriv;
-
 #define	ppermitted(flg)	(mypriv->btu_priv & flg)
 
 /* Send var-type message to scheduler */

@@ -29,6 +29,7 @@
 #include <errno.h>
 #include "defaults.h"
 #include "files.h"
+#include "incl_ugid.h"
 #include "incl_unix.h"
 #include "incl_net.h"
 #include "network.h"

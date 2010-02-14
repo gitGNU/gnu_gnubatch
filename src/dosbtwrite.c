@@ -26,6 +26,7 @@
 #include "files.h"
 #include "errnums.h"
 #include "ecodes.h"
+#include "incl_ugid.h"
 #include "incl_unix.h"
 #include "incl_net.h"
 #include "incl_sig.h"
@@ -47,14 +48,10 @@ SHORT	uaportnum;
 #include "timecon.h"
 #include "btjob.h"
 #include "q_shm.h"
-
-uid_t	Realuid;
-gid_t	Realgid;
-ULONG	Fileprivs;
 struct	jshm_info	Job_seg;
 /* End of shared libs dependencies */
 
-FILE	*Cfile;
+FILE	*Cfile;					/* Need this as not including client lib */
 
 static	char	Filename[] = __FILE__;
 

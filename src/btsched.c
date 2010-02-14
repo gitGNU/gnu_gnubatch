@@ -120,18 +120,13 @@ struct	vshm_info	Var_seg;
 
 int	qchanges;
 
-uid_t	Daemuid,
-	Daemgid,
-	Realuid;
-gid_t	Realgid;
-
 unsigned	Startlim,
 		Startwait;
 
 LONG	Max_ll,
 	Current_ll;
 
-FILE	*Cfile;
+FILE	*Cfile;			/* Need this here because std one in client library */
 
 char	*spdir;
 

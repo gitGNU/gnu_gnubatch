@@ -44,11 +44,6 @@ extern	char	*spdir;		/* Spool directory, typically /usr/spool/batch */
 
 extern	int	Ctrl_chan;
 
-extern	BtuserRef mypriv;	/* My privileges */
-
-extern	uid_t		Realuid;
-extern	gid_t		Realgid;
-
 /* X stuff */
 
 extern	Widget	jtitwid,	/* Job title window */

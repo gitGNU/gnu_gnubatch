@@ -88,33 +88,9 @@ void  mvwhdrstr(WINDOW *, const int, const int, const char *);
 
 char	*Curr_pwd;
 
-uid_t		Realuid,
-		Effuid,
-		Daemuid;
-
-gid_t		Realgid,
-		Effgid;
-
-FILE	*Cfile;
-
 char	hok,
 	getflags = BTU_DISP,
 	alphsort = SRT_NONE;
-
-char	*Restru, *Restrg, *jobqueue;	/* Ref resolution only */
-
-/* Satisfy sharedlibs dependencies */
-#include "timecon.h"
-#include "btconst.h"
-#include "bjparam.h"
-#include "btjob.h"
-#include "q_shm.h"
-
-int		Ctrl_chan;
-char		*Args[1], *exitcodename, *signalname;
-BtuserRef	mypriv;
-struct	jshm_info	Job_seg;
-/* End of shared libs dependencies */
 
 static	int	more_above,
 		more_below,
@@ -2329,7 +2305,7 @@ static	void  please_wait()
 
 MAINFN_TYPE  main(int argc, char **argv)
 {
-	BtuserRef	mypriv,	ulist;
+	BtuserRef	ulist;
 	unsigned	Nusers;
 #if	defined(NHONSUID) || defined(DEBUG)
 	int_ugid_t	chk_uid;

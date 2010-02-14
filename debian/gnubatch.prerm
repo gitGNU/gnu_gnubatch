@@ -17,7 +17,7 @@ set -e
 # the debian-policy package
 
 stopdaem() {
-    if /usr/bin/gbch-stop -y >/dev/null 2>&1
+    if gbch-stop -y >/dev/null 2>&1
     then echo stopped GNUbatch
     else :
     fi
@@ -33,12 +33,12 @@ removenet() {
 if grep -qs '^gnubatch' /etc/services; then
     echo "You may want to remove gnubatch entries from /etc/services"
 fi
-rm -f /etc/gnubatch.hosts
+rm -f /etc/gnubatch/gnubatch.hosts
 }
 
 removefiles() {
     (cd /var/spool/gnubatch; find . -type f -print|xargs rm -f)
-    rm -f /etc/gnubatch.conf
+    rm -f /etc/gnubatch/gnubatch.conf
 }
 
 

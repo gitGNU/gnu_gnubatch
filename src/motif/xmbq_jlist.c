@@ -86,8 +86,6 @@ extern void  widup_cb(Widget, int, XmArrowButtonCallbackStruct *);
 
 extern	Shipc	Oreq;
 
-extern	BtuserRef	mypriv;
-
 #define	ppermitted(flg)	(mypriv->btu_priv & flg)
 
 static	char	*defcondstr,
@@ -98,10 +96,9 @@ char		*ccritmark, *cnonavail, *cunread,
 char	*exportmark, *clustermark;		/* Actually these are for variables */
 
 static	HelpaltRef	progresslist;
-char			*exitcodename, *signalname;
 
-extern const char * const condname[];
-extern const char * const assname[];
+extern const char *const condname[];
+extern const char *const assname[];
 
 extern	HelpaltRef	assnames, actnames, stdinnames;
 extern	int		redir_actlen, redir_stdinlen;

@@ -70,8 +70,6 @@ struct	cluhash  {
 
 #define	JOB_MOD	60000			/*  Modulus of job numbers */
 
-extern	uid_t	Daemuid, Realuid;
-extern	uid_t	Daemgid, Realgid;
 extern	netid_t	myhostid, localhostid;
 extern	SHORT	qsock, uasock, apirsock;
 extern	SHORT	qportnum, uaportnum, apirport, apipport;
@@ -81,9 +79,6 @@ extern	unsigned  myhostl;
 extern	char	*myhostname;
 extern	SHORT	tcpproto, udpproto;
 extern	int	Ctrl_chan;
-#ifndef	USING_FLOCK
-extern	int	Sem_chan;
-#endif
 extern	long	mymtype;
 extern	int	had_alarm, hadrfresh;
 extern	struct	pend_job	pend_list[];

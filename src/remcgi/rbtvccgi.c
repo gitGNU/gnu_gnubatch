@@ -44,18 +44,6 @@
 #include "files.h"
 #include "rcgilib.h"
 
-FILE	*Cfile;
-
-uid_t	Realuid,
-	Effuid,
-	Daemuid;
-
-gid_t	Realgid,
-	Effgid;
-
-int		xbapi_fd = -1;
-apiBtuser	mypriv;
-
 apiBtvar	newvar;
 int		Nvars;
 struct	var_with_slot  *var_sl_list;
@@ -100,9 +88,9 @@ int  arg_create(struct argop *aop)
 	}
 
 	strncpy(newvar.var_name, aop->varname, BTV_NAME);
-	newvar.var_mode.u_flags = mypriv.btu_vflags[0];
-	newvar.var_mode.g_flags = mypriv.btu_vflags[1];
-	newvar.var_mode.o_flags = mypriv.btu_vflags[2];
+	newvar.var_mode.u_flags = userpriv.btu_vflags[0];
+	newvar.var_mode.g_flags = userpriv.btu_vflags[1];
+	newvar.var_mode.o_flags = userpriv.btu_vflags[2];
 	if  (signednumeric(aop->arg2))  {
 		newvar.var_value.const_type = CON_LONG;
 		newvar.var_value.con_un.con_long = atol(aop->arg2);

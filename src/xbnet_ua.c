@@ -228,7 +228,7 @@ static void udp_job_process(const netid_t whofrom, char *pmsg, int datalength, s
 		pj->lengthexp -= datalength;
 
 		if  (pj->lengthexp == 0)  {
-			BtuserRef	mypriv;
+			BtuserRef	cli_priv;
 
 			/* Finished with job, construct output job */
 
@@ -240,7 +240,7 @@ static void udp_job_process(const netid_t whofrom, char *pmsg, int datalength, s
 				goto  senderr;
 			}
 
-			if  ((ret = convert_username(frp, nih, &pj->jobout, &mypriv)) != 0)  {
+			if  ((ret = convert_username(frp, nih, &pj->jobout, &cli_priv)) != 0)  {
 				reply.param = 0;
 				abort_job(pj);
 				if  (tracing & TRACE_CLIOPEND)
@@ -248,7 +248,7 @@ static void udp_job_process(const netid_t whofrom, char *pmsg, int datalength, s
 				goto  senderr;
 			}
 
-			Fileprivs = mypriv->btu_priv;
+			Fileprivs = cli_priv->btu_priv;
 
 			/* Stick user and group into job to keep track
 			   of them.  (Realuid/realgid get set by
@@ -261,7 +261,7 @@ static void udp_job_process(const netid_t whofrom, char *pmsg, int datalength, s
 				abort_job(pj);
 				goto  senderr;
 			}
-			if  ((ret = validate_job(&pj->jobout, mypriv)) != 0)  {
+			if  ((ret = validate_job(&pj->jobout, cli_priv)) != 0)  {
 				reply.param = 0;
 				abort_job(pj);
 				goto  senderr;

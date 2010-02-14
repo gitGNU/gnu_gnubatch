@@ -70,43 +70,20 @@
 
 static	char	Filename[] = __FILE__;
 
-uid_t	Daemuid,
-	Realuid,
-	Effuid;
-gid_t	Effgid,
-	Realgid;
-
-BtuserRef	mypriv;
-
-FILE	*Cfile;
-
 #define	IPC_MODE	0600
 
-int	Ctrl_chan;
-#ifndef	USING_FLOCK
-int	Sem_chan;
-#endif
+extern	int	Ctrl_chan;
 
 HelpaltRef	progresslist;
 
-char		*exitcodename,
-		*signalname,
-		*localrun,
-		*jobqueue;
-
-char		*Restru,
-		*Restrg;
+char		*localrun;
 
 unsigned  char	exportflag = BJ_EXPORT|BJ_REMRUNNABLE;
 
 char		sortflag, hadhdrarg;
 
-extern const char * const condname[];
-extern const char * const assname[];
-
-/* Satisfy sharedlibs dependencies */
-char		*Args[1];
-/* End of shared libs dependencies */
+extern const char *const condname[];
+extern const char *const assname[];
 
 char		*formatstring;
 char	sdefaultfmt[] = "LN LU LH LI Lp LL Lt Lc LP";

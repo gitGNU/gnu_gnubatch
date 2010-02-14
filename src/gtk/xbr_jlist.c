@@ -64,6 +64,7 @@
 #ifdef	HAVE_SYS_RESOURCE_H
 #include <sys/resource.h>
 #endif
+#include "optflags.h"
 
 static	char	Filename[] = __FILE__;
 
@@ -76,12 +77,11 @@ static	char	*tmpfl;
 unsigned		pend_njobs, pend_max;
 struct	pend_job	*pend_list;
 
-extern	BtuserRef	mypriv;
 extern	char		*Curr_pwd;
 
 char		*execprog, *ldsvprog, *gtkprog;
 HelpaltRef	daynames_full, monnames, ifnposs_names, repunit_full;
-char		*exitcodename, *signalname, *delend_full, *retend_full;
+char		*delend_full, *retend_full;
 char		*no_title, *no_name;
 #ifdef	SUFFIXES
 char		*cmd_prefix, *cmd_suffix, *job_prefix, *job_suffix;

@@ -40,9 +40,9 @@
 
 void  produser()
 {
-	int	Ctrl_chan;
+	int	msgq_id;
 
-	if  ((Ctrl_chan = msgget(MSGID+envselect_value, 0)) >= 0)  {
+	if  ((msgq_id = msgget(MSGID+envselect_value, 0)) >= 0)  {
 		Shipc	oreq;
 		BLOCK_ZERO(&oreq, sizeof(oreq));
 		oreq.sh_mtype = TO_SCHED;
@@ -50,6 +50,6 @@ void  produser()
 		oreq.sh_params.uuid = Realuid;
 		oreq.sh_params.ugid = Realgid;
 		oreq.sh_params.upid = getpid();
-		msgsnd(Ctrl_chan, (struct msgbuf *) &oreq, sizeof(Shreq), 0);
+		msgsnd(msgq_id, (struct msgbuf *) &oreq, sizeof(Shreq), 0);
 	}
 }

@@ -1,0 +1,79 @@
+=head1 NAME
+
+gbch-btuconv - dump out GNUbatch user permissions to file
+
+=head1 SYNOPSIS
+
+B<gbch-btuconv>
+[ I<-D dir> ]
+[ I<-v n> ]
+[ I<-e n> ]
+[ I<-s> ]
+[ I<-f> ]
+I<user file> I<outfile>
+
+=head1 DESCRIPTION
+
+B<gbch-btuconv> considers a B<GNUbatch> batch directory, by default the
+current directory, takes the user file, which is usually
+F<spufile> or F<spufile0.0>, and generates a shell script file I<outfile>, which
+if executed, would recreate the B<GNUbatch> users with the same options.
+
+=head1 OPTIONS
+
+=over 8
+
+=item -D I<directory>
+
+specifies the source directory for the users and I<user file>. It can be
+specified as C<$SPOOLDIR> or C<${SPOOLDIR-/var/spool/gnubatch}> etc and the
+environment and/or F<gnubatch.conf> will be interrogated to
+interpolate the value of the environment variable given.
+
+If you use this, don't forget to put single quotes around it thus:
+
+ gbch-btuconv -D '${SPOOLDIR-/var/spool/gnubatch}' ...
+
+otherwise the shell will try to interpret the $ construct and not
+B<gbch-btuconv>.
+
+=item -e I<n>
+
+Tolerate I<n> errors of the kinds denoted by the other options before
+giving up trying to convert the file.
+
+=item -s
+
+Ignore file size errors in the saved user file (up to the number of
+total errors given by the B<-e> option.
+
+=item -f
+
+Ignore format errors (invalid form types etc) in the saved user file.
+
+=back
+
+=head1 SEE ALSO
+
+gbch-cjlist(8),
+gbch-cvlist(8),
+gbch-ciconv(8),
+gbch-setspdir(8).
+
+=head1 COPYRIGHT
+
+Copyright (c) 2009 Free Software Foundation, Inc.
+This is free software. You may redistribute copies of it under the
+terms of the GNU General Public License
+<http://www.gnu.org/licenses/gpl.html>.
+There is NO WARRANTY, to the extent permitted by law.
+
+=head1 AUTHOR
+
+John M Collins, Xi Software Ltd.
+
+=cut
+
+## Local Variables:
+## mode: nroff
+## End:

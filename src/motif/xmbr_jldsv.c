@@ -69,13 +69,8 @@ static	char	Filename[] = __FILE__;
 
 #define	C_MASK		0377	/* Umask value */
 
-Menvir	Envs[MAXJENVIR];
-char	*Args[MAXJARGS];
-
 static	HelpargRef	btr_avec;
 static	char	Varname[] = "GBCH_R";
-
-extern	char	*exitcodename, *signalname;
 
 char *rdoptfile(const char *, const char *);
 void  checksetmode(const int, const ushort *, const ushort, USHORT *);

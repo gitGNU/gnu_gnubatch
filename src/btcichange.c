@@ -50,14 +50,6 @@ static	char	Filename[] = __FILE__;
 
 #define	BTCICHANGE_INLINE
 
-uid_t	Daemuid,
-	Realuid,
-	Effuid;
-gid_t	Realgid,
-	Effgid;
-
-FILE	*Cfile;
-
 enum	{ UPD_CMD, ADD_CMD, DEL_CMD } cmd_type = UPD_CMD;
 
 char	newname[CI_MAXNAME+1],
@@ -70,19 +62,6 @@ char	nn_set,
 
 unsigned	niceval = 1000, llarg = 0;
 int		s0flag = -1, expflag = -1;	/* -1 means untouched */
-
-char	*Restru, *Restrg, *jobqueue;		/* Resolution */
-
-/* Satisfy sharedlibs dependencies */
-#include "timecon.h"
-#include "btconst.h"
-#include "btjob.h"
-#include "q_shm.h"
-int		Ctrl_chan;
-char		*Args[1], *exitcodename, *signalname;
-BtuserRef	mypriv;
-struct	jshm_info	Job_seg;
-/* end of shared library dependencies */
 
 /* For when we run out of memory.....  */
 
@@ -292,7 +271,6 @@ MAINFN_TYPE  main(int argc, char **argv)
 #if	defined(NHONSUID) || defined(DEBUG)
 	int_ugid_t	chk_uid;
 #endif
-	BtuserRef	mypriv;
 	CmdintRef	Cientry;
 	int		ret;
 

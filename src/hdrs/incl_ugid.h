@@ -44,7 +44,7 @@ extern	char	Using_dumpfile;
 extern	uid_t	Daemuid,
 		Realuid,
 		Effuid;
-extern	gid_t	Realgid;
+extern	gid_t	Daemgid, Realgid, Effgid;
 extern	int_ugid_t	lastgid;
 
 extern	ULONG	Fileprivs;

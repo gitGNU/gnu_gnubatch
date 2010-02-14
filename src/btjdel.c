@@ -57,24 +57,13 @@
 
 char	*Curr_pwd;
 
-FILE	*Cfile;
-
 #define	IPC_MODE	0600
 
-int	Ctrl_chan;
 #ifndef	USING_FLOCK
 int	Sem_chan;
 #endif
 
-uid_t	Daemuid,
-	Realuid,
-	Effuid;
-gid_t	Realgid,
-	Effgid;
-
 ULONG		indx;
-
-BtuserRef	mypriv;
 
 int	killtype = SIGTERM;
 unsigned	sleeptime = DEFSLEEP;
@@ -84,18 +73,10 @@ int	exit_code,
 	nodel,
 	unqueue;
 
-char	*jobqueue,		/* Not actually used */
-	*Args[1],		/* Ditto */
-	*Restru,
-	*Restrg,
-	*jobprefix,
+char	*jobprefix,
 	*cmdprefix;
 
 enum	cmdtype	{ CMD_DELETE, CMD_GO, CMD_GOADV, CMD_ADV };
-
-/* Satisfy sharedlibs dependencies */
-char		*exitcodename, *signalname;
-/* End of shared libs dependencies */
 
 void  nomem(const char *fl, const int ln)
 {

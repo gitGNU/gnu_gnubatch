@@ -2,32 +2,33 @@ Source: gnubatch
 Section: net
 Priority: optional
 Maintainer: John M Collins <jmc@xisl.com>
-Build-Depends: debhelper (>= 7), autotools-dev, libtool, libgtk2.0-dev, libncurses-dev
-Standards-Version: 3.8.0
+Build-Depends: debhelper (>= 7.0.50~), autotools-dev, libtool, libgtk2.0-dev, libncurses-dev
+Standards-Version: 3.8.3
 Homepage: http://www.gnu.org/software/gnubatch
 
 Package: gnubatch
 Architecture: any
 Depends: ${shlibs:Depends}, ${misc:Depends}
-Description: A network-based print spooler
+Description: A network-based batch scheduler
  This is a fast, network-enabled and reliable batch scheduler
  for GNU/Linux and UNIX systems.
 
 Package: gnubatch-doc
 Architecture: all
 Section: doc
+Depends: ${shlibs:Depends}, ${misc:Depends}
 Description: Documentation for Gnubatch
  PDF documentation for Gnubatch
 
 Package: libgnubatch0
 Architecture: any
-Depends: ${shlibs:Depends}, gnubatch (= ${binary:Version})
+Depends: ${shlibs:Depends}, ${misc:Depends}, gnubatch (= ${binary:Version})
 Description: API development library for GNUbatch
  Consists of the shared API library
 
 Package: libgnubatch-dev
 Section: libdevel
 Architecture: any
-Depends: libgnubatch0 (= ${binary:Version})
+Depends: ${shlibs:Depends}, ${misc:Depends}, libgnubatch0 (= ${binary:Version})
 Description: API development library for GNUbatch
  Consists of static API library and include files

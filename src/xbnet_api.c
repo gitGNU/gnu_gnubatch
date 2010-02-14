@@ -63,7 +63,7 @@ static	struct	sockaddr_in	apiret;
 static	char	*current_queue;
 static	unsigned	current_qlen;
 
-FILE *net_feed(const int, const netid_t, const jobno_t);
+FILE *net_feed(const int, const netid_t, const jobno_t, const int);
 
 static int  decodejreply()
 {
@@ -1554,7 +1554,7 @@ static void api_jobdata(const int sock, const slotno_t slotno, const ULONG seq, 
 		return;
 	}
 
-	jfile = jp->h.bj_hostid? net_feed(FEED_JOB, jp->h.bj_hostid, jp->h.bj_job): fopen(mkspid(SPNAM, jp->h.bj_job), "r");
+	jfile = jp->h.bj_hostid? net_feed(FEED_JOB, jp->h.bj_hostid, jp->h.bj_job, Job_seg.dptr->js_viewport): fopen(mkspid(SPNAM, jp->h.bj_job), "r");
 	if  (!jfile)  {
 		outmsg.retcode = htons(XB_UNKNOWN_JOB);
 		pushout(sock, (char *) &outmsg, sizeof(outmsg));

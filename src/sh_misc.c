@@ -39,6 +39,7 @@
 #include "incl_sig.h"
 #include "incl_net.h"
 #include "defaults.h"
+#include "incl_ugid.h"
 #include "network.h"
 #include "btconst.h"
 #include "btmode.h"
@@ -66,7 +67,7 @@ int	nchild;
 
 static	FILE	*rpfile;
 
-FILE *net_feed(const int, const netid_t, const jobno_t);
+FILE *net_feed(const int, const netid_t, const jobno_t, const int);
 
 /* Open report file if possible and write message to it.  */
 
@@ -150,7 +151,7 @@ static void  spewdel(FILE *ofl, char *prefix, const jobno_t stuff)
 static  void  spewfile(FILE *ofl, const netid_t host, const int feedtype, const jobno_t stuff)
 {
 	FILE	*fl;
-	if  ((fl = net_feed(feedtype, host, stuff)))  {
+	if  ((fl = net_feed(feedtype, host, stuff, Job_seg.dptr->js_viewport)))  {
 		int	ch;
 		if  ((ch = getc(fl)) != EOF)  {
 			do	putc(ch, ofl);

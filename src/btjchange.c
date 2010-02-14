@@ -71,44 +71,21 @@ static	char	Filename[] = __FILE__;
 
 extern	char	**environ, **xenviron;
 
-char	*exitcodename,
-	*signalname,
-	*Curr_pwd;
-
-FILE	*Cfile;
+char	*Curr_pwd;
 
 #define	IPC_MODE	0600
-
-int	Ctrl_chan;
-#ifndef	USING_FLOCK
-int	Sem_chan;
-#endif
 
 ULONG		indx;
 ULONG		Saveseq;
 
-uid_t	Daemuid,
-	Realuid,
-	Effuid;
-gid_t	Realgid,
-	Effgid;
-
-char	*Restru,
-	*Restrg;
-
-char	*jobqueue,		/* Dummy one to read file reqd by rjobfile */
-	*sjobqueue;		/* Job queue we are setting */
+char	*sjobqueue;		/* Job queue we are setting */
 
 int	exit_code;
 
 uid_t	New_owner;
 gid_t	New_group;
 
-char	*Args[MAXJARGS];
-
 unsigned	defavoid;
-
-BtuserRef	mypriv;
 
 extern char **remread_envir(const netid_t);
 void  checksetmode(const int, const ushort *, const ushort, USHORT *);

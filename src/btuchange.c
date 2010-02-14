@@ -32,16 +32,7 @@
 #include "cfile.h"
 #include "optflags.h"
 
-FILE	*Cfile;
-
 char	*Curr_pwd;
-
-uid_t	Realuid,
-	Effuid,
-	Daemuid;
-
-gid_t	Realgid,
-	Effgid;
 
 static	enum  { DEFAULT_PW, DO_DUMP_PW, KILL_PW } dump_opt = DEFAULT_PW;
 
@@ -69,24 +60,6 @@ static	USHORT		jvmodes[6];	/* Job modes are []s 3 4 5 */
 
 static	ULONG	set_flags = 0,
 		reset_flags = ALLPRIVS;
-
-char	*Restru, *Restrg, *jobqueue;
-
-/* Satisfy sharedlibs dependencies */
-#include "bjparam.h"
-#include "cmdint.h"
-#include "helpalt.h"
-#include "btconst.h"
-#include "btvar.h"
-#include "timecon.h"
-#include "btjob.h"
-#include "q_shm.h"
-int		Ctrl_chan;
-char		*Args[1], *exitcodename, *signalname;
-BtuserRef	mypriv;
-struct	jshm_info	Job_seg;
-struct	vshm_info	Var_seg;
-/* End of shared libs dependencies */
 
 struct	perm	{
 	int	number;
@@ -752,7 +725,6 @@ MAINFN_TYPE  main(int argc, char **argv)
 #if	defined(NHONSUID) || defined(DEBUG)
 	int_ugid_t	chk_uid;
 #endif
-	BtuserRef	mypriv;
 
 	versionprint(argv, "$Revision: 1.2 $", 0);
 

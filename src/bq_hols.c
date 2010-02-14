@@ -51,8 +51,6 @@ extern	WINDOW	*escr,
 		*hlpscr,
 		*Ew;
 
-extern	BtuserRef	mypriv;
-
 #define	ppermitted(flg)	(mypriv->btu_priv & flg)
 
 #define	CHANGE_MK	16

@@ -46,36 +46,13 @@
 #include "cgiuser.h"
 #include "xihtmllib.h"
 #include "cgifndjb.h"
-
-char	*Restru,
-	*Restrg,
-	*jobqueue;
-
-uid_t	Daemuid,
-	Realuid,
-	Effuid;
-
-gid_t	Realgid,
-	Effgid;
-
-BtuserRef	mypriv;
-
-/* Satisfy sharedlibs dependencies */
 #include "q_shm.h"
-char		*Args[1], *exitcodename, *signalname;
-struct	jshm_info	Job_seg;
-/* End of shared libs dependencies */
-
-FILE	*Cfile;
 
 #define	IPC_MODE	0600
 
-int	Ctrl_chan;
-#ifndef	USING_FLOCK
-int	Sem_chan;
-#endif
+extern	int	Ctrl_chan;
 
-FILE *net_feed(const int, const netid_t, const jobno_t);
+FILE *net_feed(const int, const netid_t, const jobno_t, const int);
 
 /* For when we run out of memory.....  */
 
@@ -110,7 +87,7 @@ void  perform_view(char *jnum)
 	}
 
 	if  (jp->h.bj_hostid)
-		ifl = net_feed(FEED_JOB, jp->h.bj_hostid, jp->h.bj_job);
+		ifl = net_feed(FEED_JOB, jp->h.bj_hostid, jp->h.bj_job, Job_seg.dptr->js_viewport);
 	else
 		ifl = fopen(mkspid(SPNAM, jp->h.bj_job), "r");
 

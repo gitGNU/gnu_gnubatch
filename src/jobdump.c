@@ -64,22 +64,10 @@
 #define	IPC_MODE	0
 
 int	nodelete;
-char	*exitcodename,
-	*signalname;
-FILE	*Cfile;
 
 int	Ctrl_chan;
-#ifndef	USING_FLOCK
-int	Sem_chan;
-#endif
-
-/* Satisfy sharedlibs dependencies */
-char	*Args[1];
-BtuserRef	mypriv;
-/* End of shared libs dependencies */
 
 BtjobRef		Wj;
-
 jobno_t		Jobnum;
 netid_t		netid;
 char		*Dirname;
@@ -87,15 +75,11 @@ char		*Xfile, *Jfile;
 
 Shipc		Oreq;
 extern		long  mymtype;
-uid_t		Realuid, Effuid, Daemuid;
-gid_t		Realgid, Effgid;
-
-char		*Restru, *Restrg, *jobqueue, *job_title; /* Name resolution */
 
 static	enum	{ PD_DUMPJOB, ASCANC, ASRUNN } pardump = PD_DUMPJOB;
 static	enum	{ NOVERBOSE, VERBOSE } Verbose = NOVERBOSE;
 
-FILE *net_feed(const int, const netid_t, const jobno_t);
+FILE *net_feed(const int, const netid_t, const jobno_t, const int);
 
 /* For when we run out of memory.....  */
 
@@ -156,7 +140,7 @@ void  dumpjob(BtjobRef jp)
 	int	ch;
 
 	if  (netid)
-		ifl = net_feed(FEED_JOB, netid, Jobnum);
+		ifl = net_feed(FEED_JOB, netid, Jobnum, Job_seg.dptr->js_viewport);
 	else
 		ifl = fopen(mkspid(SPNAM, Jobnum), "r");
 

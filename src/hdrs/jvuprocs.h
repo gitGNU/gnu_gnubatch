@@ -20,10 +20,6 @@ struct	svent	{
 	struct	Ventry	*vep;
 };
 
-#ifndef	USING_FLOCK
-extern	int	Sem_chan;
-#endif
-
 extern	BtjobRef	*jj_ptrs;
 extern	struct	svent	*vv_ptrs;
 
@@ -31,7 +27,6 @@ extern	ULONG	Last_j_ser,
 		Last_v_ser;
 
 extern	BtmodeRef	Mode_arg;
-extern	Mredir		Redirs[];
 extern	BtjobRef	JREQ;
 
 #define	visible(md)	mpermitted(md, BTM_SHOW)
@@ -58,6 +53,7 @@ ULONG  getxbuf();
 #ifdef	USING_FLOCK
 #define	getxbuf_serv	getxbuf
 #else
+extern	int	Sem_chan;		/* Id of semaphore used for locking */
 ULONG  getxbuf_serv();
 #endif
 #ifdef	USING_MMAP

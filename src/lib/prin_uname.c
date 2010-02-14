@@ -68,6 +68,12 @@ struct	fuhash  {
 #endif
 };
 
+/* Define these here */
+
+uid_t	Daemuid,
+	Realuid,
+	Effuid;
+
 int_ugid_t	lastgid;	/* Group of last user */
 
 #define	UG_HASHMOD	97

@@ -61,31 +61,17 @@
 
 extern	char	**environ, **xenviron;
 
-uid_t	Realuid,
-	Effuid,
-	Daemuid,
-	Repluid;		/* Replacement if requested */
-gid_t	Realgid,
-	Effgid,
-	Replgid;		/* Replacement if requested */
-
-/* Satisfy sharedlibs dependencies */
-#include "q_shm.h"
-int	Ctrl_chan;
-struct	jshm_info	Job_seg;
-struct	vshm_info	Var_seg;
-/* End of shared libs dependencies */
+uid_t	Repluid;		/* Replacement if requested */
+gid_t	Replgid;		/* Replacement if requested */
 
 extern	netid_t		Out_host;
 char	*realuname;
 char	realgname[UIDSIZE+1];
 
-BtuserRef	mypriv;
 ULONG		Fileprivs;
 
 Btjob		Out_job;
 
-FILE	*Cfile;
 char	Verbose,
 	Outside_env;
 
@@ -94,17 +80,7 @@ char	Verbose,
 #define	MODE_ON		2
 #define	MODE_OFF	3
 
-char	*Restru, *Restrg;	/* Resolution only */
-
 char	*Out_interp;
-
-char	*exitcodename,
-	*signalname;
-
-Menvir	Envs[MAXJENVIR];
-
-char	*Args[MAXJARGS],
-	*jobqueue;
 
 void  remgetuml(const netid_t, USHORT *, ULONG *);
 char **remread_envir(const netid_t);

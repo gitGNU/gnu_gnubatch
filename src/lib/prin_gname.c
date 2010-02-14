@@ -49,6 +49,10 @@ static	int	doneit;
 static	struct	ghash	*ghash[UG_HASHMOD];
 static	struct	ghash	*gnhash[UG_HASHMOD];
 
+/* Define these here */
+
+gid_t	Realgid, Effgid, Daemgid;
+
 /* Read group file to build up hash table of group ids.  This is
    usually done once only at the start of the program, however if
    done again it must be to re-read supp groups only.  */

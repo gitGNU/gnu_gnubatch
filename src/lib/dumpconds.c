@@ -30,9 +30,7 @@
 #include "btjob.h"
 #include "q_shm.h"
 #include "spitrouts.h"
-
-extern	char	*exitcodename,
-		*signalname;
+#include "optflags.h"
 
 void  spitbtrstr(const int, FILE *, const int);
 

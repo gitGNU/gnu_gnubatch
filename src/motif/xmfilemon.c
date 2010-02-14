@@ -54,34 +54,10 @@
 static	char	Filename[] = __FILE__;
 
 char	*Curr_pwd;
-uid_t	Realuid,
-	Effuid;
-gid_t	Realgid,
-	Effgid;
-
-FILE	*Cfile;
 char	Confvarname[] = "FILEMONCONF";
 
-/* Satisfy sharedlibs dependencies */
-#include "helpalt.h"
-#include "bjparam.h"
-#include "cmdint.h"
-#include "btconst.h"
-#include "btmode.h"
-#include "btvar.h"
-#include "btuser.h"
-#include "timecon.h"
-#include "btjob.h"
-#include "q_shm.h"
-
-int		Ctrl_chan;
 uid_t		Daemuid;
 ULONG		Fileprivs;
-char		*Args[1], *exitcodename, *signalname;
-BtuserRef	mypriv;
-struct		jshm_info	Job_seg;
-char		*Restru, *Restrg, *jobqueue;
-/* End of shared libs dependencies */
 
 enum  wot_mode	wotact = WM_STOP_FOUND;
 enum  wot_form	wotf = WF_APPEARS;

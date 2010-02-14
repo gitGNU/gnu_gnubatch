@@ -38,6 +38,7 @@
 #include "incl_unix.h"
 #include "incl_sig.h"
 #include "defaults.h"
+#include "incl_ugid.h"
 #include "files.h"
 #include "ecodes.h"
 #include "helpargs.h"
@@ -185,37 +186,9 @@ DIR		*Dir_p;
 unsigned	long		scan_seq;	/* Number of scans we've done */
 time_t		last_mtime;			/* Of directory we're looking at */
 
-uid_t	Realuid,
-	Effuid;
-gid_t	Realgid,
-	Effgid;
-
-FILE	*Cfile;
 char	Confvarname[] = "FILEMONCONF";
 
-char	*Restru,
-	*Restrg,
-	*jobqueue;				/* Resolution only */
-
-/* Satisfy sharedlibs dependencies */
-#include "bjparam.h"
-#include "cmdint.h"
-#include "btconst.h"
-#include "btmode.h"
-#include "btvar.h"
-#include "btuser.h"
-#include "timecon.h"
-#include "btjob.h"
-#include "q_shm.h"
-
-int		Ctrl_chan;
-uid_t		Daemuid;
 ULONG		Fileprivs;
-char		*Args[1], *exitcodename, *signalname;
-BtuserRef	mypriv;
-struct		jshm_info	Job_seg;
-/* end of shared lib dependencies */
-
 int	sem_chan, shm_chan;
 struct	fm_shm_entry	*shm_list,
 			*my_shm_slot;

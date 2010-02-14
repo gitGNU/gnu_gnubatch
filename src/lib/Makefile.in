@@ -30,6 +30,7 @@ HDRS		=	$(PARENT)/hdrs
 CCFLAGS		=	-O @gcc_useful_options@ @funny_compiler_options@
 CFLAGS		=	$(CCFLAGS) -I$(HDRS) -I$(BASE)
 LIBDIR		=	$(DESTDIR)@libdir@
+RPATH		=	@libdir@
 LDSHARED	=	ld -shared -o
 LIB		=	libgnubatch_int.la
 LIBCLIENT	=	libgnubatch_client.la
@@ -76,9 +77,9 @@ LIBCLIENTOBJS=$(CLIENTOBJS:.o=.lo)
 LIBCURSOBJS=$(CURSOBJS:.o=.lo)
 
 all:	$(OBJECTS) $(CLIENTOBJS) $(CURSOBJS)
-	libtool --mode=link @CC@ $(CCFLAGS) -o $(LIB) $(LIBOBJECTS) -rpath $(LIBDIR) -version-info 0:0:0
-	libtool --mode=link @CC@ $(CCFLAGS) -o $(LIBCLIENT) $(LIBCLIENTOBJS) -rpath $(LIBDIR) -version-info 0:0:0
-	libtool --mode=link @CC@ $(CCFLAGS) -o $(LIBCURS) $(LIBCURSOBJS) -rpath $(LIBDIR) -version-info 0:0:0
+	libtool --mode=link @CC@ $(CCFLAGS) -o $(LIB) $(LIBOBJECTS) -rpath $(RPATH) -version-info 0:0:0
+	libtool --mode=link @CC@ $(CCFLAGS) -o $(LIBCLIENT) $(LIBCLIENTOBJS) -rpath $(RPATH) -version-info 0:0:0
+	libtool --mode=link @CC@ $(CCFLAGS) -o $(LIBCURS) $(LIBCURSOBJS) -rpath $(RPATH) -version-info 0:0:0
 
 install: all
 	libtool --mode=install $(INSTALL) $(LIB) $(LIBDIR)

@@ -51,25 +51,11 @@
 #include "helpargs.h"
 #include "cfile.h"
 #include "optflags.h"
-
-FILE	*Cfile;
-int	Ctrl_chan;
-
-uid_t	Realuid, Effuid, Daemuid;
-gid_t	Realgid, Effgid;
+#include "shutilmsg.h"
 
 int	nosetpgrp = 0;
 LONG	initll = -1, jsize = 0L, vsize = 0L;
 float	decpri = 0.0;
-
-char	*Restru, *Restrg, *jobqueue;
-
-/* Satisfy sharedlibs dependencies */
-#include "q_shm.h"
-char		*Args[1], *exitcodename, *signalname;
-BtuserRef	mypriv;
-struct	jshm_info	Job_seg;
-/* End of shared libs dependencies */
 
 /* For when we run out of memory.....  */
 
@@ -84,7 +70,6 @@ static int  doconnop(const unsigned cmd, const char *hostn)
 {
 	struct	remote	*rp;
 	long		mymtype;
-	BtuserRef	mypriv;
 	Shipc		oreq;
 	Repmess		rr;
 

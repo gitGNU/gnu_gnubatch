@@ -79,28 +79,13 @@ static	char	rcsid2[] = "@(#) $Revision: 1.1 $";
 void  initcifile();
 
 char	*spdir,
-	*Curr_pwd,
-	*jobqueue;
-
-uid_t	Daemuid,
-	Realuid,
-	Effuid;
-
-gid_t	Realgid,
-	Effgid;
+	*Curr_pwd;
 
 extern	USHORT	Save_umask;
 
-FILE	*Cfile;
 char	Confvarname[] = "XMBTRCONF";
 
-int	Ctrl_chan = -1;
-#ifndef	USING_FLOCK
-int	Sem_chan;
-#endif
-
 extern	long	mymtype;
-BtuserRef	mypriv;
 
 struct	pend_job	default_pend;
 Btjob	default_job;
@@ -108,8 +93,6 @@ Btjob	default_job;
 char	xterm_edit;		/* Invoke "xterm" to run editor */
 
 char	*editor_name;	/* Name of favourite editor */
-
-char	*Restru, *Restrg;
 
 /* X Stuff */
 

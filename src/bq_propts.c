@@ -66,8 +66,7 @@ extern	WINDOW	*escr,
 extern	SHORT	initscreen;
 
 extern	char	*Curr_pwd,
-		*spdir,
-		*jobqueue;
+		*spdir;
 
 extern	int	hadrfresh;
 

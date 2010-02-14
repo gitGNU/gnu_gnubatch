@@ -44,6 +44,7 @@
 #include "btconst.h"
 #include "bjparam.h"
 #include "btjob.h"
+#include "btvar.h"
 #include "cmdint.h"
 #include "jvuprocs.h"
 #include "ecodes.h"
@@ -56,37 +57,15 @@
 #include "helpalt.h"
 #include "optflags.h"
 #include "cgifndjb.h"
-
-uid_t	Daemuid,
-	Realuid,
-	Effuid;
-gid_t	Realgid,
-	Effgid;
-
-BtuserRef	mypriv;
-
-FILE	*Cfile;
+#include "shutilmsg.h"
 
 #define	IPC_MODE	0600
-
-int	Ctrl_chan;
-#ifndef	USING_FLOCK
-int	Sem_chan;
-#endif
 
 ULONG			Saveseq;
 
 HelpaltRef	progresslist;
 
-char		*jobqueue,
-		*Restru,
-		*Restrg;
-
 static	char	*stat_codes;
-
-/* Satisfy sharedlibs dependencies */
-char		*Args[1], *signalname, *exitcodename;
-/* End of shared libs dependencies */
 
 /* For when we run out of memory.....  */
 

@@ -41,24 +41,7 @@
 #include "errnums.h"
 #include "ipcstuff.h"
 
-FILE	*Cfile;
-int	Ctrl_chan;
-
-uid_t	Realuid,
-	Effuid,
-	Daemuid;
-gid_t	Realgid,
-	Effgid;
-
-/* Satisfy sharedlibs dependencies */
-#include "helpalt.h"
-#include "q_shm.h"
-#include "btuser.h"
-char		*Args[1], *exitcodename, *signalname;
-char		*Restru, *Restrg, *jobqueue;
-BtuserRef	mypriv;
-struct	jshm_info	Job_seg;
-/* End of shared libs dependencies */
+extern	int	Ctrl_chan;
 
 void  nomem(const char *fl, const int ln)
 {

@@ -19,7 +19,6 @@ extern	char	*spdir;		/* Spool directory, typically /usr/spool/batch */
 
 extern	int	Ctrl_chan;
 extern	Shipc	Oreq;
-extern	BtuserRef mypriv;	/* My privileges */
 
 extern	int		Const_val;
 extern	int		Dirty;
