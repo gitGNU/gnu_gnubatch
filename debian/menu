@@ -1,2 +1,2 @@
-?package(gnuspool):needs="X11" section="Applications/System/Administration"\
+?package(gnubatch):needs="X11" section="Applications/System/Administration"\
   title="gnubatch queue" command="/usr/bin/gbch-xq"
