@@ -6,7 +6,6 @@ gbch-uconv - dump out GNUbatch user permissions to file
 
 B<gbch-uconv>
 [ I<-D dir> ]
-[ I<-v n> ]
 [ I<-e n> ]
 [ I<-s> ]
 [ I<-f> ]
@@ -19,11 +18,6 @@ F<btufile> held in the batch spool directory to an
 executable shell script file I<outfile>, which if executed, would
 recreate the B<GNUbatch> users permissions with the same options and
 privileges.
-
-B<gbch-uconv> understands the format of the saved user file for
-versions of B<Xi-Batch> going back to release 4, and when presented
-with a saved file, will attempt to work out from the format which
-release it relates to.
 
 In addition to options, two arguments are always supplied to
 B<gbch-cvlist>.
@@ -77,14 +71,6 @@ given by the B<-e> option.
 
 Ignore file size errors in the saved user file (up to the number of
 total errors given by the B<-e> option.
-
-=item -v I<number>
-
-Tell B<gbch-uconv> that the user file is for release I<number> of
-B<Xi-Batch>, where I<number> is 4 to 6.
-
-This may be necessary where the user file is corrupted and
-B<gbch-uconv> cannot guess what is meant.
 
 =back
 

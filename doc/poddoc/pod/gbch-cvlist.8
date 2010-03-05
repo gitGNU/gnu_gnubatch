@@ -6,7 +6,6 @@ gbch-cvlist - dump out GNUbatch variables to a shell script
 
 B<gbch-cvlist>
 [ I<-D dir> ]
-[ I<-v n> ]
 [ I<-e n> ]
 [ I<-s> ]
 [ I<-f> ]
@@ -18,11 +17,6 @@ B<gbch-cvlist> converts B<GNUbatch> variables held in the batch spool
 directory to an executable shell script which may be used to
 re-install them. This may be useful for backup purposes or for one
 stage in upgrade from one release of B<GNUbatch> to another.
-
-B<gbch-cvlist> understands the format of the saved variable file for
-versions of B<Xi-Batch> going back to release 4, and when presented
-with a saved file, will attempt to work out from the format which
-release it relates to.
 
 In addition to options, two arguments are always supplied to
 B<gbch-cvlist>.
@@ -76,14 +70,6 @@ entries up to the limit given by the B<-e> option.
 
 Ignore file size errors in the saved variable file (up to the number of
 total errors given by the B<-e> option).
-
-=item -v I<number>
-
-Tell B<gbch-cvlist> that the variable file is for release I<number> of
-B<Xi-Batch>, where I<number> is 4 to 6.
-
-This may be necessary where the variable file is corrupted and
-B<gbch-cvlist> cannot guess what is meant.
 
 =back
 

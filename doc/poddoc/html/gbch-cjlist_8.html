@@ -42,7 +42,6 @@
 <h1><a name="synopsis">SYNOPSIS</a></h1>
 <p><strong>gbch-cjlist</strong>
 [ <em>-D dir</em> ]
-[ <em>-v n</em> ]
 [ <em>-e n</em> ]
 [ <em>-u</em> ]
 [ <em>-s</em> ]
@@ -59,11 +58,6 @@ upgrading from one release of <strong>GNUbatch</strong> to another.</p>
 <p>The jobs are copied into the backup directory <em>workdir</em>, and the
 generated shell script file <em>outfile</em> refers to files in that
 directory.</p>
-<p><strong>gbch-cjlist</strong> understands the format of the saved job file for
-versions of <strong>GNUbatch</strong> and Xi-Batch going back to release 5, and when
-presented with a saved file, will attempt to work out from the format
-which release it relates to. If required, it will skip apparent errors
-in the job file.</p>
 <p>In addition to options, three arguments are always supplied to
 <strong>gbch-cjlist</strong>.</p>
 <dl>
@@ -129,14 +123,6 @@ total errors given by the <strong>-e</strong> option.</p>
 
 <dd>
 <p>Do not check user names in the saved job file.</p>
-</dd>
-<dt><strong><a name="v_number" class="item">-v <em>number</em></a></strong></dt>
-
-<dd>
-<p>Tell <strong>gbch-cjlist</strong> that the job file is for release <em>number</em> of
-<strong>Xi-Batch</strong>, where <em>number</em> is 5 to 6.</p>
-<p>This may be necessary where the job file is corrupted and <strong>gbch-cjlist</strong>
-cannot guess what is meant.</p>
 </dd>
 </dl>
 <p>

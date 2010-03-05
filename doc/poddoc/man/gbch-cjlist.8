@@ -124,7 +124,7 @@
 .\" ========================================================================
 .\"
 .IX Title "GBCH-CJLIST 8"
-.TH GBCH-CJLIST 8 "2009-05-18" "GNUbatch Release 1" "GNUbatch Batch Scheduler"
+.TH GBCH-CJLIST 8 "2010-03-05" "GNUbatch Release 1" "GNUbatch Batch Scheduler"
 .\" For nroff, turn off justification.  Always turn off hyphenation; it makes
 .\" way too many mistakes in technical documents.
 .if n .ad l
@@ -135,7 +135,6 @@ gbch\-cjlist \- dump out GNUbatch jobs to directory
 .IX Header "SYNOPSIS"
 \&\fBgbch-cjlist\fR
 [ \fI\-D dir\fR ]
-[ \fI\-v n\fR ]
 [ \fI\-e n\fR ]
 [ \fI\-u\fR ]
 [ \fI\-s\fR ]
@@ -151,12 +150,6 @@ upgrading from one release of \fBGNUbatch\fR to another.
 The jobs are copied into the backup directory \fIworkdir\fR, and the
 generated shell script file \fIoutfile\fR refers to files in that
 directory.
-.PP
-\&\fBgbch-cjlist\fR understands the format of the saved job file for
-versions of \fBGNUbatch\fR and Xi-Batch going back to release 5, and when
-presented with a saved file, will attempt to work out from the format
-which release it relates to. If required, it will skip apparent errors
-in the job file.
 .PP
 In addition to options, three arguments are always supplied to
 \&\fBgbch-cjlist\fR.
@@ -208,13 +201,6 @@ total errors given by the \fB\-e\fR option.
 .IP "\-u" 4
 .IX Item "-u"
 Do not check user names in the saved job file.
-.IP "\-v \fInumber\fR" 4
-.IX Item "-v number"
-Tell \fBgbch-cjlist\fR that the job file is for release \fInumber\fR of
-\&\fBXi-Batch\fR, where \fInumber\fR is 5 to 6.
-.Sp
-This may be necessary where the job file is corrupted and \fBgbch-cjlist\fR
-cannot guess what is meant.
 .SH "SEE ALSO"
 .IX Header "SEE ALSO"
 \&\fIgbch\-ciconv\fR\|(8),

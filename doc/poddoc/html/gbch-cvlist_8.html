@@ -42,7 +42,6 @@
 <h1><a name="synopsis">SYNOPSIS</a></h1>
 <p><strong>gbch-cvlist</strong>
 [ <em>-D dir</em> ]
-[ <em>-v n</em> ]
 [ <em>-e n</em> ]
 [ <em>-s</em> ]
 [ <em>-f</em> ]
@@ -55,10 +54,6 @@
 directory to an executable shell script which may be used to
 re-install them. This may be useful for backup purposes or for one
 stage in upgrade from one release of <strong>GNUbatch</strong> to another.</p>
-<p><strong>gbch-cvlist</strong> understands the format of the saved variable file for
-versions of <strong>Xi-Batch</strong> going back to release 4, and when presented
-with a saved file, will attempt to work out from the format which
-release it relates to.</p>
 <p>In addition to options, two arguments are always supplied to
 <strong>gbch-cvlist</strong>.</p>
 <dl>
@@ -113,14 +108,6 @@ entries up to the limit given by the <strong>-e</strong> option.</p>
 <dd>
 <p>Ignore file size errors in the saved variable file (up to the number of
 total errors given by the <strong>-e</strong> option).</p>
-</dd>
-<dt><strong><a name="v_number" class="item">-v <em>number</em></a></strong></dt>
-
-<dd>
-<p>Tell <strong>gbch-cvlist</strong> that the variable file is for release <em>number</em> of
-<strong>Xi-Batch</strong>, where <em>number</em> is 4 to 6.</p>
-<p>This may be necessary where the variable file is corrupted and
-<strong>gbch-cvlist</strong> cannot guess what is meant.</p>
 </dd>
 </dl>
 <p>

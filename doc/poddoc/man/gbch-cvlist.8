@@ -124,7 +124,7 @@
 .\" ========================================================================
 .\"
 .IX Title "GBCH-CVLIST 8"
-.TH GBCH-CVLIST 8 "2009-05-18" "GNUbatch Release 1" "GNUbatch Batch Scheduler"
+.TH GBCH-CVLIST 8 "2010-03-05" "GNUbatch Release 1" "GNUbatch Batch Scheduler"
 .\" For nroff, turn off justification.  Always turn off hyphenation; it makes
 .\" way too many mistakes in technical documents.
 .if n .ad l
@@ -135,7 +135,6 @@ gbch\-cvlist \- dump out GNUbatch variables to a shell script
 .IX Header "SYNOPSIS"
 \&\fBgbch-cvlist\fR
 [ \fI\-D dir\fR ]
-[ \fI\-v n\fR ]
 [ \fI\-e n\fR ]
 [ \fI\-s\fR ]
 [ \fI\-f\fR ]
@@ -146,11 +145,6 @@ gbch\-cvlist \- dump out GNUbatch variables to a shell script
 directory to an executable shell script which may be used to
 re-install them. This may be useful for backup purposes or for one
 stage in upgrade from one release of \fBGNUbatch\fR to another.
-.PP
-\&\fBgbch-cvlist\fR understands the format of the saved variable file for
-versions of \fBXi-Batch\fR going back to release 4, and when presented
-with a saved file, will attempt to work out from the format which
-release it relates to.
 .PP
 In addition to options, two arguments are always supplied to
 \&\fBgbch-cvlist\fR.
@@ -194,13 +188,6 @@ entries up to the limit given by the \fB\-e\fR option.
 .IX Item "-s"
 Ignore file size errors in the saved variable file (up to the number of
 total errors given by the \fB\-e\fR option).
-.IP "\-v \fInumber\fR" 4
-.IX Item "-v number"
-Tell \fBgbch-cvlist\fR that the variable file is for release \fInumber\fR of
-\&\fBXi-Batch\fR, where \fInumber\fR is 4 to 6.
-.Sp
-This may be necessary where the variable file is corrupted and
-\&\fBgbch-cvlist\fR cannot guess what is meant.
 .SH "SEE ALSO"
 .IX Header "SEE ALSO"
 \&\fIgbch\-ciconv\fR\|(8),

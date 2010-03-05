@@ -124,7 +124,7 @@
 .\" ========================================================================
 .\"
 .IX Title "GBCH-UCONV 8"
-.TH GBCH-UCONV 8 "2009-05-18" "GNUbatch Release 1" "GNUbatch Batch Scheduler"
+.TH GBCH-UCONV 8 "2010-03-05" "GNUbatch Release 1" "GNUbatch Batch Scheduler"
 .\" For nroff, turn off justification.  Always turn off hyphenation; it makes
 .\" way too many mistakes in technical documents.
 .if n .ad l
@@ -135,7 +135,6 @@ gbch\-uconv \- dump out GNUbatch user permissions to file
 .IX Header "SYNOPSIS"
 \&\fBgbch-uconv\fR
 [ \fI\-D dir\fR ]
-[ \fI\-v n\fR ]
 [ \fI\-e n\fR ]
 [ \fI\-s\fR ]
 [ \fI\-f\fR ]
@@ -147,11 +146,6 @@ gbch\-uconv \- dump out GNUbatch user permissions to file
 executable shell script file \fIoutfile\fR, which if executed, would
 recreate the \fBGNUbatch\fR users permissions with the same options and
 privileges.
-.PP
-\&\fBgbch-uconv\fR understands the format of the saved user file for
-versions of \fBXi-Batch\fR going back to release 4, and when presented
-with a saved file, will attempt to work out from the format which
-release it relates to.
 .PP
 In addition to options, two arguments are always supplied to
 \&\fBgbch-cvlist\fR.
@@ -195,13 +189,6 @@ given by the \fB\-e\fR option.
 .IX Item "-s"
 Ignore file size errors in the saved user file (up to the number of
 total errors given by the \fB\-e\fR option.
-.IP "\-v \fInumber\fR" 4
-.IX Item "-v number"
-Tell \fBgbch-uconv\fR that the user file is for release \fInumber\fR of
-\&\fBXi-Batch\fR, where \fInumber\fR is 4 to 6.
-.Sp
-This may be necessary where the user file is corrupted and
-\&\fBgbch-uconv\fR cannot guess what is meant.
 .SH "SEE ALSO"
 .IX Header "SEE ALSO"
 \&\fIgbch\-cjlist\fR\|(8),
