@@ -90,12 +90,14 @@ bgtkldsv: bgtkldsv.o
 
 install:	all
 		libtool --mode=install $(INSTALL) $(USERMODES) $(USERBINS) $(BINDIR)
+		libtool --mode=install $(INSTALL) $(NOSETUBINS) $(BINDIR)
 		libtool --mode=install $(INSTALL) $(SUIDROOT) $(SETUROOTSYSBINS) $(INTBINDIR)
 		libtool --mode=install $(INSTALL) $(NOSETMODES) $(NOSETUSYSBINS) $(INTBINDIR)
 		$(INSTALL_DATA) $(XRES) $(HELPFILEDIR)
 
 install-strip:	all
 		libtool --mode=install $(INSTALL) -s $(USERMODES) $(USERBINS) $(BINDIR)
+		libtool --mode=install $(INSTALL) -s $(NOSETUBINS) $(BINDIR)
 		libtool --mode=install $(INSTALL) -s $(SUIDROOT) $(SETUROOTSYSBINS) $(INTBINDIR)
 		libtool --mode=install $(INSTALL) -s $(NOSETMODES) $(NOSETUSYSBINS) $(INTBINDIR)
 		$(INSTALL_DATA) $(XRES) $(HELPFILEDIR)
