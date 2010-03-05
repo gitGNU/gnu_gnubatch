@@ -1,6 +1,5 @@
-gnubatch (1.2-1) unstable; urgency=low
+gnubatch (1.2) unstable; urgency=low
 
-  * Initial release (Closes: #nnnn)  <nnnn is the bug number of your ITP>
+  * Initial release (Closes: #572633)
 
- -- John M Collins (Xi Software Ltd) <jmc@xisl.com>  Thu, 21 May 2009 11:50:37 +0100
-
+ -- John M Collins (Xi Software Ltd) <jmc@xisl.com>  Fri, 05 Mar 2010 11:22:06 +0000
