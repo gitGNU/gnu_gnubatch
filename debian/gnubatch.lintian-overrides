@@ -1,4 +1,4 @@
 # These libraries are only useful to the binaries in the same package, so there's no point
 # splitting them out into a separate lib package
-gnubatch binary: package-name-doesnt-match-sonames libgnubatch-curs0 libgnubatch-int0
+gnubatch binary: package-name-doesnt-match-sonames libgnubatch-client0 libgnubatch-curs0 libgnubatch-int0
 gnubatch binary: non-dev-pkg-with-shlib-symlink
