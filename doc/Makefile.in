@@ -45,6 +45,7 @@ install install-strip: all
 	cd $(MANDIR)/man1; for p in $(STARTLINKS); do ln -s gbch-start.1 gbch-$$p.1; done
 	cd $(MANDIR)/man3; ln -s gbatch_jobfind.3 gbatch_jobfindslot.3
 	cd $(MANDIR)/man3; ln -s gbatch_varfind.3 gbatch_varfindslot.3
+	$(INSTALL) -d $(PDFDIR)
 	$(INSTALL_DATA) pdf/*.pdf $(PDFDIR)
 
 clean:
