@@ -187,7 +187,7 @@ void  cb_saveopts()
 		*ap++ = gtkprog; /* Arg 0 is the program we're running */
 		*ap++ = "XBTRXTERMEDIT";
 		digbuf[0] = xterm_edit? '1': '0';
-		digbuf[2] = '\0';
+		digbuf[1] = '\0';
 		*ap++ = digbuf;
 		*ap++ = "XBTREDITOR";
 		*ap++ = editor_name;

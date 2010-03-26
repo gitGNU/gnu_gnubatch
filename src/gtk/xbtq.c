@@ -468,12 +468,12 @@ MAINFN_TYPE  main(int argc, char **argv)
 	openvfile(1, 0);
 	initxbuffer(1);
 	initcifile();
+	load_optfile();
 	winit();
 	vbox = wstart();
 	init_jdisplay();
 	init_vdisplay();
 	wcomplete(vbox);
-	load_optfile();
 	loadmacs('j', jobmacs);
 	loadmacs('v', varmacs);
 	g_timeout_add(1000, (GSourceFunc) poll_changes, NULL);
