@@ -48,11 +48,21 @@ int  writefile(char *fl)
 	FILE  *outf = fopen(fl, "w");
 	size_t	nb;
 	char	buf[1024];
+	int	um = umask(0);
+	umask(um);
+
 	if  (!outf)
 		return  E_NOJOB;
 	while  ((nb = fread(buf, 1, sizeof(buf), stdin))  !=  0)
 		fwrite(buf, 1, nb, outf);
+	/* This is to try to turn on executable bits */
+#ifdef	HAVE_FCHMOD
+	fchmod(fileno(outf), 0777 & ~um);
+#endif
 	fclose(outf);
+#ifndef	HAVE_FCHMOD
+	chmod(fl, 0777 & ~um);
+#endif
 	return  0;
 }
 
