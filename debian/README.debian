@@ -14,7 +14,7 @@ gnubatch-netsrv		48106/udp        # Client access
 gnubatch-api		48107/tcp        # API
 gnubatch-api		48107/udp        # API (for wakeup messages)
 
-The script /usr/sbin/gspl-servinstall has been provided to do
+The script /usr/sbin/gbch-servinstall has been provided to do
 this for you. It will back off if there are any conflicts.
 
 Please note that the next release of GNUbatch will only use 2 ports.

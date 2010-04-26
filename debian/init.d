@@ -33,7 +33,7 @@
 
 PATH=/usr/local/sbin:/usr/local/bin:/sbin:/bin:/usr/sbin:/usr/bin
 
-DAEMON=/usr/sbin/gbch-start # Introduce the server's location here
+DAEMON=/usr/bin/gbch-start # Introduce the server's location here
 NAME=gnubatch              # Introduce the short server's name here
 DESC='Batch scheduler process'              # Introduce a short description here
 SPOOLDIR=/var/spool/gnubatch
