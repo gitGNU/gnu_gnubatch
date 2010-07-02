@@ -2,9 +2,17 @@
 
 gbch-hostedit - edit GNUbatch host table
 
+gbch-xhostedit - edit GNUspool host table
+
 =head1 SYNOPSIS
 
 B<gbch-hostedit>
+[ -I<o file> ]
+[ -I<s arg> ]
+[ -I<I> ]
+[ I<file> ]
+
+B<gbch-xhostedit>
 [ -I<o file> ]
 [ -I<s arg> ]
 [ -I<I> ]
@@ -15,14 +23,16 @@ B<gbch-hostedit>
 B<gbch-hostedit> is a simple curses-based program to edit host tables for
 F<gnubatch.hosts>, the host table for GNUbatch.
 
-It knows about local addresses (selecting the correct IP address for a
+B<gbch-xhostedit> is a similar program using GTK+
+
+They know about local addresses (selecting the correct IP address for a
 machine with different IPs on different networks), Windows clients,
 DHCP, trusted hosts, manual connections, probes and timeouts.
 
 Input is taken from standard input unless a file name is given, and
 output is to standard output unless the B<-o> option is given.
 
-Normally this would be run as follows:
+Normally they would be run as follows:
 
 	gbch-hostedit -o /tmp/hostfile /usr/local/etc/
 	cp /tmp/hostfile /usr/local/etc/
@@ -32,6 +42,9 @@ You will usually have to stop and restart GNUbatch after you have
 done this so that all parts of the system "know" about the new hosts,
 however this may not be necessary in all cases, you may only have to
 "C<kill -1>" the process id of the xbnetserv process.
+
+Options are identical in each case (except B<gbch-xhostedit> also
+takes options parsed by GTK+).
 
 =head1 OPTIONS
 

@@ -1,6 +1,6 @@
 /* cursproc.c -- curses routines for hostedit
 
-   Copyright 2009 Free Software Foundation, Inc.
+   Copyright 2008 Free Software Foundation, Inc.
 
    This program is free software: you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by
@@ -25,16 +25,7 @@
 #include "incl_unix.h"
 #include "networkincl.h"
 #include "remote.h"
-
-extern	struct	remote	*hostlist;
-extern	int	hostnum, hostmax;
-
-extern	char	*phname(netid_t, const int);
-extern	void	addhostentry(const struct remote *);
-
-extern	int	hadlocaddr;
-extern	char	defcluser[];
-extern	netid_t	myhostid;
+#include "hostedit.h"
 
 #define	HOST_P		0
 #define	ALIAS_P		20
@@ -55,33 +46,6 @@ extern	netid_t	myhostid;
 #define	HDRLINES	5
 
 jmp_buf	escj;
-
-int	hnameclashes(char *newname)
-{
-	int	cnt;
-
-	for  (cnt = 0;  cnt < hostnum;  cnt++)  {
-		struct	remote	*rp = &hostlist[cnt];
-		if  (rp->ht_flags & HT_ROAMUSER)
-			continue;
-		if  (strcmp(rp->hostname, newname) == 0  ||  strcmp(rp->alias, newname) == 0)
-			return  1;
-	}
-	return  0;
-}
-
-char	*ipclashes(const netid_t newip)
-{
-	int	cnt;
-	for  (cnt = 0;  cnt < hostnum;  cnt++)  {
-		struct	remote	*rp = &hostlist[cnt];
-		if  (rp->ht_flags & HT_ROAMUSER)
-			continue;
-		if  (rp->hostid == newip)
-			return  rp->hostname;
-	}
-	return  (char *) 0;
-}
 
 int	ask(const int row, const char *quest, const int dflt)
 {
@@ -169,8 +133,7 @@ void	asktimeout(struct remote *rp, const int row)
 		rp->ht_timeout = askn(row+2, "Timeout value");
 }
 
-/* Ask hostname - return 1 if given as IP address */
-int	askhname(char *hnp, const int row, const char *htype, struct remote *rp)
+enum IPatype  askhname(char *hnp, const int row, const char *htype, struct remote *rp)
 {
 	int	ch, starta, cnt;
 
@@ -262,7 +225,7 @@ int	askhname(char *hnp, const int row, const char *htype, struct remote *rp)
 					}
 					rp->hostid = resip;
 					rp->ht_flags |= HT_HOSTISIP;
-					return  1;
+					return  IPADDR_IP;
 				}
 				move(row-1, 0);
 				clrtoeol();
@@ -282,7 +245,7 @@ int	askhname(char *hnp, const int row, const char *htype, struct remote *rp)
 				hp = gethostbyname(hnp);
 				if  (hp)  {
 					char	*cp;
-					if  ((cp = ipclashes(*(unsigned long *) hp->h_addr)))  {
+					if  ((cp = ipclashes(*(netid_t *) hp->h_addr)))  {
 						move(row-1, 0);
 						clrtoeol();
 						standout();
@@ -290,8 +253,8 @@ int	askhname(char *hnp, const int row, const char *htype, struct remote *rp)
 						break;
 					}
 					if  (rp)
-						rp->hostid = *(unsigned long *) hp->h_addr;
-					return  0;
+						rp->hostid = *(netid_t *) hp->h_addr;
+					return  IPADDR_NAME;
 				}
 				move(row-1, 0);
 				clrtoeol();
@@ -513,7 +476,7 @@ void	proc_addunixhost()
 	memset((void *) &resrp, '\0', sizeof(resrp));
 
 	clear();
-	askalias(&resrp, 4, askhname(resrp.hostname, 2, "Unix host name", &resrp));
+	askalias(&resrp, 4, askhname(resrp.hostname, 2, "Unix host name", &resrp) == IPADDR_IP);
 	if  (ask(6, "Probe (check alive) before connecting", 1))
 		resrp.ht_flags |= HT_PROBEFIRST;
 	if  (ask(8, "Trust host with user information", 1))
@@ -538,7 +501,7 @@ void	proc_addwinhost()
 	nxtrow = 10;
 
 	if  (ask(2, "Specific Windows Host (Y) or `roaming user' (N)", 1))  {
-		askalias(&resrp, 6, askhname(resrp.hostname, 4, "Windows client host name", &resrp));
+		askalias(&resrp, 6, askhname(resrp.hostname, 4, "Windows client host name", &resrp) == IPADDR_IP);
 		askuser(resrp.dosuser, 8, "Default user", 1, 0);
 	}
 	else  {
@@ -705,7 +668,7 @@ void	proc_locaddr()
 
 	clear();
 
-	if  (hadlocaddr)  {
+	if  (hadlocaddr != NO_IPADDR)  {
 		if  (ask(nxtline, "Local address set, do you want to unset it", 0))  {
 			struct	hostent	*hp;
 			char	myname[256];
@@ -713,16 +676,14 @@ void	proc_locaddr()
 			gethostname(myname, sizeof(myname) - 1);
 			if  ((hp = gethostbyname(myname)))  {
 				myhostid = *(netid_t *) hp->h_addr;
-				hadlocaddr = 0;
+				hadlocaddr = NO_IPADDR;
 			}
 		}
 	}
 	else  if  (ask(nxtline, "Do you want to set a local address", 0))  {
-		int	isip;
 		struct	remote	dummr;
 		memset(&dummr, '\0', sizeof(dummr));
-		isip = askhname(dummr.hostname, nxtline+2, "Local address", &dummr);
-		hadlocaddr = 2 - isip;
+		hadlocaddr = askhname(dummr.hostname, nxtline+2, "Local address", &dummr);
 		myhostid = dummr.hostid;
 	}
 }
@@ -783,14 +744,14 @@ void	disp_hostlist(const int startrow)
 	mvprintw(2, USER_P, "User");
 	mvprintw(2, DMCH_P, "Dft mc");
 
-	if  (hadlocaddr)  {
+	if  (hadlocaddr != NO_IPADDR)  {
 		mvprintw(3, HOST_P, "Local Address:");
-		if  (hadlocaddr == 2)
-			printw("%s", phname(myhostid, 0));
+		if  (hadlocaddr == IPADDR_NAME)
+			printw("%s", phname(myhostid, IPADDR_NAME));
 	}
 	else
-		mvprintw(3, HOST_P, "Current: %s", phname(myhostid, 0));
-	mvprintw(3, IPADDR_P, phname(myhostid, 1));
+		mvprintw(3, HOST_P, "Current: %s", phname(myhostid, IPADDR_NAME));
+	mvprintw(3, IPADDR_P, phname(myhostid, IPADDR_IP));
 	if  (defcluser[0])
 		mvprintw(4, HOST_P, "Default client user: %s", defcluser);
 

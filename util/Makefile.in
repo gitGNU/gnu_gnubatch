@@ -27,6 +27,8 @@ CC		=	@CC@
 CCFLAGS		=	-O @gcc_useful_options@ @funny_compiler_options@
 CFLAGS		=	$(CCFLAGS) -I$(BASE) -I$(HDRS)
 LDFLAGS		=
+GTKINCL		=	`pkg-config --cflags gtk+-2.0`
+GTKLIBS		=	`pkg-config --libs gtk+-2.0`
 LIBNET		=	@SOCKLIBS@
 LIBCURSES	=	@LIBCURSES@
 YACC		=	@YACC@
@@ -34,7 +36,7 @@ YFLAGS		=	-d
 LEX		=	@LEX@
 LEXLIB		=	@LEXLIB@
 RM		=	rm -f
-PROGS		=	gbch-pmenu gbch-hostedit gbch-passwd
+PROGS		=	gbch-pmenu gbch-hostedit gbch-xhostedit gbch-passwd
 BUILDPROGS	=	helpparse
 BINDIR		=	$(DESTDIR)@bindir@
 SBINDIR		=	$(DESTDIR)@sbindir@
@@ -60,6 +62,12 @@ gbch-pmenu:	pmenu.o
 gbch-hostedit:	hostedit.o parsehtab.o cursproc.o
 	$(CC) $(LDFLAGS) -o $@ hostedit.o parsehtab.o cursproc.o $(LIBCURSES) $(LIBNET)
 
+gbch-xhostedit:	xhostedit.o parsehtab.o
+	-$(CC) $(LDFLAGS) -o $@ xhostedit.o parsehtab.o $(GTKLIBS) $(LIBNET)
+
+xhostedit.o:	xhostedit.c
+	-$(CC) -c -o $@ $(CFLAGS) $(GTKINCL) xhostedit.c
+
 install:	all
 	$(INSTALL) -d $(SBINDIR)
 	$(INSTALL) -d $(BINDIR)
@@ -73,7 +81,7 @@ install-strip:	all
 #	$(INSTALL) -s shmdump $(BINDIR)
 
 clean:
-	$(RM) *.o helpparse $(BUILDPROGS) $(PROGS) shmdump y.tab.h
+	$(RM) *.o helpparse $(BUILDPROGS) $(PROGS) shmdump
 
 distclean:	clean
 	$(RM) Makefile

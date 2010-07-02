@@ -1,6 +1,6 @@
 /* parsehtab.c -- Parese host file for GNUspool for hostedit
 
-   Copyright 2009 Free Software Foundation, Inc.
+   Copyright 2008 Free Software Foundation, Inc.
 
    This program is free software: you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by
@@ -20,13 +20,17 @@
 #include <ctype.h>
 #include <sys/types.h>
 #include <pwd.h>
+#include <time.h>
 #include "defaults.h"
 #include "networkincl.h"
 #include "incl_unix.h"
 #include "remote.h"
+#include "hostedit.h"
 
+struct	remote	*hostlist;
+int	hostnum, hostmax;
 netid_t	myhostid;
-int	hadlocaddr;
+enum	IPatype  hadlocaddr = NO_IPADDR;
 char	defcluser[UIDSIZE+1];
 
 /* Maximum number of bits we are prepared to parse the host file into.  */
@@ -38,6 +42,14 @@ char	defcluser[UIDSIZE+1];
 #define	HOSTF_TIMEOUT	3
 
 char		hostf_errors = 0;  /* Tell hostfile has errors */
+
+enum  Stype  sort_type = SORT_NONE;
+
+void  memory_out()
+{
+	fprintf(stderr, "Run out of memory\n");
+	exit(255);
+}
 
 int	ncstrcmp(const char *a, const char *b)
 {
@@ -55,7 +67,7 @@ int	ncstrcmp(const char *a, const char *b)
 
 int	ncstrncmp(const char *a, const char *b, int n)
 {
-	register  int	ac, bc;
+	int	ac, bc;
 
 	while  (--n >= 0)  {
 		ac = *a++;
@@ -78,7 +90,7 @@ int	ncstrncmp(const char *a, const char *b, int n)
 
 static	int  spliton(char **result, char *string, const char *delims)
 {
-	register  int	parsecnt = 1;
+	int	parsecnt = 1;
 	int	resc = 1;
 
 	/* Assumes no leading delimiters */
@@ -244,7 +256,7 @@ struct	remote *get_hostfile(const char *fname)
 #else
 					myhostid = inet_addr(bits[HOSTF_ALIAS]);
 #endif
-					hadlocaddr = 1;
+					hadlocaddr = IPADDR_IP;
 				}
 				else  if  (!(hp = gethostbyname(bits[HOSTF_ALIAS])))  {
 					if  (myhostid == 0L)  {
@@ -255,7 +267,7 @@ struct	remote *get_hostfile(const char *fname)
 				}
 				else  {
 					myhostid = * (netid_t *) hp->h_addr;
-					hadlocaddr = 2;
+					hadlocaddr = IPADDR_NAME;
 				}
 				continue;
 			}
@@ -439,4 +451,154 @@ struct	remote *get_hostfile(const char *fname)
 	}
 	endhostent();
 	return  (struct  remote  *) 0;
+}
+
+static void  checkhlistsize()
+{
+	if  (hostnum >= hostmax)  {
+		if  (hostlist)  {
+			hostmax += INCHOSTS;
+			hostlist = (struct remote *) realloc((char *) hostlist, (unsigned) hostmax * sizeof(struct remote));
+		}
+		else  {
+			hostmax = INITHOSTS;
+			hostlist = (struct remote *) malloc(INITHOSTS * sizeof(struct remote));
+		}
+		if  (!hostlist)
+			memory_out();
+	}
+}
+
+void  addhostentry(const struct remote *arp)
+{
+	checkhlistsize();
+	hostlist[hostnum++] = *arp;
+}
+
+void  load_hostfile(const char *fname)
+{
+	struct	remote	*inp;
+
+	while  ((inp = get_hostfile(fname)))  {
+		checkhlistsize();
+		hostlist[hostnum++] = *inp;
+	}
+	end_hostfile();
+}
+
+char *phname(netid_t ipadd, const enum IPatype asip)
+{
+	if  (asip == IPADDR_IP)  {
+		struct	in_addr	ina_str;
+		ina_str.s_addr = ipadd;
+		return  inet_ntoa(ina_str);
+	}
+	else  {
+		struct  hostent  *hp = gethostbyaddr((char *)&ipadd, sizeof(ipadd), AF_INET);
+		return  (char *) (hp? hp->h_name: "<unknown>");
+	}
+}
+
+void  dump_hostfile(FILE *outf)
+{
+	int	cnt;
+	time_t	t = time((time_t *) 0);
+	struct	tm	*tp = localtime(&t);
+
+	fprintf(outf, "# Host file created on %.2d/%.2d/%.2d at %.2d:%.2d:%.2d\n\n",
+		tp->tm_mday, tp->tm_mon+1, tp->tm_year%100,
+		tp->tm_hour, tp->tm_min, tp->tm_sec);
+
+	if  (hadlocaddr != NO_IPADDR)
+		fprintf(outf, "%s\t%s\n\n", locaddr, phname(myhostid, hadlocaddr));
+
+	for  (cnt = 0;  cnt < hostnum;  cnt++)  {
+		struct	remote	*hlp = &hostlist[cnt];
+		if  (hlp->ht_flags & HT_DOS)  {
+			if  (hlp->ht_flags & HT_ROAMUSER)
+				fprintf(outf, "%s\t%s\t%s", hlp->hostname, hlp->alias[0]? hlp->alias: "-", cluname);
+			else  if  (hlp->ht_flags & HT_HOSTISIP)
+				fprintf(outf, "%s\t%s\t%s", phname(hlp->hostid, IPADDR_IP), hlp->hostname, clname);
+			else
+				fprintf(outf, "%s\t%s\t%s", hlp->hostname, hlp->alias[0]? hlp->alias: "-", clname);
+			if  (hlp->dosuser[0])
+				fprintf(outf, "(%s)", hlp->dosuser);
+			if  (hlp->ht_flags & HT_PWCHECK)
+				fprintf(outf, ",%s", pwcknam);
+		}
+		else  {
+			int	had = '\t';
+			if  (hlp->ht_flags & HT_HOSTISIP)
+				fprintf(outf, "%s\t%s", phname(hlp->hostid, IPADDR_IP), hlp->hostname);
+			else
+				fprintf(outf, "%s\t%s", hlp->hostname, hlp->alias[0]? hlp->alias: "-");
+			if  (hlp->ht_flags & HT_PROBEFIRST)  {
+				fprintf(outf, "%c%s", had, probestring);
+				had = ',';
+			}
+			if  (hlp->ht_flags & HT_MANUAL)  {
+				fprintf(outf, "%c%s", had, manualstring);
+				had = ',';
+			}
+			if  (hlp->ht_flags & HT_TRUSTED)  {
+				fprintf(outf, "%c%s", had, trustnam);
+				had = ',';
+			}
+		}
+		if  (hlp->ht_timeout != NETTICKLE)
+			fprintf(outf, "\t%u", hlp->ht_timeout);
+		putc('\n', outf);
+	}
+	if  (defcluser[0])
+		fprintf(outf, "%s\t%s\t%s\n", defclient, defcluser, cluname);
+}
+
+int sort_rout(struct remote *a, struct remote *b)
+{
+	if  (a->ht_flags & HT_ROAMUSER)
+		return  b->ht_flags & HT_ROAMUSER? strcmp(a->hostname, b->hostname): 1;
+	if  (b->ht_flags & HT_ROAMUSER)
+		return  -1;
+	if  (sort_type == SORT_IP)  {
+		netid_t  na = ntohl(a->hostid), nb = ntohl(b->hostid);
+		return  na < nb? -1: na == nb? 0: 1;
+	}
+	if  (a->ht_flags & HT_DOS)
+		return  b->ht_flags & HT_DOS? strcmp(a->hostname, b->hostname): 1;
+	if  (b->ht_flags & HT_DOS)
+		return  -1;
+	return  strcmp(a->hostname, b->hostname);
+}
+
+void	sortit()
+{
+	if  (sort_type != SORT_NONE)
+		qsort(QSORTP1 hostlist, (unsigned) hostnum, sizeof(struct remote), QSORTP4 sort_rout);
+}
+
+int  hnameclashes(const char *newname)
+{
+	int	cnt;
+
+	for  (cnt = 0;  cnt < hostnum;  cnt++)  {
+		struct	remote	*rp = &hostlist[cnt];
+		if  (rp->ht_flags & HT_ROAMUSER)
+			continue;
+		if  (strcmp(rp->hostname, newname) == 0  ||  strcmp(rp->alias, newname) == 0)
+			return  1;
+	}
+	return  0;
+}
+
+char	*ipclashes(const netid_t newip)
+{
+	int	cnt;
+	for  (cnt = 0;  cnt < hostnum;  cnt++)  {
+		struct	remote	*rp = &hostlist[cnt];
+		if  (rp->ht_flags & HT_ROAMUSER)
+			continue;
+		if  (rp->hostid == newip)
+			return  rp->hostname;
+	}
+	return  (char *) 0;
 }

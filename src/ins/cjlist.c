@@ -62,6 +62,7 @@ struct  {
 	char	*srcdir;	/* Directory we read from if not pwd */
 	char	*outdir;	/* Directory we write to */
 	char	*outfile;	/* Output file */
+	char	*delim;		/* Delimiter prefix */
 	long	errtol;		/* Number of errors we'll take */
 	long	errors;		/* Number we've had */
 	short	ignsize;	/* Ignore file size */
@@ -202,28 +203,37 @@ static const char *get_host(netid_t nid)
 	return  "unknown";
 }
 
-static int  copyjob(const jobno_t jobnum)
+static	FILE	*openjob(const jobno_t jobnum)
+{
+	return  fopen(mkspid(SPNAM, jobnum), "r");
+}
+	
+static	int	copyjob(FILE *ifd, const jobno_t jobnum)
 {
 	int	ch;
-	FILE	*ifd, *ofd;
 	char	*nam = mkspid(SPNAM, jobnum);
+	FILE	*ofd;
 	char	path[PATH_MAX];
 
-	if  (!(ifd = fopen(nam, "r")))
-		return  0;
 	sprintf(path, "%s/%s", popts.outdir, nam);
-	if  (!(ofd = fopen(path, "w")))  {
-		fclose(ifd);
+	if  (!(ofd = fopen(path, "w")))
 		return  0;
-	}
 	while  ((ch = getc(ifd)) != EOF)
 		putc(ch, ofd);
-	fclose(ifd);
 	fclose(ofd);
 	return  1;
 }
 
-static void  conv_env(const unsigned nenv, const int envp, const char *spacep)
+static	void	copyjob_stdout(FILE *ifd, const jobno_t jobnum)
+{
+	int	ch;
+	printf("<<\'%s_%lu\'\n", popts.delim, (unsigned long) jobnum);
+	while  ((ch = getc(ifd)) != EOF)
+		putchar(ch);
+	printf("%s_%lu\n", popts.delim, (unsigned long) jobnum);
+}
+
+static	void	conv_env(const unsigned nenv, const int envp, const char *spacep)
 {
 	unsigned	cnt;
 	const	Envir	*el = (const Envir *) &spacep[envp];
@@ -344,7 +354,7 @@ static void  conv_time(TimeconRef tc)
 {
 	unsigned	nd;
 	struct	tm	*t;
-	static	char	*days_abbrevf[] = { "Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Hday" };
+	static	char	*days_abbrev[] = { "Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Hday" };
 	static	char	*timnames[] = { "Minutes", "Hours", "Days", "Weeks", "Monthsb", "Monthse", "Years" };
 	if  (!tc->tc_istime)
 		return;
@@ -376,11 +386,11 @@ static void  conv_time(TimeconRef tc)
 	fputs(" -A -", stdout);
 	for  (nd = 0;  nd < TC_NDAYS;  nd++)
 		if  (tc->tc_nvaldays & (1 << nd))
-			printf(",%s", days_abbrevf[nd]);
+			printf(",%s", days_abbrev[nd]);
 	printf(" -%c", "SHR9"[tc->tc_nposs]);
 }
 
-int  isit_r5(const int ifd, const struct stat *sb)
+int isit_r5(const int ifd, const struct stat *sb)
 {
 	int	okjobs = 0;
 	struct	Jsave	old;
@@ -404,14 +414,19 @@ int  isit_r5(const int ifd, const struct stat *sb)
 
 void  conv_r5(const int ifd)
 {
+	FILE	*jfile;
 	struct	Jsave	old;
 
 	printf("#! /bin/sh\n# Conversion from release 5/6\n");
 	lseek(ifd, 0L, 0);
 
 	while  (read(ifd, (char *) &old, sizeof(old)) == sizeof(old))  {
-		if  (!jobfldsok(&old)  ||  !copyjob(old.sj_job))
+		if  (!jobfldsok(&old)  ||  !(jfile = openjob(old.sj_job)))
 			continue;
+		if  (popts.outdir  &&  !copyjob(jfile, old.sj_job))  {
+			fclose(jfile);
+			continue;
+		}
 		printf("\n# Conversion of job number %ld\n\n", (long) old.sj_job);
 		conv_env(old.sj_nenv, old.sj_env, old.sj_space);
 		printf(BTR_PROGRAM " -%c -%c -%c -p %d -i %s -l %u -P 0%.3o -L %ld -t %u -Y %ld -2 %u -W %d",
@@ -442,11 +457,26 @@ void  conv_r5(const int ifd)
 		conv_conds(old.sj_conds);
 		conv_asses(old.sj_asses);
 		conv_time(&old.sj_times);
-		printf(" %s/%s\n", popts.outdir, mkspid(SPNAM, old.sj_job));
+		putchar(' ');
+		if  (popts.outdir)
+			printf("%s/%s\n", popts.outdir, mkspid(SPNAM, old.sj_job));
+		else
+			copyjob_stdout(jfile, old.sj_job);
+		fclose(jfile);
 	}
 }
 
-MAINFN_TYPE  main(int argc, char **argv)
+static	int	delimok(char *arg)
+{
+	if  (!isalpha(*arg))
+		return  0;
+	while  (*++arg)
+		if  (!isalnum(*arg) && *arg != '_')
+			return  0;
+	return  1;
+}
+
+MAINFN_TYPE main(int argc, char **argv)
 {
 	int		ifd, ch, forcevn = 0;
 	struct	stat	sbuf;
@@ -454,10 +484,9 @@ MAINFN_TYPE  main(int argc, char **argv)
 	extern	int	optind;
 	extern	char	*optarg;
 
-	versionprint(argv, "$Revision: 1.1 $", 0);
 	progname = argv[0];
 
-	while  ((ch = getopt(argc, argv, "usfe:v:D:")) != EOF)
+	while  ((ch = getopt(argc, argv, "usfe:v:D:I:")) != EOF)
 		switch  (ch)  {
 		default:
 			goto  usage;
@@ -483,11 +512,18 @@ MAINFN_TYPE  main(int argc, char **argv)
 				return  101;
 			}
 			continue;
+		case  'I':
+			if  (!delimok(optarg))  {
+				fprintf(stderr, "Invalid format delimiter %s - should be name\n", optarg);
+				return  102;
+			}
+			popts.delim = optarg;
+			continue;
 		}
 
-	if  (argc - optind != 3)  {
+	if  ((argc - optind != 3 && !popts.delim) || (argc - optind != 2 && popts.delim))  {
 	usage:
-		fprintf(stderr, "Usage: %s [-D dir] [-u] [-s] [-f] [-e n] [-v n] jfile outfile workdir\n", argv[0]);
+		fprintf(stderr, "Usage: %s [-D dir] [-u] [-s] [-f] [-e n] [-v n] [-I delim] jfile outfile [workdir]\n", argv[0]);
 		return  100;
 	}
 
@@ -504,17 +540,20 @@ MAINFN_TYPE  main(int argc, char **argv)
 		popts.srcdir = newd;
 	}
 
-	/* Get out directory for saved jobs before we mess around with
-	   output files and suchwhat. */
+	if  (!popts.delim)  {
 
-	popts.outdir = argv[optind+2];
-	if  (stat(popts.outdir, &sbuf) < 0)  {
-		fprintf(stderr, "Cannot find directory %s\n", popts.outdir);
-		return  4;
-	}
-	if  ((sbuf.st_mode & S_IFMT) != S_IFDIR)  {
-		fprintf(stderr, "%s is not a directory\n", popts.outdir);
-		return  5;
+		/* Get out directory for saved jobs before we mess around with
+		   output files and suchwhat. */
+
+		popts.outdir = argv[optind+2];
+		if  (stat(popts.outdir, &sbuf) < 0)  {
+			fprintf(stderr, "Cannot find directory %s\n", popts.outdir);
+			return  4;
+		}
+		if  ((sbuf.st_mode & S_IFMT) != S_IFDIR)  {
+			fprintf(stderr, "%s is not a directory\n", popts.outdir);
+			return  5;
+		}
 	}
 
 	/* Create output file, remembering to unlink it later
@@ -530,7 +569,8 @@ MAINFN_TYPE  main(int argc, char **argv)
 
 	if  (popts.srcdir)  {
 		popts.outfile = make_absolute(popts.outfile);
-		popts.outdir = make_absolute(popts.outdir);
+		if  (popts.outdir)
+			popts.outdir = make_absolute(popts.outdir);
 		if  (chdir(popts.srcdir) < 0)  {
 			fprintf(stderr, "Cannot open source directory %s\n", popts.srcdir);
 			unlink(popts.outfile);

@@ -18,15 +18,27 @@ set -e
 # for details, see http://www.debian.org/doc/debian-policy/ or
 # the debian-policy package
 
+purgenet() {
+if grep -qs '^gnubatch' /etc/services; then
+    echo "You may want to remove gnubatch entries from /etc/services"
+fi
+rm -f /etc/gnubatch/gnubatch.hosts
+}
+
+purgefiles() {
+    rm -rf /var/spool/gnubatch
+    rm -f /etc/gnubatch/gnubatch.conf
+}
+
 
 case "$1" in
-    purge|remove|abort-install|disappear)
-	ldconfig
-	grep -q '^gnubatch:' /etc/passwd && userdel gnubatch
+    purge)
+	purgenet
+	purgefiles
+	deluser gnubatch
     ;;
 
-    upgrade|failed-upgrade|abort-upgrade)
-	:
+    remove|upgrade|failed-upgrade|abort-install|abort-upgrade|disappear)
     ;;
 
     *)
