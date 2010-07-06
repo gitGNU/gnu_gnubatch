@@ -805,32 +805,15 @@ MAINFN_TYPE  main(int argc, char **argv)
 	if  (!job_cwd)
 		job_cwd = Curr_pwd;
 
-	/* If sending to remote, invoke rbtr with the same arguments
-	   we started with not the ones constructed.  Try to do
-	   it with a version of rbtr parallel to the btr we
-	   started with. By the way we don't let rbtr re-invoke
+	/* If sending to remote, invoke gbch-rr with the same arguments
+	   we started with not the ones constructed.
+	   By the way we don't let gbch-rr re-invoke
 	   this or we could loop forever.  */
 
 	if  (Out_host)  {
-		char	*epath = origargv[0];
-		char	*npath, *sp;
-
+		char	*npath;
 		freexbuf(indx);
-		if  ((sp = strrchr(epath, '/')))  {
-			int	rp = sp - epath + 1;
-			if  (!(npath = malloc((unsigned) (strlen(epath) + 2))))
-				ABORT_NOMEM;
-			strncpy(npath, epath, (unsigned) (sp - epath) + 1);
-			npath[rp] = 'r';
-			strcpy(&npath[rp+1], sp+1);
-		}
-		else  {
-			if  (!(npath = malloc((unsigned) (strlen(epath) + 2))))
-				ABORT_NOMEM;
-			npath[0] = 'r';
-			strcpy(&npath[1], epath);
-			npath = spath(npath, Curr_pwd);	/* Leak here but we're about to ditch it */
-		}
+		npath = spath("gbch-rr", Curr_pwd);
 		if  (!npath)  {
 			print_error($E{Cannot find rbtr});
 			exit(E_USAGE);

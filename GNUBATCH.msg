@@ -1034,11 +1034,11 @@ E,H{No such user on remote} ++
 You need to set it up first - sorry."
 
 E,H{Trouble with job header} ++
-"Trouble sending job header.",
+"Trouble sending job header - %E",
 "There has been a Network failure sending header of job to remote."
 
 E,H{Trouble with job} ++
-"Trouble sending job",
+"Trouble sending job - %E",
 "There has been a Network failure sending the job to the remote system."
 
 E,H{Cant read status result} ++
