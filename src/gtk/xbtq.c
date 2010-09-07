@@ -237,7 +237,7 @@ void  msg_error()
 void  womsg(unsigned code)
 {
 	Oreq.sh_params.mcode = code;
-	if  (msgsnd(Ctrl_chan, (struct msgbuf *) &Oreq, sizeof(Shreq), IPC_NOWAIT) < 0)
+	if  (msgsnd(Ctrl_chan, (struct msgbuf *) &Oreq, sizeof(Shreq), 0) < 0)
 		msg_error();
 }
 

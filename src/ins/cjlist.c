@@ -75,13 +75,13 @@ extern char *make_absolute(char *);
 
 char	*progname;
 
-void  nomem(const char *fl, const int ln)
+void	nomem(const char *fl, const int ln)
 {
 	fprintf(stderr, "%s:Mem alloc fault: %s line %d\n", progname, fl, ln);
 	exit(E_NOMEM);
 }
 
-static int  unameok(const char *un, const int_ugid_t uid)
+static int unameok(const char *un, const int_ugid_t uid)
 {
 	struct	passwd	*pw;
 
@@ -96,7 +96,7 @@ static int  unameok(const char *un, const int_ugid_t uid)
 	return  1;
 }
 
-static int  gnameok(const char *gn, const int_ugid_t gid)
+static int gnameok(const char *gn, const int_ugid_t gid)
 {
 	struct	group	*gw;
 
@@ -111,7 +111,7 @@ static int  gnameok(const char *gn, const int_ugid_t gid)
 	return  1;
 }
 
-static int  jobok(const jobno_t jobnum)
+static int jobok(const jobno_t jobnum)
 {
 	char	*nam;
 	struct	stat	sbuf;
@@ -124,7 +124,7 @@ static int  jobok(const jobno_t jobnum)
 	return  1;
 }
 
-static int  validvar(const Vref *vr)
+static int validvar(const Vref *vr)
 {
 	const	char	*cp = vr->sv_name;
 
@@ -138,7 +138,7 @@ static int  validvar(const Vref *vr)
 	return  1;
 }
 
-static int  jobfldsok(struct Jsave *old)
+static int jobfldsok(struct Jsave *old)
 {
 	int	cnt;
 
@@ -207,7 +207,7 @@ static	FILE	*openjob(const jobno_t jobnum)
 {
 	return  fopen(mkspid(SPNAM, jobnum), "r");
 }
-	
+
 static	int	copyjob(FILE *ifd, const jobno_t jobnum)
 {
 	int	ch;
@@ -242,7 +242,7 @@ static	void	conv_env(const unsigned nenv, const int envp, const char *spacep)
 		printf("%s=\'%s\' \\\n", &spacep[el->e_name], &spacep[el->e_value]);
 }
 
-static void  conv_redirs(const unsigned nredirs, const int redirp, const char *spacep)
+static void conv_redirs(const unsigned nredirs, const int redirp, const char *spacep)
 {
 	const	Redir	*rp = (const Redir *) &spacep[redirp];
 	unsigned	cnt;
@@ -254,7 +254,7 @@ static void  conv_redirs(const unsigned nredirs, const int redirp, const char *s
 	}
 }
 
-static void  conv_args(const unsigned nargs, const int argp, const char *spacep)
+static void conv_args(const unsigned nargs, const int argp, const char *spacep)
 {
 	const Jarg  *ap = (const Jarg *) &spacep[argp];
 	unsigned  cnt;
@@ -272,7 +272,7 @@ static void  conv_args(const unsigned nargs, const int argp, const char *spacep)
 	}
 }
 
-static void  conv_conds(struct Sjcond *sjc)
+static void conv_conds(struct Sjcond *sjc)
 {
 	unsigned  cnt;
 	Vref	*vr;
@@ -297,7 +297,7 @@ static void  conv_conds(struct Sjcond *sjc)
 	}
 }
 
-static void  conv_asses(struct Sjass *sja)
+static void conv_asses(struct Sjass *sja)
 {
 	unsigned  cnt;
 	Vref	*vr;
@@ -350,7 +350,7 @@ static void  conv_asses(struct Sjass *sja)
 	}
 }
 
-static void  conv_time(TimeconRef tc)
+static void conv_time(TimeconRef tc)
 {
 	unsigned	nd;
 	struct	tm	*t;
@@ -412,7 +412,7 @@ int isit_r5(const int ifd, const struct stat *sb)
 	return  okjobs > 0;
 }
 
-void  conv_r5(const int ifd)
+void conv_r5(const int ifd)
 {
 	FILE	*jfile;
 	struct	Jsave	old;

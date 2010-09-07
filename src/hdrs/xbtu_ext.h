@@ -24,7 +24,6 @@ extern	char		alphsort;
 #define	SRT_NONE	0	/* Sort by numeric uid (default) */
 #define	SRT_USER	1	/* Sort by user name */
 #define	SRT_GROUP	2	/* Sort by group name */
-extern	unsigned	Nusers;
 extern	Btdef		Btuhdr;
 extern	BtuserRef	ulist;
 
@@ -52,10 +51,6 @@ extern void  cb_vmode(GtkAction *);
 extern void  cb_priv(GtkAction *);
 extern void  cb_copyall();
 extern void  cb_copydef();
-extern void  cb_charges();
-extern void  cb_zerou();
-extern void  cb_zeroall();
-extern void  cb_impose();
 extern void  defdisplay();
 extern void  update_all_users();
 extern void  update_selected_users();

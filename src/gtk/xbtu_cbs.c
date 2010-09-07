@@ -60,6 +60,9 @@ static	char	Filename[] = __FILE__;
 
 #define	MAX_UDISP	3
 
+/* Positions (in the motif sense) of users we are thinking of mangling
+   If null/zero then we are looking at the default list.  */
+
 static	unsigned	*pendulist;
 static	int		pendunum;
 
@@ -110,7 +113,7 @@ static int  getselectedusers(const int moan)
 	return  0;
 }
 
-GtkWidget *create_pri_dialog(struct dialog_data *ddata,  const unsigned minp, const unsigned defp, const unsigned maxp)
+GtkWidget *create_pri_dialog(struct dialog_data *ddata, const unsigned minp, const unsigned defp, const unsigned maxp)
 {
 	GtkWidget  *frame, *vbox, *hbox, *vbox2, *lab;
 	char	*pr;
@@ -154,7 +157,7 @@ GtkWidget *create_pri_dialog(struct dialog_data *ddata,  const unsigned minp, co
 	return  frame;
 }
 
-GtkWidget *create_ll_dialog(struct dialog_data *ddata,  const unsigned maxll, const unsigned totll, const unsigned specll)
+GtkWidget *create_ll_dialog(struct dialog_data *ddata, const unsigned maxll, const unsigned totll, const unsigned specll)
 {
 	GtkWidget *frame, *vbox;
 	char	*pr;
@@ -540,7 +543,7 @@ static void  copyu(BtuserRef n)
 void  cb_copyall()
 {
 	unsigned  cnt;
-	for  (cnt = 0;  cnt < Nusers;  cnt++)
+	for  (cnt = 0;  cnt < Npwusers;  cnt++)
 		copyu(&ulist[cnt]);
 	update_all_users();
 	uchanges++;
@@ -555,146 +558,4 @@ void  cb_copydef()
 		copyu(&ulist[pendulist[cnt]]);
 	update_selected_users();
 	uchanges++;
-}
-
-/* Open charge file as required */
-
-static int  grab_file(const int omode)
-{
-	static	char	*file_name;
-
-	if  (!file_name)
-		file_name = envprocess(CHFILE);
-
-	return  open(file_name, omode);
-}
-
-void  cb_charges()
-{
-	GtkWidget  *dlg, *cwid, *scroll;
-	GtkCellRenderer     *rend;
-	GtkListStore	*clist_store;
-	int	cnt;
-	char	*pr;
-	gchar   buf[30];
-
-	if  (!getselectedusers(1))
-		return;
-
-	clist_store = gtk_list_store_new(2, G_TYPE_STRING, G_TYPE_STRING);
-
-	for  (cnt = 0;  cnt < pendunum;  cnt++)  {
-		int_ugid_t  uu = ulist[pendulist[cnt]].btu_user;
-		GtkTreeIter   iter;
-		gtk_list_store_append(clist_store, &iter);
-		g_snprintf(buf, sizeof(buf), "%.2f", calccharge(uu));
-		gtk_list_store_set(clist_store, &iter, 0, prin_uname(uu), 1, buf, -1);
-	}
-
-	pr = gprompt($P{xbtuser charges dlg});
-	dlg = gtk_dialog_new_with_buttons(pr, GTK_WINDOW(toplevel), GTK_DIALOG_DESTROY_WITH_PARENT, GTK_STOCK_OK, GTK_RESPONSE_OK, NULL);
-	free(pr);
-	cwid = gtk_tree_view_new();
-	rend = gtk_cell_renderer_text_new();
-	gtk_tree_view_insert_column_with_attributes(GTK_TREE_VIEW(cwid), -1, "User", rend, "text", 0, NULL);
-	gtk_tree_view_column_set_resizable(gtk_tree_view_get_column(GTK_TREE_VIEW(cwid), 0), TRUE);
-	rend = gtk_cell_renderer_text_new();
-	gtk_tree_view_insert_column_with_attributes(GTK_TREE_VIEW(cwid), -1, "Charge", rend, "text", 1, NULL);
-	gtk_tree_view_column_set_resizable(gtk_tree_view_get_column(GTK_TREE_VIEW(cwid), 1), TRUE);
-
-	gtk_tree_view_set_model(GTK_TREE_VIEW(cwid), GTK_TREE_MODEL(clist_store));
-	g_object_unref(clist_store);		/* So that it gets deallocated */
-
-	scroll = gtk_scrolled_window_new(NULL, NULL);
-	gtk_container_set_border_width(GTK_CONTAINER(scroll), 5);
-	gtk_scrolled_window_set_policy(GTK_SCROLLED_WINDOW(scroll), GTK_POLICY_AUTOMATIC, GTK_POLICY_AUTOMATIC);
-	gtk_container_add(GTK_CONTAINER(scroll), cwid);
-	gtk_box_pack_start(GTK_BOX(GTK_DIALOG(dlg)->vbox), scroll, FALSE, FALSE, 0);
-
-	gtk_widget_show_all(dlg);
-
-	gtk_dialog_run(GTK_DIALOG(dlg));
-	gtk_widget_destroy(dlg);
-}
-
-void  cb_zerou()
-{
-	int	fd, cnt;
-	struct	btcharge	btc;
-
-	if  (!getselectedusers(1))
-		return;
-	if  (!Confirm($PH{xmbtuser zero charges for given users}))
-		return;
-	if  ((fd = grab_file(O_WRONLY|O_APPEND)) < 0)
-		return;
-
-	time(&btc.btch_when);
-	btc.btch_what = BTCH_ZERO;
-	for  (cnt = 0;  cnt < pendunum;  cnt++)  {
-		btc.btch_user = ulist[pendulist[cnt]].btu_user;
-		write(fd, (char *) &btc, sizeof(btc));
-	}
-	close(fd);
-}
-
-void  cb_zeroall()
-{
-	int	fd;
-	struct	btcharge	btc;
-
-	if  (!Confirm($PH{xmbtuser zero charges for all users}))
-		return;
-	if  ((fd = grab_file(O_WRONLY|O_APPEND)) < 0)
-		return;
-	time(&btc.btch_when);
-	btc.btch_host = 0;
-	btc.btch_user = -1;
-	btc.btch_what = BTCH_ZEROALL;
-	btc.btch_pri = 0;
-	btc.btch_ll = 0;
-	btc.btch_runtime = 0.0;
-	write(fd, (char *) &btc, sizeof(btc));
-	close(fd);
-}
-
-void  cb_impose()
-{
-	GtkWidget  *dlg, *hbox, *spin;
-	GtkAdjustment *adj;
-
-	if  (!getselectedusers(1))
-		return;
-
-	dlg = gprompt_dialog(toplevel, $P{xbtuser impose dlg});
-
-	hbox = gtk_hbox_new(TRUE, DEF_DLG_HPAD);
-	gtk_box_pack_start(GTK_BOX(GTK_DIALOG(dlg)->vbox), hbox, FALSE, FALSE, 0);
-	gtk_box_pack_start(GTK_BOX(hbox), user_lab(1, "Impose charges: "), FALSE, FALSE, 0);
-
-	adj = (GtkAdjustment *) gtk_adjustment_new(1.0, 1.0, 1E6, 1.0, 100.0, 0.0);
-	spin = gtk_spin_button_new(adj, 0.25, 2);
-	gtk_box_pack_start(GTK_BOX(hbox), spin, FALSE, FALSE, 0);
-	gtk_widget_show_all(dlg);
-
-	if  (gtk_dialog_run(GTK_DIALOG(dlg)) == GTK_RESPONSE_OK)  {
-		double  res = gtk_spin_button_get_value(GTK_SPIN_BUTTON(spin));
-		int  fd, cnt;
-
-		if  ((fd = grab_file(O_WRONLY|O_APPEND)) >= 0)  {
-			struct	btcharge	btc;
-			time(&btc.btch_when);
-			btc.btch_host = 0;		/* Me */
-			btc.btch_pri = 0;
-			btc.btch_ll = 0;
-			btc.btch_runtime = res;
-			btc.btch_what = BTCH_FEE;
-			for  (cnt = 0;  cnt < pendunum;  cnt++)  {
-				btc.btch_user = ulist[pendulist[cnt]].btu_user;
-				write(fd, (char *) &btc, sizeof(btc));
-			}
-			close(fd);
-		}
-	}
-	gtk_widget_destroy(dlg);
 }

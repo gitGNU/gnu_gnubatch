@@ -785,7 +785,7 @@ void  cb_submit()
 #ifdef	USING_MMAP
 	sync_xfermmap();
 #endif
-	if  (msgsnd(Ctrl_chan, (struct msgbuf *) &Oreq, sizeof(Shreq) + sizeof(ULONG), IPC_NOWAIT) < 0)  {
+	if  (msgsnd(Ctrl_chan, (struct msgbuf *) &Oreq, sizeof(Shreq) + sizeof(ULONG), 0) < 0)  {
 		int	savee = errno;
 		unlink(tmpfl);
 		freexbuf(jindx);

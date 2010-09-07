@@ -254,7 +254,7 @@ gboolean  view_clicked(GtkWidget *treeview, GdkEventButton *event, gpointer user
 #define	SORTBY_JOBFILE	4
 #define	SORTBY_DIRECT	5
 
-static gint sort_uint(GtkTreeModel *model, GtkTreeIter *a, GtkTreeIter *b, gpointer userdata)
+static gint  sort_uint(GtkTreeModel *model, GtkTreeIter *a, GtkTreeIter *b, gpointer userdata)
 {
 	guint	seq1, seq2;
 	gint	colnum = GPOINTER_TO_INT(userdata);
@@ -263,7 +263,7 @@ static gint sort_uint(GtkTreeModel *model, GtkTreeIter *a, GtkTreeIter *b, gpoin
 	return  seq1 < seq2? -1:  seq1 == seq2? 0: 1;
 }
 
-static gint sort_string(GtkTreeModel *model, GtkTreeIter *a, GtkTreeIter *b, gpointer userdata)
+static gint  sort_string(GtkTreeModel *model, GtkTreeIter *a, GtkTreeIter *b, gpointer userdata)
 {
         gchar	*name1, *name2;
 	gint	ret = 0;

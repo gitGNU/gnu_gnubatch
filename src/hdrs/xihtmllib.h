@@ -24,30 +24,30 @@
 
 struct	posttab  {
 	char	*postname;	/* Name in pair */
-	void  (*post_fn)(char *);
+	void	(*post_fn)(char *);
 	char	**postfile;	/* For file name controls - temp file name inserted */
 };
 
 extern void  html_error(const char *);
 extern void  html_nomem(const char *, const int);
 #define	ABORT_HTML_NOMEM	html_nomem(Filename, __LINE__)
-extern int  html_getline(char *);
-extern void  html_openini();
-extern void  html_closeini();
-extern int  html_iniparam(const char *, char *);
-extern int  html_inibool(const char *, const int);
-extern long  html_iniint(const char *, const int);
-extern char *html_inistr(const char *, char *);
-extern char *html_inifile(const char *, char *);
-extern int  html_cookexpiry();
-extern int  html_output_file(const char *, const int);
-extern void  html_out_or_err(const char *, const int);
-extern int  html_out_param_file(const char *, const int, const ULONG, const ULONG);
-extern int  html_out_cparam_file(const char *, const int, const char *);
-extern void  html_disperror(const int);
-extern void  html_fldprint(const char *);
-extern void  html_pre_putchar(const int);
-extern int  html_getpostline(char *);
-extern void  html_convert(const char *, char *);
-extern char **html_getvalues(const char *);
-extern void  html_postvalues(struct posttab *);
+extern int	html_getline(char *);
+extern void	html_openini();
+extern void	html_closeini();
+extern int	html_iniparam(const char *, char *);
+extern int	html_inibool(const char *, const int);
+extern long	html_iniint(const char *, const int);
+extern char	*html_inistr(const char *, char *);
+extern char	*html_inifile(const char *, char *);
+extern int	html_cookexpiry();
+extern int	html_output_file(const char *, const int);
+extern void	html_out_or_err(const char *, const int);
+extern int	html_out_param_file(const char *, const int, const ULONG, const ULONG);
+extern int	html_out_cparam_file(const char *, const int, const char *);
+extern void	html_disperror(const int);
+extern void	html_fldprint(const char *);
+extern void	html_pre_putchar(const int);
+extern int	html_getpostline(char *);
+extern void	html_convert(const char *, char *);
+extern char	**html_getvalues(const char *);
+extern void	html_postvalues(struct posttab *);

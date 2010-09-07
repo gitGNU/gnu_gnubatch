@@ -651,7 +651,6 @@ int  growvseg()
 #ifdef	USING_MMAP
 	Var_seg.inf.reqsize = Maxvars * sizeof(struct Ventry) + sizeof(vhash_t) * VAR_HASHMOD + sizeof(struct vshm_hdr);
 	gshmchan(&Var_seg.inf, VSHMOFF); /* Panics if it can't grow */
-	newseg = Var_seg.inf.seg;
 	Maxvars = (Var_seg.inf.segsize - sizeof(struct vshm_hdr) - sizeof(vhash_t) * VAR_HASHMOD) / sizeof(struct Ventry);
 
 	/* We still have the same physical file so we don't need to copy.
@@ -676,6 +675,7 @@ int  growvseg()
 	Var_seg.dptr->vs_nxtid = Var_seg.inf.base;
 #endif
 
+	newseg = Var_seg.inf.seg;
 	newdptr = (struct vshm_hdr *) newseg;
 	newhash = (vhash_t *) (newseg + sizeof(struct vshm_hdr));
 	newlist = (struct Ventry *) ((char *) newhash + VAR_HASHMOD * sizeof(vhash_t));

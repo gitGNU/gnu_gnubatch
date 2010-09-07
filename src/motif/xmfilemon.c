@@ -57,7 +57,6 @@ char	*Curr_pwd;
 char	Confvarname[] = "FILEMONCONF";
 
 uid_t		Daemuid;
-ULONG		Fileprivs;
 
 enum  wot_mode	wotact = WM_STOP_FOUND;
 enum  wot_form	wotf = WF_APPEARS;
@@ -203,7 +202,7 @@ void  dohelp(Widget wid, int helpcode)
 }
 
 #ifndef HAVE_XM_SPINB_H
-static void time_adj(Widget w, XtIntervalId *id, const int adj, XtTimerCallbackProc tcb)
+static void  time_adj(Widget w, XtIntervalId *id, const int adj, XtTimerCallbackProc tcb)
 {
 	int		n;
 	char		*txt, nbuf[6];
@@ -248,7 +247,7 @@ static void  timedn_cb(Widget w, Widget tw, XmArrowButtonCallbackStruct *cbs)
 	time_cb(tw, cbs, time_dn);
 }
 
-Widget CreateArrowPair(char *name, Widget formw, Widget topw, Widget leftw, XtCallbackProc upcall, XtCallbackProc dncall)
+Widget  CreateArrowPair(char *name, Widget formw, Widget topw, Widget leftw, XtCallbackProc upcall, XtCallbackProc dncall)
 {
 	Widget	uparrow, dnarrow;
 	char	fullname[10];

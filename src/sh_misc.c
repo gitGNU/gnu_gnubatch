@@ -148,7 +148,7 @@ static void  spewdel(FILE *ofl, char *prefix, const jobno_t stuff)
 }
 
 #ifdef	NETWORK_VERSION
-static  void  spewfile(FILE *ofl, const netid_t host, const int feedtype, const jobno_t stuff)
+static void  spewfile(FILE *ofl, const netid_t host, const int feedtype, const jobno_t stuff)
 {
 	FILE	*fl;
 	if  ((fl = net_feed(feedtype, host, stuff, Job_seg.dptr->js_viewport)))  {
@@ -165,7 +165,7 @@ static  void  spewfile(FILE *ofl, const netid_t host, const int feedtype, const 
 
 /* Invoke spmdisp command.  */
 
-static  void  rmsg(cmd_type cmd, CBtjobRef jp, const netid_t host, const int msg, const jobno_t sostuff, const jobno_t sestuff, char **envlist)
+static void  rmsg(cmd_type cmd, CBtjobRef jp, const netid_t host, const int msg, const jobno_t sostuff, const jobno_t sestuff, char **envlist)
 {
 	char	**ap, *cp;
 	FILE	*po = (FILE *) 0, *pe = (FILE *) 0;
@@ -505,44 +505,3 @@ void  rem_notify(BtjobRef jp, const netid_t host, const struct jremnotemsg *msg)
 	exit(0);
 }
 #endif
-
-static	int	chfid;
-
-/* Initialise charges file.  */
-
-void  open_chfile()
-{
-	char	*chfile = envprocess(CHFILE);
-	if  ((chfid = open(chfile, O_WRONLY|O_APPEND|O_CREAT, 0644)) < 0)
-		panic($E{Panic cannot create charge file});
-	free(chfile);
-	if  (Daemuid != ROOTID)
-#if	defined(HAVE_FCHOWN) && !defined(M88000)
-		fchown(chfid, Daemuid, getegid());
-#else
-		chown(chfile, Daemuid, getegid());
-#endif
-	fcntl(chfid, F_SETFD, 1);
-}
-
-/* Do charge - pass on to originator of remote jobs.  */
-
-void  do_charge(BtjobRef jp, const LONG runtime)
-{
-	struct	btcharge	btu;
-
-#ifdef	NETWORK_VERSION
-	if  (jp->h.bj_hostid)  {
-		job_imessage(jp->h.bj_hostid, &jp->h, N_DOCHARGE, runtime);
-		return;
-	}
-#endif
-	time(&btu.btch_when);
-	btu.btch_host = jp->h.bj_hostid;
-	btu.btch_user = jp->h.bj_mode.o_uid;
-	btu.btch_pri = jp->h.bj_pri;
-	btu.btch_what = BTCH_RECORD;
-	btu.btch_ll = jp->h.bj_ll;
-	btu.btch_runtime = runtime;
-	write(chfid, (char *) &btu, sizeof(btu));
-}

@@ -31,6 +31,7 @@
 #include "timecon.h"
 #include "btmode.h"
 #include "bjparam.h"
+#include "btuser.h"
 #include "btjob.h"
 #include "cmdint.h"
 #include "btvar.h"
@@ -131,12 +132,12 @@ const char *qtitle_of(CBtjobRef jp)
 
 /* Send job reference only to scheduler */
 
-void  wjimsg(const unsigned code, CBtjobRef jp)
+void  qwjimsg(const unsigned code, CBtjobRef jp)
 {
 	Oreq.sh_params.mcode = code;
 	Oreq.sh_un.jobref.hostid = jp->h.bj_hostid;
 	Oreq.sh_un.jobref.slotno = jp->h.bj_slotno;
-	if  (msgsnd(Ctrl_chan, (struct msgbuf *) &Oreq, sizeof(Shreq) + sizeof(jident), IPC_NOWAIT) < 0)
+	if  (msgsnd(Ctrl_chan, (struct msgbuf *) &Oreq, sizeof(Shreq) + sizeof(jident), 0) < 0)
 		msg_error();
 }
 
@@ -149,13 +150,13 @@ void  wjmsg(const unsigned code, const ULONG indx)
 #ifdef	USING_MMAP
 	sync_xfermmap();
 #endif
-	if  (msgsnd(Ctrl_chan, (struct msgbuf *) &Oreq, sizeof(Shreq) + sizeof(ULONG), IPC_NOWAIT) < 0)
+	if  (msgsnd(Ctrl_chan, (struct msgbuf *) &Oreq, sizeof(Shreq) + sizeof(ULONG), 0) < 0)
 		msg_error();
 }
 
 /* Display job-type error message */
 
-void  dojerror(unsigned retc, BtjobRef jp)
+void  qdojerror(unsigned retc, BtjobRef jp)
 {
 	switch  (retc & REQ_TYPE)  {
 	default:
@@ -183,7 +184,7 @@ int  deljob(BtjobRef jp)
 
 	/* Can the geyser do it?  */
 
-	if  (!mpermitted(&jp->h.bj_mode, BTM_DELETE))  {
+	if  (!mpermitted(&jp->h.bj_mode, BTM_DELETE, mypriv->btu_priv))  {
 		disp_str = qtitle_of(jp);
 		doerror(jscr, $E{btq no delete permission});
 		return  0;
@@ -239,9 +240,9 @@ int  deljob(BtjobRef jp)
 			return  -1;
 	}
 
-	wjimsg(J_DELETE, jp);
+	qwjimsg(J_DELETE, jp);
 	if  ((retc = readreply()) != J_OK)  {
-		dojerror(retc, jp);
+		qdojerror(retc, jp);
 		return  -1;
 	}
 	return  1;
@@ -256,12 +257,12 @@ int  modjob(BtjobRef jp)
 	const	char	*title = qtitle_of(jp);
 	Btmode		buffm;
 
-	if  (!mpermitted(&jp->h.bj_mode, BTM_RDMODE))  {
+	if  (!mpermitted(&jp->h.bj_mode, BTM_RDMODE, mypriv->btu_priv))  {
 		disp_str = title;
 		doerror(jscr, $E{btq no change mode});
 		return  0;
 	}
-	readwrite = mpermitted(&jp->h.bj_mode, BTM_WRMODE);
+	readwrite = mpermitted(&jp->h.bj_mode, BTM_WRMODE, mypriv->btu_priv);
 	buffm = jp->h.bj_mode;
 	if  (mode_edit(jscr, readwrite, 1, title, jp->h.bj_job, &buffm) <= 0  ||  !readwrite)
 		return  -1;
@@ -270,7 +271,7 @@ int  modjob(BtjobRef jp)
 	bjp->h.bj_mode = buffm;
 	wjmsg(J_CHMOD, xindx);
 	if  ((retc = readreply()) != J_OK)  {
-		dojerror(retc, bjp);
+		qdojerror(retc, bjp);
 		freexbuf(xindx);
 		return  -1;
 	}
@@ -323,9 +324,9 @@ int  ownjob(BtjobRef jp)
 	}
 
 	Oreq.sh_params.param = nu;
-	wjimsg(J_CHOWN, jp);
+	qwjimsg(J_CHOWN, jp);
 	if  ((retc = readreply()) != J_OK)  {
-		dojerror(retc, jp);
+		qdojerror(retc, jp);
 		return  -1;
 	}
 	return  1;
@@ -368,15 +369,15 @@ int  grpjob(BtjobRef jp)
 	}
 
 	Oreq.sh_params.param = ng;
-	wjimsg(J_CHGRP, jp);
+	qwjimsg(J_CHGRP, jp);
 	if  ((retc = readreply()) != J_OK)  {
-		dojerror(retc, jp);
+		qdojerror(retc, jp);
 		return  -1;
 	}
 	return  1;
 }
 
-static int vconfdel(WINDOW *win, int row, int state, char *name)
+static int  vconfdel(WINDOW *win, int row, int state, char *name)
 {
 	int	by, ch;
 	char	*cnfmsg;
@@ -460,11 +461,11 @@ int  editjcvars(BtjobRef jp)
 
 	/* Can the geyser do it?  */
 
-	if  (!mpermitted(&jp->h.bj_mode, BTM_READ))  {
+	if  (!mpermitted(&jp->h.bj_mode, BTM_READ, mypriv->btu_priv))  {
 		doerror(jscr, $E{btq cannot read job});
 		return  0;
 	}
-	if  (!mpermitted(&jp->h.bj_mode, BTM_WRITE))
+	if  (!mpermitted(&jp->h.bj_mode, BTM_WRITE, mypriv->btu_priv))
 		readonly = 1;
 
 	/* First time round, read prompts */
@@ -660,7 +661,7 @@ int  editjcvars(BtjobRef jp)
 		BLOCK_COPY(bjp->h.bj_conds, buffcond, sizeof(buffcond));
 		wjmsg(J_CHANGE, xindx);
 		if  ((retc = readreply()) != J_OK)  {
-			dojerror(retc, bjp);
+			qdojerror(retc, bjp);
 			freexbuf(xindx);
 			return  -1;
 		}
@@ -894,11 +895,11 @@ int  editjsvars(BtjobRef jp)
 
 	/* Can the geyser do it?  */
 
-	if  (!mpermitted(&jp->h.bj_mode, BTM_READ))  {
+	if  (!mpermitted(&jp->h.bj_mode, BTM_READ, mypriv->btu_priv))  {
 		doerror(jscr, $E{btq cannot read job});
 		return  0;
 	}
-	if  (!mpermitted(&jp->h.bj_mode, BTM_WRITE))
+	if  (!mpermitted(&jp->h.bj_mode, BTM_WRITE, mypriv->btu_priv))
 		readonly = 1;
 
 	/* First time round, read prompts */
@@ -1083,7 +1084,7 @@ int  editjsvars(BtjobRef jp)
 		BLOCK_COPY(bjp->h.bj_asses, buffass, sizeof(buffass));
 		wjmsg(J_CHANGE, xindx);
 		if  ((retc = readreply()) != J_OK)  {
-			dojerror(retc, bjp);
+			qdojerror(retc, bjp);
 			freexbuf(xindx);
 			return  -1;
 		}
@@ -1330,7 +1331,7 @@ int  editmwflags(BtjobRef jp)
 
 	/* Can the geyser do it?  */
 
-	if  (!mpermitted(&jp->h.bj_mode, BTM_WRITE))  {
+	if  (!mpermitted(&jp->h.bj_mode, BTM_WRITE, mypriv->btu_priv))  {
 		doerror(jscr, $E{btq cannot write job});
 		return  0;
 	}
@@ -1474,7 +1475,7 @@ int  editmwflags(BtjobRef jp)
 			bjp->h.bj_jflags |= BJ_WRT;
 		wjmsg(J_CHANGE, xindx);
 		if  ((retc = readreply()) != J_OK)  {
-			dojerror(retc, bjp);
+			qdojerror(retc, bjp);
 			freexbuf(xindx);
 			return  -1;
 		}

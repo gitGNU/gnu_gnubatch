@@ -81,7 +81,7 @@ void  perform_view(char *jnum)
 	}
 
 	jp = jw.jp;
-	if  (!mpermitted(&jp->h.bj_mode, BTM_READ))  {
+	if  (!mpermitted(&jp->h.bj_mode, BTM_READ, mypriv->btu_priv))  {
 		html_out_cparam_file("nopriv", 1, jnum);
 		exit(E_NOPRIV);
 	}
@@ -98,7 +98,7 @@ void  perform_view(char *jnum)
 
 	fputs("<SCRIPT LANGUAGE=\"JavaScript\">\n", stdout);
 	printf("viewheader(\"%s\", \"%s\", %d);\n",
-	       jnum, title_of(jp), mpermitted(&jp->h.bj_mode, BTM_WRITE));
+	       jnum, title_of(jp), mpermitted(&jp->h.bj_mode, BTM_WRITE, mypriv->btu_priv));
 	fputs("</SCRIPT>\n<PRE>", stdout);
 	while  ((ch = getc(ifl)) != EOF)
 		html_pre_putchar(ch);

@@ -61,8 +61,8 @@ char		sortflag, hadhdrarg;
 
 unsigned	Jaccess_flags = 0;
 
-extern const char *const condname[];
-extern const char *const assname[];
+extern const char * const condname[];
+extern const char * const assname[];
 
 char	*formatstring;
 char	sdefaultfmt[] = "LN LU LH LI Lp LL Lt Lc LP";
@@ -960,7 +960,7 @@ struct	arginterp  {
 	unsigned  short  flags;
 #define	AIF_NOARG	0
 #define	AIF_ARG		1
-	int  (*arg_fn)(char *);
+	int	(*arg_fn)(char *);
 };
 
 int  perf_listformat(char *notused)

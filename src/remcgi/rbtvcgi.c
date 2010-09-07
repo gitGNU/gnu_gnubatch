@@ -329,7 +329,7 @@ struct	arginterp  {
 	unsigned  short  flags;
 #define	AIF_NOARG	0
 #define	AIF_ARG		1
-	int  (*arg_fn)(char *);
+	int	(*arg_fn)(char *);
 };
 
 static char *tof(const USHORT x)

@@ -50,7 +50,8 @@ long	mymtype;				/* Define this here */
 
 int  wjimsg_param(const unsigned code, const LONG param, CBtjobRef jp)
 {
-	Shipc		Oreq;
+	Shipc	Oreq;
+	int	blkcount = MSGQ_BLOCKS;
 
 	mymtype = MTOFFSET + (Oreq.sh_params.upid = getpid());
 	Oreq.sh_mtype = TO_SCHED;
@@ -60,8 +61,14 @@ int  wjimsg_param(const unsigned code, const LONG param, CBtjobRef jp)
 	Oreq.sh_params.param = param;
 	Oreq.sh_un.jobref.hostid = jp->h.bj_hostid;
 	Oreq.sh_un.jobref.slotno = jp->h.bj_slotno;
-	if  (msgsnd(Ctrl_chan, (struct msgbuf *) &Oreq, sizeof(Shreq) + sizeof(jident), IPC_NOWAIT) < 0)
-		return  errno == EAGAIN? $E{IPC msg q full}: $E{IPC msg q error};
+	while  (msgsnd(Ctrl_chan, (struct msgbuf *) &Oreq, sizeof(Shreq) + sizeof(jident), IPC_NOWAIT) < 0)  {
+		if  (errno != EAGAIN)
+			return  $E{IPC msg q error};
+		blkcount--;
+		if  (blkcount <= 0)
+			return  $E{IPC msg q full};
+		sleep(MSGQ_BLOCKWAIT);
+	}
 	return  0;
 }
 
@@ -76,6 +83,7 @@ int  wjimsg(const unsigned code, CBtjobRef jp)
 int  wjxfermsg(const unsigned code, const ULONG indx)
 {
 	Shipc		Oreq;
+	int	blkcount = MSGQ_BLOCKS;
 
 	BLOCK_ZERO(&Oreq, sizeof(Oreq));
 	mymtype = MTOFFSET + (Oreq.sh_params.upid = getpid());
@@ -87,8 +95,14 @@ int  wjxfermsg(const unsigned code, const ULONG indx)
 #ifdef	USING_MMAP
 	sync_xfermmap();
 #endif
-	if  (msgsnd(Ctrl_chan, (struct msgbuf *) &Oreq, sizeof(Shreq) + sizeof(ULONG), IPC_NOWAIT) < 0)
-		return  errno == EAGAIN? $E{IPC msg q full}: $E{IPC msg q error};
+	while  (msgsnd(Ctrl_chan, (struct msgbuf *) &Oreq, sizeof(Shreq) + sizeof(ULONG), IPC_NOWAIT) < 0)  {
+		if  (errno != EAGAIN)
+			return  $E{IPC msg q error};
+		blkcount--;
+		if  (blkcount <= 0)
+			return  $E{IPC msg q full};
+		sleep(MSGQ_BLOCKWAIT);
+	}
 	return  0;
 }
 
@@ -97,6 +111,7 @@ int  wjxfermsg(const unsigned code, const ULONG indx)
 int  wvmsg(unsigned code, CBtvarRef vp, const ULONG seq)
 {
 	Shipc		Oreq;
+	int	blkcount = MSGQ_BLOCKS;
 
 	BLOCK_ZERO(&Oreq, sizeof(Oreq));
 	mymtype = MTOFFSET + (Oreq.sh_params.upid = getpid());
@@ -106,8 +121,14 @@ int  wvmsg(unsigned code, CBtvarRef vp, const ULONG seq)
 	Oreq.sh_params.mcode = code;
 	Oreq.sh_un.sh_var = *vp;
 	Oreq.sh_un.sh_var.var_sequence = seq;
-	if  (msgsnd(Ctrl_chan, (struct msgbuf *) &Oreq, sizeof(Shreq) + sizeof(Btvar), IPC_NOWAIT) < 0)
-		return  errno == EAGAIN? $E{IPC msg q full}: $E{IPC msg q error};
+	while  (msgsnd(Ctrl_chan, (struct msgbuf *) &Oreq, sizeof(Shreq) + sizeof(Btvar), IPC_NOWAIT) < 0)  {
+		if  (errno != EAGAIN)
+			return  $E{IPC msg q error};
+		blkcount--;
+		if  (blkcount <= 0)
+			return  $E{IPC msg q full};
+		sleep(MSGQ_BLOCKWAIT);
+	}
 	return  0;
 }
 
@@ -146,4 +167,3 @@ int  doverror(unsigned retc, BtvarRef vp)
 		return  (int) ((retc & ~REQ_TYPE) + $E{Base for scheduler net errors});
 	}
 }
-

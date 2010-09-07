@@ -54,8 +54,7 @@ static	struct	sockaddr_in	serv_addr, cli_addr;
 static int  initsock(const netid_t hostid)
 {
 	int	sockfd;
-	SHORT	portnum;
-	SHORT	udpproto;
+	SHORT	portnum, udpproto;
 	struct	servent	*sp;
 	struct	protoent  *pp;
 	char	*udp_protoname;
@@ -129,7 +128,7 @@ static	RETSIGTYPE  asig(int n)
 	return;			/* Don't do anything just return setting EINTR */
 }
 
-static  int  udp_enquire(char *outmsg, const int outlen, char *inmsg, const int inlen)
+static int  udp_enquire(char *outmsg, const int outlen, char *inmsg, const int inlen)
 {
 #ifdef	STRUCT_SIG
 	struct	sigstruct_name	za, zold;
@@ -208,14 +207,14 @@ void  remgetuml(const netid_t hostid, USHORT *um, ULONG *ul)
 
 static int  eread(char *buff, const unsigned bufl)
 {
-		int	inbytes;
-		SOCKLEN_T		repl = sizeof(struct sockaddr_in);
-		struct	sockaddr_in	reply_addr;
-		if  ((inbytes = recvfrom(udpsock, buff, bufl, 0, (struct sockaddr *) &reply_addr, &repl)) <= 0)  {
-			print_error($E{Cannot receive UDP packet});
-			exit(E_NETERR);
-		}
-		return  inbytes;
+	int	inbytes;
+	SOCKLEN_T		repl = sizeof(struct sockaddr_in);
+	struct	sockaddr_in	reply_addr;
+	if  ((inbytes = recvfrom(udpsock, buff, bufl, 0, (struct sockaddr *) &reply_addr, &repl)) <= 0)  {
+		print_error($E{Cannot receive UDP packet});
+		exit(E_NETERR);
+	}
+	return  inbytes;
 }
 
 char **remread_envir(const netid_t hostid)

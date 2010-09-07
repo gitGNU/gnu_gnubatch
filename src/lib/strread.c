@@ -28,8 +28,7 @@ char	*strread(FILE *fp, const char *delim)
 {
 	int	ch, ccnt;
 	unsigned  bufsize;
-	char	*resbuf;
-	char	initbuf[INITSIZE];
+	char	*resbuf, initbuf[INITSIZE];
 
 	ccnt = 0;
 	do  {

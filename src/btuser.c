@@ -659,9 +659,11 @@ void  doerror(WINDOW *wp, int Errnum)
 }
 
 /* Display and update modes
-   Return non-zero if changes made */
+   Return non-zero if changes made
+   First arg is the user list if setting default and isindivuser is 0
+   Otherwise user we're looking at */
 
-int  mprocess(BtuserRef up, int readwrite, BtuserRef ulist, unsigned nu)
+int  mprocess(BtuserRef userlist, int readwrite, int isindivuser)
 {
 	struct  mode	*mp;
 	int  ch, currow;
@@ -678,14 +680,14 @@ int  mprocess(BtuserRef up, int readwrite, BtuserRef ulist, unsigned nu)
 	Ew = stdscr;
 	clear();
 
-	if  (up)  {
-		disp_arg[0] = up->btu_user;
-		disp_str = prin_uname((uid_t) up->btu_user);
+	if  (isindivuser)  {
+		disp_arg[0] = userlist->btu_user;
+		disp_str = prin_uname((uid_t) userlist->btu_user);
 		disp_arg[1] = lastgid;
 		disp_str2 = prin_gname((gid_t) lastgid);
 		hv = helphdr('R');
-		resj = up->btu_jflags;
-		resv = up->btu_vflags;
+		resj = userlist->btu_jflags;
+		resv = userlist->btu_vflags;
 		mstate = readwrite? $S{btuser edit modes}: $S{btuser view modes};
 	}
 	else  {
@@ -786,7 +788,7 @@ int  mprocess(BtuserRef up, int readwrite, BtuserRef ulist, unsigned nu)
 			/* If just a common or garden user, return
 			   number of changes */
 
-			if  (up)
+			if  (isindivuser)
 				return  changes;
 
 			/* If nothing done, don't ask stupid questions.  */
@@ -807,11 +809,11 @@ int  mprocess(BtuserRef up, int readwrite, BtuserRef ulist, unsigned nu)
 			}  while  (ch != $K{btuser key set mode} && ch != $K{btuser key unset mode});
 
 			if  (ch == $K{btuser key set mode})  {
-				for  (currow = 0;  currow < nu;  currow++)
-					if  (ulist[currow].btu_user != Realuid)
+				for  (currow = 0;  currow < Npwusers;  currow++)
+					if  (userlist[currow].btu_user != Realuid)
 						for  (ugo_which = 0;  ugo_which < 3;  ugo_which++)  {
-							ulist[currow].btu_jflags[ugo_which] = resj[ugo_which];
-							ulist[currow].btu_vflags[ugo_which] = resv[ugo_which];
+							userlist[currow].btu_jflags[ugo_which] = resj[ugo_which];
+							userlist[currow].btu_vflags[ugo_which] = resv[ugo_which];
 						}
 			}
 			return  changes;
@@ -955,7 +957,7 @@ int  mprocess(BtuserRef up, int readwrite, BtuserRef ulist, unsigned nu)
 		case  $K{btuser key setdef mode}:
 			if  (!readwrite)
 				goto  readonly;
-			if  (!up)
+			if  (!isindivuser)
 				goto  badc;
 
 			resj[0] = Btuhdr.btd_jflags[0];
@@ -973,7 +975,7 @@ int  mprocess(BtuserRef up, int readwrite, BtuserRef ulist, unsigned nu)
 /* Display and update privileges
    Return non-zero if changes made */
 
-int  pprocess(BtuserRef up, int readwrite, BtuserRef ulist, unsigned nu)
+int  pprocess(BtuserRef userlist, int readwrite, int isindivuser)
 {
 	struct  perm	*pp;
 	int  ch, currow;
@@ -986,13 +988,13 @@ int  pprocess(BtuserRef up, int readwrite, BtuserRef ulist, unsigned nu)
 	Ew = stdscr;
 	clear();
 
-	if  (up)  {
-		disp_str = uname = prin_uname((uid_t) up->btu_user);
-		disp_arg[0] = up->btu_user;
+	if  (isindivuser)  {
+		disp_str = uname = prin_uname((uid_t) userlist->btu_user);
+		disp_arg[0] = userlist->btu_user;
 		disp_arg[1] = lastgid;
 		disp_str2 = prin_gname((gid_t) lastgid);
 		hv = helphdr('N');
-		res = up->btu_priv;
+		res = userlist->btu_priv;
 		smsg = gprompt($P{btuser privs state});
 		mstate = readwrite? $S{btuser privs state} : $S{btuser view privs};
 	}
@@ -1069,8 +1071,8 @@ int  pprocess(BtuserRef up, int readwrite, BtuserRef ulist, unsigned nu)
 		fin:
 			/* If just a common or garden user, return number of changes */
 
-			if  (up)  {
-				up->btu_priv = (ULONG) res;
+			if  (isindivuser)  {
+				userlist->btu_priv = (ULONG) res;
 				return  changes;
 			}
 
@@ -1093,9 +1095,9 @@ int  pprocess(BtuserRef up, int readwrite, BtuserRef ulist, unsigned nu)
 			}  while  (ch != $K{Btuser key set priv} && ch != $K{Btuser key unset priv});
 
 			if  (ch == $K{Btuser key set priv})
-				for  (currow = 0;  currow < nu;  currow++)
-					if  (ulist[currow].btu_user != Realuid)
-						ulist[currow].btu_priv = (ULONG) res;
+				for  (currow = 0;  currow < (int) Npwusers;  currow++)
+					if  (userlist[currow].btu_user != Realuid)
+						userlist[currow].btu_priv = (ULONG) res;
 			Btuhdr.btd_priv = (ULONG) res;
 			return  changes;
 
@@ -1157,7 +1159,7 @@ int  pprocess(BtuserRef up, int readwrite, BtuserRef ulist, unsigned nu)
 		case  $K{Btuser key setdef priv}:
 			if  (!readwrite)
 				goto  readonly;
-			if  (!up)
+			if  (!isindivuser)
 				goto  badc;
 			res = Btuhdr.btd_priv;
 			changes++;
@@ -1270,7 +1272,7 @@ static	int  smatch(BtuserRef uwho, const char *mstr)
 /* Search for string in user name
    Return 0 - found otherwise return error code */
 
-static	int  dosearch(BtuserRef ulist, const unsigned Nusers, const int isback, int *Tup, int *Cup)
+static	int  dosearch(BtuserRef ulist, const int isback, int *Tup, int *Cup)
 {
 	char	*mstr;
 	int	mline, Current_user = *Cup, row = *Tup - Current_user + more_above;
@@ -1284,12 +1286,12 @@ static	int  dosearch(BtuserRef ulist, const unsigned Nusers, const int isback, i
 		for  (mline = Current_user - 1;  mline >= 0;  mline--)
 			if  (smatch(&ulist[mline], mstr))
 				goto  gotit;
-		for  (mline = Nusers - 1;  mline >= Current_user;  mline--)
+		for  (mline = Npwusers - 1;  mline >= Current_user;  mline--)
 			if  (smatch(&ulist[mline], mstr))
 				goto  gotit;
 	}
 	else  {
-		for  (mline = Current_user + 1;  (unsigned) mline < Nusers;  mline++)
+		for  (mline = Current_user + 1;  (unsigned) mline < Npwusers;  mline++)
 			if  (smatch(&ulist[mline], mstr))
 				goto  gotit;
 		for  (mline = 0;  mline <= Current_user;  mline++)
@@ -1366,7 +1368,7 @@ void  linithdr()
 
 /* Fill up the screen.  */
 
-void  ldisplay(BtuserRef ulist, unsigned nu, int start)
+void  ldisplay(BtuserRef ulist, int start)
 {
 	int	row, endl, i;
 	BtuserRef	up;
@@ -1423,15 +1425,15 @@ void  ldisplay(BtuserRef ulist, unsigned nu, int start)
 	more_below = 0;
 	endl = LLINES;
 
-	if  (nu - start > endl - row)  {
+	if  ((int) Npwusers - start > endl - row)  {
 		more_below = 1;
 		wstandout(lscr);
-		mvwprintw(lscr, endl-1, (COLS - (int) strlen(more_bmsg))/2, more_bmsg, nu + row - start - endl + 1);
+		mvwprintw(lscr, endl-1, (COLS - (int) strlen(more_bmsg))/2, more_bmsg, (int) Npwusers + row - start - endl + 1);
 		wstandend(lscr);
 		endl--;
 	}
 
-	for  (i = start;  i < nu  &&  row < endl;  row++, i++)  {
+	for  (i = start;  i < (int) Npwusers  &&  row < endl;  row++, i++)  {
 		up = &ulist[i];
 		mvwaddstr(lscr, row, USNAM_P, prin_uname((uid_t) up->btu_user));
 		mvwaddstr(lscr, row, GRPNAM_P, prin_gname((gid_t) lastgid));
@@ -1536,7 +1538,7 @@ static void  user_macro(BtuserRef ulist, const int up, const int num)
 			close(0);
 			close(1);
 			close(2);
-			dup(dup(open("/dev/null", O_RDWR)));
+			Ignored_error = dup(dup(open("/dev/null", O_RDWR)));
 		}
 		execv(execprog, argbuf);
 		exit(255);
@@ -1578,7 +1580,7 @@ static void  user_macro(BtuserRef ulist, const int up, const int num)
 /* This accepts input from the screen for the overall list.
    Return 1 if changes made, otherwise 0.  */
 
-int  lprocess(BtuserRef ulist, unsigned nu, int readwrite)
+int  lprocess(BtuserRef ulist, int readwrite)
 {
 	int	changes = 0, ch, err_no;
 	int	Start, Row, u_p, mstate, incr;
@@ -1595,7 +1597,7 @@ int  lprocess(BtuserRef ulist, unsigned nu, int readwrite)
  refill:
 	select_state(mstate);
  refill2:
-	ldisplay(ulist, nu, Start);
+	ldisplay(ulist, Start);
 
 	for  (;;)  {
 		u_p = Row - Start + more_above;
@@ -1661,7 +1663,7 @@ int  lprocess(BtuserRef ulist, unsigned nu, int readwrite)
 
 		case  $K{key cursor down}:
 			Row++;
-			if  (Row >= nu)  {
+			if  (Row >= (int) Npwusers)  {
 				Row--;
 el:				err_no = $E{btuser list off end};
 				goto  err;
@@ -1699,24 +1701,24 @@ bl:				err_no = $E{btuser list off beg};
 
 		case  $K{key bottom}:
 			incr = Start + LLINES - more_above - more_below - 1;
-			if  (Row < incr  &&  incr < nu - 1)  {
+			if  (Row < incr  &&  incr < (int) Npwusers - 1)  {
 				Row = incr;
 				continue;
 			}
-			if  (nu > LLINES)  {
-				Start = nu - LLINES + 1;
+			if  ((int) Npwusers > LLINES)  {
+				Start = (int) Npwusers - LLINES + 1;
 				Row = Start + LLINES - 2;
 			}
 			else  {
 				Start = 0;
-				Row = nu - 1;
+				Row = (int) Npwusers - 1;
 			}
 			goto  refill2;
 
 		case  $K{key screen down}:
 			incr = LLINES - more_above - more_below;
 		drest:
-			if  (Start + incr >= nu)
+			if  (Start + incr >= (int) Npwusers)
 				goto  el;
 			Start += incr;
 			if  (Row < Start)
@@ -1751,10 +1753,6 @@ bl:				err_no = $E{btuser list off beg};
 		readonly:	err_no = $E{btuser read only};
 				goto  err;
 			}
-			if  (nu == 0)  {
-		nou:		err_no = $E{btuser no users};
-				goto  err;
-			}
 			up = &ulist[Row];
 			wn_udp.msg = prin_uname((uid_t) up->btu_user);
 			num = wnum(lscr, u_p, &wn_udp, (LONG) up->btu_defp);
@@ -1778,8 +1776,6 @@ bl:				err_no = $E{btuser list off beg};
 		case  $K{btuser key user min pri}:
 			if  (!readwrite)
 				goto  readonly;
-			if  (nu == 0)
-				goto  nou;
 			up = &ulist[Row];
 			wn_ulp.msg = prin_uname((uid_t) up->btu_user);
 			num = wnum(lscr, u_p, &wn_ulp, (LONG) up->btu_minp);
@@ -1803,8 +1799,6 @@ bl:				err_no = $E{btuser list off beg};
 		case  $K{btuser key user max pri}:
 			if  (!readwrite)
 				goto  readonly;
-			if  (nu == 0)
-				goto  nou;
 			up = &ulist[Row];
 			wn_uhp.msg = prin_uname((uid_t) up->btu_user);
 			num = wnum(lscr, u_p, &wn_uhp, (LONG) up->btu_maxp);
@@ -1828,8 +1822,6 @@ bl:				err_no = $E{btuser list off beg};
 		case  $K{btuser key user max ll}:
 			if  (!readwrite)
 				goto  readonly;
-			if  (nu == 0)
-				goto  nou;
 			up = &ulist[Row];
 			wn_umaxll.msg = prin_uname((uid_t) up->btu_user);
 			num = wnum(lscr, u_p, &wn_umaxll, (LONG) up->btu_maxll);
@@ -1853,8 +1845,6 @@ bl:				err_no = $E{btuser list off beg};
 		case  $K{btuser key user tot ll}:
 			if  (!readwrite)
 				goto  readonly;
-			if  (nu == 0)
-				goto  nou;
 			up = &ulist[Row];
 			wn_utotll.msg = prin_uname((uid_t) up->btu_user);
 			num = wnum(lscr, u_p, &wn_utotll, (LONG) up->btu_totll);
@@ -1878,8 +1868,6 @@ bl:				err_no = $E{btuser list off beg};
 		case  $K{btuser key user spec ll}:
 			if  (!readwrite)
 				goto  readonly;
-			if  (nu == 0)
-				goto  nou;
 			up = &ulist[Row];
 			wn_uspecll.msg = prin_uname((uid_t) up->btu_user);
 			num = wnum(lscr, u_p, &wn_uspecll, (LONG) up->btu_spec_ll);
@@ -1901,10 +1889,8 @@ bl:				err_no = $E{btuser list off beg};
 			continue;
 
 		case  $K{btuser key user modes}:
-			if  (nu == 0)
-				goto  nou;
 			up = &ulist[Row];
-			changes += mprocess(up, readwrite, ulist, nu);
+			changes += mprocess(up, readwrite, 1);
 #ifndef	CURSES_OVERLAP_BUG
 			touchwin(hlscr);
 #ifdef	HAVE_TERMINFO
@@ -1924,7 +1910,7 @@ bl:				err_no = $E{btuser list off beg};
 			goto  refill;
 
 		case  $K{btuser key def modes}:
-			ch = mprocess((BtuserRef) 0, readwrite, ulist, nu);
+			ch = mprocess(ulist, readwrite, 0);
 			if  (tlscr)  {
 				touchwin(tlscr);
 #ifdef	HAVE_TERMINFO
@@ -1948,10 +1934,8 @@ bl:				err_no = $E{btuser list off beg};
 			goto  refill;
 
 		case  $K{btuser key user priv}:
-			if  (nu == 0)
-				goto  nou;
 			up = &ulist[Row];
-			changes += pprocess(up, readwrite, ulist, nu);
+			changes += pprocess(up, readwrite, 1);
 			touchwin(hlscr);
 #ifdef	HAVE_TERMINFO
 			wnoutrefresh(hlscr);
@@ -1969,7 +1953,7 @@ bl:				err_no = $E{btuser list off beg};
 			goto  refill;
 
 		case  $K{btuser key def priv}:
-			ch = pprocess((BtuserRef) 0, readwrite, ulist, nu);
+			ch = pprocess(ulist, readwrite, 0);
 			if  (tlscr)  {
 				touchwin(tlscr);
 #ifdef	HAVE_TERMINFO
@@ -1995,8 +1979,6 @@ bl:				err_no = $E{btuser list off beg};
 		case  $K{btuser key copy user}:
 			if  (!readwrite)
 				goto  readonly;
-			if  (nu == 0)
-				goto  nou;
 			copyu(&ulist[Row]);
 			changes++;
 			goto  refill2;
@@ -2004,7 +1986,7 @@ bl:				err_no = $E{btuser list off beg};
 		case  $K{btuser key copy all}:
 			if  (!readwrite)
 				goto  readonly;
-			for  (ch = 0;  ch < nu;  ch++)
+			for  (ch = 0;  ch < (int) Npwusers;  ch++)
 				copyu(&ulist[ch]);
 			changes++;
 			goto  refill2;
@@ -2012,10 +1994,8 @@ bl:				err_no = $E{btuser list off beg};
 		case  $K{btuser key charge}:
 			if  (!readwrite)
 				goto  readonly;
-			if  (nu == 0)
-				goto  nou;
 			up = &ulist[Row];
-			fnum = calccharge(up->btu_user);
+			fnum = 0;
 			if  (!cch)
 				cch = gprompt($P{Btuser charge is});
 			mvwprintw(lscr, u_p, 0, cch, prin_uname((uid_t) up->btu_user), fnum);
@@ -2023,7 +2003,7 @@ bl:				err_no = $E{btuser list off beg};
 			ch = getkey(MAG_A|MAG_P);
 			if  (Dispflags & DF_HELPCLR)
 				goto  refill2;
-			ldisplay(ulist, nu, Start);
+			ldisplay(ulist, Start);
 			wmove(lscr, u_p, 0);
 #ifdef	HAVE_TERMINFO
 			wnoutrefresh(lscr);
@@ -2038,7 +2018,7 @@ bl:				err_no = $E{btuser list off beg};
 		case  $K{btuser key exec} + 6:case  $K{btuser key exec} + 7:case  $K{btuser key exec} + 8:
 		case  $K{btuser key exec} + 9:
 			user_macro(ulist, Row, ch - $K{btuser key exec});
-			ldisplay(ulist, nu, Start);
+			ldisplay(ulist, Start);
 			if  (escr)  {
 				touchwin(escr);
 				wrefresh(escr);
@@ -2047,9 +2027,9 @@ bl:				err_no = $E{btuser list off beg};
 
 		case  $K{key search forward}:
 		case  $K{key search backward}:
-			if  ((err_no = dosearch(ulist, nu, ch == $K{key search backward}, &Start, &Row)) != 0)  {
+			if  ((err_no = dosearch(ulist, ch == $K{key search backward}, &Start, &Row)) != 0)  {
 				doerror(lscr, err_no);
-				ldisplay(ulist, nu, Start);
+				ldisplay(ulist, Start);
 				touchwin(escr);
 				wrefresh(escr);
 				continue;
@@ -2075,7 +2055,7 @@ void  display_info(BtuserRef item)
 	disp_arg[5] = item->btu_maxll;
 	disp_arg[6] = item->btu_totll;
 	disp_arg[7] = item->btu_spec_ll;
-	disp_float = calccharge((int_ugid_t) Realuid);
+	/* disp_float = 0;  Was charge now not used */
 	fprint_error(stdout, $E{btuser simple display});
 
 	if  (item->btu_priv)  {
@@ -2256,62 +2236,16 @@ o_helpclr,	o_nohelpclr,	o_helpbox,	o_nohelpbox,
 o_errbox,	o_noerrbox
 };
 
-static	int  confirm_rebuild()
-{
-	char	**emess = helpvec($E{Confirm rebuild uc file}, 'E');
-	int	mx, my, mr, mc, cnt, ch;
-
-	count_hv(emess, &mr, &mc);
-	if  (mr <= 0)
-		return  1;
-	getmaxyx(lscr, my, mx);
-	my = my < mr? 0: (my - mr) / 2;
-	mx = mx < mc? 0: (mx - mc) / 2;
-	for  (cnt = 0;  cnt < mr;  cnt++)  {
-		mvwaddstr(lscr, my+cnt, mx, emess[cnt]);
-		free(emess[cnt]);
-	}
-	free((char *) emess);
-	select_state($S{btuser ok rebuild state});
-	wrefresh(lscr);
-	do  {
-		ch = getkey(MAG_A|MAG_P);
-		if  (ch == $K{key help})
-			dochelp(lscr, $H{btuser ok rebuild state});
-	}  while  (ch != $K{btuser ok rebuild} && ch != $K{btuser not ok rebuild});
-	werase(lscr);
-	return  ch == $K{btuser ok rebuild};
-}
-
-static	void  please_wait()
-{
-	char	**emess = helpvec($E{Rebuilding wait}, 'E');
-	int	mx, my, mr, mc, cnt;
-	count_hv(emess, &mr, &mc);
-	if  (mr <= 0)
-		return;
-	getmaxyx(lscr, my, mx);
-	my = my < mr? 0: (my - mr) / 2;
-	mx = mx < mc? 0: (mx - mc) / 2;
-	for  (cnt = 0;  cnt < mr;  cnt++)  {
-		mvwaddstr(lscr, my+cnt, mx, emess[cnt]);
-		free(emess[cnt]);
-	}
-	free((char *) emess);
-	wrefresh(lscr);
-}
-
 /* Ye olde main routine.  */
 
 MAINFN_TYPE  main(int argc, char **argv)
 {
 	BtuserRef	ulist;
-	unsigned	Nusers;
 #if	defined(NHONSUID) || defined(DEBUG)
 	int_ugid_t	chk_uid;
 #endif
 
-	versionprint(argv, "$Revision: 1.2 $", 0);
+	versionprint(argv, "$Revision: 1.3 $", 0);
 
 	if  ((progname = strrchr(argv[0], '/')))
 		progname++;
@@ -2337,10 +2271,7 @@ MAINFN_TYPE  main(int argc, char **argv)
 
 	SWAP_TO(Daemuid);
 
-	if  (!(mypriv = getbtuentry(Realuid)))  {
-		print_error($E{Not registered yet});
-		exit(E_UNOTSETUP);
-	}
+	mypriv = getbtuentry(Realuid);		/* Always returns something or bombs */
 
 	switch  (getflags)  {
 	default:
@@ -2351,7 +2282,7 @@ MAINFN_TYPE  main(int argc, char **argv)
 	case  BTU_UPERM:
                 if  (!(mypriv->btu_priv & BTM_UMASK))  {
                         print_error($E{No set default modes});
-                        exit(E_PERM);
+                        return  E_PERM;
                 }
 #ifdef	HAVE_TERMIOS_H
 		tcgetattr(0, &orig_term);
@@ -2363,22 +2294,26 @@ MAINFN_TYPE  main(int argc, char **argv)
 #ifdef	HAVE_ATEXIT
 		atexit(exit_cleanup);
 #endif
-		if  (mprocess(mypriv, 1, (BtuserRef) 0, 1))
+		if  (mprocess(mypriv, 1, 1))
 			putbtuentry(mypriv);
 		break;
 
 	case  BTU_UREAD:
 		if  (!(mypriv->btu_priv & BTM_RADMIN))  {
                         print_error($E{No read admin file priv});
-                        exit(E_PERM);
+                        return  E_PERM;
                 }
-		ulist = getbtulist(&Nusers);
+		ulist = getbtulist();
+		if  (Npwusers == 0)  {
+			print_error($E{btuser no users});
+			return  E_SETUP;
+		}
 		switch  (alphsort)  {
 		case  SRT_USER:
-			qsort(QSORTP1 ulist, Nusers, sizeof(Btuser), QSORTP4 sort_u);
+			qsort(QSORTP1 ulist, Npwusers, sizeof(Btuser), QSORTP4 sort_u);
 			break;
 		case  SRT_GROUP:
-			qsort(QSORTP1 ulist, Nusers, sizeof(Btuser), QSORTP4 sort_g);
+			qsort(QSORTP1 ulist, Npwusers, sizeof(Btuser), QSORTP4 sort_g);
 			break;
 		}
 #ifdef	HAVE_TERMIOS_H
@@ -2392,7 +2327,7 @@ MAINFN_TYPE  main(int argc, char **argv)
 #ifdef	HAVE_ATEXIT
 		atexit(exit_cleanup);
 #endif
-		lprocess(ulist, Nusers, 0);
+		lprocess(ulist, 0);
 		break;
 
 	case  BTU_UUPD:
@@ -2411,41 +2346,25 @@ MAINFN_TYPE  main(int argc, char **argv)
 #ifdef	HAVE_ATEXIT
 		atexit(exit_cleanup);
 #endif
-		if  (btu_needs_rebuild  &&  confirm_rebuild())  {
-			char  *name = envprocess(DUMPPWFILE);
-			int	wuz = access(name, 0);
-			if  (wuz >= 0)  {
-				un_rpwfile();
-				unlink(name);
-			}
-			free(name);
-			please_wait();
-#ifdef	HAVE_GETGROUPS
-			Requires_suppgrps = 1;
-			rpwfile();
-			rgrpfile();
-#endif
-			rebuild_btufile();
-			if  (wuz >= 0)
-				dump_pwfile();
-			produser();
-			werase(lscr);
+		ulist = getbtulist();
+		if  (Npwusers == 0)  {
+			print_error($E{btuser no users});
+			return  E_SETUP;
 		}
-		ulist = getbtulist(&Nusers);
 		switch  (alphsort)  {
 		case  SRT_USER:
-			qsort(QSORTP1 ulist, Nusers, sizeof(Btuser), QSORTP4 sort_u);
+			qsort(QSORTP1 ulist, Npwusers, sizeof(Btuser), QSORTP4 sort_u);
 			break;
 		case  SRT_GROUP:
-			qsort(QSORTP1 ulist, Nusers, sizeof(Btuser), QSORTP4 sort_g);
+			qsort(QSORTP1 ulist, Npwusers, sizeof(Btuser), QSORTP4 sort_g);
 			break;
 		}
-		if  (lprocess(ulist, Nusers, 1)  ||  hchanges)  {
-			qsort(QSORTP1 ulist, Nusers, sizeof(Btuser), QSORTP4 sort_id);
-			putbtulist(ulist, Nusers, hchanges);
+		if  (lprocess(ulist, 1)  ||  hchanges)  {
+			qsort(QSORTP1 ulist, Npwusers, sizeof(Btuser), QSORTP4 sort_id);
+			putbtulist(ulist);
 		}
 		break;
 	}
 
-	exit(0);
+	return  0;
 }

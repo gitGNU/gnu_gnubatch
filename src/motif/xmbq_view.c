@@ -639,7 +639,7 @@ static void  setup_draw()
 	XtAddCallback(drawing_a, XmNresizeCallback, (XtCallbackProc) expose_resize, (XtPointer) 0);
 }
 
-static void EndSetupViewDlg(Widget shelldlg, Widget panew, XtCallbackProc endrout, int helpcode)
+static void  EndSetupViewDlg(Widget shelldlg, Widget panew, XtCallbackProc endrout, int helpcode)
 {
 	Widget	actform, okw, cancw, helpw;
 	Dimension	h;

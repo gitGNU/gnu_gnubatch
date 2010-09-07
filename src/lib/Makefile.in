@@ -39,15 +39,14 @@ RM		=	rm -f
 INSTALL		=	@INSTALL@
 INSTALL_DATA	=	@INSTALL_DATA@
 
-OBJECTS=advtime.o	altlen.o	calcharge.o	calchash.o \
-	condname.o	disp_alt.o	disperror.o	envgetserv.o \
-	envprocess.o	getbtuser.o	helpprmpt.o	helprdalt.o \
-	helprdn.o	help_readl.o	helpvec.o	insertu.o \
-	look_host.o	mkspid.o	mmangle.o	mpermitted.o \
-	ncstrncmp.o	net_feed.o	open_ci.o	op_icf.o \
-	packjstring.o	prin_gname.o	prin_uname.o	qmatch.o \
-	readu.o		runpwd.o	spath.o		stracpy.o \
-	stringsch.o	strread.o	versionprint.o
+OBJECTS=advtime.o	altlen.o	calchash.o	condname.o \
+	disp_alt.o	disperror.o	envgetserv.o	envprocess.o \
+	getbtuser.o	helpprmpt.o	helprdalt.o 	helprdn.o \
+	help_readl.o	helpvec.o	look_host.o	mkspid.o \
+	mmangle.o	mpermitted.o	ncstrncmp.o	net_feed.o \
+	open_ci.o	op_icf.o	packjstring.o	prin_gname.o \
+	prin_uname.o	qmatch.o	runpwd.o	spath.o	\
+	stracpy.o	stringsch.o	strread.o	versionprint.o
 
 # libgnubatch_client is for client programs
 

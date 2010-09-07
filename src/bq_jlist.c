@@ -127,12 +127,12 @@ static	struct	sctrl
 
 void	doerror(WINDOW *, int);
 void	dochelp(WINDOW *, int);
-void	dojerror(unsigned, BtjobRef);
+void	qdojerror(unsigned, BtjobRef);
 void	endhe(WINDOW *, WINDOW **);
 void	notebgwin(WINDOW *, WINDOW *, WINDOW *);
 void	viewfile(BtjobRef);
 void	viewhols(WINDOW *);
-void	wjimsg(const unsigned, CBtjobRef);
+void	qwjimsg(const unsigned, CBtjobRef);
 void	wjmsg(const unsigned, const ULONG);
 void	wn_fill(WINDOW *, const int, const struct sctrl *, const LONG);
 void	ws_fill(WINDOW *, const int, const struct sctrl *, const char *);
@@ -616,7 +616,7 @@ void  jdisplay()
 			break;
 		}
 
-		isreadable = mpermitted(&jp->h.bj_mode, BTM_READ);
+		isreadable = mpermitted(&jp->h.bj_mode, BTM_READ, mypriv->btu_priv);
 
 		wmove(jscr, row, 0);
 
@@ -738,7 +738,7 @@ static int  smatch(const int mline, const char *mstr)
 	const	char	*title;
 	const	char	*tp, *mp;
 
-	if  (!mpermitted(&jj_ptrs[mline]->h.bj_mode, BTM_READ))
+	if  (!mpermitted(&jj_ptrs[mline]->h.bj_mode, BTM_READ, mypriv->btu_priv))
 		return  0;
 
 	for  (title = qtitle_of(jj_ptrs[mline]);  *title;  title++)  {
@@ -912,10 +912,9 @@ static void  job_macro(BtjobRef jp, const int num)
 
 int  j_process()
 {
-	int	num, err_no, i, incr, ret;
+	int	num, err_no, i, incr, ret, ch, currow;
 	unsigned	retc;
 	ULONG		xindx;
-	int	ch, currow;
 	char	*str;
 	const	char	*title;
 	BtjobRef	jp, djp;
@@ -1261,7 +1260,7 @@ bj:			err_no = $E{btq jlist off beginning};
 	case  $K{btq jlist key prio}:
 		if  (Jeline >= Job_seg.njobs)
 			goto  noj;
-		if  (!mpermitted(&jj_ptrs[Jeline]->h.bj_mode, BTM_WRITE))  {
+		if  (!mpermitted(&jj_ptrs[Jeline]->h.bj_mode, BTM_WRITE, mypriv->btu_priv))  {
 			err_no = $E{btq cannot write job};
 			goto  err;
 		}
@@ -1276,7 +1275,7 @@ bj:			err_no = $E{btq jlist off beginning};
 	doch:
 		wjmsg(J_CHANGE, xindx);
 		if  ((retc = readreply()) != J_OK)
-			dojerror(retc, djp);
+			qdojerror(retc, djp);
 		freexbuf(xindx);
 		goto  Jmove;
 
@@ -1284,7 +1283,7 @@ bj:			err_no = $E{btq jlist off beginning};
 		if  (Jeline >= Job_seg.njobs)
 			goto  noj;
 		jp = jj_ptrs[Jeline];
-		if  (!mpermitted(&jp->h.bj_mode, BTM_WRITE))  {
+		if  (!mpermitted(&jp->h.bj_mode, BTM_WRITE, mypriv->btu_priv))  {
 			err_no = $E{btq cannot write job};
 			goto  err;
 		}
@@ -1305,7 +1304,7 @@ bj:			err_no = $E{btq jlist off beginning};
 		if  (Jeline >= Job_seg.njobs)
 			goto  noj;
 		jp = jj_ptrs[Jeline];
-		if  (!mpermitted(&jp->h.bj_mode, BTM_WRITE))  {
+		if  (!mpermitted(&jp->h.bj_mode, BTM_WRITE, mypriv->btu_priv))  {
 			err_no = $E{btq cannot write job};
 			goto  err;
 		}
@@ -1336,7 +1335,7 @@ bj:			err_no = $E{btq jlist off beginning};
 		if  (Jeline >= Job_seg.njobs)
 			goto  noj;
 		jp = jj_ptrs[Jeline];
-		if  (!mpermitted(&jp->h.bj_mode, BTM_WRITE))  {
+		if  (!mpermitted(&jp->h.bj_mode, BTM_WRITE, mypriv->btu_priv))  {
 			err_no = $E{btq cannot write job};
 			goto  err;
 		}
@@ -1352,7 +1351,7 @@ bj:			err_no = $E{btq jlist off beginning};
 		if  (Jeline >= Job_seg.njobs)
 			goto  noj;
 		jp = jj_ptrs[Jeline];
-		if  (!mpermitted(&jp->h.bj_mode, BTM_WRITE))  {
+		if  (!mpermitted(&jp->h.bj_mode, BTM_WRITE, mypriv->btu_priv))  {
 			err_no = $E{btq cannot write job};
 			goto  err;
 		}
@@ -1371,7 +1370,7 @@ bj:			err_no = $E{btq jlist off beginning};
 	case  $K{btq jlist key view}:
 		if  (Jeline >= Job_seg.njobs)
 			goto  noj;
-		if  (!mpermitted(&jj_ptrs[Jeline]->h.bj_mode, BTM_READ))  {
+		if  (!mpermitted(&jj_ptrs[Jeline]->h.bj_mode, BTM_READ, mypriv->btu_priv))  {
 			err_no = $E{btq cannot read job};
 			goto  err;
 		}
@@ -1451,7 +1450,9 @@ bj:			err_no = $E{btq jlist off beginning};
 	case  $K{btq jlist key gojna}:
 		if  (Jeline >= Job_seg.njobs)
 			goto  noj;
-		if  (!mpermitted(&jj_ptrs[Jeline]->h.bj_mode, (unsigned) (ch == $K{btq jlist key goj} || ch == $K{btq jlist key gojna}? (BTM_WRITE|BTM_KILL): BTM_WRITE)))  {
+		if  (!mpermitted(&jj_ptrs[Jeline]->h.bj_mode,
+				 (unsigned) (ch == $K{btq jlist key goj} || ch == $K{btq jlist key gojna}? (BTM_WRITE|BTM_KILL): BTM_WRITE),
+				 mypriv->btu_priv))  {
 			err_no = $E{btq cannot write job};
 			goto  err;
 		}
@@ -1473,13 +1474,13 @@ bj:			err_no = $E{btq jlist off beginning};
 			wjmsg(J_CHANGE, xindx);
 			retc = readreply();
 			if  (retc != J_OK)
-				dojerror(retc, djp);
+				qdojerror(retc, djp);
 			freexbuf(xindx);
 			goto  Jmove;
 		}
 		if  (ch == $K{btq jlist key goj} || ch == $K{btq jlist key gojna})  {
 			/* Ignore error because the job might have started */
-			wjimsg(ch == $K{btq jlist key goj}? J_FORCE: J_FORCENA, jj_ptrs[Jeline]);
+			qwjimsg(ch == $K{btq jlist key goj}? J_FORCE: J_FORCENA, jj_ptrs[Jeline]);
 			readreply();
 		}
 		goto  Jmove;
@@ -1487,7 +1488,7 @@ bj:			err_no = $E{btq jlist off beginning};
 	case  $K{btq jlist key kill}:
 		if  (Jeline >= Job_seg.njobs)
 			goto  noj;
-		if  (!mpermitted(&jj_ptrs[Jeline]->h.bj_mode, BTM_KILL))  {
+		if  (!mpermitted(&jj_ptrs[Jeline]->h.bj_mode, BTM_KILL, mypriv->btu_priv))  {
 			err_no = $E{btq jlist cannot kill};
 			goto  err;
 		}
@@ -1496,9 +1497,9 @@ bj:			err_no = $E{btq jlist off beginning};
 			goto  Jdisp;
 
 		Oreq.sh_params.param = num;
-		wjimsg(J_KILL, jj_ptrs[Jeline]);
+		qwjimsg(J_KILL, jj_ptrs[Jeline]);
 		if  ((retc = readreply()) != J_OK)
-			dojerror(retc, jj_ptrs[Jeline]);
+			qdojerror(retc, jj_ptrs[Jeline]);
 		goto  Jdisp;
 
 	case  $K{btq jlist key mwflags}:

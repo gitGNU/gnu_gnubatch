@@ -147,7 +147,7 @@ static	void	list_select(Widget w, void (*proc)(), XmListCallbackStruct *cbs)
 
 /* Create the edit stuff for a fixed list dialog */
 
-static void CreateFixedListDlg(Widget formw, char *listwname, XtCallbackProc newrout, XtCallbackProc editrout, XtCallbackProc delrout, unsigned	readonly, void *mcproc)
+static void  CreateFixedListDlg(Widget formw, char *listwname, XtCallbackProc newrout, XtCallbackProc editrout, XtCallbackProc delrout, unsigned readonly, void *mcproc)
 {
 	Widget	neww, editw, delw, movew, copyw;
 
@@ -236,7 +236,7 @@ static void CreateFixedListDlg(Widget formw, char *listwname, XtCallbackProc new
 
 /* Create the edit stuff for a scrolled list dialog */
 
-static  void  CreateScrolledListDlg(Widget formw, char *listwname,XtCallbackProc newrout, XtCallbackProc editrout, XtCallbackProc delrout, unsigned readonly, void *mcproc)
+static void  CreateScrolledListDlg(Widget formw, char *listwname, XtCallbackProc newrout, XtCallbackProc editrout, XtCallbackProc delrout, unsigned readonly, void *mcproc)
 {
 	Widget	neww, editw, delw, movew, copyw;
 	int		n;
@@ -991,7 +991,7 @@ static void  endjconds(Widget w, int data)
 		wjmsg(J_CHANGE, xindx);
 		retc = readreply();
 		if  (retc != J_OK)
-			dojerror(retc, bjp);
+			qdojerror(retc, bjp);
 		freexbuf(xindx);
 	}
 	if  (copyconds)  {
@@ -1013,7 +1013,7 @@ static void  endjasses(Widget w, int data)
 		wjmsg(J_CHANGE, xindx);
 		retc = readreply();
 		if  (retc != J_OK)
-			dojerror(retc, bjp);
+			qdojerror(retc, bjp);
 		freexbuf(xindx);
 	}
 	if  (copyasses)  {
@@ -1041,7 +1041,7 @@ void  cb_jconds(Widget parent)
 	}
 	for  (;  hadj < MAXCVARS;  hadj++)
 		copyconds[hadj].bjc_compar = C_UNUSED;
-	readonly = !mpermitted(&cj->h.bj_mode, BTM_WRITE);
+	readonly = !mpermitted(&cj->h.bj_mode, BTM_WRITE, mypriv->btu_priv);
 	CreateEditDlg(parent, "Jcond", &jc_shell, &panew, &editform, 5);
 	CreateFixedListDlg(editform, "Jclist", (XtCallbackProc) newcond, (XtCallbackProc) editcond, (XtCallbackProc) delcond, readonly, (void *) mccond);
 	filljclist();
@@ -1067,7 +1067,7 @@ void  cb_jass(Widget parent)
 	}
 	for  (;  hadj < MAXSEVARS;  hadj++)
 		copyasses[hadj].bja_op = BJA_NONE;
-	readonly = !mpermitted(&cj->h.bj_mode, BTM_WRITE);
+	readonly = !mpermitted(&cj->h.bj_mode, BTM_WRITE, mypriv->btu_priv);
 	CreateEditDlg(parent, "Jass", &ja_shell, &panew, &editform, 5);
 	CreateFixedListDlg(editform, "Jalist", (XtCallbackProc) newass, (XtCallbackProc) editass, (XtCallbackProc) delass, readonly, (void *) mcass);
 	filljalist();
@@ -1248,7 +1248,7 @@ static void  endjargs(Widget w, int data)
 		wjmsg(J_CHANGE, xindx);
 		retc = readreply();
 		if  (retc != J_OK)
-			dojerror(retc, bjp);
+			qdojerror(retc, bjp);
 		freexbuf(xindx);
 	}
 	if  (copyargs)  {
@@ -1276,7 +1276,7 @@ void  cb_jargs(Widget parent)
 	Nitems = cj->h.bj_nargs;
 	for  (jcnt = 0;  jcnt < Nitems;  jcnt++)
 		copyargs[jcnt] = stracpy(ARG_OF(cj, jcnt));
-	readonly = !mpermitted(&cj->h.bj_mode, BTM_WRITE);
+	readonly = !mpermitted(&cj->h.bj_mode, BTM_WRITE, mypriv->btu_priv);
 	CreateEditDlg(parent, "Jargs", &ja_shell, &panew, &editform, 5);
 	CreateScrolledListDlg(editform, "Jarglist", (XtCallbackProc) newarg, (XtCallbackProc) editarg, (XtCallbackProc) delarg, readonly, (void *) mcarg);
 	filljarglist();
@@ -1458,7 +1458,7 @@ static void  endjenvs(Widget w, int data)
 		wjmsg(J_CHANGE, xindx);
 		retc = readreply();
 		if  (retc != J_OK)
-			dojerror(retc, bjp);
+			qdojerror(retc, bjp);
 		freexbuf(xindx);
 	}
 	if  (copyenvs)  {
@@ -1492,7 +1492,7 @@ void  cb_jenv(Widget parent)
 		copyenvs[jcnt].e_name = stracpy(namep);
 		copyenvs[jcnt].e_value = stracpy(valp);
 	}
-	readonly = !mpermitted(&cj->h.bj_mode, BTM_WRITE);
+	readonly = !mpermitted(&cj->h.bj_mode, BTM_WRITE, mypriv->btu_priv);
 	CreateEditDlg(parent, "Jenvs", &ja_shell, &panew, &editform, 5);
 	CreateScrolledListDlg(editform, "Jenvlist", (XtCallbackProc) newenv, (XtCallbackProc) editenv, (XtCallbackProc) delenv, readonly, (void *) mcenv);
 	filljenvlist();
@@ -1863,7 +1863,7 @@ static void  endjredirs(Widget w, int data)
 		wjmsg(J_CHANGE, xindx);
 		retc = readreply();
 		if  (retc != J_OK)
-			dojerror(retc, bjp);
+			qdojerror(retc, bjp);
 		freexbuf(xindx);
 	}
 	if  (copyredirs)  {
@@ -1898,7 +1898,7 @@ void  cb_jredirs(Widget parent)
 		else
 			copyredirs[jcnt].un.buffer = stracpy(&cj->bj_space[rp->arg]);
 	}
-	readonly = !mpermitted(&cj->h.bj_mode, BTM_WRITE);
+	readonly = !mpermitted(&cj->h.bj_mode, BTM_WRITE, mypriv->btu_priv);
 	CreateEditDlg(parent, "Jredirs", &ja_shell, &panew, &editform, 5);
 	CreateScrolledListDlg(editform, "Jredirlist", (XtCallbackProc) newredir, (XtCallbackProc) editredir, (XtCallbackProc) delredir, readonly, (void *) mcredir);
 	filljredirlist();

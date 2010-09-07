@@ -82,7 +82,7 @@ int  signednumeric(const char *str)
 
 struct	argop  {
 	const	char	*name;		/* Name of parameter case insens */
-	int  (*arg_fn)(struct argop *);
+	int	(*arg_fn)(struct argop *);
 	unsigned  char	locovar;	/* Local vars only */
 	unsigned  char	npars;		/* Number of args */
 	char		*varname, *arg2, *arg3;	/* Supplied args */

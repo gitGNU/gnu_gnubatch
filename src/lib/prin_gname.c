@@ -69,7 +69,7 @@ void  rgrpfile()
 
 	if  (doneit)  {
 #ifdef	HAVE_GETGROUPS
-		if  (Requires_suppgrps && !Using_dumpfile)  {
+		if  (Requires_suppgrps)  {
 			while  ((ugrp = getgrent()) != (struct group *) 0)
 				for  (gp = ugrp->gr_mem;  *gp;  gp++)
 					add_suppgrp(*gp, ugrp->gr_gid);
@@ -97,7 +97,7 @@ void  rgrpfile()
 		*hpp = hp;
 		*hnpp = hp;
 #ifdef	HAVE_GETGROUPS
-		if  (Requires_suppgrps && !Using_dumpfile)
+		if  (Requires_suppgrps)
 			for  (gp = ugrp->gr_mem;  *gp;  gp++)
 				add_suppgrp(*gp, ugrp->gr_gid);
 #endif

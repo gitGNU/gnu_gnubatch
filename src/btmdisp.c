@@ -68,7 +68,7 @@ void  nomem(const char *fl, const int ln)
 void  pushfile(FILE *ofl, const int ifd, const int mcode)
 {
 	FILE	*ifl;
-	int  ch;
+	int	ch;
 
 	if  ((ifl = fdopen(ifd, "r")))  {
 		if  ((ch = getc(ifl)) != EOF)  {

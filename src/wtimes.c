@@ -125,7 +125,7 @@ static	HelpaltRef	Roalts,
 void  endhe(WINDOW *, WINDOW **);
 void  dochelp(WINDOW *, int);
 void  doerror(WINDOW *, int);
-void  dojerror(unsigned, BtjobRef);
+void  qdojerror(unsigned, BtjobRef);
 void  wjmsg(const unsigned, const ULONG);
 LONG  wnum(WINDOW *, const int, struct sctrl *, const LONG);
 
@@ -443,7 +443,7 @@ void  wtdisplay(WINDOW *wp, TimeconRef tc, struct rowmarks *rowlist, struct colm
 		1 ok
 		2 ok and don't bother with next field */
 
-static int gettdigs(WINDOW *wp, TimeconRef tc, struct rowmarks *rm, struct colmarks *cm)
+static int  gettdigs(WINDOW *wp, TimeconRef tc, struct rowmarks *rm, struct colmarks *cm)
 {
 	int	row, col, dignum, coladd, ch, err_no, dig, ctim, newtim;
 	struct	tm	*t = localtime(&tc->tc_nexttime);
@@ -656,7 +656,7 @@ static int gettdigs(WINDOW *wp, TimeconRef tc, struct rowmarks *rm, struct colma
 	}
 }
 
-static int getdw(WINDOW *wp, TimeconRef tc, struct rowmarks *rm, struct colmarks *cm)
+static int  getdw(WINDOW *wp, TimeconRef tc, struct rowmarks *rm, struct colmarks *cm)
 {
 	int	row, col, ch, err_no;
 
@@ -738,7 +738,7 @@ static int getdw(WINDOW *wp, TimeconRef tc, struct rowmarks *rm, struct colmarks
 	}
 }
 
-static int getdm(WINDOW *wp, TimeconRef tc, struct rowmarks *rm, struct colmarks *cm)
+static int  getdm(WINDOW *wp, TimeconRef tc, struct rowmarks *rm, struct colmarks *cm)
 {
 	int	row, col, dignum, ch, err_no, dig, newday, cday, cmon;
 	struct	tm	*t = localtime(&tc->tc_nexttime);
@@ -874,7 +874,7 @@ static int getdm(WINDOW *wp, TimeconRef tc, struct rowmarks *rm, struct colmarks
 	}
 }
 
-static int getmon(WINDOW *wp, TimeconRef tc, struct rowmarks *rm, struct colmarks *cm)
+static int  getmon(WINDOW *wp, TimeconRef tc, struct rowmarks *rm, struct colmarks *cm)
 {
 	int	row, col, ch, err_no;
 	struct	tm	*t = localtime(&tc->tc_nexttime);
@@ -967,7 +967,7 @@ static int getmon(WINDOW *wp, TimeconRef tc, struct rowmarks *rm, struct colmark
 	}
 }
 
-static int getyr(WINDOW *wp, TimeconRef tc, struct rowmarks *rm, struct colmarks *cm)
+static int  getyr(WINDOW *wp, TimeconRef tc, struct rowmarks *rm, struct colmarks *cm)
 {
 	int	row, col, ch, err_no;
 	struct	tm	*t = localtime(&tc->tc_nexttime);
@@ -1092,7 +1092,7 @@ static int getyr(WINDOW *wp, TimeconRef tc, struct rowmarks *rm, struct colmarks
 			0 abort
 			1 ok */
 
-static  int  dateaccept(WINDOW *wp, TimeconRef tc, struct rowmarks *rm, struct colmarks *cm)
+static int  dateaccept(WINDOW *wp, TimeconRef tc, struct rowmarks *rm, struct colmarks *cm)
 {
 	int	i, ret;
 	static	int	(*fns[])() =
@@ -1116,7 +1116,7 @@ static  int  dateaccept(WINDOW *wp, TimeconRef tc, struct rowmarks *rm, struct c
 	return  1;
 }
 
-static int roaccept(WINDOW *wp, TimeconRef tc, struct rowmarks *rm, struct colmarks *cm)
+static int  roaccept(WINDOW *wp, TimeconRef tc, struct rowmarks *rm, struct colmarks *cm)
 {
 	int	ch, err_no, on, un;
 	ULONG	oldval;
@@ -1373,7 +1373,7 @@ static int  atallaccept(WINDOW *wp, TimeconRef tc, struct colmarks *cm)
 	}
 }
 
-static int avdaccept(WINDOW *wp, TimeconRef tc, struct rowmarks *rm, struct colmarks *cm)
+static int  avdaccept(WINDOW *wp, TimeconRef tc, struct rowmarks *rm, struct colmarks *cm)
 {
 	int	ch, err_no, dayno = 0;
 	int	cursrow = rm->avd_row, curscol = cm->adays_col;
@@ -1478,7 +1478,7 @@ static int avdaccept(WINDOW *wp, TimeconRef tc, struct rowmarks *rm, struct colm
 	}
 }
 
-static int skaccept(WINDOW *wp, TimeconRef tc, struct rowmarks *rm, struct colmarks *cm)
+static int  skaccept(WINDOW *wp, TimeconRef tc, struct rowmarks *rm, struct colmarks *cm)
 {
 	int	ch, err_no;
 	int	nrows = Npalts->numalt;
@@ -1649,7 +1649,7 @@ int  wtimes(WINDOW *wp, BtjobRef jp, const char *msg)
 	bjp->h.bj_times = res;
 	wjmsg(J_CHANGE, xindx);
 	if  ((retc = readreply()) != J_OK)  {
-		dojerror(retc, bjp);
+		qdojerror(retc, bjp);
 		freexbuf(xindx);
 		return  -1;
 	}

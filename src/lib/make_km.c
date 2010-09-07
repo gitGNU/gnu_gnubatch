@@ -120,7 +120,7 @@ void  map_dup(struct keymap_sparse **ksp)
 		map_dup(&newp->ks_link);
 }
 
-void insert_state_key(const int state, const char *text, const int length, const int value)
+void  insert_state_key(const int state, const char *text, const int length, const int value)
 {
 	struct	state_map	*sm;
 	int	i;

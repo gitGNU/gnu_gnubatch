@@ -24,7 +24,6 @@ extern	char		alphsort;
 #define	SRT_NONE	0	/* Sort by numeric uid (default) */
 #define	SRT_USER	1	/* Sort by user name */
 #define	SRT_GROUP	2	/* Sort by group name */
-extern	unsigned	Nusers;
 extern	Btdef		Btuhdr;
 extern	BtuserRef	ulist;
 
@@ -71,8 +70,6 @@ extern void  cb_macrou(Widget, int);
 extern void  cb_mode(Widget, int);
 extern void  cb_priv(Widget, int);
 extern void  cb_copydef(Widget, int);
-extern void  cb_zeroc(Widget, int);
-extern void  cb_impose(Widget, int);
 extern void  defdisplay();
 extern void  displaybusy(const int);
 extern void  cb_srchfor(Widget);

@@ -195,7 +195,7 @@ typedef	unsigned	fmt_t;
 struct	formatdef  {
 	SHORT	statecode;	/* Code number for heading if applicable */
 	char	*msg;		/* Heading */
-	unsigned  (*fmt_fn)(CBtjobRef, const int, const int);
+	unsigned (*fmt_fn)(CBtjobRef, const int, const int);
 };
 
 #define	NULLCP	(char *) 0
@@ -334,7 +334,7 @@ void  jdisplay()
 		if  (nwanted != 0  &&  !iswanted(jp))
 			continue;
 		*wp++ = *jp;
-		isreadable = mpermitted(&jp->h.bj_mode, BTM_READ);
+		isreadable = mpermitted(&jp->h.bj_mode, BTM_READ, mypriv->btu_priv);
 		fp = formatstring;
 		pc = 0;
 		while  (*fp)  {
@@ -431,7 +431,7 @@ void  jdisplay()
 	for  (jcnt = 0;  jcnt < (int) wanted_jobs;  jcnt++)  {
 		int	isreadable;
 		jp = &copied_wanted[jcnt];
-		isreadable = mpermitted(&jp->h.bj_mode, BTM_READ);
+		isreadable = mpermitted(&jp->h.bj_mode, BTM_READ, mypriv->btu_priv);
 		fp = formatstring;
 		pc = 0;
 		while  (*fp)  {
@@ -507,7 +507,7 @@ static void  doview()
 			continue;
 		if  (nwanted != 0  &&  !iswanted(jp))
 			continue;
-		if  (!mpermitted(&jp->h.bj_mode, BTM_READ))  {
+		if  (!mpermitted(&jp->h.bj_mode, BTM_READ, mypriv->btu_priv))  {
 			if  (nwanted == 0)
 				continue;
 			disp_arg[0] = jp->h.bj_job;

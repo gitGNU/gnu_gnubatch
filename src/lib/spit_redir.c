@@ -25,7 +25,7 @@
 #include "bjparam.h"
 #include "btjob.h"
 
-void spit_redir(FILE *dest, const unsigned fd, const unsigned action, const unsigned arg, const char *buff)
+void  spit_redir(FILE *dest, const unsigned fd, const unsigned action, const unsigned arg, const char *buff)
 {
 	putc(' ', dest);
 	switch  (action)  {

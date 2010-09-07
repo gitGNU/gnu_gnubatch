@@ -272,7 +272,7 @@ void  rvarfile(const int andunlock)
 
 /* Look up named var in file */
 
-vhash_t lookupvar(const char *name, const netid_t hostid, const unsigned perm, ULONG *Sseqp)
+vhash_t  lookupvar(const char *name, const netid_t hostid, const unsigned perm, ULONG *Sseqp)
 {
 	int	hadmatch = 0;
 	vhash_t	hp;
@@ -283,7 +283,7 @@ vhash_t lookupvar(const char *name, const netid_t hostid, const unsigned perm, U
 		fp = &Var_seg.vlist[hp];
 		if  (fp->Vent.var_id.hostid == hostid && strcmp(fp->Vent.var_name, name) == 0)  {
 			hadmatch++;
-			if  (mpermitted(&fp->Vent.var_mode, perm))  {
+			if  (mpermitted(&fp->Vent.var_mode, perm, 0))  {
 				*Sseqp = fp->Vent.var_sequence;
 				vunlock();
 				return  hp;

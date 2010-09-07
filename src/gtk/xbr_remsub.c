@@ -76,8 +76,7 @@ const	char	TSname[] = GBNETSERV_PORT;
 static int  initsock(int *rsock, const netid_t hostid, struct sockaddr_in *saddr)
 {
 	int	sockfd;
-	SHORT	portnum;
-	SHORT	udpproto;
+	SHORT	portnum, udpproto;
 	struct	sockaddr_in	cli_addr;
 	struct	servent	*sp;
 	struct	protoent  *pp;
@@ -129,7 +128,7 @@ static	RETSIGTYPE  asig(int n)
 	return;			/* Don't do anything just return setting EINTR */
 }
 
-static int udp_enquire(const int sockfd, struct sockaddr_in *saddr, char *outmsg, const int outlen, char *inmsg, const int inlen)
+static int  udp_enquire(const int sockfd, struct sockaddr_in *saddr, char *outmsg, const int outlen, char *inmsg, const int inlen)
 {
 #ifdef	STRUCT_SIG
 	struct	sigstruct_name	za, zold;
@@ -603,7 +602,7 @@ static void  ghostlist()
 
 static	char		*nohmsg;
 
-static netid_t choosehost(const int dlgtitle, struct remparams *rp, const int nullok, const int exist)
+static netid_t  choosehost(const int dlgtitle, struct remparams *rp, const int nullok, const int exist)
 {
 	GtkWidget		*dlg, *hostw;
 	int			cnt, offset = 0;

@@ -93,7 +93,7 @@ static void  addtable(const netid_t netid, const char *hname, const int isalias)
 /* Split string into bits in result using delimiters given.  Ignore
    bits after MAXPARSE-1 Assume string is manglable */
 
-static int  spliton(char **result,  char *string, const char *delims)
+static int  spliton(char **result, char *string, const char *delims)
 {
 	int	parsecnt = 1, resc = 1;
 

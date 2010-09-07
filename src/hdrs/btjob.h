@@ -131,9 +131,9 @@ typedef	struct	{
 	slotno_t	slotno;	/* SHM slot number on machine */
 }  jident;
 
-int	packjstring(BtjobRef, const char *, const char *, MredirRef, MenvirRef, char **);
-int	repackjob(BtjobRef, CBtjobRef, const char *, const char *, const unsigned, const unsigned, const unsigned, MredirRef, MenvirRef, char **);
-const char *title_of(CBtjobRef);
+extern	int	packjstring(BtjobRef, const char *, const char *, MredirRef, MenvirRef, char **);
+extern	int	repackjob(BtjobRef, CBtjobRef, const char *, const char *, const unsigned, const unsigned, const unsigned, MredirRef, MenvirRef, char **);
+extern	const char *title_of(CBtjobRef);
 
 #define	pid_jhash(pid)	(((unsigned) (pid)) % JOBHASHMOD)
 #define	jno_jhash(jno)	(((unsigned) (jno)) % JOBHASHMOD)

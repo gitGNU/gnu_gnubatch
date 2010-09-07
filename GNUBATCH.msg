@@ -25,9 +25,9 @@ DEFINE	LIB0 (lib) :
 		advtime.c  repmnthfix.c;
 
 DEFINE	LIB1 (lib) :
-		calcharge.c calchash.c getbtuser.c
-		getxbuf.c insertu.c look_host.c mpermitted.c net_feed.c
-		open_ci.c packjstring.c readreply.c readu.c
+		calchash.c getbtuser.c
+		getxbuf.c look_host.c mpermitted.c net_feed.c
+		open_ci.c packjstring.c readreply.c
 		produser.c rjfile.c rvfile.c;
 
 DEFINE	LIB2 (lib) :
@@ -1070,26 +1070,7 @@ E,H{Unknown queue result message} ++
 Mostly for btcharge
 ]
 
-E{Btcharge output format} ++			"%s:%f"
-E{Unexpected charges record} ++			"Unexpected charges record %d0"
-E{Btcharge record this host} ++			"%D4 %T4:%u0:%d1:%d2:%f"
-E{Btcharge record other host} ++		"%D4 %T4:%u0:%d1:%d2:%f run on %N5"
-E{Btcharge fee imposed} ++			"%D4 %T4:%u0 charged %f"
-E{Btcharge fee all} ++				"%D4 %T4:All users charged %f"
-E{Btcharge user consolidated} ++		"%D4 %T4:%u0 consolidated to %f"
-E{Btcharge zero user} ++			"%D4 %T4:%u0 zeroed"
-E{Btcharge zero all} ++				"%D4 %T4:All users zeroed"
-E{Bad number for charge amt} ++			"%P:bad number for charge amount: %s"
 E{Btcharge unknown user} ++			"Unknown user name %s"
-
-E{Btcharge batch running} ++
-"%P:The GNUbatch scheduler is running and to avoid conflicts
-we only allow reformatting of the charges file whilst it
-is stopped."
-
-E{Btcharge not created yet} ++
-"Sorry but the charges file has not been created yet.
-Has GNUbatch been run yet?"
 
 [
 Btstart
@@ -1855,6 +1836,7 @@ Display titles for btulist
 ]
 P{Btulist title}+'d'-1		"Defp"
 P{Btulist title}+'g'-1		"Group"
+P{Btulist title}+'i'-1		"Uid"
 P{Btulist title}+'j'-1		"Jmode"
 P{Btulist title}+'l'-1		"Minp"
 P{Btulist title}+'m'-1		"Maxp"
@@ -2157,20 +2139,6 @@ A{btcichange arg freeze current} ++ COPY	"freeze-current"
 A{btcichange arg freeze home} ++ COPY		"freeze-home"
 
 [
-Argument syntax for btcharge
-]
-A{btcharge arg explain} = ROUND(@, 20)	"?,explain"
-A{btcharge arg print} ++ COPY		"p,print-users"
-A{btcharge arg full} ++ COPY		"P,print-full"
-A{btcharge arg zero} ++ COPY		"z,zero-charge"
-A{btcharge arg add} ++ COPY		"c,add-charge"
-A{btcharge arg consol} ++ COPY		"C,consolidate"
-A{btcharge arg reset} ++ COPY		"R,reset-file"
-A{btcharge arg cancel} ++ COPY		"K,cancel-flags"
-A{btcharge arg freeze current} ++ COPY	"freeze-current"
-A{btcharge arg freeze home} ++ COPY	"freeze-home"
-
-[
 Argument defs for btjstat
 ]
 A{btjstat arg explain} = ROUND(@, 20)	"?,explain"
@@ -2439,24 +2407,7 @@ E{btcichange explain} ++
 [
 Usage options - btcharge
 ]
-E{btcharge explain} ++
-"   %P [-c charge] [-p] [-z] [ user ... ]
-           -c charge
-                   means add the specified charge to the named users'
-                   charge record (before printing it)
-           -p
-                   means print the charge records for the named users
-           -P
-                   means print full records for the named users
-           -z
-                   means zero the charge records for the named users
-                   (after printing it)
-           -C
-                   consolidate charge records
-           -R
-                   reset file (only whilst scheduler not running)
-           if no users are specified, the default is ALL users
-           if no options are specified, the default is ``-p''"
+E{btcharge explain} ++ "%P has been deprecated as charges are not supported any more"
 
 [
 Usage options - btjstat
@@ -4132,8 +4083,7 @@ m t s  Set maximum, total, special user load levels
 M T S  Set maximum, total, special default load levels
 p P    Edit user/default permissions
 c C    Edit user/default access
-a A    Copy defaults to user, all users
-b      Display charge"
+a A    Copy defaults to user, all users"
 
 ({btuser interactive state})K{btuser key user def pri} = 500	"d"
 ({btuser interactive state})K{btuser key sys def pri} ++	"D"
@@ -4328,13 +4278,6 @@ E,S{Saveopts yorn state} = 21
 ({Saveopts yorn state})		K	{key yorn yes} = 500		"y,Y"
 ({Saveopts yorn state})		K	{key yorn no} ++		"n,N"
 
-H,S{btuser ok rebuild state} = 50
-"Please confirm whether you want to rebuild
-the user control file."
-
-({btuser ok rebuild state})	K	{btuser ok rebuild} = 500	"y,Y,t,T,s,S"
-({btuser ok rebuild state})	K	{btuser not ok rebuild}	++	"n,N,f,F,u,U"
-
 [
 Prompts errors and help around basic commands
 ]
@@ -4496,8 +4439,7 @@ E{btuser simple display} = 900
 "The GNUbatch account for user %u0 group %g1.
 Minimum priority %d2 maximum %d3 default %d4
 Maximum load level %d5 total load %d6
-Special jobs are allocated a load of %d7
-Current charge is %f units."
+Special jobs are allocated a load of %d7."
 
 P{btuser privilege header} ++		"Privileges are:"
 P{btuser privilege next} ++		", "
@@ -5821,14 +5763,6 @@ H{xmbtuser user menu} ++
 
     Copy       - copy defaults to selected users"
 
-H{xmbtuser charges menu} ++
-"Charges menu - Choose from:
-    Zero       - Set charges for selected users
-                 to zero
-    Zero all   - Set charges for all users to zero
-    Impose     - Add a value to selected users'
-                 current charge."
-
 H{xmbtuser search menu} ++
 "Search menu - Choose from:
     Search - for particular string
@@ -5902,10 +5836,6 @@ H{xmbtuser user priv dialog} ++
 "This menu selects the privileges for the selected users
 Use the ""Set Default"" button to set to the defaults."
 
-H{xmbtuser addfee dialog} ++
-"Use this menu to add a constant fee to the charges
-for all of the selected users."
-
 H{xmbtuser search menu help} ++
 "Use this menu to set up which kind of search you want to
 do for particular users.
@@ -5922,16 +5852,6 @@ P,H{xmbtuser copy privs to everyone} = ROUND(@, 50)
 "After editing the default privileges, you can
 now choose to assign these defaults to all other users
 (apart from yourself)."
-
-P,H{xmbtuser zero charges for all users} ++
-"Zero charges for all users",
-"I just thought I'd ask before zero-ing charges for
-all known users, as this is a bit drastic!"
-
-P,H{xmbtuser zero charges for given users} ++
-"Zero charges for selected users",
-"I just thought I'd ask before zero-ing charges for
-the selected users, as this is a bit drastic!"
 
 [
 Error messages and corresponding help
@@ -5975,10 +5895,6 @@ E,H{xmbtuser specll gt totll} ++
 "You have set the special load level
 to a higher value that the total load level
 I think that this is a mistake."
-
-E,H{xmbtuser invalid numeric} ++
-"Invalid numeric field",
-"Expecting a numeric value for the fee to impose."
 
 E,H{xmbtuser macro not defined} ++
 "Macro command %d0 not defined.",
@@ -6157,9 +6073,6 @@ P{xbtuser framelab jmode} = ROUND(@, 5) "Job default permissions"
 P{xbtuser framelab vmode} = ROUND(@, 5) "Variable default permissions"
 P{xbtuser framelab privs} = ROUND(@, 5) "Privileges"
 P{xbtuser priv setdef} ++		"Set default"
-
-P{xbtuser charges dlg} = ROUND(@, 5)	"Display user charges"
-P{xbtuser impose dlg} = ROUND(@, 5)	"Impose fee"
 
 P{xbtuser frametab pri}	= ROUND(@, 5)	"Priorities"
 P{xbtuser frametab ll} ++		"Load levels"
@@ -6672,10 +6585,6 @@ E{Cannot unlock user ctrl file} ++
 "Error - %E
 Attempting to unlock user control file."
 
-E{Cannot create temp user file} ++
-"Error - %E
-Attempting to create temporary file %s."
-
 E{Wrong version of product} ++
 "User control file GNUbatch version number is %d0.
 GNUbatch Version is %d1.
@@ -6746,34 +6655,6 @@ E{Unlock error} ++	"%P - error %E unlocking"
 E{Lock error jobs} ++	"%P - error %E locking job seg"
 E{Lock error vars} ++	"%P - error %E locking var seg"
 
-E,H{Not registered yet} = ROUND(@, 50)
-"Sorry, but your user id %R has not yet been
-registered for GNUbatch. You need to run
-(or have run for you) ""btuser -i"" or ""xmbtuser"".",
-"Sorry, but your user id %R has not yet been
-registered for GNUbatch. You need to run
-(or have run for you) ""btuser -i"" or ""xmbtuser""."
-
-E{Consider rebuild uc file} ++
-"Warning: Your user control file may be out of date
-with your password file. Please consider running ""btuser -i""
-or ""btuchange -R""."
-
-P,H,E{Confirm rebuild uc file} ++
-"Rebuild user control file?",
-"The user control file may be out of sync with the
-password file, with some new users omitted or old ones
-still included. Please indicate whether you want to
-rebuild it. (This may take some time and will hold up
-other users).",
-"Your user control file may be out of date
-with your password file.
-Do you want to rebuild it? (Y or N).
-(This may take some time and may hold up other users)"
-
-E{Rebuilding wait} ++			"***Rebuilding user control file, please wait***"
-E{Finished rebuild} ++			"Finished rebuild."
-
 [
 Mostly panic messages
 ]
@@ -6796,7 +6677,6 @@ E{Panic couldn't reset sem id} ++		"Could not reset semaphore id - %E"
 E{Panic cannot create CI file} ++		"Cannot create command interpreter file %s - %E"
 E{Panic cannot open CI file} ++			"Cannot open command interpreter file %s - %E"
 E{Panic cannot read CI file} ++			"Trouble reading command interpreter file %s"
-E{Panic cannot create charge file} ++		"%P cannot create charge file - %E"
 E{Panic trouble creating shared mem} ++
 "Trouble creating shared memory id %x9 - %E
 To fix this try running ""ripc -d"" or removing the segment

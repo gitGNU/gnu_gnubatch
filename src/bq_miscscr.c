@@ -127,7 +127,7 @@ int  r_max(int a, int b)
 
 /* Expand mode etc codes into messages */
 
-static int  expcodes(WINDOW * win)
+static int  expcodes(WINDOW *win)
 {
 	int	i, j, look4, modestart;
 
@@ -494,9 +494,7 @@ void  con_refill(WINDOW *win, int row, int col, BtconRef cp)
 
 int  getval(WINDOW *win, int row, int col, int update, BtconRef cp)
 {
-	int	ch;
-	int	posn = 0, icol, is_num, is_string;
-	int	err_no;
+	int	ch, posn = 0, icol, is_num, is_string, err_no;
 	unsigned  magcode;
 	char	result[BTC_VALUE+1];
 

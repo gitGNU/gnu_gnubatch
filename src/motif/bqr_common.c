@@ -99,7 +99,7 @@ static void  endmailwrt(Widget w, int data)
 			wjmsg(J_CHANGE, xindx);
 			retc = readreply();
 			if  (retc != J_OK)
-				dojerror(retc, bjp);
+				qdojerror(retc, bjp);
 		}
 		freexbuf(xindx);
 	}
@@ -140,7 +140,7 @@ void  cb_jmail(Widget parent, int isjob)
 		return;
 	cjob = cj;
 	nochanges = 0;
-	readonly = !mpermitted(&cj->h.bj_mode, BTM_WRITE);
+	readonly = !mpermitted(&cj->h.bj_mode, BTM_WRITE, mypriv->btu_priv);
 #endif
 #ifdef	XMBTR_JCALL
 	BtjobRef	cj;
@@ -299,7 +299,7 @@ static void  fillintimes()
 }
 
 #ifdef HAVE_XM_SPINB_H
-static void  time_adj(Widget w, XtPointer wh, XmSpinBoxCallbackStruct * cbs)
+static void  time_adj(Widget w, XtPointer wh, XmSpinBoxCallbackStruct *cbs)
 {
 	time_t	newtime = ctimec.tc_nexttime;
 	Widget	whichw = cbs->widget;
@@ -654,7 +654,7 @@ static void  endstime(Widget w, int data)
 		wjmsg(J_CHANGE, xindx);
 		retc = readreply();
 		if  (retc != J_OK)
-			dojerror(retc, bjp);
+			qdojerror(retc, bjp);
 		freexbuf(xindx);
 #endif
 #ifdef	XMBTR_JCALL
@@ -695,7 +695,7 @@ void  cb_stime(Widget parent, int isjob)
 	}
 	cjob = cj;
 	nochanges = 0;
-	readonly = !mpermitted(&cj->h.bj_mode, BTM_WRITE);
+	readonly = !mpermitted(&cj->h.bj_mode, BTM_WRITE, mypriv->btu_priv);
 	init_tdefaults();
 #endif
 #ifdef	XMBTR_JCALL
@@ -1498,7 +1498,7 @@ static void  endtitprill(Widget w, int data)
 		wjmsg(J_CHANGE, xindx);
 		retc = readreply();
 		if  (retc != J_OK)
-			dojerror(retc, bjp);
+			qdojerror(retc, bjp);
 		freexbuf(xindx);
 #endif
 #ifdef	XMBTR_JCALL
@@ -1832,7 +1832,7 @@ static void  endprocpar(Widget w, int data)
 		wjmsg(J_CHANGE, xindx);
 		retc = readreply();
 		if  (retc != J_OK)
-			dojerror(retc, bjp);
+			qdojerror(retc, bjp);
 		freexbuf(xindx);
 #endif
 #ifdef	XMBTR_JCALL
@@ -1844,10 +1844,10 @@ static void  endprocpar(Widget w, int data)
 }
 
 #ifdef	XMBTQ_JCALL
-static Widget error_box(Widget mainform, Widget	prevabove, Widget prevleft, char *widname, const int widnum, const int current, const unsigned readonly)
+static Widget  error_box(Widget mainform, Widget prevabove, Widget prevleft, char *widname, const int widnum, const int current, const unsigned readonly)
 #endif
 #ifdef	XMBTR_JCALL
-static Widget error_box(Widget mainform, Widget	prevabove, Widget prevleft, char *widname, const int widnum, const int current)
+static Widget  error_box(Widget mainform, Widget prevabove, Widget prevleft, char *widname, const int widnum, const int current)
 #endif
 {
 	Widget	result;
@@ -1897,10 +1897,10 @@ static Widget error_box(Widget mainform, Widget	prevabove, Widget prevleft, char
 }
 
 #ifdef	XMBTQ_JCALL
-static Widget error_boxes(Widget mainform, Widget prevabove, char *labname, char *widnamel, char *widnameu, const int wnl, const int wnu, const int currl, const int curru, unsigned readonly)
+static Widget  error_boxes(Widget mainform, Widget prevabove, char *labname, char *widnamel, char *widnameu, const int wnl, const int wnu, const int currl, const int curru, unsigned readonly)
 #endif
 #ifdef	XMBTR_JCALL
-static Widget error_boxes(Widget mainform, Widget prevabove, char *labname, char *widnamel, char *widnameu, const int wnl, const int wnu, const int currl, const int curru)
+static Widget  error_boxes(Widget mainform, Widget prevabove, char *labname, char *widnamel, char *widnameu, const int wnl, const int wnu, const int currl, const int curru)
 #endif
 {
 	Widget	prevleft;
@@ -1945,7 +1945,7 @@ void  cb_procpar(Widget parent, int isjob)
 	if  (!cj)
 		return;
 	cjob = cj;
-	readonly = !mpermitted(&cj->h.bj_mode, BTM_WRITE);
+	readonly = !mpermitted(&cj->h.bj_mode, BTM_WRITE, mypriv->btu_priv);
 	nochanges = 0;
 #endif
 #ifdef	XMBTR_JCALL
@@ -2317,7 +2317,7 @@ static void  endruntime(Widget w, int data)
 		wjmsg(J_CHANGE, xindx);
 		retc = readreply();
 		if  (retc != J_OK)
-			dojerror(retc, bjp);
+			qdojerror(retc, bjp);
 		freexbuf(xindx);
 	}
 #endif
@@ -2360,7 +2360,7 @@ void  cb_runtime(Widget parent, int isjob)
 	init_tdefaults();
 #endif
 	cjob = cj;
-	readonly = !mpermitted(&cj->h.bj_mode, BTM_WRITE);
+	readonly = !mpermitted(&cj->h.bj_mode, BTM_WRITE, mypriv->btu_priv);
 #endif
 #ifdef	XMBTR_JCALL
 	Widget	pushb;

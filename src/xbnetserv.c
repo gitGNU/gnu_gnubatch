@@ -602,7 +602,7 @@ int  tcp_serv_open(SHORT portnum)
 {
 	int	result;
 	struct	sockaddr_in	sin;
-#if	defined(SO_REUSEADDR)
+#ifdef	SO_REUSEADDR
 	int	on = 1;
 #endif
 	sin.sin_family = AF_INET;
@@ -1048,7 +1048,7 @@ static void  process_q()
 #ifdef	USING_MMAP
 	sync_xfermmap();
 #endif
-	for  (tries = 0;  tries < MAXTRIES;  tries++)  {
+	for  (tries = 0;  tries < MSGQ_BLOCKS;  tries++)  {
 		if  (msgsnd(Ctrl_chan, (struct msgbuf *)&Oreq, sizeof(Shreq) + sizeof(ULONG), IPC_NOWAIT) >= 0)  {
 			freexbuf_serv(indx);
 			if  ((ret = readreply()) != J_OK)  {
@@ -1061,7 +1061,7 @@ static void  process_q()
 			close(sock);
 			exit(0);
 		}
-		sleep(TRYTIME);
+		sleep(MSGQ_BLOCKWAIT);
 	}
 	freexbuf_serv(indx);
 	unlink(tmpfl);
@@ -1071,54 +1071,8 @@ static void  process_q()
 
 static void  process()
 {
-	int	nret;
+	int	nret, highfd;
 	unsigned  nexttime;
-#ifdef	POLLSOCKETS
-	int	npoll = apirsock >= 0? 3: 2;
-	struct	pollfd	fdlist[3];
-
-	fdlist[0].fd = qsock;
-	fdlist[1].fd = uasock;
-	fdlist[2].fd = apirsock;
-	fdlist[0].events = fdlist[1].events = fdlist[2].events = POLLIN|POLLPRI|POLLERR;
-	fdlist[0].revents = fdlist[1].revents = fdlist[2].revents = 0;
-
-	for  (;;)  {
-
-		alarm(nexttime = process_alarm());
-
-		/* Treat an error as an indication to stop (probably signal).  */
-
-		if  ((nret = poll(fdlist, npoll, -1)) < 0)  {
-			if  (errno == EINTR)  {
-				if  (had_alarm)  {
-					had_alarm = 0;
-					alarm(nexttime = process_alarm());
-				}
-				hadrfresh = 0;
-				continue;
-			}
-			exit(0);
-		}
-
-		if  (nexttime != 0)
-			alarm(0);
-
-		if  (fdlist[0].revents)  {
-			process_q();
-			if  (--nret <= 0)
-				continue;
-		}
-		if  (fdlist[1].revents)  {
-			process_ua();
-			if  (--nret <= 0)
-				continue;
-		}
-		if  (fdlist[2].revents)
-			process_api();
-	}
-#else
-	int	highfd;
 	fd_set	ready;
 
 	highfd = qsock;
@@ -1165,7 +1119,6 @@ static void  process()
 		if  (apirsock >= 0  &&  FD_ISSET(apirsock, &ready))
 			process_api();
 	}
-#endif		/* !POLLSOCKETS */
 }
 
 void  trace_dtime(char *buf)

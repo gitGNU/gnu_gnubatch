@@ -701,7 +701,7 @@ static struct posttab *find_posttab(const char *nam, struct posttab *pt)
 	return  (struct posttab *) 0;
 }
 
-static int is_boundary(char *buff, char *boundary, const int buffb, const int boundb)
+static int  is_boundary(char *buff, char *boundary, const int buffb, const int boundb)
 {
 	if  (buffb < boundb + 3)	/* Two extra minuses and \n */
 		return  0;

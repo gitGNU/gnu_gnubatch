@@ -17,6 +17,7 @@
 
 #include "config.h"
 #include <stdio.h>
+#include <ctype.h>
 #include "errnums.h"
 
 int  helprdn()
@@ -28,7 +29,7 @@ int  helprdn()
 		ch = getc(Cfile);
 	}
 
-	while  (ch >= '0'  && ch <= '9')  {
+	while  (isdigit(ch))  {
 		result = result * 10 + ch - '0';
 		ch = getc(Cfile);
 	}

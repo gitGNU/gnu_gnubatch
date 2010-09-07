@@ -22,8 +22,7 @@
 
 void  fprint_error(FILE *fp, int Errnum)
 {
-	char	**emess = helpvec(Errnum, 'E');
-	char	**ep;
+	char	**emess = helpvec(Errnum, 'E'), **ep;
 
 	if  (emess[0] == (char *) 0)  {
 		free((char *) emess);

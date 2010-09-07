@@ -153,7 +153,7 @@ static void  udp_send_to(char *vec, const int size, const netid_t whoto)
 	}
 }
 
-static void udp_job_process(const netid_t whofrom, char *pmsg, int datalength, struct sockaddr_in *sinp)
+static void  udp_job_process(const netid_t whofrom, char *pmsg, int datalength, struct sockaddr_in *sinp)
 {
 	int			ret = 0, tries;
 	ULONG			indx;
@@ -248,8 +248,6 @@ static void udp_job_process(const netid_t whofrom, char *pmsg, int datalength, s
 				goto  senderr;
 			}
 
-			Fileprivs = cli_priv->btu_priv;
-
 			/* Stick user and group into job to keep track
 			   of them.  (Realuid/realgid get set by
 			   convert_username).  */
@@ -328,10 +326,10 @@ static void udp_job_process(const netid_t whofrom, char *pmsg, int datalength, s
 #ifdef	USING_MMAP
 		sync_xfermmap();
 #endif
-		for  (tries = 0;  tries < MAXTRIES;  tries++)  {
+		for  (tries = 0;  tries < MSGQ_BLOCKS;  tries++)  {
 			if  (msgsnd(Ctrl_chan, (struct msgbuf *)&Oreq, sizeof(Shreq) + sizeof(ULONG), IPC_NOWAIT) >= 0)
 				goto  sentok;
-			sleep(TRYTIME);
+			sleep(MSGQ_BLOCKWAIT);
 		}
 		freexbuf_serv(indx);
 		abort_job(pj);
@@ -410,7 +408,7 @@ static	void	udp_send_uglist(struct sockaddr_in *sinp, char **(*ugfn)(const char 
 	udp_send_vec(reply, 1, sinp);
 }
 
-static void udp_send_vlist(const netid_t whofrom, const char *pmsg, const int datalen, struct sockaddr_in *sinp)
+static void  udp_send_vlist(const netid_t whofrom, const char *pmsg, const int datalen, struct sockaddr_in *sinp)
 {
 	struct	hhash	*frp;
 	const	struct	ua_venq	*venq;
@@ -434,7 +432,6 @@ static void udp_send_vlist(const netid_t whofrom, const char *pmsg, const int da
 	Realgid = (gid_t) lastgid;
 	if  (!(mpriv = getbtuentry(Realuid)))
 		goto  badret;
-	Fileprivs = mpriv->btu_priv;
 	rvarfile(1);
 
 	/* These aren't sorted, that's the other end's problem.  */
@@ -446,7 +443,7 @@ static void udp_send_vlist(const netid_t whofrom, const char *pmsg, const int da
 		for  (hp = Var_seg.vhash[nn];  hp >= 0;  hp = fp->Vnext)  {
 			fp = &Var_seg.vlist[hp];
 			vp = &fp->Vent;
-			if  ((vp->var_flags & VF_EXPORT)  &&  mpermitted(&vp->var_mode, perm))  {
+			if  ((vp->var_flags & VF_EXPORT)  &&  mpermitted(&vp->var_mode, perm, 0))  {
 				unsigned  lng = strlen(vp->var_name), hlng, tlng;
 				char	*hname;
 				if  (vp->var_id.hostid)  {
@@ -574,7 +571,7 @@ void  put_hf(const unsigned year, char *reply)
 	}
 }
 
-static void udp_send_hlist(const netid_t whofrom, const char *pmsg, const int datalen, struct sockaddr_in *sinp)
+static void  udp_send_hlist(const netid_t whofrom, const char *pmsg, const int datalen, struct sockaddr_in *sinp)
 {
 	const	struct	ua_venq	*venq;
 	unsigned	year;
@@ -907,7 +904,7 @@ static void  do_logout(struct hhash *frp)
 
 /* Handle logins and initial enquiries, doing as much as possible.  */
 
-static void udp_login(const netid_t whofrom, struct ua_login *inmsg, const int inlng, struct sockaddr_in *sinp)
+static void  udp_login(const netid_t whofrom, struct ua_login *inmsg, const int inlng, struct sockaddr_in *sinp)
 {
 	struct	ua_login	reply;
 
@@ -1041,7 +1038,7 @@ static void udp_login(const netid_t whofrom, struct ua_login *inmsg, const int i
 	udp_send_vec((char *) &reply, sizeof(reply), sinp);
 }
 
-static void udp_newgrp(const netid_t whofrom, struct ua_login *inmsg, const int inlng, struct sockaddr_in *sinp)
+static void  udp_newgrp(const netid_t whofrom, struct ua_login *inmsg, const int inlng, struct sockaddr_in *sinp)
 {
 	struct	hhash		*frp;
 	int_ugid_t		ngid;
@@ -1119,7 +1116,7 @@ static void udp_newgrp(const netid_t whofrom, struct ua_login *inmsg, const int 
 
 /* Original kind of enquiry for user permissions.  */
 
-static void udp_send_perms(const netid_t whofrom, const char *pmsg, const int datalen, struct sockaddr_in *sinp)
+static void  udp_send_perms(const netid_t whofrom, const char *pmsg, const int datalen, struct sockaddr_in *sinp)
 {
 	int		ret;
 	int_ugid_t	nuid;
@@ -1347,7 +1344,7 @@ void  tell_myself(struct hhash *frp)
 
 /* This is mainly for dosbtwrite */
 
-static void answer_asku(const netid_t whofrom, struct ua_pal *inmsg, const int inlng, struct sockaddr_in *sinp)
+static void  answer_asku(const netid_t whofrom, struct ua_pal *inmsg, const int inlng, struct sockaddr_in *sinp)
 {
 	int	nu = 0, cnt;
 	struct	hhash	*hp;

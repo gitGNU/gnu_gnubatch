@@ -114,12 +114,12 @@ struct	macromenitem	jobmacs[MAXMACS];
 
 /* Send job reference only to scheduler */
 
-void  wjimsg(const unsigned code, CBtjobRef jp)
+void  qwjimsg(const unsigned code, CBtjobRef jp)
 {
 	Oreq.sh_params.mcode = code;
 	Oreq.sh_un.jobref.hostid = jp->h.bj_hostid;
 	Oreq.sh_un.jobref.slotno = jp->h.bj_slotno;
-	if  (msgsnd(Ctrl_chan, (struct msgbuf *) &Oreq, sizeof(Shreq) + sizeof(jident), IPC_NOWAIT) < 0)
+	if  (msgsnd(Ctrl_chan, (struct msgbuf *) &Oreq, sizeof(Shreq) + sizeof(jident), 0) < 0)
 		msg_error();
 }
 
@@ -132,13 +132,13 @@ void  wjmsg(const unsigned code, const ULONG indx)
 #ifdef	USING_MMAP
 	sync_xfermmap();
 #endif
-	if  (msgsnd(Ctrl_chan, (struct msgbuf *) &Oreq, sizeof(Shreq) + sizeof(ULONG), IPC_NOWAIT) < 0)
+	if  (msgsnd(Ctrl_chan, (struct msgbuf *) &Oreq, sizeof(Shreq) + sizeof(ULONG), 0) < 0)
 		msg_error();
 }
 
 /* Display job-type error message */
 
-void  dojerror(unsigned retc, BtjobRef jp)
+void  qdojerror(unsigned retc, BtjobRef jp)
 {
 	switch  (retc & REQ_TYPE)  {
 	default:
@@ -351,7 +351,7 @@ void  cb_jqueue(GtkAction *action)
 			unsigned  tlng = strlen(cp) + strlen(cj->jobqueue) + 2;
 			if  (!(ntit = malloc(tlng)))
 				ABORT_NOMEM;
-			sprintf(ntit, "%s:%s", cj->jobqueue, cp+1);
+			sprintf(ntit, "%s:%s", cj->jobqueue, cp);
 		}
 		else
 			ntit = stracpy(cp);
@@ -440,7 +440,7 @@ void  cb_advtime()
 	wjmsg(J_CHANGE, xindx);
 	retc = readreply();
 	if  (retc != J_OK)
-		dojerror(retc, djp);
+		qdojerror(retc, djp);
 	freexbuf(xindx);
 }
 
@@ -465,7 +465,7 @@ void  cb_setrunc(GtkAction *action)
 	wjmsg(J_CHANGE, xindx);
 	retc = readreply();
 	if  (retc != J_OK)
-		dojerror(retc, djp);
+		qdojerror(retc, djp);
 	freexbuf(xindx);
 }
 
@@ -492,16 +492,16 @@ void  cb_force(GtkAction *action)
 		wjmsg(J_CHANGE, xindx);
 		retc = readreply();
 		if  (retc != J_OK)  {
-			dojerror(retc, djp);
+			qdojerror(retc, djp);
 			freexbuf(xindx);
 			return;
 		}
 		freexbuf(xindx);
 	}
-	wjimsg(strcmp(gtk_action_get_name(action), "Force") == 0? J_FORCENA: J_FORCE, cj);
+	qwjimsg(strcmp(gtk_action_get_name(action), "Force") == 0? J_FORCENA: J_FORCE, cj);
 	retc = readreply();
 	if  (retc != J_OK)
-		dojerror(retc, cj);
+		qdojerror(retc, cj);
 }
 
 /* Signal sending */
@@ -580,9 +580,9 @@ void  cb_kill(GtkAction *action)
 		return;
 
 	Oreq.sh_params.param = signum;
-	wjimsg(J_KILL, cj);
+	qwjimsg(J_KILL, cj);
 	if  ((retc = readreply()) != J_OK)
-		dojerror(retc, cj);
+		qdojerror(retc, cj);
 }
 #endif /* !IN_XBTR */
 
@@ -1111,7 +1111,7 @@ void  cb_time()
 		wjmsg(J_CHANGE, xindx);
 		retc = readreply();
 		if  (retc != J_OK)
-			dojerror(retc, bjp);
+			qdojerror(retc, bjp);
 		freexbuf(xindx);
 		break;
 #endif
@@ -1706,7 +1706,7 @@ static int  extract_job_propresp(struct propdialog_data *ddata)
 	wjmsg(J_CHANGE, xindx);
 	retc = readreply();
 	if  (retc != J_OK)
-		dojerror(retc, bjp);
+		qdojerror(retc, bjp);
 	freexbuf(xindx);
 #endif
 	return  1;
@@ -1846,7 +1846,7 @@ void  cb_jperm()
 			*bjp = cjob;
 			wjmsg(J_CHMOD, xindx);
 			if  ((retc = readreply()) != J_OK)
-				dojerror(retc, bjp);
+				qdojerror(retc, bjp);
 			freexbuf(xindx);
 		}
 #endif
@@ -1907,9 +1907,9 @@ void  cb_jowner()
 		gtk_combo_box_set_active(GTK_COMBO_BOX(gsel), uw);
 
 	if  (!(mypriv->btu_priv & BTM_WADMIN))  {
-		if  (!mpermitted(&cj->h.bj_mode, cj->h.bj_mode.o_uid == Realuid? BTM_UGIVE: BTM_UTAKE))
+		if  (!mpermitted(&cj->h.bj_mode, cj->h.bj_mode.o_uid == Realuid? BTM_UGIVE: BTM_UTAKE, mypriv->btu_priv))
 			gtk_widget_set_sensitive(usel, FALSE);
-		if  (!mpermitted(&cj->h.bj_mode, cj->h.bj_mode.o_gid == Realgid? BTM_GGIVE: BTM_GTAKE))
+		if  (!mpermitted(&cj->h.bj_mode, cj->h.bj_mode.o_gid == Realgid? BTM_GGIVE: BTM_GTAKE, mypriv->btu_priv))
 			gtk_widget_set_sensitive(gsel, FALSE);
 	}
 
@@ -1927,9 +1927,9 @@ void  cb_jowner()
 				doerror($EH{xmbtq invalid group});
 			else  {
 				Oreq.sh_params.param = nug;
-				wjimsg(J_CHGRP, cj);
+				qwjimsg(J_CHGRP, cj);
 				if  ((retc = readreply()) != J_OK)
-					dojerror(retc, cj);
+					qdojerror(retc, cj);
 			}
 		}
 		g_free(newug);
@@ -1942,9 +1942,9 @@ void  cb_jowner()
 				doerror($EH{xmbtq invalid user});
 			else  {
 				Oreq.sh_params.param = nug;
-				wjimsg(J_CHOWN, cj);
+				qwjimsg(J_CHOWN, cj);
 				if  ((retc = readreply()) != J_OK)
-					dojerror(retc, cj);
+					qdojerror(retc, cj);
 			}
 		}
 		g_free(newug);
@@ -1970,10 +1970,10 @@ void  cb_jdel()
 	if  (Dispflags & DF_CONFABORT  &&  !Confirm($PH{xmbtq confirm delete job}))
 		return;
 
-	wjimsg(J_DELETE, cj);
+	qwjimsg(J_DELETE, cj);
 	retc = readreply();
 	if  (retc != J_OK)
-		dojerror(retc, cj);
+		qdojerror(retc, cj);
 }
 
 void  cb_timedef()

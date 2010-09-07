@@ -121,8 +121,7 @@ void  spit_options(FILE *dest, const char *name)
 static int  initsock(const netid_t hostid)
 {
 	int	sockfd;
-	SHORT	portnum;
-	SHORT	udpproto;
+	SHORT	portnum, udpproto;
 	struct	servent	*sp;
 	struct	protoent  *pp;
 	char	*udp_protoname;

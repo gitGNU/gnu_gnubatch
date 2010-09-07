@@ -17,7 +17,8 @@
 
 /* Location of various files
    We pretend this is a shell script for autoconf as it saves too many
-  defines with loads of \$s in. */
+  defines with loads of \$s in.
+  datarootdir=@datarootdir@ */
 
 #define	GNU_BATCH_VERSION		@PACKAGE_VERSION@
 #define	GNU_BATCH_MAJOR_VERSION		@MAJOR_PACKAGE_VERSION@
@@ -60,9 +61,6 @@
 
 #define	SPDIR_RAW	"@spooldir@"
 #define	BTUFILE		"${SPOOLDIR-@spooldir@}/btufile@PACKAGE_VERSION@"
-#define	BTUTMP		"${SPOOLDIR-@spooldir@}/btutmp@PACKAGE_VERSION@"
-#define	CHFILE		"${SPOOLDIR-@spooldir@}/btcharges@PACKAGE_VERSION@"
-#define	CHTMP		"${SPOOLDIR-@spooldir@}/btchtmp@PACKAGE_VERSION@"
 #define	BTCI		"${SPOOLDIR-@spooldir@}/cifile"
 #define	HOLFILE		"${SPOOLDIR-@spooldir@}/holfile"
 #define	SPDIR		"${SPOOLDIR-@spooldir@}"
@@ -88,7 +86,6 @@
 
 #define	INT_CONFIG	"${SPHELPDIR-@sphelpdir@}/btint-config"
 
-#define	DUMPPWFILE	"${SPOOLDIR-@spooldir@}/pwdump@PACKAGE_VERSION@"
 #define	BTPWPROG	"${SPROGDIR-@pkgexecdir@}/btpwchk"
 
 #define	XIHTMLINI	"${SPROGDIR-@pkgdatadir@}/gbhtml.ini"

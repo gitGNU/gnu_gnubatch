@@ -1913,9 +1913,6 @@ int  ulcheck(BtjobhRef jp)
 	unsigned	jind = Job_seg.dptr->js_q_head, sofar = 0;
 	BtuserRef	g;
 
-	if  (!(g = getbtuentry((uid_t) jp->bj_mode.o_uid)))
-		return  1;
-
 	while  (jind != JOBHASHEND)  {
 		BtjobhRef	njp = &Job_seg.jlist[jind].j.h;
 		if  (njp->bj_mode.o_uid == jp->bj_mode.o_uid  &&  njp->bj_progress >= BJP_STARTUP1  &&  njp->bj_runhostid == 0)
@@ -1923,6 +1920,7 @@ int  ulcheck(BtjobhRef jp)
 		jind = Job_seg.jlist[jind].q_nxt;
 	}
 
+	g = getbtuentry((uid_t) jp->bj_mode.o_uid);
 	return  jp->bj_ll + sofar > g->btu_totll;
 }
 
@@ -2805,7 +2803,6 @@ void  completed_job(const unsigned slotno)
 		break;
 	}
 
-	do_charge((Btjob *) jp, (LONG) (jh->bj_etime - jh->bj_stime));
 	logjob((Btjob *) jp, lcode, 0L, jh->bj_mode.o_uid, jh->bj_mode.o_gid);
 
 #ifdef	NETWORK_VERSION

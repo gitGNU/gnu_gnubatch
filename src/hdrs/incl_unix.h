@@ -33,6 +33,7 @@
 
 #define	QSORTP1	(void *)
 #define	QSORTP4	(int (*)(const void *,const void *))
+
 #ifdef	STDC_HEADERS
 #include <string.h>
 #else
@@ -66,3 +67,7 @@ extern char *runpwd();
 extern void  nomem(const char *, const int);
 #define	ABORT_NOMEM	nomem(Filename, __LINE__)
 #define	ABORT_NOMEMINL	nomem(__FILE__, __LINE__)
+
+/* This is to shut compilers up about errors which don't matter */
+
+extern	int	Ignored_error;

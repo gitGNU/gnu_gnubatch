@@ -206,7 +206,7 @@ static void  endqueue(Widget w, int data)
 			unsigned  tlng = strlen(cp) + strlen(cjob->jobqueue) + 2;
 			if  (!(ntit = malloc(tlng)))
 				ABORT_NOMEM;
-			sprintf(ntit, "%s:%s", cjob->jobqueue, cp+1);
+			sprintf(ntit, "%s:%s", cjob->jobqueue, cp);
 		}
 		else
 			ntit = stracpy(cp);
@@ -326,7 +326,7 @@ static void  mdtoggle(Widget parent, int which, XmToggleButtonCallbackStruct *cb
 	}
 }
 
-static void CreateModeDialog(Widget formw, Widget prevabove, BtmodeRef current, int isvar)
+static void  CreateModeDialog(Widget formw, Widget prevabove, BtmodeRef current, int isvar)
 {
 	Widget	mrc;
 	int	nrows = MODENUMBERS, row, col;

@@ -45,8 +45,6 @@ GtkWidget	*toplevel;
 
 HelpaltRef	montypes, filetypes;
 
-ULONG		Fileprivs;
-
 void  nomem(const char *fl, const int ln)
 {
 	fprintf(stderr, "%s:Mem alloc fault: %s line %d\n", progname, fl, ln);

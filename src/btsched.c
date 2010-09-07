@@ -286,6 +286,33 @@ void  niceend(int signum)
 	do_exit(0);
 }
 
+#if  	defined(HAVE_SIGACTION) && defined(SA_SIGINFO)
+void  trap_loop(int signum, siginfo_t *sit, void *p)
+{
+	unsigned  long  pc = 0;
+	FILE	*fp = fopen("loop.trap", "a");
+#ifdef	OS_LINUX
+	struct  ucontext  *uc = (struct ucontext *) p;
+	pc = uc->uc_mcontext.gregs[14];
+#endif
+#ifdef	OS_OSF1
+	struct  sigcontext  *sc = (struct sigcontext *) p;
+	pc = sc->sc_pc;
+#endif
+#ifdef  OS_AIX_4_3
+	unsigned *addr = (unsigned *) p;
+	pc = addr[10];		/* I'm sure it's declared somewhere but I can't find it */
+#endif
+#if  	defined(OS_SOLARIS) && !defined(i386)
+	struct ucontext *uc = (struct ucontext *) p;
+	pc = uc->uc_mcontext.gregs[REG_PC];
+#endif
+	fprintf(fp, "Pid = %d:\tSignal %d pc = %lx addr = %lx\n", getpid(), sit->si_signo, pc, (unsigned long) sit->si_addr);
+	fclose(fp);
+	_exit(0);
+}
+#endif
+
 /* Try to exit gracefully and quickly....
    Return error code if you can't do it.  */
 
@@ -1115,12 +1142,8 @@ static void  n_reqs(ShipcRef rq, int bytes)
 			goto  badlen;
 		if  (tracing & TRACE_NETREQ)
 			trace_op_pid("Docharge", rq->sh_params.upid);
-		{
-			int	jn = findj_by_jid(&rq->sh_un.jobref);
-			if  (jn >= 0)
-				do_charge(&Job_seg.jlist[jn].j, rq->sh_params.param);
-			return;
-		}
+		/* Don't do anything but continue to support people who do */
+		return;
 
 	case  N_RJASSIGN:
 		if  (bytes != sizeof(Shreq) + sizeof(struct jremassmsg))
@@ -1452,7 +1475,6 @@ MAINFN_TYPE  main(int argc, char **argv)
 	oldumask = umask(C_MASK);
 	nice(DEF_BASE_NICE);
 
-	open_chfile();
 	initlog();
 
 	/* As parent process, generate IPC message.  Open job and var
@@ -1470,11 +1492,41 @@ MAINFN_TYPE  main(int argc, char **argv)
 	sigact_routine(SIGQUIT, &zign, (struct sigstruct_name *) 0);
 	zign.sighandler_el = niceend;
 	sigact_routine(SIGTERM, &zign, (struct sigstruct_name *) 0);
+#ifndef	DEBUG
+#if  	defined(HAVE_SIGACTION) && defined(SA_SIGINFO)
+	zign.sigflags_el = SA_SIGINFO;
+#ifdef	NO_SA_SIGACTION
+	zign.sighandler_el = trap_loop;
+#else
+	zign.sa_sigaction = trap_loop;
+#endif
+#endif
+	sigact_routine(SIGFPE, &zign, (struct sigstruct_name *) 0);
+	sigact_routine(SIGBUS, &zign, (struct sigstruct_name *) 0);
+	sigact_routine(SIGSEGV, &zign, (struct sigstruct_name *) 0);
+	sigact_routine(SIGILL, &zign, (struct sigstruct_name *) 0);
+#ifdef	SIGSYS
+	sigact_routine(SIGSYS, &zign, (struct sigstruct_name *) 0);
+#endif /* SIGSYS */
+#ifdef	HAVE_SIGACTION
+	zign.sigflags_el = SIGVEC_INTFLAG;
+	zign.sighandler_el = niceend;
+#endif
+#endif /* !DEBUG */
 #else  /* !STRUCT_SIG */
 	signal(SIGHUP, SIG_IGN);
 	signal(SIGINT, SIG_IGN);
 	signal(SIGQUIT, SIG_IGN);
 	signal(SIGTERM, niceend);
+#ifndef	DEBUG
+	signal(SIGFPE, niceend);
+	signal(SIGBUS, niceend);
+	signal(SIGSEGV, niceend);
+	signal(SIGILL, niceend);
+#ifdef	SIGSYS
+	signal(SIGSYS, niceend);
+#endif /* SIGSYS */
+#endif /* !DEBUG */
 #endif /* !STRUCT_SIG */
 
 	/* Must open var file first as it's needed by job file */

@@ -106,19 +106,19 @@ extern	int	Ctrl_chan;
 
 /* Send var-type message to scheduler */
 
-void  wvmsg(unsigned code, BtvarRef vp, ULONG Saveseq)
+void  qwvmsg(unsigned code, BtvarRef vp, ULONG Saveseq)
 {
 	Oreq.sh_params.mcode = code;
 	if  (vp)
 		Oreq.sh_un.sh_var = *vp;
 	Oreq.sh_un.sh_var.var_sequence = Saveseq;
-	if  (msgsnd(Ctrl_chan, (struct msgbuf *) &Oreq, sizeof(Shreq) + sizeof(Btvar), IPC_NOWAIT) < 0)
+	if  (msgsnd(Ctrl_chan, (struct msgbuf *) &Oreq, sizeof(Shreq) + sizeof(Btvar), 0) < 0)
 		msg_error();
 }
 
 /* Display var-type error message */
 
-void  doverror(unsigned retc, BtvarRef vp)
+void  qdoverror(unsigned retc, BtvarRef vp)
 {
 	switch  (retc  & REQ_TYPE)  {
 	default:
@@ -251,9 +251,9 @@ int  createvar()
 	refresh();
 #endif
 	strcpy(Oreq.sh_un.sh_var.var_comment, str);
-	wvmsg(V_CREATE, (BtvarRef) 0, 0L);
+	qwvmsg(V_CREATE, (BtvarRef) 0, 0L);
 	if  ((retc = readreply()) != V_OK)  {
-		doverror(retc, &Oreq.sh_un.sh_var);
+		qdoverror(retc, &Oreq.sh_un.sh_var);
 		return  -1;
 	}
 	return  1;
@@ -268,7 +268,7 @@ int  delvar(BtvarRef vp)
 
 	/* Can the geyser do it?  */
 
-	if  (!mpermitted(&vp->var_mode, BTM_DELETE))  {
+	if  (!mpermitted(&vp->var_mode, BTM_DELETE, mypriv->btu_priv))  {
 		disp_str = vp->var_name;
 		doerror(vscr, $E{btq vlist cannot delete});
 		return  0;
@@ -320,9 +320,9 @@ int  delvar(BtvarRef vp)
 			return  -1;
 	}
 
-	wvmsg(V_DELETE, vp, Saveseq);
+	qwvmsg(V_DELETE, vp, Saveseq);
 	if  ((retc = readreply()) != V_OK)  {
-		doverror(retc, &Oreq.sh_un.sh_var);
+		qdoverror(retc, &Oreq.sh_un.sh_var);
 		return  -1;
 	}
 	return  1;
@@ -338,7 +338,7 @@ int  assvar(BtvarRef vp, int row, int col, int prompt)
 
 	disp_str = vp->var_name;
 
-	if  (!mpermitted(&vp->var_mode, BTM_WRITE))  {
+	if  (!mpermitted(&vp->var_mode, BTM_WRITE, mypriv->btu_priv))  {
 		doerror(vscr, $E{btq vlist cannot assign});
 		return  0;
 	}
@@ -368,9 +368,9 @@ int  assvar(BtvarRef vp, int row, int col, int prompt)
 		return  -1;
 	Oreq.sh_un.sh_var = *vp;
 	Oreq.sh_un.sh_var.var_value = newval;
-	wvmsg(V_ASSIGN, (BtvarRef) 0, Saveseq);
+	qwvmsg(V_ASSIGN, (BtvarRef) 0, Saveseq);
 	if  ((retc = readreply()) != V_OK)  {
-		doverror(retc, &Oreq.sh_un.sh_var);
+		qdoverror(retc, &Oreq.sh_un.sh_var);
 		return  -1;
 	}
 	return  1;
@@ -432,7 +432,7 @@ int  arithvar(int key, BtvarRef vp)
 	unsigned	retc;
 
 	disp_str = vp->var_name;
-	if  (!mpermitted(&vp->var_mode, BTM_WRITE))  {
+	if  (!mpermitted(&vp->var_mode, BTM_WRITE, mypriv->btu_priv))  {
 		doerror(vscr, $E{btq vlist cannot assign});
 		return  0;
 	}
@@ -465,9 +465,9 @@ int  arithvar(int key, BtvarRef vp)
 
 	Oreq.sh_un.sh_var = *vp;
 	Oreq.sh_un.sh_var.var_value.con_un.con_long = newval;
-	wvmsg(V_ASSIGN, (BtvarRef) 0, Saveseq);
+	qwvmsg(V_ASSIGN, (BtvarRef) 0, Saveseq);
 	if  ((retc = readreply()) != V_OK)  {
-		doverror(retc, &Oreq.sh_un.sh_var);
+		qdoverror(retc, &Oreq.sh_un.sh_var);
 		return  -1;
 	}
 	return  1;
@@ -479,21 +479,21 @@ int  modvar(BtvarRef vp)
 	unsigned	retc;
 	ULONG		Saveseq = vp->var_sequence;
 
-	if  (!mpermitted(&vp->var_mode, BTM_RDMODE))  {
+	if  (!mpermitted(&vp->var_mode, BTM_RDMODE, mypriv->btu_priv))  {
 		disp_str = vp->var_name;
 		doerror(vscr, $E{btq vlist cannot change mode});
 		return  0;
 	}
 
-	readwrite = mpermitted(&vp->var_mode, BTM_WRMODE);
+	readwrite = mpermitted(&vp->var_mode, BTM_WRMODE, mypriv->btu_priv);
 
 	Oreq.sh_un.sh_var = *vp;
 	if  (mode_edit(vscr, readwrite, 0, vp->var_name, (jobno_t) 0, &Oreq.sh_un.sh_var.var_mode) <= 0  ||  !readwrite)
 		return  -1;
 
-	wvmsg(V_CHMOD, (BtvarRef) 0, Saveseq);
+	qwvmsg(V_CHMOD, (BtvarRef) 0, Saveseq);
 	if  ((retc = readreply()) != V_OK)  {
-		doverror(retc, &Oreq.sh_un.sh_var);
+		qdoverror(retc, &Oreq.sh_un.sh_var);
 		return  -1;
 	}
 	return  1;
@@ -536,9 +536,9 @@ int  ownvar(BtvarRef vp)
 	}
 
 	Oreq.sh_params.param = nu;
-	wvmsg(V_CHOWN, vp, Saveseq);
+	qwvmsg(V_CHOWN, vp, Saveseq);
 	if  ((retc = readreply()) != V_OK)  {
-		doverror(retc, &Oreq.sh_un.sh_var);
+		qdoverror(retc, &Oreq.sh_un.sh_var);
 		return  -1;
 	}
 	return  1;
@@ -581,9 +581,9 @@ int  grpvar(BtvarRef vp)
 	}
 
 	Oreq.sh_params.param = ng;
-	wvmsg(V_CHGRP, vp, Saveseq);
+	qwvmsg(V_CHGRP, vp, Saveseq);
 	if  ((retc = readreply()) != V_OK)  {
-		doverror(retc, &Oreq.sh_un.sh_var);
+		qdoverror(retc, &Oreq.sh_un.sh_var);
 		return  -1;
 	}
 	return  1;
@@ -600,7 +600,7 @@ int  renvar(BtvarRef vp)
 
 	/* Can the geyser do it?  */
 
-	if  (!mpermitted(&vp->var_mode, BTM_DELETE))  {
+	if  (!mpermitted(&vp->var_mode, BTM_DELETE, mypriv->btu_priv))  {
 		disp_str = vp->var_name;
 		doerror(vscr, $E{btq vlist Cannot rename});
 		return  0;
@@ -628,11 +628,11 @@ int  renvar(BtvarRef vp)
 	Oreq.sh_un.sh_rn.sh_ovar = *vp;
 	Oreq.sh_un.sh_rn.sh_ovar.var_sequence = Saveseq;
 	strcpy(Oreq.sh_un.sh_rn.sh_rnewname, str);
-	if  (msgsnd(Ctrl_chan, (struct msgbuf *) &Oreq, sizeof(Shreq) + sizeof(Btvar) + strlen(str) + 1, IPC_NOWAIT) < 0)
+	if  (msgsnd(Ctrl_chan, (struct msgbuf *) &Oreq, sizeof(Shreq) + sizeof(Btvar) + strlen(str) + 1, 0) < 0)
 		msg_error();
 	if  ((retc = readreply()) != V_OK)  {
 		disp_str2 = Oreq.sh_un.sh_rn.sh_rnewname;
-		doverror(retc, &Oreq.sh_un.sh_rn.sh_ovar);
+		qdoverror(retc, &Oreq.sh_un.sh_rn.sh_ovar);
 		return  -1;
 	}
 	return  1;

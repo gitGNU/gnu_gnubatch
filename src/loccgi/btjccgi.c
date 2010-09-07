@@ -89,7 +89,7 @@ void  nomem(const char *fl, const int ln)
 
 struct	argop  {
 	const	char	*name;		/* Name of parameter case insens */
-	int  (*arg_fn)(const struct argop *);
+	int	(*arg_fn)(const struct argop *);
 	unsigned  char	typ;			/* Type of parameter */
 #define	AO_BOOL		0
 #define	AO_UCHAR	1

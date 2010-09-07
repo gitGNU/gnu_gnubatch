@@ -106,7 +106,7 @@ extern	WINDOW	*jscr,
 
 void  dochelp(WINDOW *, int);
 void  doerror(WINDOW *, int);
-void  dojerror(unsigned, BtjobRef);
+void  qdojerror(unsigned, BtjobRef);
 void  endhe(WINDOW *, WINDOW **);
 void  ws_fill(WINDOW *, const int, const struct sctrl *, const char *);
 void  wn_fill(WINDOW *, const int, const struct sctrl *, const LONG);
@@ -136,11 +136,11 @@ int  editjargs(BtjobRef jp)
 
 	/* Can the geyser do it?  */
 
-	if  (!mpermitted(&jp->h.bj_mode, BTM_READ))  {
+	if  (!mpermitted(&jp->h.bj_mode, BTM_READ, mypriv->btu_priv))  {
 		doerror(jscr, $E{btq cannot read job});
 		return  0;
 	}
-	if  (!mpermitted(&jp->h.bj_mode, BTM_WRITE))
+	if  (!mpermitted(&jp->h.bj_mode, BTM_WRITE, mypriv->btu_priv))
 		readonly = 1;
 
 	/* Initialise buffer which gives args */
@@ -453,7 +453,7 @@ int  editjargs(BtjobRef jp)
 		}
 		wjmsg(J_CHANGE, xindx);
 		if  ((retc = readreply()) != J_OK)  {
-			dojerror(retc, bjp);
+			qdojerror(retc, bjp);
 			freexbuf(xindx);
 			freehelp(hv);
 			free(movingmsg);
@@ -495,11 +495,11 @@ int  editenvir(BtjobRef jp)
 
 	/* Can the geyser do it?  */
 
-	if  (!mpermitted(&jp->h.bj_mode, BTM_READ))  {
+	if  (!mpermitted(&jp->h.bj_mode, BTM_READ, mypriv->btu_priv))  {
 		doerror(jscr, $E{btq cannot read job});
 		return  0;
 	}
-	if  (!mpermitted(&jp->h.bj_mode, BTM_WRITE))
+	if  (!mpermitted(&jp->h.bj_mode, BTM_WRITE, mypriv->btu_priv))
 		readonly = 1;
 
 	/* Initialise buffer which gives envs */
@@ -831,7 +831,7 @@ int  editenvir(BtjobRef jp)
 		}
 		wjmsg(J_CHANGE, xindx);
 		if  ((retc = readreply()) != J_OK)  {
-			dojerror(retc, bjp);
+			qdojerror(retc, bjp);
 			freexbuf(xindx);
 			freehelp(hv);
 			free(movingmsg);
@@ -871,11 +871,11 @@ int  editredir(BtjobRef jp)
 
 	/* Can the geyser do it?  */
 
-	if  (!mpermitted(&jp->h.bj_mode, BTM_READ))  {
+	if  (!mpermitted(&jp->h.bj_mode, BTM_READ, mypriv->btu_priv))  {
 		doerror(jscr, $E{btq cannot read job});
 		return  0;
 	}
-	if  (!mpermitted(&jp->h.bj_mode, BTM_WRITE))
+	if  (!mpermitted(&jp->h.bj_mode, BTM_WRITE, mypriv->btu_priv))
 		readonly = 1;
 
 	/* Initialise buffer which gives redirs */
@@ -1312,7 +1312,7 @@ int  editredir(BtjobRef jp)
 		}
 		wjmsg(J_CHANGE, xindx);
 		if  ((retc = readreply()) != J_OK)  {
-			dojerror(retc, bjp);
+			qdojerror(retc, bjp);
 			freexbuf(xindx);
 			freehelp(hv);
 			free(movingmsg);
@@ -1360,11 +1360,11 @@ int  editprocenv(BtjobRef jp)
 
 	/* Can the geyser do it?  */
 
-	if  (!mpermitted(&jp->h.bj_mode, BTM_READ))  {
+	if  (!mpermitted(&jp->h.bj_mode, BTM_READ, mypriv->btu_priv))  {
 		doerror(jscr, $E{btq cannot read job});
 		return  0;
 	}
-	if  (!mpermitted(&jp->h.bj_mode, BTM_WRITE))
+	if  (!mpermitted(&jp->h.bj_mode, BTM_WRITE, mypriv->btu_priv))
 		readonly = 1;
 
 	/* Get header for procenv window, incorporating the job name
@@ -1567,7 +1567,7 @@ int  editprocenv(BtjobRef jp)
 	doout:
 		wjmsg(J_CHANGE, xindx);
 		if  ((retc = readreply()) != J_OK)  {
-			dojerror(retc, bjp);
+			qdojerror(retc, bjp);
 			freexbuf(xindx);
 			freehelp(hv);
 			free(dirprompt);

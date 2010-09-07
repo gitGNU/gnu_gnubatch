@@ -61,10 +61,10 @@ struct	remote	{
 
 extern	netid_t		myhostid;
 
-void		end_hostfile();
-unsigned	calcnhash(const netid_t);
-netid_t  	look_hostname(const char *);
-char		*look_host(const netid_t);
-struct	remote	*get_hostfile();
-void 		hash_hostfile();
+extern	void		end_hostfile();
+extern	unsigned	calcnhash(const netid_t);
+extern	netid_t  	look_hostname(const char *);
+extern	char		*look_host(const netid_t);
+extern	struct	remote	*get_hostfile();
+extern	void 		hash_hostfile();
 #endif

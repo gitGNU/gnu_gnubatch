@@ -84,4 +84,4 @@ typedef	const	Btmode	*CBtmodeRef;
 #define	MODE_ON		2
 #define	MODE_OFF	3
 
-extern int mpermitted(CBtmodeRef, const unsigned);
+extern	int  mpermitted(CBtmodeRef, const unsigned, const ULONG);

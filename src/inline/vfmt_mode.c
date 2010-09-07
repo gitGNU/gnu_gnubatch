@@ -18,7 +18,7 @@
 VFORMAT(fmt_mode)
 {
 	fmt_t  lng = 0;
-	if  (mpermitted(&vp->var_mode, BTM_RDMODE))  {
+	if  (mpermitted(&vp->var_mode, BTM_RDMODE, 0))  {
 		lng = fmtmode(lng, "U", vp->var_mode.u_flags);
 		lng = fmtmode(lng, ",G", vp->var_mode.g_flags);
 		lng = fmtmode(lng, ",O", vp->var_mode.o_flags);

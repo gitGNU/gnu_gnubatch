@@ -680,7 +680,7 @@ EOPTION(o_queuehost)
 	return  OPTRESULT_ARG_OK;
 }
 
-void checksetmode(const int modenum, const ushort *plist, const ushort srcmode, USHORT *flgs)
+void  checksetmode(const int modenum, const ushort *plist, const ushort srcmode, USHORT *flgs)
 {
 	USHORT	mflags = 0;
 

@@ -364,7 +364,7 @@ static void  editci(GtkTreeIter *iter, struct cmdint_data *cdata)
 	gtk_widget_destroy(dlg);
 }
 
-static void ilist_dblclk(GtkTreeView *treeview, GtkTreePath *path, GtkTreeViewColumn  *col, struct cmdint_data *cdata)
+static void  ilist_dblclk(GtkTreeView *treeview, GtkTreePath *path, GtkTreeViewColumn  *col, struct cmdint_data *cdata)
 {
 	GtkTreeIter	iter;
 

@@ -48,7 +48,7 @@ void  jid_unpack(BtjobhRef dest, const jident *src)
 	dest->bj_slotno = ntohl(src->slotno);
 }
 
-void  vid_pack(vident *dest, const Btvar * const src)
+void  vid_pack(vident *dest, const Btvar *const src)
 {
 	dest->hostid = src->var_id.hostid? src->var_id.hostid: myhostid;
 	dest->slotno = htonl(src->var_id.slotno);

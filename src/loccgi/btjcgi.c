@@ -455,17 +455,17 @@ void  jdisplay()
 		if  (jp->h.bj_hostid  &&  (jp->h.bj_jflags & exportflag) == 0)
 			continue;
 
-		if  (mpermitted(&jp->h.bj_mode, BTM_READ))  {
+		if  (mpermitted(&jp->h.bj_mode, BTM_READ, mypriv->btu_priv))  {
 			isreadable = 1;
 			hval |= LV_MINEORVIEW|LV_LOCORRVIEW;
 		}
-		if  (mpermitted(&jp->h.bj_mode, BTM_WRITE))
+		if  (mpermitted(&jp->h.bj_mode, BTM_WRITE, mypriv->btu_priv))
 			hval |= LV_CHANGEABLE;
-		if  (mpermitted(&jp->h.bj_mode, BTM_DELETE))
+		if  (mpermitted(&jp->h.bj_mode, BTM_DELETE, mypriv->btu_priv))
 			hval |= LV_DELETEABLE;
-		if  (mpermitted(&jp->h.bj_mode, BTM_KILL))
+		if  (mpermitted(&jp->h.bj_mode, BTM_KILL, mypriv->btu_priv))
 			hval |= LV_KILLABLE;
-		if  (mpermitted(&jp->h.bj_mode, BTM_WRMODE))
+		if  (mpermitted(&jp->h.bj_mode, BTM_WRMODE, mypriv->btu_priv))
 			hval |= LV_CHMODABLE;
 		if  (jp->h.bj_progress >= BJP_STARTUP1)
 			hval |= LV_PROCESS;
@@ -498,7 +498,7 @@ struct	arginterp  {
 	unsigned  short  flags;
 #define	AIF_NOARG	0
 #define	AIF_ARG		1
-	int  (*arg_fn)(char *);
+	int	(*arg_fn)(char *);
 };
 
 int  perf_listformat(char *notused)
@@ -712,7 +712,7 @@ char **gen_vlist(const USHORT permflags, const int expr)
 
 		/* Skip ones which aren't allowed.  */
 
-		if  (!mpermitted(&vp->var_mode, permflags))
+		if  (!mpermitted(&vp->var_mode, permflags, mypriv->btu_priv))
 			continue;
 
 		if  (expr)  {
@@ -1091,7 +1091,7 @@ int  perf_listperms(char *arg)
 	setup_for_jobextract(arg, &jw);
 	jp = jw.jp;
 	mp = &jp->h.bj_mode;
-	if  (!mpermitted(mp, BTM_RDMODE|BTM_WRMODE))  {
+	if  (!mpermitted(mp, BTM_RDMODE|BTM_WRMODE, mypriv->btu_priv))  {
 		disp_str = arg;
 		html_disperror($E{btjcgi no mode perm});
 		exit(E_NOPRIV);

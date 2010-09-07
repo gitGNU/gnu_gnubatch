@@ -48,8 +48,8 @@ void  close_optfile()
 char *rdoptfile(const char *file, const char *keyword)
 {
 	const  char	*inp;
-	int		ch, outlen;
 	char		*outp, *result = (char *) 0;
+	int		ch, outlen;
 
 	if  (file != (char *) 0)  {
 		close_optfile();	/*  Close previous one  */

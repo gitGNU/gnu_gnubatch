@@ -25,6 +25,7 @@
 SHELL		=	/bin/sh
 prefix		=	@prefix@
 exec_prefix	=	@exec_prefix@
+datarootdir	=	@datarootdir@
 PARENT		=	..
 BASE		=	../..
 HDRS		=	$(PARENT)/hdrs

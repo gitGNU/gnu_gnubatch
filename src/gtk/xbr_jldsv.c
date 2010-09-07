@@ -71,8 +71,8 @@ static	HelpargRef	btr_avec;
 
 static	char	Varname[] = "GBCH_R";
 
-char *rdoptfile(const char *, const char *);
-void  checksetmode(const int, const ushort *, const ushort, USHORT *);
+extern	char	*rdoptfile(const char *, const char *);
+extern	void	checksetmode(const int, const ushort *, const ushort, USHORT *);
 
 #ifdef DO_NOT_DEFINE
 /* This is just to force the inclusion of help

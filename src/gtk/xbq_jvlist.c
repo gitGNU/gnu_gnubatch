@@ -497,7 +497,7 @@ void  init_vlist_win()
 
 /* Common stuff on job list entry where we don't worry about whether job is readable */
 
-static void  set_jlist_common(GtkTreeIter * iter, const int jnum)
+static void  set_jlist_common(GtkTreeIter *iter, const int jnum)
 {
 	CBtjobhRef  jh = &jj_ptrs[jnum]->h;
 	char	outbuffer[HOSTNSIZE+30];
@@ -1001,7 +1001,7 @@ void  set_jlist_runt(GtkTreeIter *iter, CBtjobRef jp)
 	gtk_list_store_set(jlist_store, iter, JGRACETIME_COL, outbuffer, -1);
 }
 
-static unsigned mfmtmode(char *buff, unsigned lng, const char *prefix, const unsigned md)
+static unsigned  mfmtmode(char *buff, unsigned lng, const char *prefix, const unsigned md)
 {
 #ifdef	CHARSPRINTF
 	int	cnt;
@@ -1037,13 +1037,13 @@ static unsigned mfmtmode(char *buff, unsigned lng, const char *prefix, const uns
 	return  lng;
 }
 
-static void set_mode_col(GtkListStore *store, GtkTreeIter *iter, const int col, CBtmodeRef md)
+static void  set_mode_col(GtkListStore *store, GtkTreeIter *iter, const int col, CBtmodeRef md)
 {
 	char	outbuffer[50];
 
 	outbuffer[0] = '\0';
 
-	if  (mpermitted(md, BTM_RDMODE))  {
+	if  (mpermitted(md, BTM_RDMODE, mypriv->btu_priv))  {
 		unsigned  lng = mfmtmode(outbuffer, 0, "U", md->u_flags);
 		lng = mfmtmode(outbuffer, lng, ",G", md->g_flags);
 		mfmtmode(outbuffer, lng, ",O", md->o_flags);
@@ -1057,7 +1057,7 @@ void  set_jlist_store(const int jnum, GtkTreeIter *iter)
 
 	set_jlist_common(iter, jnum);
 
-	if  (mpermitted(&jp->h.bj_mode, BTM_READ))  {
+	if  (mpermitted(&jp->h.bj_mode, BTM_READ, mypriv->btu_priv))  {
 
 		set_jlist_title(iter, jp);
 		set_jlist_prillum(iter, jp);
@@ -1134,7 +1134,7 @@ void  set_vlist_store(const int vnum, GtkTreeIter *iter)
 	else
 		gtk_list_store_set(vlist_store, iter, VNAME_COL, vp->var_name, -1);
 
-	if  (mpermitted(&vp->var_mode, BTM_READ))  {
+	if  (mpermitted(&vp->var_mode, BTM_READ, mypriv->btu_priv))  {
 		CBtconRef	cp = &vp->var_value;
 		if  (cp->const_type == CON_STRING)
 			sprintf(vbuff, "\"%s\"", cp->con_un.con_string);
@@ -1319,7 +1319,7 @@ BtjobRef  getselectedjob(unsigned perm)
 		guint  seq;
 		gtk_tree_model_get(GTK_TREE_MODEL(jlist_store), &iter, SEQ_COL, &seq, -1);
 		result = jj_ptrs[seq];
-		if  (perm == 0  ||  mpermitted(&result->h.bj_mode, perm))
+		if  (perm == 0  ||  mpermitted(&result->h.bj_mode, perm, mypriv->btu_priv))
 			return  result;
 
 		disp_arg[0] = result->h.bj_job;
@@ -1360,7 +1360,7 @@ BtvarRef  getselectedvar(unsigned perm)
 
 		gtk_tree_model_get(GTK_TREE_MODEL(vlist_store), &iter, SEQ_COL, &seq, -1);
 		vp = &vv_ptrs[seq].vep->Vent;
-		if  (perm == 0  ||  mpermitted(&vp->var_mode, perm))
+		if  (perm == 0  ||  mpermitted(&vp->var_mode, perm, mypriv->btu_priv))
 			return  vp;
 
 		disp_str = vp->var_name;
@@ -1405,7 +1405,7 @@ int  val_var(const char *name, const unsigned modeflag)
 		vp = &vv_ptrs[middle].vep->Vent;
 		if  ((s = strcmp(colp, vp->var_name)) == 0)  {
 			if  (vp->var_id.hostid == hostid)  {
-				if  (mpermitted(&vp->var_mode, modeflag))
+				if  (mpermitted(&vp->var_mode, modeflag, mypriv->btu_priv))
 					return  middle;
 				return  -1;
 			}

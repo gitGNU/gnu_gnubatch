@@ -43,7 +43,7 @@ int  readfile(char *fl)
 	return  0;
 }
 
-int  writefile(char *fl)
+int	writefile(char *fl)
 {
 	FILE  *outf = fopen(fl, "w");
 	size_t	nb;

@@ -270,7 +270,7 @@ int  rjarg_title(apiBtjob *jp, char *str)
 
 /* Decode permission flags in CGI routines */
 
-void	decode_permflags(USHORT *arr, char *str, const int off, const int isjob)
+void  decode_permflags(USHORT *arr, char *str, const int off, const int isjob)
 {
 	USHORT  *ap;
 

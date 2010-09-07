@@ -463,7 +463,7 @@ FILE *ginfile(char *arg)
 	}
 	else  {
 		FILE	*res;
-		int  ch, pfile[2];
+		int	ch, pfile[2];
 		static	PIDTYPE	lastpid = -1;
 
 		/* Otherwise we fork off a process to read the file as
@@ -539,6 +539,7 @@ FILE *ginfile(char *arg)
 void  enqueue(char *name)
 {
 	unsigned	retc;
+	int	blkcount = MSGQ_BLOCKS;
 
 	JREQ->h.bj_job = job_num;
 
@@ -546,10 +547,13 @@ void  enqueue(char *name)
 #ifdef	USING_MMAP
 	sync_xfermmap();
 #endif
-	if  (msgsnd(Ctrl_chan, (struct msgbuf *) &Oreq, sizeof(Shreq) + sizeof(ULONG), IPC_NOWAIT) < 0)  {
-		print_error(errno == EAGAIN? $E{IPC msg q full}: $E{IPC msg q error});
-		unlink(tmpfl);
-		exit(E_SETUP);
+	while  (msgsnd(Ctrl_chan, (struct msgbuf *) &Oreq, sizeof(Shreq) + sizeof(ULONG), IPC_NOWAIT) < 0)  {
+		if  (errno != EAGAIN  ||  --blkcount <= 0)  {
+			print_error(errno == EAGAIN? $E{IPC msg q full}: $E{IPC msg q error});
+			unlink(tmpfl);
+			exit(E_SETUP);
+		}
+		sleep(MSGQ_BLOCKWAIT);
 	}
 	if  ((retc = readreply()) != J_OK)  {
 		unlink(tmpfl);

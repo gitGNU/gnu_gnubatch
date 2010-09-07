@@ -289,15 +289,15 @@ void  vdisplay()
 			continue;
 		if  (vp->var_id.hostid  &&  Dispflags & DF_LOCALONLY)
 			continue;
-		if  (mpermitted(&vp->var_mode, BTM_READ))  {
+		if  (mpermitted(&vp->var_mode, BTM_READ, mypriv->btu_priv))  {
 			isreadable = 1;
 			hval |= LV_MINEORVIEW|LV_LOCORRVIEW;
 		}
-		if  (mpermitted(&vp->var_mode, BTM_WRITE))
+		if  (mpermitted(&vp->var_mode, BTM_WRITE, mypriv->btu_priv))
 			hval |= LV_CHANGEABLE;
-		if  (mpermitted(&vp->var_mode, BTM_DELETE)  &&  !vp->var_id.hostid)
+		if  (mpermitted(&vp->var_mode, BTM_DELETE, mypriv->btu_priv)  &&  !vp->var_id.hostid)
 			hval |= LV_DELETEABLE;
-		if  (mpermitted(&vp->var_mode, BTM_WRMODE))
+		if  (mpermitted(&vp->var_mode, BTM_WRMODE, mypriv->btu_priv))
 			hval |= LV_CHMODABLE;
 
 		startrow();
@@ -324,7 +324,7 @@ struct	arginterp  {
 	unsigned  short  flags;
 #define	AIF_NOARG	0
 #define	AIF_ARG		1
-	int  (*arg_fn)(char *);
+	int	(*arg_fn)(char *);
 };
 
 static char *tof(const USHORT x)

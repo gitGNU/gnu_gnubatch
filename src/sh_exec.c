@@ -147,9 +147,8 @@ void  tellsched(const unsigned code, const ULONG param)
 	mess.outmsg.ugid = getgid();
 	mess.outmsg.hostid = 0;
 	mess.outmsg.param = param;
-	while  (msgsnd(Ctrl_chan, (struct msgbuf *) &mess, sizeof(mess) - sizeof(long), 0) < 0)
-		if  (errno != EINTR)
-			panic($E{Panic queue clogged up});
+	while  (msgsnd(Ctrl_chan, (struct msgbuf *) &mess, sizeof(mess) - sizeof(long), 0) < 0  &&  errno == EINTR)
+		;
 }
 
 /* Replace % args in arguments and environment. */
@@ -1110,7 +1109,7 @@ void  do_resched_msgs()
 {
 	Repmess	inmess;
 #ifdef	UNSAFE_SIGNALS
-	static RETSIGTYPE  catchit(int);
+	static  RETSIGTYPE catchit(int);
 	signal(RESCHED, SIG_IGN);
 #endif
 

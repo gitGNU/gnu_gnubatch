@@ -171,6 +171,22 @@ static fmt_t  fmt_group(CBtuserRef up, const int fwidth)
 		def_in_grp? (fmt_t) strlen(strcpy(bigbuff, defaultname)): 0;
 }
 
+static  fmt_t  fmt_uid(CBtuserRef up, const int fwidth)
+{
+#ifdef	CHARSPRINTF
+	if  (up)
+		sprintf(bigbuff, "%*u", fwidth, (unsigned) up->btu_user);
+	else
+		sprintf(bigbuff, "%*s", fwidth, "-");
+	return  (fmt_t) strlen(bigbuff);
+#else
+	if  (up)
+		return  (fmt_t) sprintf(bigbuff, "%*u", fwidth, (unsigned) up->btu_user);
+	else
+		return  (fmt_t)  sprintf(bigbuff, "%*s", fwidth, "-");
+#endif
+}
+
 /* Mapping of format characters (assumed A-Z a-z) and format routines */
 
 struct	formatdef  {
@@ -191,7 +207,7 @@ struct	formatdef
 	{	0,				NULLCP,	0		},	/* f */
 	{	$P{Btulist title}+'g'-1,	NULLCP,	fmt_group	},	/* g */
 	{	0,				NULLCP,	0		},	/* h */
-	{	0,				NULLCP,	0		},	/* i */
+	{	$P{Btulist title}+'i'-1,	NULLCP,	fmt_uid		},	/* i */
 	{	$P{Btulist title}+'j'-1,	NULLCP,	fmt_jmode	},	/* j */
 	{	0,				NULLCP,	0		},	/* k */
 	{	$P{Btulist title}+'l'-1,	NULLCP,	fmt_minpri	},	/* l */
@@ -573,12 +589,12 @@ int  sort_g(BtuserRef a, BtuserRef b)
 MAINFN_TYPE  main(int argc, char **argv)
 {
 	BtuserRef	ulist = (BtuserRef) 0;
-	unsigned	Nu = 0, pn;
+	unsigned	nusers = 0, pn;
 #if	defined(NHONSUID) || defined(DEBUG)
 	int_ugid_t	chk_uid;
 #endif
 
-	versionprint(argv, "$Revision: 1.2 $", 0);
+	versionprint(argv, "$Revision: 1.3 $", 0);
 
 	if  ((progname = strrchr(argv[0], '/')))
 		progname++;
@@ -610,54 +626,47 @@ MAINFN_TYPE  main(int argc, char **argv)
 	for  (pn = 0;  pn < NUM_PRIVBITS;  pn++)
 		ptab[pn].string = gprompt($P{Read adm abbr}+pn);
 
-	if  (!(mypriv = getbtuentry(Realuid)))  {
-		print_error($E{Not registered yet});
-		exit(E_UNOTSETUP);
-	}
+	mypriv = getbtuentry(Realuid);
+
 	if  (!(mypriv->btu_priv & BTM_RADMIN))  {
 		print_error($E{No read admin file priv});
 		exit(E_NOPRIV);
 	}
-	if  (btu_needs_rebuild)
-		print_error($E{Consider rebuild uc file});
 	if  (ulines)  {
-		ulist = getbtulist(&Nu);
 		if  (*argv)  {
-			BtuserRef newlist, ulp;
-			unsigned  cnt = 0;
-			char	**av;
-			for  (av = argv;  *av;  av++)
-				cnt++;
-			if  (!(newlist = (BtuserRef) malloc(cnt * sizeof(Btuser))))
+			char  **av = argv;
+			BtuserRef  up;
+			while  (*++av)
+				nusers++;
+			ulist = (BtuserRef) malloc(nusers * sizeof(Btuser));
+			if  (!ulist)
 				ABORT_NOMEM;
-			ulp = newlist;
-			cnt = 0;
+			up = ulist;
 			for  (av = argv;  *av;  av++)  {
-				int_ugid_t uid = lookup_uname(*av);
-				BtuserRef  oul;
-				if  (uid == UNKNOWN_UID)  {
-					disp_str = *av;
+				char	*uname = *av;
+				int_ugid_t  uid;
+				if  (isdigit(uname[0]))
+					uid = atoi(uname);
+				else  if   ((uid = lookup_uname(uname)) == UNKNOWN_UID)  {
+					nusers--;
+					disp_str = uname;
 					print_error($E{Btcharge unknown user});
 					continue;
 				}
-				for  (oul = ulist;  oul < &ulist[Nu];  oul++)
-					if  (oul->btu_user == uid)  {
-						*ulp++ = *oul;
-						cnt++;
-						break;
-					}
+				*up++ = *getbtuentry(uid);
 			}
-			free((char *) ulist);
-			ulist = newlist;
-			Nu = cnt;
+		}
+		else  {
+			ulist = getbtulist();
+			nusers = Npwusers;
 		}
 		if  (alphsort == SRT_USER)
-			qsort(QSORTP1 ulist, Nu, sizeof(Btuser), QSORTP4 sort_u);
+			qsort(QSORTP1 ulist, nusers, sizeof(Btuser), QSORTP4 sort_u);
 		else  if  (alphsort == SRT_GROUP)
-			qsort(QSORTP1 ulist, Nu, sizeof(Btuser), QSORTP4 sort_g);
+			qsort(QSORTP1 ulist, nusers, sizeof(Btuser), QSORTP4 sort_g);
 	}
 	if  (!formatstring)
 		formatstring = sdefaultfmt;
-	udisplay(ulist, Nu);
+	udisplay(ulist, nusers);
 	exit(0);
 }

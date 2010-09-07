@@ -191,7 +191,7 @@ void  whdrstr(WINDOW *wp, const char *str)
 	}
 }
 
-void mvwhdrstr(WINDOW *wp, const int row, const int col, const char *str)
+void  mvwhdrstr(WINDOW *wp, const int row, const int col, const char *str)
 {
 	wmove(wp, row, col);
 	whdrstr(wp, str);

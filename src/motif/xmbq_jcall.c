@@ -128,12 +128,12 @@ static	struct	{
 
 /* Send job reference only to scheduler */
 
-void  wjimsg(const unsigned code, CBtjobRef jp)
+void  qwjimsg(const unsigned code, CBtjobRef jp)
 {
 	Oreq.sh_params.mcode = code;
 	Oreq.sh_un.jobref.hostid = jp->h.bj_hostid;
 	Oreq.sh_un.jobref.slotno = jp->h.bj_slotno;
-	if  (msgsnd(Ctrl_chan, (struct msgbuf *) &Oreq, sizeof(Shreq) + sizeof(jident), IPC_NOWAIT) < 0)
+	if  (msgsnd(Ctrl_chan, (struct msgbuf *) &Oreq, sizeof(Shreq) + sizeof(jident), 0) < 0)
 		msg_error();
 }
 
@@ -146,13 +146,13 @@ void  wjmsg(const unsigned code, const ULONG indx)
 #ifdef	USING_MMAP
 	sync_xfermmap();
 #endif
-	if  (msgsnd(Ctrl_chan, (struct msgbuf *) &Oreq, sizeof(Shreq) + sizeof(ULONG), IPC_NOWAIT) < 0)
+	if  (msgsnd(Ctrl_chan, (struct msgbuf *) &Oreq, sizeof(Shreq) + sizeof(ULONG), 0) < 0)
 		msg_error();
 }
 
 /* Display job-type error message */
 
-void  dojerror(unsigned retc, BtjobRef jp)
+void  qdojerror(unsigned retc, BtjobRef jp)
 {
 	switch  (retc & REQ_TYPE)  {
 	default:
@@ -271,7 +271,7 @@ void  cb_advtime()
 	wjmsg(J_CHANGE, xindx);
 	retc = readreply();
 	if  (retc != J_OK)
-		dojerror(retc, djp);
+		qdojerror(retc, djp);
 	freexbuf(xindx);
 }
 
@@ -302,16 +302,16 @@ void  cb_jact(Widget parent, int data)
 		wjmsg(J_CHANGE, xindx);
 		retc = readreply();
 		if  (retc != J_OK)  {
-			dojerror(retc, djp);
+			qdojerror(retc, djp);
 			freexbuf(xindx);
 			return;
 		}
 		freexbuf(xindx);
 	}
-	wjimsg(data, cj);
+	qwjimsg(data, cj);
 	retc = readreply();
 	if  (retc != J_OK)
-		dojerror(retc, cj);
+		qdojerror(retc, cj);
 }
 
 static void  sendsig(Widget w, int data)
@@ -319,9 +319,9 @@ static void  sendsig(Widget w, int data)
 	if  (data)  {		/* signal pressed */
 		unsigned	retc;
 		Oreq.sh_params.param = data;
-		wjimsg(J_KILL, cjob);
+		qwjimsg(J_KILL, cjob);
 		if  ((retc = readreply()) != J_OK)
-			dojerror(retc, cjob);
+			qdojerror(retc, cjob);
 	}
 	XtDestroyWidget(GetTopShell(w));
 }
@@ -347,9 +347,9 @@ void  cb_jkill(Widget parent, int data)
 	if  (data != 0)  {
 		unsigned	retc;
 		Oreq.sh_params.param = data;
-		wjimsg(J_KILL, cj);
+		qwjimsg(J_KILL, cj);
 		if  ((retc = readreply()) != J_OK)
-			dojerror(retc, cj);
+			qdojerror(retc, cj);
 		return;
 	}
 
@@ -390,7 +390,7 @@ void  cb_jstate(Widget parent, int data)
 	wjmsg(J_CHANGE, xindx);
 	retc = readreply();
 	if  (retc != J_OK)
-		dojerror(retc, djp);
+		qdojerror(retc, djp);
 	freexbuf(xindx);
 }
 

@@ -560,6 +560,7 @@ void  reply_probe()
 	Shipc	nmsg;
 	SOCKLEN_T		repl = sizeof(struct sockaddr_in);
 	struct	sockaddr_in	reply_addr;
+
 	if  (recvfrom(probesock, (char *) &pmsg, sizeof(pmsg), 0, (struct sockaddr *) &reply_addr, &repl) < 0)
 		return;
 
@@ -2335,14 +2336,8 @@ static RETSIGTYPE  stop_mon(int signum)
 
 void  netmonitor()
 {
-	int	nret, rpcnt;
-#ifdef	POLLSOCKETS
-	int	fdnum;
-	struct	pollfd	*fdlist, *fd;
-#else
-	int	highfd;
+	int	nret, rpcnt, highfd;
 	fd_set	setupset, ready;
-#endif
 #ifdef	STRUCT_SIG
 	struct	sigstruct_name	z;
 #endif
@@ -2399,33 +2394,6 @@ void  netmonitor()
 #endif /* !DEBUG */
 #endif /* !STRUCT_SIG */
 
-#ifdef	POLLSOCKETS
-
-	fdnum = 3;
-	for  (rpcnt = 0;  rpcnt < connected.rl_nums;  rpcnt++)
-		if  (connected.list[rpcnt]->sockfd >= 0)
-			fdnum++;
-
-	if  (!(fdlist = (struct pollfd *) malloc((unsigned) (fdnum * sizeof(struct pollfd)))))
-		ABORT_NOMEM;
-
-	fdlist[0].fd = listsock;
-	fdlist[1].fd = viewsock;
-	fdlist[2].fd = probesock;
-	fdlist[0].events = fdlist[1].events = fdlist[2].events = POLLIN|POLLPRI|POLLERR;
-	fdlist[0].revents = fdlist[1].revents = fdlist[2].revents = 0;
-
-	fd = &fdlist[3];
-
-	for  (rpcnt = 0;  rpcnt < connected.rl_nums;  rpcnt++)  {
-		if  (connected.list[rpcnt]->sockfd >= 0)  {
-			fd->fd = connected.list[rpcnt]->sockfd;
-			fd->events = POLLIN|POLLPRI|POLLERR;
-			fd->revents = 0;
-			fd++;
-		}
-	}
-#else
 	highfd = listsock;
 	if  (viewsock > highfd)
 		highfd = viewsock;
@@ -2444,7 +2412,6 @@ void  netmonitor()
 			FD_SET(sock, &setupset);
 		}
 	}
-#endif
 
 	/* Set signal to note shutdown messages */
 
@@ -2459,64 +2426,6 @@ void  netmonitor()
 	   process.
 	   We slurp up messages and put on message queue. */
 
-#ifdef	POLLSOCKETS
-
-	for  (;;)  {
-
-		if  (count_catch_shut > 0)
-			exec_catchshut();
-
-		if  ((nret = poll(fdlist, fdnum, -1)) < 0)  {
-			if  (errno == EINTR)
-				continue;
-			panic($E{Panic poll/select error in netmonitor process});
-		}
-
-		if  (fdlist[1].revents)  {
-			feed_req();
-			if  (--nret <= 0)
-				continue;
-		}
-
-		fd = &fdlist[3];
-		for  (rpcnt = 0;  rpcnt < connected.rl_nums;  rpcnt++)  {
-			struct  remote  *rp = connected.list[rpcnt];
-			if  (rp->sockfd >= 0)  {
-				if  (fd->revents & POLLIN)  {
-					remote_recv(rp);
-					--nret;
-				}
-				else  if  (fd->revents)  {
-					Shipc	reply;
-					BLOCK_ZERO(&reply, sizeof(reply));
-					reply.sh_mtype = TO_SCHED;
-					reply.sh_params.mcode = N_SHUTHOST;
-					reply.sh_params.hostid = rp->hostid;
-					msgsnd(Ctrl_chan, (struct msgbuf *) &reply, sizeof(Shreq), 0);
-					exit(0);
-				}
-
-				fd++;
-			}
-		}
-		if  (nret <= 0)
-			continue;
-
-		if  (fdlist[2].revents)  {
-			reply_probe();
-			if  (--nret <= 0)
-				continue;
-		}
-		if  (fdlist[0].revents)  {
-			Shipc	reply;
-			BLOCK_ZERO(&reply, sizeof(reply));
-			reply.sh_mtype = TO_SCHED;
-			reply.sh_params.mcode = N_NEWHOST;
-			msgsnd(Ctrl_chan, (struct msgbuf *) &reply, sizeof(Shreq), 0);
-			exit(0);
-		}
-	}
-#else
 	for  (;;)  {
 
 		if  (count_catch_shut > 0)
@@ -2561,7 +2470,6 @@ void  netmonitor()
 			exit(0);
 		}
 	}
-#endif		/* !POLLSOCKETS */
 }
 
 #else	/* !NETWORK_VERSION */

@@ -104,7 +104,7 @@ int  val_var(const char *name, const unsigned modeflag)
 		vp = &vv_ptrs[middle].vep->Vent;
 		if  ((s = strcmp(colp, vp->var_name)) == 0)  {
 			if  (vp->var_id.hostid == hostid)  {
-				if  (mpermitted(&vp->var_mode, modeflag))
+				if  (mpermitted(&vp->var_mode, modeflag, mypriv->btu_priv))
 					return  middle;
 				return  -1;
 			}
@@ -143,7 +143,7 @@ static char **gen_vars(int isexport, unsigned mode)
 
 		/* Skip ones which are not allowed.  */
 
-		if  (!mpermitted(&vp->var_mode, mode))
+		if  (!mpermitted(&vp->var_mode, mode, mypriv->btu_priv))
 			continue;
 		if  (isexport >= 0)  {
 			if  (isexport)  {

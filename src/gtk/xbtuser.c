@@ -52,7 +52,6 @@ char	*Curr_pwd;
 int	hchanges,	/* Had changes to default */
 	uchanges;	/* Had changes to user(s) */
 
-unsigned	Nusers;
 BtuserRef	ulist;
 static	char	*defhdr;
 
@@ -105,7 +104,6 @@ static GtkActionEntry entries[] = {
 	{ "FileMenu", NULL, "_File" },
 	{ "DefMenu", NULL, "_Defaults" },
 	{ "UserMenu", NULL, "_Users"  },
-	{ "ChargeMenu", NULL, "_Charges"  },
 	{ "HelpMenu", NULL, "_Help" },
 	{ "Quit", GTK_STOCK_QUIT, "_Quit", "<control>Q", "Quit and save", G_CALLBACK(gtk_main_quit)},
 	{ "Dpri", NULL, "Default _pri", "<shift>P", "Set default priorities", G_CALLBACK(cb_pris)},
@@ -121,11 +119,6 @@ static GtkActionEntry entries[] = {
 	{ "uvmode", NULL, "_Var pPermissions", "A", "Set default var permissions for users", G_CALLBACK(cb_vmode)},
 	{ "upriv", NULL, "Privileges", "V", "Set privileges for users", G_CALLBACK(cb_priv)},
 	{ "copydef", NULL, "Copy defaults", NULL, "Copy defaults to selected users", G_CALLBACK(cb_copydef)},
-
-	{ "dispcharge", NULL, "Display charges", NULL, "Display charges for users", G_CALLBACK(cb_charges)},
-	{ "zerou", NULL, "Zero charges", NULL, "Zero charges for selected users", G_CALLBACK(cb_zerou)},
-	{ "zeroall", NULL, "Zero all charges", NULL, "Zero charges for all users", G_CALLBACK(cb_zeroall)},
-	{ "impose", NULL, "Impose fee", NULL, "Impose fee on selected users", G_CALLBACK(cb_impose)},
 
 	{ "About", NULL, "About xbtuser", NULL, "About xbtuser", G_CALLBACK(cb_about)}  };
 
@@ -184,7 +177,7 @@ static void  winit()
 	g_signal_connect(G_OBJECT(toplevel), "destroy", G_CALLBACK(gtk_main_quit), NULL);
 }
 
-gint sort_userid(GtkTreeModel *model, GtkTreeIter *a, GtkTreeIter *b, gpointer userdata)
+gint  sort_userid(GtkTreeModel *model, GtkTreeIter *a, GtkTreeIter *b, gpointer userdata)
 {
 	guint	id1, id2;
         gtk_tree_model_get(model, a, UID_COL, &id1, -1);
@@ -192,7 +185,7 @@ gint sort_userid(GtkTreeModel *model, GtkTreeIter *a, GtkTreeIter *b, gpointer u
 	return  id1 < id2? -1:  id1 == id2? 0: 1;
 }
 
-gint sort_username(GtkTreeModel *model, GtkTreeIter *a, GtkTreeIter *b, gpointer userdata)
+gint  sort_username(GtkTreeModel *model, GtkTreeIter *a, GtkTreeIter *b, gpointer userdata)
 {
         gchar	*name1, *name2;
 	gint	ret = 0;
@@ -219,7 +212,7 @@ gint sort_username(GtkTreeModel *model, GtkTreeIter *a, GtkTreeIter *b, gpointer
 	return  ret;
 }
 
-gint sort_groupname(GtkTreeModel *model, GtkTreeIter *a, GtkTreeIter *b, gpointer userdata)
+gint  sort_groupname(GtkTreeModel *model, GtkTreeIter *a, GtkTreeIter *b, gpointer userdata)
 {
         gchar	*name1, *name2;
 	gint	ret = 0;
@@ -427,7 +420,7 @@ void  udisplay()
 	unsigned  ucnt;
 	GtkTreeIter   iter;
 
-	for  (ucnt = 0;  ucnt < Nusers;  ucnt++)  {
+	for  (ucnt = 0;  ucnt < Npwusers;  ucnt++)  {
 
 		/* Add reow to store.
 		   Put in index and uid which udisp doesn't do */
@@ -459,9 +452,10 @@ void  defdisplay()
 
 MAINFN_TYPE  main(int argc, char **argv)
 {
+	BtuserRef	mypriv;
 	GtkWidget  *vbox;
 
-	versionprint(argv, "$Revision: 1.1 $", 0);
+	versionprint(argv, "$Revision: 1.2 $", 0);
 
 	if  ((progname = strrchr(argv[0], '/')))
 		progname++;
@@ -492,43 +486,19 @@ MAINFN_TYPE  main(int argc, char **argv)
 
 	winit();
 
-	if  (!(mypriv = getbtuentry(Realuid)))  {
-		doerror($EH{Not registered yet});
-		exit(E_UNOTSETUP);
-	}
+	mypriv = getbtuentry(Realuid);
+
 	if  (!(mypriv->btu_priv & BTM_WADMIN))  {
 		doerror($EH{No write admin file priv});
 		exit(E_NOPRIV);
 	}
-	if  (btu_needs_rebuild && Confirm($PH{Confirm rebuild uc file}))  {
-		char  *name = envprocess(DUMPPWFILE);
-		int	wuz = access(name, 0);
-		if  (wuz >= 0)  {
-			un_rpwfile();
-			unlink(name);
-		}
-		free(name);
-#ifdef	HAVE_GETGROUPS
-		Requires_suppgrps = 1;
-		rpwfile();
-		rgrpfile();
-#endif
-		rebuild_btufile();
-		if  (wuz >= 0)
-			dump_pwfile();
-		produser();
-	}
-	ulist = getbtulist(&Nusers);
+	ulist = getbtulist();
 	vbox = wstart();
 	defdisplay();
 	udisplay();
 	wcomplete(vbox);
 	gtk_main();
-	if  (uchanges || hchanges)  {
-		if  (uchanges)
-			putbtulist(ulist, Nusers, hchanges);
-		else
-			putbtulist((BtuserRef) 0, 0, hchanges);
-	}
+	if  (uchanges || hchanges)
+		putbtulist(ulist);
 	return  0;
 }

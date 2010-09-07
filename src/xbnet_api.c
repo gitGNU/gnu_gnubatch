@@ -57,8 +57,7 @@
 static	char	Filename[] = __FILE__;
 
 static	int	prodsock = -1;
-static	struct	sockaddr_in	apiaddr;
-static	struct	sockaddr_in	apiret;
+static	struct	sockaddr_in	apiaddr, apiret;
 
 static	char	*current_queue;
 static	unsigned	current_qlen;
@@ -117,7 +116,7 @@ static void  mode_pack(Btmode *dest, const Btmode *src)
 	dest->o_gid = htonl(src->o_gid);
 	strncpy(dest->o_user, src->o_user, UIDSIZE);
 	strncpy(dest->o_group, src->o_group, UIDSIZE);
-	if  (mpermitted(src, BTM_RDMODE))  {
+	if  (mpermitted(src, BTM_RDMODE, 0))  {
 		dest->c_uid = htonl(src->c_uid);
 		dest->c_gid = htonl(src->c_gid);
 		strncpy(dest->c_user, src->c_user, UIDSIZE);
@@ -130,7 +129,7 @@ static void  mode_pack(Btmode *dest, const Btmode *src)
 
 /* Send a message regarding a job operation, and decode result.  */
 
-static  int  wjimsg(const unsigned op, const int_ugid_t uid, const int_ugid_t gid, const Btjob *jp, const ULONG param)
+static int  wjimsg(const unsigned op, const int_ugid_t uid, const int_ugid_t gid, const Btjob *jp, const ULONG param)
 {
 	int		tries;
 	Shipc		Oreq;
@@ -144,7 +143,7 @@ static  int  wjimsg(const unsigned op, const int_ugid_t uid, const int_ugid_t gi
 	Oreq.sh_params.param = param;
 	Oreq.sh_un.jobref.hostid = jp->h.bj_hostid;
 	Oreq.sh_un.jobref.slotno = jp->h.bj_slotno;
-	for  (tries = 1;  tries <= MAXTRIES;  tries++)  {
+	for  (tries = 1;  tries <= MSGQ_BLOCKS;  tries++)  {
 		if  (msgsnd(Ctrl_chan, (struct msgbuf *) &Oreq, sizeof(Shreq) + sizeof(jident), IPC_NOWAIT) >= 0)
 			return  decodejreply();
 		if  (tracing & TRACE_SYSOP)  {
@@ -152,14 +151,14 @@ static  int  wjimsg(const unsigned op, const int_ugid_t uid, const int_ugid_t gi
 			sprintf(msg, "wjimsg-full-%u", tries);
 			trace_op(Realuid, msg);
 		}
-		sleep(10);
+		sleep(MSGQ_BLOCKWAIT);
 	}
 	return  XB_QFULL;
 }
 
 /* Ditto for job create/update */
 
-static int wjmsg(const unsigned op, const int_ugid_t uid, const int_ugid_t gid, const ULONG xindx)
+static int  wjmsg(const unsigned op, const int_ugid_t uid, const int_ugid_t gid, const ULONG xindx)
 {
 	int		tries;
 	Shipc		Oreq;
@@ -174,7 +173,7 @@ static int wjmsg(const unsigned op, const int_ugid_t uid, const int_ugid_t gid, 
 #ifdef	USING_MMAP
 	sync_xfermmap();
 #endif
-	for  (tries = 1;  tries <= MAXTRIES;  tries++)  {
+	for  (tries = 1;  tries <= MSGQ_BLOCKS;  tries++)  {
 		if  (msgsnd(Ctrl_chan, (struct msgbuf *) &Oreq, sizeof(Shreq) + sizeof(ULONG), IPC_NOWAIT) >= 0)  {
 			int  ret  = decodejreply();
 			freexbuf_serv(xindx);
@@ -185,13 +184,13 @@ static int wjmsg(const unsigned op, const int_ugid_t uid, const int_ugid_t gid, 
 			sprintf(msg, "wjmsg-full-%u", tries);
 			trace_op(Realuid, msg);
 		}
-		sleep(10);
+		sleep(MSGQ_BLOCKWAIT);
 	}
 	freexbuf_serv(xindx);
 	return  XB_QFULL;
 }
 
-static int wvmsg(const unsigned op, const int_ugid_t uid, const int_ugid_t gid, const Btvar *varp, const ULONG seq, const ULONG param)
+static int  wvmsg(const unsigned op, const int_ugid_t uid, const int_ugid_t gid, const Btvar *varp, const ULONG seq, const ULONG param)
 {
 	int	tries;
 	Shipc	Oreq;
@@ -205,7 +204,7 @@ static int wvmsg(const unsigned op, const int_ugid_t uid, const int_ugid_t gid, 
 	mymtype = MTOFFSET + (Oreq.sh_params.upid = getpid());
 	Oreq.sh_un.sh_var = *varp;
 	Oreq.sh_un.sh_var.var_sequence = seq;
-	for  (tries = 1;  tries <= MAXTRIES;  tries++)  {
+	for  (tries = 1;  tries <= MSGQ_BLOCKS;  tries++)  {
 		if  (msgsnd(Ctrl_chan, (struct msgbuf *) &Oreq, sizeof(Shreq) + sizeof(Btvar), IPC_NOWAIT) >= 0)
 			return  readvreply();
 		if  (tracing & TRACE_SYSOP)  {
@@ -213,7 +212,7 @@ static int wvmsg(const unsigned op, const int_ugid_t uid, const int_ugid_t gid, 
 			sprintf(msg, "wvmsg-full-%u", tries);
 			trace_op(Realuid, msg);
 		}
-		sleep(10);
+		sleep(MSGQ_BLOCKWAIT);
 	}
 	return  XB_QFULL;
 }
@@ -464,7 +463,7 @@ static void  reply_joblist(const int sock, const ULONG flags)
 
 		jind = jhp->q_nxt;
 
-		if  (!mpermitted(&jp->h.bj_mode, BTM_SHOW))
+		if  (!mpermitted(&jp->h.bj_mode, BTM_SHOW, 0))
 			continue;
 		if  (flags & XB_FLAG_LOCALONLY && jp->h.bj_hostid != 0)
 			continue;
@@ -502,7 +501,7 @@ static void  reply_joblist(const int sock, const ULONG flags)
 
 		jind = jhp->q_nxt;
 
-		if  (!mpermitted(&jp->h.bj_mode, BTM_SHOW))
+		if  (!mpermitted(&jp->h.bj_mode, BTM_SHOW, 0))
 			continue;
 		if  (flags & XB_FLAG_LOCALONLY && jp->h.bj_hostid != 0)
 			continue;
@@ -545,7 +544,7 @@ static void  reply_varlist(const int sock, const ULONG flags)
 		if  (!vp->Vused)
 			continue;
 		varp = &vp->Vent;
-		if  (!mpermitted(&varp->var_mode, BTM_SHOW))
+		if  (!mpermitted(&varp->var_mode, BTM_SHOW, 0))
 			continue;
 		if  (flags & XB_FLAG_LOCALONLY  &&  varp->var_id.hostid != 0)
 			continue;
@@ -574,7 +573,7 @@ static void  reply_varlist(const int sock, const ULONG flags)
 		if  (!vp->Vused)
 			continue;
 		varp = &vp->Vent;
-		if  (!mpermitted(&varp->var_mode, BTM_SHOW))
+		if  (!mpermitted(&varp->var_mode, BTM_SHOW, 0))
 			continue;
 		if  (flags & XB_FLAG_LOCALONLY  &&  varp->var_id.hostid != 0)
 			continue;
@@ -594,10 +593,10 @@ static void  reply_varlist(const int sock, const ULONG flags)
 		trace_op_res(Realuid, "varlist", "OK");
 }
 
-static int check_valid_job(const int sock, const ULONG flags, const Btjob *jp, const char *tmsg)
+static int  check_valid_job(const int sock, const ULONG flags, const Btjob *jp, const char *tmsg)
 {
 	if  (jp->h.bj_job == 0  ||
-	     !mpermitted(&jp->h.bj_mode, BTM_SHOW)  ||
+	     !mpermitted(&jp->h.bj_mode, BTM_SHOW, 0)  ||
 	     ((flags & XB_FLAG_LOCALONLY)  &&  jp->h.bj_hostid != 0)  ||
 	     ((flags & XB_FLAG_USERONLY)  &&  jp->h.bj_mode.o_uid != Realuid)  ||
 	     ((flags & XB_FLAG_GROUPONLY)  &&  jp->h.bj_mode.o_gid != Realgid))  {
@@ -644,7 +643,7 @@ static void  job_read_rest(const int sock, const Btjob *jp)
 	outjob.hdr.nm_runhostid	= jp->h.bj_runhostid == 0? myhostid: jp->h.bj_runhostid;
 	outjob.hdr.nm_job	= htonl(jp->h.bj_job);
 
-	if  (mpermitted(&jp->h.bj_mode, BTM_READ))  {
+	if  (mpermitted(&jp->h.bj_mode, BTM_READ, 0))  {
 		outjob.hdr.nm_pri	= jp->h.bj_pri;
 		outjob.hdr.nm_istime	= jp->h.bj_times.tc_istime;
 		outjob.hdr.nm_mday	= jp->h.bj_times.tc_mday;
@@ -769,7 +768,7 @@ static void  job_read_rest(const int sock, const Btjob *jp)
 	pushout(sock, (char *) &outjob, hwm);
 }
 
-static void reply_jobread(const int sock, const slotno_t slotno, const ULONG seq, const ULONG flags)
+static void  reply_jobread(const int sock, const slotno_t slotno, const ULONG seq, const ULONG flags)
 {
 	Btjob			*jp;
 	struct	api_msg		outmsg;
@@ -799,7 +798,7 @@ static void reply_jobread(const int sock, const slotno_t slotno, const ULONG seq
 	}
 }
 
-static  void  reply_jobfind(const int sock, const unsigned code, const jobno_t jn, const netid_t nid, const ULONG flags)
+static void  reply_jobfind(const int sock, const unsigned code, const jobno_t jn, const netid_t nid, const ULONG flags)
 {
 	unsigned	jind;
 	Btjob		*jp;
@@ -842,7 +841,7 @@ static void  var_read_rest(const int sock, const Btvar *varp)
 	outvar.nm_type = varp->var_type;
 	outvar.nm_flags = varp->var_flags;
 	strncpy(outvar.nm_name, varp->var_name, BTV_NAME);
-	if  (mpermitted(&varp->var_mode, BTM_READ))  {
+	if  (mpermitted(&varp->var_mode, BTM_READ, 0))  {
 		outvar.nm_c_time = htonl(varp->var_c_time);
 		strncpy(outvar.nm_comment, varp->var_comment, BTV_COMMENT);
 		if  ((outvar.nm_consttype = varp->var_value.const_type) == CON_STRING)
@@ -853,7 +852,7 @@ static void  var_read_rest(const int sock, const Btvar *varp)
 	pushout(sock, (char *) &outvar, sizeof(outvar));
 }
 
-static void reply_varread(const int sock, const slotno_t slotno, const ULONG	seq, const ULONG flags)
+static void  reply_varread(const int sock, const slotno_t slotno, const ULONG seq, const ULONG flags)
 {
 	Btvar			*varp;
 	struct	api_msg		outmsg;
@@ -880,7 +879,7 @@ static void reply_varread(const int sock, const slotno_t slotno, const ULONG	seq
 	}
 
 	varp = &Var_seg.vlist[slotno].Vent;
-	if  (!mpermitted(&varp->var_mode, BTM_SHOW)  ||
+	if  (!mpermitted(&varp->var_mode, BTM_SHOW, 0)  ||
 	     ((flags & XB_FLAG_LOCALONLY)  &&  varp->var_id.hostid != 0) ||
 	     ((flags & XB_FLAG_USERONLY)  &&  varp->var_mode.o_uid != Realuid)  ||
 	     ((flags & XB_FLAG_GROUPONLY)  &&  varp->var_mode.o_gid != Realgid))  {
@@ -898,7 +897,7 @@ static void reply_varread(const int sock, const slotno_t slotno, const ULONG	seq
 		trace_op_res(Realuid, "varread", "OK");
 }
 
-static  void  reply_varfind(const int sock, const unsigned code, const netid_t nid, const ULONG flags)
+static void  reply_varfind(const int sock, const unsigned code, const netid_t nid, const ULONG flags)
 {
 	vhash_t	vp;
 	Btvar	*varp;
@@ -917,7 +916,7 @@ static  void  reply_varfind(const int sock, const unsigned code, const netid_t n
 		return;
 	}
 	varp = &Var_seg.vlist[vp].Vent;
-	if  (!mpermitted(&varp->var_mode, BTM_SHOW)  ||
+	if  (!mpermitted(&varp->var_mode, BTM_SHOW, 0)  ||
 	     ((flags & XB_FLAG_LOCALONLY)  &&  varp->var_id.hostid != 0) ||
 	     ((flags & XB_FLAG_USERONLY)  &&  varp->var_mode.o_uid != Realuid)  ||
 	     ((flags & XB_FLAG_GROUPONLY)  &&  varp->var_mode.o_gid != Realgid))  {
@@ -937,7 +936,7 @@ static  void  reply_varfind(const int sock, const unsigned code, const netid_t n
 		trace_op_res(Realuid, "findvar", "OK");
 }
 
-static void reply_jobdel(const int sock, const slotno_t	slotno, const ULONG seq, const ULONG flags)
+static void  reply_jobdel(const int sock, const slotno_t slotno, const ULONG seq, const ULONG flags)
 {
 	Btjob	*jp;
 
@@ -960,7 +959,7 @@ static void reply_jobdel(const int sock, const slotno_t	slotno, const ULONG seq,
 	if  (check_valid_job(sock, flags, jp, "jobdel"))  {
 		int	ret;
 		struct	api_msg		outmsg;
-		if  (!mpermitted(&jp->h.bj_mode, BTM_DELETE))  {
+		if  (!mpermitted(&jp->h.bj_mode, BTM_DELETE, 0))  {
 			err_result(sock, XB_NOPERM, Job_seg.dptr->js_serial);
 			if  (tracing & TRACE_APIOPEND)
 				trace_op_res(Realuid, "jobdel", "noperm");
@@ -981,10 +980,7 @@ static void reply_jobdel(const int sock, const slotno_t	slotno, const ULONG seq,
 	}
 }
 
-static int  reply_vardel(
-	 const slotno_t slotno,
-	 const ULONG seq,
-	 const ULONG flags)
+static int  reply_vardel(const slotno_t slotno, const ULONG seq, const ULONG flags)
 {
 	Btvar	*varp;
 
@@ -997,19 +993,19 @@ static int  reply_vardel(
 		return  XB_UNKNOWN_VAR;
 
 	varp = &Var_seg.vlist[slotno].Vent;
-	if  (!mpermitted(&varp->var_mode, BTM_SHOW)  ||
+	if  (!mpermitted(&varp->var_mode, BTM_SHOW, 0)  ||
 	     ((flags & XB_FLAG_LOCALONLY)  &&  varp->var_id.hostid != 0) ||
 	     ((flags & XB_FLAG_USERONLY)  &&  varp->var_mode.o_uid != Realuid)  ||
 	     ((flags & XB_FLAG_GROUPONLY)  &&  varp->var_mode.o_gid != Realgid))
 		return  XB_UNKNOWN_VAR;
 
-	if  (!mpermitted(&varp->var_mode, BTM_DELETE))
+	if  (!mpermitted(&varp->var_mode, BTM_DELETE, 0))
 		return  XB_NOPERM;
 
 	return  wvmsg(V_DELETE, Realuid, Realgid, varp, varp->var_sequence, 0);
 }
 
-static int reply_jobop(const slotno_t slotno, const ULONG seq, const ULONG flags, const ULONG op, const ULONG param)
+static int  reply_jobop(const slotno_t slotno, const ULONG seq, const ULONG flags, const ULONG op, const ULONG param)
 {
 	Btjob	*jp, *djp;
 	ULONG	xindx, nop;
@@ -1023,7 +1019,7 @@ static int reply_jobop(const slotno_t slotno, const ULONG seq, const ULONG flags
 
 	jp = &Job_seg.jlist[slotno].j;
 	if  (jp->h.bj_job == 0  ||
-	     !mpermitted(&jp->h.bj_mode, BTM_SHOW)  ||
+	     !mpermitted(&jp->h.bj_mode, BTM_SHOW, 0)  ||
 	     ((flags & XB_FLAG_LOCALONLY)  &&  jp->h.bj_hostid != 0)  ||
 	     ((flags & XB_FLAG_USERONLY)  &&  jp->h.bj_mode.o_uid != Realuid)  ||
 	     ((flags & XB_FLAG_GROUPONLY)  &&  jp->h.bj_mode.o_gid != Realgid))
@@ -1058,7 +1054,7 @@ static int reply_jobop(const slotno_t slotno, const ULONG seq, const ULONG flags
 		   structure.  Maybe we ought to make this a
 		   separate shreq code sometime if we do it often enough?  */
 
-		if  (!mpermitted(&jp->h.bj_mode, BTM_WRITE))
+		if  (!mpermitted(&jp->h.bj_mode, BTM_WRITE, 0))
 			return  XB_NOPERM;
 		if  (jp->h.bj_progress == nop) /* Already set to that, go away */
 			return  XB_OK;
@@ -1071,14 +1067,14 @@ static int reply_jobop(const slotno_t slotno, const ULONG seq, const ULONG flags
 
 	case  XB_JOP_FORCE:
 	case  XB_JOP_FORCEADV:
-		if  (!mpermitted(&jp->h.bj_mode, BTM_WRITE|BTM_KILL))
+		if  (!mpermitted(&jp->h.bj_mode, BTM_WRITE|BTM_KILL, 0))
 			return  XB_NOPERM;
 		if  (jp->h.bj_progress >= BJP_STARTUP1)
 			return  XB_ISRUNNING;
 		return  wjimsg(op == XB_JOP_FORCE? J_FORCENA: J_FORCE, Realuid, Realgid, jp, 0);
 
 	case  XB_JOP_ADVTIME:
-		if  (!mpermitted(&jp->h.bj_mode, BTM_WRITE))
+		if  (!mpermitted(&jp->h.bj_mode, BTM_WRITE, 0))
 			return  XB_NOPERM;
 		if  (!jp->h.bj_times.tc_istime)
 			return  XB_NOTIMETOA;
@@ -1090,7 +1086,7 @@ static int reply_jobop(const slotno_t slotno, const ULONG seq, const ULONG flags
 		return  wjmsg(J_CHANGE, Realuid, Realgid, xindx);
 
 	case  XB_JOP_KILL:
-		if  (!mpermitted(&jp->h.bj_mode, BTM_KILL))
+		if  (!mpermitted(&jp->h.bj_mode, BTM_KILL, 0))
 			return  XB_NOPERM;
 		if  (jp->h.bj_progress < BJP_STARTUP1)
 			return  XB_ISNOTRUNNING;
@@ -1098,7 +1094,7 @@ static int reply_jobop(const slotno_t slotno, const ULONG seq, const ULONG flags
 	}
 }
 
-static void api_jobstart(const int sock, struct	hhash *frp, const Btuser *mpriv, const jobno_t jobno)
+static void  api_jobstart(const int sock, struct hhash *frp, const Btuser *mpriv, const jobno_t jobno)
 {
 	int			ret;
 	unsigned		length;
@@ -1293,7 +1289,7 @@ static int  reply_varadd(const int sock, const Btuser *priv)
 	return  wvmsg(V_CREATE, Realuid, Realgid, &rvar, 0, 0);
 }
 
-static  int  reply_jobupd(const int sock, const Btuser *mperm, const slotno_t slotno, const ULONG	seq, const ULONG flags)
+static int  reply_jobupd(const int sock, const Btuser *mperm, const slotno_t slotno, const ULONG seq, const ULONG flags)
 {
 	int		cinum;
 	unsigned	length;
@@ -1316,7 +1312,7 @@ static  int  reply_jobupd(const int sock, const Btuser *mperm, const slotno_t sl
 		return  XB_INVALIDSLOT;
 
 	jp = &Job_seg.jlist[slotno].j;
-	if  (jp->h.bj_job == 0  ||  !mpermitted(&jp->h.bj_mode, BTM_SHOW)  ||
+	if  (jp->h.bj_job == 0  ||  !mpermitted(&jp->h.bj_mode, BTM_SHOW, 0)  ||
 	     ((flags & XB_FLAG_LOCALONLY)  &&  jp->h.bj_hostid != 0)  ||
 	     ((flags & XB_FLAG_USERONLY)  &&  jp->h.bj_mode.o_uid != Realuid)  ||
 	     ((flags & XB_FLAG_GROUPONLY)  &&  jp->h.bj_mode.o_gid != Realgid))
@@ -1329,7 +1325,7 @@ static  int  reply_jobupd(const int sock, const Btuser *mperm, const slotno_t sl
 			return  XB_UNKNOWN_JOB;
 	}
 
-	if  (!mpermitted(&jp->h.bj_mode, BTM_WRITE))
+	if  (!mpermitted(&jp->h.bj_mode, BTM_WRITE, 0))
 		return  XB_NOPERM;
 
 	if  (jp->h.bj_progress >= BJP_STARTUP1)
@@ -1363,7 +1359,7 @@ static  int  reply_jobupd(const int sock, const Btuser *mperm, const slotno_t sl
 	return  wjmsg(J_CHANGE, Realuid, Realgid, xindx);
 }
 
-static int reply_varupd(const int sock, const slotno_t slotno, const ULONG seq, const ULONG flags)
+static int  reply_varupd(const int sock, const slotno_t slotno, const ULONG seq, const ULONG flags)
 {
 	unsigned	wflags = BTM_WRITE;
 	Btvar	*varp, rvar;
@@ -1390,7 +1386,7 @@ static int reply_varupd(const int sock, const slotno_t slotno, const ULONG seq, 
 	else
 		rvar.var_value.con_un.con_long = ntohl(invar.nm_un.nm_long);
 
-	if  (!mpermitted(&varp->var_mode, BTM_SHOW)  ||
+	if  (!mpermitted(&varp->var_mode, BTM_SHOW, 0)  ||
 	     ((flags & XB_FLAG_LOCALONLY)  &&  varp->var_id.hostid != 0) ||
 	     ((flags & XB_FLAG_USERONLY)  &&  varp->var_mode.o_uid != Realuid)  ||
 	     ((flags & XB_FLAG_GROUPONLY)  &&  varp->var_mode.o_gid != Realgid))
@@ -1410,7 +1406,7 @@ static int reply_varupd(const int sock, const slotno_t slotno, const ULONG seq, 
 	if  (wflags == 0)	/* Nothing doing forget it */
 		return  XB_OK;
 
-	if  (!mpermitted(&varp->var_mode, wflags))
+	if  (!mpermitted(&varp->var_mode, wflags, 0))
 		return  XB_NOPERM;
 
 	Saveseq = varp->var_sequence;
@@ -1425,7 +1421,7 @@ static int reply_varupd(const int sock, const slotno_t slotno, const ULONG seq, 
 	return  XB_OK;
 }
 
-static int reply_varchcomm(const int sock, const slotno_t slotno, const ULONG seq, const ULONG flags)
+static int  reply_varchcomm(const int sock, const slotno_t slotno, const ULONG seq, const ULONG flags)
 {
 	Btvar	*varp, rvar;
 	struct	varnetmsg	invar;
@@ -1440,13 +1436,13 @@ static int reply_varchcomm(const int sock, const slotno_t slotno, const ULONG se
 		return  XB_UNKNOWN_VAR;
 
 	varp = &Var_seg.vlist[slotno].Vent;
-	if  (!mpermitted(&varp->var_mode, BTM_SHOW)  ||
+	if  (!mpermitted(&varp->var_mode, BTM_SHOW, 0)  ||
 	     ((flags & XB_FLAG_LOCALONLY)  &&  varp->var_id.hostid != 0) ||
 	     ((flags & XB_FLAG_USERONLY)  &&  varp->var_mode.o_uid != Realuid)  ||
 	     ((flags & XB_FLAG_GROUPONLY)  &&  varp->var_mode.o_gid != Realgid))
 		return  XB_UNKNOWN_VAR;
 
-	if  (!mpermitted(&varp->var_mode, BTM_WRITE))
+	if  (!mpermitted(&varp->var_mode, BTM_WRITE, 0))
 		return  XB_NOPERM;
 
 	rvar = *varp;
@@ -1454,7 +1450,7 @@ static int reply_varchcomm(const int sock, const slotno_t slotno, const ULONG se
 	return  wvmsg(V_CHCOMM, Realuid, Realgid, &rvar, varp->var_sequence, 0);
 }
 
-static int reply_varrename(const int sock, const slotno_t slotno, const ULONG seq, const ULONG flags)
+static int  reply_varrename(const int sock, const slotno_t slotno, const ULONG seq, const ULONG flags)
 {
 	Btvar	*varp;
 	char	nbuf[BTV_NAME+1];
@@ -1470,13 +1466,13 @@ static int reply_varrename(const int sock, const slotno_t slotno, const ULONG se
 		return  XB_UNKNOWN_VAR;
 
 	varp = &Var_seg.vlist[slotno].Vent;
-	if  (!mpermitted(&varp->var_mode, BTM_SHOW)  ||
+	if  (!mpermitted(&varp->var_mode, BTM_SHOW, 0)  ||
 	     ((flags & XB_FLAG_LOCALONLY)  &&  varp->var_id.hostid != 0) ||
 	     ((flags & XB_FLAG_USERONLY)  &&  varp->var_mode.o_uid != Realuid)  ||
 	     ((flags & XB_FLAG_GROUPONLY)  &&  varp->var_mode.o_gid != Realgid))
 		return  XB_UNKNOWN_VAR;
 
-	if  (!mpermitted(&varp->var_mode, BTM_DELETE))
+	if  (!mpermitted(&varp->var_mode, BTM_DELETE, 0))
 		return  XB_NOPERM;
 
 	BLOCK_ZERO(&Oreq, sizeof(Oreq));
@@ -1492,7 +1488,7 @@ static int reply_varrename(const int sock, const slotno_t slotno, const ULONG se
 	return  readvreply();
 }
 
-static void api_jobdata(const int sock, const slotno_t slotno, const ULONG seq, const ULONG flags)
+static void  api_jobdata(const int sock, const slotno_t slotno, const ULONG seq, const ULONG flags)
 {
 	int	inbp, ch;
 	FILE	*jfile;
@@ -1523,7 +1519,7 @@ static void api_jobdata(const int sock, const slotno_t slotno, const ULONG seq, 
 
 	jp = &Job_seg.jlist[slotno].j;
 
-	if  (jp->h.bj_job == 0  ||  !mpermitted(&jp->h.bj_mode, BTM_SHOW)  ||
+	if  (jp->h.bj_job == 0  ||  !mpermitted(&jp->h.bj_mode, BTM_SHOW, 0)  ||
 	     ((flags & XB_FLAG_LOCALONLY)  &&  jp->h.bj_hostid != 0)  ||
 	     ((flags & XB_FLAG_USERONLY)  &&  jp->h.bj_mode.o_uid != Realuid)  ||
 	     ((flags & XB_FLAG_GROUPONLY)  &&  jp->h.bj_mode.o_gid != Realgid))  {
@@ -1546,7 +1542,7 @@ static void api_jobdata(const int sock, const slotno_t slotno, const ULONG seq, 
 		}
 	}
 
-	if  (!mpermitted(&jp->h.bj_mode, BTM_READ))  {
+	if  (!mpermitted(&jp->h.bj_mode, BTM_READ, 0))  {
 		outmsg.retcode = htons(XB_NOPERM);
 		pushout(sock, (char *) &outmsg, sizeof(outmsg));
 		if  (tracing & TRACE_APIOPEND)
@@ -1599,7 +1595,7 @@ static void api_jobdata(const int sock, const slotno_t slotno, const ULONG seq, 
 		trace_op_res(Realuid, "jobdata", "OK");
 }
 
-static int reply_jobchmod(const int sock, const slotno_t slotno, const ULONG seq, const ULONG flags)
+static int  reply_jobchmod(const int sock, const slotno_t slotno, const ULONG seq, const ULONG flags)
 {
 	Btjob		*jp, *djp;
 	ULONG		xindx;
@@ -1617,7 +1613,7 @@ static int reply_jobchmod(const int sock, const slotno_t slotno, const ULONG seq
 
 	jp = &Job_seg.jlist[slotno].j;
 	if  (jp->h.bj_job == 0  ||
-	     !mpermitted(&jp->h.bj_mode, BTM_SHOW)  ||
+	     !mpermitted(&jp->h.bj_mode, BTM_SHOW, 0)  ||
 	     ((flags & XB_FLAG_LOCALONLY)  &&  jp->h.bj_hostid != 0)  ||
 	     ((flags & XB_FLAG_USERONLY)  &&  jp->h.bj_mode.o_uid != Realuid)  ||
 	     ((flags & XB_FLAG_GROUPONLY)  &&  jp->h.bj_mode.o_gid != Realgid))
@@ -1630,7 +1626,7 @@ static int reply_jobchmod(const int sock, const slotno_t slotno, const ULONG seq
 			return  XB_UNKNOWN_JOB;
 	}
 
-	if  (!mpermitted(&jp->h.bj_mode, BTM_WRMODE))
+	if  (!mpermitted(&jp->h.bj_mode, BTM_WRMODE, 0))
 		return  XB_NOPERM;
 
 	djp = &Xbuffer->Ring[xindx = getxbuf_serv()];
@@ -1641,7 +1637,7 @@ static int reply_jobchmod(const int sock, const slotno_t slotno, const ULONG seq
 	return  wjmsg(J_CHMOD, Realuid, Realgid, xindx);
 }
 
-static int reply_varchmod(const int sock, const slotno_t slotno, const ULONG seq, const ULONG flags)
+static int  reply_varchmod(const int sock, const slotno_t slotno, const ULONG seq, const ULONG flags)
 {
 	Btvar	*varp, rvar;
 	struct	varnetmsg	invar;
@@ -1658,13 +1654,13 @@ static int reply_varchmod(const int sock, const slotno_t slotno, const ULONG seq
 		return  XB_UNKNOWN_VAR;
 
 	varp = &Var_seg.vlist[slotno].Vent;
-	if  (!mpermitted(&varp->var_mode, BTM_SHOW)  ||
+	if  (!mpermitted(&varp->var_mode, BTM_SHOW, 0)  ||
 	     ((flags & XB_FLAG_LOCALONLY)  &&  varp->var_id.hostid != 0) ||
 	     ((flags & XB_FLAG_USERONLY)  &&  varp->var_mode.o_uid != Realuid)  ||
 	     ((flags & XB_FLAG_GROUPONLY)  &&  varp->var_mode.o_gid != Realgid))
 		return  XB_UNKNOWN_VAR;
 
-	if  (!mpermitted(&varp->var_mode, BTM_WRMODE))
+	if  (!mpermitted(&varp->var_mode, BTM_WRMODE, 0))
 		return  XB_NOPERM;
 
 	rvar = *varp;
@@ -1674,7 +1670,7 @@ static int reply_varchmod(const int sock, const slotno_t slotno, const ULONG seq
 	return  wvmsg(V_CHMOD, Realuid, Realgid, &rvar, rvar.var_sequence, 0);
 }
 
-static int reply_jobchown(const int sock, const slotno_t slotno, const ULONG seq, const ULONG flags)
+static int  reply_jobchown(const int sock, const slotno_t slotno, const ULONG seq, const ULONG flags)
 {
 	Btjob		*jp;
 	int_ugid_t	nuid;
@@ -1694,7 +1690,7 @@ static int reply_jobchown(const int sock, const slotno_t slotno, const ULONG seq
 
 	jp = &Job_seg.jlist[slotno].j;
 	if  (jp->h.bj_job == 0  ||
-	     !mpermitted(&jp->h.bj_mode, BTM_SHOW)  ||
+	     !mpermitted(&jp->h.bj_mode, BTM_SHOW, 0)  ||
 	     ((flags & XB_FLAG_LOCALONLY)  &&  jp->h.bj_hostid != 0)  ||
 	     ((flags & XB_FLAG_USERONLY)  &&  jp->h.bj_mode.o_uid != Realuid)  ||
 	     ((flags & XB_FLAG_GROUPONLY)  &&  jp->h.bj_mode.o_gid != Realgid))
@@ -1710,7 +1706,7 @@ static int reply_jobchown(const int sock, const slotno_t slotno, const ULONG seq
 	return  wjimsg(J_CHOWN, Realuid, Realgid, jp, (ULONG) nuid);
 }
 
-static int reply_varchown(const int sock, const slotno_t slotno, const ULONG seq, const ULONG flags)
+static int  reply_varchown(const int sock, const slotno_t slotno, const ULONG seq, const ULONG flags)
 {
 	Btvar		*varp;
 	int_ugid_t	nuid;
@@ -1730,7 +1726,7 @@ static int reply_varchown(const int sock, const slotno_t slotno, const ULONG seq
 		return  XB_UNKNOWN_VAR;
 
 	varp = &Var_seg.vlist[slotno].Vent;
-	if  (!mpermitted(&varp->var_mode, BTM_SHOW)  ||
+	if  (!mpermitted(&varp->var_mode, BTM_SHOW, 0)  ||
 	     ((flags & XB_FLAG_LOCALONLY)  &&  varp->var_id.hostid != 0) ||
 	     ((flags & XB_FLAG_USERONLY)  &&  varp->var_mode.o_uid != Realuid)  ||
 	     ((flags & XB_FLAG_GROUPONLY)  &&  varp->var_mode.o_gid != Realgid))
@@ -1739,7 +1735,7 @@ static int reply_varchown(const int sock, const slotno_t slotno, const ULONG seq
 	return  wvmsg(V_CHOWN, Realuid, Realgid, varp, varp->var_sequence, (ULONG) nuid);
 }
 
-static int reply_jobchgrp(const int sock, const slotno_t slotno, const ULONG seq, const ULONG flags)
+static int  reply_jobchgrp(const int sock, const slotno_t slotno, const ULONG seq, const ULONG flags)
 {
 	Btjob		*jp;
 	int_ugid_t	ngid;
@@ -1759,7 +1755,7 @@ static int reply_jobchgrp(const int sock, const slotno_t slotno, const ULONG seq
 
 	jp = &Job_seg.jlist[slotno].j;
 	if  (jp->h.bj_job == 0  ||
-	     !mpermitted(&jp->h.bj_mode, BTM_SHOW)  ||
+	     !mpermitted(&jp->h.bj_mode, BTM_SHOW, 0)  ||
 	     ((flags & XB_FLAG_LOCALONLY)  &&  jp->h.bj_hostid != 0)  ||
 	     ((flags & XB_FLAG_USERONLY)  &&  jp->h.bj_mode.o_uid != Realuid)  ||
 	     ((flags & XB_FLAG_GROUPONLY)  &&  jp->h.bj_mode.o_gid != Realgid))
@@ -1775,7 +1771,7 @@ static int reply_jobchgrp(const int sock, const slotno_t slotno, const ULONG seq
 	return  wjimsg(J_CHGRP, Realuid, Realgid, jp, (ULONG) ngid);
 }
 
-static int reply_varchgrp(const int sock, const slotno_t slotno, const ULONG seq, const ULONG flags)
+static int  reply_varchgrp(const int sock, const slotno_t slotno, const ULONG seq, const ULONG flags)
 {
 	Btvar		*varp;
 	int_ugid_t	ngid;
@@ -1795,7 +1791,7 @@ static int reply_varchgrp(const int sock, const slotno_t slotno, const ULONG seq
 		return  XB_UNKNOWN_VAR;
 
 	varp = &Var_seg.vlist[slotno].Vent;
-	if  (!mpermitted(&varp->var_mode, BTM_SHOW)  ||
+	if  (!mpermitted(&varp->var_mode, BTM_SHOW, 0)  ||
 	     ((flags & XB_FLAG_LOCALONLY)  &&  varp->var_id.hostid != 0) ||
 	     ((flags & XB_FLAG_USERONLY)  &&  varp->var_mode.o_uid != Realuid)  ||
 	     ((flags & XB_FLAG_GROUPONLY)  &&  varp->var_mode.o_gid != Realgid))
@@ -2214,14 +2210,7 @@ void  process_api()
 	/* Need to make a copy as subsequent calls overwrite static
 	   space in getbtuentry */
 
-	if  (!(mpriv = getbtuentry(Realuid)))  {
-		if  (tracing & TRACE_APICONN)
-			trace_op_res(Realuid, "unkuid", frp->rem.hostname);
-		err_result(sock, XB_UNKNOWN_USER, 0);
-		abort_exit(0);
-	}
-	Fileprivs = mpriv->btu_priv;
-	hispriv = *mpriv;
+	hispriv = *getbtuentry(Realuid);
 
 	/* Ok we made it */
 
@@ -2626,11 +2615,7 @@ void  process_api()
 
 			/* Still re-read it in case something changed */
 
-			if  (!(mpriv = getbtuentry(ouid)))  {
-				ret = XB_UNKNOWN_USER;
-				break;
-			}
-			btuser_pack(&outpriv.ua_perm, mpriv);
+			btuser_pack(&outpriv.ua_perm, getbtuentry(ouid));
 			strcpy(outpriv.ua_uname, prin_uname((uid_t) ouid));
 			strcpy(outpriv.ua_gname, prin_gname((gid_t) ogid));
 			outmsg.retcode = 0;
@@ -2713,11 +2698,7 @@ void  process_api()
 			/* In case something has changed */
 
 			if  (ouid == Realuid)  {
-				if  (!(mpriv = getbtuentry(ouid)))  {
-					ret = XB_UNKNOWN_USER;
-					break;
-				}
-				hispriv = *mpriv;
+				hispriv = *getbtuentry(ouid);
 				if  (!(hispriv.btu_priv & BTM_WADMIN))  {
 
 					/* Disallow everything except def prio and flags */
@@ -2742,11 +2723,7 @@ void  process_api()
 					}
 				}
 			}
-			if  (!(mpriv = getbtuentry(ouid)))  {
-				ret = XB_UNKNOWN_USER;
-				break;
-			}
-
+			mpriv = getbtuentry(ouid);
 			mpriv->btu_minp = rbtu.btu_minp;
 			mpriv->btu_maxp = rbtu.btu_maxp;
 			mpriv->btu_defp = rbtu.btu_defp;
@@ -2801,11 +2778,7 @@ void  process_api()
 
 			/* Re-read file to get locking open */
 
-			if  (!(mpriv = getbtuentry(Realuid)))  {
-				ret = XB_UNKNOWN_USER;
-				break;
-			}
-			hispriv = *mpriv;
+			hispriv = *getbtuentry(Realuid);
 			Btuhdr.btd_minp = rbthdr.btd_minp;
 			Btuhdr.btd_maxp = rbthdr.btd_maxp;
 			Btuhdr.btd_defp = rbthdr.btd_defp;
@@ -2818,7 +2791,7 @@ void  process_api()
 				Btuhdr.btd_jflags[cnt] = rbthdr.btd_jflags[cnt];
 				Btuhdr.btd_vflags[cnt] = rbthdr.btd_vflags[cnt];
 			}
-			putbtulist((Btuser *) 0, 0, 1);
+			putbtuhdr();
 			ret = XB_OK;
 			break;
 		}

@@ -155,7 +155,7 @@ void	upd_hrow(const struct remote *hp, GtkTreeIter *iter)
 		if  (hp->ht_flags & HT_HOSTISIP)  {
 			h = phname(hp->hostid, IPADDR_IP);
 			a = hp->hostname;
-			i = "";
+			i = h;
 		}
 		else  {
 			h = hp->hostname;
@@ -273,6 +273,8 @@ int	extract_hostnames(struct remote *rp, GtkWidget *hwig, GtkWidget *awig)
 		}
 		rp->hostid = resip;
 		rp->ht_flags = HT_HOSTISIP;
+		strncpy(rp->hostname, a, HOSTNSIZE-1);
+		rp->alias[0] = '\0';
 	}
 	else  {
 		char	*c;
@@ -291,9 +293,9 @@ int	extract_hostnames(struct remote *rp, GtkWidget *hwig, GtkWidget *awig)
 		}
 		rp->ht_flags = 0;
 		rp->hostid = resip;
+		strncpy(rp->hostname, h, HOSTNSIZE-1);
+		strncpy(rp->alias, a, HOSTNSIZE-1);
 	}
-	strncpy(rp->hostname, h, HOSTNSIZE-1);
-	strncpy(rp->alias, a, HOSTNSIZE-1);
 	return  1;
 }
 

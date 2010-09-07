@@ -134,7 +134,7 @@ struct	actop  {
 #define	PROC_RUN	2
 #define	PERMS_SET	4
 	USHORT		perms;		/* Permissions we need */
-	int  (*act_op)(CBtjobRef, const int);
+	int	(*act_op)(CBtjobRef, const int);
 } actlist[] =  {
 	{	"delete",	0,		BTM_DELETE,	act_delete  },
 	{	"kill",		PROC_RUN,	BTM_KILL,	act_kill  },
@@ -231,7 +231,7 @@ void  process(char **joblist)
 				exit(E_RUNNING);
 			}
 		}
-		if  (!mpermitted(&jp->h.bj_mode, aop->perms))  {
+		if  (!mpermitted(&jp->h.bj_mode, aop->perms, mypriv->btu_priv))  {
 			html_out_cparam_file("noperm", 1, arg);
 			exit(E_NOPRIV);
 		}

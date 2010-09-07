@@ -29,7 +29,7 @@ extern	ULONG	Last_j_ser,
 extern	BtmodeRef	Mode_arg;
 extern	BtjobRef	JREQ;
 
-#define	visible(md)	mpermitted(md, BTM_SHOW)
+#define	visible(md)	mpermitted(md, BTM_SHOW, 0)
 
 void  freexbuf(const ULONG);
 #ifdef	USING_FLOCK
@@ -48,7 +48,7 @@ void  rjobfile(const int);
 void  rvarfile(const int);
 void  rvarlist(const int);
 
-vhash_t	lookupvar(const char *, const netid_t, const unsigned, ULONG *);
+extern	vhash_t	lookupvar(const char *, const netid_t, const unsigned, ULONG *);
 ULONG  getxbuf();
 #ifdef	USING_FLOCK
 #define	getxbuf_serv	getxbuf

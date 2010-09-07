@@ -93,7 +93,7 @@ void  vdisplay();
 
 /* Set up a queue selection pane and dialog */
 
-static Widget CreateQselDialog(Widget mainform, Widget prevabove, char *existing, int nullok)
+static Widget  CreateQselDialog(Widget mainform, Widget prevabove, char *existing, int nullok)
 {
 	Widget	qtitw;
 #if  !defined(HAVE_XM_COMBOBOX_H) || defined(BROKEN_COMBOBOX)
@@ -246,7 +246,7 @@ Widget  CreateIselDialog(Widget mainform, Widget prevabove, char *existing)
 }
 
 #if  defined(HAVE_XM_COMBOBOX_H) && !defined(BROKEN_COMBOBOX)
-static Widget Create_ug_sel_dlg(Widget mainform, Widget	prevabove, char *labname, char *widname, int widnum, char **uglist, char *existing, int nullok, unsigned readonly)
+static Widget  Create_ug_sel_dlg(Widget mainform, Widget prevabove, char *labname, char *widname, int widnum, char **uglist, char *existing, int nullok, unsigned readonly)
 {
 	Widget	ugtitw;
 	int	nrows, ncols, cnt, cnt2, spos = -1;
@@ -298,21 +298,21 @@ static Widget Create_ug_sel_dlg(Widget mainform, Widget	prevabove, char *labname
 	return  workw[widnum];
 }
 
-Widget CreateUselDialog(Widget mainform, Widget prevabove, char *existing, int nullok, unsigned readonly)
+Widget  CreateUselDialog(Widget mainform, Widget prevabove, char *existing, int nullok, unsigned readonly)
 {
 	return  Create_ug_sel_dlg(mainform, prevabove, "username", "user", WORKW_UTXTW, gen_ulist((char *) 0), existing, nullok, readonly);
 }
 
 /* Set up a group selection pane and dialog */
 
-Widget CreateGselDialog(Widget mainform, Widget prevabove, char *existing, int nullok, unsigned readonly)
+Widget  CreateGselDialog(Widget mainform, Widget prevabove, char *existing, int nullok, unsigned readonly)
 {
 	return  Create_ug_sel_dlg(mainform, prevabove, "groupname", "group", WORKW_GTXTW, gen_glist((char *) 0), existing, nullok, readonly);
 }
 
 #else
 
-static Widget Create_ug_sel_dlg(Widget mainform, Widget	prevabove, char *labname, char *widname, char *butname, int widnum, XtCallbackProc callb, char *existing, int nullok, unsigned	readonly)
+static Widget  Create_ug_sel_dlg(Widget mainform, Widget prevabove, char *labname, char *widname, char *butname, int widnum, XtCallbackProc callb, char *existing, int nullok, unsigned readonly)
 {
 	Widget	ugtitw, ugselb;
 
@@ -348,14 +348,14 @@ static Widget Create_ug_sel_dlg(Widget mainform, Widget	prevabove, char *labname
 
 /* Set up a user selection pane and dialog */
 
-Widget CreateUselDialog(Widget mainform, Widget prevabove, char *existing, int nullok, unsigned readonly)
+Widget  CreateUselDialog(Widget mainform, Widget prevabove, char *existing, int nullok, unsigned readonly)
 {
 	return  Create_ug_sel_dlg(mainform, prevabove, "username", "user", "uselect", WORKW_UTXTW, (XtCallbackProc) getusersel, existing, nullok, readonly);
 }
 
 /* Set up a group selection pane and dialog */
 
-Widget CreateGselDialog(Widget mainform, Widget prevabove, char *existing, int nullok, unsigned readonly)
+Widget  CreateGselDialog(Widget mainform, Widget prevabove, char *existing, int nullok, unsigned readonly)
 {
 	return  Create_ug_sel_dlg(mainform, prevabove, "groupname", "group", "gselect", WORKW_GTXTW, (XtCallbackProc) getgroupsel, existing, nullok, readonly);
 }
@@ -363,7 +363,7 @@ Widget CreateGselDialog(Widget mainform, Widget prevabove, char *existing, int n
 
 /* Create the stuff at the beginning of a dialog */
 
-void CreateEditDlg(Widget parent, char *dlgname, Widget *dlgres, Widget *paneres, Widget *formres, const int nbutts)
+void  CreateEditDlg(Widget parent, char *dlgname, Widget *dlgres, Widget *paneres, Widget *formres, const int nbutts)
 {
 	int	n = 0;
 	Arg	arg[8];

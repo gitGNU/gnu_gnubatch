@@ -135,7 +135,7 @@ static	void	list_select(Widget w, void (*proc)(), XmListCallbackStruct *cbs)
 
 /* Create the edit stuff for a fixed list dialog */
 
-static void CreateFixedListDlg(Widget formw, char *listwname, XtCallbackProc newrout, XtCallbackProc editrout, XtCallbackProc delrout, void *mcproc)
+static void  CreateFixedListDlg(Widget formw, char *listwname, XtCallbackProc newrout, XtCallbackProc editrout, XtCallbackProc delrout, void *mcproc)
 {
 	Widget	neww, editw, delw, movew, copyw;
 
@@ -215,7 +215,7 @@ static void CreateFixedListDlg(Widget formw, char *listwname, XtCallbackProc new
 
 /* Create the edit stuff for a scrolled list dialog */
 
-static void CreateScrolledListDlg(Widget formw, char *listwname, XtCallbackProc newrout, XtCallbackProc editrout, XtCallbackProc delrout, void *mcproc)
+static void  CreateScrolledListDlg(Widget formw, char *listwname, XtCallbackProc newrout, XtCallbackProc editrout, XtCallbackProc delrout, void *mcproc)
 {
 	Widget	neww, editw, delw, movew, copyw;
 	int		n;

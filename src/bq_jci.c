@@ -189,10 +189,7 @@ static int  pok(char *name)
 
 int  ciprocess()
 {
-	int	err_no;
-	int	ch, nsel;
-	int	start, select, srow, currow, tilines, cnt, incr, creatrow;
-	int	readwrite;
+	int	err_no, ch, nsel, start, select, srow, currow, tilines, cnt, incr, creatrow, readwrite;
 	char	*str;
 	Cmdint	Newentry;
 
@@ -676,7 +673,7 @@ int  dounqueue(BtjobRef jp)
 	disp_str = title = qtitle_of(jp);
 	disp_arg[0] = jp->h.bj_job;
 
-	if  (!mpermitted(&jp->h.bj_mode, BTM_READ|BTM_WRITE|BTM_DELETE))  {
+	if  (!mpermitted(&jp->h.bj_mode, BTM_READ|BTM_WRITE|BTM_DELETE, mypriv->btu_priv))  {
 		doerror(jscr, $E{btq unq no permission});
 		return  0;
 	}

@@ -111,8 +111,7 @@ char	*filename;
 struct	dirent	*readdir(dirp)
 DIR	*dirp;
 {
-	struct  dirent  *dp;
-	struct	direct	indir;
+	struct  dirent  *dp, indir;
 
 	while  (read(dirp->dd_fd, (char *)&indir, sizeof(indir)) > 0)  {
 		if  (indir.d_ino == 0)
@@ -188,7 +187,6 @@ time_t		last_mtime;			/* Of directory we're looking at */
 
 char	Confvarname[] = "FILEMONCONF";
 
-ULONG		Fileprivs;
 int	sem_chan, shm_chan;
 struct	fm_shm_entry	*shm_list,
 			*my_shm_slot;

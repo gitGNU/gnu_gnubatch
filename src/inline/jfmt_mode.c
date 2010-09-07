@@ -18,7 +18,7 @@
 JFORMAT(fmt_mode)
 {
 	fmt_t  lng = 0;
-	if  (mpermitted(&jp->h.bj_mode, BTM_RDMODE))  {
+	if  (mpermitted(&jp->h.bj_mode, BTM_RDMODE, 0))  {
 		lng = fmtmode(lng, "U", jp->h.bj_mode.u_flags);
 		lng = fmtmode(lng, ",G", jp->h.bj_mode.g_flags);
 		lng = fmtmode(lng, ",O", jp->h.bj_mode.o_flags);

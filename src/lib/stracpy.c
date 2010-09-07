@@ -18,6 +18,10 @@
 #include "config.h"
 #include "incl_unix.h"
 
+/* Include this here as it's used virtually everywhere */
+
+int	Ignored_error;
+
 static	char	Filename[] = __FILE__;
 
 /* Yes I have heard of strdup but UNIXes hadn't when I wrote this.

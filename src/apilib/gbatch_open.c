@@ -47,9 +47,6 @@
 
 static	unsigned	api_max;
 static	struct	api_fd	apilist[MAXFDS];
-#ifdef	POLLSOCKETS
-static	struct	pollfd	flist[MAXFDS];
-#endif
 
 int	gbatch_dataerror;
 
@@ -266,29 +263,7 @@ static void  procpoll(int fd)
 static RETSIGTYPE  catchpoll(int n)
 {
 	unsigned	cnt;
-	int		fd;
-
-#ifdef	POLLSOCKETS
-	unsigned	pcnt;
-
-#ifdef	UNSAFE_SIGNALS
-	signal(n, catchpoll);
-#endif
-
-	for  (pcnt = cnt = 0;  cnt < api_max;  cnt++)
-		if  ((fd = apilist[cnt].prodfd) >= 0)  {
-			flist[pcnt].fd = fd;
-			flist[pcnt].events = POLLIN|POLLPRI|POLLERR;
-			flist[pcnt].revents = 0;
-			pcnt++;
-		}
-	while  (poll(flist, pcnt, 0) > 0)  {
-		for  (cnt = 0;  cnt < pcnt;  cnt++)
-			if  (flist[cnt].revents)
-				procpoll(flist[cnt].fd);
-	}
-#else
-	int	highfd = -1, nret;
+	int		fd, highfd = -1, nret;
 	fd_set	ready;
 
 #ifdef	UNSAFE_SIGNALS
@@ -313,7 +288,6 @@ static RETSIGTYPE  catchpoll(int n)
 				nret--;
 			}
 	}
-#endif
 }
 
 static int  setmon(struct api_fd *fdp)

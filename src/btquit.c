@@ -53,7 +53,7 @@ void  nomem(const char *fl, const int ln)
 
 MAINFN_TYPE  main(int argc, char **argv)
 {
-	int	countdown = 5;
+	int	countdown = MSGQ_BLOCKS;
 #if	defined(NHONSUID) || defined(DEBUG)
 	int_ugid_t	chk_uid;
 #endif
@@ -123,7 +123,7 @@ MAINFN_TYPE  main(int argc, char **argv)
 				exit(E_SETUP);
 			}
 			print_error($E{Waiting as shutting down});
-			sleep(5);
+			sleep(MSGQ_BLOCKWAIT);
 			continue;
 
 		case  EACCES:

@@ -23,6 +23,7 @@ BASE		=	..
 PARENT		=	..
 prefix		=	@prefix@
 exec_prefix	=	@exec_prefix@
+datarootdir	=	@datarootdir@
 MANDIR		=	$(DESTDIR)@mandir@
 PDFDIR		=	$(DESTDIR)@pdfdir@
 INSTALL		=	@INSTALL@

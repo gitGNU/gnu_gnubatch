@@ -286,7 +286,7 @@ struct	flst  {
 
 #define	N_CONVS	((sizeof(funclist)) / sizeof(struct flst))
 
-/* Versions relate to the version of GNUbatch on which this is based */
+/* Versions relate to the version of Xi-Batch on which this is based */
 
 MAINFN_TYPE  main(int argc, char **argv)
 {

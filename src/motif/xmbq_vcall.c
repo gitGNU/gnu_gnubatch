@@ -77,19 +77,19 @@ ULONG		Saveseq;
 
 /* Send var-type message to scheduler */
 
-void  wvmsg(unsigned code, BtvarRef vp, ULONG Sseq)
+void  qwvmsg(unsigned code, BtvarRef vp, ULONG Sseq)
 {
 	Oreq.sh_params.mcode = code;
 	if  (vp)
 		Oreq.sh_un.sh_var = *vp;
 	Oreq.sh_un.sh_var.var_sequence = Sseq;
-	if  (msgsnd(Ctrl_chan, (struct msgbuf *) &Oreq, sizeof(Shreq) + sizeof(Btvar), IPC_NOWAIT) < 0)
+	if  (msgsnd(Ctrl_chan, (struct msgbuf *) &Oreq, sizeof(Shreq) + sizeof(Btvar), 0) < 0)
 		msg_error();
 }
 
 /* Display var-type error message */
 
-void  doverror(unsigned retc, BtvarRef vp)
+void  qdoverror(unsigned retc, BtvarRef vp)
 {
 	switch  (retc  & REQ_TYPE)  {
 	default:
@@ -315,9 +315,9 @@ static void  endvass(Widget w, int data)
 		extract_vval(&newval);
 		Oreq.sh_un.sh_var = *cvar;
 		Oreq.sh_un.sh_var.var_value = newval;
-		wvmsg(V_ASSIGN, (BtvarRef) 0, Saveseq);
+		qwvmsg(V_ASSIGN, (BtvarRef) 0, Saveseq);
 		if  ((retc = readreply()) != V_OK)
-			doverror(retc, &Oreq.sh_un.sh_var);
+			qdoverror(retc, &Oreq.sh_un.sh_var);
 	}
 	XtDestroyWidget(GetTopShell(w));
 }
@@ -376,9 +376,9 @@ static void  endvcomm(Widget w, int data)
 		strncpy(Oreq.sh_un.sh_var.var_comment, cp, (unsigned) lng);
 		Oreq.sh_un.sh_var.var_comment[lng] = '\0';
 		XtFree(txt);
-		wvmsg(V_CHCOMM, (BtvarRef) 0, Saveseq);
+		qwvmsg(V_CHCOMM, (BtvarRef) 0, Saveseq);
 		if  ((retc = readreply()) != V_OK)
-			doverror(retc, &Oreq.sh_un.sh_var);
+			qdoverror(retc, &Oreq.sh_un.sh_var);
 	}
 	XtDestroyWidget(GetTopShell(w));
 }
@@ -454,9 +454,9 @@ void  cb_arith(Widget parent, int op)
 	}
 	Oreq.sh_un.sh_var = *cv;
 	Oreq.sh_un.sh_var.var_value.con_un.con_long = newvalue;
-	wvmsg(V_ASSIGN, (BtvarRef) 0, Saveseq);
+	qwvmsg(V_ASSIGN, (BtvarRef) 0, Saveseq);
 	if  ((retc = readreply()) != V_OK)
-		doverror(retc, &Oreq.sh_un.sh_var);
+		qdoverror(retc, &Oreq.sh_un.sh_var);
 }
 
 void  cb_vexport(Widget parent, int data)
@@ -482,9 +482,9 @@ void  cb_vexport(Widget parent, int data)
 		else
 			Oreq.sh_un.sh_var.var_flags &= ~VF_EXPORT;
 	}
-	wvmsg(V_CHFLAGS, (BtvarRef) 0, Saveseq);
+	qwvmsg(V_CHFLAGS, (BtvarRef) 0, Saveseq);
 	if  ((retc = readreply()) != V_OK)
-		doverror(retc, &Oreq.sh_un.sh_var);
+		qdoverror(retc, &Oreq.sh_un.sh_var);
 }
 
 /* Action, currently only delete */
@@ -498,9 +498,9 @@ void  cb_vact(Widget parent, int data)
 	Saveseq = cv->var_sequence;
 	if  (Dispflags & DF_CONFABORT  &&  !Confirm(vwid, $PH{xmbtq confirm delete var}))
 		return;
-	wvmsg(data, cv, Saveseq);
+	qwvmsg(data, cv, Saveseq);
 	if  ((retc = readreply()) != V_OK)
-		doverror(retc, &Oreq.sh_un.sh_var);
+		qdoverror(retc, &Oreq.sh_un.sh_var);
 }
 
 static void  endvcreate(Widget w, int data)
@@ -552,9 +552,9 @@ static void  endvcreate(Widget w, int data)
 		Oreq.sh_un.sh_var.var_mode.o_flags = mypriv->btu_vflags[2];
 		Oreq.sh_un.sh_var.var_type = 0;
 		Oreq.sh_un.sh_var.var_flags = 0;
-		wvmsg(V_CREATE, (BtvarRef) 0, 0L);
+		qwvmsg(V_CREATE, (BtvarRef) 0, 0L);
 		if  ((retc = readreply()) != V_OK)
-			doverror(retc, &Oreq.sh_un.sh_var);
+			qdoverror(retc, &Oreq.sh_un.sh_var);
 	}
 	XtDestroyWidget(GetTopShell(w));
 }
@@ -655,10 +655,10 @@ static void  endrename(Widget w, int data)
 		Oreq.sh_un.sh_rn.sh_ovar.var_sequence = Saveseq;
 		strcpy(Oreq.sh_un.sh_rn.sh_rnewname, cp);
 		XtFree(txt);
-		if  (msgsnd(Ctrl_chan, (struct msgbuf *) &Oreq, sizeof(Shreq) + sizeof(Btvar) + lng + 1, IPC_NOWAIT) < 0)
+		if  (msgsnd(Ctrl_chan, (struct msgbuf *) &Oreq, sizeof(Shreq) + sizeof(Btvar) + lng + 1, 0) < 0)
 			msg_error();
 		if  ((retc = readreply()) != V_OK)
-			doverror(retc, &Oreq.sh_un.sh_rn.sh_ovar);
+			qdoverror(retc, &Oreq.sh_un.sh_rn.sh_ovar);
 	}
 	XtDestroyWidget(GetTopShell(w));
 }
@@ -766,10 +766,10 @@ static void  endvperm(Widget w, int data)
 				return;
 			}
 			Oreq.sh_params.param = nug;
-			wvmsg(V_CHGRP, cvar, Saveseq);
+			qwvmsg(V_CHGRP, cvar, Saveseq);
 			if  ((retc = readreply()) != V_OK)  {
 				XtFree(txt);
-				doverror(retc, &Oreq.sh_un.sh_var);
+				qdoverror(retc, &Oreq.sh_un.sh_var);
 				return;
 			}
 			Saveseq++;
@@ -789,10 +789,10 @@ static void  endvperm(Widget w, int data)
 				return;
 			}
 			Oreq.sh_params.param = nug;
-			wvmsg(V_CHOWN, cvar, Saveseq);
+			qwvmsg(V_CHOWN, cvar, Saveseq);
 			if  ((retc = readreply()) != V_OK)  {
 				XtFree(txt);
-				doverror(retc, &Oreq.sh_un.sh_var);
+				qdoverror(retc, &Oreq.sh_un.sh_var);
 				return;
 			}
 			Saveseq++;
@@ -805,9 +805,9 @@ static void  endvperm(Widget w, int data)
 			Oreq.sh_un.sh_var.var_mode.u_flags = copymode[0];
 			Oreq.sh_un.sh_var.var_mode.g_flags = copymode[1];
 			Oreq.sh_un.sh_var.var_mode.o_flags = copymode[2];
-			wvmsg(V_CHMOD, (BtvarRef) 0, Saveseq);
+			qwvmsg(V_CHMOD, (BtvarRef) 0, Saveseq);
 			if  ((retc = readreply()) != V_OK)
-				doverror(retc, &Oreq.sh_un.sh_var);
+				qdoverror(retc, &Oreq.sh_un.sh_var);
 		}
 	}
 	if  (modew)  {
@@ -817,7 +817,7 @@ static void  endvperm(Widget w, int data)
 	XtDestroyWidget(GetTopShell(w));
 }
 
-static void CreateModeDialog(Widget formw, Widget prevabove, BtmodeRef current, unsigned readonly, int isvar)
+static void  CreateModeDialog(Widget formw, Widget prevabove, BtmodeRef current, unsigned readonly, int isvar)
 {
 	Widget	mrc;
 	int	nrows = MODENUMBERS, row, col;
@@ -834,8 +834,8 @@ static void CreateModeDialog(Widget formw, Widget prevabove, BtmodeRef current, 
 	if  (mypriv->btu_priv & BTM_WADMIN)
 		chgu = chgg = 0;
 	else  {
-		chgu = !mpermitted(current, current->o_uid == Realuid? BTM_UGIVE: BTM_UTAKE);
-		chgg = !mpermitted(current, current->o_gid == Realgid? BTM_GGIVE: BTM_GTAKE);
+		chgu = !mpermitted(current, current->o_uid == Realuid? BTM_UGIVE: BTM_UTAKE, mypriv->btu_priv);
+		chgg = !mpermitted(current, current->o_gid == Realgid? BTM_GGIVE: BTM_GTAKE, mypriv->btu_priv);
 	}
 	prevabove = CreateUselDialog(formw, prevabove, current->o_user, 0, chgu);
 	prevabove = CreateGselDialog(formw, prevabove, current->o_group, 0, chgg);
@@ -875,7 +875,7 @@ void  cb_vperm(Widget parent)
 	if  (!(modew = (Widget *) malloc((unsigned)(3 * MODENUMBERS * sizeof(Widget)))))
 		ABORT_NOMEM;
 	prevabove = CreateVeditDlg(parent, "vmode", &vm_shell, &panew, &formw);
-	readonly = !mpermitted(&cv->var_mode, BTM_WRMODE);
+	readonly = !mpermitted(&cv->var_mode, BTM_WRMODE, mypriv->btu_priv);
 	CreateModeDialog(formw, prevabove, &cv->var_mode, readonly, 1);
 	XtManageChild(formw);
 	CreateActionEndDlg(vm_shell, panew, (XtCallbackProc) endvperm, $H{xmbtq vperm dialog});
@@ -902,10 +902,10 @@ static void  endjperm(Widget w, int data)
 				return;
 			}
 			Oreq.sh_params.param = nug;
-			wjimsg(J_CHGRP, cjob);
+			qwjimsg(J_CHGRP, cjob);
 			if  ((retc = readreply()) != J_OK)  {
 				XtFree(txt);
-				dojerror(retc, cjob);
+				qdojerror(retc, cjob);
 				return;
 			}
 		}
@@ -924,10 +924,10 @@ static void  endjperm(Widget w, int data)
 				return;
 			}
 			Oreq.sh_params.param = nug;
-			wjimsg(J_CHOWN, cjob);
+			qwjimsg(J_CHOWN, cjob);
 			if  ((retc = readreply()) != J_OK)  {
 				XtFree(txt);
-				dojerror(retc, cjob);
+				qdojerror(retc, cjob);
 				return;
 			}
 		}
@@ -943,7 +943,7 @@ static void  endjperm(Widget w, int data)
 			bjp->h.bj_mode.o_flags = copymode[2];
 			wjmsg(J_CHMOD, xindx);
 			if  ((retc = readreply()) != J_OK)
-				dojerror(retc, bjp);
+				qdojerror(retc, bjp);
 			freexbuf(xindx);
 		}
 	}
@@ -965,7 +965,7 @@ void  cb_jperm(Widget parent)
 	if  (!(modew = (Widget *) malloc((unsigned)(3 * MODENUMBERS * sizeof(Widget)))))
 		ABORT_NOMEM;
 	prevabove = CreateJeditDlg(parent, "jmode", &jm_shell, &panew, &formw);
-	readonly = !mpermitted(&cj->h.bj_mode, BTM_WRMODE);
+	readonly = !mpermitted(&cj->h.bj_mode, BTM_WRMODE, mypriv->btu_priv);
 	CreateModeDialog(formw, prevabove, &cj->h.bj_mode, readonly, 0);
 	XtManageChild(formw);
 	CreateActionEndDlg(jm_shell, panew, (XtCallbackProc) endjperm, $H{xmbtq jperm dialog});

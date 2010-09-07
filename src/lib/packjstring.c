@@ -29,7 +29,7 @@
    if we run out of space.  The numbers of strings are assumed to
    be correct in "jp" */
 
-int packjstring(BtjobRef jp, const char *dp, const char *tp, MredirRef rp, MenvirRef ep, char **ap)
+int  packjstring(BtjobRef jp, const char *dp, const char *tp, MredirRef rp, MenvirRef ep, char **ap)
 {
 	unsigned  offset = 0;
 	char	*next = &jp->bj_space[0];
@@ -157,7 +157,7 @@ int packjstring(BtjobRef jp, const char *dp, const char *tp, MredirRef rp, Menvi
 
 /* Repack changed bits of a job */
 
-int repackjob(BtjobRef	new, CBtjobRef old,const char *dp, const char *tp, const unsigned nr, const unsigned ne, const unsigned na, MredirRef rp, MenvirRef ep, char **ap)
+int  repackjob(BtjobRef new, CBtjobRef old, const char *dp, const char *tp, const unsigned nr, const unsigned ne, const unsigned na, MredirRef rp, MenvirRef ep, char **ap)
 {
 	Mredir	reds[MAXJREDIRS];
 	Menvir	envs[MAXJENVIR];
@@ -209,7 +209,7 @@ const char *title_of(CBtjobRef jp)
 	return  jp->h.bj_title < 0? "": &jp->bj_space[jp->h.bj_title];
 }
 
-void unpackenv(BtjobRef jp, unsigned cnt, char **namep, char **valp)
+void  unpackenv(BtjobRef jp, unsigned cnt, char **namep, char **valp)
 {
 	EnvirRef  ep = &((EnvirRef) &jp->bj_space[jp->h.bj_env])[cnt];
 	*namep = &jp->bj_space[ep->e_name];

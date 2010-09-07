@@ -45,7 +45,6 @@
 #include "rcgilib.h"
 
 int		Nvars;
-
 struct	var_with_slot  *var_sl_list;
 
 void  nomem(const char *fl, const int ln)
@@ -71,7 +70,7 @@ struct	actop  {
 #define	PROC_RUN	2
 #define	PERMS_SET	4
 	USHORT		op;
-	int  (*act_op)(struct jobswanted *, const unsigned, const int);
+	int	(*act_op)(struct jobswanted *, const unsigned, const int);
 } actlist[] =  {
 	{	"delete",	0,		0,			act_delete  },
 	{	"kill",		PROC_RUN,	GBATCH_JOP_KILL,	act_jop  },
@@ -84,7 +83,7 @@ struct	actop  {
 	{	"perms",	PERMS_SET|NEEDS_XBUF,	BTM_RDMODE|BTM_WRMODE,	0 }
 };
 
-void	act_perms(struct jobswanted *jw, apiBtjob *jp, char *setf, char *unsetf)
+void  act_perms(struct jobswanted *jw, apiBtjob *jp, char *setf, char *unsetf)
 {
 	int	ret;
 	USHORT	sarr[3], usarr[3];

@@ -208,8 +208,7 @@ int  shmpermitted(ShreqRef sr, BtmodeRef md, unsigned flag)
 	     (md->o_gid == sr->ugid  &&  (gf & flag) == flag) || (of & flag) == flag)
 		return  1;
 
-	if  (!(g = getbtuentry(sr->uuid)))
-		return  0;
+	g = getbtuentry(sr->uuid);
 
 	if  (g->btu_priv & BTM_ORP_UG)  {
 		uf |= gf;
@@ -231,29 +230,18 @@ int  shmpermitted(ShreqRef sr, BtmodeRef md, unsigned flag)
 
 int  ppermitted(uid_t uid, ULONG flag)
 {
-	BtuserRef	g;
-
-	if  ((g = getbtuentry(uid)))
-		return  (g->btu_priv & flag) != 0;
-	return  0;
+	BtuserRef  g = getbtuentry(uid);
+	return  (g->btu_priv & flag) != 0;
 }
 
 /* Initialise default modes for given user variable */
 
 void  initumode(uid_t uid, BtmodeRef mp)
 {
-	BtuserRef	g;
-
-	if  ((g = getbtuentry(uid)))  {
-		mp->u_flags = g->btu_vflags[0];
-		mp->g_flags = g->btu_vflags[1];
-		mp->o_flags = g->btu_vflags[2];
-	}
-	else  {
-		mp->u_flags = U_DF_UV;
-		mp->g_flags = U_DF_GV;
-		mp->o_flags = U_DF_OV;
-	}
+	BtuserRef  g = getbtuentry(uid);
+	mp->u_flags = g->btu_vflags[0];
+	mp->g_flags = g->btu_vflags[1];
+	mp->o_flags = g->btu_vflags[2];
 }
 
 /* `Force' a message out.  */
@@ -273,13 +261,13 @@ void  forcemsg(char *buf, int len)
 
 	/* Try again n times */
 
-	for  (nn = 0;  nn < OPTRIES;  nn++)  {
-		sleep(OPWAIT);
+	for  (nn = 0;  nn < MSGQ_BLOCKS;  nn++)  {
+		sleep(MSGQ_BLOCKWAIT);
 		if  (msgsnd(Ctrl_chan, (struct msgbuf *) buf, len, IPC_NOWAIT) >= 0)
 			return;
 	}
 
-	panic($E{Panic queue clogged up});
+	nfreport($E{Panic queue clogged up});
 }
 
 /* Send a reply to an operator via IPC */

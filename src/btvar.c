@@ -365,7 +365,7 @@ void  spit_options(FILE *dest, const char *name)
 
 /* See whether the user can access the mode.  (Needed by library function rvfile).  */
 
-int  mpermitted(CBtmodeRef md, const unsigned flag)
+int  mpermitted(CBtmodeRef md, const unsigned flag, const ULONG fl)
 {
 	return  1;		/* Dummy - rely on scheduler */
 }
@@ -374,10 +374,20 @@ int  mpermitted(CBtmodeRef md, const unsigned flag)
 
 void  wrt_vmsg(unsigned code)
 {
+	int	blkcount = MSGQ_BLOCKS;
+
 	Oreq.sh_params.mcode = code;
-	if  (msgsnd(Ctrl_chan, (struct msgbuf *) &Oreq, sizeof(Shreq) + sizeof(Btvar), IPC_NOWAIT) < 0)  {
-		print_error(errno == EAGAIN? $E{IPC msg q full}: $E{IPC msg q error});
-		exit(E_SETUP);
+	while  (msgsnd(Ctrl_chan, (struct msgbuf *) &Oreq, sizeof(Shreq) + sizeof(Btvar), IPC_NOWAIT) < 0)  {
+		if  (errno != EAGAIN)  {
+			print_error($E{IPC msg q error});
+			exit(E_SETUP);
+		}
+		blkcount--;
+		if  (blkcount <= 0)  {
+			print_error($E{IPC msg q full});
+			exit(E_SETUP);
+		}
+		sleep(MSGQ_BLOCKWAIT);
 	}
 }
 
@@ -425,7 +435,7 @@ int  docompar(int oper, BtvarRef vp)
 
 /* Display var-type error message */
 
-int  doverror(unsigned retc, BtvarRef vp)
+int  btv_doverror(unsigned retc, BtvarRef vp)
 {
 	switch  (retc & REQ_TYPE)  {
 	default:
@@ -471,7 +481,7 @@ int  doexpset(vhash_t vp)
 	Oreq.sh_un.sh_var.var_sequence = Saveseq++;
 	wrt_vmsg(V_CHFLAGS);
 	if  ((retc = readreply()) != V_OK)
-		return  doverror(retc, &Oreq.sh_un.sh_var);
+		return  btv_doverror(retc, &Oreq.sh_un.sh_var);
 	return  0;
 }
 
@@ -500,7 +510,7 @@ int  doset(vhash_t vp)
 		wrt_vmsg(V_ASSIGN);
 		retc = readreply();
 		if  (retc != V_OK)
-			return  doverror(retc, &Oreq.sh_un.sh_var);
+			return  btv_doverror(retc, &Oreq.sh_un.sh_var);
 		Saveseq++;
 		if  ((Exportflag > 0 || Clusterflag > 0)  &&  (retc = doexpset((vhash_t) -1)) != 0)
 			return  retc;
@@ -519,7 +529,7 @@ int  doset(vhash_t vp)
 	}
 	retc = readreply();
 	if  (retc != V_OK)
-		return  doverror(retc, &Oreq.sh_un.sh_var);
+		return  btv_doverror(retc, &Oreq.sh_un.sh_var);
 	return  0;
 }
 
@@ -534,7 +544,7 @@ int  dodelete(vhash_t vp)
 	wrt_vmsg(V_DELETE);
 	if  ((retc = readreply()) == V_OK)
 		return  0;
-	return  doverror(retc, &Oreq.sh_un.sh_var);
+	return  btv_doverror(retc, &Oreq.sh_un.sh_var);
 }
 
 /* Ditto for mode set */
@@ -556,7 +566,7 @@ int  domodeset(vhash_t vp)
 	checksetmode(2, mypriv->btu_vflags, varp->var_mode.o_flags, &Oreq.sh_un.sh_var.var_mode.o_flags);
 	wrt_vmsg(V_CHMOD);
 	if  ((retc = readreply()) != V_OK)
-		return  doverror(retc, &Oreq.sh_un.sh_var);
+		return  btv_doverror(retc, &Oreq.sh_un.sh_var);
 	return  0;
 }
 
@@ -571,7 +581,7 @@ int  douset(vhash_t vp)
 	Oreq.sh_params.param = New_owner;
 	wrt_vmsg(V_CHOWN);
 	if  ((retc = readreply()) != V_OK)
-		return  doverror(retc, &Oreq.sh_un.sh_var);
+		return  btv_doverror(retc, &Oreq.sh_un.sh_var);
 	return  0;
 }
 
@@ -586,7 +596,7 @@ int  dogset(vhash_t vp)
 	Oreq.sh_params.param = New_group;
 	wrt_vmsg(V_CHGRP);
 	if  ((retc = readreply()) != V_OK)
-		return  doverror(retc, &Oreq.sh_un.sh_var);
+		return  btv_doverror(retc, &Oreq.sh_un.sh_var);
 	return  0;
 }
 

@@ -68,8 +68,6 @@ extern	netid_t		Out_host;
 char	*realuname;
 char	realgname[UIDSIZE+1];
 
-ULONG		Fileprivs;
-
 Btjob		Out_job;
 
 char	Verbose,
@@ -303,7 +301,7 @@ FILE *ginfile(char *arg)
 	}
 	else  {
 		FILE	*res;
-		int  ch, pfile[2];
+		int	ch, pfile[2];
 		static	PIDTYPE	lastpid = -1;
 
 		/* Otherwise we fork off a process to read the file as
@@ -444,7 +442,7 @@ static void  copyout(FILE *inf, const int outsock)
 
 MAINFN_TYPE  main(int argc, char **argv)
 {
-	FILE  *inf;
+	FILE  		*inf;
 	int		outsock, exitcode = 0, ret, ch;
 	char		*Curr_pwd = (char *) 0;
 	jobno_t		jn;
@@ -554,7 +552,6 @@ MAINFN_TYPE  main(int argc, char **argv)
 	realuname = prin_uname(Realuid);
 	if  (Out_host)
 		mypriv = remgetbtuser(Out_host, realuname, realgname);
-	Fileprivs = mypriv->btu_priv;
 
 	if  ((mypriv->btu_priv & BTM_CREATE) == 0)  {
 		print_error($E{No create perm});

@@ -64,10 +64,10 @@ struct	macromenitem  {
 extern int  add_macro_to_list(const char *, const char, struct macromenitem *);
 
 extern void  msg_error();
-extern void  wjimsg(const unsigned, CBtjobRef);
+extern void  qwjimsg(const unsigned, CBtjobRef);
 extern void  wjmsg(const unsigned, const ULONG);
 
-extern void  dojerror(unsigned, BtjobRef);
+extern void  qdojerror(unsigned, BtjobRef);
 extern int  chk_okcidel(const int);
 extern const char *qtitle_of(CBtjobRef);
 

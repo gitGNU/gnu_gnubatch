@@ -231,7 +231,7 @@ void  vdisplay()
 			continue;
 		if  (nwanted != 0  &&  !iswanted(vp))
 			continue;
-		isreadable = mpermitted(&vp->var_mode, BTM_READ);
+		isreadable = mpermitted(&vp->var_mode, BTM_READ, mypriv->btu_priv);
 		fp = formatstring;
 		pc = 0;
 		while  (*fp)  {
@@ -315,7 +315,7 @@ void  vdisplay()
 	for  (vcnt = 0;  vcnt < number_wanted;  vcnt++)  {
 		int	isreadable;
 		vp = &copied_wanted[vcnt];
-		isreadable = mpermitted(&vp->var_mode, BTM_READ);
+		isreadable = mpermitted(&vp->var_mode, BTM_READ, mypriv->btu_priv);
 		fp = formatstring;
 		pc = 0;
 		while  (*fp)  {

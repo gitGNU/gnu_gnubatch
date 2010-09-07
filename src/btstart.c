@@ -72,6 +72,7 @@ static int  doconnop(const unsigned cmd, const char *hostn)
 	long		mymtype;
 	Shipc		oreq;
 	Repmess		rr;
+	int	blkcount = MSGQ_BLOCKS;
 
 	disp_str = hostn;
 	while  ((rp = get_hostfile()))
@@ -107,9 +108,17 @@ static int  doconnop(const unsigned cmd, const char *hostn)
 	mymtype = MTOFFSET + (oreq.sh_params.upid = getpid());
 	oreq.sh_un.sh_n = *rp;
 	oreq.sh_un.sh_n.ht_flags &= ~HT_MANUAL;
-	if  (msgsnd(Ctrl_chan, (struct msgbuf *) &oreq, sizeof(Shreq) + sizeof(struct remote), IPC_NOWAIT) < 0)  {
-		print_error(errno == EAGAIN? $E{IPC msg q full}: $E{IPC msg q error});
-		exit(E_SETUP);
+	while  (msgsnd(Ctrl_chan, (struct msgbuf *) &oreq, sizeof(Shreq) + sizeof(struct remote), IPC_NOWAIT) < 0)  {
+		if  (errno != EAGAIN)  {
+			print_error($E{IPC msg q error});
+			exit(E_SETUP);
+		}
+		blkcount--;
+		if  (blkcount <= 0)  {
+			print_error($E{IPC msg q full});
+			exit(E_SETUP);
+		}
+		sleep(MSGQ_BLOCKWAIT);
 	}
 
 	while  (msgrcv(Ctrl_chan, (struct msgbuf *) &rr, sizeof(Shreq), mymtype, 0) < 0)  {
@@ -252,11 +261,12 @@ static LONG  g_adj(const char *arg)
 	return  (LONG) atol(arg);
 }
 
-static  int  dodst(const int remaswell, const time_t starttime, const time_t endtime, const LONG adj)
+static int  dodst(const int remaswell, const time_t starttime, const time_t endtime, const LONG adj)
 {
 	long		mymtype;
 	Shipc		oreq;
 	Repmess		rr;
+	int	blkcount = MSGQ_BLOCKS;
 
 	if  (starttime >= endtime  ||  adj == 0)  {
 		print_error($E{Bad dst adjustment});
@@ -272,9 +282,17 @@ static  int  dodst(const int remaswell, const time_t starttime, const time_t end
 	oreq.sh_un.sh_adj.sh_starttime = starttime;
 	oreq.sh_un.sh_adj.sh_endtime = endtime;
 	oreq.sh_un.sh_adj.sh_adjust = adj;
-	if  (msgsnd(Ctrl_chan, (struct msgbuf *) &oreq, sizeof(Shreq) + sizeof(struct adjstr), IPC_NOWAIT) < 0)  {
-		print_error(errno == EAGAIN? $E{IPC msg q full}: $E{IPC msg q error});
-		exit(E_SETUP);
+	while  (msgsnd(Ctrl_chan, (struct msgbuf *) &oreq, sizeof(Shreq) + sizeof(struct adjstr), IPC_NOWAIT) < 0)  {
+		if  (errno != EAGAIN)  {
+			print_error($E{IPC msg q error});
+			exit(E_SETUP);
+		}
+		blkcount--;
+		if  (blkcount <= 0)  {
+			print_error($E{IPC msg q full});
+			exit(E_SETUP);
+		}
+		sleep(MSGQ_BLOCKWAIT);
 	}
 	while  (msgrcv(Ctrl_chan, (struct msgbuf *) &rr, sizeof(Shreq), mymtype, 0) < 0)  {
 		if  (errno == EINTR)
@@ -496,10 +514,10 @@ MAINFN_TYPE  main(int argc, char **argv)
 		while  (waitpid(pid, &code, 0) < 0)
 			;
 #else
-		while  (wait(&code)) != pid)
+		while  (wait(&code) != pid)
 			;
 #endif
-		if  (code != 0)  {
+		if  ((code & 255) != 0)  {
 			print_error($E{Btstart giving up});
 			exit(code >> 8);
 		}

@@ -208,10 +208,8 @@ static	char	**title;
 
 static void  initnames()
 {
-	int	i, j;
 	struct  ltab	*lt;
-	int	hrows, cols, look4, rowstart, pstart;
-	int	nextstate[TABNUM];
+	int	i, j, hrows, cols, look4, rowstart, pstart, nextstate[TABNUM];
 
 	title = helphdr('=');
 	count_hv(title, &hrows, &cols);
@@ -408,9 +406,8 @@ static void  ask_build()
 
 int  propts()
 {
-	int	ch;
+	int	ch, i, whichel;
 	struct  ltab	*lt;
-	int	i, whichel;
 	char	**hv;
 	static	char	doneinit = 0;
 

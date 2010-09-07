@@ -18,7 +18,6 @@
 extern	void	rgrpfile();
 extern	void	rpwfile();
 extern	void	un_rpwfile();
-extern	void	dump_pwfile();
 extern	void	produser();
 extern	int	isvuser(const uid_t);
 extern	int_ugid_t	lookup_gname(const char *);
@@ -34,8 +33,6 @@ extern	int	get_suppgrps(const uid_t, gid_t **);
 extern	char	Requires_suppgrps;
 #endif
 
-extern	char	Using_dumpfile;
-
 /* Unknown user and groups */
 
 #define	UNKNOWN_UID	(-1)
@@ -47,9 +44,7 @@ extern	uid_t	Daemuid,
 extern	gid_t	Daemgid, Realgid, Effgid;
 extern	int_ugid_t	lastgid;
 
-extern	ULONG	Fileprivs;
-
-/* Check that uid assignments make sense */
+extern	unsigned  Npwusers;
 
 #ifdef	HAVE_SETEUID
 #if	defined(NHONSUID) || defined(DEBUG)

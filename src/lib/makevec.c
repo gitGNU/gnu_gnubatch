@@ -32,9 +32,8 @@ static	char	Filename[] = __FILE__;
 
 char **makevec(const char *arg)
 {
-	char	*resv, **res;
-	int  count, tot, rbits = 0, quote;
-	char	**ores;
+	char	*resv, **res, **ores;
+	int	count, tot, rbits = 0, quote;
 
 	ores = res = (char **)malloc((unsigned)(INITV * sizeof(char *)));
 	resv = (char *)malloc((unsigned)(strlen(arg) + 1));

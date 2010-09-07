@@ -268,7 +268,7 @@ static void  vfillin(BtvarRef vp, char *obuf, char *fmt)
 	char	*cp = fmt, *rp = obuf, *lbp;
 	struct	formatdef  *fp;
 	int	currplace = -1, lastplace, nn, inlen;
-	int	isreadable = mpermitted(&vp->var_mode, BTM_READ);
+	int	isreadable = mpermitted(&vp->var_mode, BTM_READ, mypriv->btu_priv);
 
 	while  (*cp)  {
 		if  (*cp != '%')  {
@@ -414,7 +414,7 @@ BtvarRef  getselectedvar(unsigned perm)
 		XtFree((char *) plist);
 		if  ((unsigned) cvarpos < Var_seg.nvars)  {
 			BtvarRef  vp = &vv_ptrs[cvarpos].vep->Vent;
-			if  (!mpermitted(&vp->var_mode, perm))  {
+			if  (!mpermitted(&vp->var_mode, perm, mypriv->btu_priv))  {
 				disp_str = vp->var_name;
 				disp_str2 = vp->var_mode.o_user;
 				doerror(vwid, $EH{xmbtq no var access perm});
@@ -459,7 +459,7 @@ int  val_var(const char *name, const unsigned modeflag)
 		vp = &vv_ptrs[middle].vep->Vent;
 		if  ((s = strcmp(colp, vp->var_name)) == 0)  {
 			if  (vp->var_id.hostid == hostid)  {
-				if  (mpermitted(&vp->var_mode, modeflag))
+				if  (mpermitted(&vp->var_mode, modeflag, mypriv->btu_priv))
 					return  middle;
 				return  -1;
 			}
@@ -482,8 +482,8 @@ int  val_var(const char *name, const unsigned modeflag)
 
 static char **gen_vars(int isexport, unsigned mode)
 {
-	unsigned	vcnt, maxr, countr;
 	char		**result;
+	unsigned	vcnt, maxr, countr;
 
 	if  ((result = (char **) malloc((Var_seg.nvars + 1)/2 * sizeof(char *))) == (char **) 0)
 		ABORT_NOMEM;
@@ -496,7 +496,7 @@ static char **gen_vars(int isexport, unsigned mode)
 
 		/* Skip ones which are not allowed.  */
 
-		if  (!mpermitted(&vp->var_mode, mode))
+		if  (!mpermitted(&vp->var_mode, mode, mypriv->btu_priv))
 			continue;
 		if  (isexport >= 0)  {
 			if  (isexport)  {

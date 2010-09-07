@@ -39,6 +39,7 @@
 #include "cmdint.h"
 #include "btvar.h"
 #include "shreq.h"
+#include "btuser.h"
 #include "magic_ch.h"
 #include "sctrl.h"
 #include "statenums.h"
@@ -93,12 +94,12 @@ static	SHORT	value_col, value_row;
 void  con_refill(WINDOW *, int, int, BtconRef);
 void  dochelp(WINDOW *, int);
 void  doerror(WINDOW *, int);
-void  doverror(unsigned, BtvarRef);
+void  qdoverror(unsigned, BtvarRef);
 void  endhe(WINDOW *, WINDOW **);
 void  notebgwin(WINDOW *, WINDOW *, WINDOW *);
 void  viewhols(WINDOW *);
 void  ws_fill(WINDOW *, const int, const struct sctrl *, const char *);
-void  wvmsg(unsigned, BtvarRef, ULONG);
+void  qwvmsg(unsigned, BtvarRef, ULONG);
 void  offersave(char *, const int);
 int  createvar();
 int  delvar(BtvarRef);
@@ -144,7 +145,7 @@ int  val_var(const char *name, const unsigned modeflag)
 		vp = &vv_ptrs[middle].vep->Vent;
 		if  ((s = strcmp(colp, vp->var_name)) == 0)  {
 			if  (vp->var_id.hostid == hostid)  {
-				if  (mpermitted(&vp->var_mode, modeflag))
+				if  (mpermitted(&vp->var_mode, modeflag, mypriv->btu_priv))
 					return  middle;
 				return  -1;
 			}
@@ -167,9 +168,8 @@ int  val_var(const char *name, const unsigned modeflag)
 
 static char **gen_vars(char *prefix, unsigned mode)
 {
-	unsigned	vcnt;
+	unsigned	vcnt, maxr, countr;
 	char	**result;
-	unsigned  maxr, countr;
 	int	sfl = 0;
 
 	if  ((result = (char **) malloc((Var_seg.nvars + 1)/2 * sizeof(char *))) == (char **) 0)
@@ -185,7 +185,7 @@ static char **gen_vars(char *prefix, unsigned mode)
 
 		/* Skip ones which don't match the prefix or not allowed.  */
 
-		if  (!mpermitted(&vp->var_mode, mode))
+		if  (!mpermitted(&vp->var_mode, mode, mypriv->btu_priv))
 			continue;
 		if  (gv_export)  {
 			if  (!(vp->var_flags & VF_EXPORT)  &&  (vp->var_type != VT_MACHNAME || vp->var_id.hostid))
@@ -480,7 +480,7 @@ static void  vfillin(BtvarRef vp, const int row, const char *fmt)
 	char	*lbp;
 	struct	formatdef  *fp;
 	int	currplace = -1, lastplace, nn, inlen, dummy;
-	int	isreadable = mpermitted(&vp->var_mode, BTM_READ);
+	int	isreadable = mpermitted(&vp->var_mode, BTM_READ, mypriv->btu_priv);
 
 	wmove(vscr, row, 0);
 
@@ -646,7 +646,7 @@ static int  smatch(const int mline, const char *mstr)
 	CBtvarRef  vp = &vv_ptrs[mline].vep->Vent;
 	if  (smatchit(vp->var_name, mstr))
 		return  1;
-	if  (mpermitted(&vp->var_mode, BTM_READ)  &&  smatchit(vp->var_comment, mstr))
+	if  (mpermitted(&vp->var_mode, BTM_READ, mypriv->btu_priv)  &&  smatchit(vp->var_comment, mstr))
 		return  1;
 	return  0;
 }
@@ -811,10 +811,10 @@ static void  var_macro(BtvarRef vp, const int num)
 
 int  v_process()
 {
-	int	err_no, i, ret;
+	int	err_no, i, ret,	ch, currow;
 	unsigned	retc;
 	ULONG		Saveseq;
-	int	ch, currow;
+
 	char	*str;
 
  refillall:
@@ -1175,7 +1175,7 @@ nov:			err_no = $E{btq vlist no vars};
 			goto  Vmove;
 		Oreq.sh_un.sh_var = vv_ptrs[Veline].vep->Vent;
 		strcpy(Oreq.sh_un.sh_var.var_comment, str);
-		wvmsg(V_CHCOMM, (BtvarRef) 0, Saveseq);
+		qwvmsg(V_CHCOMM, (BtvarRef) 0, Saveseq);
 		if  ((retc = readreply()) == V_OK)  {
 			if  (hadrfresh)
 				return  -1;
@@ -1190,7 +1190,7 @@ nov:			err_no = $E{btq vlist no vars};
 #else
 		wrefresh(vscr);
 #endif
-		doverror(retc, &Oreq.sh_un.sh_var);
+		qdoverror(retc, &Oreq.sh_un.sh_var);
 		goto  Vrefresh;
 
 	case  $K{btq vlist key rename}:
@@ -1208,13 +1208,13 @@ nov:			err_no = $E{btq vlist no vars};
 			goto  nextin;
 		Oreq.sh_un.sh_var.var_flags |= VF_EXPORT;
 	fset:
-		wvmsg(V_CHFLAGS, (BtvarRef) 0, Saveseq);
+		qwvmsg(V_CHFLAGS, (BtvarRef) 0, Saveseq);
 		if  ((retc = readreply()) == V_OK)  {
 			if  (hadrfresh)
 				return  -1;
 			goto  Vreset;
 		}
-		doverror(retc, &Oreq.sh_un.sh_var);
+		qdoverror(retc, &Oreq.sh_un.sh_var);
 		goto  Vrefresh;
 
 	case  $K{btq vlist key usexport}:

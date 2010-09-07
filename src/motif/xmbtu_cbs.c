@@ -231,13 +231,13 @@ static void  enddispopt(Widget w, int data)
 			switch  (alphsort)  {
 			default:
 			case  SORT_NONE:
-				qsort(QSORTP1 ulist, Nusers, sizeof(Btuser), QSORTP4 sort_id);
+				qsort(QSORTP1 ulist, Npwusers, sizeof(Btuser), QSORTP4 sort_id);
 				break;
 			case  SORT_USER:
-				qsort(QSORTP1 ulist, Nusers, sizeof(Btuser), QSORTP4 sort_u);
+				qsort(QSORTP1 ulist, Npwusers, sizeof(Btuser), QSORTP4 sort_u);
 				break;
 			case  SORT_GROUP:
-				qsort(QSORTP1 ulist, Nusers, sizeof(Btuser), QSORTP4 sort_g);
+				qsort(QSORTP1 ulist, Npwusers, sizeof(Btuser), QSORTP4 sort_g);
 				break;
 			}
 			udisplay(0, (int *) 0);
@@ -744,7 +744,7 @@ static void  endpriv(Widget w, int data)
 				Btuhdr.btd_priv = newflags;
 				hchanges++;
 				uchanges++;
-				for  (cnt = 0;  cnt < Nusers;  cnt++)
+				for  (cnt = 0;  cnt < (int) Npwusers;  cnt++)
 					if  (ulist[cnt].btu_user != Realuid)
 						ulist[cnt].btu_priv = newflags;
 				udisplay(0, (int *) 0);
@@ -873,186 +873,11 @@ void  cb_copydef(Widget parent, int which)
 		udisplay(pendunum, pendulist);
 	}
 	else  {
-		for  (cnt = 0;  cnt < Nusers;  cnt++)
+		for  (cnt = 0;  cnt < (int) Npwusers;  cnt++)
 			copyu(&ulist[cnt]);
 		udisplay(0, (int *) 0);
 	}
 	uchanges++;
-}
-
-static void  endcbdisplay(Widget w, int data)
-{
-	XtDestroyWidget(GetTopShell(w));
-}
-
-void  cb_cdisplay(Widget parent, int notused)
-{
-	int		cnt, n;
-	XmStringTable	str_list;
-	Widget		c_shell, cpanes, listw;
-	Arg		args[8];
-	XmString	dones;
-
-	if  (pendunum > 0)  {
-		pendunum = 0;
-		XtFree((char *) pendulist);
-		pendulist = (int *) 0;
-	}
-
-	if  (!getselectedusers(1))
-		return;
-
-	displaybusy(1);
-	str_list = (XmStringTable) XtMalloc(pendunum * sizeof(XmString *));
-	for  (cnt = 0;  cnt < pendunum; cnt++)  {
-		int_ugid_t	uu = ulist[pendulist[cnt]-1].btu_user;
-		char	buf[UIDSIZE + 40];
-		sprintf(buf, "%-10.10s %g", prin_uname((uid_t) uu), calccharge(uu));
-		str_list[cnt] = XmStringCreateSimple(buf);
-	}
-	dones = XmStringCreateLocalized("Done");
-	n = 0;
-        XtSetArg(args[n], XmNdialogStyle, XmDIALOG_FULL_APPLICATION_MODAL); n++;
-	XtSetArg(args[n], XmNdeleteResponse, XmDESTROY); n++;
-	XtSetArg(args[n], XmNokLabelString, dones);	n++;
-        c_shell = cpanes = XmCreateTemplateDialog(GetTopShell(parent), "chlist", args, n);
-	XmStringFree(dones);
-	listw = XmCreateScrolledList(cpanes, "chargelist", args, 0);
-	n = 0;
-	XtSetArg(args[n], XmNitems, str_list); n++;
-	XtSetArg(args[n], XmNitemCount, pendunum); n++;
-	XtSetArg(args[n], XmNvisibleItemCount, pendunum > 30? 30: pendunum); n++;
-	XtSetValues(listw, args, n);
-	XtManageChild(listw);
-	for  (cnt = 0;  cnt < pendunum;  cnt++)
-		XmStringFree(str_list[cnt]);
-	XtFree((char *) str_list);
-	displaybusy(0);
-	XtAddCallback(c_shell, XmNokCallback, (XtCallbackProc) endcbdisplay, (XtPointer) 0);
-        XtManageChild(c_shell);
-}
-
-/* Open charge file as required */
-
-static int  grab_file(const int omode)
-{
-	static	char	*file_name;
-
-	if  (!file_name)
-		file_name = envprocess(CHFILE);
-
-	return  open(file_name, omode);
-}
-
-void  cb_zeroc(Widget parent, int which)
-{
-	int	cnt, fd;
-	struct	btcharge	btc;
-
-	if  (pendunum > 0)  {
-		pendunum = 0;
-		XtFree((char *) pendulist);
-		pendulist = (int *) 0;
-	}
-
-	btc.btch_host = 0;		/* Me */
-	btc.btch_pri = 0;
-	btc.btch_ll = 0;
-	btc.btch_runtime = 0;
-
-	if  (!which)  {
-		if  (!getselectedusers(1))
-			return;
-		if  (!Confirm(parent, $PH{xmbtuser zero charges for given users}))
-			return;
-		if  ((fd = grab_file(O_WRONLY|O_APPEND)) < 0)
-			return;
-		time(&btc.btch_when);
-		btc.btch_what = BTCH_ZERO;
-		for  (cnt = 0;  cnt < pendunum;  cnt++)  {
-			btc.btch_user = ulist[pendulist[cnt]-1].btu_user;
-			write(fd, (char *) &btc, sizeof(btc));
-		}
-	}
-	else  {
-		if  (!Confirm(parent, $PH{xmbtuser zero charges for all users}))
-			return;
-		if  ((fd = grab_file(O_WRONLY|O_APPEND)) < 0)
-			return;
-		time(&btc.btch_when);
-		btc.btch_what = BTCH_ZEROALL;
-		btc.btch_user = -1;
-		write(fd, (char *) &btc, sizeof(btc));
-	}
-	close(fd);
-}
-
-static void  endimp(Widget w, int data)
-{
-	if  (data)  {		/* OK pressed */
-		char	*txt, *tp;
-		int	cnt, fd;
-		double	res;
-		struct	btcharge	btc;
-
-		XtVaGetValues(workw[WORKW_IMPW], XmNvalue, &txt, NULL);
-		for  (tp = txt;  isspace(*tp);  tp++)
-			;
-		if  (!isdigit(*tp))  {
-			doerror(w, $EH{xmbtuser invalid numeric});
-			XtFree(txt);
-			return;
-		}
-		res = atof(txt);
-		if  ((fd = grab_file(O_WRONLY|O_APPEND)) >= 0)  {
-			time(&btc.btch_when);
-			btc.btch_host = 0;		/* Me */
-			btc.btch_pri = 0;
-			btc.btch_ll = 0;
-			btc.btch_runtime = res;
-			btc.btch_what = BTCH_FEE;
-			for  (cnt = 0;  cnt < pendunum;  cnt++)  {
-				btc.btch_user = ulist[pendulist[cnt]-1].btu_user;
-				write(fd, (char *) &btc, sizeof(btc));
-			}
-			close(fd);
-		}
-	}
-	XtDestroyWidget(GetTopShell(w));
-}
-
-void  cb_impose(Widget parent, int which)
-{
-	Widget	imp_shell, paneview, mainform, prevabove, titw;
-	char	nbuf[10];
-
-	if  (pendunum > 0)  {
-		pendunum = 0;
-		XtFree((char *) pendulist);
-		pendulist = (int *) 0;
-	}
-
-	if  (!getselectedusers(1))
-		return;
-
-	prevabove = CreateUEditDlg(parent, "impose", &imp_shell, &paneview, &mainform);
-
-	titw = place_label_left(mainform, prevabove, "amount");
-	workw[WORKW_IMPW] = XtVaCreateManagedWidget("amt",
-						    xmTextFieldWidgetClass,	mainform,
-						    XmNcolumns,			10,
-						    XmNmaxWidth,		10,
-						    XmNcursorPositionVisible,	False,
-						    XmNtopAttachment,		XmATTACH_WIDGET,
-						    XmNtopWidget,		prevabove,
-						    XmNleftAttachment,		XmATTACH_WIDGET,
-						    XmNleftWidget,		titw,
-						    NULL);
-
-	sprintf(nbuf, "%10.2f", 0.0);
-	XmTextSetString(workw[WORKW_IMPW], nbuf);
-	XtManageChild(mainform);
-	CreateActionEndDlg(imp_shell, paneview, (XtCallbackProc) endimp, $H{xmbtuser addfee dialog});
 }
 
 static void  umacroexec(char *str)
@@ -1206,19 +1031,19 @@ static void  execute_search()
 		XtFree((char *) plist);
 	}
 	else
-		cline = sbackward? (int) Nusers: -1;
+		cline = sbackward? (int) Npwusers: -1;
 	if  (sbackward)  {
 		for  (nline = cline - 1;  nline >= 0;  nline--)
 			if  (usermatch(nline))
 				goto  gotuser;
 		if  (wraparound)
-			for  (nline = Nusers-1;  nline > cline;  nline--)
+			for  (nline = Npwusers-1;  nline > cline;  nline--)
 				if  (usermatch(nline))
 					goto  gotuser;
 		doerror(uwid, $EH{Rsearch user not found});
 	}
 	else  {
-		for  (nline = cline + 1;  nline < Nusers;  nline++)
+		for  (nline = cline + 1;  nline < Npwusers;  nline++)
 			if  (usermatch(nline))
 				goto  gotuser;
 		if  (wraparound)

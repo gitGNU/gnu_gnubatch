@@ -28,6 +28,7 @@ MSGFILE		=	GNUBATCH.msg
 HELPPARSE	=	$(UTILDIR)/helpparse
 prefix		=	@prefix@
 exec_prefix	=	@exec_prefix@
+datarootdir	=	@datarootdir@
 BINDIR		=	$(DESTDIR)@bindir@
 SBINDIR		=	$(DESTDIR)@sbindir@
 INTBINDIR	=	$(DESTDIR)@pkgexecdir@
@@ -53,16 +54,16 @@ utild:
 	touch $@
 
 install:	all
-	cd $(UTILDIR);make install
-	cd $(BUILDDIR);$(MAKE) install prefix="$(prefix)" exec_prefix="$(exec_prefix)"
-	cd doc;$(MAKE) install
+	cd $(UTILDIR);make install prefix="$(prefix)" exec_prefix="$(exec_prefix)" datarootdir="$(datarootdir)"
+	cd $(BUILDDIR);$(MAKE) install prefix="$(prefix)" exec_prefix="$(exec_prefix)" datarootdir="$(datarootdir)"
+	cd doc;$(MAKE) install prefix="$(prefix)" exec_prefix="$(exec_prefix)" datarootdir="$(datarootdir)"
 	$(STAGED_INSTALL) || $(BINDIR)/gbch-uchange -R
 	$(STAGED_INSTALL) || $(BINDIR)/gbch-uchange -p ALL `who am i|sed -e 's/ .*//'`
 
 install-strip:	all
-	cd $(UTILDIR);make install-strip
-	cd $(BUILDDIR);$(MAKE) install-strip prefix="$(prefix)" exec_prefix="$(exec_prefix)"
-	cd doc;$(MAKE) install
+	cd $(UTILDIR);make install-strip prefix="$(prefix)" exec_prefix="$(exec_prefix)" datarootdir="$(datarootdir)"
+	cd $(BUILDDIR);$(MAKE) install-strip prefix="$(prefix)" exec_prefix="$(exec_prefix)" datarootdir="$(datarootdir)"
+	cd doc;$(MAKE) install prefix="$(prefix)" exec_prefix="$(exec_prefix)" datarootdir="$(datarootdir)"
 	$(STAGED_INSTALL) || $(BINDIR)/gbch-uchange -R
 	$(STAGED_INSTALL) || $(BINDIR)/gbch-uchange -p ALL `who am i|sed -e 's/ .*//'`
 

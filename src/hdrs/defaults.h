@@ -63,6 +63,9 @@ typedef	LONG	int_pid_t;
 #define	DEF_LUMPSIZE	20		/* Number of jobs/vars to send at once on startup */
 #define	DEF_LUMPWAIT	2		/* Time to wait in each case */
 
+#define	MSGQ_BLOCKS	30		/* Number of times we try message queue */
+#define	MSGQ_BLOCKWAIT	10		/* Sleep time between message queue tries */
+
 /*	Space in a job structure to allow for strings and vectors
  	We can be a little bit more profligate than we used to be in
  	the days when we passed it in the job. This fell foul of the

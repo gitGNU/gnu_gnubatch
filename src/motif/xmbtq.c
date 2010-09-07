@@ -363,7 +363,7 @@ void  msg_error()
 void  womsg(unsigned code)
 {
 	Oreq.sh_params.mcode = code;
-	if  (msgsnd(Ctrl_chan, (struct msgbuf *) &Oreq, sizeof(Shreq), IPC_NOWAIT) < 0)
+	if  (msgsnd(Ctrl_chan, (struct msgbuf *) &Oreq, sizeof(Shreq), 0) < 0)
 		msg_error();
 }
 
@@ -556,7 +556,7 @@ Widget  BuildPulldown(Widget menub, pull_button *item)
 	return  NULL;
 }
 
-static void setup_macros(Widget	menub, const int helpcode, const int helpbase, char *pullname, XtCallbackProc macroproc)
+static void  setup_macros(Widget menub, const int helpcode, const int helpbase, char *pullname, XtCallbackProc macroproc)
 {
 	int	cnt, had = 0;
 	Widget	pulldown, cascade, button;
@@ -694,7 +694,7 @@ static Widget  maketitle(char *tname, char *tstring)
 	return  labv;
 }
 
-void do_jpopup(Widget wid, XEvent *xev, String *args, Cardinal *nargs)
+void  do_jpopup(Widget wid, XEvent *xev, String *args, Cardinal *nargs)
 {
 	XButtonPressedEvent  *bpe = (XButtonPressedEvent *) xev;
 	int	pos = XmListYToPos(jwid, bpe->y);
@@ -705,7 +705,7 @@ void do_jpopup(Widget wid, XEvent *xev, String *args, Cardinal *nargs)
 	XtManageChild(jpopmenu);
 }
 
-void do_vpopup(Widget wid, XEvent *xev, String *args, Cardinal *nargs)
+void  do_vpopup(Widget wid, XEvent *xev, String *args, Cardinal *nargs)
 {
 	XButtonPressedEvent  *bpe = (XButtonPressedEvent *) xev;
 	int	pos = XmListYToPos(vwid, bpe->y), *plist, nplist, cnt;
@@ -726,7 +726,7 @@ void do_vpopup(Widget wid, XEvent *xev, String *args, Cardinal *nargs)
 }
 
 #ifdef	ACCEL_TRANSLATIONS
-void do_quit(Widget wid, XEvent *xev, String *args, Cardinal *nargs)
+void  do_quit(Widget wid, XEvent *xev, String *args, Cardinal *nargs)
 {
 	cb_quit(wid, 0);
 }

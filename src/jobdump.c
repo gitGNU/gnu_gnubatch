@@ -435,11 +435,9 @@ MAINFN_TYPE  main(int argc, char **argv)
  gotit:
 	jp = &Job_seg.jlist[jind].j;
 	junlock();
-	if  (!mpermitted(&jp->h.bj_mode, nodelete? BTM_READ: BTM_READ|BTM_DELETE))  {
-		BtuserRef	mypriv = getbtuentry(Realuid);
-		if  (!mypriv  ||  !(mypriv->btu_priv & BTM_WADMIN))
-			exit(E_CANTDEL);
-	}
+	mypriv = getbtuentry(Realuid);
+	if  (!mpermitted(&jp->h.bj_mode, nodelete? BTM_READ: BTM_READ|BTM_DELETE, mypriv->btu_priv)  &&  !(mypriv->btu_priv & BTM_WADMIN))
+		return  E_CANTDEL;
 	switch  (pardump)  {
 	default:
 		dumpjob(jp);

@@ -102,7 +102,7 @@ Widget  place_label_top(Widget form, Widget left, char *widname)
 					NULL);
 }
 
-Widget place_label(Widget form, Widget above, Widget left, char *widname)
+Widget  place_label(Widget form, Widget above, Widget left, char *widname)
 {
 	return  XtVaCreateManagedWidget(widname,
 					xmLabelGadgetClass,	form,
@@ -621,8 +621,8 @@ void  initcifile()
 
 char **listcis(char *prefix)
 {
-	unsigned	cicnt, maxr, countr;
 	char	**result;
+	unsigned	cicnt, maxr, countr;
 	int	sfl = 0;
 
 	if  (prefix)  {

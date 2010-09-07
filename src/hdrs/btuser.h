@@ -99,18 +99,12 @@ struct	btcharge	{
 };
 
 extern	Btdef	Btuhdr;
+extern	BtuserRef	mypriv;
 
-extern void  putbtulist(BtuserRef, unsigned, int);
-extern void  putbtuentry(BtuserRef);
-extern void  insertu(const int, CBtuserRef);
-extern void  rebuild_btufile();
-
-extern int  readu(const int, const int_ugid_t, BtuserRef);
 extern BtuserRef  getbtuser(const uid_t);
 extern BtuserRef  getbtuentry(const uid_t);
-extern BtuserRef  getbtulist(unsigned *);
+extern BtuserRef  getbtulist();
 
-extern double  calccharge(const int_ugid_t);
-
-extern	int	btu_needs_rebuild;
-extern	BtuserRef	mypriv;
+extern void  putbtuhdr();
+extern void  putbtuentry(BtuserRef);
+extern void  putbtulist(BtuserRef);

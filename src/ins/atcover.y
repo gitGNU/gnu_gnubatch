@@ -742,7 +742,7 @@ int	yylex()
 	return  ch;
 }
 
-void  execrest(const char * prog, const char * arg1, char ** args)
+void  execrest(const char *prog, const char *arg1, char **args)
 {
 	unsigned  n = 3;
 	char  **ap = args, **argl;

@@ -211,7 +211,7 @@ void  logjob(BtjobRef jp, unsigned event, netid_t hostid, int_ugid_t uid, int_ug
 
 /* Log var event.  */
 
-void logvar(BtvarRef vp, unsigned event, unsigned source, netid_t hostid, int_ugid_t uid, int_ugid_t gid, BtjobRef jp)
+void  logvar(BtvarRef vp, unsigned event, unsigned source, netid_t hostid, int_ugid_t uid, int_ugid_t gid, BtjobRef jp)
 {
 	time_t	now;
 	struct	tm	*tp;

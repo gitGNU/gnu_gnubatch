@@ -26,6 +26,7 @@
 #include "btconst.h"
 #include "timecon.h"
 #include "btmode.h"
+#include "btuser.h"
 #include "bjparam.h"
 #include "btjob.h"
 #include "btvar.h"
@@ -253,7 +254,7 @@ void  viewfile(BtjobRef jp)
 	disp_arg[0] = jp->h.bj_job;
 	disp_str = qtitle_of(jp);
 
-	if  (!mpermitted(&jp->h.bj_mode, BTM_READ))  {
+	if  (!mpermitted(&jp->h.bj_mode, BTM_READ, mypriv->btu_priv))  {
 		doerror(jscr, $E{btq cannot read job});
 		return;
 	}

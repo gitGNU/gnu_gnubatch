@@ -34,9 +34,6 @@
 
 char	*Curr_pwd;
 
-static	enum  { DEFAULT_PW, DO_DUMP_PW, KILL_PW } dump_opt = DEFAULT_PW;
-
-unsigned Nusers;
 BtuserRef	ulist;
 
 static	char	set_default,
@@ -45,8 +42,7 @@ static	char	set_default,
 		abs_priv,
 		jmode_setting,
 		vmode_setting,
-		JVmode_set[6],
-		rebuild_file;
+		JVmode_set[6];
 
 static	unsigned  char	min_p,
 			max_p,
@@ -132,13 +128,11 @@ OPTION(o_nocopyall)
 
 OPTION(o_rebuild)
 {
-	rebuild_file = 1;
 	return  OPTRESULT_OK;
 }
 
 OPTION(o_norebuild)
 {
-	rebuild_file = 0;
 	return  OPTRESULT_OK;
 }
 
@@ -495,19 +489,16 @@ OPTION(o_vmode)
 
 OPTION(o_dumppw)
 {
-	dump_opt = DO_DUMP_PW;
 	return  OPTRESULT_OK;
 }
 
 OPTION(o_aswaspw)
 {
-	dump_opt = DEFAULT_PW;
 	return  OPTRESULT_OK;
 }
 
 OPTION(o_killpw)
 {
-	dump_opt = KILL_PW;
 	return  OPTRESULT_OK;
 }
 
@@ -555,11 +546,6 @@ void  spit_options(FILE *dest, const char *name)
 
 	cancont = spitoption(set_default? $A{btuchange arg setdefs}: $A{btuchange arg setusers}, $A{btuchange arg explain}, dest, '=', cancont);
 	cancont = spitoption(copyall? $A{btuchange arg copydefs}: $A{btuchange arg nocopydefs}, $A{btuchange arg explain}, dest, ' ', cancont);
-	cancont = spitoption(rebuild_file? $A{btuchange arg rebuild}: $A{btuchange arg norebuild}, $A{btuchange arg explain}, dest, ' ', cancont);
-	cancont = spitoption(dump_opt == KILL_PW? $A{btuchange kill pw} :
-			     dump_opt == DO_DUMP_PW? $A{btuchange dump pw} :
-			     $A{btuchange aswas pw},
-			     $A{btuchange arg explain}, dest, ' ', cancont);
 	if  (min_p != 0)  {
 		spitoption($A{btuchange arg minpri}, $A{btuchange arg explain}, dest, ' ', 0);
 		fprintf(dest, " %u", min_p);
@@ -648,7 +634,7 @@ BtuserRef  find_user(const char *uname)
 		return  (BtuserRef) 0;
 
 	first = 0;
-	last = Nusers;
+	last = Npwusers;
 
 	while  (first < last)  {
 		middle = (first + last) / 2;
@@ -698,7 +684,7 @@ static void  u_update(BtuserRef up, const int metoo)
 
 static void  copy_all()
 {
-	BtuserRef  up, ue = &ulist[Nusers];
+	BtuserRef  up, ue = &ulist[Npwusers];
 	for  (up = ulist;  up < ue;  up++)  {
 		up->btu_minp = Btuhdr.btd_minp;
 		up->btu_maxp = Btuhdr.btd_maxp;
@@ -726,7 +712,7 @@ MAINFN_TYPE  main(int argc, char **argv)
 	int_ugid_t	chk_uid;
 #endif
 
-	versionprint(argv, "$Revision: 1.2 $", 0);
+	versionprint(argv, "$Revision: 1.3 $", 0);
 
 	if  ((progname = strrchr(argv[0], '/')))
 		progname++;
@@ -748,51 +734,18 @@ MAINFN_TYPE  main(int argc, char **argv)
 #define	FREEZE_EXIT
 #include "inline/freezecode.c"
 
-	if  (!(mypriv = getbtuentry(Realuid)))  {
-		print_error($E{Not registered yet});
-		exit(E_UNOTSETUP);
-	}
+	mypriv = getbtuentry(Realuid);
+
 	if  (!(mypriv->btu_priv & BTM_WADMIN))  {
 		print_error($E{No write admin file priv});
-		exit(E_NOPRIV);
+		return  E_NOPRIV;
 	}
-	if  (rebuild_file)  {
-		char  *name = envprocess(DUMPPWFILE);
-		int	wuz = access(name, 0);
-		un_rpwfile();
-		unlink(name);
-		free(name);
-		if  (btu_needs_rebuild)  {
-			print_error($E{Rebuilding wait});
-#ifdef	HAVE_GETGROUPS
-			Requires_suppgrps = 1;
-			rpwfile();
-			rgrpfile();
-#endif
-			rebuild_btufile();
-			if  (dump_opt == DO_DUMP_PW  ||  (wuz >= 0 && dump_opt == DEFAULT_PW))
-				dump_pwfile();
-			produser();
-			print_error($E{Finished rebuild});
-		}
-		else  {
-#ifdef	HAVE_GETGROUPS
-			Requires_suppgrps = 1;
-			rpwfile();
-			rgrpfile();
-#else
-			rpwfile();
-#endif
-			if  (dump_opt == DO_DUMP_PW  ||  (wuz >= 0 && dump_opt == DEFAULT_PW))
-				dump_pwfile();
-		}
-	}
-	ulist = getbtulist(&Nusers);
+	ulist = getbtulist();
 
 	if  (set_default)  {
 		if  (*argv != (char *) 0)  {
 			print_error($E{Btuchange unexp arg});
-			exit(E_USAGE);
+			return  E_USAGE;
 		}
 		if  (min_p != 0)
 			Btuhdr.btd_minp = min_p;
@@ -826,13 +779,13 @@ MAINFN_TYPE  main(int argc, char **argv)
 		}
 		if  (copyall)
 			copy_all();
-		putbtulist(ulist, Nusers, 1);
+		putbtulist(ulist);
 	}
 	else  {
 		if  (copyall)
 			copy_all();
-		if  (*argv == (char *) 0)  {
-			BtuserRef  up, ue = &ulist[Nusers];
+		if  (!*argv)  {
+			BtuserRef  up, ue = &ulist[Npwusers];
 			for  (up = ulist;  up < ue;  up++)
 				u_update(up, 0);
 		}
@@ -849,7 +802,7 @@ MAINFN_TYPE  main(int argc, char **argv)
 					u_update(up, 1);
 			}
 		}
-		putbtulist(ulist, Nusers, 0);
+		putbtulist(ulist);
 	}
 	return  nerrors > 0? E_FALSE: E_TRUE;
 }

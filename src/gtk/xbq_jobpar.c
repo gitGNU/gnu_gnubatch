@@ -262,7 +262,7 @@ void  decode_defass(char *coded)
    Assume in 0th column (only used for conds and asses)
    isexport is -1 to list everything 0 for unexported 1 for exported */
 
-static	void setup_varlist(struct conddata *adata, GCallback vlchanged, unsigned perm, int isexport)
+static	void  setup_varlist(struct conddata *adata, GCallback vlchanged, unsigned perm, int isexport)
 {
 	GtkListStore	*varlist_store;
 	GtkTreeViewColumn *col;
@@ -285,7 +285,7 @@ static	void setup_varlist(struct conddata *adata, GCallback vlchanged, unsigned 
 
 		/* Skip ones which are not allowed.  */
 
-		if  (!mpermitted(&vp->var_mode, perm))
+		if  (!mpermitted(&vp->var_mode, perm, mypriv->btu_priv))
 			continue;
 
 		if  (isexport >= 0)  {
@@ -323,7 +323,7 @@ static	void setup_varlist(struct conddata *adata, GCallback vlchanged, unsigned 
 #define	COND_VALUE_TEXT_SENS_COL	7
 #define	COND_VALUE_INT_SENS_COL		8
 
-static void cb_cond_var_changed(GtkCellRendererText *rend, gchar *path, gchar *new_text, struct conddata *adata)
+static void  cb_cond_var_changed(GtkCellRendererText *rend, gchar *path, gchar *new_text, struct conddata *adata)
 {
 	GtkTreeIter   iter;
 	gchar        *old_text, *curr_type;
@@ -352,7 +352,7 @@ static void cb_cond_var_changed(GtkCellRendererText *rend, gchar *path, gchar *n
 	gtk_list_store_set(adata->alist_store, &iter, COND_VAR_COL, new_text, COND_CRIT_SENS_COL, csens, COND_VALUE_TEXT_SENS_COL, tsens, COND_VALUE_INT_SENS_COL, isens, -1);
 }
 
-static void cb_cond_type_changed(GtkCellRendererText *rend, gchar *path, gchar *new_text, struct conddata *adata)
+static void  cb_cond_type_changed(GtkCellRendererText *rend, gchar *path, gchar *new_text, struct conddata *adata)
 {
 	GtkTreeIter   iter;
 	gchar        *old_text, *curr_var;
@@ -401,21 +401,21 @@ static void  cb_cond_textint_changed(GtkCellRendererToggle *rend, gchar *path, s
 	gtk_list_store_set(adata->alist_store, &iter, COND_VALUE_ISTEXT_COL, value, COND_VALUE_TEXT_SENS_COL, value, COND_VALUE_INT_SENS_COL, !value, -1);
 }
 
-static void cb_cond_textval_changed(GtkCellRendererText *rend, gchar *path, gchar *new_text, struct conddata *adata)
+static void  cb_cond_textval_changed(GtkCellRendererText *rend, gchar *path, gchar *new_text, struct conddata *adata)
 {
 	GtkTreeIter   iter;
 	gtk_tree_model_get_iter_from_string(GTK_TREE_MODEL(adata->alist_store), &iter, path);
 	gtk_list_store_set(adata->alist_store, &iter, COND_VALUE_TEXT_COL, new_text, -1);
 }
 
-static void cb_cond_intval_changed(GtkCellRendererText *rend, gchar *path, gchar *new_text, struct conddata *adata)
+static void  cb_cond_intval_changed(GtkCellRendererText *rend, gchar *path, gchar *new_text, struct conddata *adata)
 {
 	GtkTreeIter   iter;
 	gtk_tree_model_get_iter_from_string(GTK_TREE_MODEL(adata->alist_store), &iter, path);
 	gtk_list_store_set(adata->alist_store, &iter, COND_VALUE_INT_COL, atoi(new_text), -1);
 }
 
-static int condedit(GtkWidget *dlg, JcondRef condlist, const unsigned perm, const int isexport)
+static int  condedit(GtkWidget *dlg, JcondRef condlist, const unsigned perm, const int isexport)
 {
 	GtkCellRenderer  *rend;
 	GtkTreeViewColumn *col;
@@ -697,7 +697,7 @@ void  cb_conds()
 				continue;
 
 			vp = &Var_seg.vlist[jc->bjc_varind].Vent;
-			if  (!mpermitted(&vp->var_mode, BTM_READ))
+			if  (!mpermitted(&vp->var_mode, BTM_READ, mypriv->btu_priv))
 				continue;
 			if  (isexport)  {
 				if  (!(vp->var_flags & VF_EXPORT)  &&  (vp->var_type != VT_MACHNAME || vp->var_id.hostid))
@@ -718,7 +718,7 @@ void  cb_conds()
 		wjmsg(J_CHANGE, xindx);
 		retc = readreply();
 		if  (retc != J_OK)
-			dojerror(retc, bjp);
+			qdojerror(retc, bjp);
 		freexbuf(xindx);
 	}
 }
@@ -755,7 +755,7 @@ void  cb_conddef()
 #define	ASS_VALUE_INT_SENS_COL	15
 #define	ASS_VALUE_ISTEXT_SENS_COL	16
 
-static void cb_ass_var_changed(GtkCellRendererText *rend, gchar *path, gchar *new_text, struct conddata *adata)
+static void  cb_ass_var_changed(GtkCellRendererText *rend, gchar *path, gchar *new_text, struct conddata *adata)
 {
 	GtkTreeIter   iter;
 	gchar        *old_text, *curr_type;
@@ -801,7 +801,7 @@ static void cb_ass_var_changed(GtkCellRendererText *rend, gchar *path, gchar *ne
 			   -1);
 }
 
-static void cb_ass_type_changed(GtkCellRendererText *rend, gchar *path, gchar *new_text, struct conddata *adata)
+static void  cb_ass_type_changed(GtkCellRendererText *rend, gchar *path, gchar *new_text, struct conddata *adata)
 {
 	GtkTreeIter   iter;
 	gchar        *old_text, *curr_var;
@@ -847,7 +847,7 @@ static void cb_ass_type_changed(GtkCellRendererText *rend, gchar *path, gchar *n
 			   -1);
 }
 
-static void cb_ass_toggle(GtkCellRendererToggle *rend, gchar *path, struct conddata *adata, const int col)
+static void  cb_ass_toggle(GtkCellRendererToggle *rend, gchar *path, struct conddata *adata, const int col)
 {
 	GtkTreeIter	iter;
 	gboolean	value;
@@ -895,14 +895,14 @@ static void  cb_ass_textint_changed(GtkCellRendererToggle *rend, gchar *path, st
 	gtk_list_store_set(adata->alist_store, &iter, ASS_VALUE_ISTEXT_COL, value, ASS_VALUE_TEXT_SENS_COL, value, ASS_VALUE_INT_SENS_COL, !value, -1);
 }
 
-static void cb_ass_textval_changed(GtkCellRendererText *rend, gchar *path, gchar *new_text, struct conddata *adata)
+static void  cb_ass_textval_changed(GtkCellRendererText *rend, gchar *path, gchar *new_text, struct conddata *adata)
 {
 	GtkTreeIter   iter;
 	gtk_tree_model_get_iter_from_string(GTK_TREE_MODEL(adata->alist_store), &iter, path);
 	gtk_list_store_set(adata->alist_store, &iter, ASS_VALUE_TEXT_COL, new_text, -1);
 }
 
-static void cb_ass_intval_changed(GtkCellRendererText *rend, gchar *path, gchar *new_text, struct conddata *adata)
+static void  cb_ass_intval_changed(GtkCellRendererText *rend, gchar *path, gchar *new_text, struct conddata *adata)
 {
 	GtkTreeIter   iter;
 	gtk_tree_model_get_iter_from_string(GTK_TREE_MODEL(adata->alist_store), &iter, path);
@@ -921,7 +921,7 @@ struct	assf_list  {
 	   { "C",	ASS_CANC_FLAG_COL,	cb_cancf_changed },
 	   { "R",	ASS_REVERSE_FLAG_COL,	cb_revf_changed  }  };
 
-static int assedit(GtkWidget *dlg, JassRef asslist, const unsigned perm, const int isexport)
+static int  assedit(GtkWidget *dlg, JassRef asslist, const unsigned perm, const int isexport)
 {
 	GtkCellRenderer  *rend;
 	GtkTreeViewColumn *col;
@@ -1286,7 +1286,7 @@ void  cb_asses()
 				continue;
 
 			vp = &Var_seg.vlist[ja->bja_varind].Vent;
-			if  (!mpermitted(&vp->var_mode, BTM_WRITE))
+			if  (!mpermitted(&vp->var_mode, BTM_WRITE, mypriv->btu_priv))
 				continue;
 			if  (isexport)  {
 				if  (!(vp->var_flags & VF_EXPORT)  &&  (vp->var_type != VT_MACHNAME || vp->var_id.hostid))
@@ -1307,7 +1307,7 @@ void  cb_asses()
 		wjmsg(J_CHANGE, xindx);
 		retc = readreply();
 		if  (retc != J_OK)
-			dojerror(retc, bjp);
+			qdojerror(retc, bjp);
 		freexbuf(xindx);
 	}
 }
@@ -1356,7 +1356,7 @@ static void  del_arg(struct aerdata *adata)
 		gtk_list_store_remove(adata->alist_store, &iter);
 }
 
-static void cb_arg_val_changed(GtkCellRendererText *rend, gchar *path, gchar *new_text, struct aerdata *adata)
+static void  cb_arg_val_changed(GtkCellRendererText *rend, gchar *path, gchar *new_text, struct aerdata *adata)
 {
 	GtkTreeIter   iter;
 	gtk_tree_model_get_iter_from_string(GTK_TREE_MODEL(adata->alist_store), &iter, path);
@@ -1491,7 +1491,7 @@ void  cb_args()
 		wjmsg(J_CHANGE, xindx);
 		retc = readreply();
 		if  (retc != J_OK)
-			dojerror(retc, bjp);
+			qdojerror(retc, bjp);
 		freexbuf(xindx);
 #endif
 		break;
@@ -1519,14 +1519,14 @@ static void  add_env(struct aerdata *adata)
 	gtk_widget_destroy(dlg);
 }
 
-static void cb_env_name_changed(GtkCellRendererText *rend, gchar *path, gchar *new_text, struct aerdata *adata)
+static void  cb_env_name_changed(GtkCellRendererText *rend, gchar *path, gchar *new_text, struct aerdata *adata)
 {
 	GtkTreeIter   iter;
 	gtk_tree_model_get_iter_from_string(GTK_TREE_MODEL(adata->alist_store), &iter, path);
 	gtk_list_store_set(adata->alist_store, &iter, 0, new_text, -1);
 }
 
-static void cb_env_val_changed(GtkCellRendererText *rend, gchar *path, gchar *new_text, struct aerdata *adata)
+static void  cb_env_val_changed(GtkCellRendererText *rend, gchar *path, gchar *new_text, struct aerdata *adata)
 {
 	GtkTreeIter   iter;
 	gtk_tree_model_get_iter_from_string(GTK_TREE_MODEL(adata->alist_store), &iter, path);
@@ -1676,7 +1676,7 @@ void  cb_env()
 		wjmsg(J_CHANGE, xindx);
 		retc = readreply();
 		if  (retc != J_OK)
-			dojerror(retc, bjp);
+			qdojerror(retc, bjp);
 		freexbuf(xindx);
 #endif
 		break;
@@ -1691,14 +1691,14 @@ void  cb_env()
 #define	REDIR_FD2_COL		4
 #define	REDIR_FD2_SENS_COL	5
 
-static void cb_redir_fd_changed(GtkCellRendererText *rend, gchar *path, gchar *new_text, struct aerdata *adata)
+static void  cb_redir_fd_changed(GtkCellRendererText *rend, gchar *path, gchar *new_text, struct aerdata *adata)
 {
 	GtkTreeIter   iter;
 	gtk_tree_model_get_iter_from_string(GTK_TREE_MODEL(adata->alist_store), &iter, path);
 	gtk_list_store_set(adata->alist_store, &iter, REDIR_FD_COL, atoi(new_text), -1);
 }
 
-static void cb_redir_type_changed(GtkCellRendererText *rend, gchar *path, gchar *new_text, struct aerdata *adata)
+static void  cb_redir_type_changed(GtkCellRendererText *rend, gchar *path, gchar *new_text, struct aerdata *adata)
 {
 	GtkTreeIter	iter;
 	gchar		*old_text;
@@ -1725,14 +1725,14 @@ static void cb_redir_type_changed(GtkCellRendererText *rend, gchar *path, gchar 
 	gtk_list_store_set(adata->alist_store, &iter, REDIR_TYPE_COL, new_text, REDIR_FILENAME_SENS_COL, filen_sens, REDIR_FD2_SENS_COL, fd2_sens, -1);
 }
 
-static void cb_redir_file_changed(GtkCellRendererText *rend, gchar *path, gchar *new_text, struct aerdata *adata)
+static void  cb_redir_file_changed(GtkCellRendererText *rend, gchar *path, gchar *new_text, struct aerdata *adata)
 {
 	GtkTreeIter   iter;
 	gtk_tree_model_get_iter_from_string(GTK_TREE_MODEL(adata->alist_store), &iter, path);
 	gtk_list_store_set(adata->alist_store, &iter, REDIR_FILENAME_COL, new_text, -1);
 }
 
-static void cb_redir_dup_fd_changed(GtkCellRendererText *rend, gchar *path, gchar *new_text, struct aerdata *adata)
+static void  cb_redir_dup_fd_changed(GtkCellRendererText *rend, gchar *path, gchar *new_text, struct aerdata *adata)
 {
 	GtkTreeIter   iter;
 	gtk_tree_model_get_iter_from_string(GTK_TREE_MODEL(adata->alist_store), &iter, path);
@@ -2112,7 +2112,7 @@ void  cb_redir()
 		wjmsg(J_CHANGE, xindx);
 		retc = readreply();
 		if  (retc != J_OK)
-			dojerror(retc, bjp);
+			qdojerror(retc, bjp);
 		freexbuf(xindx);
 #endif
 		break;

@@ -21,13 +21,6 @@
 	<separator/>
 	<menuitem action='copydef'/>
     </menu>
-    <menu action='ChargeMenu'>
-	<menuitem action='dispcharge'/>
-	<separator/>
-	<menuitem action='zerou'/>
-	<menuitem action='zeroall'/>
-	<menuitem action='impose'/>
-    </menu>
     <menu action='HelpMenu'>
       <menuitem action='About'/>
     </menu>

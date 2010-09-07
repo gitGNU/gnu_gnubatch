@@ -355,10 +355,8 @@ static	char	**title;
 
 static void  initnames()
 {
-	int	i, j;
 	struct  ltab	*lt;
-	int	hrows, cols, look4, rowstart, pstart;
-	int	nextstate[TABNUM];
+	int	i, j, hrows, cols, look4, rowstart, pstart, nextstate[TABNUM];
 
 	title = helphdr('=');
 	count_hv(title, &hrows, &cols);
@@ -566,9 +564,8 @@ static void  ask_build()
 
 int  propts()
 {
-	int	ch;
+	int	ch, i, whichel;
 	struct  ltab	*lt;
-	int	i, whichel;
 	char	**hv;
 	static	char	doneinit = 0;
 
@@ -878,8 +875,7 @@ static void  fmtdisplay(char **fmt_hdr, int start)
 
 int  fmtprocess(char **fmt, const char hch, struct formatdef *utab, struct formatdef *ltab)
 {
-	int	ch;
-	int	err_no, hrows, tilines, start, srow, currow, incr, cnt, insertwhere, changes = 0;
+	int	ch, err_no, hrows, tilines, start, srow, currow, incr, cnt, insertwhere, changes = 0;
 	char	**fmt_hdr;
 
 	/* Save these for help function */

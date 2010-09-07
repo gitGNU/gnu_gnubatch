@@ -71,7 +71,6 @@ int	hchanges,	/* Had changes to default */
 	uchanges;	/* Had changes to user(s) */
 
 char		alphsort;
-unsigned	Nusers;
 BtuserRef	ulist;
 static	char	*defhdr;
 
@@ -165,12 +164,6 @@ user_casc[] = {
 	{	ITEM,	"upriv",	cb_priv,	1	},
 	{	SEP	},
 	{	ITEM,	"ucpy",		cb_copydef,	1	}},
-chrg_casc[] = {
-	{	ITEM,	"Display",	cb_cdisplay,	0	},
-	{	SEP	},
-	{	ITEM,	"Zero",		cb_zeroc,	0	},
-	{	ITEM,	"Zeroall",	cb_zeroc,	1	},
-	{	ITEM,	"Impose",	cb_impose,	0	}},
 search_casc[] = {
 	{	ITEM,	"Search",	cb_srchfor,	0	},
 	{	ITEM,	"Searchforw",	cb_rsrch,	0	},
@@ -188,15 +181,13 @@ static	pull_button
 		"Defaults",	XtNumber(def_casc),	$H{xmbtuser defaults menu},	def_casc	},
 	user_button = {
 		"Users",	XtNumber(user_casc),	$H{xmbtuser user menu},		user_casc	},
-	chrg_button = {
-		"Charges",	XtNumber(chrg_casc),	$H{xmbtuser charges menu},	chrg_casc	},
 	srch_button = {
 		"Search",	XtNumber(search_casc),	$H{xmbtuser search menu},	search_casc	},
 	help_button = {
 		"Help",		XtNumber(help_casc),	$H{xmbtuser help menu},		help_casc,	1	};
 
 static	pull_button	*menlist[] = {
-	&opt_button, &def_button, &user_button, &chrg_button, &srch_button, &help_button
+	&opt_button, &def_button, &user_button, &srch_button, &help_button
 };
 
 #if	defined(HAVE_MEMCPY) && !defined(HAVE_BCOPY)
@@ -248,8 +239,8 @@ static void  cb_quit(Widget w, int n)
 {
 	if  (uchanges || hchanges)  {
 		if  (alphsort != SRT_NONE)
-			qsort(QSORTP1 ulist, Nusers, sizeof(Btuser), QSORTP4 sort_id);
-		putbtulist(ulist, Nusers, hchanges);
+			qsort(QSORTP1 ulist, Npwusers, sizeof(Btuser), QSORTP4 sort_id);
+		putbtulist(ulist);
 	}
 	exit(n);
 }
@@ -375,7 +366,7 @@ Widget  BuildPulldown(Widget menub, pull_button *item)
 	return  NULL;
 }
 
-static void setup_macros(Widget	menub, const int helpcode, const int helpbase, char *pullname, XtCallbackProc macroproc)
+static void  setup_macros(Widget menub, const int helpcode, const int helpbase, char *pullname, XtCallbackProc macroproc)
 {
 	int	cnt, had = 0;
 	Widget	pulldown, cascade, button;
@@ -625,7 +616,7 @@ void  udisplay(int nu, int *posns)
 
 	if  (nu <= 0)  {
 		XmListDeleteAllItems(uwid);
-		for  (ucnt = 0;  ucnt < Nusers;  ucnt++)  {
+		for  (ucnt = 0;  ucnt < (int) Npwusers;  ucnt++)  {
 			str = fillbuffer(obuf, sizeof(obuf), &ulist[ucnt]);
 			XmListAddItem(uwid, str, 0);
 			XmStringFree(str);
@@ -677,66 +668,20 @@ MAINFN_TYPE  main(int argc, char **argv)
 
 	SWAP_TO(Daemuid);
 	wstart(argc, argv);
-	if  (!(mypriv = getbtuentry(Realuid)))  {
-		doerror(toplevel, $EH{Not registered yet});
-		exit(E_UNOTSETUP);
-	}
+	mypriv = getbtuentry(Realuid);
+
 	if  (!(mypriv->btu_priv & BTM_WADMIN))  {
 		doerror(toplevel, $EH{No write admin file priv});
 		exit(E_NOPRIV);
 	}
-	if  (btu_needs_rebuild && Confirm(toplevel, $PH{Confirm rebuild uc file}))  {
-		char  *name = envprocess(DUMPPWFILE);
-		int	wuz = access(name, 0);
-		if  (wuz >= 0)  {
-			un_rpwfile();
-			unlink(name);
-		}
-		free(name);
-		displaybusy(1);
-#ifdef	HAVE_GETGROUPS
-		Requires_suppgrps = 1;
-		rpwfile();
-		rgrpfile();
-#endif
-		rebuild_btufile();
-		if  (wuz >= 0)
-			dump_pwfile();
-		produser();
-		displaybusy(0);
-	}
-	ulist = getbtulist(&Nusers);
-
-	/* Chop down list to ones we want */
-
-	if  (Nusers != 0  &&  (urestrict || grestrict))  {
-		unsigned   cnt, nucnt = 0;
-		BtuserRef  cp, np;
-		BtuserRef  newulist = (BtuserRef) malloc(Nusers * sizeof(Btuser));
-		if  (!newulist)
-			ABORT_NOMEM;
-		cp = ulist;
-		np = newulist;
-		for  (cnt = 0;  cnt < Nusers;  cp++, cnt++)  {
-			char	*un, *gn;
-			un = prin_uname((uid_t) cp->btu_user);
-			gn = prin_gname((gid_t) lastgid);
-			if  ((urestrict && !qmatch(urestrict, un)) || (grestrict && !qmatch(grestrict, gn)))
-				continue;
-			*np++ = *cp;
-			nucnt++;
-		}
-		free((char *) ulist);
-		ulist = newulist;
-		Nusers = nucnt;
-	}
+	ulist = getbtulist();
 
 	switch  (alphsort)  {
 	case  SRT_USER:
-		qsort(QSORTP1 ulist, Nusers, sizeof(Btuser), QSORTP4 sort_u);
+		qsort(QSORTP1 ulist, Npwusers, sizeof(Btuser), QSORTP4 sort_u);
 		break;
 	case  SRT_GROUP:
-		qsort(QSORTP1 ulist, Nusers, sizeof(Btuser), QSORTP4 sort_g);
+		qsort(QSORTP1 ulist, Npwusers, sizeof(Btuser), QSORTP4 sort_g);
 		break;
 	}
 	defdisplay();

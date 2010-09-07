@@ -80,8 +80,7 @@ const	char	TSname[] = GBNETSERV_PORT;
 static int  initsock(int *rsock, const netid_t hostid, struct sockaddr_in *saddr)
 {
 	int	sockfd;
-	SHORT	portnum;
-	SHORT	udpproto;
+	SHORT	portnum, udpproto;
 	struct	sockaddr_in	cli_addr;
 	struct	servent	*sp;
 	struct	protoent  *pp;
@@ -133,7 +132,7 @@ static	RETSIGTYPE  asig(int n)
 	return;			/* Don't do anything just return setting EINTR */
 }
 
-static int udp_enquire(const int sockfd, struct sockaddr_in *saddr, char *outmsg, const int outlen, char *inmsg, const int inlen)
+static int  udp_enquire(const int sockfd, struct sockaddr_in *saddr, char *outmsg, const int outlen, char *inmsg, const int inlen)
 {
 #ifdef	STRUCT_SIG
 	struct	sigstruct_name	za, zold;
@@ -426,7 +425,6 @@ static int  remgoutfile(const netid_t hostid, CBtjobRef jb, int *rsock)
 	if  (tcpportnum < 0  &&  (sock = inittcp()) != 0)
 		return  sock;
 
-
 	if  ((sock = socket(PF_INET, SOCK_STREAM, 0)) < 0)
 		return  $EH{Cannot open socket for remote job send};
 
@@ -653,7 +651,7 @@ static void  hselresp(Widget w, int nullok, XmSelectionBoxCallbackStruct *cbs)
 	XtDestroyWidget(w);
 }
 
-static int choosehost(char *dlgtitle, struct remparams *rp, const int nullok, const int exist)
+static int  choosehost(char *dlgtitle, struct remparams *rp, const int nullok, const int exist)
 {
 	Widget			dlg;
 	int			udpsock, ec;
@@ -803,7 +801,7 @@ void  cb_remsubmit(Widget w, int notused)
 	int			outsock = 0;
 	struct	remparams	*hp;
 	struct	remparams  	h_parms;
-	extern char *gen_path(char *, char *);
+	extern  char *gen_path(char *, char *);
 
 	if  ((indx = getselectedjob(1)) < 0)
 		return;

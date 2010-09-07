@@ -21,9 +21,9 @@
 #include "incl_ugid.h"
 #include "btmode.h"
 
-/* Fileprivs and Real[gu]id must be set up right before this is called!  */
+/* Real[gu]id must be set up right before this is called!  */
 
-int  mpermitted(CBtmodeRef md, const unsigned flag)
+int  mpermitted(CBtmodeRef md, const unsigned flag, const ULONG Fileprivs)
 {
 	USHORT	uf = md->u_flags;
 	USHORT	gf = md->g_flags;

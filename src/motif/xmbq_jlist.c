@@ -558,7 +558,7 @@ void  jdisplay()
 		struct	formatdef  *fp;
 		char		*cp = job_format, *rp = obuf, *lbp;
 		int		currplace = -1, lastplace, nn, inlen;
-		int		isreadable = mpermitted(&jp->h.bj_mode, BTM_READ);
+		int		isreadable = mpermitted(&jp->h.bj_mode, BTM_READ, mypriv->btu_priv);
 #if defined(HAVE_XMRENDITION) && !defined(BROKEN_RENDITION)
 		char		nbuf[20];
 #endif
@@ -650,7 +650,7 @@ BtjobRef  getselectedjob(unsigned perm)
 	if  (XmListGetSelectedPos(jwid, &plist, &pcnt)  &&  pcnt > 0)  {
 		BtjobRef  result = jj_ptrs[plist[0] - 1];
 		XtFree((char *) plist);
-		if  (!mpermitted(&result->h.bj_mode, perm))  {
+		if  (!mpermitted(&result->h.bj_mode, perm, mypriv->btu_priv))  {
 			disp_arg[0] = result->h.bj_job;
 			disp_str = qtitle_of(result);
 			disp_str2 = result->h.bj_mode.o_user;

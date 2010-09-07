@@ -45,7 +45,7 @@ void spit_cond(FILE *dest, const unsigned comp, const unsigned crit, const netid
 	dumpcon(dest, value);
 }
 
-void spit_ass(FILE *dest, const unsigned assop, const unsigned flags, const unsigned crit, const netid_t vhost, char *vname, BtconRef value)
+void  spit_ass(FILE *dest, const unsigned assop, const unsigned flags, const unsigned crit, const netid_t vhost, char *vname, BtconRef value)
 {
 	if  (vhost)
 		spitoption(crit & ACRIT_NORUN? $A{btr arg asscrit}: $A{btr arg noasscrit}, $A{btr arg explain}, dest, ' ', 0);

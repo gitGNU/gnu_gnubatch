@@ -63,19 +63,19 @@ struct	macromenitem	varmacs[MAXMACS];
 
 /* Send var-type message to scheduler */
 
-void  wvmsg(unsigned code, BtvarRef vp, ULONG Sseq)
+void  qwvmsg(unsigned code, BtvarRef vp, ULONG Sseq)
 {
 	Oreq.sh_params.mcode = code;
 	if  (vp)
 		Oreq.sh_un.sh_var = *vp;
 	Oreq.sh_un.sh_var.var_sequence = Sseq;
-	if  (msgsnd(Ctrl_chan, (struct msgbuf *) &Oreq, sizeof(Shreq) + sizeof(Btvar), IPC_NOWAIT) < 0)
+	if  (msgsnd(Ctrl_chan, (struct msgbuf *) &Oreq, sizeof(Shreq) + sizeof(Btvar), 0) < 0)
 		msg_error();
 }
 
 /* Display var-type error message */
 
-void  doverror(unsigned retc, BtvarRef vp)
+void  qdoverror(unsigned retc, BtvarRef vp)
 {
 	switch  (retc  & REQ_TYPE)  {
 	default:
@@ -262,9 +262,9 @@ void  cb_createv()
 		Oreq.sh_un.sh_var.var_mode.g_flags = mypriv->btu_vflags[1];
 		Oreq.sh_un.sh_var.var_mode.o_flags = mypriv->btu_vflags[2];
 		Oreq.sh_un.sh_var.var_type = 0;
-		wvmsg(V_CREATE, (BtvarRef) 0, 0L);
+		qwvmsg(V_CREATE, (BtvarRef) 0, 0L);
 		if  ((retc = readreply()) != V_OK)
-			doverror(retc, &Oreq.sh_un.sh_var);
+			qdoverror(retc, &Oreq.sh_un.sh_var);
 		break;
 	}
 	gtk_widget_destroy(dlg);
@@ -304,10 +304,10 @@ void  cb_renamev()
 				Oreq.sh_un.sh_rn.sh_ovar = *cv;
 				Oreq.sh_un.sh_rn.sh_ovar.var_sequence = Saveseq;
 				strcpy(Oreq.sh_un.sh_rn.sh_rnewname, newname);
-				if  (msgsnd(Ctrl_chan, (struct msgbuf *) &Oreq, sizeof(Shreq) + sizeof(Btvar) + strlen(newname) + 1, IPC_NOWAIT) < 0)
+				if  (msgsnd(Ctrl_chan, (struct msgbuf *) &Oreq, sizeof(Shreq) + sizeof(Btvar) + strlen(newname) + 1, 0) < 0)
 					msg_error();
 				if  ((retc = readreply()) != V_OK)
-					doverror(retc, &Oreq.sh_un.sh_rn.sh_ovar);
+					qdoverror(retc, &Oreq.sh_un.sh_rn.sh_ovar);
 			}
 			break;
 		}
@@ -357,9 +357,9 @@ void  cb_vexport()
 				if  (newv > 1)
 					Oreq.sh_un.sh_var.var_flags |= VF_CLUSTER;
 			}
-			wvmsg(V_CHFLAGS, (BtvarRef) 0, Saveseq);
+			qwvmsg(V_CHFLAGS, (BtvarRef) 0, Saveseq);
 			if  ((retc = readreply()) != V_OK)
-				doverror(retc, &Oreq.sh_un.sh_var);
+				qdoverror(retc, &Oreq.sh_un.sh_var);
 		}
 	}
 	gtk_widget_destroy(dlg);
@@ -378,9 +378,9 @@ void  cb_vdel()
 	if  (Dispflags & DF_CONFABORT  &&  !Confirm($PH{xmbtq confirm delete var}))
 		return;
 
-	wvmsg(V_DELETE, cv, Saveseq);
+	qwvmsg(V_DELETE, cv, Saveseq);
 	if  ((retc = readreply()) != V_OK)
-		doverror(retc, &Oreq.sh_un.sh_var);
+		qdoverror(retc, &Oreq.sh_un.sh_var);
 }
 
 void  cb_assign()
@@ -433,10 +433,10 @@ void  cb_assign()
 			Oreq.sh_un.sh_var.var_value.con_un.con_long = atol(newval);
 		}
 
-		wvmsg(V_ASSIGN, (BtvarRef) 0, Saveseq);
+		qwvmsg(V_ASSIGN, (BtvarRef) 0, Saveseq);
 
 		if  ((retc = readreply()) != V_OK)
-			doverror(retc, &Oreq.sh_un.sh_var);
+			qdoverror(retc, &Oreq.sh_un.sh_var);
 
 		break;
 	}
@@ -469,9 +469,9 @@ void  cb_vcomment()
 			unsigned	retc;
 			Oreq.sh_un.sh_var = *cv;
 			strncpy(Oreq.sh_un.sh_var.var_comment, newval, BTV_COMMENT);
-			wvmsg(V_CHCOMM, (BtvarRef) 0, Saveseq);
+			qwvmsg(V_CHCOMM, (BtvarRef) 0, Saveseq);
 			if  ((retc = readreply()) != V_OK)
-				doverror(retc, &Oreq.sh_un.sh_var);
+				qdoverror(retc, &Oreq.sh_un.sh_var);
 		}
 	}
 
@@ -550,9 +550,9 @@ void  cb_arith(GtkAction *action)
 
 	Oreq.sh_un.sh_var = *cv;
 	Oreq.sh_un.sh_var.var_value.con_un.con_long = newvalue;
-	wvmsg(V_ASSIGN, (BtvarRef) 0, Saveseq);
+	qwvmsg(V_ASSIGN, (BtvarRef) 0, Saveseq);
 	if  ((retc = readreply()) != V_OK)
-		doverror(retc, &Oreq.sh_un.sh_var);
+		qdoverror(retc, &Oreq.sh_un.sh_var);
 }
 
 extern	void	setup_vmodebits(GtkWidget *, GtkWidget *[3][NUM_VMODEBITS], USHORT, USHORT, USHORT);
@@ -588,9 +588,9 @@ void  cb_vperm()
 		     cvar.var_mode.o_flags != cv->var_mode.o_flags)  {
 			unsigned  retc;
 			Oreq.sh_un.sh_var = cvar;
-			wvmsg(V_CHMOD, (BtvarRef) 0, Saveseq);
+			qwvmsg(V_CHMOD, (BtvarRef) 0, Saveseq);
 			if  ((retc = readreply()) != V_OK)
-				doverror(retc, &Oreq.sh_un.sh_var);
+				qdoverror(retc, &Oreq.sh_un.sh_var);
 		}
 	}
 	gtk_widget_destroy(dlg);
@@ -651,9 +651,9 @@ void  cb_vowner()
 		gtk_combo_box_set_active(GTK_COMBO_BOX(gsel), uw);
 
 	if  (!(mypriv->btu_priv & BTM_WADMIN))  {
-		if  (!mpermitted(&cv->var_mode, cv->var_mode.o_uid == Realuid? BTM_UGIVE: BTM_UTAKE))
+		if  (!mpermitted(&cv->var_mode, cv->var_mode.o_uid == Realuid? BTM_UGIVE: BTM_UTAKE, mypriv->btu_priv))
 			gtk_widget_set_sensitive(usel, FALSE);
-		if  (!mpermitted(&cv->var_mode, cv->var_mode.o_gid == Realgid? BTM_GGIVE: BTM_GTAKE))
+		if  (!mpermitted(&cv->var_mode, cv->var_mode.o_gid == Realgid? BTM_GGIVE: BTM_GTAKE, mypriv->btu_priv))
 			gtk_widget_set_sensitive(gsel, FALSE);
 	}
 
@@ -671,9 +671,9 @@ void  cb_vowner()
 				doerror($EH{xmbtq invalid group});
 			else  {
 				Oreq.sh_params.param = nug;
-				wvmsg(V_CHGRP, cv, Saveseq);
+				qwvmsg(V_CHGRP, cv, Saveseq);
 				if  ((retc = readreply()) != V_OK)
-					doverror(retc, &Oreq.sh_un.sh_var);
+					qdoverror(retc, &Oreq.sh_un.sh_var);
 				Saveseq++;
 			}
 		}
@@ -687,9 +687,9 @@ void  cb_vowner()
 				doerror($EH{xmbtq invalid user});
 			else  {
 				Oreq.sh_params.param = nug;
-				wvmsg(V_CHOWN, cv, Saveseq);
+				qwvmsg(V_CHOWN, cv, Saveseq);
 				if  ((retc = readreply()) != V_OK)
-					doverror(retc, &Oreq.sh_un.sh_var);
+					qdoverror(retc, &Oreq.sh_un.sh_var);
 			}
 		}
 		g_free(newug);
