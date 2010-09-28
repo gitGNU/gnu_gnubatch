@@ -27,7 +27,6 @@ rm -f /etc/gnubatch/gnubatch.hosts
 
 purgefiles() {
     rm -rf /var/spool/gnubatch
-    rm -f /etc/gnubatch/gnubatch.conf
 }
 
 
