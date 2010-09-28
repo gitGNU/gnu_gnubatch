@@ -8,7 +8,7 @@ Homepage: http://www.gnu.org/software/gnubatch
 
 Package: gnubatch
 Architecture: any
-Depends: ${shlibs:Depends}, ${misc:Depends}
+Depends: ${shlibs:Depends}, ${misc:Depends}, adduser
 Description: A network-based batch scheduler
  This is a fast, network-enabled and reliable batch scheduler
  for GNU/Linux and UNIX systems.

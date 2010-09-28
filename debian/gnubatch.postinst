@@ -85,7 +85,10 @@ fixperms() {
 
 case "$1" in
     configure)
-	fixperms
+        if ! id -u gnubatch > /dev/null 2>&1 ; then
+            adduser --system --no-create-home --home /var/spool/gnubatch --gecos 'GNUbatch system user,,,' --ingroup daemon gnubatch
+        fi
+        fixperms
     ;;
 
     abort-upgrade|abort-remove|abort-deconfigure)
