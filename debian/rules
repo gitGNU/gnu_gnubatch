@@ -24,6 +24,7 @@ override_dh_auto_configure:
 override_dh_installdirs:
 	dh_installdirs -Pdebian/tmp -pgnubatch
 	dh_installdirs -Ngnubatch
+	mkdir -p debian/gnubatch/etc/gnubatch
 
 override_dh_auto_install:
 	$(MAKE) DESTDIR=$(CURDIR)/debian/tmp BATCHUSER=root datarootdir=/usr/share STAGED_INSTALL=true install
