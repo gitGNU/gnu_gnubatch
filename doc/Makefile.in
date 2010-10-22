@@ -39,6 +39,10 @@ pdfdocs:
 	# Currently don't do anything
 
 install install-strip: all
+	$(INSTALL) -d $(MANDIR)/man1
+	$(INSTALL) -d $(MANDIR)/man3
+	$(INSTALL) -d $(MANDIR)/man5
+	$(INSTALL) -d $(MANDIR)/man8
 	$(INSTALL_DATA) poddoc/man/*.1 $(MANDIR)/man1
 	$(INSTALL_DATA) poddoc/man/*.3 $(MANDIR)/man3
 	$(INSTALL_DATA) poddoc/man/*.5 $(MANDIR)/man5
