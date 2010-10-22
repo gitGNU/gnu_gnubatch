@@ -25,6 +25,8 @@
 #include "incl_unix.h"
 #include "files.h"
 
+FILE	*Cfile;					/* Need definition of this here */
+
 /* I don't know where to find this routine in the general case but I
    hope that this will work instead of groping around zillions of
    includes */
