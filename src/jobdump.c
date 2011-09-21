@@ -305,7 +305,7 @@ MAINFN_TYPE  main(int argc, char **argv)
 	int_ugid_t	chk_uid;
 #endif
 
-	versionprint(argv, "$Revision: 1.1 $", 1);
+	versionprint(argv, "$Revision: 1.4 $", 1);
 
 	if  ((progname = strrchr(argv[0], '/')))
 		progname++;

@@ -6760,6 +6760,13 @@ E{Exec cannot pipe} ++				"Trouble with pipe for %s - %E"
 E{Exec cannot fork} ++				"Trouble with fork for %s - %E"
 
 [
+Probe errors
+]
+
+E{Probe incorrect IP 1} ++		"Probe invoked with incorrect IP %s"
+E{Probe incorrect IP 2} ++		"Called from IP %s"
+
+[
 btwrite messages
 ]
 

@@ -295,7 +295,7 @@ MAINFN_TYPE  main(int argc, char **argv)
 	extern	int	optind;
 	extern	char	*optarg;
 
-	versionprint(argv, "$Revision: 1.1 $", 0);
+	versionprint(argv, "$Revision: 1.4 $", 0);
 
 	while  ((ch = getopt(argc, argv, "sfe:v:D:")) != EOF)
 		switch  (ch)  {

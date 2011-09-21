@@ -398,7 +398,7 @@ MAINFN_TYPE  main(int argc, char **argv)
 {
 	GtkWidget  *vbox;
 
-	versionprint(argv, "$Revision: 1.1 $", 0);
+	versionprint(argv, "$Revision: 1.4 $", 0);
 
 	if  ((progname = strrchr(argv[0], '/')))
 		progname++;

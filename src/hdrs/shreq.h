@@ -169,6 +169,7 @@
 #define	N_HOSTOFFLINE	(NET_REPLY|7)	/* User reply - host off line */
 #define	N_HOSTDIED	(NET_REPLY|8)	/* User reply - host died */
 #define	N_CONNFAIL	(NET_REPLY|9)	/* User reply - connection failed */
+#define	N_WRONGIP	(NET_REPLY|10)	/* Wrong IP address */
 
 /* Message packet to/from scheduler */
 

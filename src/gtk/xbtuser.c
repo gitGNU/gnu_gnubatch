@@ -455,7 +455,7 @@ MAINFN_TYPE  main(int argc, char **argv)
 	BtuserRef	mypriv;
 	GtkWidget  *vbox;
 
-	versionprint(argv, "$Revision: 1.2 $", 0);
+	versionprint(argv, "$Revision: 1.4 $", 0);
 
 	if  ((progname = strrchr(argv[0], '/')))
 		progname++;

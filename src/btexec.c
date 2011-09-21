@@ -102,7 +102,7 @@ MAINFN_TYPE  main(int argc, char **argv)
 	uid_t  duid = ROOTID, myuid = getuid();
 	char	**newargv;
 
-	versionprint(argv, "$Revision: 1.1 $", 1);
+	versionprint(argv, "$Revision: 1.4 $", 1);
 
 	/* Get batch uid */
 

@@ -684,7 +684,7 @@ MAINFN_TYPE  main(int argc, char **argv)
 	ULONG		indx;
 	char		**origargv = argv;
 
-	versionprint(argv, "$Revision: 1.2 $", 0);
+	versionprint(argv, "$Revision: 1.4 $", 0);
 
 	if  ((progname = strrchr(argv[0], '/')))
 		progname++;

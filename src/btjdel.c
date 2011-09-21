@@ -480,7 +480,7 @@ MAINFN_TYPE  main(int argc, char **argv)
 #endif
 	enum	cmdtype	which = CMD_DELETE;
 
-	versionprint(argv, "$Revision: 1.2 $", 0);
+	versionprint(argv, "$Revision: 1.4 $", 0);
 
 	if  ((progname = strrchr(argv[0], '/')))
 		progname++;

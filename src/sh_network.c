@@ -564,8 +564,38 @@ void  reply_probe()
 	if  (recvfrom(probesock, (char *) &pmsg, sizeof(pmsg), 0, (struct sockaddr *) &reply_addr, &repl) < 0)
 		return;
 
-	if  ((whofrom = pmsg.hdr.hostid) == 0L  ||  whofrom == myhostid)
+	/* Get who it's from from the reply address rather than believing what it says in
+	   the message packet. If it's "me" ignore it as we could go on forever */
+
+	if  ((whofrom = reply_addr.sin_addr.s_addr) == myhostid)
 		return;
+
+	/* See if caller has got IP right.
+	   If it's zeros, it's just to find it out so we don't argue,
+	   otherwise we make a report */
+
+	if  (pmsg.hdr.hostid != whofrom)  {
+		pmsg.hdr.code = N_WRONGIP;
+		if  (pmsg.hdr.hostid != 0L)  {
+			struct  in_addr  wip;
+			/* Have to do this as two messages as inet_ntoa overwrites buffer each time */
+			wip.s_addr = pmsg.hdr.hostid;
+			disp_str = inet_ntoa(wip);
+			nfreport($E{Probe incorrect IP 1});
+			wip.s_addr = whofrom;
+			disp_str = inet_ntoa(wip);
+			nfreport($E{Probe incorrect IP 2});
+			/* The other end will have set up its own socket to send back on */
+			pmsg.hdr.hostid = whofrom;
+			probe_send(whofrom, &pmsg);
+		}
+		else  {
+			/* If it was just an enquiry (0 in the hostid) send it back the way it came */
+			pmsg.hdr.hostid = whofrom;
+			sendto(probesock, (char *) &pmsg, sizeof(struct netmsg), 0, (struct sockaddr *) &reply_addr, sizeof(reply_addr));
+		}
+		return;
+	}
 
 	switch  (ntohs(pmsg.hdr.code))  {
 	default:
@@ -636,7 +666,7 @@ void  newhost()
 		rq.hdr.code = htons(N_SHUTHOST);
 		rq.hdr.length = htons(sizeof(struct netmsg));
 		rq.hdr.hostid = myhostid;
-		write(newsock, (char *) &rq, sizeof(rq));
+		Ignored_error = write(newsock, (char *) &rq, sizeof(rq));
 		hp = gethostbyaddr((char *) &sin.sin_addr.s_addr, sizeof(netid_t), AF_INET);
 		disp_str = hp? hp->h_name: inet_ntoa(sin.sin_addr);
 		nfreport($E{Connection attempt from unknown host});
