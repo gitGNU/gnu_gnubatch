@@ -220,7 +220,12 @@ char *prin_uname(const uid_t uid)
 
 int  isvuser(const uid_t uid)
 {
-	return	luid_lookup(uid) != (struct uhash *) 0;
+        struct  uhash  *hp = luid_lookup(uid);
+        if  (hp)  {
+                lastgid = hp->pwh_dgid;
+                return  1;
+        }
+        return  0;
 }
 
 int_ugid_t  lookup_uname(const char *name)

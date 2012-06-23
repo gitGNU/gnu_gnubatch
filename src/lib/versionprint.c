@@ -26,7 +26,7 @@
 
 const	char	GNUbatch_version[] = GNU_BATCH_VERSION_STRING;
 
-/* Translate $Revision: 1.1 $ string into just version number */
+/* Translate $Revision: 1.whetever $ string into just version number */
 
 static	const	char  *xlate_vers(const char *progvers, char *buf)
 {

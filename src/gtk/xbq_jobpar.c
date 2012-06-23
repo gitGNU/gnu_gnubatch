@@ -2424,7 +2424,7 @@ void  cb_unqueue()
 
 		/* Child process */
 
-		chdir(Curr_pwd);	/* So it picks up the right config file */
+		Ignored_error = chdir(Curr_pwd);	/* So it picks up the right config file */
 		if  (cj->h.bj_hostid)
 			sprintf(jobnobuf, "%s:%ld", look_host(cj->h.bj_hostid), (long) cj->h.bj_job);
 		else
@@ -2508,7 +2508,7 @@ void  cb_freeze(GtkAction *action)
 
 			/* Child process */
 
-			chdir(Curr_pwd);	/* So it picks up the right config file */
+			Ignored_error = chdir(Curr_pwd);	/* So it picks up the right config file */
 			if  (jp->h.bj_hostid)
 				sprintf(jobnobuf, "%s:%ld", look_host(jp->h.bj_hostid), (long) jp->h.bj_job);
 			else
@@ -2552,7 +2552,7 @@ void  cb_createj()
 #endif
 	}
 	else  {
-		chdir(Curr_pwd);	/* So it picks up the right config file */
+		Ignored_error = chdir(Curr_pwd);	/* So it picks up the right config file */
 		execl(execprog, XBTR_PROGRAM, (char *) 0);
 		exit(E_SETUP);
 	}

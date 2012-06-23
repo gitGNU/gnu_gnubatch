@@ -80,19 +80,8 @@ int  sock_write(const int sock, char *buffer, int nbytes)
 static void  inittcp()
 {
 	struct	servent	*sp;
-	struct	protoent  *pp;
-	char	*tcp_protoname;
-
-	if  (!((pp = getprotobyname("tcp"))  || (pp = getprotobyname("TCP"))))  {
-		print_error($E{No TCP protocol});
-		exit(E_NETERR);
-	}
-	tcp_protoname = pp->p_name;
-	endprotoent();
-
 	/* Get port number for this caper */
-
-	if  (!(sp = env_getserv(TSname, tcp_protoname)))  {
+	if  (!(sp = env_getserv(TSname, IPPROTO_TCP)))  {
 		print_error($E{No xbnetserv TCP service});
 		endservent();
 		exit(E_NETERR);

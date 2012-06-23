@@ -25,7 +25,6 @@ struct	pend_job	{
 	USHORT		lengthexp;		/* Length expected (of job descriptor) */
 	char		*cpos;			/* Pointer into jobout */
 	unsigned  char	prodsent;		/* Sent a prod */
-	USHORT		timeout;		/* Timeout value to decide when to enquire death */
 	time_t		lastaction;		/* Last message received (for timeout) */
 	jobno_t		jobn;			/* Job number we are creating */
 	struct nijobmsg	jobin;			/* Job details pending */
@@ -36,22 +35,31 @@ struct	pend_job	{
 
 struct	hhash	{
 	struct	hhash	*hn_next;	/* Next in hash chain */
-	struct	remote	rem;		/* Remote structure */
-	char		*dosname;	/* DOS user name (W95 user name if "roaming") */
-	char		*actname;	/* Actual name (W95 user name if not "roaming") */
-	USHORT		timeout;	/* Timeout value for seeing if it is asleep */
-	USHORT		flags;		/* Status flags same as UAL_OK etc  */
-	time_t		lastaction;	/* Last action for timeout */
+	netid_t         hostid;		/* Remote structure */
+        int             isme;           /* Is local host */
+        int             isclient;       /* Is windows client*/
 };
 
-/*  Structure used to hash client user names  */
+/* Structure used to map Windows user names to UNIX ones */
 
-struct	cluhash  {
-	struct	cluhash	*next;		/* Next in hash chain */
-	struct	cluhash	*alias_next;	/* Next in alias hash chain */
-	unsigned	refcnt;		/* Reference count whilst deallocating */
-	char		*machname;	/* Machine name "opt" */
-	struct	remote	rem;		/* NB not a "*" */
+struct  winuhash  {
+        struct  winuhash  *next;                /* Next in hash chain */
+        char            *winname;               /* Windows name */
+        char            *unixname;              /* UNIX name */
+        char            *unixgroup;             /* Group name primary group */
+        int_ugid_t      uuid;                   /* UNIX user id */
+        int_ugid_t      ugid;                   /* UNIX primary group id */
+};
+
+/* Structure to hold details of auto-login hosts (this should probably be removed) */
+
+struct  alhash  {
+        struct  alhash  *next;                  /* Next in hash chain */
+        netid_t         hostid;                 /* Host id */
+        char            *unixname;              /* Unix user name */
+        char            *unixgroup;             /* Unix group name */
+        int_ugid_t      uuid;                   /* Unix uid */
+        int_ugid_t      ugid;                   /* UNIX primary group id */
 };
 
 #ifndef	_NFILE
@@ -70,36 +78,21 @@ struct	cluhash  {
 
 #define	JOB_MOD	60000			/*  Modulus of job numbers */
 
+extern  char    *Defaultuser, *Defaultgroup;
+extern  int_ugid_t  Defaultuid, Defaultgid;
 extern	netid_t	myhostid, localhostid;
 extern	SHORT	qsock, uasock, apirsock;
 extern	SHORT	qportnum, uaportnum, apirport, apipport;
 extern	USHORT	err_which;
 extern	USHORT	orig_umask;
 extern	unsigned  myhostl;
+extern  unsigned  timeouts;
 extern	char	*myhostname;
-extern	SHORT	tcpproto, udpproto;
 extern	int	Ctrl_chan;
 extern	long	mymtype;
-extern	int	had_alarm, hadrfresh;
+extern	int	hadrfresh;
 extern	struct	pend_job	pend_list[];
 extern	struct	hhash	*nhashtab[];
-extern	struct	cluhash	*cluhashtab[];
-
-extern	unsigned tracing;
-extern	FILE	*tracefile;
-
-extern void  trace_op(const int_ugid_t, const char *);
-extern void  trace_op_res(const int_ugid_t, const char *, const char *);
-extern void  client_trace_op(const netid_t, const char *);
-extern void  client_trace_op_name(const netid_t, const char *, const char *);
-
-#define	TRACE_SYSOP		(1 << 0)
-#define	TRACE_APICONN		(1 << 1)
-#define	TRACE_APIOPSTART	(1 << 2)
-#define	TRACE_APIOPEND		(1 << 3)
-#define	TRACE_CLICONN		(1 << 4)
-#define	TRACE_CLIOPSTART	(1 << 5)
-#define	TRACE_CLIOPEND		(1 << 6)
 
 extern	void  abort_job(struct pend_job *);
 extern	void  btuser_pack(BtuserRef, BtuserRef);
@@ -115,18 +108,17 @@ extern	int  tcp_serv_accept(const int, netid_t *);
 extern	int  validate_job(BtjobRef, const Btuser *);
 extern	int  checkpw(const char *, const char *);
 extern	int  convert_username(struct hhash *, struct ni_jobhdr *, BtjobRef, BtuserRef *);
-extern	int  chk_vgroup(const int_ugid_t, const char *);
+extern	int  chk_vgroup(const char *, const char *);
 
 extern	unsigned  process_alarm();
 extern	unsigned  unpack_cavars(BtjobRef, const struct nijobmsg *);
 extern	unsigned  unpack_job(BtjobRef, const struct nijobmsg *, const unsigned, const netid_t);
 extern	unsigned  calc_clu_hash(const char *);
 
-extern	struct hhash *find_remote(const netid_t);
+extern  netid_t  translate_netid(struct sockaddr_in *);
+extern  struct alhash *find_autoconn(const netid_t);
+extern  struct winuhash *lookup_winu(const char *);
+extern  struct  hhash  *lookup_hhash(const netid_t);
 extern	struct pend_job *add_pend(const netid_t);
 extern	struct pend_job *find_j_by_jno(const jobno_t);
 extern	FILE *goutfile(jobno_t *, char *, const int);
-
-extern	struct cluhash *update_roam_name(struct hhash *, const char *);
-extern	struct cluhash *new_roam_name(const netid_t, struct hhash **, const char *);
-extern	int  	       update_nonroam_name(struct hhash *, const char *);

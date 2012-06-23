@@ -60,7 +60,7 @@ struct	perm	{
 
 char	*formatstring;
 char	sdefaultfmt[] = "%u %g %d %l %m %x %t %s %p";
-char	bigbuff[120];
+char	bigbuff[250];
 
 static	char	Filename[] = __FILE__;
 
@@ -588,13 +588,13 @@ int  sort_g(BtuserRef a, BtuserRef b)
 
 MAINFN_TYPE  main(int argc, char **argv)
 {
-	BtuserRef	ulist = (BtuserRef) 0;
-	unsigned	nusers = 0, pn;
 #if	defined(NHONSUID) || defined(DEBUG)
 	int_ugid_t	chk_uid;
 #endif
+	BtuserRef	mypriv, ulist = (BtuserRef) 0;
+	unsigned	nusers = 0, pn;
 
-	versionprint(argv, "$Revision: 1.4 $", 0);
+	versionprint(argv, "$Revision: 1.5 $", 0);
 
 	if  ((progname = strrchr(argv[0], '/')))
 		progname++;
@@ -636,6 +636,7 @@ MAINFN_TYPE  main(int argc, char **argv)
 		if  (*argv)  {
 			char  **av = argv;
 			BtuserRef  up;
+			nusers = 1;
 			while  (*++av)
 				nusers++;
 			ulist = (BtuserRef) malloc(nusers * sizeof(Btuser));
@@ -650,7 +651,7 @@ MAINFN_TYPE  main(int argc, char **argv)
 				else  if   ((uid = lookup_uname(uname)) == UNKNOWN_UID)  {
 					nusers--;
 					disp_str = uname;
-					print_error($E{Btcharge unknown user});
+					print_error($E{Unknown owner});
 					continue;
 				}
 				*up++ = *getbtuentry(uid);

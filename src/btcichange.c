@@ -274,7 +274,7 @@ MAINFN_TYPE  main(int argc, char **argv)
 	CmdintRef	Cientry;
 	int		ret;
 
-	versionprint(argv, "$Revision: 1.4 $", 0);
+	versionprint(argv, "$Revision: 1.5 $", 0);
 
 	if  ((progname = strrchr(argv[0], '/')))
 		progname++;
@@ -357,7 +357,7 @@ MAINFN_TYPE  main(int argc, char **argv)
 		if  (args_set)
 			strcpy(Cientry->ci_args, args);
 		lseek(Ci_fd, (long) (ci_ind * sizeof(Cmdint)), 0);
-		write(Ci_fd, (char *) Cientry, sizeof(Cmdint));
+		Ignored_error = write(Ci_fd, (char *) Cientry, sizeof(Cmdint));
 		break;
 
 	case  DEL_CMD:
@@ -371,7 +371,7 @@ MAINFN_TYPE  main(int argc, char **argv)
 		}
 		Ci_list[ci_ind].ci_name[0] = '\0';
 		lseek(Ci_fd, (long) (ci_ind * sizeof(Cmdint)), 0);
-		write(Ci_fd, (char *) &Ci_list[ci_ind], sizeof(Cmdint));
+		Ignored_error = write(Ci_fd, (char *) &Ci_list[ci_ind], sizeof(Cmdint));
 		break;
 
 	case  ADD_CMD:
@@ -408,7 +408,7 @@ MAINFN_TYPE  main(int argc, char **argv)
 		if  (expflag > 0)
 			Cientry->ci_flags |= CIF_INTERPARGS;
 		lseek(Ci_fd, (long) (ci_ind * sizeof(Cmdint)), 0);
-		write(Ci_fd, (char *) &Ci_list[ci_ind], sizeof(Cmdint));
+		Ignored_error = write(Ci_fd, (char *) &Ci_list[ci_ind], sizeof(Cmdint));
 		break;
 	}
 

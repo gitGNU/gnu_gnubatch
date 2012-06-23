@@ -439,7 +439,7 @@ void  viewhols(WINDOW *inwin)
 		hfid = open(fname, O_RDWR|O_CREAT, 0644);
 #ifndef	HAVE_FCHOWN
 		if  (Realuid == ROOTID)
-			chown(fname, Daemuid, Realgid);
+			Ignored_error = chown(fname, Daemuid, Realgid);
 #endif
 		umask(oldumask);
 		free(fname);
@@ -449,7 +449,7 @@ void  viewhols(WINDOW *inwin)
 		}
 #ifdef	HAVE_FCHOWN
 		if  (Realuid == ROOTID)
-			fchown(hfid, Daemuid, Realgid);
+			Ignored_error = fchown(hfid, Daemuid, Realgid);
 #endif
 	}
 
@@ -466,7 +466,7 @@ void  viewhols(WINDOW *inwin)
 		if  (ret & CHANGE_MK)  {
 			readyear(yearmap, monthd, year);
 			lseek(hfid, (long) ((year - 90) * YVECSIZE), 0);
-			write(hfid, (char *) yearmap, sizeof(yearmap));
+			Ignored_error = write(hfid, (char *) yearmap, sizeof(yearmap));
 			ret &= ~CHANGE_MK;
 		}
 		if  (ret == 0)  {

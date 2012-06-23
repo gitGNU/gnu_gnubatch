@@ -301,11 +301,12 @@ MAINFN_TYPE  main(int argc, char **argv)
 	unsigned	jind;
 	BtjobRef	jp;
 	HelpargRef	helpa;
+	FILE		*ignored;
 #if	defined(NHONSUID) || defined(DEBUG)
 	int_ugid_t	chk_uid;
 #endif
 
-	versionprint(argv, "$Revision: 1.4 $", 1);
+	versionprint(argv, "$Revision: 1.5 $", 1);
 
 	if  ((progname = strrchr(argv[0], '/')))
 		progname++;
@@ -313,7 +314,7 @@ MAINFN_TYPE  main(int argc, char **argv)
 		progname = argv[0];
 
 	init_mcfile();
-	freopen("/dev/null", "w", stderr);
+	ignored = freopen("/dev/null", "w", stderr);
 
 	Realuid = getuid();
 	Effuid = geteuid();

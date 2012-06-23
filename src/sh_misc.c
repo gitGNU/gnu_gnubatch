@@ -83,7 +83,7 @@ void  nfreport(int msgno)
 		fid = open(REPFILE, O_WRONLY|O_APPEND|O_CREAT, 0666);
 		if  (fid < 0)
 			return;
-		chown(REPFILE, Daemuid, Daemgid);
+		Ignored_error = chown(REPFILE, Daemuid, Daemgid);
 		fcntl(fid, F_SETFD, 1);
 		rpfile = fdopen(fid, "a");
 		if  (rpfile == (FILE *) 0)  {

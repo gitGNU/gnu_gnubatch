@@ -87,9 +87,9 @@ static void  cgifileopen()
 			umask(oldumask);
 			if  (fd >= 0  &&  Effuid != Daemuid) /* Shouldn't matter if not init'ed */
 #ifdef	HAVE_FCHOWN
-				fchown(fd, Daemuid, Effgid);
+				Ignored_error = fchown(fd, Daemuid, Effgid);
 #else
-				chown(fn, Daemuid, Effgid);
+				Ignored_error = chown(fn, Daemuid, Effgid);
 #endif
 		}
 		if  (fd < 0  ||  !(user_file = fdopen(fd, "r+")))  {
@@ -236,12 +236,12 @@ static int  checkpw(const char *name, const char *passwd)
 		close(ipfd[0]);
 		if  (opfd[0] != 0)  {
 			close(0);
-			dup(opfd[0]);
+			Ignored_error = dup(opfd[0]);
 			close(opfd[0]);
 		}
 		if  (ipfd[1] != 1)  {
 			close(1);
-			dup(ipfd[1]);
+			Ignored_error = dup(ipfd[1]);
 			close(ipfd[1]);
 		}
 		execl(btpwnam, btpwnam, name, (char *) 0);
@@ -254,9 +254,9 @@ static int  checkpw(const char *name, const char *passwd)
 		close(opfd[1]);
 		return  0;
 	}
-	write(opfd[1], passwd, strlen(passwd));
+	Ignored_error = write(opfd[1], passwd, strlen(passwd));
 	rbuf[0] = '\n';
-	write(opfd[1], rbuf, sizeof(rbuf));
+	Ignored_error = write(opfd[1], rbuf, sizeof(rbuf));
 	close(opfd[1]);
 	if  (read(ipfd[0], rbuf, sizeof(rbuf)) != sizeof(rbuf))  {
 		close(ipfd[0]);

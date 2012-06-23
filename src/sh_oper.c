@@ -280,8 +280,6 @@ void  sendreply(const int_pid_t pid, const unsigned code)
 
 	if  (pid == 0  ||  code == 0)
 		return;
-	if  (tracing & TRACE_RET)
-		trace_reply(code, pid);
 	ipm.outmsg.mcode = code & SHREQ_CODE;
 	ipm.mm = MTOFFSET + pid;
 	forcemsg((char *) &ipm, sizeof(Shreq));

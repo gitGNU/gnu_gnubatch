@@ -158,6 +158,8 @@
 #define	N_RJASSIGN	(NET_REQ|15)	/* Network message - given job remote assigns */
 #define	N_XBNATT	(NET_REQ|17)	/* Request to attach xbnetserv process */
 #define	N_ROAMUSER	(NET_REQ|18)	/* Note user logged in to xbnetserv */
+#define N_SETNOTSERVER  (NET_REQ|19)    /* Network message - set not server */
+#define N_SETISSERVER   (NET_REQ|20)    /* Network message - unset not server */
 
 #define	N_CONNOK	(NET_REPLY|0)	/* Connection ok */
 #define	N_REMLOCK_NONE	(NET_REPLY|1)	/* Lock - no reply  */

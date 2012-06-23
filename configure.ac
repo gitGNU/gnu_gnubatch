@@ -14,7 +14,7 @@ dnl   You should have received a copy of the GNU General Public License
 dnl  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 dnl  Process this file with autoconf to produce a configure script.
 
-AC_INIT(src/btsched.c, 1.4)
+AC_INIT(src/btsched.c, 1.5)
 AC_SUBST(MAJOR_PACKAGE_VERSION)
 
 changequote(<<, >>)dnl
@@ -42,6 +42,8 @@ directarg(spool-directory,[spool directory (can be large)],[spooldir],[$localsta
 directarg(internal-programs,[internal programs],[pkgexecdir],[$libexecdir/gnubatch])
 directarg(pkgdatadir,[data files other than help],[pkgdatadir],[$datadir/gnubatch])
 directarg(helpfiles,[help files],[sphelpdir],[$pkgdatadir/help])
+directarg(docs-directory,[directory for documents],[docdir],[$pkgdatadir/doc])
+directarg(pdfs-directory,[directory for pdf docs],[pdfdir],[$pkgdatadir/pdf])
 
 if test "$BATCHUSER" = ""
 then BATCHUSER=gnubatch

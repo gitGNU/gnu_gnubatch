@@ -279,7 +279,7 @@ static void  initsvs(const LONG initll)
 
 	BLOCK_ZERO(&mod, sizeof(mod));
 	initumode(Daemuid? Daemuid: ROOTID, &mod);
-	if  (Daemuid)
+	if  (Daemuid != ROOTID)
 		mod.c_uid = mod.o_uid = Daemuid;
 	else
 		mod.c_uid = mod.o_uid = ROOTID;
@@ -352,7 +352,7 @@ void  initsvmachine()
 
 	BLOCK_ZERO(&mod, sizeof(mod));
 	initumode(Daemuid? Daemuid: ROOTID, &mod);
-	if  (Daemuid)
+	if  (Daemuid != ROOTID)
 		mod.c_uid = mod.o_uid = Daemuid;
 	else
 		mod.c_uid = mod.o_uid = ROOTID;
@@ -436,11 +436,11 @@ void  creatvfile(LONG vsize, const LONG initll)
 	}
 
 #ifdef	HAVE_FCHOWN
-	if  (Daemuid)
-		fchown(vfilefd, Daemuid, Daemgid);
+	if  (Daemuid != ROOTID)
+		Ignored_error = fchown(vfilefd, Daemuid, Daemgid);
 #else
-	if  (Daemuid)
-		chown(vfilename, Daemuid, Daemgid);
+	if  (Daemuid != ROOTID)
+		Ignored_error = chown(vfilename, Daemuid, Daemgid);
 #endif
 	fcntl(vfilefd, F_SETFD, 1);
 
@@ -454,11 +454,11 @@ void  creatvfile(LONG vsize, const LONG initll)
 	if  ((Var_seg.inf.lockfd = open(VLOCK_FILE, O_CREAT|O_TRUNC|O_RDWR, 0600)) < 0)
 		goto  fail;
 #ifdef	HAVE_FCHOWN
-	if  (Daemuid)
-		fchown(Var_seg.inf.lockfd, Daemuid, Daemgid);
+	if  (Daemuid != ROOTID)
+		Ignored_error = fchown(Var_seg.inf.lockfd, Daemuid, Daemgid);
 #else
-	if  (Daemuid)
-		chown(VLOCK_FILE, Daemuid, Daemgid);
+	if  (Daemuid != ROOTID)
+		Ignored_error = chown(VLOCK_FILE, Daemuid, Daemgid);
 #endif
 
 	fcntl(Var_seg.inf.lockfd, F_SETFD, 1);
@@ -571,7 +571,7 @@ void  rewrvf()
 	wlock.l_len = 0L;
 
 #ifdef	HAVE_FTRUNCATE
-	ftruncate(vfilefd, 0L);
+	Ignored_error = ftruncate(vfilefd, 0L);
 	lseek(vfilefd, 0L, 0);
 	while  (fcntl(vfilefd, F_SETLKW, &wlock) < 0)  {
 		if  (errno != EINTR)
@@ -586,11 +586,11 @@ void  rewrvf()
 			panic($E{Panic cannot create var file});
 		fcntl(vfilefd, F_SETFD, 1);
 #ifdef	HAVE_FCHOWN
-		if  (Daemuid)
-			fchown(vfilefd, Daemuid, Daemgid);
+		if  (Daemuid != ROOTID)
+			Ignored_error = fchown(vfilefd, Daemuid, Daemgid);
 #else
-		if  (Daemuid)
-			chown(vfilename, Daemuid, Daemgid);
+		if  (Daemuid != ROOTID)
+			Ignored_error = chown(vfilename, Daemuid, Daemgid);
 #endif
 	}
 	else
@@ -608,7 +608,7 @@ void  rewrvf()
 		for  (hp = Var_seg.vhash[hn];  hp >= 0;  hp = Var_seg.vlist[hp].Vnext)
 			if  (Var_seg.vlist[hp].Vent.var_id.hostid == 0)  {
 				hadvars++;
-				write(vfilefd, (char *) &Var_seg.vlist[hp].Vent, sizeof(Btvar));
+				Ignored_error = write(vfilefd, (char *) &Var_seg.vlist[hp].Vent, sizeof(Btvar));
 			}
 	}
 

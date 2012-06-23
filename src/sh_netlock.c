@@ -144,6 +144,7 @@ void  end_remotelock()
 void  get_remotelock()
 {
 	union	my_semun	ms;
+	int     num_remhosts = get_nservers();
 
 	ms.val = 0;
 
@@ -217,7 +218,7 @@ void  lose_remotelock()
 	union	my_semun	ms;
 
 	ms.val = 0;
-	if  (num_remhosts == 0)
+	if  (get_nservers() <= 0)
 		return;
 	sem_op(&lockit);
 	if  (semctl(netsem_chan, NLCK_TYPE, GETVAL, ms) == NLT_LOCLOCK)  {

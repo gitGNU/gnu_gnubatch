@@ -91,9 +91,9 @@ static  void  openlog(char *name, char **np, FILE **fp, BtmodeRef mp)
 		if  (f == (FILE *) 0)
 			return;
 #if	defined(HAVE_FCHOWN) && !defined(M88000)
-		fchown(fileno(f), (uid_t) mp->o_uid, (gid_t) mp->o_gid);
+		Ignored_error = fchown(fileno(f), (uid_t) mp->o_uid, (gid_t) mp->o_gid);
 #else
-		chown(name, (uid_t) mp->o_uid, (gid_t) mp->o_gid);
+		Ignored_error = chown(name, (uid_t) mp->o_uid, (gid_t) mp->o_gid);
 #endif
 		if  (mp->u_flags & BTM_READ)
 			mm |= 0400;

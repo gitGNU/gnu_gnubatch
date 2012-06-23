@@ -1377,7 +1377,7 @@ void  offersave(char *fmt, const int statecode)
 	for  (;;)  {
 		struct	stat	sbuf1, sbuf2;
 		if  (!(str = wgets(stdscr, prow, &wst_fname, "")))  {
-			chdir(spdir);
+			Ignored_error = chdir(spdir);
 			free(wd);
 			return;
 		}
@@ -1423,7 +1423,7 @@ void  offersave(char *fmt, const int statecode)
 		do  ret = getkey(MAG_A|MAG_P);
 		while	(ret == EOF);
 	}
-	chdir(spdir);
+	Ignored_error = chdir(spdir);
 	free(wfile);
 	if  (!(wfile = malloc((unsigned) (strlen(wd) + strlen(str) + 2))))
 		ABORT_NOMEM;

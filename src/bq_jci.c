@@ -130,7 +130,7 @@ void  initcifile()
 static void  rewcil(int ind)
 {
 	lseek(Ci_fd, (long) (ind * sizeof(Cmdint)), 0);
-	write(Ci_fd, (char *) &Ci_list[ind], sizeof(Cmdint));
+	Ignored_error = write(Ci_fd, (char *) &Ci_list[ind], sizeof(Cmdint));
 }
 
 static void  cidisplay(int start)
@@ -439,11 +439,11 @@ bv:			err_no = $E{btq ci off beginning};
 		for  (nsel = 0;  nsel < Ci_num;  nsel++)
 			if  (NULLENTRY(nsel))  {
 				lseek(Ci_fd, (long) (nsel * sizeof(Cmdint)), 0);
-				write(Ci_fd, (char *) &Newentry, sizeof(Cmdint));
+				Ignored_error = write(Ci_fd, (char *) &Newentry, sizeof(Cmdint));
 				goto  Cidisp;
 			}
 		lseek(Ci_fd, 0L, 2);
-		write(Ci_fd, (char *) &Newentry, sizeof(Cmdint));
+		Ignored_error = write(Ci_fd, (char *) &Newentry, sizeof(Cmdint));
 		goto  Cidisp;
 
 	case  $K{btq key delete ci}:
@@ -825,7 +825,7 @@ int  dounqueue(BtjobRef jp)
 		refresh();
 #endif
 		delwin(cw);
-		chdir(spdir);
+		Ignored_error = chdir(spdir);
 
 		if  ((pid = fork()))  {
 			int	status;
@@ -877,7 +877,7 @@ int  dounqueue(BtjobRef jp)
 		}
 
 		setuid(Realuid);
-		chdir(Curr_pwd);	/* So that it picks up config file correctly */
+		Ignored_error = chdir(Curr_pwd);	/* So that it picks up config file correctly */
 		if  (jp->h.bj_hostid)
 			sprintf(jobnobuf, "%s:%ld", look_host(jp->h.bj_hostid), (long) jp->h.bj_job);
 		else
@@ -924,7 +924,7 @@ int  dounqueue(BtjobRef jp)
 		refresh();
 #endif
 		delwin(cw);
-		chdir(spdir);
+		Ignored_error = chdir(spdir);
 
 		if  ((pid = fork()))  {
 			int	status;
@@ -969,7 +969,7 @@ int  dounqueue(BtjobRef jp)
 		}
 
 		setuid(Realuid);
-		chdir(Curr_pwd);	/* So that it picks up config file correctly */
+		Ignored_error = chdir(Curr_pwd);	/* So that it picks up config file correctly */
 		if  (jp->h.bj_hostid)
 			sprintf(jobnobuf, "%s:%ld", look_host(jp->h.bj_hostid), (long) jp->h.bj_job);
 		else
@@ -999,6 +999,6 @@ int  dounqueue(BtjobRef jp)
 	refresh();
 #endif
 	delwin(cw);
-	chdir(spdir);
+	Ignored_error = chdir(spdir);
 	return  -1;
 }

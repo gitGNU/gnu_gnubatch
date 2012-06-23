@@ -38,9 +38,10 @@ int  gbatch_putbtu(const int fd, const char *username, const apiBtuser *res)
 
 	if  (!fdp)
 		return  XB_INVALID_FD;
+	BLOCK_ZERO(&msg, sizeof(msg));
 	msg.code = API_PUTBTU;
-	strncpy(msg.un.us.username, username? username: fdp->username, UIDSIZE);
-	msg.un.us.username[UIDSIZE] = '\0';
+	if  (username  &&  username[0])
+		strncpy(msg.un.us.username, username, UIDSIZE);
 
 	/* And now do all the byte-swapping */
 

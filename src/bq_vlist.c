@@ -770,9 +770,9 @@ static void  var_macro(BtvarRef vp, const int num)
 			close(0);
 			close(1);
 			close(2);
-			dup(dup(open("/dev/null", O_RDWR)));
+			Ignored_error = dup(dup(open("/dev/null", O_RDWR)));
 		}
-		chdir(Curr_pwd);
+		Ignored_error = chdir(Curr_pwd);
 		execv(execprog, argbuf);
 		exit(255);
 	}

@@ -160,8 +160,11 @@ struct	ua_venq		{		/* Variables or holidays */
 	char		uav_code;	/* CL_SV_VLIST or CL_SV_HLIST*/
 	char		uav_padding;
 	USHORT		uav_perm;	/* Permission flags or year after 1990 */
-	char	uname[UIDSIZE+1];	/* User name submitted by */
-	char	gname[UIDSIZE+1];	/* Group name submitted by */
+	char	uname[UIDSIZE+1];	/* User name submitted by or null if sending uid */
+        union   {
+            char	gname[UIDSIZE+1];/* Group name submitted by */
+            int_ugid_t  uav_uid;        /* User id on sending host */
+        } uav_un;
 };
 
 /* Reply to request for permissions */
@@ -183,9 +186,14 @@ struct	ua_login	{
 	unsigned  char	ual_op;				/* Operation/result as below */
 	unsigned  char	ual_fill;			/* Filler */
 	USHORT		ual_fill1;			/* Filler */
-	char		ual_name[UIDSIZE+1];		/* User or default user */
+	char		ual_name[WUIDSIZE+1];		/* User or default user */
 	char		ual_passwd[UA_PASSWDSZ+1];	/* Password */
-	char		ual_machname[HOSTNSIZE+2];	/* Client's machine name + 1 byte filler */
+        union   {
+            /* We don't actually use the machine name any more but we keep the field
+               to make the structure the same length as old versions of things were expecting. */
+            char	ual_machname[HOSTNSIZE+2];
+            int_ugid_t  ual_uid;                        /* User ID to distinguish UNIX clients */
+        }  ua_un;
 };
 
 #define	UAL_LOGIN	30	/* Log in with user name & password */
@@ -197,6 +205,8 @@ struct	ua_login	{
 #define	UAL_INVP	36	/* Not logged in, invalid passwd */
 #define	UAL_NEWGRP	37	/* New group */
 #define	UAL_INVG	38	/* Invalid group */
+#define UAL_ULOGIN      39      /* Log in as UNIX user */
+#define UAL_UENQUIRE    40      /* Enquire about user from UNIX */
 
 struct	ua_pal  {		/* Talk to friends */
 	unsigned  char	uap_op;		/* Msg - see below */
@@ -205,7 +215,7 @@ struct	ua_pal  {		/* Talk to friends */
 	netid_t		uap_netid;	/* IP we'return talking about */
 	char		uap_name[UIDSIZE+1];	/* Unix end user */
 	char		uap_grp[UIDSIZE+1];	/* Unix end group */
-	char		uap_wname[UIDSIZE+1];	/* Windross server */
+	char		uap_wname[WUIDSIZE+1];	/* Windross server */
 };
 
 #define	UAU_MAXU	20	/* Limit on number times one user logged in */

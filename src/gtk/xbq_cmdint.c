@@ -544,7 +544,7 @@ void  cb_interps()
 
 #ifdef	HAVE_FTRUNCATE
 		if  (ninterps < Ci_num)
-			ftruncate(Ci_fd, ninterps * sizeof(Cmdint));
+			Ignored_error = ftruncate(Ci_fd, ninterps * sizeof(Cmdint));
 
 		if  (ninterps != Ci_num  &&  !(Ci_list = (CmdintRef) realloc((char *) Ci_list, (unsigned)(ninterps * sizeof(Cmdint)))))
 			ABORT_NOMEM;
@@ -611,7 +611,7 @@ void  cb_interps()
 			Ci_num = ninterps;
 #endif
 		lseek(Ci_fd, 0L, 0);
-		write(Ci_fd, (char *) Ci_list, Ci_num * sizeof(Cmdint));
+		Ignored_error = write(Ci_fd, (char *) Ci_list, Ci_num * sizeof(Cmdint));
 	}
 
 	gtk_widget_destroy(dlg);

@@ -80,22 +80,13 @@ const	char	TSname[] = GBNETSERV_PORT;
 static int  initsock(int *rsock, const netid_t hostid, struct sockaddr_in *saddr)
 {
 	int	sockfd;
-	SHORT	portnum, udpproto;
+	SHORT	portnum;
 	struct	sockaddr_in	cli_addr;
 	struct	servent	*sp;
-	struct	protoent  *pp;
-	char	*udp_protoname;
-
-	if  (!((pp = getprotobyname("udp"))  || (pp = getprotobyname("UDP"))))
-		return  $EH{No UDP Protocol};
-
-	udp_protoname = pp->p_name;
-	udpproto = pp->p_proto;
-	endprotoent();
 
 	/* Get port number for this caper */
 
-	if  (!(sp = env_getserv(Sname, udp_protoname)))  {
+	if  (!(sp = env_getserv(Sname, IPPROTO_UDP)))  {
 		endservent();
 		return  $EH{No xbnetserv UDP service};
 	}
@@ -116,7 +107,7 @@ static int  initsock(int *rsock, const netid_t hostid, struct sockaddr_in *saddr
 	disp_arg[0] = ntohs(portnum);
 	disp_arg[1] = hostid;
 
-	if  ((sockfd = socket(AF_INET, SOCK_DGRAM, udpproto)) < 0)
+	if  ((sockfd = socket(AF_INET, SOCK_DGRAM, IPPROTO_UDP)) < 0)
 		return  $EH{Cannot create UDP access socket};
 
 	if  (bind(sockfd, (struct sockaddr *) &cli_addr, sizeof(cli_addr)) < 0)  {
@@ -198,18 +189,10 @@ static void  unpack_btuser(Btuser *dest, const Btuser *src)
 static int  inittcp()
 {
 	struct	servent	*sp;
-	struct	protoent  *pp;
-	char	*tcp_protoname;
-
-	if  (!((pp = getprotobyname("tcp"))  || (pp = getprotobyname("TCP"))))
-		return  $EH{No TCP protocol};
-
-	tcp_protoname = pp->p_name;
-	endprotoent();
 
 	/* Get port number for this caper */
 
-	if  (!(sp = env_getserv(TSname, tcp_protoname)))  {
+	if  (!(sp = env_getserv(TSname, IPPROTO_TCP)))  {
 		endservent();
 		return  $EH{No xbnetserv TCP service};
 	}
@@ -590,7 +573,7 @@ static void  ghostlist()
 	maxhosts = INIT_HOSTS;
 
 	while  ((rp = get_hostfile()))  {
-		if  (rp->ht_flags & (HT_ISCLIENT|HT_DOS|HT_ROAMUSER))
+		if  (rp->ht_flags & (HT_DOS|HT_ROAMUSER))
 			continue;
 		if  (rp->hostname[0])
 			ahost(rp->hostid, rp->hostname);

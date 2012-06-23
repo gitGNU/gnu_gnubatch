@@ -74,13 +74,14 @@
 #define	DEFAULT_NWORDS	4
 #define	MAX_NWORDS	8
 
+int                     Ignored_error;
 int			errors = 0, locktries = 0, locksem = -1, using_mmap = -1;
 int			hadalarm;
 unsigned		lockwait;
 unsigned		blksize = DEFAULT_NWORDS;		/* Bumped up to bytes later */
 char			npchar = '.', dumphex, dumpok, dumpall, psok, notifok,  dipc, showfree, nofgrep, lockfail;
 char			*psarg, *scriptname;
-char			*spooldir = "/usr/spool/batch";	/* FIXME */
+char			*spooldir = "/usr/local/var/gnubatch";		/* Checkme */
 int			envselect_value;
 
 #ifndef	PATH_MAX
@@ -283,7 +284,7 @@ void  dops(const long lpid)
 				printf("Last attaching process was %ld\n", lpid);
 		}
 		fflush(stdout);
-		system(scriptname);
+		Ignored_error = system(scriptname);
 		_exit(101);
 	}
 	else  {
@@ -302,7 +303,7 @@ void  dops(const long lpid)
 				sprintf(obuf, "ps %s | fgrep \' %ld \'", psarg, lpid);
 		}
 		fflush(stdout);
-		system(obuf);
+		Ignored_error = system(obuf);
 	}
 }
 
@@ -1855,6 +1856,12 @@ void  dump_q(int rq)
 				case  N_ROAMUSER:
 					printf(" N_ROAMUSER");
 					break;
+				case  N_SETNOTSERVER:
+					printf(" N_SETNOTSERVER");
+					break;
+				case  N_SETISSERVER:
+					printf (" N_SETISSERVER");
+					break;
 				case  N_CONNOK:
 					printf(" N_CONNOK");
 					break;
@@ -1885,6 +1892,9 @@ void  dump_q(int rq)
 				case  N_CONNFAIL:
 					printf(" N_CONNFAIL");
 					break;
+				case  N_WRONGIP:
+					printf(" N_WRONGIP");
+					break;
 				}
 				printf("\npid = %s%ld uid=%ld (%s) gid=%ld (%s) param=%ld\n",
 				       lookhost(un.shrep.outmsg.hostid),
@@ -1909,7 +1919,7 @@ MAINFN_TYPE  main(int argc, char **argv)
 	double	daemtime = 0.0;
 	extern	char	*optarg;
 
-	versionprint(argv, "$Revision: 1.4 $", 0);
+	versionprint(argv, "$Revision: 1.5 $", 0);
 
 	while  ((c = getopt(argc, argv, "rdFAD:P:o:nxabB:N:S:Gl:L:X:")) != EOF)
 		switch  (c)  {

@@ -56,19 +56,39 @@
 
 static	char	Filename[] = __FILE__;
 
-static	int	prodsock = -1;
-static	struct	sockaddr_in	apiaddr, apiret;
-
-static	char	*current_queue;
-static	unsigned	current_qlen;
+struct  api_status      {
+        int             sock;                   /* TCP socket */
+        int             prodsock;               /* Socket for refresh messages */
+        netid_t         hostid;                 /* Who we are speaking to 0=local host */
+        int_ugid_t      realuid;                /* User id in question */
+        int_ugid_t      realgid;                /* Group id in question */
+        char            *current_queue;         /* Current queue prefix */
+        unsigned	current_qlen;           /* Length of that saves calculating each time */
+        enum  {  NOT_LOGGED = 0, LOGGED_IN_UNIX = 1, LOGGED_IN_WIN = 2, LOGGED_IN_WINU = 3 }    is_logged;
+        ULONG           jser;                   /* Job shm serial */
+        ULONG           vser;                   /* Var shm serial */
+        Btuser          hispriv;                /* Permissions structure in effect */
+        struct  api_msg inmsg;                  /* Input message */
+        struct  api_msg outmsg;                 /* Output message */
+        struct  sockaddr_in     apiaddr;        /* Address for binding prod socket */
+        struct  sockaddr_in     apiret;         /* Address for sending prods */
+};
 
 FILE *net_feed(const int, const netid_t, const jobno_t, const int);
+
+/* Initialise status thing so we can have it auto */
+
+static  void    init_status(struct api_status *ap)
+{
+        BLOCK_ZERO(ap, sizeof(struct api_status));
+        ap->sock = ap->prodsock = -1;
+}
 
 static int  decodejreply()
 {
 	switch  (readreply())  {
 	default:		return  XB_ERR;			/* Dunno what that was */
-	case  J_OK:		return	XB_OK;
+	case  J_OK:		return	 XB_OK;
 	case  J_NEXIST:		return  XB_UNKNOWN_JOB;
 	case  J_VNEXIST:	return  XB_UNKNOWN_VAR;
 	case  J_NOPERM:		return  XB_NOPERM;
@@ -129,7 +149,7 @@ static void  mode_pack(Btmode *dest, const Btmode *src)
 
 /* Send a message regarding a job operation, and decode result.  */
 
-static int  wjimsg(const unsigned op, const int_ugid_t uid, const int_ugid_t gid, const Btjob *jp, const ULONG param)
+static int  wjimsg(const unsigned op, const Btjob *jp, const ULONG param)
 {
 	int		tries;
 	Shipc		Oreq;
@@ -137,8 +157,8 @@ static int  wjimsg(const unsigned op, const int_ugid_t uid, const int_ugid_t gid
 	BLOCK_ZERO(&Oreq, sizeof(Oreq));
 	Oreq.sh_mtype = TO_SCHED;
 	Oreq.sh_params.mcode = op;
-	Oreq.sh_params.uuid = uid;
-	Oreq.sh_params.ugid = gid;
+	Oreq.sh_params.uuid = Realuid;
+	Oreq.sh_params.ugid = Realgid;
 	mymtype = MTOFFSET + (Oreq.sh_params.upid = getpid());
 	Oreq.sh_params.param = param;
 	Oreq.sh_un.jobref.hostid = jp->h.bj_hostid;
@@ -146,11 +166,6 @@ static int  wjimsg(const unsigned op, const int_ugid_t uid, const int_ugid_t gid
 	for  (tries = 1;  tries <= MSGQ_BLOCKS;  tries++)  {
 		if  (msgsnd(Ctrl_chan, (struct msgbuf *) &Oreq, sizeof(Shreq) + sizeof(jident), IPC_NOWAIT) >= 0)
 			return  decodejreply();
-		if  (tracing & TRACE_SYSOP)  {
-			char  msg[16];
-			sprintf(msg, "wjimsg-full-%u", tries);
-			trace_op(Realuid, msg);
-		}
 		sleep(MSGQ_BLOCKWAIT);
 	}
 	return  XB_QFULL;
@@ -158,7 +173,7 @@ static int  wjimsg(const unsigned op, const int_ugid_t uid, const int_ugid_t gid
 
 /* Ditto for job create/update */
 
-static int  wjmsg(const unsigned op, const int_ugid_t uid, const int_ugid_t gid, const ULONG xindx)
+static int  wjmsg(const unsigned op, const ULONG xindx)
 {
 	int		tries;
 	Shipc		Oreq;
@@ -166,8 +181,8 @@ static int  wjmsg(const unsigned op, const int_ugid_t uid, const int_ugid_t gid,
 	BLOCK_ZERO(&Oreq, sizeof(Oreq));
 	Oreq.sh_mtype = TO_SCHED;
 	Oreq.sh_params.mcode = op;
-	Oreq.sh_params.uuid = uid;
-	Oreq.sh_params.ugid = gid;
+	Oreq.sh_params.uuid = Realuid;
+	Oreq.sh_params.ugid = Realgid;
 	mymtype = MTOFFSET + (Oreq.sh_params.upid = getpid());
 	Oreq.sh_un.sh_jobindex = xindx;
 #ifdef	USING_MMAP
@@ -179,18 +194,13 @@ static int  wjmsg(const unsigned op, const int_ugid_t uid, const int_ugid_t gid,
 			freexbuf_serv(xindx);
 			return  ret;
 		}
-		if  (tracing & TRACE_SYSOP)  {
-			char  msg[16];
-			sprintf(msg, "wjmsg-full-%u", tries);
-			trace_op(Realuid, msg);
-		}
 		sleep(MSGQ_BLOCKWAIT);
 	}
 	freexbuf_serv(xindx);
 	return  XB_QFULL;
 }
 
-static int  wvmsg(const unsigned op, const int_ugid_t uid, const int_ugid_t gid, const Btvar *varp, const ULONG seq, const ULONG param)
+static int  wvmsg(const unsigned op, const Btvar *varp, const ULONG seq, const ULONG param)
 {
 	int	tries;
 	Shipc	Oreq;
@@ -199,19 +209,14 @@ static int  wvmsg(const unsigned op, const int_ugid_t uid, const int_ugid_t gid,
 	Oreq.sh_mtype = TO_SCHED;
 	Oreq.sh_params.mcode = op;
 	Oreq.sh_params.param = param;
-	Oreq.sh_params.uuid = uid;
-	Oreq.sh_params.ugid = gid;
+	Oreq.sh_params.uuid = Realuid;
+	Oreq.sh_params.ugid = Realgid;
 	mymtype = MTOFFSET + (Oreq.sh_params.upid = getpid());
 	Oreq.sh_un.sh_var = *varp;
 	Oreq.sh_un.sh_var.var_sequence = seq;
 	for  (tries = 1;  tries <= MSGQ_BLOCKS;  tries++)  {
 		if  (msgsnd(Ctrl_chan, (struct msgbuf *) &Oreq, sizeof(Shreq) + sizeof(Btvar), IPC_NOWAIT) >= 0)
 			return  readvreply();
-		if  (tracing & TRACE_SYSOP)  {
-			char  msg[16];
-			sprintf(msg, "wvmsg-full-%u", tries);
-			trace_op(Realuid, msg);
-		}
 		sleep(MSGQ_BLOCKWAIT);
 	}
 	return  XB_QFULL;
@@ -233,78 +238,75 @@ static void  abort_exit(const int n)
 	exit(n);
 }
 
-static void  setup_prod()
+static void  setup_prod(struct api_status *ap)
 {
-	BLOCK_ZERO(&apiret, sizeof(apiret));
-	apiret.sin_family = AF_INET;
-	apiret.sin_addr.s_addr = htonl(INADDR_ANY);
-	apiret.sin_port = 0;
-	if  ((prodsock = socket(AF_INET, SOCK_DGRAM, udpproto)) < 0)
+	BLOCK_ZERO(&ap->apiret, sizeof(ap->apiret));
+	ap->apiret.sin_family = AF_INET;
+	ap->apiret.sin_addr.s_addr = htonl(INADDR_ANY);
+	if  ((ap->prodsock = socket(AF_INET, SOCK_DGRAM, IPPROTO_UDP)) < 0)
 		return;
-	if  (bind(prodsock, (struct sockaddr *) &apiret, sizeof(apiret)) < 0)  {
-		close(prodsock);
-		prodsock = -1;
+	if  (bind(ap->prodsock, (struct sockaddr *) &ap->apiret, sizeof(ap->apiret)) < 0)  {
+		close(ap->prodsock);
+		ap->prodsock = -1;
 	}
 }
 
-static void  unsetup_prod()
+static void  unsetup_prod(struct api_status *ap)
 {
-	if  (prodsock >= 0)  {
-		close(prodsock);
-		prodsock = -1;
+	if  (ap->prodsock >= 0)  {
+		close(ap->prodsock);
+		ap->prodsock = -1;
 	}
 }
 
-static void  proc_refresh(const netid_t whofrom)
+static void  proc_refresh(struct api_status *ap)
 {
-	struct	api_msg	outmsg;
-	static	ULONG	jser, vser;
 	int	prodj = 0, prodv = 0;
 
-	if  (jser != Job_seg.dptr->js_serial)  {
-		jser = Job_seg.dptr->js_serial;
+	if  (ap->jser != Job_seg.dptr->js_serial)  {
+		ap->jser = Job_seg.dptr->js_serial;
 		prodj++;
 	}
-	if  (vser != Var_seg.dptr->vs_serial)  {
-		vser = Var_seg.dptr->vs_serial;
+	if  (ap->vser != Var_seg.dptr->vs_serial)  {
+		ap->vser = Var_seg.dptr->vs_serial;
 		prodv++;
 	}
 
-	if  (prodsock < 0  ||  !(prodj || prodv))
+	if  (ap->prodsock < 0  ||  !(prodj || prodv))
 		return;
 
-	BLOCK_ZERO(&apiaddr, sizeof(apiaddr));
-	apiaddr.sin_family = AF_INET;
-	apiaddr.sin_addr.s_addr = whofrom;
-	apiaddr.sin_port = apipport;
+	BLOCK_ZERO(&ap->apiaddr, sizeof(ap->apiaddr));
+	ap->apiaddr.sin_family = AF_INET;
+	ap->apiaddr.sin_addr.s_addr = ap->hostid;
+	ap->apiaddr.sin_port = apipport;
 
 	if  (prodj)  {
-		outmsg.code = API_JOBPROD;
-		outmsg.un.r_reader.seq = htonl(jser);
-		if  (sendto(prodsock, (char *) &outmsg, sizeof(outmsg), 0, (struct sockaddr *) &apiaddr, sizeof(apiaddr)) < 0)  {
-			close(prodsock);
-			prodsock = -1;
+		ap->outmsg.code = API_JOBPROD;
+		ap->outmsg.un.r_reader.seq = htonl(ap->jser);
+		if  (sendto(ap->prodsock, (char *) &ap->outmsg, sizeof(ap->outmsg), 0, (struct sockaddr *) &ap->apiaddr, sizeof(ap->apiaddr)) < 0)  {
+			close(ap->prodsock);
+			ap->prodsock = -1;
 			return;
 		}
 	}
 	if  (prodv)  {
-		outmsg.code = API_VARPROD;
-		outmsg.un.r_reader.seq = htonl(vser);
-		if  (sendto(prodsock, (char *) &outmsg, sizeof(outmsg), 0, (struct sockaddr *) &apiaddr, sizeof(apiaddr)) < 0)  {
-			close(prodsock);
-			prodsock = -1;
+		ap->outmsg.code = API_VARPROD;
+		ap->outmsg.un.r_reader.seq = htonl(ap->vser);
+		if  (sendto(ap->prodsock, (char *) &ap->outmsg, sizeof(ap->outmsg), 0, (struct sockaddr *) &ap->apiaddr, sizeof(ap->apiaddr)) < 0)  {
+			close(ap->prodsock);
+			ap->prodsock = -1;
 			return;
 		}
 	}
 }
 
-static void  pushout(const int sock, char *cbufp, unsigned obytes)
+static void  pushout(struct api_status *ap, char *cbufp, unsigned obytes)
 {
 	int	xbytes;
 
 	while  (obytes != 0)  {
-		if  ((xbytes = write(sock, cbufp, obytes)) <= 0)  {
-			if  (xbytes < 0  &&  errno == EINTR)
+		if  ((xbytes = write(ap->sock, cbufp, obytes)) < 0)  {
+			if  (errno == EINTR)
 				continue;
 			abort_exit(0);
 		}
@@ -313,14 +315,19 @@ static void  pushout(const int sock, char *cbufp, unsigned obytes)
 	}
 }
 
-static void  pullin(const int sock, char *cbufp, unsigned ibytes)
+static void  pullin(struct api_status *ap, char *cbufp, unsigned ibytes)
 {
 	int	xbytes;
 
 	while  (ibytes != 0)  {
-		if  ((xbytes = read(sock, cbufp, ibytes)) <= 0)  {
-			if  (xbytes < 0  &&  errno == EINTR)
-				continue;
+		if  ((xbytes = read(ap->sock, cbufp, ibytes)) <= 0)  {
+                        if  (xbytes < 0  &&  errno == EINTR)  {
+                                while  (hadrfresh)  {
+                                        hadrfresh = 0;
+                                        proc_refresh(ap);
+                                }
+                                continue;
+                        }
 			abort_exit(0);
 		}
 		cbufp += xbytes;
@@ -328,13 +335,22 @@ static void  pullin(const int sock, char *cbufp, unsigned ibytes)
 	}
 }
 
-static void  err_result(const int sock, const int code, const ULONG seq)
+static  void    put_reply(struct api_status *ap)
 {
-	struct	api_msg	outmsg;
-	outmsg.code = 0;
-	outmsg.retcode = htons((SHORT) code);
-	outmsg.un.r_reader.seq = htonl(seq);
-	pushout(sock, (char *) &outmsg, sizeof(outmsg));
+        pushout(ap, (char *) &ap->outmsg, sizeof(ap->outmsg));
+}
+
+static  void    get_message(struct api_status *ap)
+{
+        pullin(ap, (char *) &ap->inmsg, sizeof(ap->inmsg));
+}
+
+static void  err_result(struct api_status *ap, const int code, const ULONG seq)
+{
+	ap->outmsg.code = 0;
+	ap->outmsg.retcode = htons((SHORT) code);
+	ap->outmsg.un.r_reader.seq = htonl(seq);
+	put_reply(ap);
 }
 
 static void  swapinj(Btjob *to, const struct jobnetmsg *from)
@@ -444,16 +460,33 @@ static void  swapinj(Btjob *to, const struct jobnetmsg *from)
 #endif
 }
 
-static void  reply_joblist(const int sock, const ULONG flags)
+static int  notinqueue(struct api_status *ap, const Btjob *jp)
 {
+        const	char	*tit, *cp;
+
+        if  (!ap->current_queue)
+                return  0;
+
+        tit = title_of(jp);
+        cp = strchr(tit, ':');
+        if  (!cp)
+                return  0;
+        if  ((cp - tit) != ap->current_qlen)
+                return  1;
+
+        return  strncmp(tit, ap->current_queue, ap->current_qlen) != 0;
+}
+
+static void  reply_joblist(struct api_status *ap)
+{
+        ULONG           flags = ntohl(ap->inmsg.un.lister.flags);
 	unsigned	jind, njobs;
 	slotno_t	*rbuf, *rbufp;
-	struct	api_msg	outmsg;
 
-	outmsg.code = API_JOBLIST;
-	outmsg.retcode = 0;
+	ap->outmsg.code = API_JOBLIST;
+	ap->outmsg.retcode = 0;
 
-	rjobfile(0);
+	rjobfile(0);                    /* param 0 means leave locked */
 	njobs = 0;
 
 	jind = Job_seg.dptr->js_q_head;
@@ -471,22 +504,16 @@ static void  reply_joblist(const int sock, const ULONG flags)
 			continue;
 		if  (flags & XB_FLAG_GROUPONLY && jp->h.bj_mode.o_gid != Realgid)
 			continue;
-		if  (flags & XB_FLAG_QUEUEONLY && current_queue)  {
-			const	char	*tit = title_of(jp), *cp;
-			if  ((cp = strchr(tit, ':'))  &&
-			     ((cp - tit) != current_qlen || strncmp(tit, current_queue, current_qlen) != 0))
-				continue;
-		}
+		if  (flags & XB_FLAG_QUEUEONLY && notinqueue(ap, jp))
+			continue;
 		njobs++;
 	}
 
-	outmsg.un.r_lister.nitems = htonl((ULONG) njobs);
-	outmsg.un.r_lister.seq = htonl(Job_seg.dptr->js_serial);
-	pushout(sock, (char *) &outmsg, sizeof(outmsg));
+	ap->outmsg.un.r_lister.nitems = htonl((ULONG) njobs);
+	ap->outmsg.un.r_lister.seq = htonl(Job_seg.dptr->js_serial);
+        put_reply(ap);
 	if  (njobs == 0)  {
 		junlock();
-		if  (tracing & TRACE_APIOPEND)
-			trace_op_res(Realuid, "joblist", "OK-none");
 		return;
 	}
 	if  (!(rbuf = (slotno_t *) malloc(njobs * sizeof(slotno_t))))
@@ -509,34 +536,28 @@ static void  reply_joblist(const int sock, const ULONG flags)
 			continue;
 		if  (flags & XB_FLAG_GROUPONLY && jp->h.bj_mode.o_gid != Realgid)
 			continue;
-		if  (flags & XB_FLAG_QUEUEONLY && current_queue)  {
-			const	char	*tit = title_of(jp), *cp;
-			if  ((cp = strchr(tit, ':'))  &&
-			     ((cp - tit) != current_qlen || strncmp(tit, current_queue, current_qlen) != 0))
-				continue;
-		}
+		if  (flags & XB_FLAG_QUEUEONLY && notinqueue(ap, jp))
+                        continue;
 		*rbufp++ = htonl(nind);
 	}
 	junlock();
 
 	/* Splat the thing out */
 
-	pushout(sock, (char *) rbuf, sizeof(slotno_t) * njobs);
+	pushout(ap, (char *) rbuf, sizeof(slotno_t) * njobs);
 	free((char *) rbuf);
-	if  (tracing & TRACE_APIOPEND)
-		trace_op_res(Realuid, "joblist", "OK");
 }
 
-static void  reply_varlist(const int sock, const ULONG flags)
+static void  reply_varlist(struct api_status *ap)
 {
-	struct	Ventry	*vp, *ve;
+	ULONG           flags = ntohl(ap->inmsg.un.lister.flags);
+        struct	Ventry	*vp, *ve;
 	unsigned	numvars = 0;
 	slotno_t	*rbuf, *rbufp;
-	struct	api_msg	outmsg;
 
-	outmsg.code = API_VARLIST;
-	outmsg.retcode = 0;
-	rvarfile(0);
+	ap->outmsg.code = API_VARLIST;
+	ap->outmsg.retcode = 0;
+	rvarfile(0);                    /* And leave locked */
 	ve = &Var_seg.vlist[Var_seg.dptr->vs_maxvars];
 
 	for  (vp = &Var_seg.vlist[0]; vp < ve;  vp++)  {
@@ -555,13 +576,11 @@ static void  reply_varlist(const int sock, const ULONG flags)
 		numvars++;
 	}
 
-	outmsg.un.r_lister.nitems = htonl((ULONG) numvars);
-	outmsg.un.r_lister.seq = htonl(Var_seg.dptr->vs_serial);
-	pushout(sock, (char *) &outmsg, sizeof(outmsg));
+	ap->outmsg.un.r_lister.nitems = htonl((ULONG) numvars);
+	ap->outmsg.un.r_lister.seq = htonl(Var_seg.dptr->vs_serial);
+	put_reply(ap);
 	if  (numvars == 0)  {
 		vunlock();
-		if  (tracing & TRACE_APIOPEND)
-			trace_op_res(Realuid, "varlist", "OK-none");
 		return;
 	}
 	if  (!(rbuf = (slotno_t *) malloc(numvars * sizeof(slotno_t))))
@@ -587,38 +606,26 @@ static void  reply_varlist(const int sock, const ULONG flags)
 
 	/* Splat the thing out */
 
-	pushout(sock, (char *) rbuf, sizeof(slotno_t) * numvars);
+	pushout(ap, (char *) rbuf, sizeof(slotno_t) * numvars);
 	free((char *) rbuf);
-	if  (tracing & TRACE_APIOPEND)
-		trace_op_res(Realuid, "varlist", "OK");
 }
 
-static int  check_valid_job(const int sock, const ULONG flags, const Btjob *jp, const char *tmsg)
+static int  check_valid_job(struct api_status *ap, const ULONG flags, const Btjob *jp)
 {
 	if  (jp->h.bj_job == 0  ||
 	     !mpermitted(&jp->h.bj_mode, BTM_SHOW, 0)  ||
 	     ((flags & XB_FLAG_LOCALONLY)  &&  jp->h.bj_hostid != 0)  ||
 	     ((flags & XB_FLAG_USERONLY)  &&  jp->h.bj_mode.o_uid != Realuid)  ||
-	     ((flags & XB_FLAG_GROUPONLY)  &&  jp->h.bj_mode.o_gid != Realgid))  {
-		err_result(sock, XB_UNKNOWN_JOB, Job_seg.dptr->js_serial);
-		if  (tracing & TRACE_APIOPEND)
-			trace_op_res(Realuid, tmsg, "unkjob");
+	     ((flags & XB_FLAG_GROUPONLY)  &&  jp->h.bj_mode.o_gid != Realgid))
 		return  0;
-	}
-	if  (flags & XB_FLAG_QUEUEONLY && current_queue)  {
-		const	char	*tit = title_of(jp), *cp;
-		if  ((cp = strchr(tit, ':'))  &&
-		     ((cp - tit) != current_qlen || strncmp(tit, current_queue, current_qlen) != 0))  {
-			err_result(sock, XB_UNKNOWN_JOB, Job_seg.dptr->js_serial);
-			if  (tracing & TRACE_APIOPEND)
-				trace_op_res(Realuid, tmsg, "unkjob");
-			return  0;
-		}
-	}
+
+	if  (flags & XB_FLAG_QUEUEONLY && notinqueue(ap, jp))
+                return  0;
+
 	return  1;
 }
 
-static void  job_read_rest(const int sock, const Btjob *jp)
+static void  job_read_rest(struct api_status *ap, const Btjob *jp)
 {
 	int		cnt;
 #ifndef	WORDS_BIGENDIAN
@@ -765,43 +772,45 @@ static void  job_read_rest(const int sock, const Btjob *jp)
 		sred++;
 	}
 #endif
-	pushout(sock, (char *) &outjob, hwm);
+	pushout(ap, (char *) &outjob, hwm);
 }
 
-static void  reply_jobread(const int sock, const slotno_t slotno, const ULONG seq, const ULONG flags)
+static void  reply_jobread(struct api_status *ap)
 {
+        slotno_t        slotno = ntohl(ap->inmsg.un.reader.slotno);
+        ULONG           seq = ntohl(ap->inmsg.un.reader.seq);
+        ULONG           flags = ntohl(ap->inmsg.un.reader.flags);
 	Btjob			*jp;
-	struct	api_msg		outmsg;
 
 	rjobfile(1);
 	if  (!(flags & XB_FLAG_IGNORESEQ)  &&  seq != Job_seg.dptr->js_serial)  {
-		err_result(sock, XB_SEQUENCE, Job_seg.dptr->js_serial);
-		if  (tracing & TRACE_APIOPEND)
-			trace_op_res(Realuid, "jobread", "seqerr");
+		err_result(ap, XB_SEQUENCE, Job_seg.dptr->js_serial);
 		return;
 	}
 	if  (slotno >= Job_seg.dptr->js_maxjobs)  {
-		err_result(sock, XB_INVALIDSLOT, Job_seg.dptr->js_serial);
-		if  (tracing & TRACE_APIOPEND)
-			trace_op_res(Realuid, "jobread", "invslot");
+		err_result(ap, XB_INVALIDSLOT, Job_seg.dptr->js_serial);
 		return;
 	}
 	jp = &Job_seg.jlist[slotno].j;
-	if  (check_valid_job(sock, flags, jp, "jobread"))  {
-		outmsg.code = API_JOBREAD;
-		outmsg.retcode = 0;
-		outmsg.un.r_reader.seq = htonl(Job_seg.dptr->js_serial);
-		pushout(sock, (char *) &outmsg, sizeof(outmsg));
-		job_read_rest(sock, jp);
-		if  (tracing & TRACE_APIOPEND)
-			trace_op_res(Realuid, "jobread", "OK");
+	if  (check_valid_job(ap, flags, jp))  {
+		ap->outmsg.code = API_JOBREAD;
+		ap->outmsg.retcode = XB_OK;
+		ap->outmsg.un.r_reader.seq = htonl(Job_seg.dptr->js_serial);
+		put_reply(ap);
+		job_read_rest(ap, jp);
 	}
 }
 
-static void  reply_jobfind(const int sock, const unsigned code, const jobno_t jn, const netid_t nid, const ULONG flags)
+static void  reply_jobfind(struct api_status *ap)
 {
+        jobno_t         jn = ntohl(ap->inmsg.un.jobfind.jobno);
+        netid_t         nid = ap->inmsg.un.jobfind.netid;
+        ULONG           flags = ntohl(ap->inmsg.un.jobfind.flags);
 	unsigned	jind;
 	Btjob		*jp;
+
+        if  (nid == myhostid  ||  nid == htonl(INADDR_LOOPBACK))
+                nid = 0;
 
 	rjobfile(1);
 	jind = Job_seg.hashp_jno[jno_jhash(jn)];
@@ -810,27 +819,22 @@ static void  reply_jobfind(const int sock, const unsigned code, const jobno_t jn
 			goto  gotit;
 		jind = Job_seg.jlist[jind].nxt_jno_hash;
 	}
-	err_result(sock, XB_UNKNOWN_JOB, Job_seg.dptr->js_serial);
-	if  (tracing & TRACE_APIOPEND)
-		trace_op_res(Realuid, "findjob", "unkjob");
+	err_result(ap, XB_UNKNOWN_JOB, Job_seg.dptr->js_serial);
 	return;
  gotit:
 	jp = &Job_seg.jlist[jind].j;
-	if  (check_valid_job(sock, flags, jp, "jobfind"))  {
-		struct	api_msg		outmsg;
-		outmsg.code = code;
-		outmsg.retcode = 0;
-		outmsg.un.r_find.seq = htonl(Job_seg.dptr->js_serial);
-		outmsg.un.r_find.slotno = htonl((ULONG) jind);
-		pushout(sock, (char *) &outmsg, sizeof(outmsg));
-		if  (code == API_FINDJOB)
-			job_read_rest(sock, jp);
-		if  (tracing & TRACE_APIOPEND)
-			trace_op_res(Realuid, "findjob", "OK");
+	if  (check_valid_job(ap, flags, jp))  {
+		ap->outmsg.code = ap->inmsg.code;
+		ap->outmsg.retcode = XB_OK;
+		ap->outmsg.un.r_find.seq = htonl(Job_seg.dptr->js_serial);
+		ap->outmsg.un.r_find.slotno = htonl((ULONG) jind);
+		put_reply(ap);
+		if  (ap->inmsg.code == API_FINDJOB)
+			job_read_rest(ap, jp);
 	}
 }
 
-static void  var_read_rest(const int sock, const Btvar *varp)
+static void  var_read_rest(struct api_status *ap, const Btvar *varp)
 {
 	struct	varnetmsg	outvar;
 
@@ -849,32 +853,28 @@ static void  var_read_rest(const int sock, const Btvar *varp)
 		else
 			outvar.nm_un.nm_long = htonl(varp->var_value.con_un.con_long);
 	}
-	pushout(sock, (char *) &outvar, sizeof(outvar));
+	pushout(ap, (char *) &outvar, sizeof(outvar));
 }
 
-static void  reply_varread(const int sock, const slotno_t slotno, const ULONG seq, const ULONG flags)
+static void  reply_varread(struct api_status *ap)
 {
-	Btvar			*varp;
-	struct	api_msg		outmsg;
+        slotno_t        slotno = ntohl(ap->inmsg.un.reader.slotno);
+        ULONG           seq = ntohl(ap->inmsg.un.reader.seq);
+        ULONG           flags = ntohl(ap->inmsg.un.reader.flags);
+	Btvar		*varp;
 
 	rvarfile(1);
 	if  (!(flags & XB_FLAG_IGNORESEQ)  &&  seq != Var_seg.dptr->vs_serial)  {
-		err_result(sock, XB_SEQUENCE, Var_seg.dptr->vs_serial);
-		if  (tracing & TRACE_APIOPEND)
-			trace_op_res(Realuid, "varread", "seq");
+		err_result(ap, XB_SEQUENCE, Var_seg.dptr->vs_serial);
 		return;
 	}
 	if  (slotno >= Var_seg.dptr->vs_maxvars)  {
-		err_result(sock, XB_INVALIDSLOT, Var_seg.dptr->vs_serial);
-		if  (tracing & TRACE_APIOPEND)
-			trace_op_res(Realuid, "varread", "invslot");
+		err_result(ap, XB_INVALIDSLOT, Var_seg.dptr->vs_serial);
 		return;
 	}
 
 	if  (!Var_seg.vlist[slotno].Vused)  {
-		err_result(sock, XB_UNKNOWN_VAR, Var_seg.dptr->vs_serial);
-		if  (tracing & TRACE_APIOPEND)
-			trace_op_res(Realuid, "varread", "unkvar");
+		err_result(ap, XB_UNKNOWN_VAR, Var_seg.dptr->vs_serial);
 		return;
 	}
 
@@ -883,36 +883,34 @@ static void  reply_varread(const int sock, const slotno_t slotno, const ULONG se
 	     ((flags & XB_FLAG_LOCALONLY)  &&  varp->var_id.hostid != 0) ||
 	     ((flags & XB_FLAG_USERONLY)  &&  varp->var_mode.o_uid != Realuid)  ||
 	     ((flags & XB_FLAG_GROUPONLY)  &&  varp->var_mode.o_gid != Realgid))  {
-		err_result(sock, XB_UNKNOWN_VAR, Var_seg.dptr->vs_serial);
-		if  (tracing & TRACE_APIOPEND)
-			trace_op_res(Realuid, "varread", "unkvar");
+		err_result(ap, XB_UNKNOWN_VAR, Var_seg.dptr->vs_serial);
 		return;
 	}
-	outmsg.code = API_VARREAD;
-	outmsg.retcode = 0;
-	outmsg.un.r_reader.seq = htonl(Var_seg.dptr->vs_serial);
-	pushout(sock, (char *) &outmsg, sizeof(outmsg));
-	var_read_rest(sock, varp);
-	if  (tracing & TRACE_APIOPEND)
-		trace_op_res(Realuid, "varread", "OK");
+	ap->outmsg.code = API_VARREAD;
+	ap->outmsg.retcode = XB_OK;
+	ap->outmsg.un.r_reader.seq = htonl(Var_seg.dptr->vs_serial);
+        put_reply(ap);
+	var_read_rest(ap, varp);
 }
 
-static void  reply_varfind(const int sock, const unsigned code, const netid_t nid, const ULONG flags)
+static void  reply_varfind(struct api_status *ap)
 {
+        netid_t nid = ap->inmsg.un.varfind.netid;
+        ULONG   flags = ntohl(ap->inmsg.un.varfind.flags);
 	vhash_t	vp;
 	Btvar	*varp;
 	ULONG	Seq;
 	char	varname[BTV_NAME+1];
-	struct	api_msg		outmsg;
 
-	pullin(sock, varname, sizeof(varname));
+        if  (nid == myhostid)
+                nid = 0;
+
+	pullin(ap, varname, sizeof(varname));
 
 	rvarfile(1);
 
 	if  ((vp = lookupvar(varname, nid, BTM_READ, &Seq)) < 0)  {
-		err_result(sock, XB_UNKNOWN_VAR, Var_seg.dptr->vs_serial);
-		if  (tracing & TRACE_APIOPEND)
-			trace_op_res(Realuid, "findvar", "unkvar");
+		err_result(ap, XB_UNKNOWN_VAR, Var_seg.dptr->vs_serial);
 		return;
 	}
 	varp = &Var_seg.vlist[vp].Vent;
@@ -920,72 +918,52 @@ static void  reply_varfind(const int sock, const unsigned code, const netid_t ni
 	     ((flags & XB_FLAG_LOCALONLY)  &&  varp->var_id.hostid != 0) ||
 	     ((flags & XB_FLAG_USERONLY)  &&  varp->var_mode.o_uid != Realuid)  ||
 	     ((flags & XB_FLAG_GROUPONLY)  &&  varp->var_mode.o_gid != Realgid))  {
-		err_result(sock, XB_UNKNOWN_VAR, Var_seg.dptr->vs_serial);
-		if  (tracing & TRACE_APIOPEND)
-			trace_op_res(Realuid, "findvar", "unkvar");
+		err_result(ap, XB_UNKNOWN_VAR, Var_seg.dptr->vs_serial);
 		return;
 	}
-	outmsg.code = code;
-	outmsg.retcode = 0;
-	outmsg.un.r_find.seq = htonl(Var_seg.dptr->vs_serial);
-	outmsg.un.r_find.slotno = htonl((LONG) vp);
-	pushout(sock, (char *) &outmsg, sizeof(outmsg));
-	if  (code == API_FINDVAR)
-		var_read_rest(sock, varp);
-	if  (tracing & TRACE_APIOPEND)
-		trace_op_res(Realuid, "findvar", "OK");
+	ap->outmsg.code = ap->inmsg.code;
+	ap->outmsg.retcode = 0;
+	ap->outmsg.un.r_find.seq = htonl(Var_seg.dptr->vs_serial);
+	ap->outmsg.un.r_find.slotno = htonl((LONG) vp);
+	put_reply(ap);
+	if  (ap->inmsg.code == API_FINDVAR)
+		var_read_rest(ap, varp);
 }
 
-static void  reply_jobdel(const int sock, const slotno_t slotno, const ULONG seq, const ULONG flags)
+static int reply_jobdel(struct api_status *ap)
 {
-	Btjob	*jp;
+        slotno_t        slotno = ntohl(ap->inmsg.un.reader.slotno);
+        ULONG           seq = ntohl(ap->inmsg.un.reader.seq);
+        ULONG           flags = ntohl(ap->inmsg.un.reader.flags);
+	Btjob           *jp;
 
 	rjobfile(1);
-	if  (!(flags & XB_FLAG_IGNORESEQ)  &&  seq != Job_seg.dptr->js_serial)  {
-		err_result(sock, XB_SEQUENCE, Job_seg.dptr->js_serial);
-		if  (tracing & TRACE_APIOPEND)
-			trace_op_res(Realuid, "jobdel", "seq");
-		return;
-	}
 
-	if  (slotno >= Job_seg.dptr->js_maxjobs)  {
-		err_result(sock, XB_INVALIDSLOT, Job_seg.dptr->js_serial);
-		if  (tracing & TRACE_APIOPEND)
-			trace_op_res(Realuid, "jobdel", "invslot");
-		return;
-	}
+        if  (!(flags & XB_FLAG_IGNORESEQ)  &&  seq != Job_seg.dptr->js_serial)
+                return  XB_SEQUENCE;
+
+	if  (slotno >= Job_seg.dptr->js_maxjobs)
+                return  XB_INVALIDSLOT;
 
 	jp = &Job_seg.jlist[slotno].j;
-	if  (check_valid_job(sock, flags, jp, "jobdel"))  {
-		int	ret;
-		struct	api_msg		outmsg;
-		if  (!mpermitted(&jp->h.bj_mode, BTM_DELETE, 0))  {
-			err_result(sock, XB_NOPERM, Job_seg.dptr->js_serial);
-			if  (tracing & TRACE_APIOPEND)
-				trace_op_res(Realuid, "jobdel", "noperm");
-			return;
-		}
-		if  ((ret = wjimsg(J_DELETE, Realuid, Realgid, jp, 0)) != XB_OK)  {
-			err_result(sock, ret, Job_seg.dptr->js_serial);
-			if  (tracing & TRACE_APIOPEND)
-				trace_op_res(Realuid, "jobdel", "failed");
-			return;
-		}
-		outmsg.code = API_JOBDEL;
-		outmsg.retcode = 0;
-		outmsg.un.r_reader.seq = htonl(Job_seg.dptr->js_serial);
-		pushout(sock, (char *) &outmsg, sizeof(outmsg));
-		if  (tracing & TRACE_APIOPEND)
-			trace_op_res(Realuid, "jobdel", "OK");
-	}
+	if  (check_valid_job(ap, flags, jp))  {
+		if  (!mpermitted(&jp->h.bj_mode, BTM_DELETE, 0))
+                        return  XB_NOPERM;
+		return  wjimsg(J_DELETE, jp, 0);
+ 	}
+        return  XB_UNKNOWN_JOB;
 }
 
-static int  reply_vardel(const slotno_t slotno, const ULONG seq, const ULONG flags)
+static int  reply_vardel(struct api_status *ap)
 {
+        slotno_t        slotno = ntohl(ap->inmsg.un.reader.slotno);
+        ULONG           seq = ntohl(ap->inmsg.un.reader.seq);
+        ULONG           flags = ntohl(ap->inmsg.un.reader.flags);
 	Btvar	*varp;
 
 	rvarfile(1);
-	if  (!(flags & XB_FLAG_IGNORESEQ)  &&  seq != Var_seg.dptr->vs_serial)
+
+        if  (!(flags & XB_FLAG_IGNORESEQ)  &&  seq != Var_seg.dptr->vs_serial)
 		return  XB_SEQUENCE;
 	if  (slotno >= Var_seg.dptr->vs_maxvars)
 		return  XB_INVALIDSLOT;
@@ -1002,15 +980,21 @@ static int  reply_vardel(const slotno_t slotno, const ULONG seq, const ULONG fla
 	if  (!mpermitted(&varp->var_mode, BTM_DELETE, 0))
 		return  XB_NOPERM;
 
-	return  wvmsg(V_DELETE, Realuid, Realgid, varp, varp->var_sequence, 0);
+	return  wvmsg(V_DELETE, varp, varp->var_sequence, 0);
 }
 
-static int  reply_jobop(const slotno_t slotno, const ULONG seq, const ULONG flags, const ULONG op, const ULONG param)
+static int  reply_jobop(struct api_status *ap)
 {
+        slotno_t  slotno = ntohl(ap->inmsg.un.jop.slotno);
+        ULONG  seq = ntohl(ap->inmsg.un.jop.seq);
+        ULONG  flags = ntohl(ap->inmsg.un.jop.flags);
+        ULONG  op = ntohl(ap->inmsg.un.jop.op);
+        ULONG  param = ntohl(ap->inmsg.un.jop.param);
 	Btjob	*jp, *djp;
 	ULONG	xindx, nop;
 
 	rjobfile(1);
+
 	if  (!(flags & XB_FLAG_IGNORESEQ)  &&  seq != Job_seg.dptr->js_serial)
 		return  XB_SEQUENCE;
 
@@ -1025,12 +1009,8 @@ static int  reply_jobop(const slotno_t slotno, const ULONG seq, const ULONG flag
 	     ((flags & XB_FLAG_GROUPONLY)  &&  jp->h.bj_mode.o_gid != Realgid))
 		return  XB_UNKNOWN_JOB;
 
-	if  (flags & XB_FLAG_QUEUEONLY && current_queue)  {
-		const	char	*tit = title_of(jp), *cp;
-		if  ((cp = strchr(tit, ':'))  &&
-		     ((cp - tit) != current_qlen || strncmp(tit, current_queue, current_qlen) != 0))
-			return  XB_UNKNOWN_JOB;
-	}
+	if  (flags & XB_FLAG_QUEUEONLY && notinqueue(ap, jp))
+		return  XB_UNKNOWN_JOB;
 
 	/* We might have to do different messages depending upon
 	   whether we are setting progress etc or killing.
@@ -1063,7 +1043,7 @@ static int  reply_jobop(const slotno_t slotno, const ULONG seq, const ULONG flag
 		djp = &Xbuffer->Ring[xindx = getxbuf_serv()];
 		*djp = *jp;
 		djp->h.bj_progress = (unsigned char) nop;
-		return  wjmsg(J_CHANGE, Realuid, Realgid, xindx);
+		return  wjmsg(J_CHANGE, xindx);
 
 	case  XB_JOP_FORCE:
 	case  XB_JOP_FORCEADV:
@@ -1071,7 +1051,7 @@ static int  reply_jobop(const slotno_t slotno, const ULONG seq, const ULONG flag
 			return  XB_NOPERM;
 		if  (jp->h.bj_progress >= BJP_STARTUP1)
 			return  XB_ISRUNNING;
-		return  wjimsg(op == XB_JOP_FORCE? J_FORCENA: J_FORCE, Realuid, Realgid, jp, 0);
+		return  wjimsg(op == XB_JOP_FORCE? J_FORCENA: J_FORCE, jp, 0);
 
 	case  XB_JOP_ADVTIME:
 		if  (!mpermitted(&jp->h.bj_mode, BTM_WRITE, 0))
@@ -1083,55 +1063,49 @@ static int  reply_jobop(const slotno_t slotno, const ULONG seq, const ULONG flag
 		djp = &Xbuffer->Ring[xindx = getxbuf_serv()];
 		*djp = *jp;
 		djp->h.bj_times.tc_nexttime = advtime(&djp->h.bj_times);
-		return  wjmsg(J_CHANGE, Realuid, Realgid, xindx);
+		return  wjmsg(J_CHANGE, xindx);
 
 	case  XB_JOP_KILL:
 		if  (!mpermitted(&jp->h.bj_mode, BTM_KILL, 0))
 			return  XB_NOPERM;
 		if  (jp->h.bj_progress < BJP_STARTUP1)
 			return  XB_ISNOTRUNNING;
-		return  wjimsg(J_KILL, Realuid, Realgid, jp, param);
+		return  wjimsg(J_KILL, jp, param);
 	}
 }
 
-static void  api_jobstart(const int sock, struct hhash *frp, const Btuser *mpriv, const jobno_t jobno)
+static void  api_jobstart(struct api_status *ap)
 {
 	int			ret;
 	unsigned		length;
-	netid_t			whofrom = frp->rem.hostid;
 	struct	pend_job	*pj;
-	struct	api_msg		outmsg;
 	struct	jobnetmsg	injob;
 
-	outmsg.code = API_JOBADD;
-	outmsg.retcode = 0;
+	ap->outmsg.code = API_JOBADD;
+	ap->outmsg.retcode = XB_OK;
 
 	/* Length is variable as all the space may not be filled up
 	   Read it in even if we intend to reject it as the
 	   socket will have gunge in it otherwise.  */
 
-	pullin(sock, (char *) &injob.hdr, sizeof(injob.hdr));
+	pullin(ap, (char *) &injob.hdr, sizeof(injob.hdr));
 	length = ntohs(injob.hdr.hdr.length);
-	pullin(sock, sizeof(injob.hdr) + (char *) &injob, length - sizeof(injob.hdr));
+	pullin(ap, sizeof(injob.hdr) + (char *) &injob, length - sizeof(injob.hdr));
 
 	/* If he can't create new entries then he can visit his handy
 	   local taxidermist */
 
-	if  (!(mpriv->btu_priv & BTM_CREATE))  {
-		outmsg.retcode = htons(XB_NOCRPERM);
-		pushout(sock, (char *) &outmsg, sizeof(outmsg));
-		if  (tracing & TRACE_APIOPEND)
-			trace_op_res(Realuid, "jobadd", "nocrperm");
+	if  (!(ap->hispriv.btu_priv & BTM_CREATE))  {
+		ap->outmsg.retcode = htons(XB_NOCRPERM);
+                put_reply(ap);
 		return;
 	}
 
 	/* Allocate a pending job structure */
 
-	if  (!(pj = add_pend(whofrom)))  {
-		outmsg.retcode = htons(XB_NOMEM_QF);
-		pushout(sock, (char *) &outmsg, sizeof(outmsg));
-		if  (tracing & TRACE_APIOPEND)
-			trace_op_res(Realuid, "jobadd", "nomem");
+	if  (!(pj = add_pend(ap->hostid)))  {
+		ap->outmsg.retcode = htons(XB_NOMEM_QF);
+                put_reply(ap);
 		return;
 	}
 
@@ -1139,54 +1113,56 @@ static void  api_jobstart(const int sock, struct hhash *frp, const Btuser *mpriv
 
 	swapinj(&pj->jobout, &injob);
 	pj->jobout.h.bj_jflags &= ~(BJ_CLIENTJOB|BJ_ROAMUSER);
-	if  (frp->rem.ht_flags & HT_DOS)  {
-		pj->jobout.h.bj_jflags |= BJ_CLIENTJOB;
-		if  (frp->rem.ht_flags & HT_ROAMUSER)
-			pj->jobout.h.bj_jflags |= BJ_ROAMUSER;
-	}
-	if  (whofrom != myhostid  &&  whofrom != localhostid)
-		pj->jobout.h.bj_orighostid = whofrom;
+        if  (ap->is_logged != LOGGED_IN_UNIX)  {
+               pj->jobout.h.bj_jflags |= BJ_CLIENTJOB;
+               if  (ap->is_logged == LOGGED_IN_WINU)
+                       pj->jobout.h.bj_jflags |= BJ_ROAMUSER;
+        }
+        pj->jobout.h.bj_orighostid = ap->hostid;
+#ifdef HAVE_TO_COPY_UNAME
+        pj->jobout.h.bj_mode.o_uid = pj->jobout.h.bj_mode.c_uid = ap->realuid;
+        pj->jobout.h.bj_mode.o_gid = pj->jobout.h.bj_mode.c_gid = ap->realgid;
+        strncpy(pj->jobout.h.bj_mode.o_user, prin_uname(ap->realuid), UIDSIZE);
+        strncpy(pj->jobout.h.bj_mode.c_user, pj->jobout.h.bj_mode.o_user, UIDSIZE);
+        strncpy(pj->jobout.h.bj_mode.o_group, prin_gname(ap->realgid), UIDSIZE);
+        strncpy(pj->jobout.h.bj_mode.c_group, pj->jobout.h.bj_mode.o_group, UIDSIZE);
+#endif
 
 	/* Don't bother with user ids in job modes as they get stuffed
 	   in by the scheduler from the shreq structure.  */
 
 	if  (validate_ci(pj->jobout.h.bj_cmdinterp) < 0)  {
-		outmsg.retcode = htons(XB_BAD_CI);
-		pushout(sock, (char *) &outmsg, sizeof(outmsg));
+		ap->outmsg.retcode = htons(XB_BAD_CI);
+                put_reply(ap);
 		abort_job(pj);
-		if  (tracing & TRACE_APIOPEND)
-			trace_op_res(Realuid, "jobadd", "badci");
 		return;
 	}
 
-	if  ((ret = validate_job(&pj->jobout, mpriv)) != 0)  {
-		outmsg.retcode = htons((SHORT) XB_CONVERT_XBNR(ret));
-		pushout(sock, (char *) &outmsg, sizeof(outmsg));
+	if  ((ret = validate_job(&pj->jobout, &ap->hispriv)) != 0)  {
+		ap->outmsg.retcode = htons((SHORT) XB_CONVERT_XBNR(ret));
+                put_reply(ap);
 		abort_job(pj);
-		if  (tracing & TRACE_APIOPEND)
-			trace_op_res(Realuid, "jobadd", "invjob");
 		return;
 	}
-	pj->jobn = jobno;
+	pj->jobn = ntohl(ap->inmsg.un.jobdata.jobno);
 	pj->out_f = goutfile(&pj->jobn, pj->tmpfl, 0);
 	pj->jobout.h.bj_job = pj->jobn;
-	outmsg.un.jobdata.jobno = htonl(pj->jobn);
-	pushout(sock, (char *) &outmsg, sizeof(outmsg));
-	if  (tracing & TRACE_APIOPEND)
-		trace_op_res(Realuid, "jobadd", "OK");
+	ap->outmsg.un.jobdata.jobno = htonl(pj->jobn);
+        put_reply(ap);
 }
 
 /* Next lump of a job.  */
 
-static void  api_jobcont(const int sock, const jobno_t jobno, const USHORT nbytes)
+static void  api_jobcont(struct api_status *ap)
 {
+        USHORT                  nbytes = ntohs(ap->inmsg.un.jobdata.nbytes);
 	unsigned		cnt;
 	unsigned	char	*bp;
 	struct	pend_job	*pj;
 	char	inbuffer[XBA_BUFFSIZE];	/* XBA_BUFFSIZE always >= nbytes */
 
-	pullin(sock, inbuffer, nbytes);
-	if  (!(pj = find_j_by_jno(jobno)))
+	pullin(ap, inbuffer, nbytes);
+	if  (!(pj = find_j_by_jno(ntohl(ap->inmsg.un.jobdata.jobno))))
 		return;
 	bp = (unsigned char *) inbuffer;
 	for  (cnt = 0;  cnt < nbytes;  cnt++)  {
@@ -1196,40 +1172,40 @@ static void  api_jobcont(const int sock, const jobno_t jobno, const USHORT nbyte
 		}
 		bp++;
 	}
-	if  (tracing & TRACE_APIOPEND)
-		trace_op_res(Realuid, "datain", "OK");
 }
 
 /* Final lump of job */
 
-static void  api_jobfinish(const int sock, const jobno_t jobno)
+static void  api_jobfinish(struct api_status *ap)
 {
+        jobno_t                 jobno = ntohl(ap->inmsg.un.jobdata.jobno);
 	struct	pend_job	*pj;
-	struct	api_msg		outmsg;
 
-	outmsg.code = API_DATAEND;
-	outmsg.retcode = 0;
-	outmsg.un.jobdata.jobno = htonl(jobno);
+	ap->outmsg.code = API_DATAEND;
+	ap->outmsg.retcode = XB_OK;
+	ap->outmsg.un.jobdata.jobno = htonl(jobno);
 
 	if  (!(pj = find_j_by_jno(jobno)))
-		outmsg.retcode = htons(XB_UNKNOWN_JOB);
+		ap->outmsg.retcode = htons(XB_UNKNOWN_JOB);
 	else  {
+                int     ret;
 		ULONG	xindx;
 		Btjob  *djp;
 		djp = &Xbuffer->Ring[xindx = getxbuf_serv()];
 		BLOCK_COPY(djp, &pj->jobout, sizeof(Btjob));
 		djp->h.bj_slotno = -1;
 		time(&djp->h.bj_time);
-		outmsg.retcode = htons((SHORT) wjmsg(J_CREATE, Realuid, Realgid, xindx));
+                ret = wjmsg(J_CREATE, xindx);
+		ap->outmsg.retcode = htons((SHORT) ret);
 		fclose(pj->out_f);
 		pj->out_f = (FILE *) 0;
-		if  (outmsg.retcode != 0)
+		if  (ret != XB_OK)  {
 			unlink(pj->tmpfl);
+			ap->outmsg.retcode = htons(ret);
+		}
 	}
-	outmsg.un.jobdata.seq = htonl(Job_seg.dptr->js_serial);
-	pushout(sock, (char *) &outmsg, sizeof(outmsg));
-	if  (tracing & TRACE_APIOPEND)
-		trace_op_res(Realuid, "dataend", "OK");
+	ap->outmsg.un.jobdata.seq = htonl(Job_seg.dptr->js_serial);
+        put_reply(ap);
 }
 
 /* Abort a job.
@@ -1238,33 +1214,32 @@ static void  api_jobfinish(const int sock, const jobno_t jobno)
    politely telling us 'ere they crash in a spectacular heap,
    well ones I've seen anyhow (even ones I write).  */
 
-static void  api_jobabort(const int sock, const jobno_t jobno)
+static void  api_jobabort(struct api_status *ap)
 {
+        jobno_t         jobno = ntohl(ap->inmsg.un.jobdata.jobno);
 	struct	pend_job	*pj;
-	struct	api_msg		outmsg;
 
-	outmsg.code = API_DATAABORT;
-	outmsg.retcode = 0;
-	outmsg.un.jobdata.jobno = htonl(jobno);
+	ap->outmsg.code = API_DATAABORT;
+	ap->outmsg.retcode = XB_OK;
+	ap->outmsg.un.jobdata.jobno = htonl(jobno);
 
 	if  (!(pj = find_j_by_jno(jobno)))
-		outmsg.retcode = htons(XB_UNKNOWN_JOB);
+		ap->outmsg.retcode = htons(XB_UNKNOWN_JOB);
 	else
 		abort_job(pj);
-	pushout(sock, (char *) &outmsg, sizeof(outmsg));
-	if  (tracing & TRACE_APIOPEND)
-		trace_op_res(Realuid, "jobabort", "OK");
+        put_reply(ap);
 }
 
 /* Add a groovy new variable */
 
-static int  reply_varadd(const int sock, const Btuser *priv)
+static int  reply_varadd(struct api_status *ap)
 {
 	struct	varnetmsg	invar;
 	Btvar	rvar;
 
-	pullin(sock, (char *) &invar, sizeof(invar));
+	pullin(ap, (char *) &invar, sizeof(invar));
 	BLOCK_ZERO(&rvar, sizeof(rvar));
+
 	rvar.var_type = invar.nm_type;
 	rvar.var_flags = invar.nm_flags;
 	strncpy(rvar.var_name, invar.nm_name, BTV_NAME);
@@ -1277,20 +1252,23 @@ static int  reply_varadd(const int sock, const Btuser *priv)
 	else
 		rvar.var_value.con_un.con_long = ntohl(invar.nm_un.nm_long);
 
-	if  ((priv->btu_priv & BTM_CREATE) == 0)
+	if  ((ap->hispriv.btu_priv & BTM_CREATE) == 0)
 		return  XBNR_NOCRPERM;
 
-	if  (!(priv->btu_priv & BTM_UMASK)  &&
-	     (rvar.var_mode.u_flags != priv->btu_vflags[0] ||
-	      rvar.var_mode.g_flags != priv->btu_vflags[1] ||
-	      rvar.var_mode.o_flags != priv->btu_vflags[2]))
+	if  (!(ap->hispriv.btu_priv & BTM_UMASK)  &&
+	     (rvar.var_mode.u_flags != ap->hispriv.btu_vflags[0] ||
+	      rvar.var_mode.g_flags != ap->hispriv.btu_vflags[1] ||
+	      rvar.var_mode.o_flags != ap->hispriv.btu_vflags[2]))
 		return  XBNR_NOCMODE;
 
-	return  wvmsg(V_CREATE, Realuid, Realgid, &rvar, 0, 0);
+	return  wvmsg(V_CREATE, &rvar, 0, 0);
 }
 
-static int  reply_jobupd(const int sock, const Btuser *mperm, const slotno_t slotno, const ULONG seq, const ULONG flags)
+static int  reply_jobupd(struct api_status *ap)
 {
+        slotno_t        slotno = ntohl(ap->inmsg.un.reader.slotno);
+        ULONG           seq = ntohl(ap->inmsg.un.reader.seq);
+        ULONG           flags = ntohl(ap->inmsg.un.reader.flags);
 	int		cinum;
 	unsigned	length;
 	ULONG		xindx;
@@ -1300,9 +1278,9 @@ static int  reply_jobupd(const int sock, const Btuser *mperm, const slotno_t slo
 
 	/* Length is variable as per jobadd.  */
 
-	pullin(sock, (char *) &injob.hdr, sizeof(injob.hdr));
+	pullin(ap, (char *) &injob.hdr, sizeof(injob.hdr));
 	length = ntohs(injob.hdr.hdr.length);
-	pullin(sock, sizeof(injob.hdr) + (char *) &injob, length - sizeof(injob.hdr));
+	pullin(ap, sizeof(injob.hdr) + (char *) &injob, length - sizeof(injob.hdr));
 	swapinj(&rjob, &injob);
 
 	rjobfile(1);
@@ -1318,12 +1296,8 @@ static int  reply_jobupd(const int sock, const Btuser *mperm, const slotno_t slo
 	     ((flags & XB_FLAG_GROUPONLY)  &&  jp->h.bj_mode.o_gid != Realgid))
 		return  XB_UNKNOWN_JOB;
 
-	if  (flags & XB_FLAG_QUEUEONLY && current_queue)  {
-		const	char	*tit = title_of(jp), *cp;
-		if  ((cp = strchr(tit, ':'))  &&
-		     ((cp - tit) != current_qlen || strncmp(tit, current_queue, current_qlen) != 0))
-			return  XB_UNKNOWN_JOB;
-	}
+	if  (flags & XB_FLAG_QUEUEONLY && notinqueue(ap, jp))
+                return  XB_UNKNOWN_JOB;
 
 	if  (!mpermitted(&jp->h.bj_mode, BTM_WRITE, 0))
 		return  XB_NOPERM;
@@ -1335,7 +1309,7 @@ static int  reply_jobupd(const int sock, const Btuser *mperm, const slotno_t slo
 	   ownership etc so we won't bother to look.  We will
 	   validate the priority and load levels though.  */
 
-	if  (rjob.h.bj_pri < mperm->btu_minp  ||  rjob.h.bj_pri > mperm->btu_maxp)
+	if  (rjob.h.bj_pri < ap->hispriv.btu_minp  ||  rjob.h.bj_pri > ap->hispriv.btu_maxp)
 		return  XB_BAD_PRIORITY;
 
 	if  ((cinum = validate_ci(rjob.h.bj_cmdinterp)) < 0)
@@ -1343,9 +1317,9 @@ static int  reply_jobupd(const int sock, const Btuser *mperm, const slotno_t slo
 
 	/* Validate load level */
 
-	if  (rjob.h.bj_ll == 0  ||  rjob.h.bj_ll > mperm->btu_maxll)
+	if  (rjob.h.bj_ll == 0  ||  rjob.h.bj_ll > ap->hispriv.btu_maxll)
 		return  XBNR_BAD_LL;
-	if  (!(mperm->btu_priv & BTM_SPCREATE) && rjob.h.bj_ll != Ci_list[cinum].ci_ll)
+	if  (!(ap->hispriv.btu_priv & BTM_SPCREATE) && rjob.h.bj_ll != Ci_list[cinum].ci_ll)
 		return  XBNR_BAD_LL;
 
 	/* Copy across bits which the scheduler uses to identify the job */
@@ -1356,20 +1330,23 @@ static int  reply_jobupd(const int sock, const Btuser *mperm, const slotno_t slo
 
 	djp = &Xbuffer->Ring[xindx = getxbuf_serv()];
 	BLOCK_COPY(djp, &rjob, sizeof(Btjob));
-	return  wjmsg(J_CHANGE, Realuid, Realgid, xindx);
+	return  wjmsg(J_CHANGE, xindx);
 }
 
-static int  reply_varupd(const int sock, const slotno_t slotno, const ULONG seq, const ULONG flags)
+static int  reply_varupd(struct api_status *ap)
 {
+        slotno_t        slotno = ntohl(ap->inmsg.un.reader.slotno);
+        ULONG           seq = ntohl(ap->inmsg.un.reader.seq);
+        ULONG           flags = ntohl(ap->inmsg.un.reader.flags);
 	unsigned	wflags = BTM_WRITE;
-	Btvar	*varp, rvar;
-	struct	varnetmsg	invar;
+	Btvar           *varp, rvar;
+	struct	varnetmsg  invar;
 	ULONG		Saveseq;
 
-	pullin(sock, (char *) &invar, sizeof(invar));
+	pullin(ap, (char *) &invar, sizeof(invar));
 	BLOCK_ZERO(&rvar, sizeof(rvar));
 	rvarfile(1);
-	if  (!(flags & XB_FLAG_IGNORESEQ)  &&  seq != Var_seg.dptr->vs_serial)
+        if  (!(flags & XB_FLAG_IGNORESEQ)  &&  seq != Var_seg.dptr->vs_serial)
 		return  XB_SEQUENCE;
 
 	if  (slotno >= Var_seg.dptr->vs_maxvars)
@@ -1411,22 +1388,25 @@ static int  reply_varupd(const int sock, const slotno_t slotno, const ULONG seq,
 
 	Saveseq = varp->var_sequence;
 	if  (wflags & BTM_DELETE)  {
-		int	ret = wvmsg(V_CHFLAGS, Realuid, Realgid, &rvar, Saveseq, 0);
+		int	ret = wvmsg(V_CHFLAGS, &rvar, Saveseq, 0);
 		if  (ret != XB_OK)
 			return  ret;
 		Saveseq++;
 	}
-	if  (wflags & BTM_WRITE)
-		return  wvmsg(V_ASSIGN, Realuid, Realgid, &rvar, Saveseq, 0);
-	return  XB_OK;
+        if  (wflags & BTM_WRITE)
+		return  wvmsg(V_ASSIGN, &rvar, Saveseq, 0);
+        return  XB_OK;
 }
 
-static int  reply_varchcomm(const int sock, const slotno_t slotno, const ULONG seq, const ULONG flags)
+static int  reply_varchcomm(struct api_status *ap)
 {
-	Btvar	*varp, rvar;
-	struct	varnetmsg	invar;
+        slotno_t        slotno = ntohl(ap->inmsg.un.reader.slotno);
+        ULONG           seq = ntohl(ap->inmsg.un.reader.seq);
+        ULONG           flags = ntohl(ap->inmsg.un.reader.flags);
+	Btvar           *varp, rvar;
+	struct	varnetmsg  invar;
 
-	pullin(sock, (char *) &invar, sizeof(invar));
+	pullin(ap, (char *) &invar, sizeof(invar));
 	rvarfile(1);
 	if  (!(flags & XB_FLAG_IGNORESEQ)  &&  seq != Var_seg.dptr->vs_serial)
 		return  XB_SEQUENCE;
@@ -1447,17 +1427,21 @@ static int  reply_varchcomm(const int sock, const slotno_t slotno, const ULONG s
 
 	rvar = *varp;
 	strcpy(rvar.var_comment, invar.nm_comment);
-	return  wvmsg(V_CHCOMM, Realuid, Realgid, &rvar, varp->var_sequence, 0);
+	return  wvmsg(V_CHCOMM, &rvar, varp->var_sequence, 0);
 }
 
-static int  reply_varrename(const int sock, const slotno_t slotno, const ULONG seq, const ULONG flags)
+static int  reply_varrename(struct api_status *ap)
 {
+        slotno_t        slotno = ntohl(ap->inmsg.un.reader.slotno);
+        ULONG           seq = ntohl(ap->inmsg.un.reader.seq);
+        ULONG           flags = ntohl(ap->inmsg.un.reader.flags);
 	Btvar	*varp;
 	char	nbuf[BTV_NAME+1];
 	Shipc	Oreq;
 
-	pullin(sock, (char *) nbuf, sizeof(nbuf));
+	pullin(ap, (char *) nbuf, sizeof(nbuf));
 	rvarfile(1);
+
 	if  (!(flags & XB_FLAG_IGNORESEQ)  &&  seq != Var_seg.dptr->vs_serial)
 		return  XB_SEQUENCE;
 	if  (slotno >= Var_seg.dptr->vs_maxvars)
@@ -1485,35 +1469,32 @@ static int  reply_varrename(const int sock, const slotno_t slotno, const ULONG s
 	Oreq.sh_un.sh_rn.sh_ovar.var_sequence = varp->var_sequence;
 	strcpy(Oreq.sh_un.sh_rn.sh_rnewname, nbuf);
 	msgsnd(Ctrl_chan, (struct msgbuf *) &Oreq, sizeof(Shreq) + sizeof(Btvar) + strlen(nbuf) + 1, 0);
-	return  readvreply();
+	return readvreply();
 }
 
-static void  api_jobdata(const int sock, const slotno_t slotno, const ULONG seq, const ULONG flags)
+static void  api_jobdata(struct api_status *ap)
 {
+        slotno_t  slotno = ntohl(ap->inmsg.un.reader.slotno);
+        ULONG     seq = ntohl(ap->inmsg.un.reader.seq);
+        ULONG     flags = ntohl(ap->inmsg.un.reader.flags);
 	int	inbp, ch;
 	FILE	*jfile;
 	Btjob	*jp;
-	struct	api_msg	outmsg;
 	char	buffer[XBA_BUFFSIZE];
 
-	outmsg.code = API_JOBDATA;
-	outmsg.retcode = 0;
+	ap->outmsg.code = API_JOBDATA;
+	ap->outmsg.retcode = XB_OK;
 
 	rjobfile(1);
 
-	outmsg.un.jobdata.seq = htonl(Job_seg.dptr->js_serial);
-	if  (!(flags & XB_FLAG_IGNORESEQ)  &&  seq != Job_seg.dptr->js_serial)  {
-		outmsg.retcode = htons(XB_SEQUENCE);
-		pushout(sock, (char *) &outmsg, sizeof(outmsg));
-		if  (tracing & TRACE_APIOPEND)
-			trace_op_res(Realuid, "jobdata", "seq");
+        if  (!(flags & XB_FLAG_IGNORESEQ)  &&  seq != Job_seg.dptr->js_serial)  {
+		ap->outmsg.retcode = htons(XB_SEQUENCE);
+		put_reply(ap);
 		return;
 	}
 	if  (slotno >= Job_seg.dptr->js_maxjobs)  {
-		outmsg.retcode = htons(XB_INVALIDSLOT);
-		pushout(sock, (char *) &outmsg, sizeof(outmsg));
-		if  (tracing & TRACE_APIOPEND)
-			trace_op_res(Realuid, "jobdata", "invslot");
+		ap->outmsg.retcode = htons(XB_INVALIDSLOT);
+                put_reply(ap);
 		return;
 	}
 
@@ -1523,88 +1504,77 @@ static void  api_jobdata(const int sock, const slotno_t slotno, const ULONG seq,
 	     ((flags & XB_FLAG_LOCALONLY)  &&  jp->h.bj_hostid != 0)  ||
 	     ((flags & XB_FLAG_USERONLY)  &&  jp->h.bj_mode.o_uid != Realuid)  ||
 	     ((flags & XB_FLAG_GROUPONLY)  &&  jp->h.bj_mode.o_gid != Realgid))  {
-		outmsg.retcode = htons(XB_UNKNOWN_JOB);
-		pushout(sock, (char *) &outmsg, sizeof(outmsg));
-		if  (tracing & TRACE_APIOPEND)
-			trace_op_res(Realuid, "jobdata", "unkjob");
+		ap->outmsg.retcode = htons(XB_UNKNOWN_JOB);
+		put_reply(ap);
 		return;
 	}
 
-	if  (flags & XB_FLAG_QUEUEONLY && current_queue)  {
-		const	char	*tit = title_of(jp), *cp;
-		if  ((cp = strchr(tit, ':'))  &&
-		     ((cp - tit) != current_qlen || strncmp(tit, current_queue, current_qlen) != 0))  {
-			outmsg.retcode = htons(XB_UNKNOWN_JOB);
-			pushout(sock, (char *) &outmsg, sizeof(outmsg));
-			if  (tracing & TRACE_APIOPEND)
-				trace_op_res(Realuid, "jobdata", "unkjob");
-			return;
-		}
+	if  (flags & XB_FLAG_QUEUEONLY && notinqueue(ap, jp))  {
+		ap->outmsg.retcode = htons(XB_UNKNOWN_JOB);
+		put_reply(ap);
+		return;
 	}
 
 	if  (!mpermitted(&jp->h.bj_mode, BTM_READ, 0))  {
-		outmsg.retcode = htons(XB_NOPERM);
-		pushout(sock, (char *) &outmsg, sizeof(outmsg));
-		if  (tracing & TRACE_APIOPEND)
-			trace_op_res(Realuid, "jobdata", "noperm");
+		ap->outmsg.retcode = htons(XB_NOPERM);
+                put_reply(ap);
 		return;
 	}
 
 	jfile = jp->h.bj_hostid? net_feed(FEED_JOB, jp->h.bj_hostid, jp->h.bj_job, Job_seg.dptr->js_viewport): fopen(mkspid(SPNAM, jp->h.bj_job), "r");
 	if  (!jfile)  {
-		outmsg.retcode = htons(XB_UNKNOWN_JOB);
-		pushout(sock, (char *) &outmsg, sizeof(outmsg));
-		if  (tracing & TRACE_APIOPEND)
-			trace_op_res(Realuid, "jobdata", "unkjob");
+		ap->outmsg.retcode = htons(XB_UNKNOWN_JOB);
+		put_reply(ap);
 		return;
 	}
 
 	/* Say ok */
 
-	pushout(sock, (char *) &outmsg, sizeof(outmsg));
+	put_reply(ap);
 
 	/* Read the file and splat it out.  */
 
-	outmsg.code = API_DATAOUT;
-	outmsg.un.jobdata.jobno = htonl(jp->h.bj_job);
+	ap->outmsg.code = API_DATAOUT;
+	ap->outmsg.un.jobdata.jobno = htonl(jp->h.bj_job);
 	inbp = 0;
 
 	while  ((ch = getc(jfile)) != EOF)  {
 		buffer[inbp++] = (char) ch;
 		if  (inbp >= sizeof(buffer))  {
-			outmsg.un.jobdata.nbytes = htons(inbp);
-			pushout(sock, (char *) &outmsg, sizeof(outmsg));
-			pushout(sock, buffer, inbp);
+			ap->outmsg.un.jobdata.nbytes = htons(inbp);
+			put_reply(ap);
+			pushout(ap, buffer, inbp);
 			inbp = 0;
 		}
 	}
 
 	fclose(jfile);
 	if  (inbp > 0)  {
-		outmsg.un.jobdata.nbytes = htons(inbp);
-		pushout(sock, (char *) &outmsg, sizeof(outmsg));
-		pushout(sock, buffer, inbp);
+		ap->outmsg.un.jobdata.nbytes = htons(inbp);
+                put_reply(ap);
+		pushout(ap, buffer, inbp);
 		inbp = 0;
 	}
 
 	/* Mark end of data */
 
-	outmsg.code = API_DATAEND;
-	pushout(sock, (char *) &outmsg, sizeof(outmsg));
-	if  (tracing & TRACE_APIOPEND)
-		trace_op_res(Realuid, "jobdata", "OK");
+	ap->outmsg.code = API_DATAEND;
+	put_reply(ap);
 }
 
-static int  reply_jobchmod(const int sock, const slotno_t slotno, const ULONG seq, const ULONG flags)
+static int  reply_jobchmod(struct api_status *ap)
 {
+        slotno_t        slotno = ntohl(ap->inmsg.un.reader.slotno);
+        ULONG           seq = ntohl(ap->inmsg.un.reader.seq);
+        ULONG           flags = ntohl(ap->inmsg.un.reader.flags);
 	Btjob		*jp, *djp;
 	ULONG		xindx;
 	struct	jobhnetmsg	injob;
 
-	pullin(sock, (char *) &injob, sizeof(injob));
+	pullin(ap, (char *) &injob, sizeof(injob));
 
 	rjobfile(1);
-	/* We didn't forget tracing here we do it in the main routine */
+
 	if  (!(flags & XB_FLAG_IGNORESEQ)  &&  seq != Job_seg.dptr->js_serial)
 		return  XB_SEQUENCE;
 
@@ -1619,12 +1589,8 @@ static int  reply_jobchmod(const int sock, const slotno_t slotno, const ULONG se
 	     ((flags & XB_FLAG_GROUPONLY)  &&  jp->h.bj_mode.o_gid != Realgid))
 		return  XB_UNKNOWN_JOB;
 
-	if  (flags & XB_FLAG_QUEUEONLY && current_queue)  {
-		const	char	*tit = title_of(jp), *cp;
-		if  ((cp = strchr(tit, ':'))  &&
-		     ((cp - tit) != current_qlen || strncmp(tit, current_queue, current_qlen) != 0))
-			return  XB_UNKNOWN_JOB;
-	}
+	if  (flags & XB_FLAG_QUEUEONLY && notinqueue(ap, jp))
+		return  XB_UNKNOWN_JOB;
 
 	if  (!mpermitted(&jp->h.bj_mode, BTM_WRMODE, 0))
 		return  XB_NOPERM;
@@ -1634,19 +1600,22 @@ static int  reply_jobchmod(const int sock, const slotno_t slotno, const ULONG se
 	djp->h.bj_mode.u_flags = ntohs(injob.nm_mode.u_flags);
 	djp->h.bj_mode.g_flags = ntohs(injob.nm_mode.g_flags);
 	djp->h.bj_mode.o_flags = ntohs(injob.nm_mode.o_flags);
-	return  wjmsg(J_CHMOD, Realuid, Realgid, xindx);
+	return  wjmsg(J_CHMOD, xindx);
 }
 
-static int  reply_varchmod(const int sock, const slotno_t slotno, const ULONG seq, const ULONG flags)
+static int  reply_varchmod(struct api_status *ap)
 {
-	Btvar	*varp, rvar;
+        slotno_t        slotno = ntohl(ap->inmsg.un.reader.slotno);
+        ULONG           seq = ntohl(ap->inmsg.un.reader.seq);
+        ULONG           flags = ntohl(ap->inmsg.un.reader.flags);
+        Btvar           *varp, rvar;
 	struct	varnetmsg	invar;
 
-	pullin(sock, (char *) &invar, sizeof(invar));
+	pullin(ap, (char *) &invar, sizeof(invar));
 
 	rvarfile(1);
-	/* We didn't forget tracing here we do it in the main routine */
-	if  (!(flags & XB_FLAG_IGNORESEQ)  &&  seq != Var_seg.dptr->vs_serial)
+
+        if  (!(flags & XB_FLAG_IGNORESEQ)  &&  seq != Var_seg.dptr->vs_serial)
 		return  XB_SEQUENCE;
 	if  (slotno >= Var_seg.dptr->vs_maxvars)
 		return  XB_INVALIDSLOT;
@@ -1667,21 +1636,25 @@ static int  reply_varchmod(const int sock, const slotno_t slotno, const ULONG se
 	rvar.var_mode.u_flags = ntohs(invar.nm_mode.u_flags);
 	rvar.var_mode.g_flags = ntohs(invar.nm_mode.g_flags);
 	rvar.var_mode.o_flags = ntohs(invar.nm_mode.o_flags);
-	return  wvmsg(V_CHMOD, Realuid, Realgid, &rvar, rvar.var_sequence, 0);
+	return  wvmsg(V_CHMOD, &rvar, rvar.var_sequence, 0);
 }
 
-static int  reply_jobchown(const int sock, const slotno_t slotno, const ULONG seq, const ULONG flags)
+static int  reply_jobchown(struct api_status *ap)
 {
+        slotno_t        slotno = ntohl(ap->inmsg.un.reader.slotno);
+        ULONG           seq = ntohl(ap->inmsg.un.reader.seq);
+        ULONG           flags = ntohl(ap->inmsg.un.reader.flags);
 	Btjob		*jp;
 	int_ugid_t	nuid;
 	struct	jugmsg	injob;
 
-	pullin(sock, (char *) &injob, sizeof(injob));
+	pullin(ap, (char *) &injob, sizeof(injob));
 
-	/* We didn't forget tracing here we do it in the main routine */
 	if  ((nuid = lookup_uname(injob.newug)) == UNKNOWN_UID)
 		return  XB_UNKNOWN_USER;
+
 	rjobfile(1);
+
 	if  (!(flags & XB_FLAG_IGNORESEQ)  &&  seq != Job_seg.dptr->js_serial)
 		return  XB_SEQUENCE;
 
@@ -1696,28 +1669,27 @@ static int  reply_jobchown(const int sock, const slotno_t slotno, const ULONG se
 	     ((flags & XB_FLAG_GROUPONLY)  &&  jp->h.bj_mode.o_gid != Realgid))
 		return  XB_UNKNOWN_JOB;
 
-	if  (flags & XB_FLAG_QUEUEONLY && current_queue)  {
-		const	char	*tit = title_of(jp), *cp;
-		if  ((cp = strchr(tit, ':'))  &&
-		     ((cp - tit) != current_qlen || strncmp(tit, current_queue, current_qlen) != 0))
-			return  XB_UNKNOWN_JOB;
-	}
+	if  (flags & XB_FLAG_QUEUEONLY && notinqueue(ap, jp))
+                return  XB_UNKNOWN_JOB;
 
-	return  wjimsg(J_CHOWN, Realuid, Realgid, jp, (ULONG) nuid);
+	return  wjimsg(J_CHOWN, jp, (ULONG) nuid);
 }
 
-static int  reply_varchown(const int sock, const slotno_t slotno, const ULONG seq, const ULONG flags)
+static int  reply_varchown(struct api_status *ap)
 {
+        slotno_t        slotno = ntohl(ap->inmsg.un.reader.slotno);
+        ULONG           seq = ntohl(ap->inmsg.un.reader.seq);
+        ULONG           flags = ntohl(ap->inmsg.un.reader.flags);
 	Btvar		*varp;
 	int_ugid_t	nuid;
 	struct	vugmsg	invar;
 
-	pullin(sock, (char *) &invar, sizeof(invar));
-	/* We didn't forget tracing here we do it in the main routine */
+	pullin(ap, (char *) &invar, sizeof(invar));
 	if  ((nuid = lookup_uname(invar.newug)) == UNKNOWN_UID)
 		return  XB_UNKNOWN_USER;
 
 	rvarfile(1);
+
 	if  (!(flags & XB_FLAG_IGNORESEQ)  &&  seq != Var_seg.dptr->vs_serial)
 		return  XB_SEQUENCE;
 	if  (slotno >= Var_seg.dptr->vs_maxvars)
@@ -1732,21 +1704,24 @@ static int  reply_varchown(const int sock, const slotno_t slotno, const ULONG se
 	     ((flags & XB_FLAG_GROUPONLY)  &&  varp->var_mode.o_gid != Realgid))
 		return  XB_UNKNOWN_VAR;
 
-	return  wvmsg(V_CHOWN, Realuid, Realgid, varp, varp->var_sequence, (ULONG) nuid);
+	return  wvmsg(V_CHOWN, varp, varp->var_sequence, (ULONG) nuid);
 }
 
-static int  reply_jobchgrp(const int sock, const slotno_t slotno, const ULONG seq, const ULONG flags)
+static int  reply_jobchgrp(struct api_status *ap)
 {
+        slotno_t        slotno = ntohl(ap->inmsg.un.reader.slotno);
+        ULONG           seq = ntohl(ap->inmsg.un.reader.seq);
+        ULONG           flags = ntohl(ap->inmsg.un.reader.flags);
 	Btjob		*jp;
 	int_ugid_t	ngid;
 	struct	jugmsg	injob;
 
-	pullin(sock, (char *) &injob, sizeof(injob));
-
-	/* We didn't forget tracing here we do it in the main routine */
+	pullin(ap, (char *) &injob, sizeof(injob));
 	if  ((ngid = lookup_gname(injob.newug)) == UNKNOWN_GID)
 		return  XB_UNKNOWN_GROUP;
-	rjobfile(1);
+
+        rjobfile(1);
+
 	if  (!(flags & XB_FLAG_IGNORESEQ)  &&  seq != Job_seg.dptr->js_serial)
 		return  XB_SEQUENCE;
 
@@ -1761,28 +1736,27 @@ static int  reply_jobchgrp(const int sock, const slotno_t slotno, const ULONG se
 	     ((flags & XB_FLAG_GROUPONLY)  &&  jp->h.bj_mode.o_gid != Realgid))
 		return  XB_UNKNOWN_JOB;
 
-	if  (flags & XB_FLAG_QUEUEONLY && current_queue)  {
-		const	char	*tit = title_of(jp), *cp;
-		if  ((cp = strchr(tit, ':'))  &&
-		     ((cp - tit) != current_qlen || strncmp(tit, current_queue, current_qlen) != 0))
-			return  XB_UNKNOWN_JOB;
-	}
+	if  (flags & XB_FLAG_QUEUEONLY  && notinqueue(ap, jp))
+		return  XB_UNKNOWN_JOB;
 
-	return  wjimsg(J_CHGRP, Realuid, Realgid, jp, (ULONG) ngid);
+	return  wjimsg(J_CHGRP, jp, (ULONG) ngid);
 }
 
-static int  reply_varchgrp(const int sock, const slotno_t slotno, const ULONG seq, const ULONG flags)
+static int  reply_varchgrp(struct api_status *ap)
 {
+        slotno_t        slotno = ntohl(ap->inmsg.un.reader.slotno);
+        ULONG           seq = ntohl(ap->inmsg.un.reader.seq);
+        ULONG           flags = ntohl(ap->inmsg.un.reader.flags);
 	Btvar		*varp;
 	int_ugid_t	ngid;
 	struct	vugmsg	invar;
 
-	pullin(sock, (char *) &invar, sizeof(invar));
-	/* We didn't forget tracing here we do it in the main routine */
-	if  ((ngid = lookup_gname(invar.newug)) == UNKNOWN_GID)
+	pullin(ap, (char *) &invar, sizeof(invar));
+        if  ((ngid = lookup_gname(invar.newug)) == UNKNOWN_GID)
 		return  XB_UNKNOWN_GROUP;
 
 	rvarfile(1);
+
 	if  (!(flags & XB_FLAG_IGNORESEQ)  &&  seq != Var_seg.dptr->vs_serial)
 		return  XB_SEQUENCE;
 	if  (slotno >= Var_seg.dptr->vs_maxvars)
@@ -1797,18 +1771,19 @@ static int  reply_varchgrp(const int sock, const slotno_t slotno, const ULONG se
 	     ((flags & XB_FLAG_GROUPONLY)  &&  varp->var_mode.o_gid != Realgid))
 		return  XB_UNKNOWN_VAR;
 
-	return  wvmsg(V_CHGRP, Realuid, Realgid, varp, varp->var_sequence, (ULONG) ngid);
+	return  wvmsg(V_CHGRP, varp, varp->var_sequence, (ULONG) ngid);
 }
 
-static int  reply_ciadd(const int sock, const Btuser *mpriv, unsigned *res)
+static int  reply_ciadd(struct api_status *ap)
 {
 	unsigned	nsel;
 	Cmdint		rci, inci;
 
-	pullin(sock, (char *) &inci, sizeof(inci));
-	/* We didn't forget tracing here we do it in the main routine */
-	if  (!(mpriv->btu_priv & BTM_SPCREATE))
+	pullin(ap, (char *) &inci, sizeof(inci));
+
+	if  (!(ap->hispriv.btu_priv & BTM_SPCREATE))
 		return  XB_NOPERM;
+
 	BLOCK_ZERO(&rci, sizeof(rci));
 	rci.ci_ll = ntohs(inci.ci_ll);
 	rci.ci_nice = inci.ci_nice;
@@ -1820,7 +1795,7 @@ static int  reply_ciadd(const int sock, const Btuser *mpriv, unsigned *res)
 		return  XB_BAD_CI;
 
 	if  (rci.ci_ll == 0)
-		rci.ci_ll = mpriv->btu_spec_ll;
+		rci.ci_ll = ap->hispriv.btu_spec_ll;
 
 	if  (validate_ci(rci.ci_name) == 0)
 		return  XB_BAD_CI;
@@ -1832,9 +1807,9 @@ static int  reply_ciadd(const int sock, const Btuser *mpriv, unsigned *res)
 		ABORT_NOMEM;
  dun:
 	lseek(Ci_fd, (long) (nsel * sizeof(Cmdint)), 0);
-	write(Ci_fd, (char *) &rci, sizeof(rci));
+	Ignored_error = write(Ci_fd, (char *) &rci, sizeof(rci));
 	Ci_list[nsel] = rci;
-	*res = nsel;
+        ap->outmsg.un.r_reader.seq = htonl(nsel);
 	return  XB_OK;
 }
 
@@ -1842,19 +1817,17 @@ static int  reply_ciadd(const int sock, const Btuser *mpriv, unsigned *res)
 #define	CIBLOCKSIZE	10
 #endif
 
-static void  reply_ciread(const int sock)
+static void  reply_ciread(struct api_status *ap)
 {
-	struct	api_msg	outmsg;
-
 	open_ci(O_RDWR);
-	outmsg.code = API_CIREAD;
-	outmsg.retcode = XB_OK;
-	outmsg.un.r_lister.nitems = htonl((ULONG) Ci_num);
-	outmsg.un.r_lister.seq = 0;
-	pushout(sock, (char *) &outmsg, sizeof(outmsg));
+	ap->outmsg.code = API_CIREAD;
+	ap->outmsg.retcode = XB_OK;
+	ap->outmsg.un.r_lister.nitems = htonl((ULONG) Ci_num);
+	ap->outmsg.un.r_lister.seq = 0;
+        put_reply(ap);
 #ifdef WORDS_BIGENDIAN
 	if  (Ci_num > 0)
-		pushout(sock, (char *) Ci_list, (unsigned) (Ci_num * sizeof(Cmdint)));
+		pushout(ap, (char *) Ci_list, (unsigned) (Ci_num * sizeof(Cmdint)));
 #else
 	if  (Ci_num > 0)  {
 		Cmdint	ciblk[CIBLOCKSIZE];
@@ -1868,20 +1841,20 @@ static void  reply_ciread(const int sock)
 				tp++;	fp++;
 			}  while  (fp < fe  &&  tp < te);
 
-			pushout(sock, (char *) ciblk, (char *) tp - (char *)ciblk);
+			pushout(ap, (char *) ciblk, (char *) tp - (char *)ciblk);
 		}  while  (fp < fe);
 	}
 #endif
 }
 
-static int  reply_ciupd(const int sock, const Btuser *mpriv, const unsigned slot)
+static int  reply_ciupd(struct api_status *ap)
 {
+        unsigned        slot = ntohl(ap->inmsg.un.reader.slotno);
 	unsigned	cnt;
-	Cmdint	rci, inci;
+	Cmdint          rci, inci;
 
-	pullin(sock, (char *) &inci, sizeof(inci));
-	/* We didn't forget tracing here we do it in the main routine */
-	if  (!(mpriv->btu_priv & BTM_SPCREATE))
+	pullin(ap, (char *) &inci, sizeof(inci));
+	if  (!(ap->hispriv.btu_priv & BTM_SPCREATE))
 		return  XB_NOPERM;
 	BLOCK_ZERO(&rci, sizeof(rci));
 	rci.ci_ll = ntohs(inci.ci_ll);
@@ -1901,17 +1874,19 @@ static int  reply_ciupd(const int sock, const Btuser *mpriv, const unsigned slot
 			return  XB_BAD_CI;
 
 	if  (rci.ci_ll == 0)
-		rci.ci_ll = mpriv->btu_spec_ll;
+		rci.ci_ll = ap->hispriv.btu_spec_ll;
 
 	lseek(Ci_fd, (long) (slot * sizeof(Cmdint)), 0);
-	write(Ci_fd, (char *) &rci, sizeof(rci));
+	Ignored_error = write(Ci_fd, (char *) &rci, sizeof(rci));
 	Ci_list[slot] = rci;
 	return  XB_OK;
 }
 
-static int  reply_cidel(const Btuser *mpriv, const unsigned slot)
+static int  reply_cidel(struct api_status *ap)
 {
-	if  (!(mpriv->btu_priv & BTM_SPCREATE))
+        unsigned        slot = ntohl(ap->inmsg.un.reader.slotno);
+
+	if  (!(ap->hispriv.btu_priv & BTM_SPCREATE))
 		return  XB_NOPERM;
 
 	rereadcif();
@@ -1919,50 +1894,50 @@ static int  reply_cidel(const Btuser *mpriv, const unsigned slot)
 		return  XB_BAD_CI;
 	Ci_list[slot].ci_name[0] = '\0';
 	lseek(Ci_fd, (long) (slot * sizeof(Cmdint)), 0);
-	write(Ci_fd, (char *) &Ci_list[slot], sizeof(Cmdint));
+	Ignored_error = write(Ci_fd, (char *) &Ci_list[slot], sizeof(Cmdint));
 	return  XB_OK;
 }
 
-static void  reply_holread(const int sock, const unsigned year)
+static void  reply_holread(struct api_status *ap)
 {
-	struct	api_msg	outmsg;
+        unsigned  year = ntohl(ap->inmsg.un.reader.slotno);
 	char	rep[YVECSIZE];
 
 	BLOCK_ZERO(rep, sizeof(rep));
-	outmsg.retcode = XB_OK;
+	ap->outmsg.retcode = XB_OK;
 	if  (year >= 1990  &&  year < 2100)  {
 		get_hf(year-1990, rep);
-		pushout(sock, (char *) &outmsg, sizeof(outmsg));
-		pushout(sock, rep, sizeof(rep));
-		if  (tracing & TRACE_APIOPEND)
-			trace_op_res(Realuid, "holread", "OK");
+                put_reply(ap);
+		pushout(ap, rep, sizeof(rep));
 	}
 	else  {
-		outmsg.retcode = htons(XB_INVALID_YEAR);
-		pushout(sock, (char *) &outmsg, sizeof(outmsg));
-		if  (tracing & TRACE_APIOPEND)
-			trace_op_res(Realuid, "holread", "invyear");
+		ap->outmsg.retcode = htons(XB_INVALID_YEAR);
+                put_reply(ap);
 	}
 }
 
-static int  reply_holupd(const int sock, const unsigned year)
+static int  reply_holupd(struct api_status *ap)
 {
+        unsigned  year = ntohl(ap->inmsg.un.reader.slotno);
 	char	inyear[YVECSIZE];
-	pullin(sock, inyear, YVECSIZE);
+	pullin(ap, inyear, YVECSIZE);
 	if  (year < 1990  ||  year >= 2100)
 		return  XB_INVALID_YEAR;
+        /* Don't we want to check this guy can do it??? */
 	put_hf(year-1990, inyear);
 	return  XB_OK;
 }
 
-static int  reply_setqueue(const int sock, const unsigned length)
+static int  reply_setqueue(struct api_status *ap)
 {
+        unsigned  length = ntohs(ap->inmsg.un.queuelength);
+
 	if  (length == 0)  {
-		if  (current_queue)  {
-			free(current_queue);
-			current_queue = (char *) 0;
+		if  (ap->current_queue)  {
+			free(ap->current_queue);
+			ap->current_queue = (char *) 0;
 		}
-		current_qlen = 0;
+		ap->current_qlen = 0;
 	}
 	else  {
 		char  *newqueue = malloc(length); /* Includes final null */
@@ -1974,34 +1949,387 @@ static int  reply_setqueue(const int sock, const unsigned length)
 
 			while  (nbytes != 0)  {
 				int	nb = nbytes < sizeof(stuff)? nbytes: sizeof(stuff);
-				pullin(sock, stuff, (unsigned) nb);
+				pullin(ap, stuff, (unsigned) nb);
 				nbytes -= nb;
 			}
 			return  XB_NOMEMQ;
 		}
-		pullin(sock, newqueue, length);
-		if  (current_queue)
-			free(current_queue);
-		current_queue = newqueue;
-		current_qlen = length - 1;
+		pullin(ap, newqueue, length);
+		if  (ap->current_queue)
+			free(ap->current_queue);
+		ap->current_queue = newqueue;
+		ap->current_qlen = length - 1;
 	}
 	return  XB_OK;
 }
 
+static  void    reply_sendenv(struct api_status *ap)
+{
+        char	**ep;
+	ULONG	ecount = 0;
+	unsigned  maxlng = 0;
+	extern	char	**xenviron;
+
+        for  (ep = xenviron;  *ep;  ep++)  {
+		unsigned  lng = strlen(*ep);
+		ecount++;
+		if  (lng > maxlng)
+			maxlng = lng;
+	}
+
+        ap->outmsg.retcode = XB_OK;
+	ap->outmsg.un.r_lister.nitems = htonl(ecount);
+	ap->outmsg.un.r_lister.seq = htonl((ULONG) maxlng);
+        put_reply(ap);
+        for  (ep = xenviron;  *ep;  ep++)  {
+                unsigned  lng = strlen(*ep);
+		ULONG	le = htonl((ULONG) lng);
+		pushout(ap, (char *) &le, sizeof(le));
+		pushout(ap, *ep, lng + 1);
+	}
+}
+
+static  void    reply_getbtu(struct api_status *ap)
+{
+	int_ugid_t	ouid = ap->realuid, ogid = ap->realgid;
+        BtuserRef       mpriv;
+	struct	ua_reply  outpriv;
+
+	if  (ap->inmsg.un.us.username[0])  {
+		if  ((ouid = lookup_uname(ap->inmsg.un.us.username)) == UNKNOWN_UID)  {
+			ap->outmsg.retcode = htons(XB_UNKNOWN_USER);
+			put_reply(ap);
+			return;
+		}
+		if  (ouid != Realuid  &&  !(ap->hispriv.btu_priv & BTM_RADMIN))  {
+			ap->outmsg.retcode = htons(XB_NOPERM);
+			put_reply(ap);
+			return;
+		}
+		ogid = lastgid;
+	}
+
+	/* Still re-read it in case something changed */
+
+        mpriv = getbtuentry(ouid);
+        if  (ouid == Realuid)
+                ap->hispriv = *mpriv;
+	btuser_pack(&outpriv.ua_perm, mpriv);
+	strcpy(outpriv.ua_uname, prin_uname((uid_t) ouid));
+	strcpy(outpriv.ua_gname, prin_gname((gid_t) ogid));
+	ap->outmsg.retcode = XB_OK;
+        put_reply(ap);
+	pushout(ap, (char *) &outpriv, sizeof(outpriv));
+}
+
+static  void    reply_getbtd(struct api_status *ap)
+{
+        int     cnt;
+	Btdef	outbthdr;
+
+        BLOCK_ZERO(&outbthdr, sizeof(outbthdr));
+	outbthdr.btd_version = Btuhdr.btd_version;
+	outbthdr.btd_minp = Btuhdr.btd_minp;
+	outbthdr.btd_maxp = Btuhdr.btd_maxp;
+	outbthdr.btd_defp = Btuhdr.btd_defp;
+	outbthdr.btd_maxll = htons(Btuhdr.btd_maxll);
+	outbthdr.btd_totll = htons(Btuhdr.btd_totll);
+	outbthdr.btd_spec_ll = htons(Btuhdr.btd_spec_ll);
+	outbthdr.btd_priv = htonl(Btuhdr.btd_priv);
+	for  (cnt = 0;  cnt < 3;  cnt++)  {
+		outbthdr.btd_jflags[cnt] = htons(Btuhdr.btd_jflags[cnt]);
+		outbthdr.btd_vflags[cnt] = htons(Btuhdr.btd_vflags[cnt]);
+	}
+	ap->outmsg.retcode = XB_OK;
+        put_reply(ap);
+	pushout(ap, (char *) &outbthdr, sizeof(outbthdr));
+}
+
+static  int     reply_putbtu(struct api_status *ap)
+{
+	int_ugid_t	ouid = ap->realuid;
+	Btuser		rbtu;
+        BtuserRef       mpriv;
+        int             cnt;
+	struct	ua_reply	buf;
+
+	pullin(ap, (char *) &buf, sizeof(buf));
+
+	if  (ap->inmsg.un.us.username[0])  {
+		if  ((ouid = lookup_uname(ap->inmsg.un.us.username)) == UNKNOWN_UID)
+			return  XB_UNKNOWN_USER;
+
+		/* Disallow if different uid and no WADMIN or in any case if no UMASK priv */
+
+		if  ((ouid != Realuid  && !(ap->hispriv.btu_priv & BTM_WADMIN)) || !(ap->hispriv.btu_priv & (BTM_UMASK|BTM_WADMIN)))
+			return  XB_NOPERM;
+	}
+
+        rbtu.btu_user = ouid;
+	rbtu.btu_minp = buf.ua_perm.btu_minp;
+	rbtu.btu_maxp = buf.ua_perm.btu_maxp;
+	rbtu.btu_defp = buf.ua_perm.btu_defp;
+	rbtu.btu_maxll = ntohs(buf.ua_perm.btu_maxll);
+	rbtu.btu_totll = ntohs(buf.ua_perm.btu_totll);
+	rbtu.btu_spec_ll = ntohs(buf.ua_perm.btu_spec_ll);
+	rbtu.btu_priv = ntohl(buf.ua_perm.btu_priv);
+
+	for  (cnt = 0;  cnt < 3;  cnt++)  {
+		rbtu.btu_jflags[cnt] = ntohs(buf.ua_perm.btu_jflags[cnt]);
+		rbtu.btu_vflags[cnt] = ntohs(buf.ua_perm.btu_vflags[cnt]);
+	}
+
+	if  (rbtu.btu_minp == 0 || rbtu.btu_maxp == 0 || rbtu.btu_defp == 0)
+                return  XB_BAD_PRIORITY;
+
+	if  (rbtu.btu_maxll == 0 || rbtu.btu_totll == 0 || rbtu.btu_spec_ll == 0)
+                return  XB_BAD_LL;
+
+        /* In case something has changed */
+
+	if  (ouid == Realuid)  {
+		ap->hispriv = *getbtuentry(ouid);
+		if  (!(ap->hispriv.btu_priv & BTM_WADMIN))  {
+
+			/* Disallow everything except def prio and flags */
+
+			if  (rbtu.btu_minp != ap->hispriv.btu_minp ||
+			     rbtu.btu_maxp != ap->hispriv.btu_maxp  ||
+			     rbtu.btu_maxll != ap->hispriv.btu_maxll  ||
+			     rbtu.btu_totll != ap->hispriv.btu_totll  ||
+			     rbtu.btu_spec_ll != ap->hispriv.btu_spec_ll ||
+			     rbtu.btu_priv != ap->hispriv.btu_priv)
+                                return  XB_NOPERM;
+
+			if  (!(ap->hispriv.btu_priv & BTM_UMASK))  {
+				for  (cnt = 0;  cnt < 3;  cnt++)  {
+                                        if  (rbtu.btu_jflags[cnt] != ap->hispriv.btu_jflags[cnt])
+                                                return  XB_NOPERM;
+                                        if  (rbtu.btu_vflags[cnt] != ap->hispriv.btu_vflags[cnt])
+                                                return  XB_NOPERM;
+                                }
+                        }
+                }
+        }
+
+        mpriv = getbtuentry(ouid);
+	mpriv->btu_minp = rbtu.btu_minp;
+	mpriv->btu_maxp = rbtu.btu_maxp;
+	mpriv->btu_defp = rbtu.btu_defp;
+	mpriv->btu_maxll = rbtu.btu_maxll;
+	mpriv->btu_totll = rbtu.btu_totll;
+	mpriv->btu_spec_ll = rbtu.btu_spec_ll;
+	mpriv->btu_priv = rbtu.btu_priv;
+	for  (cnt = 0;  cnt < 3;  cnt++)  {
+		mpriv->btu_jflags[cnt] = rbtu.btu_jflags[cnt];
+		mpriv->btu_vflags[cnt] = rbtu.btu_vflags[cnt];
+	}
+	putbtuentry(mpriv);
+	if  (ouid == Realuid)
+		ap->hispriv = *mpriv;
+        return  XB_OK;
+}
+
+static  int    reply_putbtd(struct api_status *ap)
+{
+        int     cnt;
+        Btdef	inbthdr, rbthdr;
+
+	pullin(ap, (char *) &inbthdr, sizeof(inbthdr));
+	if  (!(ap->hispriv.btu_priv & BTM_WADMIN))
+                return  XB_NOPERM;
+
+	BLOCK_ZERO(&rbthdr, sizeof(rbthdr));
+	rbthdr.btd_minp = inbthdr.btd_minp;
+	rbthdr.btd_maxp = inbthdr.btd_maxp;
+	rbthdr.btd_defp = inbthdr.btd_defp;
+	rbthdr.btd_maxll = ntohs(inbthdr.btd_maxll);
+	rbthdr.btd_totll = ntohs(inbthdr.btd_totll);
+	rbthdr.btd_spec_ll = ntohs(inbthdr.btd_spec_ll);
+	rbthdr.btd_priv = ntohl(inbthdr.btd_priv);
+	for  (cnt = 0;  cnt < 3;  cnt++)  {
+		rbthdr.btd_jflags[cnt] = ntohs(inbthdr.btd_jflags[cnt]);
+		rbthdr.btd_vflags[cnt] = ntohs(inbthdr.btd_vflags[cnt]);
+	}
+	if  (rbthdr.btd_minp == 0 || rbthdr.btd_maxp == 0 || rbthdr.btd_defp == 0)
+                return  XB_BAD_PRIORITY;
+	if  (rbthdr.btd_maxll == 0 || rbthdr.btd_totll == 0 || rbthdr.btd_spec_ll == 0)
+                return  XB_BAD_LL;
+
+	/* Re-read file to get locking open */
+
+	ap->hispriv = *getbtuentry(Realuid);
+	Btuhdr.btd_minp = rbthdr.btd_minp;
+	Btuhdr.btd_maxp = rbthdr.btd_maxp;
+	Btuhdr.btd_defp = rbthdr.btd_defp;
+	Btuhdr.btd_maxll = rbthdr.btd_maxll;
+	Btuhdr.btd_totll = rbthdr.btd_totll;
+	Btuhdr.btd_spec_ll = rbthdr.btd_spec_ll;
+	Btuhdr.btd_priv = rbthdr.btd_priv;
+	Btuhdr.btd_version = GNU_BATCH_MAJOR_VERSION;
+	for  (cnt = 0;  cnt < 3;  cnt++)  {
+		Btuhdr.btd_jflags[cnt] = rbthdr.btd_jflags[cnt];
+		Btuhdr.btd_vflags[cnt] = rbthdr.btd_vflags[cnt];
+	}
+	putbtuhdr();
+	return  XB_OK;
+}
+
+void  process_pwchk(struct api_status *ap)
+{
+	char	pwbuf[API_PASSWDSIZE+1];
+
+	ap->outmsg.code = ap->inmsg.code;
+	strncpy(ap->outmsg.un.signon.username, ap->inmsg.un.signon.username, WUIDSIZE);
+	ap->outmsg.retcode = htons(XB_NO_PASSWD);
+	put_reply(ap);
+	pullin(ap, pwbuf, sizeof(pwbuf));
+	if  (!checkpw(prin_uname(ap->realuid), pwbuf))  {
+		err_result(ap, XB_PASSWD_INVALID, 0);
+		abort_exit(0);
+	}
+}
+
+static  void    signon_ok(struct api_status *ap)
+{
+        int_ugid_t      uuid;
+
+        if  ((uuid = lookup_uname(ap->inmsg.un.signon.username)) == UNKNOWN_UID)  {
+                err_result(ap, XB_UNKNOWN_USER, 0);
+                abort_exit(0);
+        }
+        ap->realuid = uuid;
+        ap->realgid = lastgid;
+        ap->hispriv = *getbtuentry(ap->realuid);
+        ap->is_logged = LOGGED_IN_UNIX;
+}
+
+static  void  process_wlogin(struct api_status *ap)
+{
+        struct  winuhash  *wp = lookup_winu(ap->inmsg.un.signon.username);
+
+        if  (wp)  {
+                ap->realuid = wp->uuid;
+                ap->realgid = wp->ugid;
+        }
+        else  {
+                ap->realuid = Defaultuid;
+                ap->realgid = Defaultgid;
+        }
+        process_pwchk(ap);
+        ap->hispriv = *getbtuentry(ap->realuid);
+        ap->is_logged = LOGGED_IN_WIN;
+}
+
+/* This is where we sign on without a password */
+
+static  void  process_signon(struct api_status *ap)
+{
+        struct  hhash   *hp;
+        struct  winuhash  *wp;
+        struct  alhash  *alu;
+
+        if  (!ap->hostid)  {            /* Local login, we believe the user name given */
+                signon_ok(ap);
+                return;
+        }
+
+        /* OK - we might be relying on it being a Windows user, or a UNIX-user from another host.
+           See if we know the host - if not a Windows machine, accept the connection. */
+
+        hp = lookup_hhash(ap->hostid);
+        if  (hp  &&  !hp->isclient)  {
+                signon_ok(ap);
+                return;
+        }
+        /* See if we know the Windows user name */
+
+        if  (!(wp = lookup_winu(ap->inmsg.un.signon.username)))  {
+                err_result(ap, XB_UNKNOWN_USER, 0);
+                return;
+        }
+
+        /* Check if it's an auto-login user and it matches */
+
+        if  (!(alu = find_autoconn(ap->hostid))  ||  wp->uuid != alu->uuid)  {
+                err_result(ap, XB_PASSWD_INVALID, 0);
+                return;
+        }
+        ap->realuid = alu->uuid;
+        ap->realgid = alu->ugid;
+        ap->hispriv = *getbtuentry(ap->realuid);
+        ap->is_logged = LOGGED_IN_WINU;
+}
+
+/* Login - presume it's a UNIX source unless we know better */
+
+static  void    process_login(struct api_status *ap)
+{
+        struct  hhash   *hp;
+
+        if  (!(ap->hostid  &&  (((hp = lookup_hhash(ap->hostid))  &&  hp->isclient)  ||  find_autoconn(ap->hostid))))  {
+                /* We think it's a UNIX host */
+                int_ugid_t  uuid;
+
+                if  ((uuid = lookup_uname(ap->inmsg.un.signon.username)) == UNKNOWN_UID)  {
+                        err_result(ap, XB_UNKNOWN_USER, 0);
+                        abort_exit(0);
+                }
+                ap->realuid = uuid;
+                ap->realgid = lastgid;
+                process_pwchk(ap);
+                ap->hispriv = *getbtuentry(ap->realuid);
+                ap->is_logged = LOGGED_IN_UNIX;
+        }
+        else
+                process_wlogin(ap);
+}
+
+static  void    process_locallogin(struct api_status *ap)
+{
+        int_ugid_t  fromuid, touid, lgid;
+        Btuser   *mpriv;
+
+        if  (ap->hostid)  {
+                err_result(ap, XB_UNKNOWN_USER, 0);
+                abort_exit(0);
+        }
+
+        fromuid = ntohl(ap->inmsg.un.local_signon.fromuser);
+        touid = ntohl(ap->inmsg.un.local_signon.touser);
+        if  (!isvuser(fromuid))  {
+                err_result(ap, XB_UNKNOWN_USER, 0);
+                abort_exit(0);
+        }
+        lgid = lastgid;         /* We fixed prin_uname to set this */
+        if  (fromuid != touid)  {
+                if  (!isvuser(touid))  {
+                        err_result(ap, XB_UNKNOWN_USER, 0);
+                        abort_exit(0);
+                }
+                lgid = lastgid;
+        }
+        mpriv = getbtuentry(fromuid);
+        if  (fromuid != touid  &&  !(mpriv->btu_priv & BTM_WADMIN))  {
+                err_result(ap, XB_NOPERM, 0);
+                abort_exit(0);
+        }
+        ap->realuid = touid;
+        ap->realgid = lgid;
+        ap->hispriv = *mpriv;
+        ap->is_logged = LOGGED_IN_UNIX;
+}
+
 void  process_api()
 {
-	int		sock, inbytes, cnt, ret;
+        struct  api_status      apistat;
+        int		cnt, ret;
 	PIDTYPE		pid;
-	netid_t		whofrom;
-	struct	hhash	*frp;
-	Btuser		*mpriv;
-	Btuser		hispriv;
-	struct	api_msg	inmsg;
-	struct	api_msg	outmsg;
-	const	char	*tcode = "";
 
-	if  ((sock = tcp_serv_accept(apirsock, &whofrom)) < 0)
-		return;
+	init_status(&apistat);
+
+        if  ((apistat.sock = tcp_serv_accept(apirsock, &apistat.hostid)) < 0)
+                return;
 
 	if  ((pid = fork()) < 0)  {
 		print_error($E{Cannot fork});
@@ -2010,7 +2338,7 @@ void  process_api()
 
 #ifndef	BUGGY_SIGCLD
 	if  (pid != 0)  {
-		close(sock);
+		close(apistat.sock);
 		return;
 	}
 #else
@@ -2026,7 +2354,7 @@ void  process_api()
 		while  ((wpid = wait((int *) 0)) != pid  &&  (wpid >= 0 || errno == EINTR))
 			;
 #endif
-		close(sock);
+		close(apistat.sock);
 		return;
 	}
 	if  (fork() != 0)
@@ -2047,758 +2375,255 @@ void  process_api()
 		pj->clientfrom = 0;
 	}
 
-	while  ((inbytes = read(sock, (char *) &inmsg, sizeof(inmsg))) != sizeof(inmsg))  {
-		if  (inbytes >= 0  ||  errno != EINTR)
-			abort_exit(0);
-		while  (hadrfresh)  {
-			hadrfresh = 0;
-			proc_refresh(whofrom);
-		}
-	}
+        /* We need to log in first before we get reminders about jobs and variables,
+           so we don't need to worry, register it after we logged in */
 
-	frp = find_remote(whofrom);
+        get_message(&apistat);
 
-	/* If this is from a DOS user reject it if he hasn't logged
-	   in.  Support "roaming" client users, by a login
-	   protocol.  This is only available from clients.  */
+        switch  (apistat.inmsg.code)  {
+        default:
+                err_result(&apistat, XB_SEQUENCE, 0);
+                abort_exit(0);
 
-	if  (inmsg.code == API_LOGIN)  {
-		if  (frp)  {
-			if  (!(frp->rem.ht_flags & HT_DOS))  {
-				if  (tracing & TRACE_APICONN)
-					trace_op(ROOTID, "api-badlogin");
-				err_result(sock, XB_UNKNOWN_COMMAND, 0);
-				abort_exit(0);
-			}
-			if  (frp->rem.ht_flags & HT_ROAMUSER)  {
-				if  (strcmp(frp->dosname, inmsg.un.signon.username) != 0)  { /* Name change */
-					struct	cluhash	 *cp;
-					if  (!(cp = update_roam_name(frp, inmsg.un.signon.username)))  {
-						if  (tracing & TRACE_APICONN)
-							trace_op_res(ROOTID, "api-loginr-unkuser", inmsg.un.signon.username);
-						err_result(sock, XB_UNKNOWN_USER, 0);
-						abort_exit(0);
-					}
+        case  API_WLOGIN:
+                process_wlogin(&apistat);
+                break;
 
-					/* Set UAL_NOK if we need a password or if there is a default machine name
-					   which is not the same one as we are talking about. The code below will
-					   check the password */
+        case  API_LOCALLOGIN:
+                process_locallogin(&apistat);
+                break;
 
-					frp->flags = (cp->rem.ht_flags & HT_PWCHECK  ||
-						      (cp->machname  &&  look_hostname(cp->machname) != whofrom)) ? UAL_NOK: UAL_OK;
-				}
-			}
-			else  {
-				/* Non roam case we've seen the machine but we need to check the user name makes sense */
+        case  API_LOGIN:
+                process_login(&apistat);
+                break;
 
-				if  (ncstrcmp(frp->actname, inmsg.un.signon.username) != 0)  {
-					if  (!update_nonroam_name(frp, inmsg.un.signon.username))  {
-						err_result(sock, XB_UNKNOWN_USER, 0);
-						abort_exit(0);
-					}
-					frp->flags = (frp->rem.ht_flags & HT_PWCHECK  ||
-						      (frp->dosname[0]  &&  ncstrcmp(frp->dosname, frp->actname) != 0))? UAL_NOK: UAL_OK;
-				}
-			}
-		}
-		else  {
-			struct	cluhash  *cp;
+        case  API_SIGNON:
+                process_signon(&apistat);
+                break;
+        }
 
-			if  (!(cp = new_roam_name(whofrom, &frp, inmsg.un.signon.username)))  {
-				if  (tracing & TRACE_APICONN)
-					trace_op_res(ROOTID, "api-login-um-unkuser", inmsg.un.signon.username);
-				err_result(sock, XB_UNKNOWN_USER, 0);
-				abort_exit(0);
-			}
-			frp->flags = (cp->rem.ht_flags & HT_PWCHECK  ||
-				      (cp->machname  &&  look_hostname(cp->machname) != whofrom)) ? UAL_NOK: UAL_OK;
-		}
+        /* We need these copied across for priv checking to work.
+           One day we'll do this properly */
 
-		/* Now for any password-checking.  */
-
-		outmsg.code = inmsg.code;
-		strncpy(outmsg.un.signon.username, frp->actname, UIDSIZE);
-
-		if  (frp->flags != UAL_OK)  {
-			char	pwbuf[API_PASSWDSIZE+1];
-			outmsg.retcode = htons(XB_NO_PASSWD);
-			pushout(sock, (char *) &outmsg, sizeof(outmsg));
-			pullin(sock, pwbuf, sizeof(pwbuf));
-			frp->flags = checkpw(frp->actname, pwbuf)? UAL_OK: UAL_INVP;
-			if  (frp->flags != UAL_OK)  {
-				if  (tracing & TRACE_APICONN)
-					trace_op_res(ROOTID, "Loginfail", frp->actname);
-				err_result(sock, XB_PASSWD_INVALID, 0);
-				abort_exit(0);
-			}
-		}
-		outmsg.retcode = XB_OK;
-		pushout(sock, (char *) &outmsg, sizeof(outmsg));
-		if  (inmsg.re_reg  &&  frp->rem.ht_flags & HT_ROAMUSER)
-			tell_myself(frp);
-	}
-	else  {			/* Not starting with login */
-		if  (inmsg.code != API_SIGNON)  {
-			if  (tracing & TRACE_APICONN)
-				trace_op(ROOTID, "Loginseq");
-			err_result(sock, XB_SEQUENCE, 0);
-			abort_exit(0);
-		}
-		if  (!frp)  {
-			if  (tracing & TRACE_APICONN)
-				trace_op(ROOTID, "Signonunku");
-			err_result(sock, XB_UNKNOWN_USER, 0);
-			abort_exit(0);
-		}
-		if  (frp->rem.ht_flags & HT_DOS)  {
-
-			/* Possibly let a roaming user change his name.  */
-
-			if  (frp->rem.ht_flags & HT_ROAMUSER)  {
-				if  (ncstrcmp(inmsg.un.signon.username, frp->actname) != 0)  {
-					struct	cluhash		*cp;
-					if  (!(cp = update_roam_name(frp, inmsg.un.signon.username)))  {
-						if  (tracing & TRACE_APICONN)
-							trace_op_res(ROOTID, "api-signon-unkuser", inmsg.un.signon.username);
-						err_result(sock, XB_NOT_USER, 0);
-						abort_exit(0);
-					}
-					/* We didn't forget to tell_friends here - not a login, just a different user */
-					frp->flags = cp->rem.ht_flags & HT_PWCHECK? UAL_NOK: UAL_OK;
-				}
-			}
-			else  {
-				if  (ncstrcmp(frp->actname, inmsg.un.signon.username) != 0)  {
-					if  (!update_nonroam_name(frp, inmsg.un.signon.username))  {
-						if  (tracing & TRACE_APICONN)
-							trace_op_res(ROOTID, "api-signonnr-unkuser", inmsg.un.signon.username);
-						err_result(sock, XB_NOT_USER, 0);
-						abort_exit(0);
-					}
-					frp->flags = (frp->rem.ht_flags & HT_PWCHECK  ||
-						      (frp->dosname[0]  &&
-						       ncstrcmp(frp->dosname, frp->actname) != 0))? UAL_NOK : UAL_OK;
-				}
-			}
-
-			if  (frp->flags != UAL_OK)  {
-				if  (tracing & TRACE_APICONN)
-					trace_op_res(ROOTID, "Signonfail", frp->actname);
-				err_result(sock, frp->flags == UAL_NOK? XB_NO_PASSWD: frp->flags == UAL_INVU? XB_UNKNOWN_USER: XB_PASSWD_INVALID, 0);
-				abort_exit(0);
-			}
-		}
-		else  {
-			int_ugid_t	whofuser;
-
-			if  ((whofuser = lookup_uname(inmsg.un.signon.username)) == UNKNOWN_UID)  {
-				if  (tracing & TRACE_APICONN)
-					trace_op_res(ROOTID, "Signonfail", inmsg.un.signon.username);
-				err_result(sock, XB_UNKNOWN_USER, 0);
-				abort_exit(0);
-			}
-			frp->rem.n_uid = whofuser;
-			frp->rem.n_gid = lastgid;
-		}
-	}
-
-	Realuid = frp->rem.n_uid;
-	Realgid = frp->rem.n_gid;
-	if  (tracing & TRACE_APICONN)
-		trace_op_res(Realuid, "Login-OK", frp->rem.hostname);
-
-	/* Need to make a copy as subsequent calls overwrite static
-	   space in getbtuentry */
-
-	hispriv = *getbtuentry(Realuid);
+	Realuid = apistat.realuid;
+	Realgid = apistat.realgid;
 
 	/* Ok we made it */
 
-	outmsg.code = inmsg.code;
-	outmsg.retcode = 0;
-	pushout(sock, (char *) &outmsg, sizeof(outmsg));
+	apistat.outmsg.code = apistat.inmsg.code;
+	apistat.outmsg.retcode = XB_OK;
+        put_reply(&apistat);
 
 	/* So do main loop waiting for something to happen */
 
- restart:
 	for  (;;)  {
 		while  (hadrfresh)  {
 			hadrfresh = 0;
-			proc_refresh(whofrom);
+			proc_refresh(&apistat);
 		}
-		if  ((inbytes = read(sock, (char *) &inmsg, sizeof(inmsg))) != sizeof(inmsg))  {
-			if  (inbytes >= 0  ||  errno != EINTR)
-				abort_exit(0);
-			goto  restart;
-		}
-		switch  (outmsg.code = inmsg.code)  {
+
+                get_message(&apistat);
+
+                switch  (apistat.outmsg.code = apistat.inmsg.code)  {
 		default:
 			ret = XB_UNKNOWN_COMMAND;
 			break;
 
 		case  API_SIGNOFF:
-			if  (tracing & TRACE_APICONN)
-				trace_op(Realuid, "logoff");
 			abort_exit(0);
 
 		case  API_NEWGRP:
 		{
 			int_ugid_t	ngid;
 
-			if  (tracing & TRACE_APIOPSTART)
-				trace_op(Realuid, "newgrp");
-
-			if  (!(hispriv.btu_priv & BTM_WADMIN)  &&  !chk_vgroup(Realuid, inmsg.un.signon.username))  {
+                        if  (!(apistat.hispriv.btu_priv & BTM_WADMIN)  &&
+                                !chk_vgroup(prin_uname(Realuid), apistat.inmsg.un.signon.username))  {
 				ret = XB_BAD_GROUP;
-				if  (tracing & TRACE_APIOPEND)
-					trace_op_res(Realuid, "newgrp", "badgrp");
 				break;
 			}
-			if  ((ngid = lookup_gname(inmsg.un.signon.username)) == UNKNOWN_GID)  {
+			if  ((ngid = lookup_gname(apistat.inmsg.un.signon.username)) == UNKNOWN_GID)  {
 				ret = XB_UNKNOWN_GROUP;
-				if  (tracing & TRACE_APIOPEND)
-					trace_op_res(Realuid, "newgrp", "unkgrp");
 				break;
 			}
-			Realgid = frp->rem.n_gid = ngid;
+			apistat.realgid = Realgid = ngid;
 			ret = XB_OK;
-			if  (tracing & TRACE_APIOPEND)
-				trace_op_res(Realuid, "newgrp", "OK");
 			break;
 		}
 
 		case  API_JOBLIST:
-			if  (tracing & TRACE_APIOPSTART)
-				trace_op(Realuid, "joblist");
-			reply_joblist(sock, ntohl(inmsg.un.lister.flags));
+			reply_joblist(&apistat);
 			continue;
 
 		case  API_VARLIST:
-			if  (tracing & TRACE_APIOPSTART)
-				trace_op(Realuid, "varlist");
-			reply_varlist(sock, ntohl(inmsg.un.lister.flags));
+			reply_varlist(&apistat);
 			continue;
 
 		case  API_JOBREAD:
-			if  (tracing & TRACE_APIOPSTART)
-				trace_op(Realuid, "jobread");
-			reply_jobread(sock,
-				      ntohl(inmsg.un.reader.slotno),
-				      ntohl(inmsg.un.reader.seq),
-				      ntohl(inmsg.un.reader.flags));
+			reply_jobread(&apistat);
 			continue;
 
 		case  API_FINDJOBSLOT:
 		case  API_FINDJOB:
-			if  (tracing & TRACE_APIOPSTART)
-				trace_op(Realuid, "findjob");
-			reply_jobfind(sock,
-				      inmsg.code,
-				      ntohl(inmsg.un.jobfind.jobno),
-				      inmsg.un.jobfind.netid == myhostid? 0: inmsg.un.jobfind.netid,
-				      ntohl(inmsg.un.jobfind.flags));
+			reply_jobfind(&apistat);
 			continue;
 
 		case  API_VARREAD:
-			if  (tracing & TRACE_APIOPSTART)
-				trace_op(Realuid, "varread");
-			reply_varread(sock,
-				      ntohl(inmsg.un.reader.slotno),
-				      ntohl(inmsg.un.reader.seq),
-				      ntohl(inmsg.un.reader.flags));
+			reply_varread(&apistat);
 			continue;
 
 		case  API_FINDVARSLOT:
 		case  API_FINDVAR:
-			if  (tracing & TRACE_APIOPSTART)
-				trace_op(Realuid, "findvar");
-			reply_varfind(sock,
-				      inmsg.code,
-				      inmsg.un.varfind.netid == myhostid? 0: inmsg.un.varfind.netid,
-				      ntohl(inmsg.un.varfind.flags));
+			reply_varfind(&apistat);
 			continue;
 
 		case  API_JOBDEL:
-			if  (tracing & TRACE_APIOPSTART)
-				trace_op(Realuid, "jobdel");
-			reply_jobdel(sock,
-				     ntohl(inmsg.un.reader.slotno),
-				     ntohl(inmsg.un.reader.seq),
-				     ntohl(inmsg.un.reader.flags));
-			continue;
+			ret = reply_jobdel(&apistat);
+                        apistat.outmsg.un.r_reader.seq = htonl(Job_seg.dptr->js_serial);
+                        break;
 
 		case  API_VARDEL:
-			tcode = "vardel";
-			if  (tracing & TRACE_APIOPSTART)
-				trace_op(Realuid, tcode);
-			ret = reply_vardel(ntohl(inmsg.un.reader.slotno),
-					   ntohl(inmsg.un.reader.seq),
-					   ntohl(inmsg.un.reader.flags));
-			outmsg.un.r_reader.seq = htonl(Var_seg.dptr->vs_serial);
+			ret = reply_vardel(&apistat);
+                        apistat.outmsg.un.r_reader.seq = htonl(Var_seg.dptr->vs_serial);
 			break;
 
 		case  API_JOBOP:
-			tcode = "jobop";
-			if  (tracing & TRACE_APIOPSTART)
-				trace_op(Realuid, tcode);
-			ret = reply_jobop(ntohl(inmsg.un.jop.slotno),
-					  ntohl(inmsg.un.jop.seq),
-					  ntohl(inmsg.un.jop.flags),
-					  ntohl(inmsg.un.jop.op),
-					  ntohl(inmsg.un.jop.param));
-			outmsg.un.r_reader.seq = htonl(Job_seg.dptr->js_serial);
+			ret = reply_jobop(&apistat);
+                        apistat.outmsg.un.r_reader.seq = htonl(Job_seg.dptr->js_serial);
 			break;
 
 		case  API_JOBADD:
-			if  (tracing & TRACE_APIOPSTART)
-				trace_op(Realuid, "jobadd");
-			api_jobstart(sock, frp, &hispriv, ntohl(inmsg.un.jobdata.jobno));
-			continue;
+			api_jobstart(&apistat);
+                        continue;
+
 		case  API_DATAIN:
-			if  (tracing & TRACE_APIOPSTART)
-				trace_op(Realuid, "datain");
-			api_jobcont(sock, ntohl(inmsg.un.jobdata.jobno), ntohs(inmsg.un.jobdata.nbytes));
-			continue;
+			api_jobcont(&apistat);
+                        continue;
+
 		case  API_DATAEND:
-			if  (tracing & TRACE_APIOPSTART)
-				trace_op(Realuid, "dataend");
-			api_jobfinish(sock, ntohl(inmsg.un.jobdata.jobno));
-			continue;
+			api_jobfinish(&apistat);
+                        continue;
+
 		case  API_DATAABORT: /* We'll be lucky if we get this */
-			if  (tracing & TRACE_APIOPSTART)
-				trace_op(Realuid, "dataabort");
-			api_jobabort(sock, ntohl(inmsg.un.jobdata.jobno));
-			continue;
+			api_jobabort(&apistat);
+                        continue;
 
 		case  API_VARADD:
-			tcode = "varadd";
-			if  (tracing & TRACE_APIOPSTART)
-				trace_op(Realuid, tcode);
-			ret = reply_varadd(sock, &hispriv);
-			outmsg.un.r_reader.seq = htonl(Var_seg.dptr->vs_serial);
+			ret = reply_varadd(&apistat);
+                        apistat.outmsg.un.r_reader.seq = htonl(Var_seg.dptr->vs_serial);
 			break;
 
 		case  API_JOBUPD:
-			tcode = "jobupd";
-			if  (tracing & TRACE_APIOPSTART)
-				trace_op(Realuid, tcode);
-			ret = reply_jobupd(sock,
-					   &hispriv,
-					   ntohl(inmsg.un.reader.slotno),
-					   ntohl(inmsg.un.reader.seq),
-					   ntohl(inmsg.un.reader.flags));
-			outmsg.un.r_reader.seq = htonl(Job_seg.dptr->js_serial);
+			ret = reply_jobupd(&apistat);
+                        apistat.outmsg.un.r_reader.seq = htonl(Job_seg.dptr->js_serial);
 			break;
 
 		case  API_VARUPD:
-			tcode = "varupd";
-			if  (tracing & TRACE_APIOPSTART)
-				trace_op(Realuid, tcode);
-			ret = reply_varupd(sock,
-					   ntohl(inmsg.un.reader.slotno),
-					   ntohl(inmsg.un.reader.seq),
-					   ntohl(inmsg.un.reader.flags));
-			outmsg.un.r_reader.seq = htonl(Var_seg.dptr->vs_serial);
+			ret = reply_varupd(&apistat);
+                        apistat.outmsg.un.r_reader.seq = htonl(Var_seg.dptr->vs_serial);
 			break;
 
 		case  API_VARCHCOMM:
-			tcode = "varcomm";
-			if  (tracing & TRACE_APIOPSTART)
-				trace_op(Realuid, tcode);
-			ret = reply_varchcomm(sock,
-					      ntohl(inmsg.un.reader.slotno),
-					      ntohl(inmsg.un.reader.seq),
-					      ntohl(inmsg.un.reader.flags));
-			outmsg.un.r_reader.seq = htonl(Var_seg.dptr->vs_serial);
+			ret = reply_varchcomm(&apistat);
+                        apistat.outmsg.un.r_reader.seq = htonl(Var_seg.dptr->vs_serial);
 			break;
 
 		case  API_JOBDATA:
-			if  (tracing & TRACE_APIOPSTART)
-				trace_op(Realuid, "jobdata");
-			api_jobdata(sock,
-				    ntohl(inmsg.un.reader.slotno),
-				    ntohl(inmsg.un.reader.seq),
-				    ntohl(inmsg.un.reader.flags));
+			api_jobdata(&apistat);
 			continue;
 
 		case  API_JOBCHMOD:
-			tcode = "jobchmod";
-			if  (tracing & TRACE_APIOPSTART)
-				trace_op(Realuid, tcode);
-			ret = reply_jobchmod(sock,
-					     ntohl(inmsg.un.reader.slotno),
-					     ntohl(inmsg.un.reader.seq),
-					     ntohl(inmsg.un.reader.flags));
-			outmsg.un.r_reader.seq = htonl(Job_seg.dptr->js_serial);
+			ret = reply_jobchmod(&apistat);
+                        apistat.outmsg.un.r_reader.seq = htonl(Job_seg.dptr->js_serial);
 			break;
 
 		case  API_VARCHMOD:
-			tcode = "varchmod";
-			if  (tracing & TRACE_APIOPSTART)
-				trace_op(Realuid, tcode);
-			ret = reply_varchmod(sock,
-					     ntohl(inmsg.un.reader.slotno),
-					     ntohl(inmsg.un.reader.seq),
-					     ntohl(inmsg.un.reader.flags));
-			outmsg.un.r_reader.seq = htonl(Var_seg.dptr->vs_serial);
-			break;
+			ret = reply_varchmod(&apistat);
+                        apistat.outmsg.un.r_reader.seq = htonl(Var_seg.dptr->vs_serial);
+                        break;
 
 		case  API_JOBCHOWN:
-			tcode = "jobchown";
-			if  (tracing & TRACE_APIOPSTART)
-				trace_op(Realuid, tcode);
-			ret = reply_jobchown(sock,
-					     ntohl(inmsg.un.reader.slotno),
-					     ntohl(inmsg.un.reader.seq),
-					     ntohl(inmsg.un.reader.flags));
-			outmsg.un.r_reader.seq = htonl(Job_seg.dptr->js_serial);
-			break;
+			ret = reply_jobchown(&apistat);
+                        apistat.outmsg.un.r_reader.seq = htonl(Job_seg.dptr->js_serial);
+                        break;
 
 		case  API_VARCHOWN:
-			tcode = "varchown";
-			if  (tracing & TRACE_APIOPSTART)
-				trace_op(Realuid, tcode);
-			ret = reply_varchown(sock,
-					     ntohl(inmsg.un.reader.slotno),
-					     ntohl(inmsg.un.reader.seq),
-					     ntohl(inmsg.un.reader.flags));
-			outmsg.un.r_reader.seq = htonl(Var_seg.dptr->vs_serial);
+			ret = reply_varchown(&apistat);
+                        apistat.outmsg.un.r_reader.seq = htonl(Var_seg.dptr->vs_serial);
 			break;
 
 		case  API_JOBCHGRP:
-			tcode = "jobchgrp";
-			if  (tracing & TRACE_APIOPSTART)
-				trace_op(Realuid, tcode);
-			ret = reply_jobchgrp(sock,
-					     ntohl(inmsg.un.reader.slotno),
-					     ntohl(inmsg.un.reader.seq),
-					     ntohl(inmsg.un.reader.flags));
-			outmsg.un.r_reader.seq = htonl(Job_seg.dptr->js_serial);
+			ret = reply_jobchgrp(&apistat);
+                        apistat.outmsg.un.r_reader.seq = htonl(Job_seg.dptr->js_serial);
 			break;
 
 		case  API_VARCHGRP:
-			tcode = "varchgrp";
-			if  (tracing & TRACE_APIOPSTART)
-				trace_op(Realuid, tcode);
-			ret = reply_varchgrp(sock,
-					     ntohl(inmsg.un.reader.slotno),
-					     ntohl(inmsg.un.reader.seq),
-					     ntohl(inmsg.un.reader.flags));
-			outmsg.un.r_reader.seq = htonl(Var_seg.dptr->vs_serial);
+			ret = reply_varchgrp(&apistat);
+                        apistat.outmsg.un.r_reader.seq = htonl(Var_seg.dptr->vs_serial);
 			break;
 
 		case  API_VARRENAME:
-			tcode = "varrename";
-			if  (tracing & TRACE_APIOPSTART)
-				trace_op(Realuid, tcode);
-			ret = reply_varrename(sock,
-					      ntohl(inmsg.un.reader.slotno),
-					      ntohl(inmsg.un.reader.seq),
-					      ntohl(inmsg.un.reader.flags));
-			outmsg.un.r_reader.seq = htonl(Var_seg.dptr->vs_serial);
+			ret = reply_varrename(&apistat);
+                        apistat.outmsg.un.r_reader.seq = htonl(Var_seg.dptr->vs_serial);
 			break;
 
 		case  API_CIADD:
-		{
-			unsigned  res = 0;
-			tcode = "ciadd";
-			if  (tracing & TRACE_APIOPSTART)
-				trace_op(Realuid, tcode);
-			ret = reply_ciadd(sock, &hispriv, &res);
-			outmsg.un.r_reader.seq = htonl(res);
+                        ret = reply_ciadd(&apistat);
 			break;
-		}
 
 		case  API_CIREAD:
-			if  (tracing & TRACE_APIOPSTART)
-				trace_op(Realuid, "ciread");
-			reply_ciread(sock);
-			if  (tracing & TRACE_APIOPEND)
-				trace_op_res(Realuid, "ciread", "OK");
+			reply_ciread(&apistat);
 			continue;
 
 		case  API_CIUPD:
-			tcode = "ciupd";
-			if  (tracing & TRACE_APIOPSTART)
-				trace_op(Realuid, "ciupd");
-			ret = reply_ciupd(sock, &hispriv, ntohl(inmsg.un.reader.slotno));
+			ret = reply_ciupd(&apistat);
 			break;
 
 		case  API_CIDEL:
-			tcode = "cidel";
-			if  (tracing & TRACE_APIOPSTART)
-				trace_op(Realuid, "cidel");
-			ret = reply_cidel(&hispriv, ntohl(inmsg.un.reader.slotno));
+			ret = reply_cidel(&apistat);
 			break;
 
 		case  API_HOLREAD:
-			if  (tracing & TRACE_APIOPSTART)
-				trace_op(Realuid, "holread");
-			reply_holread(sock, ntohl(inmsg.un.reader.slotno));
+			reply_holread(&apistat);
 			continue;
 
 		case  API_HOLUPD:
-			tcode = "holupd";
-			if  (tracing & TRACE_APIOPSTART)
-				trace_op(Realuid, tcode);
-			ret = reply_holupd(sock, ntohl(inmsg.un.reader.slotno));
+			ret = reply_holupd(&apistat);
 			break;
 
 		case  API_SETQUEUE:
-			tcode = "setq";
-			if  (tracing & TRACE_APIOPSTART)
-				trace_op(Realuid, tcode);
-			ret = reply_setqueue(sock, ntohs(inmsg.un.queuelength));
+			ret = reply_setqueue(&apistat);
 			break;
 
 		case  API_REQPROD:
-			if  (tracing & TRACE_APIOPSTART)
-				trace_op(Realuid, "onmon");
-			setup_prod();
-			if  (tracing & TRACE_APIOPEND)
-				trace_op_res(Realuid, "onmon", "OK");
+			setup_prod(&apistat);
 			continue;
 
 		case  API_UNREQPROD:
-			if  (tracing & TRACE_APIOPSTART)
-				trace_op(Realuid, "offmon");
-			unsetup_prod();
-			if  (tracing & TRACE_APIOPEND)
-				trace_op_res(Realuid, "offmon", "OK");
+			unsetup_prod(&apistat);
 			continue;
 
 		case  API_SENDENV:
-		{
-			char	**ep;
-			ULONG	ecount = 0;
-			unsigned  maxlng = 0;
-			extern	char	**xenviron;
-			if  (tracing & TRACE_APIOPSTART)
-				trace_op(Realuid, "sendenv");
-			for  (ep = xenviron;  *ep;  ep++)  {
-				unsigned  lng = strlen(*ep);
-				ecount++;
-				if  (lng > maxlng)
-					maxlng = lng;
-			}
-			outmsg.retcode = 0;
-			outmsg.un.r_lister.nitems = htonl(ecount);
-			outmsg.un.r_lister.seq = htonl((ULONG) maxlng);
-			pushout(sock, (char *) &outmsg, sizeof(outmsg));
-			for  (ep = xenviron;  *ep;  ep++)  {
-				unsigned  lng = strlen(*ep);
-				ULONG	le = htonl((ULONG) lng);
-				pushout(sock, (char *) &le, sizeof(le));
-				pushout(sock, *ep, lng + 1);
-			}
-			if  (tracing & TRACE_APIOPEND)
-				trace_op_res(Realuid, "sendenv", "OK");
-			continue;
-		}
+                        reply_sendenv(&apistat);
+                        continue;
 
 		case  API_GETBTU:
-		{
-			int_ugid_t	ouid, ogid;
-			struct	ua_reply  outpriv;
-			tcode = "getbtu";
-			if  (tracing & TRACE_APIOPSTART)
-				trace_op(Realuid, tcode);
-			if  ((ouid = lookup_uname(inmsg.un.us.username)) == UNKNOWN_UID)  {
-				ret = XB_UNKNOWN_USER;
-				break;
-			}
-			if  (ouid != Realuid  &&  !(hispriv.btu_priv & BTM_RADMIN))  {
-				ret = XB_NOPERM;
-				break;
-			}
-			ogid = lastgid;
+                        reply_getbtu(&apistat);
+                        continue;
 
-			/* Still re-read it in case something changed */
-
-			btuser_pack(&outpriv.ua_perm, getbtuentry(ouid));
-			strcpy(outpriv.ua_uname, prin_uname((uid_t) ouid));
-			strcpy(outpriv.ua_gname, prin_gname((gid_t) ogid));
-			outmsg.retcode = 0;
-			pushout(sock, (char *) &outmsg, sizeof(outmsg));
-			pushout(sock, (char *) &outpriv, sizeof(outpriv));
-			if  (tracing & TRACE_APIOPEND)
-				trace_op_res(Realuid, tcode, "OK");
-			continue;
-		}
 		case  API_GETBTD:
-		{
-			Btdef	outbthdr;
-			if  (tracing & TRACE_APIOPSTART)
-				trace_op(Realuid, "getbtd");
-			BLOCK_ZERO(&outbthdr, sizeof(outbthdr));
-			outbthdr.btd_version = Btuhdr.btd_version;
-			outbthdr.btd_minp = Btuhdr.btd_minp;
-			outbthdr.btd_maxp = Btuhdr.btd_maxp;
-			outbthdr.btd_defp = Btuhdr.btd_defp;
-			outbthdr.btd_maxll = htons(Btuhdr.btd_maxll);
-			outbthdr.btd_totll = htons(Btuhdr.btd_totll);
-			outbthdr.btd_spec_ll = htons(Btuhdr.btd_spec_ll);
-			outbthdr.btd_priv = htonl(Btuhdr.btd_priv);
-			for  (cnt = 0;  cnt < 3;  cnt++)  {
-				outbthdr.btd_jflags[cnt] = htons(Btuhdr.btd_jflags[cnt]);
-				outbthdr.btd_vflags[cnt] = htons(Btuhdr.btd_vflags[cnt]);
-			}
-			outmsg.retcode = 0;
-			pushout(sock, (char *) &outmsg, sizeof(outmsg));
-			pushout(sock, (char *) &outbthdr, sizeof(outbthdr));
-			if  (tracing & TRACE_APIOPEND)
-				trace_op_res(Realuid, "getbtd", "OK");
-			continue;
-		}
+                        reply_getbtd(&apistat);
+                        continue;
 
 		case  API_PUTBTU:
-		{
-			int_ugid_t	ouid;
-			Btuser		rbtu;
-			struct	ua_reply	buf;
-
-			tcode = "putbtu";
-			if  (tracing & TRACE_APIOPSTART)
-				trace_op(Realuid, tcode);
-
-			pullin(sock, (char *) &buf, sizeof(buf));
-
-			if  ((ouid = lookup_uname(inmsg.un.us.username)) == UNKNOWN_UID)  {
-				ret = XB_UNKNOWN_USER;
-				break;
-			}
-			if  ((ouid != Realuid  && !(hispriv.btu_priv & BTM_WADMIN)) || !(hispriv.btu_priv & (BTM_UMASK|BTM_WADMIN)))  {
-				ret = XB_NOPERM;
-				break;
-			}
-
-			rbtu.btu_user = ouid;
-			rbtu.btu_minp = buf.ua_perm.btu_minp;
-			rbtu.btu_maxp = buf.ua_perm.btu_maxp;
-			rbtu.btu_defp = buf.ua_perm.btu_defp;
-			rbtu.btu_maxll = ntohs(buf.ua_perm.btu_maxll);
-			rbtu.btu_totll = ntohs(buf.ua_perm.btu_totll);
-			rbtu.btu_spec_ll = ntohs(buf.ua_perm.btu_spec_ll);
-			rbtu.btu_priv = ntohl(buf.ua_perm.btu_priv);
-
-			for  (cnt = 0;  cnt < 3;  cnt++)  {
-				rbtu.btu_jflags[cnt] = ntohs(buf.ua_perm.btu_jflags[cnt]);
-				rbtu.btu_vflags[cnt] = ntohs(buf.ua_perm.btu_vflags[cnt]);
-			}
-
-			if  (rbtu.btu_minp == 0 || rbtu.btu_maxp == 0 || rbtu.btu_defp == 0)  {
-				ret = XB_BAD_PRIORITY;
-				break;
-			}
-			if  (rbtu.btu_maxll == 0 || rbtu.btu_totll == 0 || rbtu.btu_spec_ll == 0)  {
-				ret = XB_BAD_LL;
-				break;
-			}
-
-			/* In case something has changed */
-
-			if  (ouid == Realuid)  {
-				hispriv = *getbtuentry(ouid);
-				if  (!(hispriv.btu_priv & BTM_WADMIN))  {
-
-					/* Disallow everything except def prio and flags */
-
-					if  (rbtu.btu_minp != hispriv.btu_minp ||
-					     rbtu.btu_maxp != hispriv.btu_maxp  ||
-					     rbtu.btu_maxll != hispriv.btu_maxll  ||
-					     rbtu.btu_totll != hispriv.btu_totll  ||
-					     rbtu.btu_spec_ll != hispriv.btu_spec_ll ||
-					     rbtu.btu_priv != hispriv.btu_priv)  {
-					badp:
-						ret = XB_NOPERM;
-						break;
-					}
-					if  (!(hispriv.btu_priv & BTM_UMASK))  {
-						for  (cnt = 0;  cnt < 3;  cnt++)  {
-							if  (rbtu.btu_jflags[cnt] != hispriv.btu_jflags[cnt])
-								goto  badp;
-							if  (rbtu.btu_vflags[cnt] != hispriv.btu_vflags[cnt])
-								goto  badp;
-						}
-					}
-				}
-			}
-			mpriv = getbtuentry(ouid);
-			mpriv->btu_minp = rbtu.btu_minp;
-			mpriv->btu_maxp = rbtu.btu_maxp;
-			mpriv->btu_defp = rbtu.btu_defp;
-			mpriv->btu_maxll = rbtu.btu_maxll;
-			mpriv->btu_totll = rbtu.btu_totll;
-			mpriv->btu_spec_ll = rbtu.btu_spec_ll;
-			mpriv->btu_priv = rbtu.btu_priv;
-			for  (cnt = 0;  cnt < 3;  cnt++)  {
-				mpriv->btu_jflags[cnt] = rbtu.btu_jflags[cnt];
-				mpriv->btu_vflags[cnt] = rbtu.btu_vflags[cnt];
-			}
-			putbtuentry(mpriv);
-			if  (ouid == Realuid)
-				hispriv = *mpriv;
-			ret = XB_OK;
-			break;
-		}
+                        ret = reply_putbtu(&apistat);
+                        break;
 
 		case  API_PUTBTD:
-		{
-			Btdef	inbthdr, rbthdr;
+                        ret = reply_putbtd(&apistat);
+                        break;
+        	}
 
-			tcode = "putbtd";
-			if  (tracing & TRACE_APIOPSTART)
-				trace_op(Realuid, tcode);
-
-			pullin(sock, (char *) &inbthdr, sizeof(inbthdr));
-			if  (!(hispriv.btu_priv & BTM_WADMIN))  {
-				ret = XB_NOPERM;
-				break;
-			}
-			BLOCK_ZERO(&rbthdr, sizeof(rbthdr));
-			rbthdr.btd_minp = inbthdr.btd_minp;
-			rbthdr.btd_maxp = inbthdr.btd_maxp;
-			rbthdr.btd_defp = inbthdr.btd_defp;
-			rbthdr.btd_maxll = ntohs(inbthdr.btd_maxll);
-			rbthdr.btd_totll = ntohs(inbthdr.btd_totll);
-			rbthdr.btd_spec_ll = ntohs(inbthdr.btd_spec_ll);
-			rbthdr.btd_priv = ntohl(inbthdr.btd_priv);
-			for  (cnt = 0;  cnt < 3;  cnt++)  {
-				rbthdr.btd_jflags[cnt] = ntohs(inbthdr.btd_jflags[cnt]);
-				rbthdr.btd_vflags[cnt] = ntohs(inbthdr.btd_vflags[cnt]);
-			}
-			if  (rbthdr.btd_minp == 0 || rbthdr.btd_maxp == 0 || rbthdr.btd_defp == 0)  {
-				ret = XB_BAD_PRIORITY;
-				break;
-			}
-			if  (rbthdr.btd_maxll == 0 || rbthdr.btd_totll == 0 || rbthdr.btd_spec_ll == 0)  {
-				ret = XB_BAD_LL;
-				break;
-			}
-
-			/* Re-read file to get locking open */
-
-			hispriv = *getbtuentry(Realuid);
-			Btuhdr.btd_minp = rbthdr.btd_minp;
-			Btuhdr.btd_maxp = rbthdr.btd_maxp;
-			Btuhdr.btd_defp = rbthdr.btd_defp;
-			Btuhdr.btd_maxll = rbthdr.btd_maxll;
-			Btuhdr.btd_totll = rbthdr.btd_totll;
-			Btuhdr.btd_spec_ll = rbthdr.btd_spec_ll;
-			Btuhdr.btd_priv = rbthdr.btd_priv;
-			Btuhdr.btd_version = GNU_BATCH_MAJOR_VERSION;
-			for  (cnt = 0;  cnt < 3;  cnt++)  {
-				Btuhdr.btd_jflags[cnt] = rbthdr.btd_jflags[cnt];
-				Btuhdr.btd_vflags[cnt] = rbthdr.btd_vflags[cnt];
-			}
-			putbtuhdr();
-			ret = XB_OK;
-			break;
-		}
-		}
-		outmsg.retcode = htons(ret);
-		pushout(sock, (char *) &outmsg, sizeof(outmsg));
-		if  (tracing & TRACE_APIOPEND)
-			trace_op_res(Realuid, tcode, ret == XB_OK? "OK": "Failed");
-	}
+                apistat.outmsg.retcode = htons(ret);
+                put_reply(&apistat);
+        }
 }

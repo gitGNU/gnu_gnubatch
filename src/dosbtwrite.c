@@ -214,7 +214,7 @@ MAINFN_TYPE  main(int argc, char **argv)
 	int	roamuser = 0, obp = 0, ch;
 	char	obuf[512];	/* Make me CL_SV_BUFFSIZE sometime */
 
-	versionprint(argv, "$Revision: 1.4 $", 1);
+	versionprint(argv, "$Revision: 1.5 $", 1);
 
 	if  ((progname = strrchr(argv[0], '/')))
 		progname++;
@@ -283,7 +283,7 @@ MAINFN_TYPE  main(int argc, char **argv)
 		uaportnum = htons((SHORT) atoi(portname));
 	else  {
 		struct  servent	*sp;
-		if  (!(sp = env_getserv(portname, "udp"))  &&  !(sp = env_getserv(portname, "UDP")))
+		if  (!(sp = env_getserv(portname, IPPROTO_UDP)))
 			back_despatch(obuf, username); /* Doesn't return */
 		uaportnum = sp->s_port;
 	}

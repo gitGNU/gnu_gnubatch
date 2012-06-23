@@ -58,11 +58,11 @@ void  initcifile()
 		panic($E{Panic cannot create CI file});
 
 #ifdef	HAVE_FCHOWN
-	if  (Daemuid)
-		fchown(Ci_fd, Daemuid, Daemgid);
+	if  (Daemuid != ROOTID)
+		Ignored_error = fchown(Ci_fd, Daemuid, Daemgid);
 #else
-	if  (Daemuid)
-		chown(cifile, Daemuid, Daemgid);
+	if  (Daemuid != ROOTID)
+		Ignored_error = chown(cifile, Daemuid, Daemgid);
 #endif
 	free(cifile);
 
@@ -74,7 +74,7 @@ void  initcifile()
 	madeup.ci_ll = (g = getbtuentry(Daemuid))? g->btu_spec_ll: U_DF_SPECLL;
 	madeup.ci_nice = DEF_CI_NICE;
 	madeup.ci_flags = 0;
-	write(Ci_fd, (char *) &madeup, sizeof(madeup));
+	Ignored_error = write(Ci_fd, (char *) &madeup, sizeof(madeup));
 	close(Ci_fd);
 	if  (open_ci(O_RDONLY))
 		panic($E{Panic cannot read CI file});

@@ -216,11 +216,11 @@ void  creatjfile(LONG jsize)
 	}
 
 #ifdef	HAVE_FCHOWN
-	if  (Daemuid)
-		fchown(jfilefd, Daemuid, Daemgid);
+	if  (Daemuid != ROOTID)
+		Ignored_error = fchown(jfilefd, Daemuid, Daemgid);
 #else
-	if  (Daemuid)
-		chown(jfilename, Daemuid, Daemgid);
+	if  (Daemuid != ROOTID)
+		Ignored_error = chown(jfilename, Daemuid, Daemgid);
 #endif
 	fcntl(jfilefd, F_SETFD, 1);
 
@@ -234,11 +234,11 @@ void  creatjfile(LONG jsize)
 	if  ((Job_seg.inf.lockfd = open(JLOCK_FILE, O_CREAT|O_TRUNC|O_RDWR, 0600)) < 0)
 		goto  fail;
 #ifdef	HAVE_FCHOWN
-	if  (Daemuid)
-		fchown(Job_seg.inf.lockfd, Daemuid, Daemgid);
+	if  (Daemuid != ROOTID)
+		Ignored_error = fchown(Job_seg.inf.lockfd, Daemuid, Daemgid);
 #else
-	if  (Daemuid)
-		chown(JLOCK_FILE, Daemuid, Daemgid);
+	if  (Daemuid != ROOTID)
+		Ignored_error = chown(JLOCK_FILE, Daemuid, Daemgid);
 #endif
 	fcntl(Job_seg.inf.lockfd, F_SETFD, 1);
 #endif
@@ -476,7 +476,7 @@ void  rewrjq()
 		if  (errno != EINTR)
 			panic($E{Panic couldnt lock job file});
 	}
-	ftruncate(jfilefd, 0L);
+	Ignored_error = ftruncate(jfilefd, 0L);
 	lseek(jfilefd, 0L, 0);
 #else
 	fjobs = lseek(jfilefd, 0L, 2) / sizeof(struct Jsave);
@@ -497,11 +497,11 @@ void  rewrjq()
 			panic($E{Panic couldnt create job file});
 		fcntl(jfilefd, F_SETFD, 1);
 #ifdef	HAVE_FCHOWN
-		if  (Daemuid)
-			fchown(jfilefd, Daemuid, Daemgid);
+		if  (Daemuid != ROOTID)
+			Ignored_error = fchown(jfilefd, Daemuid, Daemgid);
 #else
-		if  (Daemuid)
-			chown(jfilename, Daemuid, Daemgid);
+		if  (Daemuid != ROOTID)
+			Ignored_error = chown(jfilename, Daemuid, Daemgid);
 #endif
 	}
 	else
@@ -579,7 +579,7 @@ void  rewrjq()
 		Outj.sj_arg = jp->h.bj_arg;
 		Outj.sj_exits = jp->h.bj_exits;
 		BLOCK_COPY(Outj.sj_space, jp->bj_space, JOBSPACE);
-		write(jfilefd, (char *)&Outj, sizeof(struct Jsave));
+		Ignored_error = write(jfilefd, (char *)&Outj, sizeof(struct Jsave));
 	}
 	time(&Job_seg.dptr->js_lastwrite);
 
@@ -1969,14 +1969,6 @@ void  setasses(BtjobRef jp, unsigned flag, unsigned source, unsigned status, con
 		}
 		varind = ja->bja_varind;
 		vp = &Var_seg.vlist[varind].Vent;
-		if  (tracing & (TRACE_STARTASS|TRACE_STOPASS))  {
-			if  (flag & BJA_START)  {
-				if  (tracing & TRACE_STARTASS)
-					trace_op_name("jassst", 0, vp->var_name);
-			}
-			else  if  (tracing & TRACE_STOPASS)
-				trace_op_name("jassstop", 0, vp->var_name);
-		}
 #ifdef	NETWORK_VERSION
 		if  (vp->var_flags & VF_CLUSTER)  {
 

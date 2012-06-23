@@ -34,4 +34,4 @@
 #define INADDR_LOOPBACK	((in_addr_t) 0x7f000001) /* Inet 127.0.0.1.  */
 #endif
 
-extern	struct	servent *env_getserv(const char *, const char *);
+extern	struct	servent *env_getserv(const char *, const int);

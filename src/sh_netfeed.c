@@ -51,7 +51,7 @@ static  void  feed_pr(const jobno_t jobno, const char *prefix, const int sock, c
 
 	if  ((ffd = open(fname = mkspid(prefix, jobno), O_RDONLY)) >= 0)  {
 		while  ((bytes = read(ffd, buffer, sizeof(buffer))) > 0)
-			write(sock, buffer, (unsigned) bytes);
+			Ignored_error = write(sock, buffer, (unsigned) bytes);
 		close(ffd);
 		if  (del)
 			unlink(fname);

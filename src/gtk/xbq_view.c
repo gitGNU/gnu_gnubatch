@@ -510,7 +510,7 @@ static void  savechanges(struct holdata *hdata)
 	if  (hdata->mapyear < 1990)
 		return;
 	lseek(hdata->holfd, (long) ((hdata->mapyear - 1990) * YVECSIZE), 0);
-	write(hdata->holfd, (char *) hdata->yearmap, YVECSIZE);
+	Ignored_error = write(hdata->holfd, (char *) hdata->yearmap, YVECSIZE);
 }
 
 static void  loadyear(struct holdata *hdata, const int year)
@@ -607,7 +607,7 @@ void  cb_hols()
 		hdata.holfd = open(fname, O_RDWR|O_CREAT, 0644);
 #ifndef	HAVE_FCHOWN
 		if  (Realuid == ROOTID)
-			chown(fname, Daemuid, Realgid);
+			Ignored_error = chown(fname, Daemuid, Realgid);
 #endif
 		umask(oldumask);
 		free(fname);
@@ -617,7 +617,7 @@ void  cb_hols()
 		}
 #ifdef	HAVE_FCHOWN
 		if  (Realuid == ROOTID)
-			fchown(hdata.holfd, Daemuid, Realgid);
+			Ignored_error = fchown(hdata.holfd, Daemuid, Realgid);
 #endif
 	}
 

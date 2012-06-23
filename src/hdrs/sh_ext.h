@@ -50,7 +50,6 @@ extern	USHORT		lportnum,		/* These are all htons-ified */
 extern	int		Netsync_req;
 extern	PIDTYPE		Netm_pid;
 extern	netid_t		myhostid;
-extern	unsigned	num_remhosts; /* Number of remote hosts (not DOS ones) online */
 extern	slotno_t	machname_slot;/* Slot number of "machine name" variable */
 
 extern	unsigned	lumpsize, lumpwait;
@@ -93,6 +92,7 @@ extern void  panic(int);
 extern void  rewrjq();
 extern void  rewrvf();
 extern void  sendreply(const int_pid_t, const unsigned);
+extern void  set_not_server(ShipcRef, const int);
 extern void  setasses(BtjobRef, unsigned, unsigned, unsigned, const netid_t);
 extern void  started_job(const unsigned);
 extern void  tellchild(const unsigned, const ULONG);
@@ -108,6 +108,7 @@ extern int  doforce(ShreqRef, jident *, const int);
 extern int  dstadj(ShreqRef, struct adjstr *);
 extern int  enqueue(ShreqRef, BtjobRef);
 extern int  findj_by_jid(jident *);
+extern int  get_nservers();
 extern int  gshmchan(struct btshm_info *, const int);
 extern int  isit_dos(const netid_t);
 extern int  islogged(uid_t);
@@ -137,7 +138,7 @@ extern void  attach_hosts();
 extern void  ci_broadcast();
 extern void  ci_delhost(const unsigned);
 extern void  ci_remaphost(const unsigned, const unsigned, CCmdintRef);
-extern void  clearhost(const netid_t);
+extern void  clearhost(const netid_t, const int);
 extern void  deskeletonise(const vhash_t);
 extern void  deskel_jobs(const netid_t);
 extern void  end_remotelock();
@@ -178,8 +179,7 @@ extern void  reply_propose(ShreqRef, jident *);
 extern void  rem_notify(BtjobRef, const netid_t, const struct jremnotemsg *);
 extern void  remasses(BtjobhRef, const USHORT, const USHORT, const USHORT);
 extern void  rrstatchange(const netid_t, struct jstatusmsg *);
-extern void  send_endsync(const netid_t);
-extern void  sendsync(const netid_t);
+extern void  send_endsync(struct remote *);
 extern void  shut_host(const netid_t);
 extern void  statchange(struct jstatusmsg *);
 extern void  sync_single(const netid_t, const slotno_t);
@@ -192,12 +192,11 @@ extern void  var_remchname(BtvarRef);
 extern void  var_remdelete(BtvarRef);
 extern void  var_unpack(BtvarRef, const struct varnetmsg *);
 extern void  vid_pack(vident *, const Btvar * const);
-extern int  conn_attach(struct remote *);
 extern int  is_skeleton(const vhash_t);
 extern int  net_lockreq(struct remote *);
-extern int  rattach(struct remote *);
 extern int  remchjob(ShreqRef, BtjobRef);
 extern int  remjchmog(BtjobRef);
+extern int  sendsync(struct remote *);
 extern unsigned  ci_addhost(const unsigned, CCmdintRef);
 extern unsigned  job_message(const netid_t, CBtjobhRef, CShreqRef);
 extern unsigned  job_pack(struct jobnetmsg *, CBtjobRef);
@@ -212,22 +211,9 @@ extern vhash_t  vid_uplook(const vident *);
 extern char **envhandle(BtjobRef);
 extern struct remote *find_connected(const netid_t);
 extern struct remote *find_probe(const netid_t);
-extern struct remote *alloc_roam(const netid_t, const char *, const char *);
+extern struct remote *find_sync(const netid_t, const int);
+extern struct remote *alloc_roam(struct remote *);
+extern struct remote *conn_attach(struct remote *);
+extern struct remote *rattach(struct remote *);
 #endif
-
-extern	unsigned tracing;
-
-#define	TRACE_OPREQ		(1 << 0)
-#define	TRACE_JOBREQ		(1 << 1)
-#define	TRACE_VARREQ		(1 << 2)
-#define	TRACE_NETREQ		(1 << 3)
-#define	TRACE_STARTASS		(1 << 4)
-#define	TRACE_STOPASS		(1 << 5)
-#define	TRACE_RET		(1 << 8)
-
-extern	void  trace_op_pid(const char *, const int_pid_t);
-extern	void  trace_op_jslot(const char *, const int_pid_t, const slotno_t);
-extern	void  trace_op_name(const char *, const int_pid_t, const char *);
-extern	void  trace_op_net(const char *, const int_pid_t, const netid_t);
-extern	void  trace_reply(const ULONG, const int_pid_t);
 

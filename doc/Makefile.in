@@ -47,10 +47,10 @@ install install-strip: all
 	$(INSTALL_DATA) poddoc/man/*.3 $(MANDIR)/man3
 	$(INSTALL_DATA) poddoc/man/*.5 $(MANDIR)/man5
 	$(INSTALL_DATA) poddoc/man/*.8 $(MANDIR)/man8
-	cd $(MANDIR)/man1; for p in $(STARTLINKS); do ln -s gbch-start.1 gbch-$$p.1; done
-	cd $(MANDIR)/man3; ln -s gbatch_jobfind.3 gbatch_jobfindslot.3
-	cd $(MANDIR)/man3; ln -s gbatch_varfind.3 gbatch_varfindslot.3
-	cd $(MANDIR)/man8; ln -s gbch-hostedit.8 gbch-xhostedit.8
+	cd $(MANDIR)/man1; for p in $(STARTLINKS); do ln -f -s gbch-start.1 gbch-$$p.1; done
+	cd $(MANDIR)/man3; ln -f -s gbatch_jobfind.3 gbatch_jobfindslot.3
+	cd $(MANDIR)/man3; ln -f -s gbatch_varfind.3 gbatch_varfindslot.3
+	cd $(MANDIR)/man8; ln -f -s gbch-hostedit.8 gbch-xhostedit.8
 	$(INSTALL) -d $(PDFDIR)
 	$(INSTALL_DATA) pdf/*.pdf $(PDFDIR)
 

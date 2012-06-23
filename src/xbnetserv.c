@@ -76,15 +76,14 @@ SHORT	qportnum,		/* Port number for TCP */
 
 netid_t	localhostid;		/* IP of "localhost" sometimes different */
 
-SHORT	tcpproto, udpproto;
-
 const	char	Sname[] = GBNETSERV_PORT,
 		ASrname[] = DEFAULT_SERVICE,
 		ASmname[] = MON_SERVICE;
 
-int	had_alarm, hadrfresh;
+int	hadrfresh;
 
 int	Ctrl_chan = -1;
+unsigned timeouts = NETTICKLE;
 
 /* We don't use these fields as the API strips out users and groups
    itself, but we now incorporate the screening in the library
@@ -95,6 +94,10 @@ static	char	*spdir;
 
 static	char	tmpfl[NAMESIZE + 1];
 
+int_ugid_t      Defaultuid, Defaultgid;
+char            *Defaultuser,
+                *Defaultgroup;
+
 USHORT	err_which;		/* Which we are complaining about */
 USHORT	orig_umask;		/* Saved copy of original umask */
 
@@ -104,14 +107,12 @@ char		*myhostname;	/* We send our variables prefixed by this */
 BtjobRef	JREQ;
 
 struct	hhash	*nhashtab[NETHASHMOD];
-struct	cluhash	*cluhashtab[NETHASHMOD];
+struct  winuhash *winuhashtab[NETHASHMOD];
+struct  alhash  *alhashtab[NETHASHMOD];
 
 extern	char	dosuser[];
 
 struct	pend_job  pend_list[MAX_PEND_JOBS];/* List of pending UDP jobs */
-
-unsigned tracing = 0;
-FILE	*tracefile;
 
 void  nomem(const char *fl, const int ln)
 {
@@ -119,72 +120,215 @@ void  nomem(const char *fl, const int ln)
 	exit(E_NOMEM);
 }
 
-unsigned  calc_clu_hash(const char *name)
+/* Hash function for windows names limited to WUIDSIZE chars */
+
+unsigned  calc_winu_hash(const char *name)
 {
-	unsigned  sum = 0;
-	while  (*name)
-		sum += *name++;
-	return  sum % NETHASHMOD;
+        unsigned  sum = 0;
+        int	cnt = WUIDSIZE;
+        while  (*name  &&  cnt > 0)  {
+                sum += tolower(*name);
+                name++;
+                cnt--;
+        }
+        return  sum % NETHASHMOD;
 }
 
-/* Clear details of client "roaming" users if hosts file changes.  */
+/* Look up windows user name in hash table */
 
-static void  zap_clu_hash()
+struct  winuhash  *lookup_winu(const char *wuname)
 {
-	unsigned  cnt;
+        struct  winuhash  *wp;
 
-	for  (cnt = 0;  cnt < NETHASHMOD;  cnt++)  {
-		struct	cluhash  **cpp, *cp;
-		cpp = &cluhashtab[cnt];
+        for  (wp = winuhashtab[calc_winu_hash(wuname)];  wp;  wp = wp->next)
+                if  (ncstrncmp(wuname, wp->winname, WUIDSIZE) == 0)
+                        return  wp;
+        return  (struct winuhash *) 0;
+}
 
-		/* An item might be on the hash table twice under its
-		   own name and the alias name.  First process
-		   the "own name" entries.  */
+/* Allocate a new windows user name structure and return it */
 
-		while  ((cp = *cpp))  {
-			if  (--cp->refcnt == 0)  {
-				*cpp = cp->next;
-				if  (cp->machname)
-					free(cp->machname);
-				free(cp);
-			}
-			else
-				cpp = &cp->next;
-		}
+struct  winuhash  *add_winu(char *wuname)
+{
+        unsigned  hashv = calc_winu_hash(wuname);
+        struct  winuhash  *wp = (struct winuhash *) malloc(sizeof(struct winuhash));
 
-		/* Now repeat for the alias name entries.  */
+        if  (!wp)
+                ABORT_NOMEM;
 
-		cpp = &cluhashtab[cnt];
-		while  ((cp = *cpp))  {
-			*cpp = cp->alias_next;
-			if  (cp->machname)
-				free(cp->machname);
-			free(cp);
-		}
-	}
+        wp->next = winuhashtab[hashv];
+        winuhashtab[hashv] = wp;
+        return  wp;
+}
+
+/* Parse the Windows user name file */
+void    parse_winu_file()
+{
+        FILE    *fp = fopen(WINUSER_MAP, "r");
+        char    lbuf[200];
+
+        if  (!fp)
+                return;
+
+        while  (fgets(lbuf, sizeof(lbuf), fp))  {
+                struct  winuhash  *wp;
+                char  *sp = &lbuf[strlen(lbuf)-1], *cp;
+                int_ugid_t  uid, gid;
+
+                /* Zap trailing spaces at the end */
+
+                while  (sp >= &lbuf[0] &&  isspace(*sp))
+                        sp--;
+                *++sp = '\0';   /* Step back to first space */
+
+                /* Skip over leading spaces at beginning */
+
+                sp = &lbuf[0];
+                while  (isspace(*sp))
+                        sp++;
+
+                /* Forget lines starting with a # or which don't have a colon in */
+
+                if  (*sp == '#')
+                        continue;
+                if  (!(cp = strchr(sp, ':')))
+                        continue;
+
+                /* Zap the colon, cp points to windows name, sp to UNIX name.
+                   Forget ones with unknown UNIX name */
+
+                *cp++ = '\0';
+                uid = lookup_uname(sp);
+                if  (uid == UNKNOWN_UID)
+                        continue;
+                gid = lastgid;
+
+                /* If we saw Windows name before, just update details */
+
+                if  (!(wp = lookup_winu(cp)))
+                        wp = add_winu(cp);
+                wp->winname = stracpy(cp);
+                wp->unixname = stracpy(sp);
+                wp->unixgroup = stracpy(prin_gname(gid));
+                wp->uuid = uid;
+                wp->ugid = gid;
+        }
+
+        fclose(fp);
+}
+
+/* Clear hash table for Windows users on SIGHUP */
+
+void    clear_winuhash()
+{
+        unsigned  hashv;
+
+        for  (hashv = 0;  hashv < NETHASHMOD;  hashv++)  {
+                struct  winuhash  *wp = winuhashtab[hashv];
+                while  (wp)  {
+                        struct  winuhash  *nxt = wp->next;
+                        free(wp->winname);
+                        free(wp->unixname);
+                        free(wp->unixgroup);
+                        free((char *) wp);
+                        wp = nxt;
+                }
+                winuhashtab[hashv] = (struct winuhash *) 0;
+        }
+
+        /* Forget auto login stuff whilst we are there */
+        for  (hashv = 0;  hashv < NETHASHMOD;  hashv++)  {
+                struct  alhash  *al = alhashtab[hashv];
+                while  (al)  {
+                        struct  alhash  *nxt = al->next;
+                        free(al->unixname);
+                        free(al->unixgroup);
+                        free((char *) al);
+                        al = nxt;
+                }
+                alhashtab[hashv] = (struct alhash *) 0;
+        }
+}
+
+struct  alhash  *find_autoconn(const netid_t h)
+{
+        struct  alhash  *al;
+
+        for  (al = alhashtab[calcnhash(h)];  al;  al = al->next)
+                if  (al->hostid == h)
+                        return  al;
+        return  (struct alhash *)  0;
+}
+
+struct  alhash  *add_autoconn(const netid_t h, const char *uname, const int_ugid_t uid, const int_ugid_t gid)
+{
+        struct  alhash  *al = find_autoconn(h);
+
+        if  (al)
+                free(al->unixname);
+        else  {
+                unsigned  hashv = calcnhash(h);
+                al = (struct alhash *) malloc(sizeof(struct alhash));
+                if  (!al)
+                        ABORT_NOMEM;
+                al->next = alhashtab[hashv];
+                alhashtab[hashv] = al;
+                al->hostid = h;
+        }
+        al->unixname = stracpy(uname);
+        al->uuid = uid;
+        al->ugid = gid;
+        al->unixgroup = stracpy(prin_gname(gid));
+        return  al;
+}
+
+struct  hhash  *lookup_hhash(const netid_t h)
+{
+        struct  hhash  *hp;
+
+        for  (hp = nhashtab[calcnhash(h)];  hp;  hp = hp->hn_next)
+                if  (hp->hostid == h)
+                        return  hp;
+        return  (struct hhash *)  0;
+}
+
+struct  hhash  *add_hhash(const netid_t h)
+{
+        struct  hhash  *hp = (struct hhash *) malloc(sizeof(struct hhash));
+        unsigned  hashv = calcnhash(h);
+
+        if  (!hp)
+                ABORT_NOMEM;
+        hp->hn_next = nhashtab[hashv];
+        nhashtab[hashv] = hp;
+        hp->hostid = h;
+        hp->isme = 0;
+        hp->isclient = 0;
+        return  hp;
+}
+
+void    forget_hosts()
+{
+        unsigned  hashv;
+
+        for  (hashv = 0;  hashv < NETHASHMOD;  hashv++)  {
+                struct  hhash  *hp, *nxt;
+                hp = nhashtab[hashv];
+                while  (hp)  {
+                        nxt = hp->hn_next;
+                        free((char *) hp);
+                        hp = nxt;
+                }
+                nhashtab[hashv] = (struct hhash *) 0;
+        }
 }
 
 /* Add IP address representing "me" to table for benefit of APIs on local host */
 
 static void  addme(const netid_t mid)
 {
-	unsigned nhval = calcnhash(mid);
-	struct	hhash	*hp;
-	time_t	now = time((time_t *) 0);
-
-	if  (!(hp = (struct hhash *) malloc(sizeof(struct hhash))))
-		ABORT_NOMEM;
-
-	BLOCK_ZERO(hp, sizeof(struct hhash));
-	hp->hn_next = nhashtab[nhval];
-	nhashtab[nhval] = hp;
-	hp->rem.hostid = mid;
-	hp->rem.ht_flags = HT_MANUAL|HT_PROBEFIRST|HT_TRUSTED;
-	hp->timeout = hp->rem.ht_timeout = 0x7fff;
-	hp->lastaction = hp->rem.lastwrite = now;
-	hp->rem.n_uid = Daemuid;
-	hp->rem.n_gid = Daemgid;
-	hp->flags = UAL_OK;
+        struct  hhash  *hp = add_hhash(mid);
+        hp->isme = 1;
 }
 
 /* Read in hosts file and build up interesting stuff */
@@ -192,89 +336,66 @@ static void  addme(const netid_t mid)
 static void  process_hfile()
 {
 	struct	remote	*rp;
+        struct  hhash   *hp;
 	extern	char	hostf_errors;
-	time_t	now = time((time_t *) 0);
 
 	hostf_errors = 0;
 
-	while  ((rp = get_hostfile()))
+	while  ((rp = get_hostfile()))  {
 
-		if  (rp->ht_flags & HT_ROAMUSER)  {
-			struct	cluhash	*cp, **hpp, *hp;
-			int_ugid_t	lkuid;
+                /* If it is telling us about a possible client user, note the details as with the user map
+                   file, however this overrides whatever was in there and possibly provides for a machine
+                   at which a user doesn't need to supply a password */
 
-			/* Roaming user - add main and alias name to
-			   hash table.  We don't try to interpret
-			   the user names at this stage.  */
+                   if  (rp->ht_flags & HT_ROAMUSER)  {
+                        struct  winuhash  *wp;
+                        int_ugid_t  uid = lookup_uname(rp->hostname);
+                        int_ugid_t  gid = lastgid;
 
-			if  (!(cp = (struct cluhash *) malloc(sizeof(struct cluhash))))
-				ABORT_NOMEM;
-			cp->next = cp->alias_next = (struct cluhash *) 0;
-			cp->rem = *rp;
+                        if  (uid == UNKNOWN_UID)
+                                continue;
 
-			cp->rem.n_uid = Daemuid;
-			cp->rem.n_gid = Daemgid;
+                        if  (!(wp = lookup_winu(rp->alias)))
+                                wp = add_winu(rp->alias);
 
-			/* The machine name (if any) is held in "dosuser".  Please note that this is
-			   one of the places where we assume HOSTNSIZE > UIDSIZE */
+                        wp->uuid = uid;
+                        wp->ugid = gid;
+                        wp->winname = stracpy(rp->alias);
+                        wp->unixname = stracpy(rp->hostname);
+                        wp->unixgroup = stracpy(prin_gname(gid));
 
-			cp->machname = dosuser[0]? stracpy(dosuser) : (char *) 0;
-			cp->refcnt = 1;	/* For now */
+                        /* Don't worry about usual machines if
+                           we are checking anyhow or no machine given */
 
-			/* Stick it on the end of the hash chain.
-			   Repeat for alias name if applicable.  */
+                        if  (!(rp->ht_flags & HT_PWCHECK)  &&  dosuser[0])  {
+                                netid_t  defhost = look_hostname(dosuser);
+                                if  (defhost)
+                                        add_autoconn(defhost, rp->hostname, uid, gid);
+                        }
+                        continue;
+                }
 
-			for  (hpp = &cluhashtab[calc_clu_hash(rp->hostname)]; (hp = *hpp);  hpp = &hp->next)
-				;
-			*hpp = cp;
+                /* It might be telling us about a client with a fixed IP address. */
 
-			if  ((lkuid = lookup_uname(rp->hostname)) != UNKNOWN_UID)  {
-				cp->rem.n_uid = lkuid;
-				cp->rem.n_gid = lastgid;
-			}
-			if  (rp->alias[0])  {
-				for  (hpp = &cluhashtab[calc_clu_hash(rp->alias)]; (hp = *hpp);  hpp = &hp->alias_next)
-					;
-				*hpp = cp;
-				cp->refcnt++;
-				if  ((lkuid = lookup_uname(rp->alias)) != UNKNOWN_UID)  {
-					cp->rem.n_uid = lkuid;
-					cp->rem.n_gid = lastgid;
-				}
-			}
-		}
-		else  {
-			struct	hhash	*hp;
-			unsigned  nhval = calcnhash(rp->hostid);
+                if  (rp->ht_flags & HT_DOS)  {
+                        int_ugid_t  uid;
+                        hp = lookup_hhash(rp->hostid);
+                        if  (!hp)
+                                hp = add_hhash(rp->hostid);
+                        hp->isclient = 1;
+                        if  (!(rp->ht_flags & HT_PWCHECK)  &&  dosuser[0]  &&  (uid = lookup_uname(dosuser)) != UNKNOWN_UID)
+                                add_autoconn(rp->hostid, dosuser, uid, lastgid);
+                        continue;
+                }
 
-			/* These are "regular" machines.  */
+                /* We now don't bother with "trusted" */
 
-			if  (!(hp = (struct hhash *) malloc(sizeof(struct hhash))))
-				ABORT_NOMEM;
-			hp->hn_next = nhashtab[nhval];
-			nhashtab[nhval] = hp;
-			hp->rem = *rp;
-			hp->dosname = (char *) 0;
-			hp->actname = (char *) 0;
-			hp->flags = UAL_OK;
-			hp->rem.n_uid = Daemuid;
-			hp->rem.n_gid = Daemgid;
-			if  (rp->ht_flags & HT_DOS)  {
-				int_ugid_t	lkuid;
-				hp->dosname = stracpy(dosuser);
-				hp->actname = stracpy(dosuser);	/* Saves testing for it */
-				if  ((lkuid = lookup_uname(dosuser)) != UNKNOWN_UID)  {
-					hp->rem.n_uid = lkuid;
-					hp->rem.n_gid = lastgid;
-				}
-				if  (rp->ht_flags & HT_PWCHECK)
-					hp->flags = UAL_NOK;
-			}
-			hp->timeout = rp->ht_timeout;
-			hp->lastaction = now;
-		}
+                hp = lookup_hhash(rp->hostid);
+                if  (!hp)
+                        hp = add_hhash(rp->hostid);
+        }
 
-	end_hostfile();
+        end_hostfile();
 
 	/* Create entries for "me" to allow for API connections from local hosts */
 
@@ -287,47 +408,48 @@ static void  process_hfile()
 		print_error($E{Warn errors in host file});
 }
 
-/* Catch hangup signals and re-read hosts file a la mountd */
+void    read_hfiles()
+{
+        struct  winuhash  *wp;
+        int_ugid_t  uid;
+
+        parse_winu_file();
+        process_hfile();
+        if  (!(wp = lookup_winu("default"))  || (uid = lookup_uname(wp->unixname)) == UNKNOWN_UID)  {
+                Defaultuid = Daemuid;
+                Defaultgid = Daemgid;
+                Defaultuser = BATCHUNAME;
+        }
+        else  {
+                Defaultuser = wp->unixname;
+                Defaultuid = wp->uuid;
+                Defaultgid = wp->ugid;
+        }
+
+        /* The following may be a movable feast if the group name for the batch
+           user isn't defined but I don't think it matters */
+
+        Defaultgroup = prin_gname(Defaultgid);
+}
+
+/* Catch hangup signals and re-read hosts file */
 
 static RETSIGTYPE  catchhup(int n)
 {
-	unsigned  cnt;
-	struct	hhash	*hp, *np;
 #ifdef	UNSAFE_SIGNALS
 	signal(n, SIG_IGN);
 #endif
-	for  (cnt = 0;  cnt < NETHASHMOD;  cnt++)  {
-		for  (hp = nhashtab[cnt];  hp;  hp = np)  {
-			if  (hp->dosname)
-				free(hp->dosname);
-			if  (hp->actname)
-				free(hp->actname);
-			np = hp->hn_next;
-			free((char *) hp);
-		}
-		nhashtab[cnt] = (struct hhash *) 0;
-	}
-	zap_clu_hash();
-	process_hfile();
-	un_rpwfile();
+        /* Forget what we learned before and re-read it */
+
+        clear_winuhash();
+        forget_hosts();
+       	un_rpwfile();
+       	/* NB Don't think we need a rgrpfile(); here - maybe supp groups sometime?? */
 	rpwfile();
-	send_askall();
-	/* NB Don't think we need a rgrpfile(); here - maybe supp groups sometime?? */
+        read_hfiles();
 #ifdef	UNSAFE_SIGNALS
 	signal(n, catchhup);
 #endif
-}
-
-struct hhash *find_remote(const netid_t hid)
-{
-	struct	hhash	*hp;
-
-	for  (hp = nhashtab[calcnhash(hid)];  hp;  hp = hp->hn_next)
-		if  (hp->rem.hostid == hid)  {
-			time(&hp->lastaction);		/* Remember last action for timeouts */
-			return  hp;
-		}
-	return  (struct  hhash  *) 0;
 }
 
 static	char	sigstocatch[] =	{ SIGINT, SIGQUIT, SIGTERM };
@@ -357,16 +479,6 @@ RETSIGTYPE  catchabort(int n)
 	for  (cnt = 0;  cnt < MAX_PEND_JOBS;  cnt++)
 		abort_job(&pend_list[cnt]);
 	exit(E_SIGNAL);
-}
-
-/* Catch alarm signals */
-
-static RETSIGTYPE  catchalarm(int n)
-{
-#ifdef	UNSAFE_SIGNALS
-	signal(n, catchalarm);
-#endif
-	had_alarm++;
 }
 
 /* This notes signals from (presumably) the scheduler.  */
@@ -426,11 +538,8 @@ static void  lognprocess()
 	sigmask_clear(z);
 	z.sigflags_el = SIGVEC_INTFLAG;
 	sigact_routine(QRFRESH, &z, (struct sigstruct_name *) 0);
-	z.sighandler_el = catchalarm;
-	sigact_routine(SIGALRM, &z, (struct sigstruct_name *) 0);
 #else
 	signal(QRFRESH, markit);
-	signal(SIGALRM, catchalarm);
 #endif
 	BLOCK_ZERO(&Oreq, sizeof(Oreq));
 	Oreq.sh_mtype = TO_SCHED;
@@ -451,8 +560,7 @@ unsigned unpack_job(BtjobRef to, const struct nijobmsg *from, const unsigned len
 #endif
 
 	BLOCK_ZERO(to, sizeof(Btjob));
-	if  (whofrom != myhostid  &&  whofrom != localhostid)
-		to->h.bj_orighostid = whofrom;
+	to->h.bj_orighostid     =       whofrom;
 	to->h.bj_progress	=	from->ni_hdr.ni_progress;
 	to->h.bj_pri		=	from->ni_hdr.ni_pri;
 	to->h.bj_jflags		=	from->ni_hdr.ni_jflags;
@@ -610,7 +718,7 @@ int  tcp_serv_open(SHORT portnum)
 	BLOCK_ZERO(sin.sin_zero, sizeof(sin.sin_zero));
 	sin.sin_addr.s_addr = INADDR_ANY;
 
-	if  ((result = socket(PF_INET, SOCK_STREAM, tcpproto)) < 0)
+	if  ((result = socket(PF_INET, SOCK_STREAM, IPPROTO_TCP)) < 0)
 		return  -1;
 #ifdef	SO_REUSEADDR
 	setsockopt(result, SOL_SOCKET, SO_REUSEADDR, (char *) &on, sizeof(on));
@@ -622,6 +730,14 @@ int  tcp_serv_open(SHORT portnum)
 	return  result;
 }
 
+netid_t translate_netid(struct sockaddr_in *sinp)
+{
+        netid_t  result = sinp->sin_addr.s_addr;
+        if  (result == myhostid  ||  result == htonl(INADDR_LOOPBACK))
+                return  0;
+        return  result;
+}
+
 int  tcp_serv_accept(const int msock, netid_t *whofrom)
 {
 	int	sock;
@@ -631,7 +747,7 @@ int  tcp_serv_accept(const int msock, netid_t *whofrom)
 	sinl = sizeof(sin);
 	if  ((sock = accept(msock, (struct sockaddr *) &sin, &sinl)) < 0)
 		return  -1;
-	*whofrom = sin.sin_addr.s_addr;
+	*whofrom = translate_netid(&sin);
 	return  sock;
 }
 
@@ -646,7 +762,7 @@ int  udp_serv_open(SHORT portnum)
 
 	/* Open Datagram socket for user access stuff */
 
-	if  ((result = socket(PF_INET, SOCK_DGRAM, udpproto)) < 0)
+	if  ((result = socket(PF_INET, SOCK_DGRAM, IPPROTO_UDP)) < 0)
 		return  -1;
 
 	if  (bind(result, (struct sockaddr *) &sin, sizeof(sin)) < 0)  {
@@ -663,34 +779,15 @@ static int  init_network()
 {
 	struct	hostent	*hp;
 	struct	servent	*sp;
-	struct	protoent  *pp;
-	char	*tcp_protoname,
-		*udp_protoname;
 
 	/* Get id of local host if different */
 
 	if  ((hp = gethostbyname("localhost")))
 		localhostid = *(netid_t *) hp->h_addr;
 
-	/* Get TCP/UDP protocol names */
-
-	if  (!((pp = getprotobyname("tcp"))  || (pp = getprotobyname("TCP"))))  {
-		print_error($E{Netconn no TCP abort});
-		return  0;
-	}
-	tcp_protoname = stracpy(pp->p_name);
-	tcpproto = pp->p_proto;
-	if  (!((pp = getprotobyname("udp"))  || (pp = getprotobyname("UDP"))))  {
-		print_error($E{Netconn no UDP abort});
-		return  0;
-	}
-	udp_protoname = stracpy(pp->p_name);
-	udpproto = pp->p_proto;
-	endprotoent();
-
-	if  (!(sp = env_getserv(Sname, tcp_protoname)))  {
+	if  (!(sp = env_getserv(Sname, IPPROTO_TCP)))  {
 		disp_str = (char *) Sname;
-		disp_str2 = tcp_protoname;
+		disp_str2 = "tcp";
 		print_error($E{Netconn no service name});
 		return  0;
 	}
@@ -699,34 +796,32 @@ static int  init_network()
 	   lets leave it alone for now.  */
 
 	qportnum = sp->s_port;
-	if  (!(sp = env_getserv(Sname, udp_protoname)))  {
+	if  (!(sp = env_getserv(Sname, IPPROTO_UDP)))  {
 		disp_str = (char *) Sname;
-		disp_str2 = udp_protoname;
+		disp_str2 = "udp";
 		print_error($E{Netconn no service name});
 		return  0;
 	}
 
 	uaportnum = sp->s_port;
 
-	if  (!(sp = env_getserv(ASrname, tcp_protoname)))  {
+	if  (!(sp = env_getserv(ASrname, IPPROTO_TCP)))  {
 		disp_str = (char *) ASrname;
-		disp_str2 = tcp_protoname;
+		disp_str2 = "tcp";
 		print_error($E{Netconn no API req port});
-		apirport = 0;
+		return  0;
 	}
-	else
-		apirport = sp->s_port;
-	if  (!(sp = env_getserv(ASmname, udp_protoname)))  {
+	apirport = sp->s_port;
+
+        if  (!(sp = env_getserv(ASmname, IPPROTO_UDP)))  {
 		disp_str = (char *) ASmname;
-		disp_str2 = udp_protoname;
+		disp_str2 = "udp";
 		print_error($E{Netconn no API prompt port});
-		apipport = 0;
+		return  0;
 	}
-	else
-		apipport = sp->s_port;
-	free(tcp_protoname);
-	free(udp_protoname);
-	endservent();
+	apipport = sp->s_port;
+
+        endservent();
 
 	if  ((qsock = tcp_serv_open(qportnum)) < 0)  {
 		disp_arg[0] = ntohs(qportnum);
@@ -740,8 +835,11 @@ static int  init_network()
 		return  0;
 	}
 
-	if  (apirport)
-		apirsock = tcp_serv_open(apirport);
+        if  ((apirsock = tcp_serv_open(apirport)) < 0)  {
+                disp_arg[0] = ntohs(apirport);
+                print_error($E{Netconn cannot open apisock});
+                return  0;
+        }
 	return  1;
 }
 
@@ -857,71 +955,52 @@ int  validate_job(BtjobRef jp, const Btuser *userpriv)
 	return  0;
 }
 
-/* Here is where we manhandle the user id.  We leave the
-   eventually-decided user/group in Realuid/Realgid.  Return 0 if
-   OK otherwise the error code.  */
+/* In case where we have a UNIX user name passed to us, convert user name
+   appropriately */
 
-int convert_username(struct hhash *frp, struct ni_jobhdr *nih, BtjobRef jp, BtuserRef *userprivp)
+int    convert_unix_username(struct ni_jobhdr *nih, BtjobRef jp, BtuserRef *userprivp)
 {
-	char		*repu, *repg;
-	int_ugid_t	nuid, ngid, possug;
-	BtuserRef	mp;
+        char    *repu, *repg;
+        int_ugid_t  nuid, ngid, possug;
+        BtuserRef  mp;
 
-	if  (frp->rem.ht_flags & HT_DOS)  {
+        if  ((nuid = lookup_uname(nih->uname)) == UNKNOWN_UID)
+                return  XBNR_UNKNOWN_USER;
 
-		if  (frp->rem.ht_flags & HT_ROAMUSER)
-			jp->h.bj_jflags |= BJ_ROAMUSER;
+        ngid = lastgid;
 
-		Realuid = (uid_t) frp->rem.n_uid;
-		Realgid = (gid_t) frp->rem.n_gid;
+        Realuid = (uid_t) nuid;
+        Realgid = (gid_t) ngid;
 
-		/* Possibly we have a replacement user/group in the header */
+        if  ((ngid = lookup_gname(nih->gname)) != UNKNOWN_GID)
+                Realgid = (gid_t) ngid;
 
-		repu = nih->uname;
-		repg = nih->gname;
-	}
-	else  {			/* Unix end - transmogrify user name */
-		if  ((nuid = lookup_uname(nih->uname)) == UNKNOWN_UID)
-			return  XBNR_UNKNOWN_USER;
+        /* If we have a replacement user/group, they'll be in
+                   the o_user/o_group fields.  */
 
-		Realuid = (uid_t) nuid;
-		Realgid = (gid_t) lastgid;
+        repu = jp->h.bj_mode.o_user;
+        repg = jp->h.bj_mode.o_group;
 
-		if  ((ngid = lookup_gname(nih->gname)) != UNKNOWN_GID)
-			Realgid = (gid_t) ngid;
+         /* Need the current value of the user privs as it might have changed.  */
 
-		/* If we have a replacement user/group, they'll be in
-		   the o_user/o_group fields.  */
+        if  (!(mp = getbtuentry(Realuid)))
+                return  XBNR_BAD_USER;
 
-		repu = jp->h.bj_mode.o_user;
-		repg = jp->h.bj_mode.o_group;
-	}
+        *userprivp = mp;
 
-	/* Need the current value of the user privs as it might have changed.  */
+        /* If user or group has changed, we need the permission.  */
 
-	if  (!(mp = getbtuentry(Realuid)))
-		return  XBNR_BAD_USER;
-
-	*userprivp = mp;
-
-	nuid = Realuid;
-	ngid = Realgid;
-
-	/* If user or group has changed, we need the permission.  */
-
-	if  (repu[0] && (possug = lookup_uname(repu)) != UNKNOWN_UID)
-		nuid = possug;
-	if  (repg[0] && (possug = lookup_gname(repg)) != UNKNOWN_GID)
-		ngid = possug;
-
-	if  (nuid != Realuid  ||  ngid != Realgid)  {
-		if  (!(mp->btu_priv & BTM_WADMIN))
-			return  XBNR_BAD_USER;
-		Realuid = nuid;
-		Realgid = ngid;
-	}
-
-	return  0;
+        if  (repu[0] && (possug = lookup_uname(repu)) != UNKNOWN_UID)
+                nuid = possug;
+        if  (repg[0] && (possug = lookup_gname(repg)) != UNKNOWN_GID)
+                ngid = possug;
+        if  (nuid != Realuid  ||  ngid != Realgid)  {
+                if  (!(mp->btu_priv & BTM_WADMIN))
+                        return  XBNR_BAD_USER;
+                Realuid = nuid;
+                Realgid = ngid;
+        }
+        return  0;
 }
 
 /* Process requests to enqueue file */
@@ -934,37 +1013,71 @@ static void  process_q()
 	netid_t		whofrom;
 	PIDTYPE		pid;
 	jobno_t		jn;
-	struct	hhash	*frp;
 	BtuserRef	userpriv;
 	FILE		*outf;
 	Shipc		Oreq;
 	struct	ni_jobhdr	nih;
 	struct	nijobmsg	inj;
-#ifdef	STRUCT_SIG
-	struct	sigstruct_name  zch;
-	zch.sighandler_el = SIG_IGN;
-	sigmask_clear(zch);
-	zch.sigflags_el = SIGVEC_INTFLAG;
-	sigact_routine(QRFRESH, &zch, (struct sigstruct_name *) 0);
+#ifdef  HAVE_SIGACTION
+        sigset_t        sset;
+        sigemptyset(&sset);
+        sigaddset(&sset, QRFRESH);
+        sigprocmask(SIG_BLOCK, &sset, (sigset_t *) 0);
+#elif defined(HAVE_SIGVEC) || defined(HAVE_SIGVECTOR)
+        int     masked = siggetmask();
+        sigblock(masked | sigmask(QRFRESH));
 #else
-	signal(QRFRESH, SIG_IGN);
+        RETSIGTYPE  (*oldsig)(int);
+#ifdef  SIG_HOLD
+        oldsig = signal(QRFRESH, SIG_HOLD);
+#else
+        oldsig = signal(QRFRESH, SIG_IGN);
 #endif
-
-	if  ((sock = tcp_serv_accept(qsock, &whofrom)) < 0)
+#endif
+	if  ((sock = tcp_serv_accept(qsock, &whofrom)) < 0)  {
+#ifdef  HAVE_SIGACTION
+                sigprocmask(SIG_UNBLOCK, &sset, (sigset_t *) 0);
+#elif defined(HAVE_SIGVEC) || defined(HAVE_SIGVECTOR)
+                sigblock(masked);
+#else
+                signal(QRFRESH, oldsig);
+#endif
+        }
 		return;
 
 	if  (!sock_read(sock, (char *) &nih, sizeof(nih)))  {
 		close(sock);
+#ifdef  HAVE_SIGACTION
+                sigprocmask(SIG_UNBLOCK, &sset, (sigset_t *) 0);
+#elif defined(HAVE_SIGVEC) || defined(HAVE_SIGVECTOR)
+                sigblock(masked);
+#else
+                signal(QRFRESH, oldsig);
+#endif
 		return;
 	}
 
 	if  ((pid = fork()) < 0)  {
 		print_error($E{Cannot fork});
+#ifdef  HAVE_SIGACTION
+                sigprocmask(SIG_UNBLOCK, &sset, (sigset_t *) 0);
+#elif defined(HAVE_SIGVEC) || defined(HAVE_SIGVECTOR)
+                sigblock(masked);
+#else
+                signal(QRFRESH, oldsig);
+#endif
 		return;
 	}
 #ifndef	BUGGY_SIGCLD
 	if  (pid != 0)  {
 		close(sock);
+#ifdef  HAVE_SIGACTION
+                sigprocmask(SIG_UNBLOCK, &sset, (sigset_t *) 0);
+#elif defined(HAVE_SIGVEC) || defined(HAVE_SIGVECTOR)
+                sigblock(masked);
+#else
+                signal(QRFRESH, oldsig);
+#endif
 		return;
 	}
 #else
@@ -978,6 +1091,13 @@ static void  process_q()
 		PIDTYPE	wpid;
 		while  ((wpid = wait((int *) 0)) != pid  &&  (wpid >= 0 || errno == EINTR))
 			;
+#endif
+#ifdef  HAVE_SIGACTION
+                sigprocmask(SIG_UNBLOCK, &sset, (sigset_t *) 0);
+#elif defined(HAVE_SIGVEC) || defined(HAVE_SIGVECTOR)
+                sigblock(masked);
+#else
+                signal(QRFRESH, oldsig);
 #endif
 		close(sock);
 		return;
@@ -997,17 +1117,17 @@ static void  process_q()
 
 	JREQ = &Xbuffer->Ring[indx = getxbuf_serv()];
 
-	if  (!(frp = find_remote(whofrom)))  {
-		freexbuf_serv(indx);
-		tcpreply(sock, XBNR_UNKNOWN_CLIENT, 0);
-		exit(0);
-	}
-	if  ((ret = unpack_job(JREQ, &inj, joblength, frp->rem.hostid)) != 0)  {
+        /* Find out if host is client (only from UNIX though, use UDP for
+           Windows)
+           isclient = (frp = lookup_hhash(whofrom))  &&  frp->isclient;
+           Don't think we need this right now */
+
+        if  ((ret = unpack_job(JREQ, &inj, joblength, whofrom)) != 0)  {
 		freexbuf_serv(indx);
 		tcpreply(sock, ret, err_which);
 		exit(0);
 	}
-	if  ((ret = convert_username(frp, &nih, JREQ, &userpriv)) != 0)  {
+	if  ((ret = convert_unix_username(&nih, JREQ, &userpriv)) != 0)  {
 		freexbuf_serv(indx);
 		tcpreply(sock, ret, 0);
 		exit(0);
@@ -1071,103 +1191,58 @@ static void  process_q()
 
 static void  process()
 {
-	int	nret, highfd;
-	unsigned  nexttime;
+	int	highfd;
 	fd_set	ready;
+        struct  timeval  alrm;
+
+        alrm.tv_usec = 0;
 
 	highfd = qsock;
 	if  (uasock > highfd)
 		highfd = uasock;
 	if  (apirsock > highfd)
 		highfd = apirsock;
+
 	for  (;;)  {
 
-		alarm(nexttime = process_alarm());
+                /* If no timeouts in progress, don't bother with alarm */
+
+                struct  timeval  *ap = (struct timeval *) 0;
+                int  nret;
+                unsigned  nexttime = process_alarm();
+
+                if  (nexttime != 0)  {
+                        alrm.tv_sec = nexttime;
+                        ap = &alrm;
+                }
 
 		FD_ZERO(&ready);
 		FD_SET(qsock, &ready);
 		FD_SET(uasock, &ready);
-		if  (apirsock >= 0)
-			FD_SET(apirsock, &ready);
+		FD_SET(apirsock, &ready);
 
-		if  ((nret = select(highfd+1, &ready, (fd_set *) 0, (fd_set *) 0, (struct timeval *) 0)) < 0)  {
-			if  (errno == EINTR)  {
-				if  (had_alarm)  {
-					had_alarm = 0;
-					alarm(nexttime = process_alarm());
-				}
-				hadrfresh = 0;
+		if  ((nret = select(highfd+1, &ready, (fd_set *) 0, (fd_set *) 0, ap)) < 0)
+			if  (errno != EINTR)
+                                exit(0);
+
+                while  (nret > 0)  {
+                        if  (FD_ISSET(apirsock, &ready))  {
+                                process_api();
+                                nret--;
+                                continue;
+                        }
+                        if  (FD_ISSET(uasock, &ready))  {
+                                process_ua();
+                                nret--;
 				continue;
-			}
-			exit(0);
-		}
-		if  (nexttime != 0)
-			alarm(0);
-
-		if  (FD_ISSET(qsock, &ready))  {
-			process_q();
-			if  (--nret <= 0)
+                        }
+                        if  (FD_ISSET(qsock, &ready))  {
+                                process_q();
+                                nret--;
 				continue;
+                        }
 		}
-
-		if  (FD_ISSET(uasock, &ready))  {
-			process_ua();
-			if  (--nret <= 0)
-				continue;
-		}
-
-		if  (apirsock >= 0  &&  FD_ISSET(apirsock, &ready))
-			process_api();
 	}
-}
-
-void  trace_dtime(char *buf)
-{
-	time_t  now = time(0);
-	struct  tm  *tp = localtime(&now);
-	int	mon = tp->tm_mon+1, mday = tp->tm_mday;
-#ifdef	HAVE_TM_ZONE
-	if  (tp->tm_gmtoff <= -4 * 60 * 60)
-#else
-	if  (timezone >= 4 * 60 * 60)
-#endif
-	{
-		mday = mon;
-		mon = tp->tm_mday;
-	}
-	sprintf(buf, "%.2d/%.2d/%.2d|%.2d:%.2d:%.2d", mday, mon, tp->tm_year%100, tp->tm_hour, tp->tm_min, tp->tm_sec);
-}
-
-void  trace_op(const int_ugid_t uid, const char *op)
-{
-	char	tbuf[20];
-	trace_dtime(tbuf);
-	fprintf(tracefile, "%s|%.5d|%s|%s\n", tbuf, getpid(), prin_uname(uid), op);
-	fflush(tracefile);
-}
-
-void  trace_op_res(const int_ugid_t uid, const char *op, const char *res)
-{
-	char	tbuf[20];
-	trace_dtime(tbuf);
-	fprintf(tracefile, "%s|%.5d|%s|%s|%s\n", tbuf, getpid(), prin_uname(uid), op, res);
-	fflush(tracefile);
-}
-
-void  client_trace_op(const netid_t nid, const char *op)
-{
-	char	tbuf[20];
-	trace_dtime(tbuf);
-	fprintf(tracefile, "%s|%.5d|client:%s|%s\n", tbuf, getpid(), look_host(nid), op);
-	fflush(tracefile);
-}
-
-void  client_trace_op_name(const netid_t nid, const char *op, const char *uid)
-{
-	char	tbuf[20];
-	trace_dtime(tbuf);
-	fprintf(tracefile, "%s|%.5d|client:%s|%s|%s\n", tbuf, getpid(), look_host(nid), op, uid);
-	fflush(tracefile);
 }
 
 /* Ye olde main routine.
@@ -1185,7 +1260,7 @@ MAINFN_TYPE  main(int argc, char **argv)
 	struct	sigstruct_name	zign;
 #endif
 
-	versionprint(argv, "$Revision: 1.4 $", 1);
+	versionprint(argv, "$Revision: 1.5 $", 1);
 
 	if  ((progname = strrchr(argv[0], '/')))
 		progname++;
@@ -1226,22 +1301,18 @@ MAINFN_TYPE  main(int argc, char **argv)
 		return  E_SETUP;
 	}
 
-	/* Set up tracing perhaps */
+        /* Set timeout value */
 
-	trf = envprocess(XBNETTRACE);
-	tracing = atoi(trf);
-	free(trf);
-	if  (tracing)  {
-		trf = envprocess(XBNETTRFILE);
-		tracefile = fopen(trf, "a");
-		free(trf);
-		if  (!tracefile)
-			tracing = 0;
-	}
+        trf = envprocess(XBTIMEOUTS);
+        timeouts = atoi(trf);
+        free(trf);
+        if (timeouts == 0)
+                timeouts = NETTICKLE;
 
 	/* Initial processing of host file */
 
-	process_hfile();
+        read_hfiles();
+
 #ifdef	STRUCT_SIG
 	zign.sighandler_el = catchhup;
 	sigmask_clear(zign);
@@ -1283,26 +1354,20 @@ MAINFN_TYPE  main(int argc, char **argv)
 #endif
 	catchsigs(catchabort);
 #endif /* !DEBUG */
-#ifdef	STRUCT_SIG
-	zign.sighandler_el = catchalarm;
-	sigact_routine(SIGALRM, &zign, (struct sigstruct_name *) 0);
 #ifndef	BUGGY_SIGCLD
+#ifdef	STRUCT_SIG
 	zign.sighandler_el = SIG_IGN;
 #ifdef	SA_NOCLDWAIT
 	zign.sigflags_el |= SA_NOCLDWAIT;
 #endif
 	sigact_routine(SIGCLD, &zign, (struct sigstruct_name *) 0);
-#endif /* !BUGGY_SIGCLD */
 #else  /* !STRUCT_SIG */
-	signal(SIGALRM, catchalarm);
-#ifndef	BUGGY_SIGCLD
 	signal(SIGCLD, SIG_IGN);
-#endif /* !BUGGY_SIGCLD */
 #endif /* !STRUCT_SIG */
+#endif /* !BUGGY_SIGCLD */
 
-	lognprocess();
+        lognprocess();
 	initxbuffer(1);
-	send_askall();
 	process();
 	return  0;		/* Shut up compiler */
 }

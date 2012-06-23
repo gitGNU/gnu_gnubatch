@@ -68,6 +68,75 @@ static	char	Filename[] = __FILE__;
 int	holf_fd = -1;		/* Holiday file */
 static	unsigned	holf_mode;
 
+struct  udp_conn  {
+        struct  udp_conn  *next;                /* Next in hash chain */
+        time_t          lastop;                 /* Time of last op */
+        netid_t         hostid;                 /* Hostid involved */
+        int_ugid_t      host_uid;               /* User id to distinguish UNIX clients or UNKNOWN_UID */
+        int_ugid_t      uid;                    /* User id using */
+        int_ugid_t      gid;                    /* Ditto group id */
+        Btuser          privs;                  /* Permissions */
+        char            *username;              /* UNIX user name */
+        char            *groupname;             /* UNIX group name (FIXME) */
+};
+
+static  struct  udp_conn        *conn_hash[NETHASHMOD];
+
+/* These are mostly all to do with pending jobs from the old version of the
+   Windows client, however we do try to keep track of clients from UNIX hosts.
+   In those cases we track the user id (on the host) to try to distinguish different
+   users on the machine. Call find_conn with UNKNOWN_UID if we don't need to worry. */
+
+static  struct  udp_conn  *find_conn(const netid_t hostid, const int_ugid_t uid)
+{
+        struct  udp_conn  *fp;
+
+        for  (fp = conn_hash[calcnhash(hostid)];  fp;  fp = fp->next)
+                if  (fp->hostid == hostid  &&  (uid == UNKNOWN_UID || fp->host_uid == uid))
+                        return  fp;
+        return  (struct udp_conn *) 0;
+}
+
+/* Create a new connection structure for UDP ops */
+
+static  struct  udp_conn  *add_conn(const netid_t hostid)
+{
+        struct  udp_conn *fp = malloc(sizeof(struct udp_conn));
+        unsigned  hashv = calcnhash(hostid);
+        if  (!fp)
+                ABORT_NOMEM;
+
+        fp->next = conn_hash[hashv];
+        conn_hash[hashv] = fp;
+        fp->hostid = hostid;
+        fp->host_uid = UNKNOWN_UID;                       /* Fix this later if not Windows */
+        return  fp;
+}
+
+static  void    kill_conn(struct udp_conn *fp)
+{
+        struct  udp_conn  **fpp, *np;
+
+        fpp = &conn_hash[calcnhash(fp->hostid)];
+
+        while  ((np = *fpp))  {
+                if  (np == fp)  {
+                        *fpp = fp->next;
+                        free(fp->username);
+                        free(fp->groupname);
+                        free((char *) fp);
+                        return;
+                }
+                fpp = &np->next;
+        }
+
+        /* "We cannot get here" */
+        exit(E_SETUP);
+}
+
+/* Locate pending jobs, NB we assume only a few and we assume only from Windows so we
+   don't have to worry about multiple concurrent jobs from the same host */
+
 struct pend_job *find_pend(const netid_t whofrom)
 {
 	int	cnt;
@@ -139,7 +208,7 @@ static void  udp_send_to(char *vec, const int size, const netid_t whoto)
 	   bind something.  The remote uses our standard port.  */
 
 	for  (tries = 0;  tries < UDP_TRIES;  tries++)  {
-		if  ((sockfd = socket(AF_INET, SOCK_DGRAM, udpproto)) < 0)
+		if  ((sockfd = socket(AF_INET, SOCK_DGRAM, IPPROTO_UDP)) < 0)
 			return;
 		if  (bind(sockfd, (struct sockaddr *) &cli_addr, sizeof(cli_addr)) < 0)  {
 			close(sockfd);
@@ -153,41 +222,59 @@ static void  udp_send_to(char *vec, const int size, const netid_t whoto)
 	}
 }
 
-static void  udp_job_process(const netid_t whofrom, char *pmsg, int datalength, struct sockaddr_in *sinp)
+static  void  job_reply(struct sockaddr_in *sinp, const int code)
+{
+        struct	client_if  reply;
+        reply.code = code;
+        sendto(uasock, (char *) &reply, sizeof(reply), 0, (struct sockaddr *) sinp, sizeof(struct sockaddr_in));
+}
+
+static  void  job_reply_param(struct sockaddr_in *sinp, const int code, const LONG param)
+{
+        struct	client_if  reply;
+        reply.code = code;
+        reply.param = htonl(param);
+        sendto(uasock, (char *) &reply, sizeof(reply), 0, (struct sockaddr *) sinp, sizeof(struct sockaddr_in));
+}
+
+/* Process job queueing from UDP which we only do for Windows clients. */
+
+static void  udp_job_process(struct sockaddr_in *sinp, char *pmsg, int datalength)
 {
 	int			ret = 0, tries;
+        netid_t                 whofrom = translate_netid(sinp);
 	ULONG			indx;
-	struct	hhash		*frp;
+	struct	udp_conn	*fp;
 	struct	ni_jobhdr	*nih;
 	struct	pend_job	*pj;
-	struct	client_if	reply;
+        time_t                  now = time((time_t *) 0);
 	Shipc			Oreq;
 
-	if  (!(frp = find_remote(whofrom)))  {
-		if  (tracing & TRACE_CLIOPEND)
-			client_trace_op(whofrom, "Unknown client");
-		ret = XBNR_UNKNOWN_CLIENT;
-		goto  senderr;
+        /* We are only expecting this from Windows clients, so we reject people we
+           don't know or are from UNIX hosts. */
+
+	if  (!(fp = find_conn(whofrom, UNKNOWN_UID))  ||  fp->host_uid != UNKNOWN_UID)  {
+                job_reply(sinp, XBNR_UNKNOWN_CLIENT);
+                return;
 	}
 
 	if  (datalength < sizeof(struct ni_jobhdr))  {
-		if  (tracing & TRACE_CLIOPEND)
-			client_trace_op(whofrom, "jobproc badhdr");
-		ret = XBNR_BAD_JOBDATA;
-		goto  senderr;
+		job_reply(sinp, XBNR_BAD_JOBDATA);
+		return;
 	}
 
 	pj = find_pend(whofrom);
+        fp->lastop = now;
+
+        /* Get rest of message and pointer to header */
 	nih = (struct ni_jobhdr *) pmsg;
 	pmsg += sizeof(struct ni_jobhdr);
 	datalength -= sizeof(struct ni_jobhdr);
 
 	switch  (nih->code)  {
 	default:
-		if  (tracing & TRACE_CLIOPEND)
-			client_trace_op(whofrom, "Unknown cmd");
-		reply.code = SV_CL_UNKNOWNC;
-		goto  senderr;
+		job_reply(sinp, SV_CL_UNKNOWNC);
+                return;
 
 	case  CL_SV_STARTJOB:
 
@@ -196,73 +283,59 @@ static void  udp_job_process(const netid_t whofrom, char *pmsg, int datalength, 
 		abort_job(pj);
 		pj = add_pend(whofrom);
 		if  (!pj)  {
-			if  (tracing & TRACE_CLIOPEND)
-				client_trace_op(whofrom, "Nomem queue file");
-			reply.code = SV_CL_PEND_FULL;
-			goto  senderr;
+                        job_reply(sinp, SV_CL_PEND_FULL);
+			return;
 		}
-		pj->timeout = frp->timeout;
-		pj->lastaction = time((time_t *) 0);
+		pj->lastaction = now;
 		pj->joblength = pj->lengthexp = ntohs(nih->joblength);
 		if  (pj->lengthexp > sizeof(struct nijobmsg) || pj->lengthexp < (unsigned) datalength)  {
-			if  (tracing & TRACE_CLIOPEND)
-				client_trace_op(whofrom, "addjob buffer err");
-			ret = XBNR_BAD_JOBDATA;
-			goto  senderr;
+			job_reply(sinp, XBNR_BAD_JOBDATA);
+			return;
 		}
 		pj->lengthexp -= datalength;
 		pj->cpos = (char *) &pj->jobin;
 		BLOCK_COPY(pj->cpos, pmsg, datalength);
 		pj->cpos += datalength;
-		goto  sendok;
+		job_reply(sinp, SV_CL_ACK);
+                return;
 
 	case  CL_SV_CONTJOB:
 		if  ((unsigned) datalength > pj->lengthexp)  {
-			if  (tracing & TRACE_CLIOPEND)
-				client_trace_op(whofrom, "contjob buffer");
-			ret = XBNR_BAD_JOBDATA;
-			goto  senderr;
+			job_reply(sinp, XBNR_BAD_JOBDATA);
+			return;
 		}
 		BLOCK_COPY(pj->cpos, pmsg, datalength);
 		pj->cpos += datalength;
 		pj->lengthexp -= datalength;
 
 		if  (pj->lengthexp == 0)  {
-			BtuserRef	cli_priv;
 
 			/* Finished with job, construct output job */
 
 			if  ((ret = unpack_job(&pj->jobout, &pj->jobin, pj->joblength, whofrom)) != 0)  {
-				reply.param = htonl((LONG) err_which);
+                                job_reply_param(sinp, ret, err_which);
 				abort_job(pj);
-				if  (tracing & TRACE_CLIOPEND)
-					client_trace_op(whofrom, "contjob err");
-				goto  senderr;
+				return;
 			}
 
-			if  ((ret = convert_username(frp, nih, &pj->jobout, &cli_priv)) != 0)  {
-				reply.param = 0;
-				abort_job(pj);
-				if  (tracing & TRACE_CLIOPEND)
-					client_trace_op_name(whofrom, "Contjob convuser", frp->actname);
-				goto  senderr;
-			}
+			/* Stick user and group into job */
 
-			/* Stick user and group into job to keep track
-			   of them.  (Realuid/realgid get set by
-			   convert_username).  */
-
-			pj->jobout.h.bj_mode.o_uid = pj->jobout.h.bj_mode.c_uid = Realuid;
-			pj->jobout.h.bj_mode.o_gid = pj->jobout.h.bj_mode.c_gid = Realgid;
+			pj->jobout.h.bj_mode.o_uid = pj->jobout.h.bj_mode.c_uid = fp->uid;
+			pj->jobout.h.bj_mode.o_gid = pj->jobout.h.bj_mode.c_gid = fp->gid;
+                        strncpy(pj->jobout.h.bj_mode.o_user, fp->username, UIDSIZE);
+                        strncpy(pj->jobout.h.bj_mode.c_user, fp->username, UIDSIZE);
+                        strncpy(pj->jobout.h.bj_mode.o_group, fp->groupname, UIDSIZE);
+                        strncpy(pj->jobout.h.bj_mode.c_group, fp->groupname, UIDSIZE);
 
 			if  ((ret = unpack_cavars(&pj->jobout, &pj->jobin)) != 0)  {
 				abort_job(pj);
-				goto  senderr;
+                                job_reply(sinp, ret);
+                                return;
 			}
-			if  ((ret = validate_job(&pj->jobout, cli_priv)) != 0)  {
-				reply.param = 0;
+			if  ((ret = validate_job(&pj->jobout, &fp->privs)) != 0)  {
+				job_reply_param(sinp, ret, 0);
 				abort_job(pj);
-				goto  senderr;
+				return;
 			}
 
 			/* Generate job number and output file vaguely from netid etc.  */
@@ -272,46 +345,38 @@ static void  udp_job_process(const netid_t whofrom, char *pmsg, int datalength, 
 			pj->jobout.h.bj_job = pj->jobn;
 			pj->jobout.h.bj_time = pj->lastaction;
 		}
-		goto  sendok;
+		job_reply(sinp, SV_CL_ACK);
+                return;
 
 	case  CL_SV_JOBDATA:
 		if  (!pj)  {
-			if  (tracing & TRACE_CLIOPEND)
-				client_trace_op(whofrom, "Unknown job (job data)");
-			ret = SV_CL_UNKNOWNJ;
-			goto  senderr;
+			job_reply(sinp, SV_CL_UNKNOWNJ);
+			return;
 		}
 		if  (!pj->out_f  ||  pj->lengthexp != 0)  {
-			if  (tracing & TRACE_CLIOPEND)
-				client_trace_op(whofrom, "Job data buffer");
-			ret = SV_CL_BADPROTO;
-			goto  senderr;
+			job_reply(sinp, SV_CL_BADPROTO);
+			return;
 		}
-		pj->lastaction = time((time_t *) 0);
+		pj->lastaction = now;
 		while  (--datalength >= 0)  {
 			if  (putc(*(unsigned char *)pmsg, pj->out_f) == EOF)  {
 				abort_job(pj);
-				if  (tracing & TRACE_CLIOPEND)
-					client_trace_op(whofrom, "File system full");
-				ret = XBNR_FILE_FULL;
-				goto  senderr;
+				job_reply(sinp, XBNR_FILE_FULL);
+				return;
 			}
 			pmsg++;
 		}
-		goto  sendok;
+		job_reply(sinp, SV_CL_ACK);
+                return;
 
 	case  CL_SV_ENDJOB:
 		if  (!pj)  {
-			ret = SV_CL_UNKNOWNJ;
-			if  (tracing & TRACE_CLIOPEND)
-				client_trace_op(whofrom, "Unknown job (end job)");
-			goto  senderr;
+			job_reply(sinp, SV_CL_UNKNOWNJ);
+			return;
 		}
 		if  (!pj->out_f  ||  pj->lengthexp != 0)  {
-			if  (tracing & TRACE_CLIOPEND)
-				client_trace_op(whofrom, "Buffer error (end job)");
-			ret = SV_CL_BADPROTO;
-			goto  senderr;
+			job_reply(sinp, SV_CL_BADPROTO);
+			return;
 		}
 		JREQ = &Xbuffer->Ring[indx = getxbuf_serv()];
 		BLOCK_ZERO(&Oreq, sizeof(Oreq));
@@ -333,50 +398,41 @@ static void  udp_job_process(const netid_t whofrom, char *pmsg, int datalength, 
 		}
 		freexbuf_serv(indx);
 		abort_job(pj);
-		if  (tracing & TRACE_CLIOPEND)
-			client_trace_op(whofrom, "msg q full");
-		ret = XBNR_QFULL;
-		goto  senderr;
+                job_reply(sinp, XBNR_QFULL);
+                return;
 
 	sentok:
 		freexbuf_serv(indx);
-		reply.param = htonl(JREQ->h.bj_job);
 		if  ((ret = readreply()) != J_OK)  {
-			reply.param = htonl((LONG) ret);
-			ret = XBNR_ERR;
+                        job_reply_param(sinp, XBNR_ERR, ret);
 			abort_job(pj);
-			if  (tracing & TRACE_CLIOPEND)
-				client_trace_op_name(whofrom, "Job rejected", frp->actname);
-			goto  senderr;
+			return;
 		}
 
 		fclose(pj->out_f);
 		pj->out_f = (FILE *) 0;
 		pj->clientfrom = 0;
-		goto  sendok;
+		job_reply_param(sinp, SV_CL_ACK, JREQ->h.bj_job);
+                return;
 
 	case  CL_SV_HANGON:
 		if  (!pj)  {
-			if  (tracing & TRACE_CLIOPEND)
-				client_trace_op(whofrom, "unknown job (hangon)");
-			ret = SV_CL_UNKNOWNJ;
-			goto  senderr;
+			job_reply(sinp, SV_CL_UNKNOWNJ);
+			return;
 		}
-		pj->lastaction = time((time_t *) 0);
+		pj->lastaction = now;
 		pj->prodsent = 0;
-		goto  sendok;
+		job_reply(sinp, SV_CL_ACK);
+                return;
 	}
+}
 
- sendok:
-	if  (tracing & TRACE_CLIOPEND)
-		client_trace_op_name(whofrom, "Job OK", frp->actname);
-	reply.code = SV_CL_ACK;
-	udp_send_vec((char *) &reply, sizeof(reply), sinp);
-	return;
+/* Send end of list marker (also sent to indicate no permission etc) */
 
- senderr:
-	reply.code = (unsigned char) ret;
-	udp_send_vec((char *) &reply, sizeof(reply), sinp);
+static  void    udp_send_end(struct sockaddr_in *sinp)
+{
+        char    reply = '\0';
+        udp_send_vec(&reply, 1, sinp);
 }
 
 static	void	udp_send_uglist(struct sockaddr_in *sinp, char **(*ugfn)(const char *))
@@ -402,95 +458,128 @@ static	void	udp_send_uglist(struct sockaddr_in *sinp, char **(*ugfn)(const char 
 		free((char *) ul);
 	}
 
-	/* Mark end with a null */
-
-	reply[0] = '\0';
-	udp_send_vec(reply, 1, sinp);
+        udp_send_end(sinp);
 }
 
-static void  udp_send_vlist(const netid_t whofrom, const char *pmsg, const int datalen, struct sockaddr_in *sinp)
+static void  udp_send_vlist(struct sockaddr_in *sinp, struct ua_venq *uav, const int datalen)
 {
-	struct	hhash	*frp;
-	const	struct	ua_venq	*venq;
-	int		rp = 0, nn;
-	unsigned	perm;
-	BtuserRef	mpriv;
+        netid_t whofrom = translate_netid(sinp);
+        struct  udp_conn  *fp;
+        int		rp = 0, nn;
+        int_ugid_t      ruid = UNKNOWN_UID;     /* Remote user id */
 	char	reply[CL_SV_BUFFSIZE];
 
-	if  (datalen != sizeof(struct ua_venq))
-		goto  badret;
-	if  (!(frp = find_remote(whofrom)))
-		goto  badret;
+        if  (datalen != sizeof(struct ua_venq))  {
+		udp_send_end(sinp);
+		return;
+	}
 
-	frp->lastaction = time((time_t *) 0); /* Last activity */
-	venq = (const struct ua_venq *) pmsg;
-	perm = ntohs(venq->uav_perm);
-	if  (frp->rem.ht_flags & HT_DOS)
-		Realuid = (uid_t) lookup_uname(frp->dosname);
-	else
-		Realuid = (uid_t) lookup_uname(venq->uname);
-	Realgid = (gid_t) lastgid;
-	if  (!(mpriv = getbtuentry(Realuid)))
-		goto  badret;
-	rvarfile(1);
+        /* If this comes from a UNIX host, we have null in the user name and
+           the uid (at the other end) in the group name field */
+
+        if  (uav->uname[0] == '\0')
+                ruid = ntohl(uav->uav_un.uav_uid);
+
+        if  (!(fp = find_conn(whofrom, ruid)))  {
+                udp_send_end(sinp);
+                return;
+        }
+
+        /* Have to set globals Realuid and Realgid for benefit of mpermitted */
+
+        Realuid = fp->uid;
+        Realgid = fp->gid;
+        fp->lastop = time((time_t *) 0); /* Last activity */
+        rvarfile(1);
 
 	/* These aren't sorted, that's the other end's problem.  */
 
 	for  (nn = 0;  nn < VAR_HASHMOD;  nn++)  {
 		vhash_t		hp;
-		struct	Ventry	*fp;
+		struct	Ventry	*ventp;
 		BtvarRef	vp;
-		for  (hp = Var_seg.vhash[nn];  hp >= 0;  hp = fp->Vnext)  {
-			fp = &Var_seg.vlist[hp];
-			vp = &fp->Vent;
-			if  ((vp->var_flags & VF_EXPORT)  &&  mpermitted(&vp->var_mode, perm, 0))  {
-				unsigned  lng = strlen(vp->var_name), hlng, tlng;
-				char	*hname;
-				if  (vp->var_id.hostid)  {
-					hname = look_host(vp->var_id.hostid);
-					hlng = strlen(hname);
-				}
-				else  {
-					hname = myhostname;
-					hlng = myhostl;
-				}
-				tlng = lng + hlng + 2 + BTV_NAME; /* Colon and null */
-				if  (tlng + rp > CL_SV_BUFFSIZE)  {
-					udp_send_vec(reply, rp, sinp);
-					rp = 0;
-				}
-				strcpy(&reply[rp], hname);
+                unsigned        lng, hlng, tlng;
+                char            *hname;
+
+		for  (hp = Var_seg.vhash[nn];  hp >= 0;  hp = ventp->Vnext)  {
+			ventp = &Var_seg.vlist[hp];
+			vp = &ventp->Vent;                 /* Actual variable structure */
+
+                        /* Skip variable if it is not exported and we aren't looking at it from
+                           the local machine. (Theory: we can't see variables on other machines which
+                           aren't exported) */
+
+                        if  (!(vp->var_flags & VF_EXPORT)  &&  whofrom != 0L)
+                                continue;
+
+                        /* Skip variables which the permissions don't let us see */
+
+			if  (!mpermitted(&vp->var_mode, BTM_SHOW, fp->privs.btu_priv))
+                                continue;
+
+                        /* Get length of variable name in lng, total length in tlng */
+
+                        lng = strlen(vp->var_name);
+
+                        if  (vp->var_id.hostid)  {
+                                hname = look_host(vp->var_id.hostid);
+                                hlng = strlen(hname);
+                                tlng = hlng + lng + 2;         /* 2 for colon and null */
+                        }
+                        else  if  (whofrom != 0L)  {
+                                hname = myhostname;
+                                hlng = myhostl;
+                                tlng = myhostl + lng + 2;
+                        }
+                        else  {
+                                hlng = 0;
+                                tlng = lng + 1;
+                        }
+
+                        /* Spew out what we've got if it's overflowing */
+
+                        if  (tlng + rp > CL_SV_BUFFSIZE)  {
+                                udp_send_vec(reply, rp, sinp);
+				rp = 0;
+			}
+
+                        /* Assemble the var */
+
+                        if  (hlng != 0)  {      /* Putting host name in */
+                                strcpy(&reply[rp], hname);
 				rp += hlng;
 				reply[rp++] = ':';
-				strcpy(&reply[rp], vp->var_name);
-				rp += lng + 1;
-			}
-		}
+                        }
+			strcpy(&reply[rp], vp->var_name);
+			rp += lng + 1;
+                }
 	}
 	if  (rp > 0)
 		udp_send_vec(reply, rp, sinp);
 
- badret:
-	/* Mark end with a null */
-
-	reply[0] = '\0';
-	udp_send_vec(reply, 1, sinp);
-	if  (tracing & TRACE_CLIOPEND)
-		client_trace_op(whofrom, "send vlist done");
+        udp_send_end(sinp);
 }
 
-static void  udp_send_cilist(const netid_t whofrom, struct sockaddr_in *sinp)
+static void  udp_send_cilist(struct sockaddr_in *sinp)
 {
+        netid_t whofrom = translate_netid(sinp);
+        struct  udp_conn        *fp;
 	int		rp = 0;
 	unsigned	cnt;
 	CmdintRef	ocip;
-	struct	hhash	*frp;
 	char	reply[CL_SV_BUFFSIZE];
 
-	if  (!(frp = find_remote(whofrom)))
-		goto  badret;
+        /* We don't really care who uses this */
 
-	frp->lastaction = time((time_t *) 0);
+        if  (!(fp = find_conn(whofrom, UNKNOWN_UID)))  {
+                udp_send_end(sinp);
+                return;
+        }
+
+        /* If this is a UNIX user we might be updating the wrong one here but it probably
+           doesn't matter */
+
+        fp->lastop = time((time_t *) 0);
 	rereadcif();
 
 	ocip = (CmdintRef) reply;
@@ -514,13 +603,8 @@ static void  udp_send_cilist(const netid_t whofrom, struct sockaddr_in *sinp)
 	}
 	if  (rp > 0)
 		udp_send_vec(reply, rp, sinp);
- badret:
-	/* Mark end with a null */
 
-	reply[0] = '\0';
-	udp_send_vec(reply, 1, sinp);
-	if  (tracing & TRACE_CLIOPEND)
-		client_trace_op(whofrom, "send cilist-OK");
+        udp_send_end(sinp);
 }
 
 /* Get a holiday year */
@@ -536,7 +620,7 @@ void  get_hf(const unsigned year, char *reply)
 
 	if  (holf_fd >= 0)  {
 		lseek(holf_fd, (long) (year * YVECSIZE), 0);
-		read(holf_fd, reply, YVECSIZE);
+		Ignored_error = read(holf_fd, reply, YVECSIZE);
 	}
 }
 
@@ -555,10 +639,10 @@ void  put_hf(const unsigned year, char *reply)
 			holf_fd = open(fname, O_RDWR|O_CREAT, 0644);
 #ifdef	HAVE_FCHOWN
 			if  (Daemuid != ROOTID)
-				fchown(holf_fd, Daemuid, Daemgid);
+				Ignored_error = fchown(holf_fd, Daemuid, Daemgid);
 #else
 			if  (Daemuid != ROOTID)
-				chown(fname, Daemuid, Daemgid);
+				Ignored_error = chown(fname, Daemuid, Daemgid);
 #endif
 		}
 		holf_mode = O_RDWR;
@@ -567,34 +651,26 @@ void  put_hf(const unsigned year, char *reply)
 
 	if  (holf_fd >= 0)  {
 		lseek(holf_fd, (long) (year * YVECSIZE), 0);
-		write(holf_fd, reply, YVECSIZE);
+		Ignored_error = write(holf_fd, reply, YVECSIZE);
 	}
 }
 
-static void  udp_send_hlist(const netid_t whofrom, const char *pmsg, const int datalen, struct sockaddr_in *sinp)
+static void  udp_send_hlist(struct sockaddr_in *sinp, const char *pmsg, const int datalen)
 {
-	const	struct	ua_venq	*venq;
-	unsigned	year;
-	struct	hhash	*frp;
-	char	reply[CL_SV_BUFFSIZE];
+        netid_t whofrom = translate_netid(sinp);
+	struct  udp_conn        *fp;
+        char	reply[CL_SV_BUFFSIZE];
 
 	/* If read doesn't read anything, just return zeroes */
 
 	BLOCK_ZERO(reply, YVECSIZE);
-	if  (datalen != sizeof(struct ua_venq))
-		goto  badret;
-	if  (!(frp = find_remote(whofrom)))
-		goto  badret;
-
-	venq = (const struct ua_venq *) pmsg;
-	year = ntohs(venq->uav_perm);
-	get_hf(year, reply);
-	frp->lastaction = time((time_t *) 0);
-
- badret:
-	udp_send_vec(reply, YVECSIZE, sinp);
-	if  (tracing & TRACE_CLIOPEND)
-		client_trace_op(whofrom, "send hlist done");
+	if  (datalen == sizeof(struct ua_venq)  &&  (fp = find_conn(whofrom, UNKNOWN_UID)))  {
+                const	struct	ua_venq	*venq = (const struct ua_venq *) pmsg;
+                unsigned  year = ntohs(venq->uav_perm);
+                get_hf(year, reply);
+                fp->lastop = time((time_t *) 0);
+        }
+        udp_send_end(sinp);
 }
 
 int  checkpw(const char *name, const char *passwd)
@@ -622,12 +698,12 @@ int  checkpw(const char *name, const char *passwd)
 		close(ipfd[0]);
 		if  (opfd[0] != 0)  {
 			close(0);
-			dup(opfd[0]);
+			Ignored_error = dup(opfd[0]);
 			close(opfd[0]);
 		}
 		if  (ipfd[1] != 1)  {
 			close(1);
-			dup(ipfd[1]);
+			Ignored_error = dup(ipfd[1]);
 			close(ipfd[1]);
 		}
 		execl(btpwnam, btpwnam, name, (char *) 0);
@@ -640,9 +716,9 @@ int  checkpw(const char *name, const char *passwd)
 		close(opfd[1]);
 		return  0;
 	}
-	write(opfd[1], passwd, strlen(passwd));
+	Ignored_error = write(opfd[1], passwd, strlen(passwd));
 	rbuf[0] = '\n';
-	write(opfd[1], rbuf, sizeof(rbuf));
+	Ignored_error = write(opfd[1], rbuf, sizeof(rbuf));
 	close(opfd[1]);
 	if  (read(ipfd[0], rbuf, sizeof(rbuf)) != sizeof(rbuf))  {
 		close(ipfd[0]);
@@ -657,11 +733,10 @@ int  checkpw(const char *name, const char *passwd)
    systems support them and I don't think that we use this
    sufficiently often.  */
 
-int  chk_vgroup(const int_ugid_t uid, const char *gname)
+int  chk_vgroup(const char *uname, const char *gname)
 {
 	struct	group	*gg = getgrnam(gname);
 	char	**mems;
-	char	*unam = prin_uname(uid);
 
 	endgrent();
 
@@ -669,7 +744,7 @@ int  chk_vgroup(const int_ugid_t uid, const char *gname)
 		return  0;
 
 	while  (*mems)  {
-		if  (strcmp(*mems, unam) == 0)
+		if  (strcmp(*mems, uname) == 0)
 			return  1;
 		mems++;
 	}
@@ -678,7 +753,7 @@ int  chk_vgroup(const int_ugid_t uid, const char *gname)
 
 /* Tell scheduler about new user.  */
 
-void  tell_sched_roam(const netid_t netid, const char *unam, const char *gnam)
+void  tell_sched_roam(const netid_t netid, const int_ugid_t ruid, const char *unam, const char *gnam)
 {
 	Shipc	nmsg;
 
@@ -687,563 +762,433 @@ void  tell_sched_roam(const netid_t netid, const char *unam, const char *gnam)
 	nmsg.sh_params.mcode = N_ROAMUSER;
 	nmsg.sh_params.upid = getpid();
 	nmsg.sh_un.sh_n.hostid = netid;
+        nmsg.sh_un.sh_n.remuid = ruid;
+        if  (ruid == UNKNOWN_UID)
+                nmsg.sh_un.sh_n.ht_flags = HT_DOS;
+        nmsg.sh_un.sh_n.ht_flags |= HT_ROAMUSER;
 	strncpy(nmsg.sh_un.sh_n.hostname, unam, HOSTNSIZE);
 	strncpy(nmsg.sh_un.sh_n.alias, gnam, HOSTNSIZE);
 	msgsnd(Ctrl_chan, (struct msgbuf *) &nmsg, sizeof(Shreq) + sizeof(struct remote), 0); /* Not expecting reply */
 }
 
-static void  init_palsmsg(struct ua_pal *pm, struct hhash *frp)
+/* Bad return from enquiry - we return the errors in the user id field of
+   the permissions structure, which is otherwise useless.  */
+
+static  void  enq_badret(struct sockaddr_in *sinp, const int code)
 {
-	BLOCK_ZERO(pm, sizeof(struct ua_pal));
-	pm->uap_op = SV_SV_LOGGEDU;
-	pm->uap_netid = frp->rem.hostid;
-	strncpy(pm->uap_name, frp->actname, UIDSIZE);
-	strncpy(pm->uap_grp, prin_gname(frp->rem.n_gid), UIDSIZE);
-	strncpy(pm->uap_wname, frp->dosname, UIDSIZE);
+        struct  ua_reply  rep;
+        /* This turns off btu_isvalid too so other end knows we're complaining,
+           we just plonk the error code in the user field */
+        BLOCK_ZERO(&rep, sizeof(rep));
+        rep.ua_perm.btu_user = htonl((LONG) code);
+	udp_send_vec((char *) &rep, sizeof(struct ua_reply), sinp);
 }
 
-/* Tell other xbnetservs about new user.  */
-
-void  tell_friends(struct hhash *frp)
+static  void  bad_log(struct sockaddr_in *sinp, const int code)
 {
-	unsigned	cnt;
-	struct	ua_pal  palsmsg;
-
-	init_palsmsg(&palsmsg, frp);
-
-	for  (cnt = 0;  cnt < NETHASHMOD;  cnt++)  {
-		struct	hhash	*hp;
-		for  (hp = nhashtab[cnt];  hp;  hp = hp->hn_next)
-			if  ((hp->rem.ht_flags & (HT_DOS|HT_TRUSTED)) == HT_TRUSTED)  {
-				if  (tracing & TRACE_SYSOP)
-					client_trace_op_name(hp->rem.hostid, "tell friends", frp->actname);
-				udp_send_to((char *) &palsmsg, sizeof(palsmsg), hp->rem.hostid);
-			}
-	}
-
-	tell_sched_roam(frp->rem.hostid, frp->actname, palsmsg.uap_grp);
-}
-
-/* Check password status in login/enquiries on roaming users, and "tell friends" */
-
-static void  set_pwstatus(struct ua_login *inmsg, struct hhash *frp, struct cluhash *cp)
-{
-	if  (cp->rem.ht_flags & HT_PWCHECK  ||  (cp->machname  &&  ncstrcmp(cp->machname, inmsg->ual_machname) != 0))  {
-		frp->flags = UAL_NOK;
-		if  (inmsg->ual_op != UAL_LOGIN)  {
-			if  (tracing & TRACE_CLIOPEND)
-				client_trace_op_name(frp->rem.hostid, "No pw", frp->actname);
-			return;
-		}
-		if  (!checkpw(frp->actname, inmsg->ual_passwd))  {
-			if  (tracing & TRACE_CLIOPEND)
-				client_trace_op_name(frp->rem.hostid, "Bad pw", frp->actname);
-			frp->flags = UAL_INVP;
-			return;
-		}
-	}
-	frp->flags = UAL_OK;
-	tell_friends(frp);
-}
-
-/* Make name lower case - assumed at most UIDSIZE long, but we don't trust it.  */
-
-static char *lcify(const char *orig)
-{
-	static	char	result[UIDSIZE+1];
-	int	cnt = 0;
-
-	while  (*orig  &&  cnt < UIDSIZE)
-		result[cnt++] = tolower(*orig++);
-	result[cnt] = '\0';
-	return  result;
-}
-
-static struct cluhash *look_clu(const char *winname)
-{
-	struct	cluhash	*cp;
-	unsigned  hval = calc_clu_hash(winname);
-
-	for  (cp = cluhashtab[hval];  cp;  cp = cp->next)
-		if  (ncstrcmp(cp->rem.hostname, winname) == 0  &&
-		     (lookup_uname(cp->rem.hostname) != UNKNOWN_UID  ||  lookup_uname(cp->rem.alias) != UNKNOWN_UID))
-			return  cp;
-	for  (cp = cluhashtab[hval];  cp;  cp = cp->alias_next)
-		if  (ncstrcmp(cp->rem.alias, winname) == 0  &&
-		     (lookup_uname(cp->rem.hostname) != UNKNOWN_UID  ||  lookup_uname(cp->rem.alias) != UNKNOWN_UID))
-			return  cp;
-	/*  If a default user is supplied, use that */
-	winname = XBDEFNAME;
-	for  (cp = cluhashtab[calc_clu_hash(winname)];  cp;  cp = cp->next)
-		if  (ncstrcmp(cp->rem.hostname, winname) == 0  &&  lookup_uname(cp->rem.alias) != UNKNOWN_UID)
-			return  cp;
-	return  (struct cluhash *) 0;
-}
-
-static void  look_roam_ug(struct hhash *frp, struct cluhash *cp)
-{
-	int_ugid_t	nuid;
-
-	if  ((nuid = lookup_uname(cp->rem.hostname)) != UNKNOWN_UID)  {
-		frp->actname = stracpy(cp->rem.hostname);
-		frp->rem.n_uid = nuid;
-		frp->rem.n_gid = lastgid;
-	}
-	else  if  ((nuid = lookup_uname(cp->rem.alias)) != UNKNOWN_UID)  {
-		frp->actname = stracpy(cp->rem.alias);
-		frp->rem.n_uid = nuid;
-		frp->rem.n_gid = lastgid;
-	}
-	else  {
-		frp->actname = stracpy(prin_uname(Daemuid));
-		frp->rem.n_uid = Daemuid;
-		frp->rem.n_gid = Daemgid;
-	}
-}
-
-struct cluhash *update_roam_name(struct hhash *frp, const char *name)
-{
-	struct	cluhash	*cp = look_clu(name);
-
-	if  (cp)  {
-		free(frp->dosname);
-		frp->dosname = stracpy(name);
-		free(frp->actname);
-		look_roam_ug(frp, cp);
-		frp->rem.ht_flags = cp->rem.ht_flags;
-		frp->timeout = cp->rem.ht_timeout;
-		frp->lastaction = time((time_t *) 0);
-	}
-	return  cp;
-}
-
-struct cluhash *new_roam_name(const netid_t whofrom, struct hhash **frpp, const char *name)
-{
-	struct	cluhash  *cp;
-
-	if  ((cp = look_clu(name)))  {
-
-		unsigned  nhval;
-		struct	hhash	*frp;
-
-		/* Allocate and put a new structure on host hash list. */
-
-		if  (!(frp = (struct hhash *) malloc(sizeof(struct hhash))))
-			ABORT_NOMEM;
-
-		BLOCK_ZERO(frp, sizeof(struct hhash));
-		nhval = calcnhash(whofrom);
-		frp->hn_next = nhashtab[nhval];
-		nhashtab[nhval] = frp;
-		frp->rem = cp->rem;
-		frp->rem.hostid = whofrom;
-		frp->timeout = frp->rem.ht_timeout;
-		frp->lastaction = time((time_t *) 0);
-		frp->dosname = stracpy(name);
-		look_roam_ug(frp, cp);
-		*frpp = frp;
-	}
-	return  cp;
-}
-
-int  update_nonroam_name(struct hhash *frp, const char *name)
-{
-	int_ugid_t	nuid;
-
-	free(frp->actname);
-	frp->actname = stracpy(name);
-	if  ((nuid = lookup_uname(frp->actname)) == UNKNOWN_UID)  {
-		if  ((nuid = lookup_uname(lcify(name))) == UNKNOWN_UID)  {
-			frp->flags = UAL_INVU;
-			return  0;
-		}
-		free(frp->actname);
-		frp->actname = stracpy(lcify(name));
-	}
-	frp->rem.n_uid = nuid;
-	frp->rem.n_gid = lastgid;
-	frp->lastaction = time((time_t *) 0);
-	return  1;
-}
-
-static void  do_logout(struct hhash *frp)
-{
-	if  (frp->rem.ht_flags & HT_ROAMUSER)  {
-
-		struct  hhash  **hpp, *hp;
-
-		/* Roaming user, get rid of record from hash chain.
-		   We "cannot" fall off the bottom of this loop,
-		   but we write it securely don't we...  */
-
-		for  (hpp = &nhashtab[calcnhash(frp->rem.hostid)]; (hp = *hpp); hpp = &hp->hn_next)
-			if  (hp == frp)  {
-				*hpp = hp->hn_next;
-				free(frp->actname);
-				free(frp->dosname);
-				free((char *) frp);
-				break;
-			}
-	}
-	else  {
-
-		/* Non roaming-user case, disregard it unless we have
-		   a non-standard login, whereupon we fix it back
-		   to standard login.  */
-
-		if  (strcmp(frp->actname, frp->dosname) != 0)  {
-			free(frp->actname);
-			frp->actname = stracpy(frp->dosname);
-			frp->flags = frp->rem.ht_flags & HT_PWCHECK? UAL_NOK: UAL_OK;
-		}
-
-		/* Worry about that again tomorrow unless we hear back */
-		frp->lastaction = time((time_t *) 0) + 3600L * 24;
-	}
-}
-
-/* Handle logins and initial enquiries, doing as much as possible.  */
-
-static void  udp_login(const netid_t whofrom, struct ua_login *inmsg, const int inlng, struct sockaddr_in *sinp)
-{
-	struct	ua_login	reply;
-
-	BLOCK_ZERO(&reply, sizeof(reply));	/* Maybe this is paranoid but with passwords kicking about..... */
-
-	if  (inlng != sizeof(struct ua_login))  {
-		if  (tracing & TRACE_CLIOPEND)
-			client_trace_op(whofrom, "Login struct err");
-		reply.ual_op = SV_CL_BADPROTO;
-		goto  sendret;
-	}
-
-	if  (inmsg->ual_op == UAL_ENQUIRE  ||  inmsg->ual_op == UAL_LOGIN)  {
-		struct	hhash		*frp;
-		struct	cluhash		*cp;
-
-		if  ((frp = find_remote(whofrom)))  {
-
-			if  (frp->rem.ht_flags & HT_ROAMUSER)  {
-
-				/* Might have changed in the interim
-				   We stored the Windows user as sent in "dosname",
-				   the other way round from the non-roaming case */
-
-				if  (inmsg->ual_op == UAL_LOGIN)  {
-					if  (strcmp(frp->dosname, inmsg->ual_name) != 0)  { /* Name change */
-						if  (!(cp = update_roam_name(frp, inmsg->ual_name)))  {
-							if  (tracing & TRACE_CLIOPEND)
-								client_trace_op_name(whofrom, "Unknown user", inmsg->ual_name);
-							reply.ual_op = XBNR_NOT_USERNAME;
-							goto  sendret;
-						}
-						set_pwstatus(inmsg, frp, cp);
-					}
-					else  if  (frp->flags != UAL_OK)  {
-						if  (!(cp = look_clu(inmsg->ual_name)))  {
-							if  (tracing & TRACE_CLIOPEND)
-								client_trace_op_name(whofrom, "Unknown client user", inmsg->ual_name);
-							reply.ual_op = XBNR_UNKNOWN_CLIENT;
-							goto  sendret;
-						}
-						set_pwstatus(inmsg, frp, cp);
-					}
-				}
-			}
-			else  {
-
-				/* If this isn't from a client, I'm confused */
-
-				if  (!(frp->rem.ht_flags & HT_DOS))  {
-					if  (tracing & TRACE_CLIOPEND)
-						client_trace_op(whofrom, "Client op - not client");
-					reply.ual_op = XBNR_NOT_CLIENT;
-					goto  sendret;
-				}
-
-				/* Not a roaming user, but some species of dos user who must be
-				   correctly specified (case insens) in the Windows user in
-				   "actname", no opportunity for aliasing here as we've got a real
-				   user in "dosname" */
-
-				if  (inmsg->ual_op == UAL_LOGIN)  {
-					if  (ncstrcmp(frp->actname, inmsg->ual_name) != 0)  {  /* Name change */
-						if  (!update_nonroam_name(frp, inmsg->ual_name))  {
-							if  (tracing & TRACE_CLIOPEND)
-								client_trace_op_name(whofrom, "invalid user", inmsg->ual_name);
-							frp->flags = UAL_INVU;
-							goto  sendactname;
-						}
-
-						/* Change here - we no longer effectively force on password
-						   check if no (dosuser) see also look_host.c */
-
-						if  (frp->rem.ht_flags & HT_PWCHECK  ||
-						     (frp->dosname[0]  &&  ncstrcmp(frp->dosname, frp->actname) != 0))  {
-							frp->flags = UAL_NOK;		/* Password required */
-							if  (inmsg->ual_op == UAL_LOGIN  &&  !checkpw(frp->actname, inmsg->ual_passwd))
-								frp->flags = UAL_INVP;
-							else
-								frp->flags = UAL_OK;
-						}
-						else
-							frp->flags = UAL_OK;
-					}
-				}
-			}
-		}
-		else  {
-
-			/* We haven't heard of this geyser before.
-			   (This only applies to roaming users).  */
-
-			if  (!(cp = new_roam_name(whofrom, &frp, inmsg->ual_name)))  {
-				if  (tracing & TRACE_CLIOPEND)
-					client_trace_op_name(whofrom, "unknown client uname", inmsg->ual_name);
-				reply.ual_op = XBNR_UNKNOWN_CLIENT;
-				goto  sendret;
-			}
-			set_pwstatus(inmsg, frp, cp);
-		}
-
-	sendactname:
-		strncpy(reply.ual_name, frp->actname, UIDSIZE);
-		reply.ual_op = (unsigned char) frp->flags;
-	}
-	else  {
-
-		struct	hhash		*frp;
-
-		/* Logout case. */
-
-		if  (inmsg->ual_op != UAL_LOGOUT)  {
-			if  (tracing & TRACE_CLIOPEND)
-				client_trace_op(whofrom, "Invalid proto logout");
-			reply.ual_op = SV_CL_BADPROTO;
-			goto  sendret;
-		}
-
-		if  (!(frp = find_remote(whofrom)))  {
-			if  (tracing & TRACE_CLIOPEND)
-				client_trace_op(whofrom, "Unknown client");
-			reply.ual_op = XBNR_UNKNOWN_CLIENT;
-			goto  sendret;
-		}
-
-		reply.ual_op = UAL_OK;
-		do_logout(frp);
-	}
-
- sendret:
-	udp_send_vec((char *) &reply, sizeof(reply), sinp);
-}
-
-static void  udp_newgrp(const netid_t whofrom, struct ua_login *inmsg, const int inlng, struct sockaddr_in *sinp)
-{
-	struct	hhash		*frp;
-	int_ugid_t		ngid;
-	BtuserRef		hispriv;
-	struct	ua_login	reply;
-
-	BLOCK_ZERO(&reply, sizeof(reply));	/* Maybe this is paranoid but with passwords kicking about..... */
-
-	if  (inlng != sizeof(struct ua_login))  {
-		if  (tracing & TRACE_CLIOPEND)
-			client_trace_op(whofrom, "Newgrp buffer");
-		reply.ual_op = SV_CL_BADPROTO;
-		goto  sendret;
-	}
-
-	if  (!(frp = find_remote(whofrom)))  {
-		if  (tracing & TRACE_CLIOPEND)
-			client_trace_op(whofrom, "Newgrp unknown client");
-		reply.ual_op = XBNR_UNKNOWN_CLIENT;
-		goto  sendret;
-	}
-
-	/* If this isn't from a client, I'm confused */
-
-	if  (!(frp->rem.ht_flags & HT_DOS))  {
-		if  (tracing & TRACE_CLIOPEND)
-			client_trace_op(whofrom, "Newgrp not client");
-		reply.ual_op = XBNR_NOT_CLIENT;
-		goto  sendret;
-	}
-
-	/* This is where we bung the result in */
-
-	if  ((reply.ual_op = frp->flags) != UAL_OK)
-		goto  sendret;
-
-	/* Now look at the group name */
-
-	if  ((ngid = lookup_gname(inmsg->ual_name)) == UNKNOWN_GID)  {
-		if  (tracing & TRACE_CLIOPEND)
-			client_trace_op_name(whofrom, "Newgrp unknown group", inmsg->ual_name);
-		reply.ual_op = XBNR_UNKNOWN_GROUP;
-		goto  sendret;
-	}
-
-	/* See if the user can do anything, in which case we allow any group */
-
-	if  (!(hispriv = getbtuentry(frp->rem.n_uid)))  {
-		if  (tracing & TRACE_CLIOPEND)
-			client_trace_op_name(whofrom, "Newgrp bad user", prin_uname(frp->rem.n_uid));
-		reply.ual_op = XBNR_BAD_USER;
-		goto  sendret;
-	}
-	if  (!(hispriv->btu_priv & BTM_WADMIN) && !chk_vgroup(frp->rem.n_uid, inmsg->ual_name))  {
-		if  (tracing & TRACE_CLIOPEND)
-			client_trace_op_name(whofrom, "Newgrp invalid group", inmsg->ual_name);
-		reply.ual_op = UAL_INVG;
-		goto  sendret;
-	}
-
-	/*	Do the biz...	*/
-
-	if  (ngid != frp->rem.n_gid)  {
-		frp->rem.n_gid = ngid;
-		if  (frp->rem.ht_flags & HT_ROAMUSER)
-			tell_friends(frp);
-	}
-
-	if  (tracing & TRACE_CLIOPEND)
-		client_trace_op_name(whofrom, "Newgrp OK", inmsg->ual_name);
-
- sendret:
-	udp_send_vec((char *) &reply, sizeof(reply), sinp);
+        struct  ua_login  reply;
+        BLOCK_ZERO(&reply, sizeof(reply));
+        reply.ual_op = code;
+        sendto(uasock, (char *) &reply, sizeof(reply), 0, (struct sockaddr *) sinp, sizeof(struct sockaddr_in));
 }
 
 /* Original kind of enquiry for user permissions.  */
 
-static void  udp_send_perms(const netid_t whofrom, const char *pmsg, const int datalen, struct sockaddr_in *sinp)
+static void  do_enquiry(struct sockaddr_in *sinp, const char *pmsg, const int datalen)
 {
-	int		ret;
-	int_ugid_t	nuid;
-	struct	hhash	*frp;
-	BtuserRef	btuser;
-	const	struct	ni_jobhdr	*uenq;
-	struct	ua_reply  rep;
+        const	struct	ni_jobhdr *uenq = (const struct ni_jobhdr *) pmsg;
+        struct	ua_reply  rep;
+        int_ugid_t        luid;
+        netid_t whofrom;
+        struct  udp_conn  *fp;
+        struct  alhash    *ap;
 
-	BLOCK_ZERO(&rep, sizeof(rep));
+        /* We recognise Rspr and UNIX-based clients because they put the relevant user
+           name in the request, but Windows clients just have a null name field */
 
-	/* If I don't know who the client is, reject it regardless.  */
+        if  (uenq->uname[0])  {
+                luid = lookup_uname(uenq->uname);
+                if  (luid == UNKNOWN_UID)  {
+                        enq_badret(sinp, XBNR_NOT_USERNAME);
+                        return;
+                }
+                strncpy(rep.ua_uname, uenq->uname, UIDSIZE);
+                strncpy(rep.ua_gname, prin_gname(lastgid), UIDSIZE);
+                btuser_pack(&rep.ua_perm, getbtuentry(luid));
+                /* Other end knows that everything is OK because btu_isvalid is set in ua_perm */
+                udp_send_vec((char *) &rep, sizeof(struct ua_reply), sinp);
+                return;
+        }
 
-	if  (!(frp = find_remote(whofrom)))  {
-		if  (tracing & TRACE_CLIOPEND)
-			client_trace_op(whofrom, "Sendperms unknown client");
-		ret = XBNR_UNKNOWN_CLIENT;
-		goto  badret;
-	}
+        /* So it's some kind of Windows client */
 
-	/* Do this now we'll want it later anyhow.  */
+        whofrom = translate_netid(sinp);
+        if  ((fp = find_conn(whofrom, UNKNOWN_UID)))  {
+                strncpy(rep.ua_uname, fp->username, UIDSIZE);
+                strncpy(rep.ua_gname, fp->groupname, UIDSIZE);
+                btuser_pack(&rep.ua_perm, &fp->privs);
+                udp_send_vec((char *) &rep, sizeof(struct ua_reply), sinp);
+                return;
+        }
 
-	Realuid = frp->rem.n_uid;
-	Realgid = frp->rem.n_gid;
-	if  (!(btuser = getbtuentry(Realuid)))  {
-		if  (tracing & TRACE_CLIOPEND)
-			client_trace_op_name(whofrom, "Sendperms bad user", prin_uname(Realuid));
-		ret = XBNR_BAD_USER;
-		goto  badret;
-	}
+        ap = find_autoconn(whofrom);
+        if  (!ap)  {
+                enq_badret(sinp, XBNR_UNKNOWN_CLIENT);
+                return;
+        }
 
-	/* For compatibility with some older versions, on Windows
-	   machines where the message isn't the usual length,
-	   bypass the checking.  */
-
-	if  (datalen < sizeof(struct ni_jobhdr))  {
-		if  (!(frp->rem.ht_flags & HT_DOS))  {
-			if  (tracing & TRACE_CLIOPEND)
-				client_trace_op(whofrom, "Sendperms not client");
-			ret = SV_CL_BADPROTO;
-			goto  badret;
-		}
-		goto  xmit;
-	}
-
-
-	uenq = (const struct ni_jobhdr *) pmsg;
-
-	/* Windows users now have roaming users to worry about.
-	   However we keep the current uid in the remote structure.  */
-
-	if  (frp->rem.ht_flags & HT_DOS)  {
-		if  (frp->flags != UAL_OK)  {
-			if  (tracing & TRACE_CLIOPEND)
-				client_trace_op(whofrom, "Sendperms not logged in");
-			ret = frp->flags;
-			goto  badret;
-		}
-
-		if  (uenq->uname[0])  {
-			if  ((nuid = lookup_uname(uenq->uname)) == UNKNOWN_UID)  {
-				if  (tracing & TRACE_CLIOPEND)
-					client_trace_op_name(whofrom, "Unknown user", uenq->uname);
-				ret = XBNR_NOT_USERNAME;
-				goto  badret;
-			}
-			if  (nuid != Realuid)  {
-				if  (!(btuser->btu_priv & BTM_RADMIN))  {
-					if  (tracing & TRACE_CLIOPEND)
-						client_trace_op_name(whofrom, "No read admin", prin_uname(Realuid));
-					ret = XBNR_NORADMIN;
-					goto  badret;
-				}
-				Realuid = (uid_t) nuid;
-				Realgid = (gid_t) lastgid;
-				if  (!(btuser = getbtuentry(Realuid)))  {
-					if  (tracing & TRACE_CLIOPEND)
-						client_trace_op_name(whofrom, "Unknown user", prin_uname(Realuid));
-					ret = XBNR_UNKNOWN_USER;
-					goto  badret;
-				}
-			}
-		}
-	}
-
- xmit:
-	strcpy(rep.ua_uname, prin_uname(Realuid));
-	strcpy(rep.ua_gname, prin_gname(Realgid));
-	btuser_pack(&rep.ua_perm, btuser);
-	udp_send_vec((char *) &rep, sizeof(struct ua_reply), sinp);
-	if  (tracing & TRACE_CLIOPEND)
-		client_trace_op_name(whofrom, "sendperms-OK", rep.ua_uname);
-	return;
- badret:
-	rep.ua_perm.btu_user = htonl((LONG) ret);
-	udp_send_vec((char *) &rep, sizeof(struct ua_reply), sinp);
+        strncpy(rep.ua_uname, ap->unixname, UIDSIZE);
+        strncpy(rep.ua_gname, ap->unixgroup, UIDSIZE);
+        btuser_pack(&rep.ua_perm, getbtuentry(ap->uuid));
+        udp_send_vec((char *) &rep, sizeof(struct ua_reply), sinp);
 }
 
-static void  udp_send_umlpars(const netid_t whofrom, struct sockaddr_in *sinp)
+/* Return OK login and UNIX user name we're in as */
+
+static  void    logret_ok(struct sockaddr_in *sinp, const char *uname)
+{
+        struct  ua_login  reply;
+
+        BLOCK_ZERO(&reply, sizeof(reply));
+        reply.ual_op = UAL_OK;
+        strncpy(reply.ual_name, uname, sizeof(reply.ual_name)-1);
+        sendto(uasock, (char *) &reply, sizeof(reply), 0, (struct sockaddr *) sinp, sizeof(struct sockaddr_in));
+}
+
+static  void    udp_uenquire(struct sockaddr_in *sinp, struct ua_login *inmsg, int inlng)
+{
+        netid_t whofrom = translate_netid(sinp);
+        struct  udp_conn  *fp;
+        int_ugid_t      uuid, ruid;
+
+        if  (inlng != sizeof(struct ua_login))  {
+                bad_log(sinp, SV_CL_BADPROTO);
+                return;
+        }
+
+        ruid = ntohl(inmsg->ua_un.ual_uid);
+
+        if  ((fp = find_conn(whofrom, ruid)))  {
+
+                /* Existing connection.
+                   If it's for a different user, reject unless it's on "my" machine.
+                   Thinks: is this OK for Batch or is it a back door? */
+
+                if  (ncstrcmp(fp->username, inmsg->ual_name) != 0)  {
+
+                        if  (whofrom != 0)  {
+                                bad_log(sinp, XBNR_NOT_USERNAME);
+                                return;
+                        }
+
+                        if  ((uuid = lookup_uname(inmsg->ual_name)) == UNKNOWN_UID)  {
+                                bad_log(sinp, XBNR_NOT_USERNAME);
+                                return;
+                        }
+                        fp->uid = uuid;
+                        fp->gid = lastgid;
+                        free(fp->username);
+                        free(fp->groupname);
+                        fp->username = stracpy(inmsg->ual_name);
+                        fp->groupname = stracpy(prin_gname(fp->gid));
+                        fp->privs = *getbtuentry(uuid);
+                }
+                fp->lastop = time((time_t *) 0);
+                logret_ok(sinp, fp->username);
+                tell_sched_roam(whofrom, ruid, fp->username, fp->groupname);
+                return;
+        }
+
+        /* Create standard connection only from same host */
+
+        if  (whofrom != 0)  {
+                bad_log(sinp, UAL_INVP);
+                return;
+        }
+
+        if  ((uuid = lookup_uname(inmsg->ual_name)) == UNKNOWN_UID)  {
+                bad_log(sinp, XBNR_NOT_USERNAME);
+                return;
+        }
+
+        /* Create connection for that person */
+
+        fp = add_conn(whofrom);
+        fp->host_uid = ruid;
+        fp->lastop = time((time_t *) 0);
+        fp->uid = uuid;
+        fp->gid = lastgid;
+        fp->username = stracpy(inmsg->ual_name);
+        fp->groupname = stracpy(prin_gname(fp->gid));
+        fp->privs = *getbtuentry(uuid);
+        logret_ok(sinp, fp->username);
+        tell_sched_roam(whofrom, ruid, fp->username, fp->groupname);
+}
+
+/* This is the parallel version for Windows clients. We don't have to worry about multiple
+   users on the same machine */
+
+void  udp_enquire(struct sockaddr_in *sinp, struct ua_login *inmsg, int inlng)
+{
+        netid_t whofrom = translate_netid(sinp);       /* We don't anticipate this to be "me" */
+        struct  udp_conn  *fp;
+        struct  alhash  *wp;
+
+        /* NB the size of the login structure may change (longer Win user name) so
+           this will cream out old clients */
+
+        if  (inlng != sizeof(struct ua_login))  {
+                bad_log(sinp, SV_CL_BADPROTO);
+                return;
+        }
+
+        /* See if it is someone we know, if so refresh the access time and return the details */
+
+        if  ((fp = find_conn(whofrom, UNKNOWN_UID)))  {
+                fp->lastop = time((time_t *) 0);
+                logret_ok(sinp, fp->username);
+                tell_sched_roam(whofrom, UNKNOWN_UID, fp->username, fp->groupname);
+                return;
+        }
+
+        /* See if it is someone we connect automatically */
+
+        if  (!(wp = find_autoconn(whofrom)))  {
+                bad_log(sinp, UAL_INVP);
+                return;
+        }
+
+        /* Create connection for that person */
+
+        fp = add_conn(whofrom);
+        fp->lastop = time((time_t *) 0);
+        fp->uid = wp->uuid;
+        fp->gid = wp->ugid;
+        fp->username = stracpy(wp->unixname);
+        fp->groupname = stracpy(wp->unixgroup);
+        fp->privs = *getbtuentry(fp->uid);
+        logret_ok(sinp, fp->username);
+        tell_sched_roam(whofrom, UNKNOWN_UID, fp->username, fp->groupname);
+}
+
+void  udp_ulogin(struct sockaddr_in *sinp, struct ua_login *inmsg, int inlng)
+{
+        netid_t whofrom = translate_netid(sinp);                /* Might be "me" */
+        struct  udp_conn  *fp;
+        int_ugid_t  luid, ruid;
+
+        if  (inlng != sizeof(struct ua_login))  {
+                bad_log(sinp, SV_CL_BADPROTO);
+                return;
+        }
+
+        ruid = ntohl(inmsg->ua_un.ual_uid);
+
+        /* See if someone is already logged in and report success if it is the same person
+           as before. Refresh the activity time. NB "whofrom" might be "me".
+           Refresh privileges in case the guy is logging in again after they've
+           been changed. */
+
+        if  ((fp = find_conn(whofrom, ruid))  &&  ncstrcmp(fp->username, inmsg->ual_name) == 0)  {
+                fp->lastop = time((time_t *) 0);
+                logret_ok(sinp, fp->username);
+                fp->privs = *getbtuentry(fp->uid);
+                tell_sched_roam(whofrom, ruid, fp->username, fp->groupname);
+                return;
+        }
+
+        /* Check password, if not OK, kill any existing connection */
+
+        if  ((luid = lookup_uname(inmsg->ual_name)) == UNKNOWN_UID  ||  !checkpw(inmsg->ual_name, inmsg->ual_passwd))  {
+                bad_log(sinp, UAL_INVP);
+                if  (fp)
+                        kill_conn(fp);
+                return;
+        }
+
+        /* Reset user name and ID of existing connection or allocate a new one */
+
+        if  (fp)  {
+                free(fp->username);
+                free(fp->groupname);
+        }
+        else  {
+                fp = add_conn(whofrom);
+                fp->host_uid = ruid;
+        }
+
+        fp->lastop = time((time_t *) 0);
+        fp->uid = luid;
+        fp->gid = lastgid;
+        fp->username = stracpy(inmsg->ual_name);
+        fp->groupname = stracpy(prin_gname(fp->gid));
+        fp->privs = *getbtuentry(luid);
+        logret_ok(sinp, fp->username);
+        tell_sched_roam(whofrom, ruid, fp->username, fp->groupname);
+}
+
+/* Log in as a Windows user */
+
+void  udp_login(struct sockaddr_in *sinp, struct ua_login *inmsg, int inlng)
+{
+        netid_t whofrom = translate_netid(sinp);
+        struct  udp_conn  *fp;
+        struct  winuhash  *wn;
+        char    *luname, *lgname;
+        int_ugid_t  luid, lgid;
+
+        /* First check the message size */
+
+        if  (inlng != sizeof(struct ua_login))  {
+                bad_log(sinp, SV_CL_BADPROTO);
+                return;
+        }
+
+        /* See what the Unix name is corresponding to that windows name.
+           Use the default user name if needed (should not be a security risk
+           with the passwords set correctly) */
+
+        if  ((wn = lookup_winu(inmsg->ual_name)))  {
+                luname = wn->unixname;
+                luid = wn->uuid;
+                lgid = wn->ugid;
+                lgname = prin_gname(wn->ugid);
+        }
+        else  {
+                luname = Defaultuser;
+                lgname = Defaultgroup;
+                luid = Defaultuid;
+                lgid = Defaultgid;
+        }
+        /* If we were logged in OK as that guy before, just refresh
+           and say OK. NB "whofrom" might be me again.
+           However we refresh the privileges in case those have changed. */
+
+        if  ((fp = find_conn(whofrom, UNKNOWN_UID)) && fp->uid == luid)  {
+                fp->lastop = time((time_t *) 0);
+                logret_ok(sinp, fp->username);
+                fp->privs = *getbtuentry(luid);
+                tell_sched_roam(whofrom, UNKNOWN_UID, fp->username, fp->groupname);
+                return;
+        }
+
+        /* Check the password and cancel existing login if wrong */
+
+        if  (!checkpw(luname, inmsg->ual_passwd))  {
+                bad_log(sinp, UAL_INVP);
+                if  (fp)
+                        kill_conn(fp);
+                return;
+       }
+
+        /* Reset user name and ID of existing connection or allocate a new one */
+
+        if  (fp)  {
+                free(fp->username);
+                free(fp->groupname);
+        }
+        else
+                fp = add_conn(whofrom);
+        fp->lastop = time((time_t *) 0);
+        fp->uid = luid;
+        fp->gid = lgid;
+        fp->username = stracpy(luname);
+        fp->groupname = stracpy(lgname);
+        logret_ok(sinp, fp->username);
+        tell_sched_roam(whofrom, UNKNOWN_UID, fp->username, fp->groupname);
+}
+
+/* Log out whoever is logged in, no reply */
+
+static  void  udp_logout(struct sockaddr_in *sinp, struct ua_login *inmsg, int inlng)
+{
+        netid_t whofrom = translate_netid(sinp);
+        struct  udp_conn  *fp;
+        int_ugid_t      ruid = UNKNOWN_UID;     /* Remote user id */
+
+        if  (inlng != sizeof(struct ua_login))  {
+                bad_log(sinp, SV_CL_BADPROTO);
+                return;
+        }
+
+       /* If this comes from a UNIX host, we have NON null in the filler and
+           the uid (at the other end) in the group name field. We do it this way
+           as existing Windows clients zero the whole thing and just put in UAL_LOGOUT */
+
+        if  (inmsg->ual_fill != '\0')
+                ruid = ntohl(inmsg->ua_un.ual_uid);
+
+        if  ((fp = find_conn(whofrom, ruid)))  {
+                tell_sched_roam(whofrom, ruid, "", "");
+                kill_conn(fp);
+        }
+}
+
+static void  udp_newgrp(struct sockaddr_in *sinp, struct ua_login *inmsg, const int inlng)
+{
+        netid_t whofrom = translate_netid(sinp);
+        struct  udp_conn        *fp;
+	int_ugid_t		ngid;
+        int_ugid_t      ruid = UNKNOWN_UID;     /* Remote user id */
+
+	if  (inlng != sizeof(struct ua_login))  {
+                bad_log(sinp, SV_CL_BADPROTO);
+                return;
+	}
+
+        /* If this comes from a UNIX host, we have NON null in the filler and
+           the uid (at the other end) in the group name field. We do it this way
+           as existing Windows clients zero the whole thing and just put in UAL_LOGOUT */
+
+        if  (inmsg->ual_fill != '\0')
+                ruid = ntohl(inmsg->ua_un.ual_uid);
+
+        if  (!(fp = find_conn(whofrom, ruid)))  {
+                bad_log(sinp, XBNR_UNKNOWN_CLIENT);
+                return;
+        }
+
+	/* Now look at the group name */
+
+	if  ((ngid = lookup_gname(inmsg->ual_name)) == UNKNOWN_GID)  {
+                bad_log(sinp, XBNR_UNKNOWN_GROUP);
+                return;
+	}
+
+	/* Allow any group if he's super-dooper */
+
+	if  (!(fp->privs.btu_priv & BTM_WADMIN) && !chk_vgroup(fp->username, inmsg->ual_name))  {
+                bad_log(sinp, UAL_INVG);
+                return;
+	}
+
+        /* Turn off the existing one */
+        tell_sched_roam(whofrom, ruid, "","");
+        fp->gid = ngid;
+        free(fp->groupname);
+        fp->groupname = stracpy(prin_gname(ngid));
+        fp->privs = *getbtuentry(fp->uid);
+        logret_ok(sinp, fp->username);
+        tell_sched_roam(whofrom, ruid, fp->username, fp->groupname);
+}
+
+/* Lies I know but just say zero to ulimit */
+
+static void  udp_send_umlpars(struct sockaddr_in *sinp)
 {
 	struct	ua_umlreply	reply;
-	char	badrep[1];
-
-	if  (!find_remote(whofrom))
-		goto  badret;
 	reply.ua_umask = htons(orig_umask);
 	reply.ua_padding = 0;
 	reply.ua_ulimit = 0L;
 	udp_send_vec((char *)&reply, sizeof(reply), sinp);
-	if  (tracing & TRACE_CLIOPEND)
-		client_trace_op(whofrom, "senduml");
-	return;
- badret:
-	/* Mark end with a null */
-
-	badrep[0] = '\0';
-	udp_send_vec(badrep, 1, sinp);
 }
 
-static void  udp_send_elist(const netid_t whofrom, struct sockaddr_in *sinp)
+static void  udp_send_elist(struct sockaddr_in *sinp)
 {
 	int		rp = 0;
 	char		**ep, *ei;
 	char	reply[CL_SV_BUFFSIZE];
 	extern	char	**xenviron;
-
-	if  (!find_remote(whofrom))
-		goto  badret;
 
 	for  (ep = xenviron;  (ei = *ep);  ep++)  {
 		unsigned  lng = strlen(ei) + 1;
@@ -1270,281 +1215,147 @@ static void  udp_send_elist(const netid_t whofrom, struct sockaddr_in *sinp)
 		strcpy(&reply[rp], ei);
 		rp += lng;
 	}
-	if  (rp > 0)
+
+        if  (rp > 0)
 		udp_send_vec(reply, rp, sinp);
- badret:
-	/* Mark end with a null */
 
-	reply[0] = '\0';
-	udp_send_vec(reply, 1, sinp);
-	if  (tracing & TRACE_CLIOPEND)
-		client_trace_op(whofrom, "send env");
-}
-
-static void  note_roamer(const netid_t whofrom, struct ua_pal *inmsg, const int inlng)
-{
-	struct	hhash	*sender, *client;
-
-	/* Ignore message if invalid length, unknown host or not
-	   trusted host wot's sending it.  */
-
-	if  (inlng != sizeof(struct ua_pal)  ||
-	     ((whofrom != myhostid  &&  whofrom != localhostid  &&
-	      !((sender = find_remote(whofrom)) && sender->rem.ht_flags & HT_TRUSTED))))
-		return;
-
-	if  ((client = find_remote(inmsg->uap_netid)))  {
-
-		int_ugid_t	nuid;
-
-		/* We've met this machine before, but possibly with a
-		   different user. */
-
-		if  (!(client->rem.ht_flags & HT_ROAMUSER))	/* Huh??? */
-			return;
-		if  (strcmp(client->dosname, inmsg->uap_wname) == 0)
-			return;
-		free(client->actname);
-		free(client->dosname);
-		client->actname = stracpy(inmsg->uap_name);
-		client->dosname = stracpy(inmsg->uap_wname);
-		if  ((nuid = lookup_uname(inmsg->uap_name)) == UNKNOWN_UID)  {
-			client->rem.n_uid = Daemuid;
-			client->rem.n_gid = Daemgid;
-		}
-		else  {
-			client->rem.n_uid = nuid;
-			client->rem.n_gid = lastgid;
-		}
-		client->lastaction = time((time_t *) 0);
-		if  (tracing & TRACE_SYSOP)
-			client_trace_op_name(whofrom, "Note roam user", client->actname);
-	}
-	else  {
-		/* Ignore it unless we know about the windows user */
-
-		if  (!new_roam_name(inmsg->uap_netid, &client, inmsg->uap_wname))
-			return;
-		client->flags = UAL_OK;
-		if  (tracing & TRACE_SYSOP)
-			client_trace_op_name(whofrom, "Note new roam user", inmsg->uap_wname);
-	}
-
-	tell_sched_roam(inmsg->uap_netid, client->actname, prin_gname(client->rem.n_gid));
-}
-
-/* Called from API when re-register option set.  */
-
-void  tell_myself(struct hhash *frp)
-{
-	struct	ua_pal  palsmsg;
-	init_palsmsg(&palsmsg, frp);
-	udp_send_to((char *) &palsmsg, sizeof(palsmsg), myhostid);
+        udp_send_end(sinp);
 }
 
 /* This is mainly for dosbtwrite */
 
-static void  answer_asku(const netid_t whofrom, struct ua_pal *inmsg, const int inlng, struct sockaddr_in *sinp)
+static void  answer_asku(struct sockaddr_in *sinp, struct ua_pal *inmsg, const int inlng)
 {
-	int	nu = 0, cnt;
-	struct	hhash	*hp;
+       	int	nu = 0;
 	struct	ua_asku_rep	reply;
 
 	BLOCK_ZERO(&reply, sizeof(reply));
 
-	if  (inlng != sizeof(struct ua_pal)  ||
-	     (whofrom != myhostid && whofrom != localhostid  &&  !((hp = find_remote(whofrom))  &&  hp->rem.ht_flags & HT_TRUSTED)))
-		goto  dun;
+	if  (inlng == sizeof(struct ua_pal))  {
+                int     cnt;
 
-	for  (cnt = 0;  cnt < NETHASHMOD;  cnt++)  {
-		for  (hp = nhashtab[cnt];  hp;  hp = hp->hn_next)  {
-			if  (!(hp->rem.ht_flags & HT_DOS))
-				continue;
-			if  (hp->flags != UAL_OK)
-				continue;
-			if  (hp->rem.ht_flags & HT_ROAMUSER)  {
-				if  (strcmp(hp->actname, inmsg->uap_name) != 0)
-					continue;
-			}
-			else  if  (strcmp(hp->dosname, inmsg->uap_name) != 0)
-				continue;
-			reply.uau_ips[nu++] = hp->rem.hostid;
-			if  (nu >= UAU_MAXU)
-				goto  dun;
-		}
-	}
+                for  (cnt = 0;  cnt < NETHASHMOD;  cnt++)  {
+                        struct  udp_conn  *hp;
+
+                        for  (hp = conn_hash[cnt];  hp;  hp = hp->next)  {
+                                if  (strcmp(hp->username, inmsg->uap_name) == 0)  {
+                                        reply.uau_ips[nu++] = hp->hostid;
+                                        if  (nu >= UAU_MAXU)
+                                                goto  dun;
+                                }
+                        }
+                }
+        }
  dun:
 	reply.uau_n = htons(nu);
 	udp_send_vec((char *) &reply, sizeof(reply), sinp);
-	if  (tracing & TRACE_SYSOP)
-		client_trace_op_name(whofrom, "asku", inmsg->uap_name);
 }
 
-static void  answer_askall(const netid_t whofrom, struct ua_pal *inmsg, const int inlng)
+/* Respond to keep alive messages assuming from Windows.  */
+
+static void  tickle(struct sockaddr_in *sinp)
 {
-	int	cnt;
-	struct	hhash	*hp;
-	struct	ua_pal	reply;
-
-	BLOCK_ZERO(&reply, sizeof(reply));
-	reply.uap_op = SV_SV_LOGGEDU;
-
-	if  (inlng != sizeof(struct ua_pal)  ||
-	     (whofrom != myhostid && whofrom != localhostid  &&
-	      !((hp = find_remote(whofrom))  &&  hp->rem.ht_flags & HT_TRUSTED)))
-		return;
-
-	for  (cnt = 0;  cnt < NETHASHMOD;  cnt++)  {
-		for  (hp = nhashtab[cnt];  hp;  hp = hp->hn_next)  {
-			if  (!(hp->rem.ht_flags & HT_ROAMUSER))
-				continue;
-			if  (hp->flags != UAL_OK)
-				continue;
-			reply.uap_netid = hp->rem.hostid;
-			strncpy(reply.uap_name, hp->actname, UIDSIZE);
-			strncpy(reply.uap_grp, prin_gname(hp->rem.n_gid), UIDSIZE);
-			strncpy(reply.uap_wname, hp->dosname, UIDSIZE);
-			udp_send_to((char *) &reply, sizeof(reply), whofrom);
-		}
-	}
-	if  (tracing & TRACE_SYSOP)
-		client_trace_op(whofrom, "askall done");
-}
-
-void  send_askall()
-{
-	int	cnt;
-	struct	ua_pal	msg;
-
-	BLOCK_ZERO(&msg, sizeof(msg));
-	msg.uap_op = SV_SV_ASKALL;
-
-	for  (cnt = 0;  cnt < NETHASHMOD;  cnt++)  {
-		struct	hhash	*hp;
-		for  (hp = nhashtab[cnt];  hp;  hp = hp->hn_next)
-			if  ((hp->rem.ht_flags & (HT_DOS|HT_TRUSTED)) == HT_TRUSTED)
-				udp_send_to((char *) &msg, sizeof(msg), hp->rem.hostid);
-	}
-}
-
-/* Respond to keep alive messages - we rely on "find_remote" updating
-   the last access time.  */
-
-static void  tickle(const netid_t whofrom, struct sockaddr_in *sinp)
-{
-	struct	hhash	*frp = find_remote(whofrom);
+	struct	udp_conn  *fp = find_conn(translate_netid(sinp), UNKNOWN_UID);
 	char	repl = XBNQ_OK;
-	if  (frp)  {
-		udp_send_vec(&repl, sizeof(repl), sinp);
-		if  (tracing & TRACE_CLIOPEND)
-			client_trace_op(whofrom, "tickle");
-	}
+        if  (fp)
+                fp->lastop = time((time_t *) 0);
+	udp_send_vec(&repl, sizeof(repl), sinp);
 }
 
 void  process_ua()
 {
 	int	datalength;
-	netid_t	whofrom;
 	LONG	pmsgl[CL_SV_BUFFSIZE/sizeof(LONG)]; /* Force to long */
 	char	*pmsg = (char *) pmsgl;
-	struct	sockaddr_in	*sinp;
-#ifdef	STRUCT_SIG
-	struct	sigstruct_name  zch;
-#endif
 	struct	sockaddr_in	sin;
 	SOCKLEN_T		sinl = sizeof(sin);
-	sinp = &sin;
 
-#ifdef	STRUCT_SIG
-	zch.sighandler_el = SIG_IGN;
-	sigmask_clear(zch);
-	zch.sigflags_el = SIGVEC_INTFLAG;
-	sigact_routine(QRFRESH, &zch, (struct sigstruct_name *) 0);
-#else
-	signal(QRFRESH, SIG_IGN);
-#endif
-	if  ((datalength = recvfrom(uasock, pmsg, sizeof(pmsgl), 0, (struct sockaddr *) sinp, &sinl)) < 0)
-		return;
-	whofrom = sin.sin_addr.s_addr;
+	while  ((datalength = recvfrom(uasock, pmsg, sizeof(pmsgl), 0, (struct sockaddr *) &sin, &sinl)) < 0)
+                if  (errno != EINTR)
+                        return;
 
-	switch  (pmsg[0])  {
+        switch  (pmsg[0])  {
+        default:
+                job_reply(&sin, SV_CL_UNKNOWNC);
+                return;
+
+        case  CL_SV_UENQUIRY:
+                do_enquiry(&sin, pmsg, datalength);
+                return;
+
+        case  UAL_UENQUIRE:
+                udp_uenquire(&sin, (struct ua_login *) pmsg, datalength);
+                return;
+
 	case  UAL_ENQUIRE:
+                udp_enquire(&sin, (struct ua_login *) pmsg, datalength);
+                return;
+
+        case  UAL_ULOGIN:
+                udp_ulogin(&sin, (struct ua_login *) pmsg, datalength);
+                return;
+
 	case  UAL_LOGIN:
-	case  UAL_LOGOUT:
-	case  UAL_OK:		/* Actually these are redundant */
-	case  UAL_NOK:
-		udp_login(whofrom, (struct ua_login *) pmsg, datalength, sinp);
-		return;
-	case  UAL_NEWGRP:
+                udp_login(&sin, (struct ua_login *) pmsg, datalength);
+                return;
+
+        case  UAL_LOGOUT:
+                udp_logout(&sin, (struct ua_login *) pmsg, datalength);
+                return;
+
+        case  CL_SV_STARTJOB:
+        case  CL_SV_CONTJOB:
+        case  CL_SV_JOBDATA:
+        case  CL_SV_ENDJOB:
+        case  CL_SV_HANGON:
+                udp_job_process(&sin, pmsg, datalength);
+                return;
+
+        case  UAL_NEWGRP:
 	case  UAL_INVG:
-		if  (tracing & TRACE_CLIOPSTART)
-			client_trace_op(whofrom, "newgrp");
-		udp_newgrp(whofrom, (struct ua_login *) pmsg, datalength, sinp);
+		udp_newgrp(&sin, (struct ua_login *) pmsg, datalength);
 		return;
-	case  CL_SV_UENQUIRY:
-		if  (tracing & TRACE_CLIOPSTART)
-			client_trace_op(whofrom, "sendperms");
-		udp_send_perms(whofrom, pmsg, datalength, sinp);
-		return;
+
 	case  CL_SV_ULIST:
-		if  (tracing & TRACE_CLIOPSTART)
-			client_trace_op(whofrom, "sendulist");
-		udp_send_uglist(sinp, gen_ulist);
+		udp_send_uglist(&sin, gen_ulist);
 		return;
+
 	case  CL_SV_GLIST:
-		if  (tracing & TRACE_CLIOPSTART)
-			client_trace_op(whofrom, "sendglist");
-		udp_send_uglist(sinp, gen_glist);
+		udp_send_uglist(&sin, gen_glist);
 		return;
+
 	case  CL_SV_VLIST:
-		if  (tracing & TRACE_CLIOPSTART)
-			client_trace_op(whofrom, "sendvlist");
-		udp_send_vlist(whofrom, pmsg, datalength, sinp);
+		udp_send_vlist(&sin, (struct ua_venq *) pmsg, datalength);
 		return;
+
 	case  CL_SV_CILIST:
-		if  (tracing & TRACE_CLIOPSTART)
-			client_trace_op(whofrom, "sendcilist");
-		udp_send_cilist(whofrom, sinp);
+		udp_send_cilist(&sin);
 		return;
+
 	case  CL_SV_HLIST:
-		if  (tracing & TRACE_CLIOPSTART)
-			client_trace_op(whofrom, "sendhlist");
-		udp_send_hlist(whofrom, pmsg, datalength, sinp);
+		udp_send_hlist(&sin, pmsg, datalength);
 		return;
+
 	case  CL_SV_UMLPARS:
-		if  (tracing & TRACE_CLIOPSTART)
-			client_trace_op(whofrom, "senduml");
-		udp_send_umlpars(whofrom, sinp);
+		udp_send_umlpars(&sin);
 		return;
+
 	case  CL_SV_ELIST:
-		if  (tracing & TRACE_CLIOPSTART)
-			client_trace_op(whofrom, "sendelist");
-		udp_send_elist(whofrom, sinp);
+		udp_send_elist(&sin);
 		return;
+
 	case  SV_SV_LOGGEDU:
-		if  (tracing & TRACE_SYSOP)
-			client_trace_op(whofrom, "noteroam");
-		note_roamer(whofrom, (struct ua_pal *) pmsg, datalength);
+        case  SV_SV_ASKALL:
 		return;
+
 	case  SV_SV_ASKU:
-		if  (tracing & TRACE_SYSOP)
-			client_trace_op(whofrom, "asku");
-		answer_asku(whofrom, (struct ua_pal *) pmsg, datalength, sinp);
+		answer_asku(&sin, (struct ua_pal *) pmsg, datalength);
 		return;
-	case  SV_SV_ASKALL:
-		if  (tracing & TRACE_SYSOP)
-			client_trace_op(whofrom, "askall");
-		answer_askall(whofrom, (struct ua_pal *) pmsg, datalength);
-		return;
+
+        case  UAL_OK:		/* Actually these are redundant */
+	case  UAL_NOK:
 	case  CL_SV_KEEPALIVE:
-		if  (tracing & TRACE_CLIOPSTART)
-			client_trace_op(whofrom, "keepalive");
-		tickle(whofrom, sinp);
-		return;
-	default:
-		if  (tracing & TRACE_CLIOPSTART)
-			client_trace_op(whofrom, "data");
-		udp_job_process(whofrom, pmsg, datalength, sinp);
+                tickle(&sin);
 		return;
 	}
 }
@@ -1553,39 +1364,8 @@ void  process_ua()
 
 static void  send_prod(struct pend_job *pj)
 {
-	int	sockfd, tries;
-	char	prodit[1];
-	struct	sockaddr_in	serv_addr, cli_addr;
-
-	prodit[0] = SV_CL_TOENQ;
-	BLOCK_ZERO(&serv_addr, sizeof(serv_addr));
-	serv_addr.sin_family = AF_INET;
-	serv_addr.sin_addr.s_addr = pj->clientfrom;
-	serv_addr.sin_port = uaportnum;
-
-	BLOCK_ZERO(&cli_addr, sizeof(cli_addr));
-	cli_addr.sin_family = AF_INET;
-	cli_addr.sin_addr.s_addr = htonl(INADDR_ANY);
-	cli_addr.sin_port = 0;
-
-	/* We don't really need the cli_addr but we are obliged to
-	   bind something.  The remote uses our standard port.  */
-
-	for  (tries = 0;  tries < UDP_TRIES;  tries++)  {
-		if  ((sockfd = socket(AF_INET, SOCK_DGRAM, udpproto)) < 0)
-			return;
-		if  (bind(sockfd, (struct sockaddr *) &cli_addr, sizeof(cli_addr)) < 0)  {
-			close(sockfd);
-			return;
-		}
-		if  (sendto(sockfd, prodit, sizeof(prodit), 0, (struct sockaddr *) &serv_addr, sizeof(serv_addr)) >= 0)  {
-			close(sockfd);
-			return;
-		}
-		close(sockfd);
-	}
-	if  (tracing & TRACE_SYSOP)
-		client_trace_op(pj->clientfrom, "Prod");
+        char    prodit = SV_CL_TOENQ;
+        udp_send_to(&prodit, sizeof(prodit), pj->clientfrom);
 }
 
 /* See which UDP ports seem to have dried up Return time of next alarm.  */
@@ -1596,11 +1376,13 @@ unsigned  process_alarm()
 	unsigned  mintime = 0, nexttime;
 	int	prodtime, killtime, cnt;
 
-	for  (cnt = 0;  cnt < MAX_PEND_JOBS;  cnt++)
+        /* Scan list of jobs being added to see half-baked ones */
+
+        for  (cnt = 0;  cnt < MAX_PEND_JOBS;  cnt++)
 		if  (pend_list[cnt].clientfrom != 0L)  {
 			struct	pend_job  *pj = &pend_list[cnt];
-			prodtime = pj->lastaction + pj->timeout - now;
-			killtime = prodtime + pj->timeout;
+			prodtime = pj->lastaction + timeouts - now;
+			killtime = prodtime + timeouts;
 			if  (killtime < 0)  {
 				abort_job(pj); /* Must have died */
 				continue;
@@ -1618,20 +1400,26 @@ unsigned  process_alarm()
 	/* Apply timeouts to stale connections.  */
 
 	for  (cnt = 0;  cnt < NETHASHMOD;  cnt++)  {
-		struct	hhash	*hp;
-	redohash:		/* Hash chain gets mangled by do_logout */
-		for  (hp = nhashtab[cnt];  hp;  hp = hp->hn_next)
-			if  (hp->rem.ht_flags & HT_DOS)  {
-				long	tdiff = (long) (hp->lastaction + hp->timeout) - now;
-				if  (tdiff <= 0)  {
-					if  (tracing & TRACE_SYSOP)
-						client_trace_op_name(hp->rem.hostid, "Force logout", hp->actname);
-					do_logout(hp);
-					goto  redohash;
-				}
-				else  if  (mintime == 0 || mintime > (unsigned) tdiff)
-					mintime = (unsigned) tdiff;
-			}
-	}
+		struct  udp_conn        **hpp, *hp;
+
+                hpp = &conn_hash[cnt];
+
+                while  ((hp = *hpp))  {
+                        long  tdiff = (long) (hp->lastop + timeouts) - now;
+                        if  (tdiff <= 0)  {
+                                *hpp = hp->next;
+                                hpp = &hp->next;
+                                free(hp->username);
+                                free(hp->groupname);
+                                free((char *) hp);
+                        }
+                        else  {
+                                if  (mintime == 0 || mintime > (unsigned) tdiff)
+                                        mintime = (unsigned) tdiff;
+                                hpp = &hp->next;
+                        }
+                }
+        }
+
 	return  mintime;
 }

@@ -143,7 +143,7 @@ static void  dounqueue(CBtjobRef jp)
 
 	udprog = envprocess(DUMPJOB);
 	setuid(Realuid);
-	chdir(Curr_pwd);	/* So that it picks up config file correctly */
+	Ignored_error = chdir(Curr_pwd);	/* So that it picks up config file correctly */
 	if  (jp->h.bj_hostid)
 		sprintf(jnobuf, "%s:%ld", look_host(jp->h.bj_hostid), (long) jp->h.bj_job);
 	else
@@ -480,7 +480,7 @@ MAINFN_TYPE  main(int argc, char **argv)
 #endif
 	enum	cmdtype	which = CMD_DELETE;
 
-	versionprint(argv, "$Revision: 1.4 $", 0);
+	versionprint(argv, "$Revision: 1.5 $", 0);
 
 	if  ((progname = strrchr(argv[0], '/')))
 		progname++;

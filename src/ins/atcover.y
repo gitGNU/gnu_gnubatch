@@ -17,7 +17,7 @@
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
 #include "config.h"
-static	char	rcsid1[] = "@(#) $Id: atcover.y,v 1.2 2009/02/22 12:49:34 toadwarble Exp $";
+static	char	rcsid1[] = "@(#) $Id: atcover.y,v 1.5 2009/02/22 12:49:34 toadwarble Exp $";
 #include <stdio.h>
 #include <ctype.h>
 #include <pwd.h>
@@ -770,7 +770,7 @@ MAINFN_TYPE  main(int argc, char **argv)
 	int	ch;
 	int	catjobs = 0, isdel = 0, islist = 0, isbatch = 0, listq = 0;
 
-	versionprint(argv, "$Revision: 1.4 $", 0);
+	versionprint(argv, "$Revision: 1.5 $", 0);
 
 	if  ((progname = strrchr(argv[0], '/')))
 		progname++;

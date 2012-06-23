@@ -69,8 +69,8 @@ int  gbatch_read(const int fd, char *buff, unsigned size)
 {
 	int	ibytes;
 	while  (size != 0)  {
-		if  ((ibytes = read(fd, buff, size)) < 0)  {
-			if  (errno == EINTR)
+		if  ((ibytes = read(fd, buff, size)) <= 0)  {
+			if  (ibytes < 0  &&  errno == EINTR)
 				continue;
 			return  XB_BADREAD;
 		}
@@ -113,88 +113,122 @@ static struct api_fd *find_prod(const int fd)
 }
 #endif
 
+static  int     getportnum(const char *servname)
+{
+        const   char    *serv = servname? servname: DEFAULT_SERVICE;
+        struct  servent  *sp;
+
+        if  (!(sp = getservbyname(serv, "tcp")))
+                sp = getservbyname(serv, "TCP");
+        if  (sp)  {
+                int     portnum = ntohs(sp->s_port);
+                endservent();
+                return  portnum;
+        }
+        endservent();
+        return  servname? XB_INVALID_SERVICE: XB_NODEFAULT_SERVICE;
+}
+
+static  int     opensock(const netid_t hostid, const int portnum)
+{
+        int     sock;
+        struct  sockaddr_in  sin;
+
+        sin.sin_family = AF_INET;
+        sin.sin_port = htons(portnum);
+        BLOCK_ZERO(sin.sin_zero, sizeof(sin.sin_zero));
+        sin.sin_addr.s_addr = hostid;
+
+        if  ((sock = socket(PF_INET, SOCK_STREAM, 0)) < 0)
+                return  XB_NOSOCKET;
+
+        if  (connect(sock, (struct sockaddr *) &sin, sizeof(sin)) < 0)  {
+                close(sock);
+                return  XB_NOCONNECT;
+        }
+
+        return  sock;
+}
+
+static  int     get_fd()
+{
+        int     result;
+
+        for  (result = 0;  result < api_max;  result++)
+                if  (apilist[result].sockfd < 0)
+                        return  result;
+        if   (++api_max >= MAXFDS)
+                return  XB_NOMEM;
+        return  result;
+}
+
+static  void    init_fd(const int fdnum, const int sock, const netid_t hostid, const int portnum)
+{
+        struct  api_fd  *ret_fd = &apilist[fdnum];
+        ret_fd->portnum = (SHORT) portnum;
+        ret_fd->sockfd = (SHORT) sock;
+        ret_fd->prodfd = -1;
+        ret_fd->hostid = hostid;
+        ret_fd->jobfn = (void (*)()) 0;
+        ret_fd->varfn = (void (*)()) 0;
+        ret_fd->jserial = 0;
+        ret_fd->vserial = 0;
+        ret_fd->bufmax = 0;
+        ret_fd->buff = (char *) 0;
+        ret_fd->queuename = (char *) 0;
+}
+
+static  int  open_common(const char *hostname, const char *servname)
+{
+        int     portnum, sock, result;
+        netid_t hostid;
+
+        if  (hostname)  {
+        	struct  hostent  *hp = gethostbyname(hostname);
+        	if  (!hp)  {
+        		endhostent();
+        		return  XB_INVALID_HOSTNAME;
+        	}
+        	hostid = * (LONG *) hp->h_addr;
+        	endhostent();
+        }
+        else
+        	hostid = htonl(INADDR_LOOPBACK);
+
+        portnum = getportnum(servname);
+        if  (portnum < 0)
+                return  portnum;
+        sock = opensock(hostid, portnum);
+        if  (sock < 0)
+                return  sock;
+        result = get_fd();
+        if  (result < 0)  {
+                close(sock);
+                return  result;
+        }
+        init_fd(result, sock, hostid, portnum);
+        return  result;
+}
+
 int  gbatch_open(const char *hostname, const char *servname)
 {
-	int	portnum, sock, ret;
-	unsigned	result;
+        int     ret, result;
+        const   char    *username = BATCHUNAME;
 	struct	api_fd	*ret_fd;
-	netid_t	hostid;
-	const	char	*serv;
 	struct	passwd	*pw;
-	struct	hostent	*hp;
-	struct	servent	*sp;
-	struct	sockaddr_in	sin;
 	struct	api_msg	outmsg;
-	char	servbuf[sizeof(DEFAULT_SERVICE) + 20];
 
-	hp = gethostbyname(hostname);
-	if  (!hp)  {
-		endhostent();
-		return  XB_INVALID_HOSTNAME;
-	}
-	hostid = * (netid_t *) hp->h_addr;
-	endhostent();
-
-	if  (servname)
-		serv = servname;
-	else  {
-		char	*cp = getenv(ENV_SELECT_VAR);
-		strcpy(servbuf, DEFAULT_SERVICE);
-		if  (cp  &&  isdigit(*cp))
-			strcat(servbuf, cp);
-		serv = servbuf;
-	}
-	if  (!(sp = getservbyname(serv, "tcp")))
-		sp = getservbyname(serv, "TCP");
-	if  (!sp)  {
-		endservent();
-		return  servname? XB_INVALID_SERVICE: XB_NODEFAULT_SERVICE;
-	}
-	portnum = (SHORT) ntohs(sp->s_port);
-	endservent();
-
-	/* And now for the groovy socket stuff....  */
-
-	sin.sin_family = AF_INET;
-	sin.sin_port = htons(portnum);
-	BLOCK_ZERO(sin.sin_zero, sizeof(sin.sin_zero));
-	sin.sin_addr.s_addr = hostid;
-
-
-	if  ((sock = socket(PF_INET, SOCK_STREAM, 0)) < 0)
-		return  XB_NOSOCKET;
-
-	if  (connect(sock, (struct sockaddr *) &sin, sizeof(sin)) < 0)  {
-		close(sock);
-		return  XB_NOCONNECT;
-	}
-
-	/* Allocate ourselves a "file descriptor" and stuff our stuff in it.  */
-
-	for  (result = 0;  result < api_max;  result++)
-		if  (apilist[result].sockfd < 0)
-			goto  found;
-	if  (++api_max >= MAXFDS)
-		return  XB_NOMEM;
- found:
-	ret_fd = &apilist[result];
-	ret_fd->portnum = (SHORT) portnum;
-	ret_fd->sockfd = (SHORT) sock;
-	ret_fd->prodfd = -1;
-	ret_fd->hostid = hostid;
-	ret_fd->jobfn = (void (*)()) 0;
-	ret_fd->varfn = (void (*)()) 0;
-	ret_fd->jserial = 0;
-	ret_fd->vserial = 0;
-	ret_fd->bufmax = 0;
-	ret_fd->queuename = (char *) 0;
-	ret_fd->buff = (char *) 0;
-	pw = getpwuid(geteuid());
-	strncpy(ret_fd->username, pw? pw->pw_name: BATCHUNAME, UIDSIZE);
-	ret_fd->username[UIDSIZE] = '\0';
+        result = open_common(hostname, servname);
+        if  (result < 0)
+                return  result;
+        ret_fd = &apilist[result];
 	outmsg.code = API_SIGNON;
-	strcpy(outmsg.un.signon.username, ret_fd->username);
-	if  ((ret = gbatch_wmsg(ret_fd, &outmsg)))  {
+	if  ((pw = getpwuid(geteuid())))
+                username = pw->pw_name;
+	strncpy(outmsg.un.signon.username, username, WUIDSIZE);
+	outmsg.un.signon.username[WUIDSIZE] = '\0';
+	endpwent();             /* Done afterwards in case it clobbers username */
+        if  ((ret = gbatch_wmsg(ret_fd, &outmsg)))  {
 		gbatch_close((int) result);
 		return  ret;
 	}
@@ -202,12 +236,126 @@ int  gbatch_open(const char *hostname, const char *servname)
 		gbatch_close((int) result);
 		return  ret;
 	}
-	if  (outmsg.retcode != 0)  {
+	if  (outmsg.retcode != XB_OK)  {
 		gbatch_close((int) result);
 		return  (SHORT) ntohs(outmsg.retcode);
 	}
-	return  (int) result;
+	return  result;
 }
+
+static  int  login_common(const int apicode, int fd, const char *username, const char *passwd)
+{
+        int     ret;
+        struct  api_fd  *ret_fd;
+        struct  api_msg outmsg;
+        char    pwbuf[API_PASSWDSIZE+1];
+
+        ret_fd = &apilist[fd];
+        outmsg.code = apicode;
+        strncpy(outmsg.un.signon.username, username, WUIDSIZE);
+        outmsg.un.signon.username[WUIDSIZE] = '\0';
+
+        if  ((ret = gbatch_wmsg(ret_fd, &outmsg)))  {
+        errret:
+                gbatch_close(fd);
+                return  ret;
+        }
+        if  ((ret = gbatch_rmsg(ret_fd, &outmsg)))  {
+                gbatch_close(fd);
+                return  ret;
+        }
+        ret = (SHORT) ntohs(outmsg.retcode);
+        if  (ret != XB_OK)  {
+                if  (ret != XB_NO_PASSWD)
+                        goto  errret;
+                strncpy(pwbuf, passwd, API_PASSWDSIZE);
+                pwbuf[API_PASSWDSIZE] = '\0';
+                if  ((ret = gbatch_write(ret_fd->sockfd, pwbuf, sizeof(pwbuf))))
+                        goto  errret;
+                if  ((ret = gbatch_rmsg(ret_fd, &outmsg)))
+                        goto  errret;
+                ret = (SHORT) ntohs(outmsg.retcode);
+                if  (ret != XB_OK)
+                        goto  errret;
+        }
+        return  fd;
+}
+
+int  gbatch_login(const char *hostname, const char *servname, const char *username, const char *passwd)
+{
+        int     result;
+        result = open_common(hostname, servname);
+        if  (result < 0)
+                return  result;
+        return  login_common(API_LOGIN, result, username, passwd);
+}
+
+int  gbatch_wlogin(const char *hostname, const char *servname, const char *username, const char *passwd)
+{
+        int     result;
+        result = open_common(hostname, servname);
+        if  (result < 0)
+                return  result;
+        return  login_common(API_WLOGIN, result, username, passwd);
+}
+
+int  gbatch_locallogin_byid(const char *servname, const int_ugid_t tou)
+{
+        int     result, sock, portnum, ret;
+        struct  api_fd  *ret_fd;
+        struct  api_msg outmsg;
+
+	outmsg.un.local_signon.fromuser = htonl(geteuid());
+	outmsg.un.local_signon.touser = htonl(tou);
+	portnum = getportnum(servname);
+	if  (portnum < 0)
+		return  portnum;
+	sock = opensock(htonl(INADDR_LOOPBACK), portnum);
+	if  (sock < 0)
+		return  sock;
+	result = get_fd();
+	if  (result < 0)  {
+		close(sock);
+	        return  result;
+	}
+
+	init_fd(result, sock, htonl(INADDR_LOOPBACK), portnum);
+	ret_fd = &apilist[result];
+
+	outmsg.code = API_LOCALLOGIN;
+
+        if  ((ret = gbatch_wmsg(ret_fd, &outmsg)))  {
+        	gbatch_close(result);
+	        return  ret;
+	}
+	if  ((ret = gbatch_rmsg(ret_fd, &outmsg)))  {
+	        gbatch_close(result);
+	        return  ret;
+	}
+	if  (outmsg.retcode != XB_OK)  {
+	        gbatch_close(result);
+	        return  (SHORT) ntohs(outmsg.retcode);
+	}
+	return  result;
+}
+
+int  gbatch_locallogin(const char *servname, const char *username)
+{
+        int_ugid_t  tou;
+
+        if  (username)  {
+                struct  passwd  *pw = getpwnam(username);
+                if  (!pw)  {
+                        endpwent();
+                        return  XB_UNKNOWN_USER;
+                }
+                tou = pw->pw_uid;
+                endpwent();
+        }
+        else
+        	tou = geteuid();
+        return  gbatch_locallogin_byid(servname, tou);
+ }
 
 int  gbatch_newgrp(const int fd, const char *name)
 {
@@ -220,17 +368,15 @@ int  gbatch_newgrp(const int fd, const char *name)
 
 	BLOCK_ZERO(&msg, sizeof(msg));
 	msg.code = API_NEWGRP;
-	strncpy(msg.un.signon.username, name, UIDSIZE);
+	strncpy(msg.un.signon.username, name, WUIDSIZE);
 	if  ((ret = gbatch_wmsg(fdp, &msg)))
 		return  ret;
 	if  ((ret = gbatch_rmsg(fdp, &msg)))
 		return  ret;
-	if  (msg.retcode != 0)
-		return  (SHORT) ntohs(msg.retcode);
-	return  XB_OK;
+        return  (SHORT) ntohs(msg.retcode);
 }
 
-#if	(defined(FASYNC) && defined(F_SETOWN))
+#if	defined(FASYNC) && defined(F_SETOWN)
 static void  procpoll(int fd)
 {
 	struct	api_fd	*fdp;
@@ -243,7 +389,6 @@ static void  procpoll(int fd)
 
 	if  (recvfrom(fdp->prodfd, (char *) &imsg, sizeof(imsg), 0, (struct sockaddr *) &reply_addr, &repl) < 0)
 		return;
-
 	switch  (imsg.code)  {
 	default:
 		return;
@@ -298,20 +443,10 @@ static int  setmon(struct api_fd *fdp)
 #ifdef	STRUCT_SIG
 	struct	sigstruct_name	z;
 #endif
-	int	protonum;
-	struct	protoent	*pp;
 	struct	sockaddr_in	sin;
 	struct	api_msg	msg;
 
-	if  (!(pp = getprotobyname("udp")) && !(pp = getprotobyname("UDP")))  {
-		endprotoent();
-		return  XB_NODEFAULT_SERVICE;
-	}
-	protonum = pp->p_proto;
-	endprotoent();
-	if  (!(sp = getservbyname(serv, "udp")))
-		sp = getservbyname(serv, "UDP");
-	if  (!sp)  {
+	if  (!(sp = getservbyname(serv, "udp")))  {
 		endservent();
 		return  XB_NODEFAULT_SERVICE;
 	}
@@ -333,7 +468,7 @@ static int  setmon(struct api_fd *fdp)
 #else
 	signal(SIGIO, catchpoll);
 #endif
-	if  ((sockfd = socket(PF_INET, SOCK_DGRAM, protonum)) < 0)
+	if  ((sockfd = socket(PF_INET, SOCK_DGRAM, IPPROTO_UDP)) < 0)
 		return  XB_NOSOCKET;
 	if  (bind(sockfd, (struct sockaddr *) &sin, sizeof(sin)) < 0)  {
 		close(sockfd);
@@ -401,7 +536,7 @@ int  gbatch_close(const int fd)
 
 	if  (!fdp)
 		return  XB_INVALID_FD;
-#if	(defined(FASYNC) && defined(F_SETOWN))
+#if	defined(FASYNC) && defined(F_SETOWN)
 	if  (fdp->prodfd >= 0)  {
 		unsetmon(fdp);
 		fdp->jobfn = (void (*)()) 0;

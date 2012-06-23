@@ -91,11 +91,13 @@
 #define	XIHTMLINI	"${SPROGDIR-@pkgdatadir@}/gbhtml.ini"
 #define	HTML_UFILE	"${SPROGDIR-@pkgdatadir@}/html_ufile"
 #define HTML_TMPFILE	"/tmp/gbcgi%ld.%d"
-
+#define	 WINUSER_MAP	"@sysconfdir@/gbuser.map"
 #define XIPWFILE	"${SPROGDIR-@pkgexecdir@}/gbpwfile"
 
 #define	BTR_PROGRAM	"gbch-r"
 #define	XBTR_PROGRAM	"gbch-xr"
+
+#define XBTIMEOUTS      "${NETTIMEOUT:1000}"
 
 #define	HALTSIG		"${HALTALL-9}"
 

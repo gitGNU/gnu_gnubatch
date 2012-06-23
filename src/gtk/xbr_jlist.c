@@ -650,7 +650,7 @@ void  cb_edit()
 	}
 
 	umask((int) Save_umask);
-	chdir(pj->directory);
+	Ignored_error = chdir(pj->directory);
 	if  (xterm_edit)  {
 		char	*termname = envprocess("${XTERM:-xterm}");
 		execl(execprog, termname, "-e", editor_name, path, (char *) 0);

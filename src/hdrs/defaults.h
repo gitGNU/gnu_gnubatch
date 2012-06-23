@@ -16,8 +16,8 @@
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
 #define	UIDSIZE		11		/* Size of UID field */
-#define	HOSTNSIZE	14		/* Host name size */
-#define	LICWARN		14		/* Days to warn about licence */
+#define	WUIDSIZE	23		/* Size of Windows name field */
+#define	HOSTNSIZE	30		/* Host name size */
 
 #define	CMODE	0600
 

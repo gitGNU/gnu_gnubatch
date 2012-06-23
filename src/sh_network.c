@@ -81,10 +81,6 @@ int	Netsync_req;
 unsigned	lumpsize = DEF_LUMPSIZE,
 		lumpwait = DEF_LUMPWAIT;
 
-static	SHORT	tcpproto, udpproto;
-
-unsigned	num_remhosts;	/* Number of connected remotes not including DOS ones */
-
 #define	INC_REMOTES	4
 
 struct	rem_list  {
@@ -93,26 +89,12 @@ struct	rem_list  {
 	struct	remote	**list;
 };
 
-struct	rem_list	possible,
-			probed,
-			connected,
-			roamers;
+struct	rem_list	probed,
+			connected;
 
-enum	hip_type  {	HIP_POSS,		/* Possible */
-			HIP_REMOTE,		/* Remote we are actually talking to */
-			HIP_PROBE,		/* Remote we are "probing" */
-			HIP_ROAM };		/* On roam list */
-
-struct	haship  {
-	struct	haship	*next;		/* Next in hash chain */
-	struct	remote	*remp;		/* Remote structure */
-	enum  hip_type	type;		/* Type of thing */
-};
-
-static	struct	haship	*hashtab[NETHASHMOD];
+static	struct	remote	*hashtab[NETHASHMOD];
 
 PIDTYPE	Netm_pid;		/* Process id of net monitor */
-
 
 #ifdef	USING_FLOCK
 #ifdef	USING_MMAP
@@ -225,7 +207,7 @@ static void  freexbuf(ULONG n)
 #endif
 }
 
-/* Allocate a remote structure and copy.  */
+/* Allocate a remote structure and copy the passed one (saves time in places).  */
 
 static struct remote *new_remote(const struct remote *rp)
 {
@@ -238,31 +220,23 @@ static struct remote *new_remote(const struct remote *rp)
 	return  result;
 }
 
-/* Allocate a new hash structure.  */
-
-static struct haship *alloc_haship(struct remote *rp, enum hip_type type)
+inline  void  add_chain(struct remote *rp)
 {
-	struct haship *result = (struct haship *) malloc(sizeof(struct haship));
-	if  (!result)
-		ABORT_NOMEM;
-	result->next = (struct haship *) 0;
-	result->remp = rp;
-	result->type = type;
-	return  result;
+        unsigned  hashv = calcnhash(rp->hostid);
+        rp->hash_next = hashtab[hashv];
+        hashtab[hashv] = rp;
 }
 
-/* Return the place which points to where a hash structure is or would go */
+/* Free remote structure from chain */
 
-static struct haship **get_pp_haship(const netid_t ipaddr)
+inline  void  free_chain(struct remote *rp)
 {
-	struct	haship	**rpp, *rp;
-
-	for  (rpp = &hashtab[calcnhash(ipaddr)];  (rp = *rpp);  rpp = &rp->next)
-		if  (rp->remp->hostid == ipaddr)
-			break;
-	/* Even if we don't find it, we return where it 'would' go.  */
-
-	return  rpp;
+        struct  remote  **rpp, *pp;
+        rpp = &hashtab[calcnhash(rp->hostid)];
+        while  ((pp = *rpp)  &&  pp != rp)
+                rpp = &pp->hash_next;
+        if  (pp)
+                *rpp = rp->hash_next;
 }
 
 /* Allocate and free members of various lists.  */
@@ -298,123 +272,134 @@ static void  free_remlist(struct rem_list *rl, struct remote *rp, const int errc
 	}
 }
 
-struct remote *alloc_roam(const netid_t roamip, const char *u_name, const char *g_name)
+/* Return the number of servers we are connected to */
+
+int     get_nservers()
 {
-	struct	remote	*rp;
-	struct	haship	**hipp, *hip;
-	struct	remote	buf;
-	int_ugid_t	ugid;
+        int     result = 0,  cnt;
 
-	/* Might be renaming of existing person.  The existing person
-	   might still have a connection on the go - probably
-	   invalid though.  */
-
-	hipp = get_pp_haship(roamip);
-	if  ((hip = *hipp))  {
-		if  (hip->remp->ht_flags & HT_ROAMUSER)
-			strcpy(hip->remp->hostname, u_name);
-		return  hip->remp;
-	}
-
-	/* New person...  */
-
-	BLOCK_ZERO(&buf, sizeof(buf));
-	strcpy(buf.hostname, u_name);
-	strcpy(buf.alias, g_name);
-	buf.n_uid = (ugid = lookup_uname(u_name)) == UNKNOWN_UID? Daemuid: ugid;
-	buf.n_gid = (ugid = lookup_gname(g_name)) == UNKNOWN_GID? Daemgid: ugid;
-	buf.sockfd = -1;
-	buf.hostid = roamip;
-	buf.ht_flags = HT_DOS|HT_ROAMUSER;
-	rp = new_remote(&buf);
-	*hipp = alloc_haship(rp, HIP_ROAM);
-	add_remlist(&roamers, rp);
-	return  rp;
+        for  (cnt = connected.rl_nums - 1;  cnt >= 0;  cnt--)
+                if  ((connected.list[cnt]->stat_flags & SF_NOTSERVER) == 0  &&  connected.list[cnt]->is_sync == NSYNC_OK)
+                        result++;
+        return  result;
 }
 
-static struct remote *look4(const netid_t netid, const enum hip_type type)
+inline struct remote *find_host(const netid_t netid)
 {
-	struct	haship  **hipp = get_pp_haship(netid);
-	struct	haship	*hip = *hipp;
-	return  (hip  &&  hip->type == type)? hip->remp: (struct remote *)  0;
+        struct  remote  *rp;
+        for  (rp = hashtab[calcnhash(netid)];  rp;  rp = rp->hash_next)
+                if  (rp->hostid == netid)
+                        return  rp;
+        return  (struct remote *) 0;
 }
 
-struct	remote *find_connected(const netid_t netid)
+inline struct remote *next_samehost(struct remote *rp)
 {
-	return  look4(netid, HIP_REMOTE);
+        netid_t  netid = rp->hostid;
+        for  (rp = rp->hash_next;  rp;  rp = rp->hash_next)
+                if  (rp->hostid == netid)
+                        return  rp;
+        return  (struct remote *) 0;
 }
 
-struct remote *find_probe(const netid_t netid)
+inline struct remote *inl_find_connected(const netid_t netid)
 {
-	return  look4(netid, HIP_PROBE);
+        struct  remote  *rp;
+        for  (rp = find_host(netid);  rp;  rp = next_samehost(rp))
+                if  (rp->stat_flags & SF_CONNECTED)
+                        return  rp;
+        return  (struct remote *) 0;
 }
 
-/* Provide inline versions for this module */
-
-inline struct	remote *inl_find_connected(const netid_t netid)
+inline struct remote *next_connected(struct remote *rp)
 {
-	return  look4(netid, HIP_REMOTE);
+        do   rp = next_samehost(rp);
+        while  (rp  &&  !(rp->stat_flags & SF_CONNECTED));
+        return  rp;
 }
 
 inline struct remote *inl_find_probe(const netid_t netid)
 {
-	return  look4(netid, HIP_PROBE);
+        struct  remote  *rp;
+        for  (rp = hashtab[calcnhash(netid)];  rp;  rp = rp->hash_next)
+                if  (rp->hostid == netid  &&  rp->stat_flags & SF_PROBED)
+                        return  rp;
+        return  (struct remote *) 0;
 }
 
-/* Reassign contents of remote structure on connection.  */
+/* Note that this is only called in respect of machines known to be clients only
+   for the benefit of *x machines which might have been servers. */
 
-static struct remote *reass_hip(struct haship *hip)
+static void  clientonly(const struct remote *crp)
 {
-	struct	remote	*rp = hip->remp;
+        struct  remote  *rp;
+        if  (find_host(crp->hostid))            /* Don't think self is a possibility */
+                return;
+        rp = new_remote(crp);
+        rp->stat_flags = SF_NOTSERVER;
+}
 
-	switch  (hip->type)  {
-	case  HIP_POSS:			/* Possible now "realised" */
-		free_remlist(&possible, rp, $E{Hash function error free_poss});
-		add_remlist(&connected, rp);
-		hip->type = HIP_REMOTE;
-		break;
+/*  Called from outside, find a connection (for manual connect).
+    If we have been told it is a client, skip it and find another */
 
-	case  HIP_ROAM:
-		free_remlist(&roamers, rp, 0);
-		add_remlist(&connected, rp);
-		hip->type = HIP_REMOTE;
-		break;
+struct  remote *find_connected(const netid_t netid)
+{
+        struct  remote  *rp = inl_find_connected(netid);
+        while  (rp  &&  !(rp->stat_flags & SF_NOTSERVER))
+                rp = next_connected(rp);
+        return  rp;
+}
 
-	case  HIP_PROBE:
-		free_remlist(&probed, rp, $E{Hash function error free_probe});
-		add_remlist(&connected, rp);
-		hip->type = HIP_REMOTE;
-		break;
+/* Outside version of find_probe - just calls the inline kind */
 
-	case  HIP_REMOTE:
-		if  (rp->ht_flags & HT_ROAMUSER)  {
-			struct	hostent	*hp;
-			struct	in_addr	sina;
-			sina.s_addr = rp->hostid;
-			hp = gethostbyaddr((char *) &rp->hostid, sizeof(netid_t), AF_INET);
-			disp_str = hp? hp->h_name: inet_ntoa(sina);
-		}
-		else
-			disp_str = rp->hostname;
-		nfreport($E{Reconnection whilst still connected});
-		close(rp->sockfd);
-		if  (rp->is_sync != NSYNC_OK)
-			Netsync_req--;
-		break;
-	}
+struct remote *find_probe(const netid_t netid)
+{
+        return  inl_find_probe(netid);
+}
 
+/* Note "roaming user" - we currently only do anything for clients we absolutely
+   know can't ever be servers as well. */
+
+struct remote *alloc_roam(struct remote *rp)
+{
+        /* Xbnetserv (in tell_sched_roam) stuffs the remote uid in here
+           to let us know it's a Win client. The hostid will be zero */
+
+        if  (rp->remuid == UNKNOWN_UID  &&  rp->hostid != 0)
+                clientonly(rp);
 	return  rp;
+}
+
+/* Handle message advising that the caller isn't a server process
+   (for when we've got clients speaking as well as btscheds) */
+
+void    set_not_server(ShipcRef req, const int toset)
+{
+        struct  remote  *rp = inl_find_connected(req->sh_params.hostid);
+        while  (rp)  {
+                if  (rp->sockfd == req->sh_params.param)  {
+                        /* We identify the correct remote by looking at the sock
+et descriptor
+                        which got passed in sh_params.param (see net_recv) */
+                        if  (toset)
+                                rp->stat_flags |= SF_NOTSERVER;
+                        else
+                                rp->stat_flags &= ~SF_NOTSERVER;
+                        return;
+                }
+                rp = next_connected(rp);
+        }
 }
 
 /* Try to attach to remote machine which may already be running.  */
 
-int  conn_attach(struct remote *prp)
+struct  remote  *conn_attach(struct remote *prp)
 {
 	int	sk;
 	struct	remote	*rp;
-	struct	haship	**hipp, *hip;
 	struct	sockaddr_in	sin;
-	if  ((sk = socket(PF_INET, SOCK_STREAM, tcpproto)) < 0)
+
+        if  ((sk = socket(PF_INET, SOCK_STREAM, IPPROTO_TCP)) < 0)
 		return  0;
 
 	sin.sin_family = AF_INET;
@@ -427,29 +412,24 @@ int  conn_attach(struct remote *prp)
 		return  0;
 	}
 
-	/* Successful connection...
-	   Now deal with what we knew before */
+	/* If it was a probe, we re-use the struct remote, taking it off the probe list. */
 
-	hipp = get_pp_haship(prp->hostid);
+        if  (prp->stat_flags & SF_PROBED)  {
+                free_remlist(&probed, prp, $E{Hash function error free_probe});
+                rp = prp;
+        }
+        else  {         /* Otherwise allocate a new one */
+                rp = new_remote(prp);
+                add_chain(rp);
+        }
 
-	if  ((hip = *hipp))			/* Heard of it before */
-		rp = reass_hip(hip);
-	else  {
-		/*   New case (from attach_hosts). */
-		rp = new_remote(prp);
-		*hipp = alloc_haship(rp, HIP_REMOTE);
-		add_remlist(&connected, rp);
-	}
-
-	/* Now set fields in remote structure.  */
-
-	rp->sockfd = (SHORT) sk;
-	rp->ht_flags |= HT_ISCLIENT;
-	rp->is_sync = NSYNC_NONE;
-	rp->lastwrite = time((time_t *) 0);
-	Netsync_req++;
-	num_remhosts++;	/* We aren't clients to DOS machines, so no check */
-	return  1;
+        rp->sockfd = sk;
+        rp->stat_flags = SF_ISCLIENT | SF_CONNECTED;
+        add_remlist(&connected, rp);
+        rp->is_sync = NSYNC_NONE;
+        rp->lastwrite = time((time_t *) 0);
+        Netsync_req++;
+        return  rp;
 }
 
 static int  probe_send(const netid_t hostid, struct netmsg *pmsg)
@@ -471,7 +451,7 @@ static int  probe_send(const netid_t hostid, struct netmsg *pmsg)
 	   bind something.  The remote uses our "pportnum".  */
 
 	for  (tries = 0;  tries < UDP_TRIES;  tries++)  {
-		if  ((sockfd = socket(AF_INET, SOCK_DGRAM, udpproto)) < 0)  {
+		if  ((sockfd = socket(AF_INET, SOCK_DGRAM, IPPROTO_UDP)) < 0)  {
 			disp_arg[0] = ntohs(pportnum);
 			nfreport($E{Panic trouble creating probe socket});
 			return  0;
@@ -482,8 +462,10 @@ static int  probe_send(const netid_t hostid, struct netmsg *pmsg)
 			close(sockfd);
 			return  0;
 		}
-		if  (sendto(sockfd, (char *) pmsg, sizeof(struct netmsg), 0, (struct sockaddr *) &serv_addr, sizeof(serv_addr)) >= 0)
-			goto  doneok;
+		if  (sendto(sockfd, (char *) pmsg, sizeof(struct netmsg), 0, (struct sockaddr *) &serv_addr, sizeof(serv_addr)) >= 0)  {
+                        close(sockfd);
+                        return  1;
+                }
 		close(sockfd);
 	}
 
@@ -492,17 +474,15 @@ static int  probe_send(const netid_t hostid, struct netmsg *pmsg)
 	disp_arg[0] = ntohs(pportnum);
 	nfreport($E{Panic trouble sending on probe socket});
 	return  0;
- doneok:
-	close(sockfd);
-	return  1;
 }
 
 /* Initiate connection by doing UDP probe first.
    The net monitor process deals with the reply, or "nettickle" discovers that
    it's not worth bothering about.  */
 
-int  probe_attach(struct remote *prp)
+void  probe_attach(struct remote *prp)
 {
+        struct  remote  *rp;
 	struct	netmsg	pmsg;
 
 	pmsg.hdr.code = htons(N_CONNECT);
@@ -510,46 +490,34 @@ int  probe_attach(struct remote *prp)
 	pmsg.hdr.hostid = myhostid;
 	pmsg.arg = 0;
 
-	if  (probe_send(prp->hostid, &pmsg))  {
-		struct	haship	**hipp, *hip;
-		struct	remote	*rp;
+        /* We always at least send the probe, worry if it is already
+           connected later */
 
-		hipp = get_pp_haship(prp->hostid);
+	if  (!probe_send(prp->hostid, &pmsg))
+                return;
 
-		if  ((hip = *hipp))  {
-			rp = hip->remp;
+        /* If we did it already, refresh the time and exit */
 
-			switch  (hip->type)  {
-			case  HIP_REMOTE:
-			case  HIP_PROBE:
-				rp->lastwrite = time((time_t *) 0);
-				return  1;
+        if  ((rp = inl_find_probe(prp->hostid)))  {
+                rp->lastwrite = time((time_t *) 0);
+                return;
+        }
 
-			case  HIP_POSS:
-				free_remlist(&possible, rp, $E{Hash function error free_poss});
-				add_remlist(&probed, rp);
-				hip->type = HIP_PROBE;
-				break;
+        /* See if we think that there is a connection. We may get this wrong if there are clients
+           around who haven't said that they are but hopefully we'll push through that change soon.
+           If "I" have connected to the other guy already it shouldn't reconnect either. */
 
-			case  HIP_ROAM:
-				free_remlist(&roamers, rp, 0);
-				add_remlist(&probed, rp);
-				hip->type = HIP_PROBE;
-				break;
-			}
-		}
-		else  {
-			rp = new_remote(prp);
-			*hipp = alloc_haship(rp, HIP_PROBE);
-			add_remlist(&probed, rp);
-		}
+        for  (rp = inl_find_connected(prp->hostid);  rp;  rp = next_connected(rp))
+                if  ((rp->stat_flags & (SF_ISCLIENT|SF_NOTSERVER)) == 0)
+                        return;
 
-		rp->is_sync = NSYNC_NONE;
-		rp->ht_flags |= HT_ISCLIENT;
-		rp->lastwrite = time((time_t *) 0);
-		return  1;
-	}
-	return  0;
+        rp = new_remote(prp);
+        rp->stat_flags = SF_PROBED|SF_ISCLIENT;
+        rp->is_sync = NSYNC_NONE;
+        rp->lastwrite = time((time_t *) 0);
+
+        add_remlist(&probed, rp);
+        add_chain(rp);
 }
 
 void  reply_probe()
@@ -631,15 +599,36 @@ void  reply_probe()
 	}
 }
 
-/* Attach remote, either immediately, or by doing probe operation first */
+/* Attach remote, either immediately, or by doing probe operation first.
+   Return the struct remote if we get through immediately,
+   otherwise null (for the benefit of sendsync) */
 
-int  rattach(struct remote *prp)
+struct  remote  *rattach(struct remote *prp)
 {
 	if  (prp->hostid == 0L  ||  prp->hostid == myhostid)
-		return  0;
-	if  (prp->ht_flags & HT_PROBEFIRST)
-		return  probe_attach(prp);
+		return  (struct remote *) 0;
+	if  (prp->ht_flags & HT_PROBEFIRST)  {
+                probe_attach(prp);
+                return  (struct remote *) 0;
+        }
 	return  conn_attach(prp);
+}
+
+/* When we seem to have a duplicate connection.
+   This might be because we have another one coming the other way at the same time.
+   We might be wrong here until all clients tell us they are clients */
+
+static void dump_connection(int sk, netid_t hostid)
+{
+        struct	netmsg	rq;
+        BLOCK_ZERO(&rq, sizeof(rq));
+	rq.hdr.code = htons(N_SHUTHOST);
+	rq.hdr.length = htons(sizeof(struct netmsg));
+	rq.hdr.hostid = myhostid;
+	Ignored_error = write(sk, (char *) &rq, sizeof(rq));
+        disp_str = look_host(hostid);
+        nfreport($E{Reconnection whilst still connected});
+        close(sk);
 }
 
 /* Accept connection from new machine */
@@ -647,8 +636,9 @@ int  rattach(struct remote *prp)
 void  newhost()
 {
 	int	newsock;
-	struct	remote	*rp;
-	struct	haship	**hipp, *hip;
+        int     definitely_nonserv = 0;
+        netid_t hostid;
+ 	struct	remote	*rp;
 	struct	sockaddr_in	sin;
 	SOCKLEN_T	sinl;
 
@@ -656,39 +646,64 @@ void  newhost()
 	if  ((newsock = accept(listsock, (struct sockaddr *) &sin, &sinl)) < 0)
 		return;
 
-	hipp = get_pp_haship((netid_t) sin.sin_addr.s_addr);
+        /* If it's from the local machine, it must be a client thing */
 
-	if  (!(hip = *hipp))  {		/* Unknown host */
-		struct	netmsg	rq;
-		struct  hostent  *hp;
+        hostid = sin.sin_addr.s_addr;
+        if  (hostid == myhostid  ||  hostid == htonl(INADDR_LOOPBACK))  {
+                rp = (struct remote *) malloc(sizeof(struct remote));
+                if  (!rp)
+                        ABORT_NOMEM;
+                BLOCK_ZERO(rp, sizeof(struct remote));
+                rp->ht_flags = HT_MANUAL;
+                rp->stat_flags = SF_CONNECTED | SF_NOTSERVER;
+                hostid = 0;
+        }
+        else  {
+                /* If we have a probe pending, reject it.
+                   It's just possible the other end is trying to call us at exactly the same time.
+                   However it's better to just reject at both ends I think */
 
-		BLOCK_ZERO(&rq, sizeof(rq));
-		rq.hdr.code = htons(N_SHUTHOST);
-		rq.hdr.length = htons(sizeof(struct netmsg));
-		rq.hdr.hostid = myhostid;
-		Ignored_error = write(newsock, (char *) &rq, sizeof(rq));
-		hp = gethostbyaddr((char *) &sin.sin_addr.s_addr, sizeof(netid_t), AF_INET);
-		disp_str = hp? hp->h_name: inet_ntoa(sin.sin_addr);
-		nfreport($E{Connection attempt from unknown host});
-		close(newsock);
-		return;
-	}
+                if  ((rp = inl_find_probe(hostid)))  {
+                        dump_connection(newsock, hostid);
+                        free_remlist(&probed, rp, 0);
+                        free_chain(rp);
+                        free((char *) rp);
+                        return;
+                }
 
-	/* The client is responsible for broadcasting job and printer
-	   details, so we'll say it's sync'ed.  It can ask for my
-	   stuff when it's ready.  */
+                /* We might be connected already, as a client and this is a server or
+                   vice versa we don't know yet. All we can do at the moment is see if we
+                   have a record with it being marked not server without it being connected */
 
-	rp = reass_hip(hip);
-	rp->is_sync = NSYNC_OK;
-	rp->ht_flags &= ~HT_ISCLIENT;
-	rp->sockfd = (SHORT) newsock;
-	rp->lastwrite = time((time_t *) 0);
-	if  (!(rp->ht_flags & HT_DOS))
-		num_remhosts++;
+                for  (rp = find_host(hostid);  rp;  rp = next_samehost(rp))
+                        if  ((rp->stat_flags & (SF_CONNECTED|SF_NOTSERVER)) == SF_NOTSERVER)  {
+                                definitely_nonserv = 1;
+                                break;
+                        }
+
+                rp = (struct remote *) malloc(sizeof(struct remote));
+                if  (!rp)
+                        ABORT_NOMEM;
+                BLOCK_ZERO(rp, sizeof(struct remote));
+                rp->ht_flags = HT_MANUAL;
+                rp->stat_flags = SF_CONNECTED;
+
+                /* If this IP is marked as not a server, then set the flag */
+
+                if  (definitely_nonserv)
+                        rp->stat_flags |= SF_NOTSERVER;
+        }
+
+        rp->sockfd = newsock;
+        rp->hostid = hostid;
+        rp->is_sync = NSYNC_OK;
+        rp->ht_timeout = NETTICKLE;
+        rp->lastwrite = time((time_t *) 0);
+        add_chain(rp);
+        add_remlist(&connected, rp);
 }
 
-/* The following are service names so that we can find a suitable port
-   number.
+/* The following are service names so that we can find a suitable port number.
    WARNING: We must run as root if we want to use privileged port numbers < 1024.  */
 
 static	char	*servnames[] = {
@@ -702,15 +717,29 @@ static	char	*vservnames[] = {
 	VIEWPORT_NAME2
 };
 
+/* Go down a list of possible port names and return the first port number we find.
+   NB Returned in net byte order.
+   Return 0 if not found. */
+
+static	int	get_serv_port(char **slist, const int proto, unsigned sn)
+{
+	struct  servent  *sp;
+	char	**slp;
+
+	sn /= sizeof(char *);
+	for  (slp = slist;  slp < &slist[sn];  slp++)
+		if  ((sp = env_getserv(*slp, proto)))
+			return  sp->s_port;
+	return  0;
+}
+
 /* Attach hosts if possible */
 
 void  attach_hosts()
 {
-	struct	servent	*sp;
-	struct	protoent  *pp;
 	struct	remote	*rp;
-	char	*tcp_protoname, *udp_protoname, *ep;
-	int	si;
+	char	*ep;
+	int	possp;
 	extern	char	hostf_errors;
 
 	if  ((ep = envprocess(LUMPSIZE))  &&  (lumpsize = (unsigned) atoi(ep)) == 0)
@@ -718,62 +747,33 @@ void  attach_hosts()
 	if  ((ep = envprocess(LUMPWAIT))  &&  (lumpwait = (unsigned) atoi(ep)) == 0)
 		lumpwait = DEF_LUMPWAIT;
 
-	/* Get TCP/UDP protocol names */
-
-	if  (!((pp = getprotobyname("tcp"))  || (pp = getprotobyname("TCP"))))
-		panic($E{Netconn no TCP abort});
-	tcp_protoname = stracpy(pp->p_name);
-	tcpproto = pp->p_proto;
-	if  (!((pp = getprotobyname("udp"))  || (pp = getprotobyname("UDP"))))
-		panic($E{Netconn no UDP abort});
-	udp_protoname = stracpy(pp->p_name);
-	udpproto = pp->p_proto;
-	endprotoent();
-
-	/* Get port number for this caper */
-
-	for  (si = 0;  si < sizeof(servnames)/sizeof(char *);  si++)
-		if  ((sp = env_getserv(servnames[si], tcp_protoname)))
-			goto  found_serv;
-	free(tcp_protoname);
-	free(udp_protoname);
-	endservent();
-	return;
-
- found_serv:
-
-	/* Shhhhhh....  I know this should be network byte order, but
-	   lets leave it alone for now.  */
-
-	lportnum = pportnum = sp->s_port;
+	lportnum = pportnum = get_serv_port(servnames, IPPROTO_TCP, sizeof(servnames));
+	if  (lportnum == 0)  {
+		panic($E{No listening port});
+		endservent();
+		return;
+	}
 
 	/* Get port number for probe port, if not found use the same as above.  */
 
-	for  (si = 0;  si < sizeof(servnames)/sizeof(char *);  si++)
-		if  ((sp = env_getserv(servnames[si], udp_protoname)))  {
-			pportnum = sp->s_port;
-			break;
-		}
+	possp = get_serv_port(servnames, IPPROTO_UDP, sizeof(servnames));
+	if  (possp != 0)
+		pportnum = possp;
 
-	for  (si = 0;  si < sizeof(vservnames)/sizeof(char *);  si++)
-		if  ((sp = env_getserv(vservnames[si], tcp_protoname)))  {
-			vportnum = sp->s_port;
-			goto  found_vserv;
-		}
+	/* Get port number for view port, if not found use the connect port + 1 */
 
-	/* Do this in 2 steps as some ntohs etc are asm calls...
-	   (including the one I first tried it on) */
-
-	vportnum = ntohs((USHORT) lportnum) + 1;
-	vportnum = htons(vportnum);
- found_vserv:
-	free(tcp_protoname);
-	free(udp_protoname);
+	vportnum = get_serv_port(vservnames, IPPROTO_TCP, sizeof(vservnames));
+	if  (vportnum == 0)  {
+		/* Do this in two steps because sometimes ntohs and htons are asm statements
+		   which go wrong if you try to do too much. */
+		possp = ntohs((USHORT) lportnum) + 1;
+		vportnum = htons(possp);
+	}
 	endservent();
 
 	/* Now set up "listening" socket */
 
-	if  ((listsock = socket(PF_INET, SOCK_STREAM, tcpproto)) >= 0)  {
+	if  ((listsock = socket(PF_INET, SOCK_STREAM, IPPROTO_TCP)) >= 0)  {
 		struct	sockaddr_in	sin;
 #ifdef	SO_REUSEADDR
 		int	on = 1;
@@ -793,7 +793,7 @@ void  attach_hosts()
 
 	/* Now set up "viewing/feeding" socket */
 
-	if  ((viewsock = socket(PF_INET, SOCK_STREAM, tcpproto)) >= 0)  {
+	if  ((viewsock = socket(PF_INET, SOCK_STREAM, IPPROTO_TCP)) >= 0)  {
 		struct	sockaddr_in	sin;
 #ifdef	SO_REUSEADDR
 		int	on = 1;
@@ -813,7 +813,7 @@ void  attach_hosts()
 
 	/* Now set up Datagram probe socket */
 
-	if  ((probesock = socket(PF_INET, SOCK_DGRAM, udpproto)) >= 0)  {
+	if  ((probesock = socket(PF_INET, SOCK_DGRAM, IPPROTO_UDP)) >= 0)  {
 		struct	sockaddr_in	sin;
 
 		sin.sin_family = AF_INET;
@@ -836,75 +836,39 @@ void  attach_hosts()
 
 	/* Now parse host file and attach as appropriate */
 
-	while  ((rp = get_hostfile()))  {
-
-		/* Ignore "roaming user" entries - xtnetserv tells us
-		   about them and they find their way into
-		   alloc_roam().  */
-
-		if  (rp->ht_flags & HT_ROAMUSER)
-			continue;
-
-		if  (rp->ht_flags & (HT_MANUAL|HT_DOS))  {
-			struct	remote  *newrp = new_remote(rp);
-			struct	haship	**hipp = get_pp_haship(rp->hostid);
-			if  (!*hipp)	/* Otherwise I'm really confused */
-				*hipp = alloc_haship(newrp, HIP_POSS);
-			add_remlist(&possible, newrp);
-			continue;
-		}
-
-		/* Otherwise set it up as a new connection.  */
-
-		rattach(rp);
-	}
+	while  ((rp = get_hostfile()))
+                if  ((rp->ht_flags & (HT_MANUAL|HT_DOS|HT_ROAMUSER)) == 0)
+                        rattach(rp);
 	end_hostfile();
 	if  (hostf_errors)
 		nfreport($E{Warn errors in host file});
 }
 
-/* Remove traces of jobs and variables on our machine associated with
-   the dying machine */
+/* Invoked to shut down connection and deallocate structures */
 
 static void  deallochost(struct remote *rp)
 {
-	struct	haship	**hipp, *hip;
+        /* Remove traces of jobs and variables on our machine associated with
+           the dying machine. */
 
-	netlock_hostdied(rp);	/* In case we thought that the machine had the lock */
-	net_jclear(rp->hostid);	/* Must clean jobs first */
-	net_vclear(rp->hostid);	/* As need to keep track of vars */
+        if  (rp->hostid)  {             /* Don't remove our own! */
+                netlock_hostdied(rp);	/* In case we thought that the machine had the lock */
+                net_jclear(rp->hostid);	/* Must clean jobs first */
+                net_vclear(rp->hostid);	/* As need to keep track of vars */
+        }
 
-	hipp = get_pp_haship(rp->hostid);
+        free_chain(rp);
 
-	if  ((hip = *hipp))  {
+        if  (rp->stat_flags & SF_CONNECTED)  {
+                close(rp->sockfd);
+                if  (rp->is_sync != NSYNC_OK)
+                        Netsync_req--;
+                free_remlist(&connected, rp, 0);
+        }
+        if  (rp->stat_flags & SF_PROBED)
+        	free_remlist(&probed, rp, $E{Hash function error free_probe});
 
-		switch  (hip->type)  {
-		case  HIP_POSS:
-		case  HIP_ROAM:
-			return;
-
-		case  HIP_PROBE:
-			free_remlist(&probed, rp, $E{Hash function error free_probe});
-			goto  deallrest;
-
-		case  HIP_REMOTE:
-			close(rp->sockfd);
-			if  (rp->is_sync != NSYNC_OK)
-				Netsync_req--;
-			free_remlist(&connected, rp, 0);
-			if  (!(rp->ht_flags & HT_DOS))
-				num_remhosts--;
-		deallrest:
-			if  (rp->ht_flags & HT_ROAMUSER)  {
-				hip->type = HIP_ROAM;
-				add_remlist(&roamers, rp);
-			}
-			else  {
-				hip->type = HIP_POSS;
-				add_remlist(&possible, rp);
-			}
-		}
-	}
+        free((char *) rp);
 }
 
 /* Write to socket, but if we get some error, treat connection as
@@ -927,12 +891,40 @@ static int  chk_write(struct remote *rp, char *buffer, unsigned length)
 	return  1;
 }
 
-void  clearhost(const netid_t netid)
+/* Remove structures associated with host, if sockfd >= 0 then specific
+   to that connection. */
+
+void  clearhost(const netid_t netid, const int sockfd)
 {
-	struct	haship	**hipp = get_pp_haship(netid);
-	struct	haship  *hip = *hipp;
-	if  (hip)
-		deallochost(hip->remp);
+        struct  remote  *rp = inl_find_connected(netid);
+
+        /* If sockfd is positive, we are specifically disconnecting
+           an existing connection */
+
+        if  (sockfd >= 0)  {
+                while  (rp)  {
+                        if  (rp->sockfd == sockfd)  {
+                                deallochost(rp);
+                                break;
+                        }
+                        rp = next_connected(rp);
+                }
+                return;
+        }
+
+        /* First go through connected ones */
+
+        while  (rp)  {
+                struct  remote  *nxtrp = next_connected(rp);    /* save this cous deallochost zaps the link */
+                if  (!(rp->stat_flags & SF_NOTSERVER))          /* This will zap clients that haven't told us they are */
+                        deallochost(rp);
+                rp = nxtrp;
+        }
+
+        /* We expect only one probe though */
+
+        if  ((rp = inl_find_probe(netid)))
+                deallochost(rp);
 }
 
 /* Read from TCP socket and join together the bits which things
@@ -940,14 +932,20 @@ void  clearhost(const netid_t netid)
 
 static void  read_sock(struct remote *rp, char *rqb, unsigned size)
 {
-	int	nbytes;
 	Shipc	omsg;
 
-	while  ((nbytes = read(rp->sockfd, rqb, size)) > 0)  {
-		if  (nbytes == size)
-			return;
-		size -= nbytes;
-		rqb += nbytes;
+	for  (;;)  {
+		int  nbytes = read(rp->sockfd, rqb, size);
+		if  (nbytes <= 0)  {
+			if  (nbytes == 0  ||  errno != EINTR)
+				break;
+		}
+		else  {
+			if  (nbytes == size)
+				return;
+			size -= nbytes;
+			rqb += nbytes;
+		}
 	}
 
 	/* If we get any kind of error or no bytes are read, then
@@ -1036,14 +1034,21 @@ void  netshut()
 void  shut_host(const netid_t hostid)
 {
 	struct	remote	*rp;
-	if  ((rp = inl_find_connected(hostid)))  {
-		struct	netmsg	rq;
-		BLOCK_ZERO(&rq, sizeof(rq));
-		rq.hdr.code = htons(N_SHUTHOST);
-		rq.hdr.length = htons(sizeof(struct netmsg));
-		rq.hdr.hostid = myhostid;
-		chk_write(rp, (char *) &rq, sizeof(rq));
-	}
+        struct	netmsg	rq;
+
+        if  (!(rp = inl_find_connected(hostid)))
+                return;
+
+        BLOCK_ZERO(&rq, sizeof(rq));
+	rq.hdr.code = htons(N_SHUTHOST);
+	rq.hdr.length = htons(sizeof(struct netmsg));
+	rq.hdr.hostid = myhostid;
+
+        do  {
+                if  (!(rp->stat_flags & SF_NOTSERVER))
+                        chk_write(rp, (char *) &rq, sizeof(rq));
+                rp = next_connected(rp);
+        }  while  (rp);
 }
 
 /* Keep connections alive */
@@ -1171,7 +1176,8 @@ void  job_rrchstat(BtjobhRef jp)
 	struct	remote	*rp;
 	struct  jobstatmsg  jsm;
 
-	if  (!(rp = inl_find_connected(jp->bj_hostid)))
+	/* Use the external version we only want servers */
+	if  (!(rp = find_connected(jp->bj_hostid)))
 		return;
 
 	BLOCK_ZERO(&jsm, sizeof(jsm));
@@ -1619,7 +1625,6 @@ void  job_recvupdate(struct remote *rp, msghdr *hdr)
 	exit(0);
 }
 
-
 /* Send update of modes only.
    Other end catches and processes reply using job_recvhupdate above */
 
@@ -1698,7 +1703,7 @@ void  job_recvugupdate(struct remote *rp, msghdr *hdr)
 	omsg.sh_mtype = TO_SCHED;
 	omsg.sh_params.mcode = jugm.hdr.code;
 	mymtype = omsg.sh_params.upid = getpid();
-	if  (rp->ht_flags & HT_ROAMUSER)  {
+	if  (rp->ht_flags & HT_ROAMUSER)  {	/* Check this FIXME */
 		omsg.sh_params.uuid = rp->n_uid;
 		omsg.sh_params.ugid = rp->n_gid;
 	}
@@ -1725,7 +1730,7 @@ unsigned  job_message(const netid_t hostid, CBtjobhRef jp, CShreqRef sr)
 	struct	remote		*rp;
 	struct	jobcmsg		jcm;
 
-	if  (!(rp = inl_find_connected(hostid)))
+	if  (!(rp = find_connected(hostid)))
 		return	N_HOSTOFFLINE;
 	jcm.hdr.code = htons((USHORT) sr->mcode);
 	jcm.hdr.length = htons(sizeof(jcm));
@@ -1746,7 +1751,7 @@ void  job_imessage(const netid_t hostid, CBtjobhRef jp, const unsigned mcode, co
 	struct	remote		*rp;
 	struct	jobcmsg		jcm;
 
-	if  (!(rp = inl_find_connected(hostid)))
+	if  (!(rp = find_connected(hostid)))
 		return;
 	BLOCK_ZERO(&jcm, sizeof(jcm));
 	jcm.hdr.code = htons((USHORT) mcode);
@@ -1808,7 +1813,7 @@ void  job_sendnote(CBtjobRef jp, const int mcode, const jobno_t sout, const jobn
 	struct	remote		*rp;
 	struct	jobnotmsg	jnm;
 
-	if  (!(rp = inl_find_connected(jp->h.bj_hostid)))
+	if  (!(rp = find_connected(jp->h.bj_hostid)))
 		return;
 	BLOCK_ZERO(&jnm, sizeof(jnm));
 	jnm.hdr.code = htons((USHORT) J_RNOTIFY);
@@ -1851,7 +1856,7 @@ void  job_recvnote(struct remote *rp, msghdr *hdr)
 void  sync_single(const netid_t hostid, const slotno_t slot)
 {
 	struct	remote	*rp;
-	if  ((rp = inl_find_connected(hostid)))  {
+	if  ((rp = find_connected(hostid)))  {
 		struct	netmsg	rq;
 		BLOCK_ZERO(&rq, sizeof(rq));
 		rq.hdr.code = htons(N_SYNCSINGLE);
@@ -1873,7 +1878,7 @@ void  send_single_jobhdr(const netid_t hostid, const slotno_t slot)
 	jp = &Job_seg.jlist[slot].j.h;
 	if  (jp->bj_job == 0)
 		return;
-	if  (!(rp = inl_find_connected(hostid)))
+	if  (!(rp = find_connected(hostid)))
 		return;
 	jobh_pack(&jhm, jp);
 	jhm.hdr.code = htons(J_HCHANGED);
@@ -1946,7 +1951,7 @@ unsigned  var_sendupdate(BtvarRef oldvar, BtvarRef newvar, ShreqRef sr)
 		break;
 	}
 
-	if  (!(rp = inl_find_connected(oldvar->var_id.hostid)))
+	if  (!(rp = find_connected(oldvar->var_id.hostid)))
 		return	N_HOSTOFFLINE;
 
 	vm.hdr.pid = htonl(sr->upid);
@@ -1978,7 +1983,7 @@ void  var_recvupdate(struct remote *rp, msghdr *hdr)
 	omsg.sh_mtype = TO_SCHED;
 	omsg.sh_params.mcode = vnm.hdr.code;
 	mymtype = omsg.sh_params.upid = getpid();
-	if  (rp->ht_flags & HT_ROAMUSER)  {
+	if  (rp->ht_flags & HT_ROAMUSER)  {             /* FIXME check this */
 		omsg.sh_params.uuid = rp->n_uid;
 		omsg.sh_params.ugid = rp->n_gid;
 	}
@@ -2001,7 +2006,7 @@ unsigned  var_sendugupdate(BtvarRef oldvar, ShreqRef sr)
 	struct	remote	*rp;
 	struct	vugmsg	vm;
 
-	if  (!(rp = inl_find_connected(oldvar->var_id.hostid)))
+	if  (!(rp = find_connected(oldvar->var_id.hostid)))
 		return	N_HOSTOFFLINE;
 
 	vm.hdr.code = htons((USHORT) sr->mcode);
@@ -2041,7 +2046,7 @@ void  var_recvugupdate(struct remote *rp, msghdr *hdr)
 	omsg.sh_mtype = TO_SCHED;
 	omsg.sh_params.mcode = vnm.hdr.code;
 	mymtype = omsg.sh_params.upid = getpid();
-	if  (rp->ht_flags & HT_ROAMUSER)  {
+	if  (rp->ht_flags & HT_ROAMUSER)  {             /* FIXME check this */
 		omsg.sh_params.uuid = rp->n_uid;
 		omsg.sh_params.ugid = rp->n_gid;
 	}
@@ -2085,29 +2090,48 @@ void  netsync()
 	}
 }
 
-/* Send details of jobs and variables to machine which asks for it */
+/* Find the person we are talking to. We distinguish multiple connections
+   on the same host by looking at the socket fd. */
 
-void  sendsync(const netid_t netid)
+struct  remote  *find_sync(const netid_t netid, const int sockfd)
 {
 	struct	remote	*rp;
-	int		vn;
-	unsigned	jind;
-	unsigned  lumpcount = 0;
+        for  (rp = inl_find_connected(netid);  rp;  rp = next_connected(rp))
+                if  (rp->sockfd == sockfd)
+                        return  rp;
+        return  (struct remote *) 0;
+}
 
-	if  (!(rp = inl_find_connected(netid)))
-		return;
+/* Send sync to given host.
+   We use this in three basic places,
+   1. If we do a "manual" connect to another server
+   2. If we get a reply to a "probe" from another server
+   3. If another server or client which connected to us wants to sync or resync.
+   Return 1 if it's OK else 0 */
+
+int  sendsync(struct remote *rp)
+{
+	int		vn;
+	unsigned	jind, jlen;
+	unsigned  lumpcount = 0;
+        struct	jobnetmsg  jm;
+        struct	varnetmsg  vm;
+
+        /* Set up common stuff */
+
+	jm.hdr.hdr.code = htons(J_CREATE);
+	jm.hdr.hdr.hostid = myhostid;
+	vm.hdr.code = htons(V_CREATE);
+	vm.hdr.hostid = myhostid;
 
 	for  (vn = 0;  vn < VAR_HASHMOD;  vn++)  {
 		vhash_t	hp;
 		for  (hp = Var_seg.vhash[vn];  hp >= 0;  hp = Var_seg.vlist[hp].Vnext)  {
 			BtvarRef  vp = &Var_seg.vlist[hp].Vent;
 			if  (vp->var_id.hostid == 0  &&  vp->var_flags & VF_EXPORT)  {
-				struct	varnetmsg  vm;
 				var_pack(&vm, vp);
-				vm.hdr.code = htons(V_CREATE);
-				vm.hdr.hostid = myhostid;
 				if  (!chk_write(rp, (char *) &vm, sizeof(vm)))
-					return;
+					return  0;
 				if  ((++lumpcount % lumpsize) == 0)
 					sleep(lumpwait);
 			}
@@ -2118,41 +2142,37 @@ void  sendsync(const netid_t netid)
 	while  (jind != JOBHASHEND)  {
 		BtjobRef  jp = &Job_seg.jlist[jind].j;
 		if  (jp->h.bj_hostid == 0  &&  jp->h.bj_jflags & BJ_EXPORT)  {
-			unsigned	jlen;
-			struct	jobnetmsg	jm;
 			jlen = job_pack(&jm, jp);
-			jm.hdr.hdr.code = htons(J_CREATE);
-			jm.hdr.hdr.hostid = myhostid;
 			if  (!chk_write(rp, (char *) &jm, jlen))
-				return;
+				return  0;
 			if  ((++lumpcount % lumpsize) == 0)
 				sleep(lumpwait);
 		}
 		jind = Job_seg.jlist[jind].q_nxt;
 	}
+
+        return  1;
 }
 
 /* Send end of sync message */
 
-void  send_endsync(const netid_t hostid)
+void  send_endsync(struct remote *rp)
 {
-	struct	remote	*rp;
-	if  ((rp = inl_find_connected(hostid)))  {
 		struct	netmsg	rq;
 		BLOCK_ZERO(&rq, sizeof(rq));
 		rq.hdr.code = htons(N_ENDSYNC);
 		rq.hdr.length = htons(sizeof(struct netmsg));
 		rq.hdr.hostid = myhostid;
 		chk_write(rp, (char *) &rq, sizeof(rq));
-	}
 }
 
+/* Note we had a successful end sync from the other end */
 
 void  endsync(const netid_t netid)
 {
 	struct	remote	*rp;
 
-	if  ((rp = inl_find_connected(netid))  &&  rp->is_sync != NSYNC_OK)  {
+	if  ((rp = find_connected(netid))  &&  rp->is_sync != NSYNC_OK)  {
 		rp->is_sync = NSYNC_OK;
 		Netsync_req--;
 	}
@@ -2177,7 +2197,7 @@ void  net_recv(struct remote *rp, msghdr *hdr)
 	imsg.arg = ntohl(imsg.arg);
 #endif
 
-	/* All these messages are internally generated so we don't send any reply * back. */
+	/* All these messages are internally generated so we don't send any reply back. */
 
 	BLOCK_ZERO(&omsg, sizeof(omsg));
 	switch  (imsg.hdr.code)  {
@@ -2189,6 +2209,7 @@ void  net_recv(struct remote *rp, msghdr *hdr)
 		omsg.sh_mtype = TO_SCHED;
 		omsg.sh_params.mcode = imsg.hdr.code;
 		omsg.sh_params.hostid = imsg.hdr.hostid;
+                omsg.sh_params.param = rp->sockfd;
 		msgsnd(Ctrl_chan, (struct msgbuf *) &omsg, sizeof(Shreq), 0);
 		if  (imsg.hdr.code == N_SHUTHOST)
 			exit(0);
@@ -2200,6 +2221,15 @@ void  net_recv(struct remote *rp, msghdr *hdr)
 		omsg.sh_params.hostid = imsg.hdr.hostid;
 		omsg.sh_params.upid = imsg.hdr.pid;
 		omsg.sh_params.param = imsg.arg;
+		msgsnd(Ctrl_chan, (struct msgbuf *) &omsg, sizeof(Shreq), 0);
+		return;
+        case  N_SETNOTSERVER:
+        case  N_SETISSERVER:
+ 		omsg.sh_mtype = TO_SCHED;
+		omsg.sh_params.mcode = imsg.hdr.code;
+		omsg.sh_params.hostid = imsg.hdr.hostid;
+		omsg.sh_params.upid = imsg.hdr.pid;
+		omsg.sh_params.param = rp->sockfd;
 		msgsnd(Ctrl_chan, (struct msgbuf *) &omsg, sizeof(Shreq), 0);
 		return;
 	}
@@ -2218,6 +2248,8 @@ void  remote_recv(struct remote *rp)
 	case  N_ENDSYNC:
 	case  N_REQREPLY:
 	case  N_SYNCSINGLE:
+        case  N_SETNOTSERVER:
+        case  N_SETISSERVER:
 		net_recv(rp, &hdr);
 		return;
 

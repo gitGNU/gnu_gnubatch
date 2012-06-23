@@ -237,6 +237,127 @@ char **envhandle(BtjobRef jp)
 	return  envlist;
 }
 
+/* Return the result of running the supplied argument as a shell command */
+
+#define	PSTDIN	0
+#define	PSTDOUT	1
+#define	PSTDERR	2
+
+static char *runprog(char *arg)
+{
+	char	*newarg;
+#ifdef	HAVE_WAITPID
+	PIDTYPE	pid;
+#else
+	PIDTYPE	pid, wpid;
+#endif
+	FILE	*rfd;
+	int	pfds[2];
+
+	if  (pipe(pfds) < 0)  {
+		unholdjobs();
+		exit(E_EXENOPIPE);
+	}
+	if  ((pid = fork()) < 0)  {
+		unholdjobs();
+		exit(E_EXENOFORK);
+	}
+	if  (pid == 0)  {
+		close(pfds[0]);
+
+		/* The following gyrations are because
+		   f.d.s 1 and/or 2 might be closed.
+		   popen falls over on most machines if it is. */
+
+		if  (pfds[1] != PSTDOUT)  {
+			close(PSTDOUT);
+			Ignored_error = dup(pfds[1]);
+		}
+		if  (pfds[1] != PSTDERR)  {
+			close(PSTDERR);
+			Ignored_error = dup(pfds[1]);
+		}
+		if  (pfds[1] != PSTDOUT && pfds[1] != PSTDERR)
+			close(pfds[1]);
+
+		execl(Ci_list[CI_STDSHELL].ci_path, Ci_list[CI_STDSHELL].ci_name, "-c", arg, (char *) 0);
+		exit(E_NOCONFIG);
+	}
+	close(pfds[1]);
+	unholdjobs();
+	if  (!(rfd = fdopen(pfds[0], "r")))
+		exit(E_NOMEM);
+	newarg = strread(rfd, "\n");
+#ifdef	HAVE_WAITPID
+	while  (waitpid(pid, (int *) 0, 0) < 0  &&  errno == EINTR)
+		;
+#else
+	while  ((wpid = wait((int *) 0)) != pid  &&  (wpid >= 0 || errno == EINTR))
+		;
+#endif
+	holdjobs();
+	if  (newarg)
+		return  newarg;
+	return  stracpy("");
+}
+
+static char  *catsegs(char *s1, char *s2)
+{
+	char	*result = malloc((unsigned) (strlen(s1)+strlen(s2)+1));
+	if  (!result)
+		ABORT_NOMEM;
+	strcpy(result, s1);
+	strcat(result, s2);
+	return  result;
+}
+
+/* Preen a string to get `` constructs out of it */
+
+static char *progpreen(char *arg)
+{
+	char	*ap = arg, *sp, *ep, *seg;
+	char	*result = (char *) 0, *rp;
+
+	/* Find the first ` in the string */
+
+	while  ((sp = strchr(ap, '`')))  {
+		*sp = '\0';
+		rp = stracpy(ap);
+		if  (result)  {		/* Already some stuff */
+			seg = catsegs(result, rp);
+			free(result);
+			free(rp);
+			result = seg;
+		}
+		else	/* First bit up to first ` */
+			result = rp;
+		sp++;	/* Past the ` */
+		ep = strchr(sp, '`');		/* Up to next ` */
+		if  (ep)  {			/* Found it */
+			*ep = '\0';		/* Set end of string */
+			ap = ep + 1;		/* Next segment just after it */
+		}
+		else
+			ap = sp + strlen(sp);	/* Set to end of string */
+		rp = runprog(sp);		/* Now get the actual output */
+		seg = catsegs(result, rp);	/* Append to result */
+		free(result);
+		free(rp);
+		result = seg;
+	}
+	if  (result)  {				/* Stuff there, just stuff trailing chars in */
+		if  (*ap)  {	/* Something to come */
+			seg = catsegs(result, ap);
+			free(result);
+			free(arg);
+			return  seg;
+		}
+		free(arg);
+		return  result;
+	}
+	return  arg;
+}
+
 /* Extract file name from redirection */
 
 static char *getfname(BtjobRef jp, RedirRef rp, char *dirname)
@@ -249,16 +370,14 @@ static char *getfname(BtjobRef jp, RedirRef rp, char *dirname)
 	}
 	if  (strchr(fname, '%'))
 		fname = argmangle(fname, jp);
+	if  (strchr(fname, '`'))
+		fname = progpreen(fname);
 	return  fname;
 }
 
 /* Do redirections.
    These now live in the job not the job file so we don't have to juggle
    with the file where the job lives. */
-
-#define	PSTDIN	0
-#define	PSTDOUT	1
-#define	PSTDERR	2
 
 static void  doredirs(BtjobRef jp, unsigned nicev, char *dirname)
 {
@@ -305,7 +424,7 @@ static void  doredirs(BtjobRef jp, unsigned nicev, char *dirname)
 
 				/*  Do nice at last minute */
 
-				nice((int) nicev);
+				Ignored_error = nice((int) nicev);
 				execl(DEF_CI_PATH, DEF_CI_NAME, "-c", fname, (char *) 0);
 				exit(E_NOCONFIG);
 			}
@@ -339,7 +458,7 @@ static void  doredirs(BtjobRef jp, unsigned nicev, char *dirname)
 
 				/* Do nice at last minute */
 
-				nice((int) nicev);
+				Ignored_error = nice((int) nicev);
 				execl(DEF_CI_PATH, DEF_CI_NAME, "-c", fname, (char *) 0);
 				exit(E_NOCONFIG);
 			}
@@ -401,82 +520,24 @@ static void  doredirs(BtjobRef jp, unsigned nicev, char *dirname)
 	}
 }
 
-/* Run a program to give us an argument.
-   Home-grown pipe as we don't trust popen. */
-
-static char *runprog(char *arg)
-{
-	unsigned  lng = strlen(arg) - 1;
-	char	*newarg;
-#ifdef	HAVE_WAITPID
-	PIDTYPE	pid;
-#else
-	PIDTYPE	pid, wpid;
-#endif
-	FILE	*rfd;
-	int	pfds[2];
-
-	if  (arg[lng] == '`')
-		arg[lng] = '\0';
-	if  (pipe(pfds) < 0)  {
-		unholdjobs();
-		exit(E_EXENOPIPE);
-	}
-	if  ((pid = fork()) < 0)  {
-		unholdjobs();
-		exit(E_EXENOFORK);
-	}
-	if  (pid == 0)  {
-		close(pfds[0]);
-
-		/* The following gyrations are because
-		   f.d.s 1 and/or 2 might be closed.
-		   popen falls over on most machines if it is. */
-
-		if  (pfds[1] != PSTDOUT)  {
-			close(PSTDOUT);
-			dup(pfds[1]);
-		}
-		if  (pfds[1] != PSTDERR)  {
-			close(PSTDERR);
-			dup(pfds[1]);
-		}
-		if  (pfds[1] != PSTDOUT && pfds[1] != PSTDERR)
-			close(pfds[1]);
-
-		execl(Ci_list[CI_STDSHELL].ci_path, Ci_list[CI_STDSHELL].ci_name, "-c", arg+1, (char *) 0);
-		exit(E_NOCONFIG);
-	}
-	close(pfds[1]);
-	unholdjobs();
-	if  (!(rfd = fdopen(pfds[0], "r")))
-		exit(E_NOMEM);
-	newarg = strread(rfd, "\n");
-#ifdef	HAVE_WAITPID
-	while  (waitpid(pid, (int *) 0, 0) < 0  &&  errno == EINTR)
-		;
-#else
-	while  ((wpid = wait((int *) 0)) != pid  &&  (wpid >= 0 || errno == EINTR))
-		;
-#endif
-	holdjobs();
-	if  (newarg)  {
-		free(arg);
-		return  newarg;
-	}
-	arg[0] = '\0';
-	return  arg;
-}
-
 /* Get argument and preen it for %s and ``s. */
 
 static char *arg_preen(BtjobRef jp, const unsigned num)
 {
 	char	*arg = stracpy(ARG_OF(jp, num));
+	/* Substitute environment variables. */
+	if  (strchr(arg, '$'))  {
+		char  *newarg = envprocess(arg);
+		/* If this doesn't work, it'll return a null value so we just ignore the $ construct */
+		if  (newarg)  {
+			free(arg);
+			arg = newarg;
+		}
+	}
 	if  (strchr(arg, '%'))
 		arg = argmangle(arg, jp);
-	if  (arg[0] == '`')
-		arg = runprog(arg);
+	if  (strchr(arg, '`'))
+		arg = progpreen(arg);
 	return  arg;
 }
 
@@ -591,11 +652,11 @@ static void  connect_jobfile(BtjobRef jp)
 			jn += JN_INC;
 		}
 #ifdef	HAVE_FCHOWN
-		if  (Daemuid)
-			fchown(fid, Daemuid, Daemgid);
+		if  (Daemuid != ROOTID)
+			Ignored_error = fchown(fid, Daemuid, Daemgid);
 #else
-		if  (Daemuid)
-			chown(tnam, Daemuid, Daemgid);
+		if  (Daemuid != ROOTID)
+			Ignored_error = chown(tnam, Daemuid, Daemgid);
 #endif
 		if  (!(outf = fdopen(fid, "w")))  {
 			unlink(tnam);
@@ -865,13 +926,17 @@ static void  startj(const unsigned indx)
 			if  (fork() > 0)
 				exit(0);
 			close(ps[0]);
-			close(1);	dup(ps[1]);	close(ps[1]);
+			close(1);
+                        Ignored_error = dup(ps[1]);
+                        close(ps[1]);
 			connect_jobfile(jp);
 			proc_args(jp);
 		}
 		else  {
 			close(ps[1]);
-			close(0);	dup(ps[0]);	close(ps[0]);
+			close(0);
+                        Ignored_error = dup(ps[0]);
+                        close(ps[0]);
 		}
 	}
 	else
@@ -892,11 +957,11 @@ static void  startj(const unsigned indx)
 			continue;
 		}
 #ifdef	HAVE_FCHOWN
-		if  (Daemuid)
-			fchown(fid, Daemuid, Daemgid);
+		if  (Daemuid != ROOTID)
+			Ignored_error = fchown(fid, Daemuid, Daemgid);
 #else
-		if  (Daemuid)
-			chown(f, Daemuid, Daemgid);
+		if  (Daemuid != ROOTID)
+			Ignored_error = chown(f, Daemuid, Daemgid);
 #endif
 		close(fid);
 		if  (freopen(f, "w", stdout))
@@ -912,11 +977,11 @@ static void  startj(const unsigned indx)
 			continue;
 		}
 #ifdef	HAVE_FCHOWN
-		if  (Daemuid)
-			fchown(fid, Daemuid, Daemgid);
+		if  (Daemuid != ROOTID)
+			Ignored_error = fchown(fid, Daemuid, Daemgid);
 #else
-		if  (Daemuid)
-			chown(f, Daemuid, Daemgid);
+		if  (Daemuid != ROOTID)
+			Ignored_error = chown(f, Daemuid, Daemgid);
 #endif
 		close(fid);
 		if  (freopen(f, "w", stderr))
@@ -990,7 +1055,7 @@ static void  startj(const unsigned indx)
 	/* Do the business */
 
 	sigfix();
-	nice((int) ci->ci_nice);
+	Ignored_error = nice((int) ci->ci_nice);
 	execv(ci->ci_path, argv);
 	exit(E_NOCONFIG);
 }

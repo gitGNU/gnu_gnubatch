@@ -16,7 +16,7 @@
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
 #include "config.h"
-static	char	rcsid2[] = "@(#) $Revision: 1.1 $";
+static	char	rcsid2[] = "@(#) $Revision: 1.5 $";
 #include <stdio.h>
 #include <sys/types.h>
 #include <sys/stat.h>
@@ -398,7 +398,7 @@ MAINFN_TYPE  main(int argc, char **argv)
 {
 	GtkWidget  *vbox;
 
-	versionprint(argv, "$Revision: 1.4 $", 0);
+	versionprint(argv, "$Revision: 1.5 $", 0);
 
 	if  ((progname = strrchr(argv[0], '/')))
 		progname++;

@@ -729,7 +729,7 @@ static int  vmacroexec(const char *str, BtvarRef vp)
 		}
 		else
 			argbuf[1] = (char *) 0;
-		chdir(Curr_pwd);
+		Ignored_error = chdir(Curr_pwd);
 		execv(execprog, argbuf);
 		exit(E_BTEXEC1);
 	}

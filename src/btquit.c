@@ -61,7 +61,7 @@ MAINFN_TYPE  main(int argc, char **argv)
 	Shipc	oreq;
 	Repmess	rep;
 
-	versionprint(argv, "$Revision: 1.4 $", 0);
+	versionprint(argv, "$Revision: 1.5 $", 0);
 
 	if  ((progname = strrchr(argv[0], '/')))
 		progname++;
@@ -94,9 +94,10 @@ MAINFN_TYPE  main(int argc, char **argv)
 	}
 	else  {
 		char	*prompt = gprompt($P{Btquit stopped ok});
+		char	*ignored;
 		fputs(prompt, stdout);
 		fflush(stdout);
-		fgets(string, sizeof(string), stdin);
+		ignored = fgets(string, sizeof(string), stdin);
 		if  (string[0] != 'y' && string[0] != 'Y')  {
 			print_error($E{Btquit not stopped});
 			exit(0);

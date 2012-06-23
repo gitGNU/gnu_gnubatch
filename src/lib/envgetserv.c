@@ -21,7 +21,7 @@
 #include "incl_unix.h"
 #include "incl_net.h"
 
-struct servent *env_getserv(const char *serv, const char *proto)
+struct servent *env_getserv(const char *serv, const int proto)
 {
 	char	buff[50];
 
@@ -32,5 +32,5 @@ struct servent *env_getserv(const char *serv, const char *proto)
 	if  (envselect_name)
 		strcat(buff, envselect_name);
 
-	return  getservbyname(buff, proto);
+	return  getservbyname(buff, proto == IPPROTO_TCP? "tcp": "udp");
 }

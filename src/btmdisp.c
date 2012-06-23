@@ -100,7 +100,7 @@ void  rmsg(char *cmd)
 		close(pfds[1]);	/*  Write side  */
 		if  (pfds[0] != 0)  {
 			close(0);
-			dup(pfds[0]);
+			Ignored_error = dup(pfds[0]);
 			close(pfds[0]);
 		}
 
@@ -241,7 +241,7 @@ MAINFN_TYPE  main(int argc, char **argv)
 	extern	char	**environ;
 	static	char	lnam[] = "LOGNAME=";
 
-	versionprint(argv, "$Revision: 1.4 $", 1);
+	versionprint(argv, "$Revision: 1.5 $", 1);
 
 	if  ((progname = strrchr(argv[0], '/')))
 		progname++;

@@ -44,7 +44,7 @@ DEFINE	DUMPLIB (lib) :
 		dumpargs.c dumpcon.c dumpconds.c dumpecrun.c dumpemode.c dumpmode.c dumpnstr.c
 		dumpredirs.c dumpstr.c dumptime.c spit_cond.c spit_msg.c spit_pparm.c spit_redir.c
 		spit_time.c spitbtrstr.c chkfuture.c;
-		
+
 DEFINE	SCREENLIB (lib) :
 		getkey.c make_km.c setkey.c wgets.c whdrstr.c whexnum.c wnum.c;
 
@@ -985,44 +985,36 @@ for it. We don't loop back to btr as it is possible for btr
 to reinvoke %P and we could go on for ever."
 
 E{No remote host specified} ++		"No remote host specified - please use btr for submitting local jobs"
-E,H{No TCP protocol} ++
-"No TCP protocol found - using getprotoent",
-"Some problem with your protocols database - no TCP protocol"
-E,H{No UDP Protocol} ++
-"No UDP protocol found - using getprotoent",
-"Some problem with your protocols database - no UDP protocol"
+E,H{No listening port} ++
+"No TCP listening port found",
+"Some problem with your services database - no port for listening"
 
-E,H{No xbnetserv TCP service} ++
+E,H{No xbnetserv TCP service} = 155
 "Cannot find TCP service name. Maybe you need to set up
-the TCP service port xbnetsrv in /etc/services.
-NB: The service name is xbnetsrv (no 2nd 'e')
-    The program name is xbnetserv (with 2nd 'e')",
-"No TCP service port xbnetsrv in /etc/services.
+the TCP service port gnubatch-netserv in /etc/services.",
+"No TCP service port gnubatch-netserv in /etc/services.
 This needs to be set up to submit jobs remotely."
 
 E,H{No xbnetserv UDP service} ++
 "Cannot find UDP service name. Maybe you need to set up
-the UDP service port xbnetsrv in /etc/services.
-NB: The service name is xbnetsrv (no 2nd 'e')
-    The program name is xbnetserv (with 2nd 'e')",
-"No UDP service port xbnetsrv in /etc/services.
+the UDP service port gnubatch-netserv in /etc/services",
+"No UDP service port gnubatch-netserv in /etc/services.
 This needs to be set up to submit jobs remotely."
+
+E,H{Netconn cannot open apisock} ++
+"Cannot open socket for API",
+"Unable to open the socked for API connections"
 
 E,H{Cannot send UDP packet} ++
 "Cannot send UDP packet.
-Is xbnetserv running on %N1?
-If not please login and run (typically)
-/usr/spool/progs/xbnetserv",
+Is xbnetserv running on %N1?",
 "The attempt to send a message to the remote host to obtain
 system parameters failed. Possibly this is because there is
 some fault on the network, or xbnetserv is not running on
 the remote host."
 
 E,H{Cannot receive UDP packet} ++
-"Cannot receive UDP packet. Is xbnetserv running on %N1?
-Is xbnetserv running on %N1?
-If not please login and run (typically)
-/usr/spool/progs/xbnetserv",
+"Cannot receive UDP packet. Is xbnetserv running on %N1?",
 "The attempt to receive a message from the remote host to obtain
 system parameters failed. Possibly this is because there is
 some fault on the network, or xbnetserv is not running on
@@ -1064,19 +1056,11 @@ E,H{Unknown queue result message} ++
 "Unknown queue result message %d0",
 "Some unexpected message %d0 returned from remote host."
 
-##  BTCHARGE
-
-[
-Mostly for btcharge
-]
-
-E{Btcharge unknown user} ++			"Unknown user name %s"
-
 [
 Btstart
 ]
 
-E{Restarting scheduler} ++		"%P - restarting GNUbatch scheduler process"
+E{Restarting scheduler} = 180	"%P - restarting GNUBatch scheduler process"
 E{Btstart fork looping} ++		"%P - waiting to fork scheduler process (got error %E)"
 E{Btstart giving up} ++			"Could not start scheduler - giving up."
 E{Btstart still couldnt open} ++	"Still could not open control file err is %E"
@@ -1548,11 +1532,11 @@ Errors within rbtr
 ]
 
 E,H{Base for rbtr return errors} + 1	COPY
-"This machine is unknown to the host machine %N1 
+"This machine is unknown to the host machine %N1
 Please ensure that this machine name is placed in the
-/etc/Xibatch-hosts file on %N1, possibly
+system hosts file on %N1, possibly
 with the ""manual"" flag.",
-"Please set up the /etc/Xibatch-hosts file as described"
+"Please set up the system hosts file as described"
 
 E,H{Base for rbtr return errors} + 2	COPY
 "Not a DOS client. You should not have got this error.",
@@ -1584,7 +1568,7 @@ E,H{Base for rbtr return errors} + 8	COPY
 E,H{Base for rbtr return errors} + 9	COPY
 "No create permission for new jobs on host %N1",
 "You do not have permission to create jobs on the host."
- 
+
 E,H{Base for rbtr return errors} + 10	COPY
 "Invalid priority specified",
 "Priority is outside acceptable range on remote host."
@@ -1635,7 +1619,7 @@ the remote server %N1."
 E,H{No hosts found} = ROUND(@, 20)
 "No hosts found to send to",
 "There are no remote hosts set up to send to.
-You need to set them up in the file /etc/Xibatch-hosts before you
+You need to set them up in the system hosts file before you
 can use this program to send jobs remotely"
 
 P,H{OK to use only host} ++
@@ -1646,7 +1630,7 @@ I need confirmation before continuing."
 E,H{Invalid host name} ++
 "Invalid host name",
 "The host name you have given is not one which has been set up
-in /etc/Xibatch-hosts. You need to do this before you can use
+in the system hosts file. You need to do this before you can use
 a new host name."
 
 E,H{Cannot open socket for remote job send} ++
@@ -2141,7 +2125,7 @@ A{btcichange arg freeze home} ++ COPY		"freeze-home"
 [
 Argument defs for btjstat
 ]
-A{btjstat arg explain} = ROUND(@, 20)	"?,explain"
+A{btjstat arg explain} = 440	"?,explain"
 A{btjstat arg defaults} ++ COPY		"d,default-states"
 A{btjstat arg statcodes} ++ COPY	"s,state"
 A{btjstat arg freeze current} ++ COPY	"freeze-current"
@@ -2541,7 +2525,7 @@ E{Bthols cannot write} ++ "Cannot open %s for writing"
 E{Bthols format error} ++ "Input file format error, expecting month: days"
 E{Bthols invalid month} ++  "Unknown month %s"
 E{Bthols invalid day in month} ++ "Invalid day number %d0 in month %s"
-E{Bthols write error} ++ "Holiday write file error %E" 
+E{Bthols write error} ++ "Holiday write file error %E"
 
 ######################################################################
 ######################################################################
@@ -4627,7 +4611,7 @@ H{xmbtq var macro help} ++
 H{xmbtq options menu help} ++
 "This screen lets you choose from:
     View options   -  enlarge/restrict display
-    Save options   -  
+    Save options   -
     View system error log file
     Quit out of %P"
 
@@ -5312,7 +5296,7 @@ afterwards - sorry about that."
 
 E,H{xmbtq unq cannot create config file} ++
 "Failed to create configuration file - sorry.",
-"I tried to create a "".xibatch"" file to save
+"I tried to create a "".gnubatch"" file to save
 the selected options, but I could not."
 
 E,H{xmbtq file not found} ++
@@ -5641,7 +5625,7 @@ H{xmbtr options menu help} ++
 
 H{xmbtr defaults menu help} ++
 "This menu sets up default options
-You can save the defaults to the current or home directories. 
+You can save the defaults to the current or home directories.
     Queue          -  set queue name
     Set runnable   -  jobs should be ready to run when submitted
     Set cancelled  -  jobs should be in cancelled state
@@ -5763,7 +5747,7 @@ H{xmbtuser user menu} ++
 
     Copy       - copy defaults to selected users"
 
-H{xmbtuser search menu} ++
+H{xmbtuser search menu} = 8
 "Search menu - Choose from:
     Search - for particular string
     Search forwards - using same
@@ -5836,7 +5820,7 @@ H{xmbtuser user priv dialog} ++
 "This menu selects the privileges for the selected users
 Use the ""Set Default"" button to set to the defaults."
 
-H{xmbtuser search menu help} ++
+H{xmbtuser search menu help} = 30
 "Use this menu to set up which kind of search you want to
 do for particular users.
 You can also set up whether you want the search to wrap around
@@ -5896,7 +5880,7 @@ E,H{xmbtuser specll gt totll} ++
 to a higher value that the total load level
 I think that this is a mistake."
 
-E,H{xmbtuser macro not defined} ++
+E,H{xmbtuser macro not defined} = 108
 "Macro command %d0 not defined.",
 "There is no macro command set up for %d0 in %F
 You need to set one up so that it can be run
@@ -6074,7 +6058,7 @@ P{xbtuser framelab vmode} = ROUND(@, 5) "Variable default permissions"
 P{xbtuser framelab privs} = ROUND(@, 5) "Privileges"
 P{xbtuser priv setdef} ++		"Set default"
 
-P{xbtuser frametab pri}	= ROUND(@, 5)	"Priorities"
+P{xbtuser frametab pri}	= 1455	"Priorities"
 P{xbtuser frametab ll} ++		"Load levels"
 P{xbtuser frametab jmode} ++		"Job perms"
 P{xbtuser frametab vmode} ++		"Var perms"
@@ -6458,7 +6442,7 @@ P{xbtr set cmd file dlgtit} ++				"Set command file name"
 P{xbtr set job file dlgtit} ++				"Set job file name"
 P{xbtr select working dir} ++				"Select working directory"
 P{xbtr view opt dlgtit} = ROUND(@, 5)			"Option setting"
-P{xbtr job script editor lab} ++			"Job script editor" 
+P{xbtr job script editor lab} ++			"Job script editor"
 P{xbtr editor in xterm} ++				"Run editor in xterm"
 P{xbtr no title} = ROUND(@, 10)				"(no title)"
 P{xbtr no file name} ++					"(no name)"
@@ -6618,11 +6602,8 @@ E,H{Unexpected sched message} ++
 "I got an unexpected error from the scheduler.
 Something is horribly wrong."
 
-E{Netconn failure abort} ++			"Aborted %P due to failure to establish network connections"
-E{Netconn no TCP abort} ++			"Panic! No TCP protocol entry! (check /etc/protocols)"
-E{Netconn no UDP abort} ++			"Panic! No UDP protocol entry! (check /etc/protocols)"
-
-E{Netconn no service name} ++
+E{Netconn failure abort} = 8020			"Aborted %P due to failure to establish network connections"
+E{Netconn no service name} = 8023
 "Panic! No %t service entry %s in /etc/services
 Please note possible source of error - different spellings
 Program name is:   %P
@@ -6677,11 +6658,11 @@ E{Panic couldn't reset sem id} ++		"Could not reset semaphore id - %E"
 E{Panic cannot create CI file} ++		"Cannot create command interpreter file %s - %E"
 E{Panic cannot open CI file} ++			"Cannot open command interpreter file %s - %E"
 E{Panic cannot read CI file} ++			"Trouble reading command interpreter file %s"
-E{Panic trouble creating shared mem} ++
+E{Panic trouble creating shared mem} = 8119
 "Trouble creating shared memory id %x9 - %E
 To fix this try running ""ripc -d"" or removing the segment
 with key %x9 with ipcrm.
-More recent versions of GNUbatch use memory-mapped files and
+More recent versions of GNUBatch use memory-mapped files and
 if the error is ""File Exists"" you should try removing files
 with names starting ""btmm_"" from the batch spool directory."
 E{Panic trouble resetting shared mem} ++	"Trouble resetting shared memory - %E"
@@ -6719,20 +6700,14 @@ E{Panic trouble binding probe socket} ++	"Trouble binding probe socket port numb
 E{Panic trouble sending on probe socket} ++	"Trouble sending on probe socket port number %d0 - %E"
 
 E,H{Warn errors in host file} ++
-"%P: Warning: There are errors in the /etc/Xibatch-hosts file",
+"%P: Warning: There are errors in the system hosts file",
 "There are errors in the host description file given in
-/etc/Xibatch-hosts. This is not fatal but it may give problems."
+the system hosts file. This is not fatal but it may give problems."
 
 E{Reconnection whilst still connected} ++
 "Warning: host %s - reconnection of unclosed connection"
 
-E{Connection attempt from unknown host} ++
-"Rejected connection attempt from unknown host %s"
-
-E{Hash function error free_poss} ++
-"Panic: hash failure error free_poss hid %s"
-
-E{Hash function error free_probe} ++
+E{Hash function error free_probe} = 8144
 "Panic: hash failure error free_probe hid %s"
 
 E{Invalid progress code try} ++
@@ -6774,7 +6749,7 @@ E{btwrite message from user} = ROUND(@, 100)	"Message from %U....."
 E{btwrite message diverted} ++			"Subject: Message diverted to mail"
 
 [
-Error messages whilst saving .xibatch files
+Error messages whilst saving .gnubatch files
 ]
 
 E{saveopts crashed} = ROUND(@, 100)
@@ -6788,13 +6763,13 @@ S{saveopts nomem} = 15
 
 E,H{saveopts file error} + {saveopts nodel}
 "Sorry cannot delete old init file from %s",
-"I am trying to create a new .xibatch file to hold
+"I am trying to create a new .gnubatch file to hold
 a reference to %s and I cannot delete the old one, sorry."
 
 E,H{saveopts file error} + {saveopts no init and del}
 "Sorry cannot create init file in %s
 (and I've deleted your old one - sorry!!)",
-"I am trying to create a new .xibatch file to hold
+"I am trying to create a new .gnubatch file to hold
 a reference to %s and I cannot do so, sorry, because
 I think I deleted your old one."
 
@@ -6808,7 +6783,7 @@ E,H{saveopts cannot fork} = {saveopts crashed} + 4
 
 E,H{saveopts file error} + {saveopts nomem}
 "No memory available creating init file.",
-"Ran out of memory creating .xibatch file"
+"Ran out of memory creating .gnubatch file"
 
 [
 No permissions
@@ -6901,7 +6876,7 @@ E{Missing prompt code} ++		"Missing prompt message code %d9"
 E,H{Missing error code} ++
 "Missing error message code %d9",
 "The help message file %F is missing an error
-code %d9. Please inform us!" 
+code %d9. Please inform us!"
 E{Missing alternative code} ++		"Missing alternative code for %d9"
 E{Missing state code} ++		"Missing state code %d9"
 E{Scrambled state code} ++		"Jumbled state code for %d9"
@@ -6942,8 +6917,8 @@ There are two possible workarounds or fixes for this:
      TERMCAP which only relate to your terminal session
      are good candidates.
 
-(b)  Set up the ""static environment file"" typically
-     /etc/Xibatch-env, to contain common environment
+(b)  Set up the ""static environment file""
+     to contain common environment
      variables for all jobs. Each job will then
      contain only those variables which differ
      from the static environment file.

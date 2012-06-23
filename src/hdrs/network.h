@@ -28,29 +28,32 @@ struct	remote	{
 	char	alias[HOSTNSIZE];	/* Alias for it (alternatively group name) */
 	SHORT	sockfd;			/* Socket fd to talk to it */
 	netid_t  hostid;		/* Host id in network byte order */
-	unsigned char	is_sync;	/* sync flags */
-#define	NSYNC_NONE	0		/* Not done yet */
-#define	NSYNC_REQ	1		/* Requested but not complete */
-#define	NSYNC_OK	2		/* Completed */
-	unsigned  char	ht_flags;	/* Host-type flags */
-#define	HT_ISCLIENT	(1 << 0)	/* Set to indicate "I" am client */
+        struct  remote  *hash_next;     /* Other remotes in same hash bucket */
+	USHORT	ht_flags;       	/* Host-type flags */
 #define	HT_PROBEFIRST	(1 << 1)	/* Probe connection first */
 #define	HT_MANUAL	(1 << 2)	/* Manual connection only */
 #define	HT_DOS		(1 << 3)	/* DOS or external client system */
 #define	HT_PWCHECK	(1 << 4)	/* Check password of user */
 #define HT_ROAMUSER	(1 << 5)	/* Roaming user */
 #define	HT_TRUSTED	(1 << 6)	/* Trusted host */
+	USHORT		stat_flags;	/* State flags in scheduler */
+#define	SF_ISCLIENT	(1 << 0)	/* Set to indicate "I" am client */
+#define	SF_PROBED	(1 << 1)	/* Set to indicate probe sent */
+#define	SF_CONNECTED	(1 << 2)	/* Connection complete */
+#define SF_NOTSERVER	(1 << 3)	/* Not a server so don't expect printers etc */
+	enum  sync_state { NSYNC_NONE = 0, NSYNC_REQ = 1, NSYNC_OK = 2 } is_sync;
 	USHORT		ht_timeout;	/* Timeout value (seconds) */
 	time_t		lastwrite;	/* When last done */
 	int_ugid_t	n_uid;		/* User id for roamuser case */
 	int_ugid_t	n_gid;		/* Group id for roamuser case */
+        int_ugid_t      remuid;         /* Remote user id for multiple instances */
 };
 
 /* Size of hash table used in various places */
 
-#define	NETHASHMOD	53		/* Not very big prime number */
+#define	NETHASHMOD	97		/* Not very big prime number */
 
-/* Fields in /etc/Xibatch-config lines */
+/* Fields in hosts file lines */
 
 #define	HOSTF_HNAME	0
 #define	HOSTF_ALIAS	1

@@ -75,7 +75,7 @@ void  rereadcif()
 	if  ((Ci_list = (CmdintRef) malloc((unsigned) sbuf.st_size)) == (CmdintRef) 0)
 		ABORT_NOMEM;
 	lseek(Ci_fd, 0L, 0);
-	read(Ci_fd, (char *) Ci_list, (unsigned) sbuf.st_size);
+	Ignored_error = read(Ci_fd, (char *) Ci_list, (unsigned) sbuf.st_size);
 	Ci_time = sbuf.st_mtime;
 }
 

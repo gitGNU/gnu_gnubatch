@@ -138,9 +138,6 @@ PIDTYPE	Xbns_pid;		/* Process id of xbnetserv process */
 
 int	Network_ok = 1;		/* Network connections in use turn off if -n */
 
-unsigned	tracing;
-FILE		*tracefile;
-
 extern char *look_hostid(const netid_t);
 
 void  do_exit(const int n)
@@ -191,48 +188,6 @@ void  do_exit(const int n)
 #endif
 #endif
 	exit(n);
-}
-
-void  traceprefix(const char *msg, const int_pid_t pid)
-{
-	time_t  now = time(0);
-	struct  tm  *tp = localtime(&now);
-	fprintf(tracefile, "%.4d/%.2d/%.2d %.2d:%.2d:%.2d: %s pid=%ld", tp->tm_year+1900, tp->tm_mon+1, tp->tm_mday, tp->tm_hour, tp->tm_min, tp->tm_sec, msg, (long) pid);
-}
-
-void  trace_op_pid(const char *msg, const int_pid_t pid)
-{
-	traceprefix(msg, pid);
-	putc('\n', tracefile);
-	fflush(tracefile);
-}
-
-void  trace_op_jslot(const char *msg, const int_pid_t pid, const slotno_t slno)
-{
-	traceprefix(msg, pid);
-	fprintf(tracefile, " slot=%ld\n", (long) slno);
-	fflush(tracefile);
-}
-
-void  trace_op_name(const char *msg, const int_pid_t pid, const char *name)
-{
-	traceprefix(msg, pid);
-	fprintf(tracefile, " name=%s\n", name);
-	fflush(tracefile);
-}
-
-void  trace_op_net(const char *msg, const int_pid_t pid, const netid_t nid)
-{
-	traceprefix(msg, pid);
-	fprintf(tracefile, " host=%s\n", look_hostid(nid));
-	fflush(tracefile);
-}
-
-void  trace_reply(const ULONG cod, const int_pid_t pid)
-{
-	traceprefix("Reply to", pid);
-	fprintf(tracefile, " code=%lx\n", (unsigned long) cod);
-	fflush(tracefile);
 }
 
 void  nomem(const char *fl, const int ln)
@@ -414,10 +369,10 @@ int  gshmchan(struct btshm_info *inf, const int off)
 			goto  fail;
 #ifdef	HAVE_FCHOWN
 		if  (Daemuid != ROOTID)
-			fchown(inf->mmfd, Daemuid, Daemgid);
+			Ignored_error = fchown(inf->mmfd, Daemuid, Daemgid);
 #else
 		if  (Daemuid != ROOTID)
-			chown(fname, Daemuid, Daemgid);
+			Ignored_error = chown(fname, Daemuid, Daemgid);
 #endif
 		fcntl(inf->mmfd, F_SETFD, 1);
 	}
@@ -505,10 +460,10 @@ void  gxbuffshm()
 	}
 #ifdef	HAVE_FCHOWN
 	if  (Daemuid != ROOTID)
-		fchown(Xshmchan, Daemuid, Daemgid);
+		Ignored_error = fchown(Xshmchan, Daemuid, Daemgid);
 #else
 	if  (Daemuid != ROOTID)
-		chown(XFMMAP_FILE, Daemuid, Daemgid);
+		Ignored_error = chown(XFMMAP_FILE, Daemuid, Daemgid);
 #endif
 	fcntl(Xshmchan, F_SETFD, 1);
 	lseek(Xshmchan, (long) (rqsize - 1), 0);
@@ -529,10 +484,10 @@ void  gxbuffshm()
 		goto  fail;
 #ifdef	HAVE_FCHOWN
 	if  (Daemuid)
-		fchown(Xlockfd, Daemuid, Daemgid);
+		Ignored_error = fchown(Xlockfd, Daemuid, Daemgid);
 #else
 	if  (Daemuid)
-		chown(XLOCK_FILE, Daemuid, Daemgid);
+		Ignored_error = chown(XLOCK_FILE, Daemuid, Daemgid);
 #endif
 	fcntl(Xlockfd, F_SETFD, 1);
 #endif
@@ -589,33 +544,25 @@ static void  o_reqs(ShipcRef rq, int bytes)
 	case  O_LOGON:
 		if  (bytes != sizeof(Shreq))
 			goto  badlen;
-		if  (tracing & TRACE_OPREQ)
-			trace_op_pid("Logon", rq->sh_params.upid);
 		ret = addoper(&rq->sh_params);
 		break;
 
 	case  O_LOGOFF:
 		if  (bytes != sizeof(Shreq))
 			goto  badlen;
-		if  (tracing & TRACE_OPREQ)
-			trace_op_pid("Logoff", rq->sh_params.upid);
 		deloper(&rq->sh_params);
 		return;
 
 	case  O_STOP:
 		if  (bytes != sizeof(Shreq))
 			goto  badlen;
-		if  (tracing & TRACE_OPREQ)
-			trace_op_pid("Stop", rq->sh_params.upid);
 		ret = o_niceend(&rq->sh_params);
-				/* Only get here if error */
+		/* Only get here if error */
 		break;
 
 	case  O_PWCHANGED:
 		if  (bytes != sizeof(Shreq))
 			goto  badlen;
-		if  (tracing & TRACE_OPREQ)
-			trace_op_pid("Pwchange", rq->sh_params.upid);
 		un_rpwfile();
 		rpwfile();
 #ifdef	HAVE_GETGROUPS
@@ -651,16 +598,12 @@ static void  j_reqs(ShipcRef rq, int bytes)
 	case  J_CREATE:
 		if  (bytes != sizeof(Shreq) + sizeof(ULONG))
 			goto  badlen;
-		if  (tracing & TRACE_JOBREQ)
-			trace_op_pid("Jcreate", rq->sh_params.upid);
 		ret = enqueue(&rq->sh_params, &Xbuffer->Ring[rq->sh_un.sh_jobindex]);
 		break;
 
 	case  J_DELETE:
 		if  (bytes != sizeof(Shreq) + sizeof(jident))
 			goto  badlen;
-		if  (tracing & TRACE_JOBREQ)
-			trace_op_pid("Jdelete", rq->sh_params.upid);
 		ret = deljob(&rq->sh_params, &rq->sh_un.jobref);
 		break;
 
@@ -668,8 +611,6 @@ static void  j_reqs(ShipcRef rq, int bytes)
 	case  J_DELETED:
 		if  (bytes != sizeof(Shreq) + sizeof(jident))
 			goto  badlen;
-		if  (tracing & TRACE_JOBREQ)
-			trace_op_pid("Jdeleted", rq->sh_params.upid);
 		job_deleted(&rq->sh_un.jobref);
 		return;
 #endif
@@ -677,88 +618,66 @@ static void  j_reqs(ShipcRef rq, int bytes)
 	case  J_CHANGE:
 		if  (bytes != sizeof(Shreq) + sizeof(ULONG))
 			goto  badlen;
-		if  (tracing & TRACE_JOBREQ)
-			trace_op_pid("Jchange", rq->sh_params.upid);
 		ret = chjob(&rq->sh_params, &Xbuffer->Ring[rq->sh_un.sh_jobindex]);
 		break;
 
 	case  J_CHOWN:
 		if  (bytes != sizeof(Shreq) + sizeof(jident))
 			goto  badlen;
-		if  (tracing & TRACE_JOBREQ)
-			trace_op_pid("Jchown", rq->sh_params.upid);
 		ret = job_chown(&rq->sh_params, &rq->sh_un.jobref);
 		break;
 
 	case  J_CHGRP:
 		if  (bytes != sizeof(Shreq) + sizeof(jident))
 			goto  badlen;
-		if  (tracing & TRACE_JOBREQ)
-			trace_op_pid("Jchgrp", rq->sh_params.upid);
 		ret = job_chgrp(&rq->sh_params, &rq->sh_un.jobref);
 		break;
 
 	case  J_CHMOD:
 		if  (bytes != sizeof(Shreq) + sizeof(ULONG))
 			goto  badlen;
-		if  (tracing & TRACE_JOBREQ)
-			trace_op_pid("Jchmod", rq->sh_params.upid);
 		ret = job_chmod(&rq->sh_params, &Xbuffer->Ring[rq->sh_un.sh_jobindex]);
 		break;
 
 	case  J_KILL:
 		if  (bytes != sizeof(Shreq) + sizeof(jident))
 			goto  badlen;
-		if  (tracing & TRACE_JOBREQ)
-			trace_op_pid("Jkill", rq->sh_params.upid);
 		ret = doabort(&rq->sh_params, &rq->sh_un.jobref);
 		break;
 
 	case  J_FORCE:
 		if  (bytes != sizeof(Shreq) + sizeof(jident))
 			goto  badlen;
-		if  (tracing & TRACE_JOBREQ)
-			trace_op_pid("Jforce", rq->sh_params.upid);
 		ret = doforce(&rq->sh_params, &rq->sh_un.jobref, 0);
 		break;
 
 	case  J_FORCENA:
 		if  (bytes != sizeof(Shreq) + sizeof(jident))
 			goto  badlen;
-		if  (tracing & TRACE_JOBREQ)
-			trace_op_pid("Jforcena", rq->sh_params.upid);
 		ret = doforce(&rq->sh_params, &rq->sh_un.jobref, 1);
 		break;
 
 	case  J_STOK:
 		if  (bytes != sizeof(Shreq))
 			goto  badlen;
-		if  (tracing & TRACE_JOBREQ)
-			trace_op_jslot("Jstok", rq->sh_params.upid, rq->sh_params.param);
 		started_job((unsigned) rq->sh_params.param);
 		return;
 
 	case  J_NOFORK:
 		if  (bytes != sizeof(Shreq))
 			goto  badlen;
-		if  (tracing & TRACE_JOBREQ)
-			trace_op_jslot("Jnofork", rq->sh_params.upid, rq->sh_params.param);
 		cannot_start((unsigned) rq->sh_params.param);
 		return;
 
 	case  J_COMPLETED:
 		if  (bytes != sizeof(Shreq))
 			goto  badlen;
-		if  (tracing & TRACE_JOBREQ)
-			trace_op_jslot("Jcompleted", rq->sh_params.upid, rq->sh_params.param);
 		completed_job((unsigned) rq->sh_params.param);
 		return;
 
 	case  J_DSTADJ:
 		if  (bytes != sizeof(Shreq) + sizeof(struct adjstr))
 			goto  badlen;
-		if  (tracing & TRACE_JOBREQ)
-			trace_op_pid("Jdst", rq->sh_params.upid);
 		ret = dstadj(&rq->sh_params, &rq->sh_un.sh_adj);
 		break;
 
@@ -769,24 +688,18 @@ static void  j_reqs(ShipcRef rq, int bytes)
 	case  J_BHCHANGED:
 		if  (bytes != sizeof(Shreq) + sizeof(ULONG))
 			goto  badlen;
-		if  (tracing & TRACE_JOBREQ)
-			trace_op_pid("Jrchange", rq->sh_params.upid);
 		ret = remchjob(&rq->sh_params, &Xbuffer->Ring[rq->sh_un.sh_jobindex]);
 		break;
 
 	case  J_CHMOGED:
 		if  (bytes != sizeof(Shreq) + sizeof(ULONG))
 			goto  badlen;
-		if  (tracing & TRACE_JOBREQ)
-			trace_op_pid("Jrchmod", rq->sh_params.upid);
 		ret = remjchmog(&Xbuffer->Ring[rq->sh_un.sh_jobindex]);
 		break;
 
 	case  J_BOQ:		/* Broadcast case - back of queue */
 		if  (bytes != sizeof(Shreq) + sizeof(jident))
 			goto  badlen;
-		if  (tracing & TRACE_JOBREQ)
-			trace_op_pid("Jboq", rq->sh_params.upid);
 		{
 			int	jn = findj_by_jid(&rq->sh_un.jobref);
 			if  (jn >= 0)
@@ -797,56 +710,42 @@ static void  j_reqs(ShipcRef rq, int bytes)
 	case  J_BFORCED:
 		if  (bytes != sizeof(Shreq) + sizeof(jident))
 			goto  badlen;
-		if  (tracing & TRACE_JOBREQ)
-			trace_op_pid("Jforced", rq->sh_params.upid);
 		forced(&rq->sh_un.jobref, 0);
 		return;
 
 	case  J_BFORCEDNA:
 		if  (bytes != sizeof(Shreq) + sizeof(jident))
 			goto  badlen;
-		if  (tracing & TRACE_JOBREQ)
-			trace_op_pid("Jforcedna", rq->sh_params.upid);
 		forced(&rq->sh_un.jobref, 1);
 		return;
 
 	case  J_CHSTATE:
 		if  (bytes != sizeof(Shreq) + sizeof(struct jstatusmsg))
 			goto  badlen;
-		if  (tracing & TRACE_JOBREQ)
-			trace_op_pid("Jchstat", rq->sh_params.upid);
 		statchange(&rq->sh_un.remstat);
 		return;
 
 	case  J_PROPOSE:
 		if  (bytes != sizeof(Shreq) + sizeof(jident))
 			goto  badlen;
-		if  (tracing & TRACE_JOBREQ)
-			trace_op_pid("Jprop", rq->sh_params.upid);
 		reply_propose(&rq->sh_params, &rq->sh_un.jobref);
 		return;
 
 	case  J_PROPOK:
 		if  (bytes != sizeof(Shreq) + sizeof(jident))
 			goto  badlen;
-		if  (tracing & TRACE_JOBREQ)
-			trace_op_pid("Jpropok", rq->sh_params.upid);
 		propok(&rq->sh_un.jobref);
 		return;
 
 	case  J_RRCHANGE:
 		if  (bytes != sizeof(Shreq) + sizeof(struct jstatusmsg))
 			goto  badlen;
-		if  (tracing & TRACE_JOBREQ)
-			trace_op_pid("Jrrch", rq->sh_params.upid);
 		rrstatchange(rq->sh_params.hostid, &rq->sh_un.remstat);
 		return;
 
 	case  J_RNOTIFY:
 		if  (bytes != sizeof(Shreq) + sizeof(struct jremnotemsg))
 			goto  badlen;
-		if  (tracing & TRACE_JOBREQ)
-			trace_op_pid("Jrnot", rq->sh_params.upid);
 		{
 			int	jn = findj_by_jid(&rq->sh_un.remnote.jid);
 			if  (jn >= 0)
@@ -855,14 +754,10 @@ static void  j_reqs(ShipcRef rq, int bytes)
 		}
 
 	case  J_RESCHED_NS:
-		if  (tracing & TRACE_JOBREQ)
-			trace_op_pid("Jreschns", rq->sh_params.upid);
 		being_started--;
 		adjust_ll(-(LONG) Job_seg.jlist[rq->sh_params.param].j.h.bj_ll);
 
 	case  J_RESCHED:
-		if  (tracing & TRACE_JOBREQ)
-			trace_op_pid("Jresch", rq->sh_params.upid);
 		qchanges++;
 		return;
 #endif
@@ -888,64 +783,48 @@ static void  v_reqs(ShipcRef rq, int bytes)
 	case  V_CREATE:
 		if  (bytes != sizeof(Shreq) + sizeof(Btvar))
 			goto  badlen;
-		if  (tracing & TRACE_VARREQ)
-			trace_op_name("Vcreate", rq->sh_params.upid, rq->sh_un.sh_var.var_name);
 		ret = var_create(&rq->sh_params, &rq->sh_un.sh_var);
 		break;
 
 	case  V_DELETE:
 		if  (bytes != sizeof(Shreq) + sizeof(Btvar))
 			goto  badlen;
-		if  (tracing & TRACE_VARREQ)
-			trace_op_name("Vdelete", rq->sh_params.upid, rq->sh_un.sh_var.var_name);
 		ret = var_delete(&rq->sh_params, &rq->sh_un.sh_var);
 		break;
 
 	case  V_ASSIGN:
 		if  (bytes != sizeof(Shreq) + sizeof(Btvar))
 			goto  badlen;
-		if  (tracing & TRACE_VARREQ)
-			trace_op_name("Vassign", rq->sh_params.upid, rq->sh_un.sh_var.var_name);
 		ret = var_assign(&rq->sh_params, &rq->sh_un.sh_var);
 		break;
 
 	case  V_CHOWN:
 		if  (bytes != sizeof(Shreq) + sizeof(Btvar))
 			goto  badlen;
-		if  (tracing & TRACE_VARREQ)
-			trace_op_name("Vchown", rq->sh_params.upid, rq->sh_un.sh_var.var_name);
 		ret = var_chown(&rq->sh_params, &rq->sh_un.sh_var);
 		break;
 
 	case  V_CHGRP:
 		if  (bytes != sizeof(Shreq) + sizeof(Btvar))
 			goto  badlen;
-		if  (tracing & TRACE_VARREQ)
-			trace_op_name("Vchgrp", rq->sh_params.upid, rq->sh_un.sh_var.var_name);
 		ret = var_chgrp(&rq->sh_params, &rq->sh_un.sh_var);
 		break;
 
 	case  V_CHMOD:
 		if  (bytes != sizeof(Shreq) + sizeof(Btvar))
 			goto  badlen;
-		if  (tracing & TRACE_VARREQ)
-			trace_op_name("Vchmod", rq->sh_params.upid, rq->sh_un.sh_var.var_name);
 		ret = var_chmod(&rq->sh_params, &rq->sh_un.sh_var);
 		break;
 
 	case  V_CHCOMM:
 		if  (bytes != sizeof(Shreq) + sizeof(Btvar))
 			goto  badlen;
-		if  (tracing & TRACE_VARREQ)
-			trace_op_name("Vchcomm", rq->sh_params.upid, rq->sh_un.sh_var.var_name);
 		ret = var_chcomm(&rq->sh_params, &rq->sh_un.sh_var);
 		break;
 
 	case  V_CHFLAGS:
 		if  (bytes != sizeof(Shreq) + sizeof(Btvar))
 			goto  badlen;
-		if  (tracing & TRACE_VARREQ)
-			trace_op_name("Vchflags", rq->sh_params.upid, rq->sh_un.sh_var.var_name);
 		ret = var_chflags(&rq->sh_params, &rq->sh_un.sh_var);
 		if  (rq->sh_params.hostid) /* Remote broadcast from toggling cluster flag */
 			return;
@@ -954,8 +833,6 @@ static void  v_reqs(ShipcRef rq, int bytes)
 	case  V_NEWNAME:
 		if  (bytes < sizeof(Shreq) + sizeof(Btvar))
 			goto  badlen;
-		if  (tracing & TRACE_VARREQ)
-			trace_op_name("Vrename", rq->sh_params.upid, rq->sh_un.sh_var.var_name);
 		ret = var_rename(&rq->sh_params, &rq->sh_un.sh_rn.sh_ovar, rq->sh_un.sh_rn.sh_rnewname);
 		break;
 
@@ -966,32 +843,24 @@ static void  v_reqs(ShipcRef rq, int bytes)
 	case  V_DELETED:
 		if  (bytes != sizeof(Shreq) + sizeof(Btvar))
 			goto  badlen;
-		if  (tracing & TRACE_VARREQ)
-			trace_op_name("Vrdel", rq->sh_params.upid, rq->sh_un.sh_var.var_name);
 		var_remdelete(&rq->sh_un.sh_var);
 		return;
 
 	case  V_ASSIGNED:
 		if  (bytes != sizeof(Shreq) + sizeof(Btvar))
 			goto  badlen;
-		if  (tracing & TRACE_VARREQ)
-			trace_op_name("Vrass", rq->sh_params.upid, rq->sh_un.sh_var.var_name);
 		var_remassign(&rq->sh_un.sh_var);
 		return;
 
 	case  V_CHMOGED:
 		if  (bytes != sizeof(Shreq) + sizeof(Btvar))
 			goto  badlen;
-		if  (tracing & TRACE_VARREQ)
-			trace_op_name("Vrchmog", rq->sh_params.upid, rq->sh_un.sh_var.var_name);
 		var_remchmog(&rq->sh_un.sh_var);
 		return;
 
 	case  V_RENAMED:
 		if  (bytes != sizeof(Shreq) + sizeof(Btvar))
 			goto  badlen;
-		if  (tracing & TRACE_VARREQ)
-			trace_op_name("Vrrename", rq->sh_params.upid, rq->sh_un.sh_var.var_name);
 		var_remchname(&rq->sh_un.sh_var);
 		return;
 #endif
@@ -1020,17 +889,13 @@ static void  n_reqs(ShipcRef rq, int bytes)
 		return;
 
 	case  N_SHUTHOST:
-		clearhost(rq->sh_params.hostid);
+		clearhost(rq->sh_params.hostid, rq->sh_params.param);
 
 	case  N_ABORTHOST:
-		if  (tracing & TRACE_NETREQ)
-			trace_op_net("Netshut", rq->sh_params.upid, rq->sh_params.hostid);
 		netmonitor();
 		break;
 
 	case  N_NEWHOST:
-		if  (tracing & TRACE_NETREQ)
-			trace_op_pid("Newhost", rq->sh_params.upid);
 		newhost();
 		netmonitor();
 		break;
@@ -1038,24 +903,24 @@ static void  n_reqs(ShipcRef rq, int bytes)
 	case  N_CONNECT:
 		if  (bytes != sizeof(Shreq) + sizeof(struct remote))
 			goto  badlen;
-		if  (tracing & TRACE_NETREQ)
-			trace_op_net("Netconn", rq->sh_params.upid, rq->sh_un.sh_n.hostid);
 		if  (find_connected(rq->sh_un.sh_n.hostid))  {
 			ret = N_CONNOK;
 			break;
 		}
 		if  (Netm_pid)
 			kill(Netm_pid, NETSHUTSIG);
-		ret = rattach(&rq->sh_un.sh_n) ? N_CONNOK: N_CONNFAIL;
+		if  ((rp = conn_attach(&rq->sh_un.sh_n))  &&  sendsync(rp))  {
+			ret = N_CONNOK;
+			break;
+		}
+		ret = N_CONNFAIL;
 		break;
 
 	case  N_DISCONNECT:
 		if  (bytes != sizeof(Shreq) + sizeof(struct remote))
 			goto  badlen;
-		if  (tracing & TRACE_NETREQ)
-			trace_op_net("Netdisconn", rq->sh_params.upid, rq->sh_un.sh_n.hostid);
 		shut_host(rq->sh_un.sh_n.hostid);
-		clearhost(rq->sh_un.sh_n.hostid); /* Now includes free_probe */
+		clearhost(rq->sh_un.sh_n.hostid, -1);
 		if  (Netm_pid)
 			kill(Netm_pid, NETSHUTSIG);
 		ret = N_CONNOK;
@@ -1064,11 +929,10 @@ static void  n_reqs(ShipcRef rq, int bytes)
 	case  N_PCONNOK:	/* Internal response to probe ok */
 		if  (bytes != sizeof(Shreq) + sizeof(struct remote))
 			goto  badlen;
-		if  (tracing & TRACE_NETREQ)
-			trace_op_net("Netconnok", rq->sh_params.upid, rq->sh_un.sh_n.hostid);
 		if  ((rp = find_probe(rq->sh_un.sh_n.hostid)))  {
-			conn_attach(rp); /* Now includes free_probe */
-			sendsync(rq->sh_un.sh_n.hostid);
+			rp = conn_attach(rp); /* Now includes free_probe */
+			if  (rp)
+				sendsync(rp);
 		}
 		netmonitor();
 		return;
@@ -1076,17 +940,13 @@ static void  n_reqs(ShipcRef rq, int bytes)
 	case  N_REQSYNC:
 		if  (bytes != sizeof(Shreq))
 			goto  badlen;
-		if  (tracing & TRACE_NETREQ)
-			trace_op_net("Reqsync", rq->sh_params.upid, rq->sh_params.hostid);
-		sendsync(rq->sh_params.hostid);
-		send_endsync(rq->sh_params.hostid);
+		if  ((rp = find_sync(rq->sh_params.hostid, (int) rq->sh_params.param))  &&  sendsync(rp))
+			send_endsync(rp);
 		return;
 
 	case  N_ENDSYNC:
 		if  (bytes != sizeof(Shreq))
 			goto  badlen;
-		if  (tracing & TRACE_NETREQ)
-			trace_op_net("Endsync", rq->sh_params.upid, rq->sh_params.hostid);
 		endsync(rq->sh_params.hostid);
 		/* Fix "forward refs" on previously-connected machines
 		   to the new one */
@@ -1096,19 +956,20 @@ static void  n_reqs(ShipcRef rq, int bytes)
 	case  N_SYNCSINGLE:
 		if  (bytes != sizeof(Shreq))
 			goto  badlen;
-		if  (tracing & TRACE_NETREQ)
-			trace_op_net("Singsync", rq->sh_params.upid, rq->sh_params.hostid);
 		send_single_jobhdr(rq->sh_params.hostid, rq->sh_params.param);
 		return;
+
+	case  N_SETNOTSERVER:
+	case  N_SETISSERVER:
+		if  (bytes != sizeof(Shreq))
+			goto  badlen;
+		set_not_server(rq, rq->sh_params.mcode == N_SETNOTSERVER);
+	        return;
 
 	case  N_XBNATT:
 		if  (bytes != sizeof(Shreq))
 			goto  badlen;
-
 		/* We kill off the process if we think a previous one is running */
-
-		if  (tracing & TRACE_NETREQ)
-			trace_op_pid("Natt", rq->sh_params.upid);
 		if  (Xbns_pid  &&  kill(Xbns_pid, 0) >= 0)
 			kill(-(PIDTYPE) rq->sh_params.upid, SIGKILL);
 		else
@@ -1118,16 +979,12 @@ static void  n_reqs(ShipcRef rq, int bytes)
 	case  N_ROAMUSER:	/* Message from xbnetserv to accept roamer */
 		if  (bytes != sizeof(Shreq) + sizeof(struct remote))
 			goto  badlen;
-		if  (tracing & TRACE_NETREQ)
-			trace_op_net("Roamuser", rq->sh_params.upid, rq->sh_un.sh_n.hostid);
-		alloc_roam(rq->sh_un.sh_n.hostid, rq->sh_un.sh_n.hostname, rq->sh_un.sh_n.alias);
+		alloc_roam(&rq->sh_un.sh_n);
 		return;
 
 	case  N_REQREPLY:
 		if  (bytes != sizeof(Shreq))
 			goto  badlen;
-		if  (tracing & TRACE_NETREQ)
-			trace_op_pid("Reqrep", rq->sh_params.upid);
 		{
 			Repmess	rep;
 			BLOCK_ZERO(&rep, sizeof(rep));
@@ -1140,16 +997,12 @@ static void  n_reqs(ShipcRef rq, int bytes)
 	case  N_DOCHARGE:
 		if  (bytes != sizeof(Shreq) + sizeof(jident))
 			goto  badlen;
-		if  (tracing & TRACE_NETREQ)
-			trace_op_pid("Docharge", rq->sh_params.upid);
 		/* Don't do anything but continue to support people who do */
 		return;
 
 	case  N_RJASSIGN:
 		if  (bytes != sizeof(Shreq) + sizeof(struct jremassmsg))
 			goto  badlen;
-		if  (tracing & TRACE_NETREQ)
-			trace_op_net("Rjassign", rq->sh_params.upid, rq->sh_params.hostid);
 		{
 			int	jn = findj_by_jid(&rq->sh_un.remas.jid);
 			if  (jn >= 0)
@@ -1284,7 +1137,7 @@ void	initholfile()
 		return;
 	}
 	close(open(fname, O_CREAT|O_WRONLY, 0644));
-	chown(fname, Daemuid, Daemgid);
+	Ignored_error = chown(fname, Daemuid, Daemgid);
 	free(fname);
 }
 
@@ -1343,7 +1196,6 @@ MAINFN_TYPE  main(int argc, char **argv)
 	LONG	initll = -1L;	/* Set to indicate leave alone */
 	LONG	jsize = 0L, vsize = 0L;
 	int	chku;
-	char	*trf;
 #ifndef	DEBUG
 	PIDTYPE	pid;
 #endif
@@ -1357,7 +1209,7 @@ MAINFN_TYPE  main(int argc, char **argv)
 	struct rlimit  rlt;
 #endif
 
-	versionprint(argv, "$Revision: 1.4 $", 1);
+	versionprint(argv, "$Revision: 1.5 $", 1);
 
 	if  ((progname = strrchr(argv[0], '/')))
 		progname++;
@@ -1473,7 +1325,7 @@ MAINFN_TYPE  main(int argc, char **argv)
 #endif
 	setuid(ROOTID);
 	oldumask = umask(C_MASK);
-	nice(DEF_BASE_NICE);
+	Ignored_error = nice(DEF_BASE_NICE);
 
 	initlog();
 
@@ -1540,7 +1392,7 @@ MAINFN_TYPE  main(int argc, char **argv)
 
 #ifndef	DEBUG
 	close(0);  close(1);  close(2);
-	dup(dup(open("/dev/null", O_RDWR)));
+	Ignored_error = dup(dup(open("/dev/null", O_RDWR)));
 
 	if  (!nosetpgrp)  {
 #ifdef	SETPGRP_VOID
@@ -1609,20 +1461,6 @@ MAINFN_TYPE  main(int argc, char **argv)
 	}
 #endif
 	nfreport($E{Scheduler started});
-
-	/* Set up tracing perhaps */
-
-	trf = envprocess(BTSCHEDTRACE);
-	tracing = atoi(trf);
-	free(trf);
-	if  (tracing)  {
-		trf = envprocess(BTSCHEDTRFILE);
-		tracefile = fopen(trf, "a");
-		free(trf);
-		if  (!tracefile)
-			tracing = 0;
-	}
-
 	process();
 	return  0;		/* process never returns, but the compiler doesn't know it */
 }

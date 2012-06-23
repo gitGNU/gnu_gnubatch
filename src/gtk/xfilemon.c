@@ -344,7 +344,7 @@ MAINFN_TYPE  main(int argc, char **argv)
 {
 	struct	dialog_data	ddata;
 
-	versionprint(argv, "$Revision: 1.4 $", 0);
+	versionprint(argv, "$Revision: 1.5 $", 0);
 
 	gtk_init(&argc, &argv);
 	init_mcfile();

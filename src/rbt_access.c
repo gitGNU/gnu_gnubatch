@@ -54,22 +54,12 @@ static	struct	sockaddr_in	serv_addr, cli_addr;
 static int  initsock(const netid_t hostid)
 {
 	int	sockfd;
-	SHORT	portnum, udpproto;
+	SHORT	portnum;
 	struct	servent	*sp;
-	struct	protoent  *pp;
-	char	*udp_protoname;
-
-	if  (!((pp = getprotobyname("udp"))  || (pp = getprotobyname("UDP"))))  {
-		print_error($E{No UDP Protocol});
-		exit(E_NETERR);
-	}
-	udp_protoname = pp->p_name;
-	udpproto = pp->p_proto;
-	endprotoent();
 
 	/* Get port number for this caper */
 
-	if  (!(sp = env_getserv(Sname, udp_protoname)))  {
+	if  (!(sp = env_getserv(Sname, IPPROTO_UDP)))  {
 		print_error($E{No xbnetserv UDP service});
 		endservent();
 		exit(E_NETERR);
@@ -90,7 +80,7 @@ static int  initsock(const netid_t hostid)
 	disp_arg[0] = ntohs(portnum);
 	disp_arg[1] = hostid;
 
-	if  ((sockfd = socket(AF_INET, SOCK_DGRAM, udpproto)) < 0)  {
+	if  ((sockfd = socket(AF_INET, SOCK_DGRAM, IPPROTO_UDP)) < 0)  {
 		print_error($E{Cannot create UDP access socket});
 		exit(E_NETERR);
 	}

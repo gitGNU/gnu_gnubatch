@@ -20,7 +20,6 @@ struct	api_fd	{
 	SHORT		sockfd;		/* Socket fd */
 	SHORT		prodfd;		/* "Prod" socket fd */
 	netid_t		hostid;		/* Host we are talking to net byte order */
-	char		username[UIDSIZE+1]; /* User name */
 #ifdef	PYRAMID
 /* (Pyramid has bug in C compiler affecting pointers to functions with const parameters) */
 	void		(*jobfn)(int);		/* Function to invoke on jobs change */
@@ -87,14 +86,22 @@ struct	api_msg	{
 
 #define	API_LOGIN	50
 #define	API_NEWGRP	51
+#define API_LOCALLOGIN  52
+#define API_WLOGIN      53
 
 	char	re_reg;			/* Re-register on login */
 	SHORT	retcode;		/* Error return/0 */
 	union  {
 		USHORT		queuelength;
 		struct  {
-			char	username[UIDSIZE+1];
+			char	username[WUIDSIZE+1];
 		}  signon;
+		/* For logins from local host - may specify alternative user */
+	        struct  {
+			int_ugid_t      fromuser;
+	                int_ugid_t      touser;
+	        }  local_signon;
+
 		struct	{
 			ULONG	flags;
 		}  lister;
