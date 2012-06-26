@@ -52,7 +52,8 @@ specific user. Only a user with <em>read admin file</em> privilege will be
 able to read the profiles of other users.</p>
 <p><em>fd</em> is a file descriptor which was previously returned by a
 successful call to <code>gbatch_open(3)</code>.</p>
-<p><em>username</em> is the name of a valid user on the server.</p>
+<p><em>username</em> is the name of a valid user on the server or null to fetch details for
+the currently-logged in user.</p>
 <p><em>groupname</em> will be assigned with the default group name on the server.</p>
 <p><em>ustr</em> is a pointer to a structure which will on successful return,
 contain the profile of the specific user.</p>

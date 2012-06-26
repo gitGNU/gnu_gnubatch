@@ -35,6 +35,9 @@ INTBINDIR	=	$(DESTDIR)@pkgexecdir@
 DATADIR		=	$(DESTDIR)@pkgdatadir@
 MANDIR		=	$(DESTDIR)@mandir@
 PDFDIR		=	$(DESTDIR)@pdfdir@
+SYSCONFD	=	$(DESTDIR)@sysconfdir@
+CONFFILE	=	gnubatch.conf
+HOSTFILE	=	gnubatch.hosts
 INSTALL		=	@INSTALL@
 INSTALL_DATA	=	@INSTALL_DATA@
 STAGED_INSTALL	=	false
@@ -57,6 +60,10 @@ install:	all
 	cd $(UTILDIR);make install prefix="$(prefix)" exec_prefix="$(exec_prefix)" datarootdir="$(datarootdir)"
 	cd $(BUILDDIR);$(MAKE) install prefix="$(prefix)" exec_prefix="$(exec_prefix)" datarootdir="$(datarootdir)"
 	cd doc;$(MAKE) install prefix="$(prefix)" exec_prefix="$(exec_prefix)" datarootdir="$(datarootdir)"
+	$(INSTALL) -d -o $(BATCHUSER) -g root -m 755 $(SYSCONFD)
+	[ -f $(SYSCONFD)/$(CONFFILE) ] || $(INSTALL) -o root -m 644 $(CONFFILE) $(SYSCONFD)
+	echo '# Hosts file - nothing set up yet' >$(HOSTFILE)
+	[ -f $(SYSCONFD)/$(HOSTFILE) ] || $(INSTALL) -o root -m 644 $(HOSTFILE) $(SYSCONFD)
 	$(STAGED_INSTALL) || $(BINDIR)/gbch-uchange -R
 	$(STAGED_INSTALL) || $(BINDIR)/gbch-uchange -p ALL `who am i|sed -e 's/ .*//'`
 
@@ -83,5 +90,5 @@ distclean:	clean
 	cd $(SRCDIR);$(MAKE) distclean
 	$(RM) $(SRCDIR)/hdrs/files.h $(SRCDIR)/hdrs/infiles.h 
 	$(RM) config.cache config.h config.status config.log Makefile
-	$(RM) Checkuserinst Userinst Netinst
+	$(RM) Checkuserinst Userinst Netinst gnubatch.conf ingnubatch.conf gnubatch.hosts
 	cd doc;$(MAKE) distclean

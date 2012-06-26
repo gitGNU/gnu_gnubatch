@@ -7649,7 +7649,7 @@ ac_config_headers="$ac_config_headers config.h"
 ac_config_commands="$ac_config_commands src/hdrs/files.h"
 
 
-ac_config_files="$ac_config_files Makefile util/Makefile src/Makefile src/helpmsg/Makefile src/hdrs/infiles.h src/lib/Makefile src/ins/Makefile src/gtk/Makefile src/motif/Makefile src/apilib/Makefile src/loccgi/Makefile src/remcgi/Makefile doc/Makefile Netinst Checkuserinst Userinst STARTUP/Startdirs"
+ac_config_files="$ac_config_files Makefile ingnubatch.conf util/Makefile src/Makefile src/helpmsg/Makefile src/hdrs/infiles.h src/lib/Makefile src/ins/Makefile src/gtk/Makefile src/motif/Makefile src/apilib/Makefile src/loccgi/Makefile src/remcgi/Makefile doc/Makefile Netinst Checkuserinst Userinst STARTUP/Startdirs"
 
 cat >confcache <<\_ACEOF
 # This file is a shell script that caches the results of configure
@@ -8366,6 +8366,7 @@ do
     "config.h") CONFIG_HEADERS="$CONFIG_HEADERS config.h" ;;
     "src/hdrs/files.h") CONFIG_COMMANDS="$CONFIG_COMMANDS src/hdrs/files.h" ;;
     "Makefile") CONFIG_FILES="$CONFIG_FILES Makefile" ;;
+    "ingnubatch.conf") CONFIG_FILES="$CONFIG_FILES ingnubatch.conf" ;;
     "util/Makefile") CONFIG_FILES="$CONFIG_FILES util/Makefile" ;;
     "src/Makefile") CONFIG_FILES="$CONFIG_FILES src/Makefile" ;;
     "src/helpmsg/Makefile") CONFIG_FILES="$CONFIG_FILES src/helpmsg/Makefile" ;;
@@ -8937,7 +8938,9 @@ $as_echo "$as_me: executing $ac_file commands" >&6;}
 
 
   case $ac_file$ac_mode in
-    "src/hdrs/files.h":C)  ./Makefiles_h.sh prefix=$prefix exec_prefix=$exec_prefix datarootdir=$datarootdir ;;
+    "src/hdrs/files.h":C) ./Makefiles_h.sh prefix=$prefix exec_prefix=$exec_prefix datarootdir=$datarootdir
+./Makegnubatch.conf.sh prefix=$prefix exec_prefix=$exec_prefix datarootdir=$datarootdir
+ ;;
 
   esac
 done # for ac_tag

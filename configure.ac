@@ -713,10 +713,12 @@ AC_DEFINE(HAVE_DD_FD),
 AC_MSG_RESULT(No directory fd macro or structure element found)))
 
 AC_CONFIG_HEADER(config.h)
-AC_CONFIG_COMMANDS([src/hdrs/files.h], [ ./Makefiles_h.sh prefix=$prefix exec_prefix=$exec_prefix datarootdir=$datarootdir],
-				       [prefix=$prefix exec_prefix=$exec_prefix datarootdir=$datarootdir])
+AC_CONFIG_COMMANDS([src/hdrs/files.h],
+[./Makefiles_h.sh prefix=$prefix exec_prefix=$exec_prefix datarootdir=$datarootdir
+./Makegnubatch.conf.sh prefix=$prefix exec_prefix=$exec_prefix datarootdir=$datarootdir
+], [prefix=$prefix exec_prefix=$exec_prefix datarootdir=$datarootdir])
 
-AC_OUTPUT(Makefile util/Makefile src/Makefile src/helpmsg/Makefile src/hdrs/infiles.h src/lib/Makefile src/ins/Makefile src/gtk/Makefile
+AC_OUTPUT(Makefile ingnubatch.conf util/Makefile src/Makefile src/helpmsg/Makefile src/hdrs/infiles.h src/lib/Makefile src/ins/Makefile src/gtk/Makefile
 src/motif/Makefile src/apilib/Makefile src/loccgi/Makefile src/remcgi/Makefile doc/Makefile Netinst Checkuserinst Userinst STARTUP/Startdirs)
 
 AH_TEMPLATE([BROKEN_COMBOBOX], [Define if Motif combo boxes don't work])

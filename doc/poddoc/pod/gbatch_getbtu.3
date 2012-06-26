@@ -24,7 +24,8 @@ able to read the profiles of other users.
 I<fd> is a file descriptor which was previously returned by a
 successful call to gbatch_open(3).
 
-I<username> is the name of a valid user on the server.
+I<username> is the name of a valid user on the server or null to fetch details for
+the currently-logged in user.
 
 I<groupname> will be assigned with the default group name on the server.
 

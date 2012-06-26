@@ -1,4 +1,4 @@
-/* files.h.in -- memory allocation for helpfile parsing
+/* files.h.in -- defines for various file locations etc
 
    Copyright 2009 Free Software Foundation, Inc.
 

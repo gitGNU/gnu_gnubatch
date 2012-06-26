@@ -1,3 +1,5 @@
+etc/gnubatch
+etc/gnubatch/gnubatch.*
 usr/bin
 usr/lib/gnubatch
 usr/lib/libgnubatch_curs*.so*

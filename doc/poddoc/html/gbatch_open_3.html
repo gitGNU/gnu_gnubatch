@@ -37,6 +37,9 @@
 <h1><a name="name">NAME</a></h1>
 <p>gbatch_open - open a connection to GNUbatch</p>
 <p>gbatch_login - open a connection to GNUbatch with password</p>
+<p>gbatch_wlogin - open a connection to GBUbatch with a password mapping user</p>
+<p>gbatch_locallogin - open a connection on the local host</p>
+<p>gbatch_locallogin_byid - open a connection on the local host, specifying user id</p>
 <p>
 </p>
 <hr />
@@ -46,49 +49,32 @@
 <p><strong>int gbatch_open(const char *</strong><em>hostname</em><strong>, const char *</strong><em>servname</em><strong>,
 const char *</strong><em>username</em><strong>)</strong></p>
 <p><strong>int gbatch_login(const char *</strong><em>hostname</em><strong>, const char *</strong><em>servname</em><strong>,
-const char *</strong><em>username</em><strong>, char *</strong><em>passwd</em><strong>, const int</strong>
-<em>rereg</em><strong>)</strong></p>
+const char *</strong><em>username</em><strong>, const char *</strong><em>passwd</em>)&gt;</p>
+<p><strong>int gbatch_wlogin(const char *</strong><em>hostname</em><strong>, const char *</strong><em>servname</em><strong>,
+const char *</strong><em>username</em><strong>, const char *</strong><em>passwd</em>)&gt;</p>
+<p><strong>int gbatch_locallogin(const char *</strong><em>servname</em><strong>, const char *</strong><em>username</em>B)&gt;</p>
+<p><strong>int gbatch_locallogin_byid(const char *</strong><em>servname</em><strong>, const int_ugid_t</strong><em>uid</em>B)&gt;</p>
 <p>
 </p>
 <hr />
 <h1><a name="description">DESCRIPTION</a></h1>
-<p>The function <strong>gbatch_open</strong> is used to open a connection to the
-<strong>GNUbatch</strong> API. It has two slightly different variants on Windows
-clients.</p>
-<p>The first format, with two arguments, applies to Unix and GNU/Linux
-applications. The username used is that of the effective userid at the
-time of the call.</p>
-<p>The second format, with three arguments is used on Windows clients and
-specifies the Unix user name in the call. This may not be acceptable
-unless the user is on a static IP address client with a default user
-either matching the user name given or being a user with <em>Write Admin
-File</em> privilege. So if the <em class="file">/etc/</em> file has the
-following in:</p>
-<pre>
- mypc  -  client(myuser)</pre>
-<p>then <code>myuser</code> can invoke this call from client <code>mypc</code>, or some other
-user if <code>myuser</code> has <em>write admin file</em> privilege. The final
-privilege will be that of the user logged-in as.</p>
-<p>The third format, which should probably be used if in any doubt,
-supplies a password.</p>
-<p>In all cases, <em>hostname</em> is the name of the host being connected to.
-This may be in any format which can be recognised by the network
-library routine <code>gethostbyname(3)</code>. <code>localhost</code> is acceptable if the
+<p><strong>gbatch_open</strong> opens a connection from a a Unix host to the specified server, or from a
+predefined windows host set up in the hosts file, with the given user name, which must
+be mapped to the correct Unix user name.</p>
+<p><strong>gbatch_login</strong> logs in with the given user name (mapped to a user name on the server
+unless from a registered Unix host) and password.</p>
+<p><strong>gbatch_wlogin</strong> is as for <strong>gbatch_login</strong>, but the given user name is always mapped
+even if the caller is a Unix server.</p>
+<p><strong>gbatch_locallogin</strong> logs in on the local host. If the user name is non-null, then this
+will be used (if permitted) other than the effective uid.</p>
+<p><strong>gbatch_locallogin_byid</strong> takes a user id rather than a user name.</p>
+<p>In all cases, <em>hostname</em> is the name of the host being connected to or null if the
 local server is to be used.</p>
 <p><em>servname</em> may be <code>NULL</code> to use a standard service name, otherwise
 an alternative service may be specified.</p>
-<p><em>username</em> should be a valid user on the server.</p>
 <p><em>passwd</em> should be the Unix password on the server or an alternate
 <em>interface password</em> set up by gbch-passwd(8).
-If this is not required it may be nulls. Note that this is a non-<code>const</code> array; it
-will be deliberately filled with nulls as soon as possible after
-entering the routine to minimise the length of time during which
-clear-text passwords are on the stack.</p>
-<p><em>rereg</em>, if non-zero, only applies to DHCP clients, and denotes that
-the Unix host should register the user as the &quot;primary&quot; user for the
-given client. The main effect of this is to override the user
-permissions for operations being performed by a concurrent <strong>gbch-qw</strong>
-session.</p>
+If this is not required it may be nulls.</p>
 <p>Note that more than one connection can be open at
 any time with various combinations of user names and hosts.</p>
 <p>When finished, close the conection with a call to <code>gbatch_close(3)</code>.</p>
@@ -119,12 +105,13 @@ defined in the include file <em class="file">gbatch.h</em>.</p>
 <code>gbatch_newgrp(3)</code>,
 <code>gbatch_setqueue(3)</code>,
 <code>gbatch_jobmon(3)</code>,
-<code>gbatch_varmon(3)</code>.</p>
+<code>gbatch_varmon(3)</code>,
+gbch-passwd(8).</p>
 <p>
 </p>
 <hr />
 <h1><a name="copyright">COPYRIGHT</a></h1>
-<p>Copyright (c) 2009 Free Software Foundation, Inc.
+<p>Copyright (c) 2012 Free Software Foundation, Inc.
 This is free software. You may redistribute copies of it under the
 terms of the GNU General Public License
 &lt;http://www.gnu.org/licenses/gpl.html&gt;.

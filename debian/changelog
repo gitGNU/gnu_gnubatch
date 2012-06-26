@@ -1,5 +1,15 @@
-gnubatch (1.3) unstable; urgency=low
+gnubatch (1.5) unstable; urgency=low
+
+  * Release 1.5
+    Revise network handling, increase user/host lengths in API.
+    Mostly rewrite xbnetserv and half of sh_network.c
+    Fix bug with expansion of names in redirections.
+
+ -- John M Collins (Xi Software Ltd) <jmc@xisl.com>  Tue, 26 Jun 2012 12:45:06 +0100
+
+gnubatch (1.1) unstable; urgency=low
 
   * Initial release (Closes: #572633)
 
  -- John M Collins (Xi Software Ltd) <jmc@xisl.com>  Fri, 05 Mar 2010 11:22:06 +0000
+

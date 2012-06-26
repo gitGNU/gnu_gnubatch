@@ -4,6 +4,12 @@ gbatch_open - open a connection to GNUbatch
 
 gbatch_login - open a connection to GNUbatch with password
 
+gbatch_wlogin - open a connection to GBUbatch with a password mapping user
+
+gbatch_locallogin - open a connection on the local host
+
+gbatch_locallogin_byid - open a connection on the local host, specifying user id
+
 =head1 SYNOPSIS
 
 =for man
@@ -20,57 +26,41 @@ B<int gbatch_open(const char *>I<hostname>B<, const char *>I<servname>B<,
 const char *>I<username>B<)>
 
 B<int gbatch_login(const char *>I<hostname>B<, const char *>I<servname>B<,
-const char *>I<username>B<, char *>I<passwd>B<, const int>
-I<rereg>B<)>
+const char *>I<username>B<, const char *>I<passwd>)>
+
+B<int gbatch_wlogin(const char *>I<hostname>B<, const char *>I<servname>B<,
+const char *>I<username>B<, const char *>I<passwd>)>
+
+B<int gbatch_locallogin(const char *>I<servname>B<, const char *>I<username>B)>
+
+B<int gbatch_locallogin_byid(const char *>I<servname>B<, const int_ugid_t>I<uid>B)>
 
 =head1 DESCRIPTION
 
-The function B<gbatch_open> is used to open a connection to the
-B<GNUbatch> API. It has two slightly different variants on Windows
-clients.
+B<gbatch_open> opens a connection from a a Unix host to the specified server, or from a
+predefined windows host set up in the hosts file, with the given user name, which must
+be mapped to the correct Unix user name.
 
-The first format, with two arguments, applies to Unix and GNU/Linux
-applications. The username used is that of the effective userid at the
-time of the call.
+B<gbatch_login> logs in with the given user name (mapped to a user name on the server
+unless from a registered Unix host) and password.
 
-The second format, with three arguments is used on Windows clients and
-specifies the Unix user name in the call. This may not be acceptable
-unless the user is on a static IP address client with a default user
-either matching the user name given or being a user with I<Write Admin
-File> privilege. So if the F</etc/> file has the
-following in:
+B<gbatch_wlogin> is as for B<gbatch_login>, but the given user name is always mapped
+even if the caller is a Unix server.
 
- mypc  -  client(myuser)
+B<gbatch_locallogin> logs in on the local host. If the user name is non-null, then this
+will be used (if permitted) other than the effective uid.
 
-then C<myuser> can invoke this call from client C<mypc>, or some other
-user if C<myuser> has I<write admin file> privilege. The final
-privilege will be that of the user logged-in as.
+B<gbatch_locallogin_byid> takes a user id rather than a user name.
 
-The third format, which should probably be used if in any doubt,
-supplies a password.
-
-In all cases, I<hostname> is the name of the host being connected to.
-This may be in any format which can be recognised by the network
-library routine gethostbyname(3). C<localhost> is acceptable if the
+In all cases, I<hostname> is the name of the host being connected to or null if the
 local server is to be used.
 
 I<servname> may be C<NULL> to use a standard service name, otherwise
 an alternative service may be specified.
 
-I<username> should be a valid user on the server.
-
 I<passwd> should be the Unix password on the server or an alternate
 I<interface password> set up by gbch-passwd(8).
-If this is not required it may be nulls. Note that this is a non-C<const> array; it
-will be deliberately filled with nulls as soon as possible after
-entering the routine to minimise the length of time during which
-clear-text passwords are on the stack.
-
-I<rereg>, if non-zero, only applies to DHCP clients, and denotes that
-the Unix host should register the user as the "primary" user for the
-given client. The main effect of this is to override the user
-permissions for operations being performed by a concurrent B<gbch-qw>
-session.
+If this is not required it may be nulls.
 
 Note that more than one connection can be open at
 any time with various combinations of user names and hosts.
@@ -99,11 +89,12 @@ gbatch_close(3),
 gbatch_newgrp(3),
 gbatch_setqueue(3),
 gbatch_jobmon(3),
-gbatch_varmon(3).
+gbatch_varmon(3),
+gbch-passwd(8).
 
 =head1 COPYRIGHT
 
-Copyright (c) 2009 Free Software Foundation, Inc.
+Copyright (c) 2012 Free Software Foundation, Inc.
 This is free software. You may redistribute copies of it under the
 terms of the GNU General Public License
 <http://www.gnu.org/licenses/gpl.html>.
