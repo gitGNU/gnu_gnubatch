@@ -38,6 +38,7 @@ PDFDIR		=	$(DESTDIR)@pdfdir@
 SYSCONFD	=	$(DESTDIR)@sysconfdir@
 CONFFILE	=	gnubatch.conf
 HOSTFILE	=	gnubatch.hosts
+BATCHUSER	=	@BATCHUSER@
 INSTALL		=	@INSTALL@
 INSTALL_DATA	=	@INSTALL_DATA@
 STAGED_INSTALL	=	false
