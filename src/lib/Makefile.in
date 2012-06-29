@@ -81,6 +81,7 @@ all:	$(OBJECTS) $(CLIENTOBJS) $(CURSOBJS)
 	libtool --mode=link @CC@ $(CCFLAGS) -o $(LIBCURS) $(LIBCURSOBJS) -rpath $(RPATH) -version-info 1:0:0
 
 install: all
+	$(INSTALL) -d -m 755 $(LIBDIR)
 	libtool --mode=install $(INSTALL) $(LIB) $(LIBDIR)
 	libtool --mode=install $(INSTALL) $(LIBCLIENT) $(LIBDIR)
 	libtool --mode=install $(INSTALL) $(LIBCURS) $(LIBDIR)
