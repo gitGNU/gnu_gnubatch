@@ -91,11 +91,15 @@ gbatch.h:	gbatch.pre\
 	sh ./Hdrmake.sh $(BASE)/config.h $(HDRS)
 
 install: all
+	$(INSTALL) -d -m 755 $(LIBDIR)
+	$(INSTALL) -d -m 755 $(INCLUDEDIR)
 	libtool --mode=install $(INSTALL) $(APILIB) $(LIBDIR)
 	$(INSTALL_DATA) gbatch.h $(INCLUDEDIR)
 	$(INSTALL_DATA) $(APILIB) $(LIBDIR)
 
 install_strip: all
+	$(INSTALL) -d -m 755 $(LIBDIR)
+	$(INSTALL) -d -m 755 $(INCLUDEDIR)
 	libtool --mode=install $(INSTALL) -s $(APILIB) $(LIBDIR)
 	$(INSTALL_DATA) gbatch.h $(INCLUDEDIR)
 	$(INSTALL_DATA) $(APILIB) $(LIBDIR)

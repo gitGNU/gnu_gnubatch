@@ -89,6 +89,7 @@ install: all
 	$(INSTALL_DATA) $(LIB) $(LIBCLIENT) $(LIBCURS) $(LIBDIR)
 
 install_strip:
+	$(INSTALL) -d -m 755 $(LIBDIR)
 	libtool --mode=install $(INSTALL) -s $(LIB) $(LIBDIR)
 	libtool --mode=install $(INSTALL) -s $(LIBCLIENT) $(LIBDIR)
 	libtool --mode=install $(INSTALL) -s $(LIBCURS) $(LIBDIR)
