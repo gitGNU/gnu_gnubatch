@@ -57,6 +57,8 @@ int	nosetpgrp = 0;
 LONG	initll = -1, jsize = 0L, vsize = 0L;
 float	decpri = 0.0;
 
+extern	char	hostf_errors;
+
 /* For when we run out of memory.....  */
 
 void  nomem(const char *fl, const int ln)
@@ -66,29 +68,58 @@ void  nomem(const char *fl, const int ln)
 }
 
 #ifdef	NETWORK_VERSION
+
+/* Find host name in host file or look it up and construct structure */
+
+static	int  get_conn_host(const char *hostn, struct remote *drp)
+{
+	struct	remote  *rp;
+	netid_t	hostid;
+
+	disp_str = hostn;	/* Prime this ready for our complaint */
+
+	while  ((rp = get_hostfile()))
+		if  (!(rp->ht_flags & HT_ROAMUSER)  &&  (strcmp(hostn, rp->hostname) == 0  ||  strcmp(hostn, rp->alias) == 0))  {
+
+			/* Don't allow connections to client machines */
+
+			if  (rp->ht_flags & HT_DOS)  {
+				print_error($E{Dos client as host});
+				return  E_NOHOST;
+			}
+			rp->ht_flags &= ~HT_MANUAL;
+			*drp = *rp;
+			end_hostfile();
+			if  (hostf_errors)
+				print_error($E{Warn errors in host file});
+			return  0;
+		}
+	end_hostfile();
+
+	/* OK see if we can look it up */
+
+	if  ((hostid = look_hostname(hostn)) == 0L)  {
+		print_error($E{Btconn unknown host});
+		return  E_NOHOST;
+	}
+
+	/* Manufacture struct */
+
+	BLOCK_ZERO(drp, sizeof(struct remote));
+	strncpy(drp->hostname, hostn, HOSTNSIZE-1);
+	drp->hostid = hostid;
+	return  0;
+}
+
 static int  doconnop(const unsigned cmd, const char *hostn)
 {
-	struct	remote	*rp;
 	long		mymtype;
 	Shipc		oreq;
 	Repmess		rr;
-	int	blkcount = MSGQ_BLOCKS;
+	int	blkcount = MSGQ_BLOCKS, ret;
 
-	disp_str = hostn;
-	while  ((rp = get_hostfile()))
-		if  (strcmp(hostn, rp->hostname) == 0  ||  strcmp(hostn, rp->alias) == 0)
-			goto  found;
-	end_hostfile();
-	print_error($E{Btconn unknown host});
-	return  E_NOHOST;
- found:
-
-	/* Don't allow connections to client machines */
-
-	if  (rp->ht_flags & HT_DOS)  {
-		print_error($E{Dos client as host});
-		return  E_NOHOST;
-	}
+	if  ((ret = get_conn_host(hostn, &oreq.sh_un.sh_n)) != 0)
+		return  ret;
 
 	/* Check that the user is allowed to do this.  We check this
 	   here rather than in the scheduler to avoid hassles
@@ -106,8 +137,6 @@ static int  doconnop(const unsigned cmd, const char *hostn)
 	oreq.sh_params.uuid = Realuid;
 	oreq.sh_params.ugid = Realgid;
 	mymtype = MTOFFSET + (oreq.sh_params.upid = getpid());
-	oreq.sh_un.sh_n = *rp;
-	oreq.sh_un.sh_n.ht_flags &= ~HT_MANUAL;
 	while  (msgsnd(Ctrl_chan, (struct msgbuf *) &oreq, sizeof(Shreq) + sizeof(struct remote), IPC_NOWAIT) < 0)  {
 		if  (errno != EAGAIN)  {
 			print_error($E{IPC msg q error});
