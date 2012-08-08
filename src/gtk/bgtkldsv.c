@@ -76,7 +76,7 @@ MAINFN_TYPE  main(int argc, char **argv)
 	struct  passwd  *pw = getpwnam(BATCHUNAME);
 	uid_t  duid = ROOTID, myuid = getuid(), mygid = getgid();
 
-	versionprint(argv, "$Revision: 1.5 $", 1);
+	versionprint(argv, "$Revision: 1.6 $", 1);
 
 	/* Get batch uid */
 

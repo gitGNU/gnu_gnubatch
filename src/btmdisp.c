@@ -241,7 +241,7 @@ MAINFN_TYPE  main(int argc, char **argv)
 	extern	char	**environ;
 	static	char	lnam[] = "LOGNAME=";
 
-	versionprint(argv, "$Revision: 1.5 $", 1);
+	versionprint(argv, "$Revision: 1.6 $", 1);
 
 	if  ((progname = strrchr(argv[0], '/')))
 		progname++;

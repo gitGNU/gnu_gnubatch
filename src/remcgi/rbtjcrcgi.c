@@ -214,7 +214,7 @@ MAINFN_TYPE  main(int argc, char **argv)
 	unsigned	defavoid = 0;
 	int_ugid_t	chku;
 
-	versionprint(argv, "$Revision: 1.5 $", 0);
+	versionprint(argv, "$Revision: 1.6 $", 0);
 
 	if  ((progname = strrchr(argv[0], '/')))
 		progname++;

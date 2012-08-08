@@ -16,7 +16,7 @@
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
 #include "config.h"
-static	char	rcsid2[] = "@(#) $Revision: 1.5 $";
+static	char	rcsid2[] = "@(#) $Revision: 1.6 $";
 #include <stdio.h>
 #include <sys/types.h>
 #include <sys/stat.h>
@@ -390,7 +390,7 @@ static void  wstart()
 
 MAINFN_TYPE  main(int argc, char **argv)
 {
-	versionprint(argv, "$Revision: 1.5 $", 0);
+	versionprint(argv, "$Revision: 1.6 $", 0);
 
 	if  ((progname = strrchr(argv[0], '/')))
 		progname++;

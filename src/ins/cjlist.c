@@ -484,7 +484,7 @@ MAINFN_TYPE main(int argc, char **argv)
 	extern	int	optind;
 	extern	char	*optarg;
 
-	versionprint(argv, "$Revision: 1.5 $", 0);
+	versionprint(argv, "$Revision: 1.6 $", 0);
 	progname = argv[0];
 
 	while  ((ch = getopt(argc, argv, "usfe:v:D:I:")) != EOF)

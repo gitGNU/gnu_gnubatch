@@ -1,3 +1,12 @@
+gnubatch (1.6) unstable; urgency=low
+
+  * Release 1.6
+    Some more revisions to network handling.
+    In particular we get local address from getsockname most of the time.
+    Update manuals to reflect this.
+
+ -- John M Collins (Xi Software Ltd) <jmc@xisl.com>  Wed, 08 Aug 2012 11:04:12 +0100
+
 gnubatch (1.5) unstable; urgency=low
 
   * Release 1.5
