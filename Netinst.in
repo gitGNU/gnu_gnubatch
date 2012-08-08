@@ -178,17 +178,19 @@ unless  ($had)  {
     close SRV;
 }
 
-unless (-f "@sysconfdir@/gnubatch-hosts")  {
-    my $hn = `hostname`;
-    chop($hn);
-    my $he = gethostbyname($hn);
-    my $ha = inet_ntoa($he);
-    unless ($ha =~ /^127\./)  {
-	if  (open(HF, ">/@sysconfdir@/gnubatch-hosts"))  {
+unless (-f "@sysconfdir@/gnubatch.hosts")  {
+	if  (open(HF, ">/@sysconfdir@/gnubatch.hosts"))  {
 	    my $lt = localtime;
-	    print HF "# Host file created on $lt\n\n";
-	    print HF "localaddress\t$ha\n";
+	    print HF <<EOF;
+# Host file created on $lt
+
+# We now get the local address by connecting to somewhere and running
+# "getsockname"
+# We probably don't need to create further entries if we are not using Windows
+# clients or things looking like them, unless you want to auto-connect on startup.
+
+localaddress\tGSN(www.gnu.org,80)
+EOF
 	    close HF;
-	}
     }
 }

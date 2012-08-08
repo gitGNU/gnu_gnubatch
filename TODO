@@ -6,7 +6,7 @@
 
 ----------------------------------------------------------------------
 
-To-Do List for GNUBATCH 1.0
+To-Do List for GNUBATCH 1.5
 ===========================
 
 This is the product distributed as Xi-Batch Release 6
@@ -100,6 +100,8 @@ exceptions rather than storing mostly identical permissions for nearly
 everyone. Maybe this should be held as XML and read into shared memory
 when anything starts up.
 
+I've done most of this.
+
 **** Most of this has been implemented in Xi-Batch R7
 
 3. Charging
@@ -108,7 +110,9 @@ when anything starts up.
 No one ever uses that so we'll get rid of it. We'll just have optional
 log files showing what got run where at the instigation of whom.
 
-4. Job Heirarchy
+I've done this.
+
+4. Job Hierarchy
 ----------------
 
 Rather than a single flat job queue I want to implement a heirarchy of
@@ -177,7 +181,7 @@ far-reaching consequences apart from overcoming the above problems as:
    to the network-handling process and put on the message queue
    there).
 
-4. We can get rid of "xtnetserv" to handle remote requests, the API
+4. We can get rid of "xbnetserv" to handle remote requests, the API
    and the Windows Clients. Everything now talks directly to the
    scheduler. And all the client process code can be replaced by calls to
    the API. This gets rid of mountains of code all duplicated and
@@ -227,6 +231,8 @@ being hideous is about as non-Free as you can get.
 Please can someone who knows how to do this do it! The MFC sources are
 enclosed - please grab those and the GTK stuff and start hacking.
 
+Actually I've mostly rewritten it all in Python and QT.
+
 4. Browser client in PHP
 ------------------------
 
@@ -249,4 +255,4 @@ update.
 Oh yes and the new version documentation needs "de-nonexistent-ifying"
 
 John Collins
-February 2009
+February 2009 some amendments July 2012

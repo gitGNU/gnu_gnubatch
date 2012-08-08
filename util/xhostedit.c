@@ -28,8 +28,9 @@
 #include "networkincl.h"
 #include "remote.h"
 #include "hostedit.h"
+#include "src/hdrs/files.h"
 
-static	char	rcsid2[] = "@(#) $Revision: 1.1 $";
+static	char	rcsid2[] = "@(#) $Revision: 1.5 $";
 
 #define	DEF_PAD	10
 #define	DEF_PAD_SMALL	5
@@ -478,10 +479,18 @@ int	extract_cluhost_dlg(struct remote *rp, struct cluhost_ddata *ddata)
 void	lochdisplay()
 {
 	GString  *loch = g_string_new(NULL);
-	if  (hadlocaddr == IPADDR_NAME)
-		g_string_printf(loch, "%s ", phname(myhostid, IPADDR_NAME));
-	else  if  (hadlocaddr == NO_IPADDR)
-		g_string_printf(loch, "Current: %s ", phname(myhostid, IPADDR_NAME));
+	switch  (hadlocaddr)  {
+	default:
+		g_string_printf(loch, "Current: %s", phname(myhostid, IPADDR_NAME));
+		break;
+	case  IPADDR_GSN_NAME:
+		g_string_printf(loch, "Fetch IP from %s port %d", gsnname, gsnport);
+		break;
+	case  IPADDR_GSN_IP:
+		g_string_printf(loch, "Fetch IP from %s port %d", phname(gsnid, IPADDR_IP), gsnport);
+		break;
+	}
+	g_string_append(loch, " current IP ");
 	g_string_append(loch, phname(myhostid, IPADDR_IP));
 	gtk_entry_set_text(GTK_ENTRY(locwid), loch->str);
 	g_string_free(loch, TRUE);
@@ -690,6 +699,19 @@ void	cb_locaddr()
 				break;
 			}
 		}
+		else  {
+			struct	hostent  *hp;
+			char	myname[256];
+			myname[sizeof(myname) - 1] = '\0';
+			gethostname(myname, sizeof(myname) - 1);
+			myhostid = 0;
+			if  ((hp = gethostbyname(myname)))
+				myhostid = *(netid_t *) hp->h_addr;
+			hadlocaddr = NO_IPADDR;
+			lochdisplay();
+			break;
+
+		}
 	  gtk_widget_destroy(dlg);
 }
 
@@ -722,6 +744,122 @@ void	cb_defuser()
 	gtk_widget_destroy(dlg);
 }
 
+const  short  ports[] = { 22, 23, 25, 80, 515, 2000, 2200 };
+
+void	cb_locfromhost()
+{
+	int	row = getselectedhost(), pn, sockfd, portnum;
+	struct  remote  *rp;
+	netid_t	servip, cliip = 0;
+
+	if  (row < 0)
+		return;
+
+	rp = &hostlist[row];
+	if  (rp->ht_flags & HT_DOS)
+		return;
+
+	servip = rp->hostid;
+	sockfd = socket(PF_INET, SOCK_STREAM, IPPROTO_TCP);
+
+	for  (pn = 0;  cliip == 0  &&  pn < sizeof(ports)/sizeof(short);  pn++)
+		cliip = gsn_getloc(sockfd, servip, portnum = ports[pn]);
+	close(sockfd);
+	if  (cliip == 0)  {
+		doerror(toplevel, "Cannot get IP via host %s", phname(servip, rp->ht_flags & HT_HOSTISIP? IPADDR_IP: IPADDR_NAME));
+		return;
+	}
+	myhostid = cliip;
+	if  (confirm("Always get host that way"))  {
+		gsnid = servip;
+		if  (rp->ht_flags & HT_HOSTISIP)
+			hadlocaddr = IPADDR_GSN_IP;
+		else  {
+			hadlocaddr = IPADDR_GSN_NAME;
+			strncpy(gsnname, rp->hostname, HOSTNSIZE);
+		}
+		gsnport = portnum;
+	}
+	else
+		hadlocaddr = IPADDR_IP;
+
+	lochdisplay();
+}
+
+void	cb_locfromweb()
+{
+	GtkWidget  *dlg, *lab, *hostw, *gsnb;
+	netid_t	 servip, cliip;
+
+	dlg = gtk_dialog_new_with_buttons("Find local IP address from web site",
+					  GTK_WINDOW(toplevel),
+					  GTK_DIALOG_DESTROY_WITH_PARENT,
+					  GTK_STOCK_OK,
+					  GTK_RESPONSE_OK,
+					  GTK_STOCK_CANCEL,
+					  GTK_RESPONSE_CANCEL,
+					  NULL);
+	lab = gtk_label_new("Web site to use");
+	gtk_box_pack_start(GTK_BOX(GTK_DIALOG(dlg)->vbox), lab, FALSE, FALSE, DEF_PAD);
+	hostw = gtk_entry_new();
+	gtk_box_pack_start(GTK_BOX(GTK_DIALOG(dlg)->vbox), hostw, FALSE, FALSE, DEF_PAD);
+	if  (gsnname[0])
+		gtk_entry_set_text(GTK_ENTRY(hostw), gsnname);
+	else
+		gtk_entry_set_text(GTK_ENTRY(hostw), "www.google.com");
+	gsnb = gtk_check_button_new_with_label("Fetch from this every time");
+	gtk_box_pack_start(GTK_BOX(GTK_DIALOG(dlg)->vbox), gsnb, FALSE, FALSE, DEF_PAD);
+	if  (hadlocaddr == IPADDR_GSN_NAME || hadlocaddr == IPADDR_GSN_IP)
+		gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(gsnb), TRUE);
+	gtk_widget_show_all(dlg);
+
+	while  (gtk_dialog_run(GTK_DIALOG(dlg)) == GTK_RESPONSE_OK)  {
+		const gchar *h = gtk_entry_get_text(GTK_ENTRY(hostw));
+		int	sockfd, isip;
+
+		if  (lookslikeip(h))  {
+			servip = getdottedip(h);
+			if  (servip == 0)  {
+				doerror(dlg, "Invalid IP address %s", h);
+				continue;
+			}
+			isip = 1;
+		}
+		else  {
+			struct	hostent	*hp = gethostbyname(h);
+			if  (!hp)  {
+				doerror(dlg, "%s is not a valid host name", h);
+				continue;
+			}
+			servip = * (netid_t *) hp->h_addr;
+			isip = 0;
+		}
+		sockfd = socket(PF_INET, SOCK_STREAM, IPPROTO_TCP);
+		cliip = gsn_getloc(sockfd, servip, 80);
+		close(sockfd);
+		if  (cliip == 0)  {
+			doerror(dlg, "Could not get IP via %s", h);
+			continue;
+		}
+		myhostid = cliip;
+		if  (gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(gsnb)))  {
+			gsnid = servip;
+			gsnport = 80;
+			if  (isip)
+				hadlocaddr = IPADDR_GSN_IP;
+			else  {
+				strncpy(gsnname, h, HOSTNSIZE);
+				hadlocaddr = IPADDR_GSN_NAME;
+			}
+		}
+		else
+			hadlocaddr = IPADDR_IP;
+		lochdisplay();
+		break;
+	}
+	gtk_widget_destroy(dlg);
+}
+
 static GtkActionEntry entries[] = {
 	{ "FileMenu", NULL, "_File" },
 	{ "HostMenu", NULL, "_Hosts" },
@@ -734,6 +872,8 @@ static GtkActionEntry entries[] = {
 	{ "Edit", NULL, "_Edit", "e", "Edit current line", G_CALLBACK(cb_edit)},
 	{ "Del", NULL, "_Delete", "<shift>D", "Delete current line", G_CALLBACK(cb_delete)},
 	{ "Locaddr", NULL, "Set _local address", "<shift>L", "Set local IP address", G_CALLBACK(cb_locaddr)},
+	{ "Locfromhost", NULL, "Set local _address from host", "<control>L", "Set local IP address by connecting host", G_CALLBACK(cb_locfromhost)},
+	{ "Locfromweb", NULL, "Set local address from website", "<control>E", "Set local IP address by connecting website", G_CALLBACK(cb_locfromweb)},
 	{ "Defu", NULL, "Default user _name", NULL, "Set default client user name", G_CALLBACK(cb_defuser)},
 	{ "About", NULL, "About xhostedit", NULL, "About xbtuser", G_CALLBACK(cb_about)}  };
 
@@ -752,6 +892,8 @@ static char	uimenu[] =
 		"</menu>"
 		"<menu action='OptMenu'>"
 			"<menuitem action='Locaddr'/>"
+			"<menuitem action='Locfromhost'/>"
+                        "<menuitem action='Locfromweb'/>"
 			"<menuitem action='Defu'/>"
 		"</menu>"
 		"<menu action='HelpMenu'>"
@@ -872,6 +1014,37 @@ void	hdisplay()
 	}
 }
 
+static	char	*gethostfile()
+{
+	const	char	*hf = HOSTFILE, *cp;
+	char  *res, *rp;
+
+	/* Cheat by assuming it's either a full file name or ${HOSTFILE-/file/name} */
+
+	if  (hf[0] == '$'  &&  (res = getenv("HOSTFILE")))
+		return  res;
+
+	cp = hf;
+	while  (*cp  &&  *cp != '-')
+		cp++;
+
+	if  (!*cp)  {
+		fprintf(stderr, "Could not understand hostfile format %s\n", hf);
+		exit(50);
+	}
+	res = malloc(strlen(cp));	/* Should be at least 1 too much */
+	if  (!res)  {
+		fprintf(stderr, "Run out of memory\n");
+		exit(51);
+	}
+	rp = res;
+	cp++;
+	while  (*cp  &&  *cp != '}')
+		*rp++ = *cp++;
+	*rp = '\0';
+	return  res;
+}
+
 int	main(int argc, char *argv[])
 {
 	int	ch, outfd, inplace = 0;
@@ -926,6 +1099,11 @@ int	main(int argc, char *argv[])
 			return  2;
 		}
 	}
+
+	/* If it's an @ sign, substitute the system file name */
+
+	if  (strcmp(inf, "@") == 0)
+		inf = gethostfile();
 
 	load_hostfile(inf);
 	if  (hostf_errors)

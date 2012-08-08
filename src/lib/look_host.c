@@ -102,7 +102,7 @@ static int  spliton(char **result, char *string, const char *delims)
 	result[0] = string;
 	while  ((string = strpbrk(string, delims)))  {
 		*string++ = '\0';
-		while  (strchr(delims, *string))
+		while  (*string  &&  strchr(delims, *string))
 			string++;
 		if  (!*string)
 			break;
@@ -114,6 +114,61 @@ static int  spliton(char **result, char *string, const char *delims)
 	while  (parsecnt < MAXPARSE)
 		result[parsecnt++] = (char *) 0;
 	return  resc;
+}
+
+/* Look at string to see if it's an IP address or looks like one as just the
+   first digit doesn't work some host names start with that */
+
+static	int  lookslikeip(const char *addr)
+{
+	int	dcount = 0, dotcount = 0;
+
+	/* Maximum number of chars is 4 lots of 3 digits = 12 + 3 dots
+	   total 15 */
+
+	while  (*addr)  {
+		if  (dcount >= 15)
+			return  0;
+		if  (!isdigit(*addr))  {
+			if  (*addr != '.')
+				return  0;
+			dotcount++;
+		}
+		addr++;
+		dcount++;
+	}
+	if  (dotcount != 3)
+		return  0;
+	return  1;
+}
+
+/* Get a.b.c.d type IP - trying to future proof */
+
+static	 netid_t  getdottedip(const char *addr)
+{
+	struct	in_addr	ina_str;
+#ifdef	DGAVIION
+	netid_t	res;
+	ina_str = inet_addr(addr);
+	res = ina_str.s_addr;
+	return  res != -1? res: 0;
+#else
+	if  (inet_aton(addr, &ina_str) == 0)
+		return  0;
+	return  ina_str.s_addr;
+#endif
+}
+
+/* Get hostid either as dotted or as host name, returning 0 if it doesn't work */
+
+static	netid_t	get_netid_from(char *addr)
+{
+	struct	hostent	*hp;
+	if  (lookslikeip(addr))
+		return  getdottedip(addr);
+	if  (!(hp = gethostbyname(addr)))
+		return  0;
+	return  * (netid_t *) hp->h_addr;
 }
 
 static char *shortestalias(const struct hostent *hp)
@@ -131,7 +186,66 @@ static char *shortestalias(const struct hostent *hp)
 	return  (char *) 0;
 }
 
-/* Provide interface like gethostent to the /etc/Xibatch-hosts file.
+/* Get local address for "me". As well as an IP, we recognise the form
+   GSN(host,port) to use "getsockname" on a connection to the port. */
+
+static void  get_local_address(char *la)
+{
+	netid_t	result;
+
+	/* Case where we want to use getsockname */
+
+	if  (ncstrncmp(la, "gsn(", 4) == 0)  {
+		char	*bits[MAXPARSE];
+		netid_t	servip;
+		int	portnum, sockfd;
+		SOCKLEN_T	slen;
+		struct	sockaddr_in	sin;
+
+		if  (spliton(bits, la+4, ",)") != 2)  {
+			hostf_errors = 1;
+			return;
+		}
+		if  ((servip = get_netid_from(bits[0])) == 0)  {
+			hostf_errors = 1;
+			return;
+		}
+		portnum = atoi(bits[1]);
+		if  (portnum <= 0)  {
+			hostf_errors = 1;
+			return;
+		}
+
+		/* Go through the motions of connecting to it to run getsockname */
+
+		BLOCK_ZERO(&sin, sizeof(sin));
+		sin.sin_family = AF_INET;
+		sin.sin_port = htons(portnum);
+		sin.sin_addr.s_addr = servip;
+		if  ((sockfd = socket(PF_INET, SOCK_STREAM, IPPROTO_TCP)) < 0)  {
+			hostf_errors = 1;
+			return;
+		}
+		if  (connect(sockfd, (struct sockaddr *) &sin, sizeof(sin)) < 0)  {
+			close(sockfd);
+			hostf_errors = 1;
+			return;
+		}
+		slen = sizeof(struct sockaddr_in);
+		if  (getsockname(sockfd, (struct sockaddr *) &sin, &slen) < 0)
+			hostf_errors = 1;
+		else
+			myhostid = sin.sin_addr.s_addr;
+		close(sockfd);
+		return;
+	}
+	if  ((result = get_netid_from(la)) == 0)
+		hostf_errors = 1;
+	else
+		myhostid = result;
+}
+
+/* Provide interface like gethostent to the hosts file.
    Side effect of "get_hostfile" is to fill in "dosuser".  */
 
 static	struct	remote	hostresult;
@@ -258,24 +372,7 @@ struct remote *get_hostfile()
 					continue;
 				}
 
-				if  (isdigit(bits[HOSTF_ALIAS][0]))  {
-#ifdef	DGAVIION
-					struct	in_addr	ina_str;
-					ina_str = inet_addr(bits[HOSTF_ALIAS]);
-					myhostid = ina_str.s_addr;
-#else
-					myhostid = inet_addr(bits[HOSTF_ALIAS]);
-#endif
-				}
-				else  if  (!(hp = gethostbyname(bits[HOSTF_ALIAS])))  {
-					if  (myhostid == 0L)  {
-						free(line);
-						hostf_errors = 1;
-						continue;
-					}
-				}
-				else
-					myhostid = * (netid_t *) hp->h_addr;
+				get_local_address(bits[HOSTF_ALIAS]);
 				free(line);
 				continue;
 			}
@@ -399,28 +496,12 @@ struct remote *get_hostfile()
 					hostresult.alias[0] = '\0';
 				hostresult.hostid = 0;
 			}
-			else  if  (isdigit(*hostp))  {
+			else  if  (lookslikeip(hostp))  {
 
-				/* Insist on alias name if given as internet address
-				   DG Aviions seem to use different inet_addr's to the
-				   rest of the universe.  */
+				/* Insist on alias name if given as internet address */
 
-				netid_t  ina;
-#ifdef	DGAVIION
-				struct	in_addr	ina_str;
-#endif
-				if  (!bits[HOSTF_ALIAS])  {
-					hostf_errors = 1;
-					free(line);
-					continue;
-				}
-#ifdef	DGAVIION
-				ina_str = inet_addr(hostp);
-				ina = ina_str.s_addr;
-#else
-				ina = inet_addr(hostp);
-#endif
-				if  (ina == -1L || ina == myhostid)  {
+				netid_t  ina = getdottedip(hostp);
+				if  (!bits[HOSTF_ALIAS] || ina == 0 || ina == myhostid)  {
 					hostf_errors = 1;
 					free(line);
 					continue;
@@ -525,18 +606,9 @@ netid_t  look_hostname(const char *name)
 	if  (!done_hostfile)
 		hash_hostfile();
 
-	/* Recent change - decode IP addresses */
-
-	if  (isdigit(name[0]))  {
-		netid_t  ina;
-#ifdef	DGAVIION
-		struct	in_addr	ina_str;
-		ina_str = inet_addr(name);
-		ina = ina_str.s_addr;
-#else
-		ina = inet_addr(name);
-#endif
-		return  ina == -1L || ina == myhostid? 0L: ina;
+	if  (lookslikeip(name))  {
+		netid_t  ina = getdottedip(name);
+		return  ina == 0 || ina == myhostid? 0: ina;
 	}
 
 	for  (hp = hhashtab[calchhash(name)];  hp;  hp = hp->hh_next)  {
@@ -564,7 +636,7 @@ void  end_hostfile()
 	return;
 }
 
-FUNCDE0(void, hash_hostfile)
+void	hash_hostfile()
 {
 	return;
 }

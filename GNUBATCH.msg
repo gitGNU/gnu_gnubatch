@@ -516,7 +516,7 @@ Default prefixes for job and command files
 
 P{Default job file prefix} = ROUND(@, 10)	"J"
 P{Default cmd file prefix} ++			"C"
-P{Default job file suffix} ++			".xbj"
+P{Default job file suffix} ++			".gbj"
 P{Default cmd file suffix} ++			".sh"
 
 [
@@ -822,16 +822,16 @@ E{Bad dst adjustment} ++		"%P: Bad DST adjustment start time must precede end ti
 E{No perm for DST} ++			"%P: No permission for DST adjustment"
 
 E,H{Cannot set owner} ++
-"%P: Sorry but you need 'special create' permission to queue jobs
+"%P: Sorry but you need 'write admin' permission to queue jobs
 with different owners.",
 "You are trying to select a different owner, but you require
-""special create"" permission to do this."
+""write admin"" permission to do this."
 
 E,H{Cannot set group} ++
-"%P: Sorry but you need 'special create' permission to queue jobs
+"%P: Sorry but you need 'write admin' permission to queue jobs
 with different groups.",
 "You are trying to select a different group, but you require
-""special create"" permission to do this."
+""write admin"" permission to do this."
 
 E,H{Unknown owner} ++
 "%P: Unknown user `%s'",
@@ -5933,7 +5933,7 @@ E{btq explain} = 80
        -b -B put boxes/do not put boxes round help
        -m -M put boxes/do not put boxes round errors
        -l   display local jobs only
-       -n   display network wide jobs
+       -r   display network wide jobs
        -q p only display jobs with the prefix pattern p
        -z -Z include/suppress jobs with null queue name
        -u user -g group"

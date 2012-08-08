@@ -45,9 +45,11 @@
 
 #define	HDRLINES	5
 
+#define	HBUFSIZE	100
+
 jmp_buf	escj;
 
-int	ask(const int row, const char *quest, const int dflt)
+int  ask(const int row, const char *quest, const int dflt)
 {
 	move(row, 0);
 	clrtoeol();
@@ -73,7 +75,7 @@ int	ask(const int row, const char *quest, const int dflt)
 	}
 }
 
-unsigned	askn(const int row, const char *msg)
+unsigned askn(const int row, const char *msg)
 {
 	int		ch, starta;
 	unsigned	result;
@@ -125,7 +127,7 @@ unsigned	askn(const int row, const char *msg)
 	}
 }
 
-void	asktimeout(struct remote *rp, const int row)
+void  asktimeout(struct remote *rp, const int row)
 {
 	if  (ask(row, "Default timeout value OK", 1))
 		rp->ht_timeout = NETTICKLE;
@@ -133,16 +135,15 @@ void	asktimeout(struct remote *rp, const int row)
 		rp->ht_timeout = askn(row+2, "Timeout value");
 }
 
-enum IPatype  askhname(char *hnp, const int row, const char *htype, struct remote *rp)
+int	ask_hostname(char *buffer, const int buflen, const int row, const char *prompt)
 {
 	int	ch, starta, cnt;
 
-	mvprintw(row, 0, "%s: ", htype);
+	mvprintw(row, 0, "%s: ", prompt);
 	getyx(stdscr, ch, starta);
 	refresh();
 
 	cnt = 0;
-
 	for  (;;)  {
 
 		switch  ((ch = getch()))  {
@@ -167,9 +168,9 @@ enum IPatype  askhname(char *hnp, const int row, const char *htype, struct remot
 		case 'P':case 'Q':case 'R':case 'S':case 'T':
 		case 'U':case 'V':case 'W':case 'X':case 'Y':
 		case 'Z':
-			if  (cnt >= HOSTNSIZE)
+			if  (cnt >= buflen)
 				continue;
-			hnp[cnt++] = ch;
+			buffer[cnt++] = ch;
 			addch(ch);
 			refresh();
 			continue;
@@ -186,7 +187,7 @@ enum IPatype  askhname(char *hnp, const int row, const char *htype, struct remot
 		case  'h' & 0x1F:
 			if  (cnt > 0)  {
 				cnt--;
-				hnp[cnt] = '\0';
+				buffer[cnt] = '\0';
 				mvaddch(row, starta+cnt, ' ');
 				move(row, starta+cnt);
 				refresh();
@@ -198,185 +199,132 @@ enum IPatype  askhname(char *hnp, const int row, const char *htype, struct remot
 #endif
 		case  '\n':
 		case  '\r':
-			if  (cnt <= 0)  {
-				move(row-1, 0);
-				clrtoeol();
-				standout();
-				addstr("You must give some host name");
-				break;
-			}
-			hnp[cnt] = '\0';
-			if  (rp  &&  isdigit(hnp[0]))  {
-				netid_t	resip;
-#ifdef	DGAVIION
-				struct	in_addr	ina_str;
-				ina_str = inet_addr(hnp);
-				resip = ina_str.s_addr;
-#else
-				resip = inet_addr(hnp);
-#endif
-				if  (resip != -1L)  {
-					if  (ipclashes(resip))  {
-						move(row-1, 0);
-						clrtoeol();
-						standout();
-						printw("%s clashes with existing IP addr", hnp);
-						break;
-					}
-					rp->hostid = resip;
-					rp->ht_flags |= HT_HOSTISIP;
-					return  IPADDR_IP;
-				}
-				move(row-1, 0);
-				clrtoeol();
-				standout();
-				printw("%s is not a valid IP addr", hnp);
-				break;
-			}
-			else  {
-				struct	hostent	*hp;
-				if  (hnameclashes(hnp))  {
+			buffer[cnt] = '\0';
+			return  cnt;
+		}
+	}
+}
+
+/* Ask hostname and return address type */
+
+enum IPatype askhname(char *hnp, const int row, const char *htype, struct remote *rp)
+{
+	for  (;;)  {
+		int	strl = ask_hostname(hnp, HOSTNSIZE-1, row, htype);
+		struct	hostent  *hp;
+		char	*cp;
+
+		if  (strl <= 0)  {
+			move(row-1, 0);
+			clrtoeol();
+			standout();
+			addstr("You must give some host name");
+			standend();
+			continue;
+		}
+		if  (lookslikeip(hnp))  {
+			netid_t	resip = getdottedip(hnp);
+			if  (resip != 0)  {
+				if  (rp  &&  ipclashes(resip))  {
 					move(row-1, 0);
 					clrtoeol();
 					standout();
-					printw("%s clashes with existing name", hnp);
-					break;
+					printw("%s clashes with existing IP addr", hnp);
+					standend();
+					continue;
 				}
-				hp = gethostbyname(hnp);
-				if  (hp)  {
-					char	*cp;
-					if  ((cp = ipclashes(*(netid_t *) hp->h_addr)))  {
-						move(row-1, 0);
-						clrtoeol();
-						standout();
-						printw("IP addr for %s clashes with existing for %s", hnp, cp);
-						break;
-					}
-					if  (rp)
-						rp->hostid = *(netid_t *) hp->h_addr;
-					return  IPADDR_NAME;
-				}
-				move(row-1, 0);
-				clrtoeol();
-				standout();
-				printw("%s is not a valid host name", hnp);
-				break;
+				rp->hostid = resip;
+				rp->ht_flags |= HT_HOSTISIP;
+				return  IPADDR_IP;
 			}
+			move(row-1, 0);
+			clrtoeol();
+			standout();
+			printw("%s is not a valid IP addr", hnp);
+			standend();
+			continue;
 		}
-		standend();
-		move(row, starta+cnt);
-		refresh();
+		if  (rp  &&  hnameclashes(hnp))  {
+			move(row-1, 0);
+			clrtoeol();
+			standout();
+			printw("%s clashes with existing name", hnp);
+			standend();
+			continue;
+		}
+		hp = gethostbyname(hnp);
+		if  (!hp)  {
+			move(row-1, 0);
+			clrtoeol();
+			standout();
+			printw("%s is not a valid host name", hnp);
+			standend();
+			continue;
+		}
+		if  (rp  &&  (cp = ipclashes(*(netid_t *) hp->h_addr)))  {
+			move(row-1, 0);
+			clrtoeol();
+			standout();
+			printw("IP addr for %s clashes with existing for %s", hnp, cp);
+			standend();
+			continue;
+		}
+		if  (rp)
+			rp->hostid = *(netid_t *) hp->h_addr;
+		return  IPADDR_NAME;
 	}
 }
 
 /* Ask alias name, last arg true means treat as host name for name given as IP */
-void	askalias(struct	remote *rp, const int row, const int musthave)
+
+void  askalias(struct remote *rp, const int row, const int musthave)
 {
-	int	ch, starta, cnt;
 	char	*hnp;
+	char	prompt[80];
 
 	if  (musthave)  {
 		hnp = rp->hostname;
-		mvprintw(row, 0, "Please give a name for this machine: ");
+		sprintf(prompt, "Please give a name for this machine: ");
 	}
 	else  {
 		hnp = rp->alias;
-		mvprintw(row, 0, "Any alias for %s%s: ", rp->hostname, strlen(rp->hostname) > 8? " (probably a good idea)": "");
+		sprintf(prompt, "Any alias for %s%s: ", rp->hostname, strlen(rp->hostname) > 8? " (probably a good idea)": "");
 	}
 
-	getyx(stdscr, ch, starta);
-	refresh();
-
-	cnt = 0;
-
 	for  (;;)  {
+		int	strl = ask_hostname(hnp, HOSTNSIZE-1, row, prompt);
 
-		switch  ((ch = getch()))  {
-		default:
+		if  (strl <= 0)  {
+			if  (!musthave)
+				return;
+			move(row-1, 0);
+			clrtoeol();
+			standout();
+			addstr("You must give some name for this host");
+			standend();
 			continue;
-
-		case  '[' & 0x1F:
-			longjmp(escj, 1);
-
-		case  '.':case '-':case '_':
-		case '0':case '1':case '2':case '3':case '4':
-		case '5':case '6':case '7':case '8':case '9':
-		case 'a':case 'b':case 'c':case 'd':case 'e':
-		case 'f':case 'g':case 'h':case 'i':case 'j':
-		case 'k':case 'l':case 'm':case 'n':case 'o':
-		case 'p':case 'q':case 'r':case 's':case 't':
-		case 'u':case 'v':case 'w':case 'x':case 'y':
-		case 'z':
-		case 'A':case 'B':case 'C':case 'D':case 'E':
-		case 'F':case 'G':case 'H':case 'I':case 'J':
-		case 'K':case 'L':case 'M':case 'N':case 'O':
-		case 'P':case 'Q':case 'R':case 'S':case 'T':
-		case 'U':case 'V':case 'W':case 'X':case 'Y':
-		case 'Z':
-			if  (cnt >= HOSTNSIZE)
-				continue;
-			hnp[cnt++] = ch;
-			addch(ch);
-			refresh();
-			continue;
-
-#ifdef	KEY_LEFT
-		case  KEY_LEFT:
-#endif
-#ifdef	KEY_DC
-		case  KEY_DC:
-#endif
-#ifdef	KEY_BACKSPACE
-		case  KEY_BACKSPACE:
-#endif
-		case  'h' & 0x1F:
-			if  (cnt > 0)  {
-				cnt--;
-				hnp[cnt] = '\0';
-				mvaddch(row, starta+cnt, ' ');
-				move(row, starta+cnt);
-				refresh();
-			}
-			continue;
-
-#ifdef	KEY_ENTER
-		case  KEY_ENTER:
-#endif
-		case  '\n':
-		case  '\r':
-			hnp[cnt] = '\0';
-			if  (cnt <= 0)  {
-				if  (!musthave)
-					return;
-				move(row-1, 0);
-				clrtoeol();
-				standout();
-				addstr("You must give some name for this host");
-				break;
-			}
-			if  (isdigit(hnp[0]))  {
-				move(row-1, 0);
-				clrtoeol();
-				standout();
-				printw("%s is not a valid alias name", hnp);
-				break;
-			}
-			if  (hnameclashes(hnp))  {
-				move(row-1, 0);
-				clrtoeol();
-				standout();
-				printw("%s is already a host/alias name", hnp);
-				break;
-			}
-			return;
 		}
-		standend();
-		move(row, starta+cnt);
-		refresh();
+		if  (lookslikeip(hnp))  {
+			move(row-1, 0);
+			clrtoeol();
+			standout();
+			printw("%s is not a valid alias name", hnp);
+			standend();
+			continue;
+		}
+		if  (hnameclashes(hnp))  {
+			move(row-1, 0);
+			clrtoeol();
+			standout();
+			printw("%s is already a host/alias name", hnp);
+			standend();
+			continue;
+		}
+		return;
 	}
 }
 
-void	askuser(char *unam, const int row, const char *msg, const int validate, const int nonull)
+void  askuser(char *unam, const int row, const char *msg, const int validate, const int nonull)
 {
 	int	ch, starta, cnt;
 
@@ -469,7 +417,7 @@ void	askuser(char *unam, const int row, const char *msg, const int validate, con
 	}
 }
 
-void	proc_addunixhost()
+void  proc_addunixhost()
 {
 	struct	remote	resrp;
 
@@ -488,7 +436,7 @@ void	proc_addunixhost()
 	addhostentry(&resrp);
 }
 
-void	proc_addwinhost()
+void  proc_addwinhost()
 {
 	int	nxtrow;
 	struct	remote	resrp;
@@ -520,7 +468,7 @@ void	proc_addwinhost()
 	addhostentry(&resrp);
 }
 
-void	proc_addhost()
+void  proc_addhost()
 {
 	clear();
 	if  (ask(LINES/2, "Is new entry a Unix host(Y) or Client(N)", 1))
@@ -529,7 +477,7 @@ void	proc_addhost()
 		proc_addwinhost();
 }
 
-void	proc_chnghost(struct remote *rp)
+void  proc_chnghost(struct remote *rp)
 {
 	int	changes = 0, nxtline = 0;
 	struct	remote	resrp;
@@ -565,7 +513,7 @@ void	proc_chnghost(struct remote *rp)
 		}
 		else  {
 			if  (resrp.ht_flags & HT_HOSTISIP)
-				mvprintw(nxtline, 0, "Windows client %s named %s", phname(resrp.hostid, 0), resrp.hostname);
+				mvprintw(nxtline, 0, "Windows client %s named %s", phname(resrp.hostid, IPADDR_NAME), resrp.hostname);
 			else  {
 				mvprintw(nxtline, 0, "Windows client %s", resrp.hostname);
 				if  (resrp.alias[0])
@@ -612,7 +560,7 @@ void	proc_chnghost(struct remote *rp)
 	}
 	else  {
 		if  (resrp.ht_flags & HT_HOSTISIP)
-			mvprintw(nxtline, 0, "Unix host %s named %s", phname(resrp.hostid, 0), resrp.hostname);
+			mvprintw(nxtline, 0, "Unix host %s named %s", phname(resrp.hostid, IPADDR_NAME), resrp.hostname);
 		else  {
 			mvprintw(nxtline, 0, "Unix host %s", resrp.hostname);
 			if  (resrp.alias[0])
@@ -662,7 +610,7 @@ void	proc_chnghost(struct remote *rp)
 		*rp = resrp;
 }
 
-void	proc_locaddr()
+void  proc_locaddr()
 {
 	int	nxtline = LINES / 3;
 
@@ -688,7 +636,106 @@ void	proc_locaddr()
 	}
 }
 
-void	proc_defuser()
+const  short  ports[] = { 22, 23, 25, 80, 515, 2000, 2200 };
+
+int  proc_locfromhost(const int line, struct remote *rp)
+{
+	int	pn, sockfd, portnum;
+	netid_t	servip = rp->hostid, cliip = 0;
+
+	if  (rp->ht_flags & HT_DOS)
+		return  0;
+	sockfd = socket(PF_INET, SOCK_STREAM, IPPROTO_TCP);
+	for  (pn = 0;  cliip ==  0  &&  pn < sizeof(ports)/sizeof(short);  pn++)
+		cliip = gsn_getloc(sockfd, servip, portnum = ports[pn]);
+	close(sockfd);
+	if  (cliip == 0)
+		return  0;
+	myhostid = cliip;
+	if  (ask(line, "Always get host that way", 1))  {
+		gsnid = servip;
+		if  (rp->ht_flags & HT_HOSTISIP)
+			hadlocaddr = IPADDR_GSN_IP;
+		else  {
+			hadlocaddr = IPADDR_GSN_NAME;
+			strncpy(gsnname, rp->hostname, HOSTNSIZE);
+		}
+		gsnport = portnum;
+	}
+	else
+		hadlocaddr = IPADDR_IP;
+	return  1;
+}
+
+int  proc_locfromweb(const int line)
+{
+	const	char	*hname;
+	char	hbuf[HBUFSIZE];
+	struct  hostent  *hp;
+	int	sockfd, isip = 0;
+	netid_t	servip, cliip;
+
+	for(;;)  {
+		if  (ask(line, "Use Google", 0))
+			hname = "www.google.com";
+		else  {
+			move(line, 0);
+			clrtoeol();
+			if  (ask_hostname(hbuf, HBUFSIZE-1, line, "Host to use") <= 0)
+				return  0;
+			hname = hbuf;
+			if  (lookslikeip(hbuf))  {
+				servip = getdottedip(hbuf);
+				if  (servip == 0)  {
+					move(line, 0);
+					clrtoeol();
+					standout();
+					printw("%s is not a valid IP address");
+					standend();
+					getch();
+					continue;
+				}
+				isip = 1;
+				break;
+			}
+		}
+		if  (!isip)  {
+			if  ((hp = gethostbyname(hname)))  {
+				servip = *(netid_t *) hp->h_addr;
+				break;
+			}
+			move(line, 0);
+			clrtoeol();
+			standout();
+			printw("%s is not a valid host", hname);
+			standend();
+			refresh();
+			getch();
+		}
+	}
+
+	sockfd = socket(PF_INET, SOCK_STREAM, IPPROTO_TCP);
+	cliip = gsn_getloc(sockfd, servip, 80);
+	close(sockfd);
+	if  (cliip == 0)
+		return  0;
+	myhostid = cliip;
+	if  (ask(line, "Always get host that way", 1))  {
+		gsnid = servip;
+		if  (isip)
+			hadlocaddr = IPADDR_GSN_IP;
+		else  {
+			strncpy(gsnname, hname, HOSTNSIZE);
+			hadlocaddr = IPADDR_GSN_NAME;
+		}
+		gsnport = 80;
+	}
+	else
+		hadlocaddr = IPADDR_IP;
+	return  1;
+}
+
+void  proc_defuser()
 {
 	int	nxtline = LINES / 3;
 
@@ -705,7 +752,7 @@ void	proc_defuser()
 	}
 }
 
-void	enhancep(const char *str)
+void  enhancep(const char * str)
 {
 	while  (*str)  {
 		if  (*str == '&')  {
@@ -729,7 +776,7 @@ void	enhancep(const char *str)
 	}
 }
 
-void	disp_hostlist(const int startrow)
+void  disp_hostlist(const int startrow)
 {
 	int	cnt, row;
 
@@ -744,14 +791,20 @@ void	disp_hostlist(const int startrow)
 	mvprintw(2, USER_P, "User");
 	mvprintw(2, DMCH_P, "Dft mc");
 
-	if  (hadlocaddr != NO_IPADDR)  {
-		mvprintw(3, HOST_P, "Local Address:");
-		if  (hadlocaddr == IPADDR_NAME)
-			printw("%s", phname(myhostid, IPADDR_NAME));
+	mvprintw(3, HOST_P, "Local Address:");
+	switch  (hadlocaddr)  {
+	default:
+		printw("%s", phname(myhostid, hadlocaddr));
+		break;
+	case  IPADDR_GSN_NAME:
+		printw("Get from %s port %d", gsnname, gsnport);
+		break;
+	case  IPADDR_GSN_IP:
+		printw("Get from %s port %d", phname(gsnid, IPADDR_IP), gsnport);
+		break;
 	}
-	else
-		mvprintw(3, HOST_P, "Current: %s", phname(myhostid, IPADDR_NAME));
-	mvprintw(3, IPADDR_P, phname(myhostid, IPADDR_IP));
+	printw(" Current: %s", phname(myhostid, IPADDR_IP));
+
 	if  (defcluser[0])
 		mvprintw(4, HOST_P, "Default client user: %s", defcluser);
 
@@ -768,14 +821,14 @@ void	disp_hostlist(const int startrow)
 			}
 			else  {
 				if  (rp->ht_flags & HT_HOSTISIP)  {
-					mvprintw(row, HOST_P, "%s", phname(rp->hostid, 1));
+					mvprintw(row, HOST_P, "%s", phname(rp->hostid, IPADDR_IP));
 					mvprintw(row, ALIAS_P, "%s", rp->hostname);
 				}
 				else  {
 					mvprintw(row, HOST_P, "%s", rp->hostname);
 					if  (rp->alias[0])
 						mvprintw(row, ALIAS_P, rp->alias);
-					mvprintw(row, IPADDR_P, "%s", phname(rp->hostid, 1));
+					mvprintw(row, IPADDR_P, "%s", phname(rp->hostid, IPADDR_IP));
 				}
 				mvprintw(row, TYPE_P, "Client");
 				if  (rp->dosuser[0])
@@ -786,14 +839,14 @@ void	disp_hostlist(const int startrow)
 		}
 		else  {
 			if  (rp->ht_flags & HT_HOSTISIP)  {
-				mvprintw(row, HOST_P, "%s", phname(rp->hostid, 1));
+				mvprintw(row, HOST_P, "%s", phname(rp->hostid, IPADDR_IP));
 				mvprintw(row, ALIAS_P, "%s", rp->hostname);
 			}
 			else  {
 				mvprintw(row, HOST_P, "%s", rp->hostname);
 				if  (rp->alias[0])
 					mvprintw(row, ALIAS_P, rp->alias);
-				mvprintw(row, IPADDR_P, "%s", phname(rp->hostid, 1));
+				mvprintw(row, IPADDR_P, "%s", phname(rp->hostid, IPADDR_IP));
 			}
 
 			if  (rp->ht_flags & HT_PROBEFIRST)
@@ -808,7 +861,27 @@ void	disp_hostlist(const int startrow)
 	}
 }
 
-void	proc_hostfile()
+void  disphelp()
+{
+        int  i, j;
+        WINDOW  *w = newwin(7, 32, 0, 0);
+
+        wstandout(w);
+        for (i = 0;  i < 7;  i++)
+                for (j = 0;  j < 32;  j++)
+                        mvwaddch(w, i, j, ' ');
+        mvwprintw(w, 0, 0, "a - add host");
+        mvwprintw(w, 1, 0, "c - change host");
+        mvwprintw(w, 2, 0, "d - delete host");
+        mvwprintw(w, 3, 0, "l - set local adddress");
+        mvwprintw(w, 4, 0, "L - set local address from host");
+        mvwprintw(w, 5, 0, "w - set local address from web");
+        mvwprintw(w, 6, 0, "u - set default user");
+        wrefresh(w);
+        delwin(w);
+}
+
+void  proc_hostfile()
 {
 	int	topline, currline;
 
@@ -833,6 +906,13 @@ void	proc_hostfile()
 		switch  ((ch = getch()))  {
 		default:
 			break;
+
+                case '?':
+                case KEY_F(1):
+                        disphelp();
+                        wrefresh(stdscr);
+                        continue;
+
 		case  'q':
 			clear();
 			refresh();
@@ -926,6 +1006,18 @@ void	proc_hostfile()
 		case  'l':
 			proc_locaddr();
 			goto  refill;
+
+		case  'L':
+			if  (hostnum <= 0)
+				continue;
+			if  (proc_locfromhost(currline-topline+HDRLINES, &hostlist[currline]))
+				goto  refill;
+			continue;
+
+                case  'w':
+                        if  (proc_locfromweb(currline-topline+HDRLINES))
+                                goto  refill;
+                        continue;
 
 		case  'u':
 			proc_defuser();

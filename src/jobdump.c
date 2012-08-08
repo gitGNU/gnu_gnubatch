@@ -151,12 +151,18 @@ void  dumpjob(BtjobRef jp)
 	seteuid(Realuid);
 	if  (chdir(Dirname) < 0)
 		exit(E_JDNOCHDIR);
+	oldumask = umask(0);
 	if  ((xfl = fopen(Xfile, "w")) == (FILE *) 0)
 		exit(E_JDFNOCR);
-	oldumask = umask(0);
 	if  ((jfl = fopen(Jfile, "w")) == (FILE *) 0)
 		exit(E_JDFNOCR);
-	chmod(Xfile, (int) (0777 &~oldumask));
+#ifdef	HAVE_FCHMOD
+	Ignored_error = fchmod(fileno(xfl), (int) (0777 & ~oldumask));
+	Ignored_error = fchmod(fileno(jfl), (int) (0666 & ~oldumask));
+#else
+	Ignored_error = chmod(Xfile, (int) (0777 & ~oldumask));
+	Ignored_error = chmod(Jfile, (int) (0666 & ~oldumask));
+#endif
 	seteuid(Daemuid);
 #else  /* !HAVE_SETEUID */
 #ifdef	ID_SWAP
@@ -168,30 +174,42 @@ void  dumpjob(BtjobRef jp)
 		setuid(Realuid);
 		if  (chdir(Dirname) < 0)
 			exit(E_JDNOCHDIR);
+		oldumask = umask(0);
 		if  ((xfl = fopen(Xfile, "w")) == (FILE *) 0)
 			exit(E_JDFNOCR);
-		oldumask = umask(0);
 		if  ((jfl = fopen(Jfile, "w")) == (FILE *) 0)
 			exit(E_JDFNOCR);
-		chmod(Xfile, (int) (0777 &~oldumask));
+#ifdef	HAVE_FCHMOD
+		Ignored_error = fchmod(fileno(xfl), (int) (0777 & ~oldumask));
+		Ignored_error = fchmod(fileno(jfl), (int) (0666 & ~oldumask));
+#else
+		Ignored_error = chmod(Xfile, (int) (0777 & ~oldumask));
+		Ignored_error = chmod(Jfile, (int) (0666 & ~oldumask));
+#endif
 		setuid(Daemuid);
 	}
 	else  {
 #endif	/* ID_SWAP */
 		if  (chdir(Dirname) < 0)
 			exit(E_JDNOCHDIR);
+		oldumask = umask(0);
 		if  ((xfl = fopen(Xfile, "w")) == (FILE *) 0)
 			exit(E_JDFNOCR);
-		oldumask = umask(0);
 		if  ((jfl = fopen(Jfile, "w")) == (FILE *) 0)
 			exit(E_JDFNOCR);
-		chmod(Xfile, (int) (0777 &~oldumask));
-#if	defined(HAVE_FCHOWN) && !defined(M88000)
-		fchown(fileno(xfl), Realuid, Realgid);
-		fchown(fileno(jfl), Realuid, Realgid);
+#ifdef	HAVE_FCHMOD
+		Ignored_error = fchmod(fileno(xfl), (int) (0777 & ~oldumask));
+		Ignored_error = fchmod(fileno(jfl), (int) (0666 & ~oldumask));
 #else
-		chown(Xfile, Realuid, Realgid);
-		chown(Jfile, Realuid, Realgid);
+		Ignored_error = chmod(Xfile, (int) (0777 & ~oldumask));
+		Ignored_error = chmod(Jfile, (int) (0666 & ~oldumask));
+#endif
+#if	defined(HAVE_FCHOWN) && !defined(M88000)
+		Ignored_error = fchown(fileno(xfl), Realuid, Realgid);
+		Ignored_error = fchown(fileno(jfl), Realuid, Realgid);
+#else
+		Ignored_error = chown(Xfile, Realuid, Realgid);
+		Ignored_error = chown(Jfile, Realuid, Realgid);
 #endif
 #ifdef	ID_SWAP
 	}

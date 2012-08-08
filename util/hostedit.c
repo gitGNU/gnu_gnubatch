@@ -25,6 +25,38 @@
 #include "networkincl.h"
 #include "remote.h"
 #include "hostedit.h"
+#include "src/hdrs/files.h"
+
+static	char	*gethostfile()
+{
+	const	char	*hf = HOSTFILE, *cp;
+	char  *res, *rp;
+
+	/* Cheat by assuming it's either a full file name or ${HOSTFILE-/file/name} */
+
+	if  (hf[0] == '$'  &&  (res = getenv("HOSTFILE")))
+		return  res;
+
+	cp = hf;
+	while  (*cp  &&  *cp != '-')
+		cp++;
+
+	if  (!*cp)  {
+		fprintf(stderr, "Could not understand hostfile format %s\n", hf);
+		exit(50);
+	}
+	res = malloc(strlen(cp));	/* Should be at least 1 too much */
+	if  (!res)  {
+		fprintf(stderr, "Run out of memory\n");
+		exit(51);
+	}
+	rp = res;
+	cp++;
+	while  (*cp  &&  *cp != '}')
+		*rp++ = *cp++;
+	*rp = '\0';
+	return  res;
+}
 
 int	main(int argc, char **argv)
 {
@@ -77,6 +109,11 @@ int	main(int argc, char **argv)
 			return  2;
 		}
 	}
+
+	/* If it's an @ sign, substitute the system file name */
+
+	if  (strcmp(inf, "@") == 0)
+		inf = gethostfile();
 
 	load_hostfile(inf);
 	if  (hostf_errors)  {

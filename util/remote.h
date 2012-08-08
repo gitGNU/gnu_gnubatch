@@ -18,7 +18,7 @@
 struct	remote	{
 	/* NB we assume in various places that HOSTNSIZE > UIDSIZE */
 	char	hostname[HOSTNSIZE];	/* Actual host name (alternatively user name) */
-	char	alias[HOSTNSIZE];	/* Alias for within Xi-Text */
+	char	alias[HOSTNSIZE];	/* Alias for within software */
 #if	HOSTNSIZE > UIDSIZE
 	char	dosuser[HOSTNSIZE+1];
 #else

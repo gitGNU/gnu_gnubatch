@@ -190,11 +190,14 @@ DEOPTION(o_catchup);
 
 OPTION(o_owner)
 {
+#ifdef	INCLUDE_LOAD_CHOWNS
 	int_ugid_t	nuid;
+#endif
 
 	if  (!arg)
 		return  OPTRESULT_MISSARG;
 
+#ifdef	INCLUDE_LOAD_CHOWNS
 	Anychanges |= OF_ANY_DOING_SOMETHING;
 	Procparchanges |= OF_OWNER_CHANGE;
 
@@ -207,17 +210,20 @@ OPTION(o_owner)
 		return  OPTRESULT_ERROR;
 	}
 	cjob->userid = nuid;
-
+#endif
 	return  OPTRESULT_ARG_OK;
 }
 
 OPTION(o_group)
 {
+#ifdef	INCLUDE_LOAD_CHOWNS
 	int_ugid_t	ngid;
+#endif
 
 	if  (!arg)
 		return  OPTRESULT_MISSARG;
 
+#ifdef	INCLUDE_LOAD_CHOWNS
 	Anychanges |= OF_ANY_DOING_SOMETHING;
 	Procparchanges |= OF_GROUP_CHANGE;
 
@@ -230,6 +236,7 @@ OPTION(o_group)
 		return  OPTRESULT_ERROR;
 	}
 	cjob->grpid = ngid;
+#endif
 	return  OPTRESULT_ARG_OK;
 }
 

@@ -16,8 +16,11 @@
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
 enum  Stype { SORT_NONE, SORT_HNAME, SORT_IP };
-enum  IPatype { NO_IPADDR, IPADDR_IP, IPADDR_NAME };
+enum  IPatype { NO_IPADDR, IPADDR_IP, IPADDR_NAME, IPADDR_GSN_NAME, IPADDR_GSN_IP };
 
+extern	int	lookslikeip(const char *);
+extern	netid_t	getdottedip(const char *);
+extern	netid_t gsn_getloc(const int, netid_t, const int);
 extern void end_hostfile();
 extern void proc_hostfile();
 extern void load_hostfile(const char *);
@@ -32,7 +35,9 @@ extern  char	*ipclashes(const netid_t);
 extern	struct	remote	*hostlist;
 extern	int	hostnum, hostmax;
 extern	char	defcluser[];
-extern	netid_t	myhostid;
+extern	char	gsnname[];
+extern	int	gsnport;
+extern	netid_t	myhostid, gsnid;
 extern	char	hostf_errors;
 
 #define	INITHOSTS	20

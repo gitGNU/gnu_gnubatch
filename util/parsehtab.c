@@ -28,10 +28,11 @@
 #include "hostedit.h"
 
 struct	remote	*hostlist;
-int	hostnum, hostmax;
-netid_t	myhostid;
-enum	IPatype  hadlocaddr = NO_IPADDR;
+int	hostnum, hostmax, gsnport;
+netid_t	myhostid, gsnid;
+enum  IPatype  hadlocaddr = NO_IPADDR;
 char	defcluser[UIDSIZE+1];
+char	gsnname[HOSTNSIZE+1];
 
 /* Maximum number of bits we are prepared to parse the host file into.  */
 
@@ -51,7 +52,7 @@ void  memory_out()
 	exit(255);
 }
 
-int	ncstrcmp(const char *a, const char *b)
+int ncstrcmp(const char *a, const char *b)
 {
 	int	ac, bc;
 
@@ -65,7 +66,7 @@ int	ncstrcmp(const char *a, const char *b)
 	}
 }
 
-int	ncstrncmp(const char *a, const char *b, int n)
+int  ncstrncmp(const char *a, const char *b, int n)
 {
 	int	ac, bc;
 
@@ -88,7 +89,7 @@ int	ncstrncmp(const char *a, const char *b, int n)
    Ignore bits after MAXPARSE-1
    Assume string is manglable */
 
-static	int  spliton(char **result, char *string, const char *delims)
+static int spliton(char **result, char *string, const char *delims)
 {
 	int	parsecnt = 1;
 	int	resc = 1;
@@ -98,7 +99,7 @@ static	int  spliton(char **result, char *string, const char *delims)
 	result[0] = string;
 	while  ((string = strpbrk(string, delims)))  {
 		*string++ = '\0';
-		while  (strchr(delims, *string))
+		while  (*string  &&  strchr(delims, *string))
 			string++;
 		if  (!*string)
 			break;
@@ -112,7 +113,66 @@ static	int  spliton(char **result, char *string, const char *delims)
 	return  resc;
 }
 
-char *shortestalias(const struct hostent *hp)
+/* Look at string to see if it's an IP address or looks like one as just the
+   first digit doesn't work some host names start with that */
+
+int  lookslikeip(const char *addr)
+{
+	int	dcount = 0, dotcount = 0;
+
+	/* Maximum number of chars is 4 lots of 3 digits = 12 + 3 dots
+	   total 15 */
+
+	while  (*addr)  {
+		if  (dcount >= 15)
+			return  0;
+		if  (!isdigit(*addr))  {
+			if  (*addr != '.')
+				return  0;
+			dotcount++;
+		}
+		addr++;
+		dcount++;
+	}
+	if  (dotcount != 3)
+		return  0;
+	return  1;
+}
+
+/* Get a.b.c.d type IP - trying to future proof */
+
+netid_t  getdottedip(const char *addr)
+{
+	struct	in_addr	ina_str;
+#ifdef	DGAVIION
+	netid_t	res;
+	ina_str = inet_addr(addr);
+	res = ina_str.s_addr;
+	return  res != -1? res: 0;
+#else
+	if  (inet_aton(addr, &ina_str) == 0)
+		return  0;
+	return  ina_str.s_addr;
+#endif
+}
+
+netid_t  gsn_getloc(const int sockfd, netid_t servip, const int port)
+{
+	struct	sockaddr_in  sin, sout;
+	int	soutl = sizeof(sout);
+
+	BLOCK_ZERO(&sin, sizeof(sin));
+	sin.sin_family = AF_INET;
+	sin.sin_port = htons(port);
+	sin.sin_addr.s_addr = servip;
+	if  (connect(sockfd, (struct sockaddr *) &sin, sizeof(sin)) < 0)
+		return  0;
+	if  (getsockname(sockfd, (struct sockaddr *) &sout, &soutl) < 0)
+		return  0;
+	return  sout.sin_addr.s_addr;
+}
+
+char	*shortestalias(const struct hostent *hp)
 {
 	char	**ap, *which = (char *) 0;
 	int	minlen = 1000, ln;
@@ -125,6 +185,83 @@ char *shortestalias(const struct hostent *hp)
 	if  (minlen < (int) strlen(hp->h_name))
 		return  which;
 	return  (char *) 0;
+}
+
+/* Get local address for "me". As well as an IP, we recognise the form
+   GSN(host,port) to use "getsockname" on a connection to the port. */
+
+static void  get_local_address(char *la)
+{
+	struct  hostent  *hp;
+
+	/* Case where we want to use getsockname */
+
+	if  (ncstrncmp(la, "gsn(", 4) == 0)  {
+		char	*bits[MAXPARSE];
+		netid_t	servip, cliip;
+		int	portnum, sockfd;
+
+		if  (spliton(bits, la+4, ",)") != 2)  {
+			hostf_errors = 1;
+			return;
+		}
+		if  (lookslikeip(bits[0]))  {
+			servip = getdottedip(bits[0]);
+			if  (servip == 0)  {
+				fprintf(stderr, "Invalid IP %s in local address getsockname\n", bits[0]);
+				hostf_errors = 1;
+				return;
+			}
+			hadlocaddr = IPADDR_GSN_IP;
+		}
+		else  {
+			if  (!(hp = gethostbyname(bits[0])))  {
+				fprintf(stderr, "Invalid host name %s in local address getsockname\n", bits[0]);
+				hostf_errors = 1;
+				return;
+			}
+			servip = * (netid_t *) hp->h_addr;
+			hadlocaddr = IPADDR_GSN_NAME;
+		}
+
+		portnum = atoi(bits[1]);
+		if  (portnum <= 0)  {
+			fprintf(stderr, "Invalid port number %s in local address getsockname\n", bits[1]);
+			hostf_errors = 1;
+			return;
+		}
+
+		strncpy(gsnname, bits[0], HOSTNSIZE);
+		gsnid = servip;
+		gsnport = portnum;
+		sockfd = socket(PF_INET, SOCK_STREAM, IPPROTO_TCP);
+		cliip = gsn_getloc(sockfd, gsnid, gsnport);
+		if  (cliip == 0)  {
+			fprintf(stderr, "Cannot currently fetch IP address via %s:%d\n", gsnname, gsnport);
+			hostf_errors = 1;
+		}
+		else
+			myhostid = cliip;
+	}
+	else  if  (lookslikeip(la))  {
+		netid_t  result = getdottedip(la);
+		if  (result == 0)  {
+			fprintf(stderr, "Invalid IP address %s in local address\n", la);
+			hostf_errors = 1;
+			return;
+		}
+		hadlocaddr = IPADDR_IP;
+		myhostid = result;
+	}
+	else  if  (!(hp = gethostbyname(la)))  {
+		fprintf(stderr, "Unknown host name %s in local address\n", la);
+		hostf_errors = 1;
+		return;
+	}
+	else  {
+		hadlocaddr = IPADDR_NAME;
+		myhostid = * (netid_t *) hp->h_addr;
+	}
 }
 
 /* Provide interface like gethostent to the /etc/Xitext-hosts file.
@@ -146,7 +283,7 @@ const	char	locaddr[] = "localaddress",
 
 static	FILE	*hfile;
 
-void	end_hostfile()
+void  end_hostfile()
 {
 	if  (hfile  &&  hfile != stdin)  {
 		fclose(hfile);
@@ -248,32 +385,11 @@ struct	remote *get_hostfile(const char *fname)
 					continue;
 				}
 
-				if  (isdigit(bits[HOSTF_ALIAS][0]))  {
-#ifdef	DGAVIION
-					struct	in_addr	ina_str;
-					ina_str = inet_addr(bits[HOSTF_ALIAS]);
-					myhostid = ina_str.s_addr;
-#else
-					myhostid = inet_addr(bits[HOSTF_ALIAS]);
-#endif
-					hadlocaddr = IPADDR_IP;
-				}
-				else  if  (!(hp = gethostbyname(bits[HOSTF_ALIAS])))  {
-					if  (myhostid == 0L)  {
-						hostf_errors = 1;
-						fprintf(stderr, "Unknown host name %s\n", bits[HOSTF_ALIAS]);
-						continue;
-					}
-				}
-				else  {
-					myhostid = * (netid_t *) hp->h_addr;
-					hadlocaddr = IPADDR_NAME;
-				}
+				get_local_address(bits[HOSTF_ALIAS]);
 				continue;
 			}
 
-			/* Alias name of - means no alias
-			   This applies to users as well. */
+			/* Alias name of - means no alias This applies to users as well. */
 
 			if  (strcmp(bits[HOSTF_ALIAS], "-") == 0)
 				bits[HOSTF_ALIAS] = (char *) 0;
@@ -398,27 +514,19 @@ struct	remote *get_hostfile(const char *fname)
 					hostresult.alias[0] = '\0';
 				hostresult.hostid = 0;
 			}
-			else  if  (isdigit(*hostp))  {
+			else  if  (lookslikeip(hostp))  {
 
-				/* Insist on alias name if given as internet address
-				   DG Aviions seem to use different inet_addr's to the rest of the universe. */
+				/* Insist on alias name if given as internet address */
 
-				netid_t  ina;
-#ifdef	DGAVIION
-				struct	in_addr	ina_str;
-#endif
+				netid_t  ina = getdottedip(hostp);
+
 				if  (!bits[HOSTF_ALIAS])  {
 					hostf_errors = 1;
-					fprintf(stderr, "No alias field for host IP given as address %s\n", hostp);
+					fprintf(stderr, "No alias name given with IP address %s\n", hostp);
 					continue;
 				}
-#ifdef	DGAVIION
-				ina_str = inet_addr(hostp);
-				ina = ina_str.s_addr;
-#else
-				ina = inet_addr(hostp);
-#endif
-				if  (ina == -1L || ina == myhostid)  {
+
+				if  (ina == 0 || ina == myhostid)  {
 					hostf_errors = 1;
 					fprintf(stderr, "Invalid/duplicated IP address %s in host file\n", hostp);
 					continue;
@@ -509,8 +617,22 @@ void  dump_hostfile(FILE *outf)
 		tp->tm_mday, tp->tm_mon+1, tp->tm_year%100,
 		tp->tm_hour, tp->tm_min, tp->tm_sec);
 
-	if  (hadlocaddr != NO_IPADDR)
-		fprintf(outf, "%s\t%s\n\n", locaddr, phname(myhostid, hadlocaddr));
+	if  (hadlocaddr != NO_IPADDR)  {
+		fprintf(outf, "%s\t", locaddr);
+		switch  (hadlocaddr)  {
+		default:
+		case  IPADDR_NAME:
+		case  IPADDR_IP:
+			fprintf(outf, "%s\n\n", phname(myhostid, hadlocaddr));
+			break;
+		case  IPADDR_GSN_NAME:
+			fprintf(outf, "GSN(%s,%d)\n\n", gsnname, gsnport);
+			break;
+		case  IPADDR_GSN_IP:
+			fprintf(outf, "GSN(%s,%d)\n\n", phname(gsnid, IPADDR_IP), gsnport);
+			break;
+		}
+	}
 
 	for  (cnt = 0;  cnt < hostnum;  cnt++)  {
 		struct	remote	*hlp = &hostlist[cnt];
