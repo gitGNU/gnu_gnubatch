@@ -17,29 +17,29 @@
 
 JFORMAT(fmt_time)
 {
-	if  (isreadable  &&  jp->h.bj_times.tc_istime != 0)  {
-		time_t	w = jp->h.bj_times.tc_nexttime;
-		time_t	now = time((time_t *) 0);
-		struct	tm  *t = localtime(&w);
-		int	t1 = t->tm_hour, t2 = t->tm_min;
-		int	sep = ':';
+        if  (isreadable  &&  jp->h.bj_times.tc_istime != 0)  {
+                time_t  w = jp->h.bj_times.tc_nexttime;
+                time_t  now = time((time_t *) 0);
+                struct  tm  *t = localtime(&w);
+                int     t1 = t->tm_hour, t2 = t->tm_min;
+                int     sep = ':';
 
-		if  (w < now || w - now > 24 * 60 * 60)  {
-			t1 = t->tm_mday;
-			t2 = t->tm_mon+1;
-#ifdef	HAVE_TM_ZONE
-			if  (t->tm_gmtoff <= -4 * 60 * 60)
+                if  (w < now || w - now > 24 * 60 * 60)  {
+                        t1 = t->tm_mday;
+                        t2 = t->tm_mon+1;
+#ifdef  HAVE_TM_ZONE
+                        if  (t->tm_gmtoff <= -4 * 60 * 60)
 #else
-			if  (timezone >= 4 * 60 * 60)
+                        if  (timezone >= 4 * 60 * 60)
 #endif
-			{
-				t1 = t2;
-				t2 = t->tm_mday;
-			}
-			sep = '/';
-		}
-		sprintf(bigbuff, "%.2d%c%.2d", t1, sep, t2);
-		return  5;
-	}
-	return  0;
+                        {
+                                t1 = t2;
+                                t2 = t->tm_mday;
+                        }
+                        sep = '/';
+                }
+                sprintf(bigbuff, "%.2d%c%.2d", t1, sep, t2);
+                return  5;
+        }
+        return  0;
 }

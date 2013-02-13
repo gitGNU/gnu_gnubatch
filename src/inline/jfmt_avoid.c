@@ -17,18 +17,18 @@
 
 JFORMAT(fmt_avoid)
 {
-	fmt_t  lng = 0;
+        fmt_t  lng = 0;
 
-	if  (isreadable  &&  jp->h.bj_times.tc_istime != 0)  {
-		int	nd, had = 0;
-		for  (nd = 0;  nd < TC_NDAYS;  nd++)  {
-			if  (jp->h.bj_times.tc_nvaldays & (1 << nd))  {
-				if  (had)
-					bigbuff[lng++] = ',';
-				had++;
-				lng += strlen(strcpy(&bigbuff[lng], disp_alt(nd, days_abbrev)));
-			}
-		}
-	}
-	return  lng;
+        if  (isreadable  &&  jp->h.bj_times.tc_istime != 0)  {
+                int     nd, had = 0;
+                for  (nd = 0;  nd < TC_NDAYS;  nd++)  {
+                        if  (jp->h.bj_times.tc_nvaldays & (1 << nd))  {
+                                if  (had)
+                                        bigbuff[lng++] = ',';
+                                had++;
+                                lng += strlen(strcpy(&bigbuff[lng], disp_alt(nd, days_abbrev)));
+                        }
+                }
+        }
+        return  lng;
 }

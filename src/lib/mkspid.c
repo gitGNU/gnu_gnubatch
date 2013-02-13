@@ -19,10 +19,10 @@
 #include <stdio.h>
 #include "defaults.h"
 
-static	char	result[20];
+static  char    result[20];
 
 char *mkspid(const char *nam, const jobno_t jnum)
 {
-	sprintf(result, "%s%.8lu", nam, (unsigned long) jnum);
-	return	result;
+        sprintf(result, "%s%.8lu", nam, (unsigned long) jnum);
+        return  result;
 }

@@ -1,18 +1,18 @@
 #
-#   Copyright 2009 Free Software Foundation, Inc.
+#   Copyright 2009 Free	Software Foundation, Inc.
 #
-#  This program is free software: you can redistribute it and/or modify
-#  it under the terms of the GNU General Public License as published by
-#  the Free Software Foundation, either version 3 of the License, or
-#  (at your option) any later version.
+#  This	program	is free	software: you can redistribute it and/or modify
+#  it under the	terms of the GNU General Public	License	as published by
+#  the Free Software Foundation, either	version	3 of the License, or
+#  (at your option) any	later version.
 #
-#  This program is distributed in the hope that it will be useful,
+#  This	program	is distributed in the hope that	it will	be useful,
 #  but WITHOUT ANY WARRANTY; without even the implied warranty of
-#  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.	 See the
 #  GNU General Public License for more details.
 #
-#   You should have received a copy of the GNU General Public License
-#  along with this program.  If not, see <http://www.gnu.org/licenses/>.
+#   You	should have received a copy of the GNU General Public License
+#  along with this program.  If	not, see <http://www.gnu.org/licenses/>.
 #
 # ----------------------------------------------------------------------
 #		Makefile for main library
@@ -23,11 +23,11 @@ SHELL		=	/bin/sh
 prefix		=	@prefix@
 exec_prefix	=	@exec_prefix@
 AR		=	ar
-CC		=	libtool --mode=compile @CC@
+CC		=	libtool	--mode=compile @CC@
 PARENT		=	..
 BASE		=	../..
 HDRS		=	$(PARENT)/hdrs
-CCFLAGS		=	-O @gcc_useful_options@ @funny_compiler_options@
+CCFLAGS		=	-O @gcc_useful_options@	@funny_compiler_options@
 CFLAGS		=	$(CCFLAGS) -I$(HDRS) -I$(BASE)
 LIBDIR		=	$(DESTDIR)@libdir@
 RPATH		=	@libdir@
@@ -41,30 +41,30 @@ INSTALL_DATA	=	@INSTALL_DATA@
 
 OBJECTS=advtime.o	altlen.o	calchash.o	condname.o \
 	disp_alt.o	disperror.o	envgetserv.o	envprocess.o \
-	getbtuser.o	helpprmpt.o	helprdalt.o 	helprdn.o \
+	getbtuser.o	helpprmpt.o	helprdalt.o	helprdn.o \
 	help_readl.o	helpvec.o	look_host.o	mkspid.o \
 	mmangle.o	mpermitted.o	ncstrncmp.o	net_feed.o \
 	open_ci.o	op_icf.o	packjstring.o	prin_gname.o \
 	prin_uname.o	qmatch.o	runpwd.o	spath.o	\
 	stracpy.o	stringsch.o	strread.o	versionprint.o
 
-# libgnubatch_client is for client programs
+# libgnubatch_client is	for client programs
 
 CLIENTOBJS=\
 	cgifndjb.o	cgiuser.o	cgiutil.o	chkfuture.o \
 	doenv.o		doopts.o	dumpargs.o	dumpconds.o \
-	dumpcon.o	dumpecrun.o	dumpemode.o 	dumpmode.o \
+	dumpcon.o	dumpecrun.o	dumpemode.o	dumpmode.o \
 	dumpnstr.o	dumpredirs.o	dumpstr.o	dumptime.o \
 	getxbuf.o	gprompt.o	helpnstate.o	helpargs.o \
 	htmllib.o	lookup_alt.o	makeovec.o	makevec.o \
 	open_cfile.o	optdisp.o	optpparm.o	optprocess.o \
-	opttime.o	optvars.o	produser.o 	rdoptfile.o \
+	opttime.o	optvars.o	produser.o	rdoptfile.o \
 	readreply.o	repmnthfix.o	rjfile.o	rvfile.o \
 	saveopts.o	shutilmsg.o	spitbtrstr.o	spit_cond.o \
 	spit_msg.o	spit_pparm.o	spit_redir.o	spit_time.o \
 	stringvec.o
 
-# libgnubatch_curs is for clients which use curses routines
+# libgnubatch_curs is for clients which	use curses routines
 
 CURSOBJS=\
 	galts.o		getkey.o	helphdr.o	make_km.o \
@@ -76,25 +76,25 @@ LIBCLIENTOBJS=$(CLIENTOBJS:.o=.lo)
 LIBCURSOBJS=$(CURSOBJS:.o=.lo)
 
 all:	$(OBJECTS) $(CLIENTOBJS) $(CURSOBJS)
-	libtool --mode=link @CC@ $(CCFLAGS) -o $(LIB) $(LIBOBJECTS) -rpath $(RPATH) -version-info 1:0:0
-	libtool --mode=link @CC@ $(CCFLAGS) -o $(LIBCLIENT) $(LIBCLIENTOBJS) -rpath $(RPATH) -version-info 1:0:0
-	libtool --mode=link @CC@ $(CCFLAGS) -o $(LIBCURS) $(LIBCURSOBJS) -rpath $(RPATH) -version-info 1:0:0
+	libtool	--mode=link @CC@ $(CCFLAGS) -o $(LIB) $(LIBOBJECTS) -rpath $(RPATH) -version-info 1:0:0
+	libtool	--mode=link @CC@ $(CCFLAGS) -o $(LIBCLIENT) $(LIBCLIENTOBJS) -rpath $(RPATH) -version-info 1:0:0
+	libtool	--mode=link @CC@ $(CCFLAGS) -o $(LIBCURS) $(LIBCURSOBJS) -rpath	$(RPATH) -version-info 1:0:0
 
 install: all
 	$(INSTALL) -d -m 755 $(LIBDIR)
-	libtool --mode=install $(INSTALL) $(LIB) $(LIBDIR)
-	libtool --mode=install $(INSTALL) $(LIBCLIENT) $(LIBDIR)
-	libtool --mode=install $(INSTALL) $(LIBCURS) $(LIBDIR)
+	libtool	--mode=install $(INSTALL) $(LIB) $(LIBDIR)
+	libtool	--mode=install $(INSTALL) $(LIBCLIENT) $(LIBDIR)
+	libtool	--mode=install $(INSTALL) $(LIBCURS) $(LIBDIR)
 	$(RM) $(LIBDIR)/libgnubatch_int.a $(LIBDIR)/libgnubatch_client.a $(LIBDIR)/libgnubatch_curs.a
-	$(INSTALL_DATA) $(LIB) $(LIBCLIENT) $(LIBCURS) $(LIBDIR)
+	$(INSTALL_DATA)	$(LIB) $(LIBCLIENT) $(LIBCURS) $(LIBDIR)
 
 install_strip:
 	$(INSTALL) -d -m 755 $(LIBDIR)
-	libtool --mode=install $(INSTALL) -s $(LIB) $(LIBDIR)
-	libtool --mode=install $(INSTALL) -s $(LIBCLIENT) $(LIBDIR)
-	libtool --mode=install $(INSTALL) -s $(LIBCURS) $(LIBDIR)
+	libtool	--mode=install $(INSTALL) -s $(LIB) $(LIBDIR)
+	libtool	--mode=install $(INSTALL) -s $(LIBCLIENT) $(LIBDIR)
+	libtool	--mode=install $(INSTALL) -s $(LIBCURS)	$(LIBDIR)
 	$(RM) $(LIBDIR)/libgnubatch_int.a $(LIBDIR)/libgnubatch_client.a $(LIBDIR)/libgnubatch_curs.a
-	$(INSTALL_DATA) $(LIB) $(LIBCLIENT) $(LIBCURS) $(LIBDIR)
+	$(INSTALL_DATA)	$(LIB) $(LIBCLIENT) $(LIBCURS) $(LIBDIR)
 
 clean:
 	$(RM) *.[oa] *.so *.la *.lo

@@ -21,13 +21,13 @@
 
 int  altlen(CHelpaltRef a)
 {
-	int	ik, result = 0, lk;
+        int     ik, result = 0, lk;
 
-	if  (!a)
-		return  0;
+        if  (!a)
+                return  0;
 
-	for  (ik = 0;  ik < a->numalt;  ik++)
-		if  ((lk = strlen(a->list[ik])) > result)
-			result = lk;
-	return  result;
+        for  (ik = 0;  ik < a->numalt;  ik++)
+                if  ((lk = strlen(a->list[ik])) > result)
+                        result = lk;
+        return  result;
 }

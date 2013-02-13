@@ -15,24 +15,24 @@
    You should have received a copy of the GNU General Public License
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
-typedef	struct	{
-	SHORT	numalt;			/*  Number of alternatives  */
-	SHORT	def_alt;		/*  Default (or -1 if none) */
-	SHORT	*alt_nums;		/*  Alternative numbers */
-	char	**list;			/*  Strings, + null term  */
+typedef struct  {
+        SHORT   numalt;                 /*  Number of alternatives  */
+        SHORT   def_alt;                /*  Default (or -1 if none) */
+        SHORT   *alt_nums;              /*  Alternative numbers */
+        char    **list;                 /*  Strings, + null term  */
 }  Helpalt, *HelpaltRef;
 
-typedef	const	Helpalt	*CHelpaltRef;
+typedef const   Helpalt *CHelpaltRef;
 
-extern	void	freealts(HelpaltRef);
-extern	int	altlen(CHelpaltRef);
-extern	char	*disp_alt(int, HelpaltRef);
-extern	int	lookup_alt(const char *, HelpaltRef);
-extern	HelpaltRef	helprdalt(const int);
-#ifdef	refresh			/* Assumed to be #defined in curses.h */
-extern	HelpaltRef	galts(WINDOW *, const int, const int);
+extern  void    freealts(HelpaltRef);
+extern  int     altlen(CHelpaltRef);
+extern  char    *disp_alt(int, HelpaltRef);
+extern  int     lookup_alt(const char *, HelpaltRef);
+extern  HelpaltRef      helprdalt(const int);
+#ifdef  refresh                 /* Assumed to be #defined in curses.h */
+extern  HelpaltRef      galts(WINDOW *, const int, const int);
 #endif
 
 /* Some standard ones */
 
-extern	HelpaltRef	repunit, days_abbrev, ifnposses;
+extern  HelpaltRef      repunit, days_abbrev, ifnposses;

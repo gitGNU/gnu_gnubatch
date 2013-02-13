@@ -21,7 +21,7 @@
  * that's obsolete.
  */
 
-#ifdef	HAVE_LONG_FILE_NAMES
+#ifdef  HAVE_LONG_FILE_NAMES
 #if HAVE_DIRENT_H
 #include <dirent.h>
 #define NAMLEN(dirent) strlen((dirent)->d_name)

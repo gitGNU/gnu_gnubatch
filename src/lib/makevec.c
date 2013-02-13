@@ -17,57 +17,57 @@
 
 
  *----------------------------------------------------------------------
- *	Turn the argument, delimited by spaces into a vector of strings like
- *	the second argument to main. This is used to process an environment
- *	variable looking like command arguments.
+ *      Turn the argument, delimited by spaces into a vector of strings like
+ *      the second argument to main. This is used to process an environment
+ *      variable looking like command arguments.
  */
 
 #include "config.h"
 #include "incl_unix.h"
 
-static	char	Filename[] = __FILE__;
+static  char    Filename[] = __FILE__;
 
-#define	INITV	20
-#define	INCV	5
+#define INITV   20
+#define INCV    5
 
 char **makevec(const char *arg)
 {
-	char	*resv, **res, **ores;
-	int	count, tot, rbits = 0, quote;
+        char    *resv, **res, **ores;
+        int     count, tot, rbits = 0, quote;
 
-	ores = res = (char **)malloc((unsigned)(INITV * sizeof(char *)));
-	resv = (char *)malloc((unsigned)(strlen(arg) + 1));
-	tot = INITV;
-	count = INITV - 1;
-	if  (res == (char **) 0 || resv == (char *) 0)
-		ABORT_NOMEM;
-	strcpy(resv, arg);
-	*res++ = resv;
-	rbits++;
+        ores = res = (char **)malloc((unsigned)(INITV * sizeof(char *)));
+        resv = (char *)malloc((unsigned)(strlen(arg) + 1));
+        tot = INITV;
+        count = INITV - 1;
+        if  (res == (char **) 0 || resv == (char *) 0)
+                ABORT_NOMEM;
+        strcpy(resv, arg);
+        *res++ = resv;
+        rbits++;
 
-	for  (;;)  {
-		quote = 0;
-		while  (*resv == ' ')
-			resv++;
-		if  (*resv == '\0')  {
-			*res = (char *) 0;
-			return  ores;
-		}
-		if  (*resv == '\'' || *resv == '\"')
-			quote = *resv++;
-		*res++ = resv;
-		rbits++;
-		while  (*resv != '\0'  &&  (*resv != ' ' || quote)  &&  *resv != quote)
-			resv++;
-		if  (*resv)
-			*resv++ = '\0';
-		if  (--count <= 0)  {
-			tot += INCV;
-			count = INCV;
-			ores = (char **)realloc((char *) ores, (unsigned) tot * sizeof(char *));
-			if  (ores == (char **) 0)
-				ABORT_NOMEM;
-			res = &ores[rbits];
-		}
-	}
+        for  (;;)  {
+                quote = 0;
+                while  (*resv == ' ')
+                        resv++;
+                if  (*resv == '\0')  {
+                        *res = (char *) 0;
+                        return  ores;
+                }
+                if  (*resv == '\'' || *resv == '\"')
+                        quote = *resv++;
+                *res++ = resv;
+                rbits++;
+                while  (*resv != '\0'  &&  (*resv != ' ' || quote)  &&  *resv != quote)
+                        resv++;
+                if  (*resv)
+                        *resv++ = '\0';
+                if  (--count <= 0)  {
+                        tot += INCV;
+                        count = INCV;
+                        ores = (char **)realloc((char *) ores, (unsigned) tot * sizeof(char *));
+                        if  (ores == (char **) 0)
+                                ABORT_NOMEM;
+                        res = &ores[rbits];
+                }
+        }
 }

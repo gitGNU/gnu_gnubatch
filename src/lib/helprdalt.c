@@ -22,123 +22,123 @@
 #include "errnums.h"
 #include "statenums.h"
 
-static	char	Filename[] = __FILE__;
+static  char    Filename[] = __FILE__;
 
-#define	INITALTS	10
-#define	INCALTS		5
+#define INITALTS        10
+#define INCALTS         5
 
 void  freealts(HelpaltRef a)
 {
-	int	i;
+        int     i;
 
-	for  (i = 0;  i < a->numalt;  i++)
-		free(a->list[i]);
-	free((char *) a->alt_nums);
-	free((char *) a->list);
-	free((char *) a);
+        for  (i = 0;  i < a->numalt;  i++)
+                free(a->list[i]);
+        free((char *) a->alt_nums);
+        free((char *) a->list);
+        free((char *) a);
 }
 
 /* Read a list of alternatives from the configuration file.
    These look like:
 
-	<state number>A[D]<alt number>:Text
+        <state number>A[D]<alt number>:Text
 
    The order they come in is the order they will be put out.
    The D signifies that the specified alternative is the default. */
 
 HelpaltRef  helprdalt(const int current_state)
 {
-	int	ch, perc = 0, maxalts, nres, lastnum = -1;
-	HelpaltRef	result;
+        int     ch, perc = 0, maxalts, nres, lastnum = -1;
+        HelpaltRef      result;
 
-	if  ((result = (HelpaltRef) malloc(sizeof(Helpalt))) == (HelpaltRef) 0)
-		ABORT_NOMEM;
+        if  ((result = (HelpaltRef) malloc(sizeof(Helpalt))) == (HelpaltRef) 0)
+                ABORT_NOMEM;
 
-	result->numalt = 0;
-	result->def_alt = -1;
-	if  ((result->alt_nums = (SHORT *) malloc(sizeof(SHORT) * INITALTS)) == (SHORT *) 0)
-		ABORT_NOMEM;
-	if  ((result->list = (char **) malloc(sizeof(char *) * INITALTS)) == (char **) 0)
-		ABORT_NOMEM;
+        result->numalt = 0;
+        result->def_alt = -1;
+        if  ((result->alt_nums = (SHORT *) malloc(sizeof(SHORT) * INITALTS)) == (SHORT *) 0)
+                ABORT_NOMEM;
+        if  ((result->list = (char **) malloc(sizeof(char *) * INITALTS)) == (char **) 0)
+                ABORT_NOMEM;
 
-	maxalts = INITALTS;
+        maxalts = INITALTS;
 
-	fseek(Cfile, 0L, 0);
+        fseek(Cfile, 0L, 0);
 
-	for  (;;)  {
-		ch = getc(Cfile);
-		if  (ch == EOF)
-			break;
+        for  (;;)  {
+                ch = getc(Cfile);
+                if  (ch == EOF)
+                        break;
 
-		/* If line doesn't start with a number ignore it */
+                /* If line doesn't start with a number ignore it */
 
-		if  ((ch < '0' || ch > '9') && ch != '-')  {
-skipn:			while  (ch != '\n')
-				ch = getc(Cfile);
-			continue;
-		}
+                if  ((ch < '0' || ch > '9') && ch != '-')  {
+skipn:                  while  (ch != '\n')
+                                ch = getc(Cfile);
+                        continue;
+                }
 
-		/* Read leading state number.
-		   If not current state forget it */
+                /* Read leading state number.
+                   If not current state forget it */
 
-		ungetc(ch, Cfile);
-		if  (helprdn() != current_state)  {
-skipr:			do  ch = getc(Cfile);
-			while  (ch != '\n' && ch != EOF);
-			continue;
-		}
-		ch = getc(Cfile);
+                ungetc(ch, Cfile);
+                if  (helprdn() != current_state)  {
+skipr:                  do  ch = getc(Cfile);
+                        while  (ch != '\n' && ch != EOF);
+                        continue;
+                }
+                ch = getc(Cfile);
 
-		/* Is it alternative spec - if not forget it */
+                /* Is it alternative spec - if not forget it */
 
-		if  (ch != 'a' && ch != 'A')
-			goto  skipr;
+                if  (ch != 'a' && ch != 'A')
+                        goto  skipr;
 
-		if  (result->numalt >= maxalts)  {
-			maxalts += INCALTS;
-			if  ((result->alt_nums = (SHORT *) realloc((char *) result->alt_nums, (unsigned) (sizeof(SHORT) * maxalts))) == (SHORT *) 0)
-				ABORT_NOMEM;
-			if  ((result->list = (char **) realloc((char *) result->list, (unsigned) (sizeof(char *) * maxalts))) == (char **) 0)
-				ABORT_NOMEM;
-		}
+                if  (result->numalt >= maxalts)  {
+                        maxalts += INCALTS;
+                        if  ((result->alt_nums = (SHORT *) realloc((char *) result->alt_nums, (unsigned) (sizeof(SHORT) * maxalts))) == (SHORT *) 0)
+                                ABORT_NOMEM;
+                        if  ((result->list = (char **) realloc((char *) result->list, (unsigned) (sizeof(char *) * maxalts))) == (char **) 0)
+                                ABORT_NOMEM;
+                }
 
-		nres = result->numalt;
-		ch = getc(Cfile);
+                nres = result->numalt;
+                ch = getc(Cfile);
 
-		/* Mark as default?  */
+                /* Mark as default?  */
 
-		if  (ch == 'd' || ch == 'D')  {
-			result->def_alt = (SHORT) nres;
-			ch = getc(Cfile);
-		}
+                if  (ch == 'd' || ch == 'D')  {
+                        result->def_alt = (SHORT) nres;
+                        ch = getc(Cfile);
+                }
 
-		/* If not followed by number use last number + 1 */
+                /* If not followed by number use last number + 1 */
 
-		ungetc(ch, Cfile);
-		if  ((ch < '0' || ch > '9') && ch != '-')
-			lastnum++;
-		else
-			lastnum = helprdn();
+                ungetc(ch, Cfile);
+                if  ((ch < '0' || ch > '9') && ch != '-')
+                        lastnum++;
+                else
+                        lastnum = helprdn();
 
-		result->alt_nums[nres] = (SHORT) lastnum;
+                result->alt_nums[nres] = (SHORT) lastnum;
 
-		if  ((ch = getc(Cfile)) != ':')  {
-			result->def_alt = -1;	/*  might have been set */
-			goto  skipn;
-		}
+                if  ((ch = getc(Cfile)) != ':')  {
+                        result->def_alt = -1;   /*  might have been set */
+                        goto  skipn;
+                }
 
-		/* Read actual line.
-		   Ignore percent flags. */
+                /* Read actual line.
+                   Ignore percent flags. */
 
-		result->list[nres] = help_readl(&perc);
-		result->numalt++;
-	}
+                result->list[nres] = help_readl(&perc);
+                result->numalt++;
+        }
 
-	/* If nothing read, zap result.  */
+        /* If nothing read, zap result.  */
 
-	if  (result->numalt <= 0)  {
-		freealts(result);
-		return  (HelpaltRef) 0;
-	}
-	return  result;
+        if  (result->numalt <= 0)  {
+                freealts(result);
+                return  (HelpaltRef) 0;
+        }
+        return  result;
 }

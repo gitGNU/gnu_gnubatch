@@ -17,11 +17,11 @@
 
 JFORMAT(fmt_qtit)
 {
-	if  (isreadable)  {
-		const	char	*colp, *title = title_of(jp);
-		if  ((colp = strchr(title, ':')))
-			return  (unsigned) strlen(strcpy(bigbuff, colp+1));
-		return  (fmt_t) strlen(strcpy(bigbuff, title));
-	}
-	return  0;
+        if  (isreadable)  {
+                const   char    *colp, *title = title_of(jp);
+                if  ((colp = strchr(title, ':')))
+                        return  (unsigned) strlen(strcpy(bigbuff, colp+1));
+                return  (fmt_t) strlen(strcpy(bigbuff, title));
+        }
+        return  0;
 }

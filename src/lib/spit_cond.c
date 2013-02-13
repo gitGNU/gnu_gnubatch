@@ -30,53 +30,47 @@
 #include "spitrouts.h"
 #include "optflags.h"
 
-void spit_cond(FILE *dest, const unsigned comp, const unsigned crit, const netid_t vhost, char *vname, BtconRef	value)
+void spit_cond(FILE *dest, const unsigned comp, const unsigned crit, const netid_t vhost, char *vname, BtconRef value)
 {
-	if  (vhost)  {
-		spitoption(crit & CCRIT_NORUN? $A{btr arg condcrit}: $A{btr arg nocondcrit},
-				$A{btr arg explain}, dest, ' ', 0);
-		spitoption($A{btr arg cond}, $A{btr arg explain}, dest, ' ', 0);
-		fprintf(dest, " %s:%s%s", look_host(vhost), vname, condname[comp-C_EQ]);
-	}
-	else  {
-		spitoption($A{btr arg cond}, $A{btr arg explain}, dest, ' ', 0);
-		fprintf(dest, " %s%s", vname, condname[comp-C_EQ]);
-	}
-	dumpcon(dest, value);
+        if  (vhost)  {
+                spitoption(crit & CCRIT_NORUN? $A{btr arg condcrit}: $A{btr arg nocondcrit},
+                                $A{btr arg explain}, dest, ' ', 0);
+                spitoption($A{btr arg cond}, $A{btr arg explain}, dest, ' ', 0);
+                fprintf(dest, " %s:%s%s", look_host(vhost), vname, condname[comp-C_EQ]);
+        }
+        else  {
+                spitoption($A{btr arg cond}, $A{btr arg explain}, dest, ' ', 0);
+                fprintf(dest, " %s%s", vname, condname[comp-C_EQ]);
+        }
+        dumpcon(dest, value);
 }
 
 void  spit_ass(FILE *dest, const unsigned assop, const unsigned flags, const unsigned crit, const netid_t vhost, char *vname, BtconRef value)
 {
-	if  (vhost)
-		spitoption(crit & ACRIT_NORUN? $A{btr arg asscrit}: $A{btr arg noasscrit}, $A{btr arg explain}, dest, ' ', 0);
-	if  (assop >= BJA_SEXIT)  {
-		spitoption($A{btr arg set}, $A{btr arg explain}, dest, ' ', 0);
-		if  (vhost)
-			fprintf(dest, " %s:%s=%s", look_host(vhost), vname, assop == BJA_SEXIT? exitcodename: signalname);
-		else
-			fprintf(dest, " %s=%s", vname,  assop == BJA_SEXIT? exitcodename: signalname);
-	}
-	else  {
-		if  (flags)  {
-			spitoption($A{btr arg setflags}, $A{btr arg explain}, dest, ' ', 0);
-			if  (flags & BJA_START)
-				putc('S', dest);
-			if  (flags & BJA_REVERSE)
-				putc('R', dest);
-			if  (flags & BJA_OK)
-				putc('N', dest);
-			if  (flags & BJA_ERROR)
-				putc('E', dest);
-			if  (flags & BJA_ABORT)
-				putc('A', dest);
-			if  (flags & BJA_CANCEL)
-				putc('C', dest);
-		}
-		spitoption($A{btr arg set}, $A{btr arg explain}, dest, ' ', 0);
-		if  (vhost)
-			fprintf(dest, " %s:%s%s", look_host(vhost), vname, assname[assop-BJA_ASSIGN]);
-		else
-			fprintf(dest, " %s%s", vname, assname[assop-BJA_ASSIGN]);
-		dumpcon(dest, value);
-	}
+        if  (vhost)
+                spitoption(crit & ACRIT_NORUN? $A{btr arg asscrit}: $A{btr arg noasscrit}, $A{btr arg explain}, dest, ' ', 0);
+        if  (assop >= BJA_SEXIT)  {
+                spitoption($A{btr arg set}, $A{btr arg explain}, dest, ' ', 0);
+                fprintf(dest, " %s=%s", host_prefix_str(vhost, vname),  assop == BJA_SEXIT? exitcodename: signalname);
+        }
+        else  {
+                if  (flags)  {
+                        spitoption($A{btr arg setflags}, $A{btr arg explain}, dest, ' ', 0);
+                        if  (flags & BJA_START)
+                                putc('S', dest);
+                        if  (flags & BJA_REVERSE)
+                                putc('R', dest);
+                        if  (flags & BJA_OK)
+                                putc('N', dest);
+                        if  (flags & BJA_ERROR)
+                                putc('E', dest);
+                        if  (flags & BJA_ABORT)
+                                putc('A', dest);
+                        if  (flags & BJA_CANCEL)
+                                putc('C', dest);
+                }
+                spitoption($A{btr arg set}, $A{btr arg explain}, dest, ' ', 0);
+                fprintf(dest, " %s%s", host_prefix_str(vhost, vname), assname[assop-BJA_ASSIGN]);
+                dumpcon(dest, value);
+        }
 }

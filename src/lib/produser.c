@@ -40,16 +40,16 @@
 
 void  produser()
 {
-	int	msgq_id;
+        int     msgq_id;
 
-	if  ((msgq_id = msgget(MSGID+envselect_value, 0)) >= 0)  {
-		Shipc	oreq;
-		BLOCK_ZERO(&oreq, sizeof(oreq));
-		oreq.sh_mtype = TO_SCHED;
-		oreq.sh_params.mcode = O_PWCHANGED;
-		oreq.sh_params.uuid = Realuid;
-		oreq.sh_params.ugid = Realgid;
-		oreq.sh_params.upid = getpid();
-		msgsnd(msgq_id, (struct msgbuf *) &oreq, sizeof(Shreq), 0);
-	}
+        if  ((msgq_id = msgget(MSGID+envselect_value, 0)) >= 0)  {
+                Shipc   oreq;
+                BLOCK_ZERO(&oreq, sizeof(oreq));
+                oreq.sh_mtype = TO_SCHED;
+                oreq.sh_params.mcode = O_PWCHANGED;
+                oreq.sh_params.uuid = Realuid;
+                oreq.sh_params.ugid = Realgid;
+                oreq.sh_params.upid = getpid();
+                msgsnd(msgq_id, (struct msgbuf *) &oreq, sizeof(Shreq), 0);
+        }
 }

@@ -15,5 +15,5 @@
    You should have received a copy of the GNU General Public License
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
-#define	JFORMAT(name) static fmt_t name(CBtjobRef jp, const int isreadable, const int fwidth)
-#define	VFORMAT(name) static fmt_t name(CBtvarRef vp, const int isreadable, const int fwidth)
+#define JFORMAT(name) static fmt_t name(CBtjobRef jp, const int isreadable, const int fwidth)
+#define VFORMAT(name) static fmt_t name(CBtvarRef vp, const int isreadable, const int fwidth)

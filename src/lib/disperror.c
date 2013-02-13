@@ -22,21 +22,21 @@
 
 void  fprint_error(FILE *fp, int Errnum)
 {
-	char	**emess = helpvec(Errnum, 'E'), **ep;
+        char    **emess = helpvec(Errnum, 'E'), **ep;
 
-	if  (emess[0] == (char *) 0)  {
-		free((char *) emess);
-		disp_arg[9] = Errnum;
-		emess = helpvec($E{Missing error code}, 'E');
-	}
-	for  (ep = emess;  *ep;  ep++)  {
-		fprintf(fp, "%s\n", *ep);
-		free(*ep);
-	}
-	free((char *) emess);
+        if  (emess[0] == (char *) 0)  {
+                free((char *) emess);
+                disp_arg[9] = Errnum;
+                emess = helpvec($E{Missing error code}, 'E');
+        }
+        for  (ep = emess;  *ep;  ep++)  {
+                fprintf(fp, "%s\n", *ep);
+                free(*ep);
+        }
+        free((char *) emess);
 }
 
 void  print_error(int Errnum)
 {
-	fprint_error(stderr, Errnum);
+        fprint_error(stderr, Errnum);
 }

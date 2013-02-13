@@ -22,13 +22,13 @@
 #include <sys/ipc.h>
 #include <sys/msg.h>
 #include <sys/sem.h>
-#ifdef	HAVE_FCNTL_H
+#ifdef  HAVE_FCNTL_H
 #include <fcntl.h>
 #endif
-#ifdef	TIME_WITH_SYS_TIME
+#ifdef  TIME_WITH_SYS_TIME
 #include <sys/time.h>
 #include <time.h>
-#elif	defined(HAVE_SYS_TIME_H)
+#elif   defined(HAVE_SYS_TIME_H)
 #include <sys/time.h>
 #else
 #include <time.h>
@@ -59,79 +59,79 @@
 #include "cgifndjb.h"
 #include "shutilmsg.h"
 
-#define	IPC_MODE	0600
+#define IPC_MODE        0600
 
-ULONG			Saveseq;
+ULONG                   Saveseq;
 
-HelpaltRef	progresslist;
+HelpaltRef      progresslist;
 
-static	char	*stat_codes;
+static  char    *stat_codes;
 
 /* For when we run out of memory.....  */
 
 void  nomem(const char *fl, const int ln)
 {
-	fprintf(stderr, "%s:Mem alloc fault: %s line %d\n", progname, fl, ln);
-	exit(E_NOMEM);
+        fprintf(stderr, "%s:Mem alloc fault: %s line %d\n", progname, fl, ln);
+        exit(E_NOMEM);
 }
 
 static int  getstat(char *jobnum)
 {
-	int		retc;
-	struct	jobswanted	jw;
-	CBtjobRef		jp;
+        int             retc;
+        struct  jobswanted      jw;
+        CBtjobRef               jp;
 
-	if  ((retc = decode_jnum(jobnum, &jw)) != 0)  {
-		print_error(retc);
-		return  E_USAGE;
-	}
-	if  (!find_job(&jw))  {
-		print_error($E{btjstat job not found});
-		return  E_NOJOB;
-	}
+        if  ((retc = decode_jnum(jobnum, &jw)) != 0)  {
+                print_error(retc);
+                return  E_USAGE;
+        }
+        if  (!find_job(&jw))  {
+                print_error($E{btjstat job not found});
+                return  E_NOJOB;
+        }
 
-	jp = jw.jp;
-	if  (stat_codes)  {
-		char	*sp = stat_codes, *cp;
-		char	*statc = disp_alt(jp->h.bj_progress, progresslist);
-		int	cnt;
-		while  ((cp = strchr(sp, ',')))  {
-			*cp = '\0';
-			cnt = ncstrcmp(sp, statc);
-			*cp = ',';
-			if  (cnt == 0)
-				return  E_TRUE;
-			sp = cp + 1;
-		}
-		return  ncstrcmp(sp, statc) == 0? E_TRUE: E_FALSE;
-	}
-	return  jp->h.bj_progress >= BJP_STARTUP1? E_TRUE: E_FALSE;
+        jp = jw.jp;
+        if  (stat_codes)  {
+                char    *sp = stat_codes, *cp;
+                char    *statc = disp_alt(jp->h.bj_progress, progresslist);
+                int     cnt;
+                while  ((cp = strchr(sp, ',')))  {
+                        *cp = '\0';
+                        cnt = ncstrcmp(sp, statc);
+                        *cp = ',';
+                        if  (cnt == 0)
+                                return  E_TRUE;
+                        sp = cp + 1;
+                }
+                return  ncstrcmp(sp, statc) == 0? E_TRUE: E_FALSE;
+        }
+        return  jp->h.bj_progress >= BJP_STARTUP1? E_TRUE: E_FALSE;
 }
 
 OPTION(o_explain)
 {
-	print_error($E{btjstat explain});
-	exit(0);
-	return  0;		/* Silence compilers */
+        print_error($E{btjstat explain});
+        exit(0);
+        return  0;              /* Silence compilers */
 }
 
 OPTION(o_defstat)
 {
-	if  (stat_codes)  {
-		free(stat_codes);
-		stat_codes = (char *) 0;
-	}
-	return  OPTRESULT_OK;
+        if  (stat_codes)  {
+                free(stat_codes);
+                stat_codes = (char *) 0;
+        }
+        return  OPTRESULT_OK;
 }
 
 OPTION(o_stats)
 {
-	if  (!arg)
-		return  OPTRESULT_MISSARG;
-	if  (stat_codes)
-		free(stat_codes);
-	stat_codes = stracpy(arg);
-	return  OPTRESULT_ARG_OK;
+        if  (!arg)
+                return  OPTRESULT_MISSARG;
+        if  (stat_codes)
+                free(stat_codes);
+        stat_codes = stracpy(arg);
+        return  OPTRESULT_ARG_OK;
 }
 
 DEOPTION(o_freezecd);
@@ -139,111 +139,111 @@ DEOPTION(o_freezehd);
 
 /* Defaults and proc table for arg interp.  */
 
-const	Argdefault	Adefs[] = {
+const   Argdefault      Adefs[] = {
   {  '?', $A{btjstat arg explain} },
   {  'd', $A{btjstat arg defaults} },
   {  's', $A{btjstat arg statcodes} },
   { 0, 0 }
 };
 
-optparam	optprocs[] = {
-o_explain,	o_defstat,	o_stats,
-o_freezecd,	o_freezehd
+optparam        optprocs[] = {
+o_explain,      o_defstat,      o_stats,
+o_freezecd,     o_freezehd
 };
 
 void  spit_options(FILE *dest, const char *name)
 {
-	fprintf(dest, "%s", name);
-	if  (stat_codes)  {
-		spitoption($A{btjstat arg statcodes}, $A{btjstat arg explain}, dest, '=', 0);
-		fprintf(dest, " \"%s\"", stat_codes);
-	}
-	else
-		spitoption($A{btjstat arg defaults}, $A{btjstat arg explain}, dest, '=', 0);
-	putc('\n', dest);
+        fprintf(dest, "%s", name);
+        if  (stat_codes)  {
+                spitoption($A{btjstat arg statcodes}, $A{btjstat arg explain}, dest, '=', 0);
+                fprintf(dest, " \"%s\"", stat_codes);
+        }
+        else
+                spitoption($A{btjstat arg defaults}, $A{btjstat arg explain}, dest, '=', 0);
+        putc('\n', dest);
 }
 
 /* Ye olde main routine.  */
 
 MAINFN_TYPE  main(int argc, char **argv)
 {
-	char	*Curr_pwd = (char *) 0;
-	int	ret;
-#if	defined(NHONSUID) || defined(DEBUG)
-	int_ugid_t	chk_uid;
+        char    *Curr_pwd = (char *) 0;
+        int     ret;
+#if     defined(NHONSUID) || defined(DEBUG)
+        int_ugid_t      chk_uid;
 #endif
-	char	*whichj;
+        char    *whichj;
 
-	versionprint(argv, "$Revision: 1.6 $", 0);
+        versionprint(argv, "$Revision: 1.7 $", 0);
 
-	if  ((progname = strrchr(argv[0], '/')))
-		progname++;
-	else
-		progname = argv[0];
+        if  ((progname = strrchr(argv[0], '/')))
+                progname++;
+        else
+                progname = argv[0];
 
-	init_mcfile();
+        init_mcfile();
 
-	Realuid = getuid();
-	Realgid = getgid();
-	Effuid = geteuid();
-	Effgid = getegid();
-	INIT_DAEMUID
-	Cfile = open_cfile(MISC_UCONFIG, "btrest.help");
-	SCRAMBLID_CHECK
-	tzset();
-	SWAP_TO(Daemuid);
-	mypriv = getbtuser(Realuid);
-	SWAP_TO(Realuid);
-	argv = optprocess(argv, Adefs, optprocs, $A{btjstat arg explain}, $A{btjstat arg freeze home}, 0);
+        Realuid = getuid();
+        Realgid = getgid();
+        Effuid = geteuid();
+        Effgid = getegid();
+        INIT_DAEMUID
+        Cfile = open_cfile(MISC_UCONFIG, "btrest.help");
+        SCRAMBLID_CHECK
+        tzset();
+        SWAP_TO(Daemuid);
+        mypriv = getbtuser(Realuid);
+        SWAP_TO(Realuid);
+        argv = optprocess(argv, Adefs, optprocs, $A{btjstat arg explain}, $A{btjstat arg freeze home}, 0);
 
 #include "inline/freezecode.c"
 
-	if  (Anychanges & OF_ANY_FREEZE_WANTED)
-		exit(0);
+        if  (Anychanges & OF_ANY_FREEZE_WANTED)
+                exit(0);
 
-	if  (argv[0])  {
-		whichj = *argv++;
-		if  (*argv)
-			goto  usage;
-	}
-	else  {
-	usage:
-		print_error($E{btjstat usage});
-		exit(E_USAGE);
-	}
+        if  (argv[0])  {
+                whichj = *argv++;
+                if  (*argv)
+                        goto  usage;
+        }
+        else  {
+        usage:
+                print_error($E{btjstat usage});
+                exit(E_USAGE);
+        }
 
-	/* Now we want to be Daemuid throughout if possible.  */
+        /* Now we want to be Daemuid throughout if possible.  */
 
-	setuid(Daemuid);
+        setuid(Daemuid);
 
-	if  ((Ctrl_chan = msgget(MSGID+envselect_value, 0)) < 0)  {
-		print_error($E{Scheduler not running});
-		exit(E_NOTRUN);
-	}
+        if  ((Ctrl_chan = msgget(MSGID+envselect_value, 0)) < 0)  {
+                print_error($E{Scheduler not running});
+                exit(E_NOTRUN);
+        }
 
-#ifndef	USING_FLOCK
-	/* Set up semaphores */
+#ifndef USING_FLOCK
+        /* Set up semaphores */
 
-	if  ((Sem_chan = semget(SEMID+envselect_value, SEMNUMS + XBUFJOBS, IPC_MODE)) < 0)  {
-		print_error($E{Cannot open semaphore});
-		exit(E_SETUP);
-	}
+        if  ((Sem_chan = semget(SEMID+envselect_value, SEMNUMS + XBUFJOBS, IPC_MODE)) < 0)  {
+                print_error($E{Cannot open semaphore});
+                exit(E_SETUP);
+        }
 #endif
 
-	/* Open the other files. No read yet until the scheduler is
-	   aware of our existence, which it won't be until we
-	   send it a message.  */
+        /* Open the other files. No read yet until the scheduler is
+           aware of our existence, which it won't be until we
+           send it a message.  */
 
-	if  ((ret = open_ci(O_RDONLY)) != 0)  {
-		print_error(ret);
-		exit(E_SETUP);
-	}
-	openjfile(0, 0);
-	rjobfile(1);
+        if  ((ret = open_ci(O_RDONLY)) != 0)  {
+                print_error(ret);
+                exit(E_SETUP);
+        }
+        openjfile(0, 0);
+        rjobfile(1);
 
-	if  (!(progresslist = helprdalt($Q{Job progress code})))  {
-		disp_arg[9] = $Q{Job progress code};
-		print_error($E{Missing alternative code});
-	}
-	return  getstat(whichj);
+        if  (!(progresslist = helprdalt($Q{Job progress code})))  {
+                disp_arg[9] = $Q{Job progress code};
+                print_error($E{Missing alternative code});
+        }
+        return  getstat(whichj);
 }

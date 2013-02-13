@@ -41,130 +41,130 @@
 #include "errnums.h"
 #include "ipcstuff.h"
 
-extern	int	Ctrl_chan;
+extern  int     Ctrl_chan;
 
 void  nomem(const char *fl, const int ln)
 {
-	fprintf(stderr, "%s:Mem alloc fault: %s line %d\n", progname, fl, ln);
-	exit(E_NOMEM);
+        fprintf(stderr, "%s:Mem alloc fault: %s line %d\n", progname, fl, ln);
+        exit(E_NOMEM);
 }
 
 /* Ye olde main routine. No arguments are expected.  */
 
 MAINFN_TYPE  main(int argc, char **argv)
 {
-	int	countdown = MSGQ_BLOCKS;
-#if	defined(NHONSUID) || defined(DEBUG)
-	int_ugid_t	chk_uid;
+        int     countdown = MSGQ_BLOCKS;
+#if     defined(NHONSUID) || defined(DEBUG)
+        int_ugid_t      chk_uid;
 #endif
-	char	string[80];
-	Shipc	oreq;
-	Repmess	rep;
+        char    string[80];
+        Shipc   oreq;
+        Repmess rep;
 
-	versionprint(argv, "$Revision: 1.6 $", 0);
+        versionprint(argv, "$Revision: 1.7 $", 0);
 
-	if  ((progname = strrchr(argv[0], '/')))
-		progname++;
-	else
-		progname = argv[0];
+        if  ((progname = strrchr(argv[0], '/')))
+                progname++;
+        else
+                progname = argv[0];
 
-	init_mcfile();
+        init_mcfile();
 
-	Realuid = getuid();
-	Realgid = getgid();
-	Effuid = geteuid();
-	Effgid = getegid();
-	INIT_DAEMUID
-	Cfile = open_cfile(MISC_UCONFIG, "btrest.help");
-	SCRAMBLID_CHECK
-	SWAP_TO(Daemuid);
+        Realuid = getuid();
+        Realgid = getgid();
+        Effuid = geteuid();
+        Effgid = getegid();
+        INIT_DAEMUID
+        Cfile = open_cfile(MISC_UCONFIG, "btrest.help");
+        SCRAMBLID_CHECK
+        SWAP_TO(Daemuid);
 
-	if  ((Ctrl_chan = msgget(MSGID+envselect_value, 0)) < 0)  {
-		print_error($E{Scheduler not running});
-		exit(E_NOTRUN);
-	}
+        if  ((Ctrl_chan = msgget(MSGID+envselect_value, 0)) < 0)  {
+                print_error($E{Scheduler not running});
+                exit(E_NOTRUN);
+        }
 
-	/* Obtain confirmation message.  */
+        /* Obtain confirmation message.  */
 
-	if  (argc > 1)  {
-		if  (argc != 2 || argv[1][0] != '-'  ||  (argv[1][1] != 'y'  && argv[1][1] != 'Y') || argv[1][2] != '\0')  {
-			print_error($E{Btquit usage});
-			exit(E_USAGE);
-		}
-	}
-	else  {
-		char	*prompt = gprompt($P{Btquit stopped ok});
-		char	*ignored;
-		fputs(prompt, stdout);
-		fflush(stdout);
-		ignored = fgets(string, sizeof(string), stdin);
-		if  (string[0] != 'y' && string[0] != 'Y')  {
-			print_error($E{Btquit not stopped});
-			exit(0);
-		}
-	}
+        if  (argc > 1)  {
+                if  (argc != 2 || argv[1][0] != '-'  ||  (argv[1][1] != 'y'  && argv[1][1] != 'Y') || argv[1][2] != '\0')  {
+                        print_error($E{Btquit usage});
+                        exit(E_USAGE);
+                }
+        }
+        else  {
+                char    *prompt = gprompt($P{Btquit stopped ok});
+                char    *ignored;
+                fputs(prompt, stdout);
+                fflush(stdout);
+                ignored = fgets(string, sizeof(string), stdin);
+                if  (string[0] != 'y' && string[0] != 'Y')  {
+                        print_error($E{Btquit not stopped});
+                        exit(0);
+                }
+        }
 
-	oreq.sh_mtype = TO_SCHED;
-	oreq.sh_params.mcode = O_STOP;
-	oreq.sh_params.uuid = Realuid;
-	oreq.sh_params.ugid = Realgid;
-	oreq.sh_params.upid = getpid();
-	oreq.sh_params.param = $S{Scheduler normal exit};
+        oreq.sh_mtype = TO_SCHED;
+        oreq.sh_params.mcode = O_STOP;
+        oreq.sh_params.uuid = Realuid;
+        oreq.sh_params.ugid = Realgid;
+        oreq.sh_params.upid = getpid();
+        oreq.sh_params.param = $S{Scheduler normal exit};
 
-	while  (msgsnd(Ctrl_chan, (struct msgbuf *) &oreq, sizeof(Shreq), IPC_NOWAIT) < 0)  {
-		switch  (errno)  {
-		default:
-			print_error($E{Btquit IPC error});
-			exit(E_SETUP);
+        while  (msgsnd(Ctrl_chan, (struct msgbuf *) &oreq, sizeof(Shreq), IPC_NOWAIT) < 0)  {
+                switch  (errno)  {
+                default:
+                        print_error($E{Btquit IPC error});
+                        exit(E_SETUP);
 
-		case  EAGAIN:
-			print_error($E{IPC msg q error});
-			if  (--countdown < 0)  {
-				print_error($E{Btquit giving up});
-				exit(E_SETUP);
-			}
-			print_error($E{Waiting as shutting down});
-			sleep(MSGQ_BLOCKWAIT);
-			continue;
+                case  EAGAIN:
+                        print_error($E{IPC msg q error});
+                        if  (--countdown < 0)  {
+                                print_error($E{Btquit giving up});
+                                exit(E_SETUP);
+                        }
+                        print_error($E{Waiting as shutting down});
+                        sleep(MSGQ_BLOCKWAIT);
+                        continue;
 
-		case  EACCES:
-			print_error($E{Check file setup});
-			exit(E_SETUP);
-		}
-	}
+                case  EACCES:
+                        print_error($E{Check file setup});
+                        exit(E_SETUP);
+                }
+        }
 
-	/* Now wait for reply */
+        /* Now wait for reply */
 
-	if  (msgrcv(Ctrl_chan, (struct msgbuf *) &rep, sizeof(Shreq), (long) (MTOFFSET + getpid()), 0) < 0)  {
-		switch  (errno)  {
-		default:
-			print_error($E{Btquit receive error});
-			exit(E_SETUP);
+        if  (msgrcv(Ctrl_chan, (struct msgbuf *) &rep, sizeof(Shreq), (long) (MTOFFSET + getpid()), 0) < 0)  {
+                switch  (errno)  {
+                default:
+                        print_error($E{Btquit receive error});
+                        exit(E_SETUP);
 
-		case  EINVAL:
-		case  EIDRM:
-			print_error($E{Btquit stopped ok});
-			exit(0);
+                case  EINVAL:
+                case  EIDRM:
+                        print_error($E{Btquit stopped ok});
+                        exit(0);
 
-		case  EACCES:
-			print_error($E{Check file setup});
-			exit(E_SETUP);
-		}
-	}
+                case  EACCES:
+                        print_error($E{Check file setup});
+                        exit(E_SETUP);
+                }
+        }
 
-	switch  (rep.outmsg.mcode)  {
-	case  O_OK:
-		/* I don't believe this, but for completeness...  */
-		print_error($E{Btquit stopped ok});
-		exit(0);
+        switch  (rep.outmsg.mcode)  {
+        case  O_OK:
+                /* I don't believe this, but for completeness...  */
+                print_error($E{Btquit stopped ok});
+                exit(0);
 
-	case  O_NOPERM:
-		print_error($E{Btquit no perm});
-		exit(E_PERM);
+        case  O_NOPERM:
+                print_error($E{Btquit no perm});
+                exit(E_PERM);
 
-	default:
-		disp_arg[0] = rep.outmsg.mcode;
-		print_error($E{Unexpected sched message});
-		exit(E_SHEDERR);
-	}
+        default:
+                disp_arg[0] = rep.outmsg.mcode;
+                print_error($E{Unexpected sched message});
+                exit(E_SHEDERR);
+        }
 }

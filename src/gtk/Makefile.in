@@ -1,18 +1,18 @@
 #
-#   Copyright 2009 Free Software Foundation, Inc.
+#   Copyright 2009 Free	Software Foundation, Inc.
 #
-#  This program is free software: you can redistribute it and/or modify
-#  it under the terms of the GNU General Public License as published by
-#  the Free Software Foundation, either version 3 of the License, or
-#  (at your option) any later version.
+#  This	program	is free	software: you can redistribute it and/or modify
+#  it under the	terms of the GNU General Public	License	as published by
+#  the Free Software Foundation, either	version	3 of the License, or
+#  (at your option) any	later version.
 #
-#  This program is distributed in the hope that it will be useful,
+#  This	program	is distributed in the hope that	it will	be useful,
 #  but WITHOUT ANY WARRANTY; without even the implied warranty of
-#  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.	 See the
 #  GNU General Public License for more details.
 #
-#   You should have received a copy of the GNU General Public License
-#  along with this program.  If not, see <http://www.gnu.org/licenses/>.
+#   You	should have received a copy of the GNU General Public License
+#  along with this program.  If	not, see <http://www.gnu.org/licenses/>.
 #
 #	Makefile for GTK routines
 #
@@ -25,8 +25,8 @@ BASE		=	../..
 HDRS		=	$(PARENT)/hdrs
 INLINE		=	$(PARENT)/inline
 CC		=	@CC@
-CCFLAGS		=	-O @gcc_useful_options@ @funny_compiler_options@
-SHLIBCC		=	libtool --mode=link $(CC) $(CCFLAGS)
+CCFLAGS		=	-O @gcc_useful_options@	@funny_compiler_options@
+SHLIBCC		=	libtool	--mode=link $(CC) $(CCFLAGS)
 LDFLAGS		=
 GTKINCL		=	`pkg-config --cflags gtk+-2.0`
 CFLAGS		=	$(CCFLAGS) -I$(HDRS) -I$(BASE) -I$(PARENT) $(GTKINCL)
@@ -41,38 +41,38 @@ RM		=	rm -f
 INSTALL		=	@INSTALL@
 INSTALL_DATA	=	@INSTALL_DATA@
 BATCHUSER	=	@BATCHUSER@
-USERMODES	=	-o $(BATCHUSER) -g root -m 4755
-NOSETMODES	=	-o $(BATCHUSER) -g root
-SUIDROOT	=	-o root -g root -m 4755
+USERMODES	=	-o $(BATCHUSER)	-g root	-m 4755
+NOSETMODES	=	-o $(BATCHUSER)	-g root
+SUIDROOT	=	-o root	-g root	-m 4755
 BINDIR		=	$(DESTDIR)@bindir@
 INTBINDIR	=	$(DESTDIR)@pkgexecdir@
 HELPFILEDIR	=	$(DESTDIR)@sphelpdir@
-USERBINS	=	gbch-xq gbch-xr gbch-xuser
+USERBINS	=	gbch-xq	gbch-xr	gbch-xuser
 NOSETUBINS	=	gbch-xfilemon
 SETUROOTSYSBINS	=	bgtkldsv
 NOSETUSYSBINS	=	bgtksave
 XRES		=	xbtq.xpm xbtq.menu xbtqview.menu xbtqsel.menu xbtuser.xpm xbtuser.menu xbtr.menu xbtr.xpm
 
-XFILEMONOBJS=xfilemon.o gtk_lib.o
-XBTQOBJS=xbtq.o xbq_jvlist.o xbq_cbs.o xbq_jcall.o xbq_jobpar.o xbq_cmdint.o xbq_vcall.o xbq_view.o gtk_lib.o gtk_modebits.o
+XFILEMONOBJS=xfilemon.o	gtk_lib.o
+XBTQOBJS=xbtq.o	xbq_jvlist.o xbq_cbs.o xbq_jcall.o xbq_jobpar.o	xbq_cmdint.o xbq_vcall.o xbq_view.o gtk_lib.o gtk_modebits.o
 XBTUSEROBJS=xbtuser.o xbtu_cbs.o gtk_lib.o gtk_modebits.o
-XBTROBJS=xbtr.o xbr_jlist.o xbr_cbs.o xbr_jcall.o xbr_jobpar.o xbr_remsub.o xbr_jldsv.o gtk_lib.o gtk_modebits.o
+XBTROBJS=xbtr.o	xbr_jlist.o xbr_cbs.o xbr_jcall.o xbr_jobpar.o xbr_remsub.o xbr_jldsv.o	gtk_lib.o gtk_modebits.o
 BGTKSAVEOBJS=bgtksave.o
 BGTKLDSVOBJS=bgtkldsv.o
 
 all:	gbch-xfilemon gbch-xq gbch-xr gbch-xuser bgtksave bgtkldsv
 
 gbch-xfilemon:	$(XFILEMONOBJS)
-		$(SHLIBCC) -o gbch-xfilemon $(LDFLAGS) $(XFILEMONOBJS) $(SHLIB) $(SHLIBCLIENT) $(GTKLIBS) $(LIBNET) $(LIBS)
+		$(SHLIBCC) -o gbch-xfilemon $(LDFLAGS) $(XFILEMONOBJS) $(SHLIB)	$(SHLIBCLIENT) $(GTKLIBS) $(LIBNET) $(LIBS)
 
 gbch-xq:	$(XBTQOBJS)
-		$(SHLIBCC) -o gbch-xq $(LDFLAGS) $(XBTQOBJS) $(SHLIB) $(SHLIBCLIENT) $(GTKLIBS) $(LIBNET) $(LIBS)
+		$(SHLIBCC) -o gbch-xq $(LDFLAGS) $(XBTQOBJS) $(SHLIB) $(SHLIBCLIENT) $(GTKLIBS)	$(LIBNET) $(LIBS)
 
 gbch-xr:	$(XBTROBJS)
-		$(SHLIBCC) -o gbch-xr $(LDFLAGS) $(XBTROBJS) $(SHLIB) $(SHLIBCLIENT) $(GTKLIBS) $(LIBNET) $(LIBS)
+		$(SHLIBCC) -o gbch-xr $(LDFLAGS) $(XBTROBJS) $(SHLIB) $(SHLIBCLIENT) $(GTKLIBS)	$(LIBNET) $(LIBS)
 
 gbch-xuser:	$(XBTUSEROBJS)
-		$(SHLIBCC) -o gbch-xuser $(LDFLAGS) $(XBTUSEROBJS) $(SHLIB) $(SHLIBCLIENT) $(GTKLIBS) $(LIBNET) $(LIBS)
+		$(SHLIBCC) -o gbch-xuser $(LDFLAGS) $(XBTUSEROBJS) $(SHLIB) $(SHLIBCLIENT) $(GTKLIBS) $(LIBNET)	$(LIBS)
 
 xbr_jcall.o:	xbq_jcall.c
 	$(CC) -c -o $@ $(CFLAGS) -DIN_XBTR xbq_jcall.c
@@ -80,7 +80,7 @@ xbr_jcall.o:	xbq_jcall.c
 xbr_jobpar.o:	xbq_jobpar.c
 	$(CC) -c -o $@ $(CFLAGS) -DIN_XBTR xbq_jobpar.c
 
-# bgtksave and bgtkldsv don't use any library routines (apart from versionprint) so
+# bgtksave and bgtkldsv	don't use any library routines (apart from versionprint) so
 # we don't bother with shared libraries
 
 bgtksave: bgtksave.o
@@ -90,18 +90,18 @@ bgtkldsv: bgtkldsv.o
 		$(CC) -o $@ $(BGTKLDSVOBJS) $(LDFLAGS) $(LIB) $(LIBS)
 
 install:	all
-		libtool --mode=install $(INSTALL) $(USERMODES) $(USERBINS) $(BINDIR)
-		libtool --mode=install $(INSTALL) $(NOSETUBINS) $(BINDIR)
-		libtool --mode=install $(INSTALL) $(SUIDROOT) $(SETUROOTSYSBINS) $(INTBINDIR)
-		libtool --mode=install $(INSTALL) $(NOSETMODES) $(NOSETUSYSBINS) $(INTBINDIR)
-		$(INSTALL_DATA) $(XRES) $(HELPFILEDIR)
+		libtool	--mode=install $(INSTALL) $(USERMODES) $(USERBINS) $(BINDIR)
+		libtool	--mode=install $(INSTALL) $(NOSETUBINS)	$(BINDIR)
+		libtool	--mode=install $(INSTALL) $(SUIDROOT) $(SETUROOTSYSBINS) $(INTBINDIR)
+		libtool	--mode=install $(INSTALL) $(NOSETMODES)	$(NOSETUSYSBINS) $(INTBINDIR)
+		$(INSTALL_DATA)	$(XRES)	$(HELPFILEDIR)
 
 install-strip:	all
-		libtool --mode=install $(INSTALL) -s $(USERMODES) $(USERBINS) $(BINDIR)
-		libtool --mode=install $(INSTALL) -s $(NOSETUBINS) $(BINDIR)
-		libtool --mode=install $(INSTALL) -s $(SUIDROOT) $(SETUROOTSYSBINS) $(INTBINDIR)
-		libtool --mode=install $(INSTALL) -s $(NOSETMODES) $(NOSETUSYSBINS) $(INTBINDIR)
-		$(INSTALL_DATA) $(XRES) $(HELPFILEDIR)
+		libtool	--mode=install $(INSTALL) -s $(USERMODES) $(USERBINS) $(BINDIR)
+		libtool	--mode=install $(INSTALL) -s $(NOSETUBINS) $(BINDIR)
+		libtool	--mode=install $(INSTALL) -s $(SUIDROOT) $(SETUROOTSYSBINS) $(INTBINDIR)
+		libtool	--mode=install $(INSTALL) -s $(NOSETMODES) $(NOSETUSYSBINS) $(INTBINDIR)
+		$(INSTALL_DATA)	$(XRES)	$(HELPFILEDIR)
 
 clean:
 	$(RM) *.o gbch-xq gbch-xuser gbch-xr gbch-xfilemon bgtksave bgtkldsv

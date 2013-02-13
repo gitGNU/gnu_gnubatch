@@ -17,18 +17,18 @@
 
 JFORMAT(fmt_export)
 {
-	static	char	*exportname, *remrunname;
+        static  char    *exportname, *remrunname;
 
-	if  (!exportname)  {
-		exportname = gprompt($P{Exportable flag});
-		remrunname = gprompt($P{Remote runnable flag});
-	}
-	if  (jp->h.bj_jflags & BJ_REMRUNNABLE)
-		return  (fmt_t) strlen(strcpy(bigbuff, remrunname));
-	else	if  (jp->h.bj_jflags & BJ_EXPORT)
-		return  (fmt_t) strlen(strcpy(bigbuff, exportname));
-	else  {
-		bigbuff[0] = '\0';
-		return  0;
-	}
+        if  (!exportname)  {
+                exportname = gprompt($P{Exportable flag});
+                remrunname = gprompt($P{Remote runnable flag});
+        }
+        if  (jp->h.bj_jflags & BJ_REMRUNNABLE)
+                return  (fmt_t) strlen(strcpy(bigbuff, remrunname));
+        else    if  (jp->h.bj_jflags & BJ_EXPORT)
+                return  (fmt_t) strlen(strcpy(bigbuff, exportname));
+        else  {
+                bigbuff[0] = '\0';
+                return  0;
+        }
 }

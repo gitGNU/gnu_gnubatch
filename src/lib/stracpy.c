@@ -20,18 +20,18 @@
 
 /* Include this here as it's used virtually everywhere */
 
-int	Ignored_error;
+int     Ignored_error;
 
-static	char	Filename[] = __FILE__;
+static  char    Filename[] = __FILE__;
 
 /* Yes I have heard of strdup but UNIXes hadn't when I wrote this.
    Also I want to abort if no space */
 
 char *stracpy(const char *s)
 {
-	unsigned  l = strlen(s) + 1;
-	char	*r;
-	if  ((r = malloc(l)) == (char *) 0)
-		ABORT_NOMEM;
-	return	strcpy(r, s);
+        unsigned  l = strlen(s) + 1;
+        char    *r;
+        if  ((r = malloc(l)) == (char *) 0)
+                ABORT_NOMEM;
+        return  strcpy(r, s);
 }

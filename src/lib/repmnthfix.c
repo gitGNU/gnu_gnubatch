@@ -22,41 +22,41 @@
 
 #include "config.h"
 #include <sys/types.h>
-#ifdef	TIME_WITH_SYS_TIME
+#ifdef  TIME_WITH_SYS_TIME
 #include <sys/time.h>
 #include <time.h>
-#elif	defined(HAVE_SYS_TIME_H)
+#elif   defined(HAVE_SYS_TIME_H)
 #include <sys/time.h>
 #else
 #include <time.h>
 #endif
 #include "timecon.h"
 
-extern	char	month_days[];
+extern  char    month_days[];
 
 int  repmnthfix(TimeconRef tcr)
 {
-	struct	tm	*t;
-	int	curml;
+        struct  tm      *t;
+        int     curml;
 
-	if  (tcr->tc_repeat != TC_MONTHSB  &&  tcr->tc_repeat != TC_MONTHSE)
-		return  0;
+        if  (tcr->tc_repeat != TC_MONTHSB  &&  tcr->tc_repeat != TC_MONTHSE)
+                return  0;
 
-	t = localtime(&tcr->tc_nexttime);
-	month_days[1] = t->tm_year % 4 == 0? 29: 28;
-	curml = month_days[t->tm_mon];
-	if  (tcr->tc_repeat == TC_MONTHSB)  {
-		if  (tcr->tc_mday == 0)
-			tcr->tc_mday = t->tm_mday;
-		return  0;
-	}
-	if  (tcr->tc_mday == 0)
-		tcr->tc_mday = curml - t->tm_mday;
-	else	if  ((int) tcr->tc_mday >= curml)
-		tcr->tc_mday = 0;
-	else
-		tcr->tc_mday = curml - tcr->tc_mday;
-	if  (tcr->tc_mday >= 21)
-		return  $E{Could repeat endlessly};
-	return  0;
+        t = localtime(&tcr->tc_nexttime);
+        month_days[1] = t->tm_year % 4 == 0? 29: 28;
+        curml = month_days[t->tm_mon];
+        if  (tcr->tc_repeat == TC_MONTHSB)  {
+                if  (tcr->tc_mday == 0)
+                        tcr->tc_mday = t->tm_mday;
+                return  0;
+        }
+        if  (tcr->tc_mday == 0)
+                tcr->tc_mday = curml - t->tm_mday;
+        else    if  ((int) tcr->tc_mday >= curml)
+                tcr->tc_mday = 0;
+        else
+                tcr->tc_mday = curml - tcr->tc_mday;
+        if  (tcr->tc_mday >= 21)
+                return  $E{Could repeat endlessly};
+        return  0;
 }

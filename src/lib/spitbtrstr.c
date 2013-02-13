@@ -21,14 +21,14 @@
 
 void  spitbtrstr(const int arg, FILE *xfl, const int term)
 {
-	int	v = arg - $A{btr arg explain};
+        int     v = arg - $A{btr arg explain};
 
-	if  (optvec[v].isplus)
-		fprintf(xfl, " +%s ", optvec[v].aun.string);
-	else  if  (optvec[v].aun.letter == 0)
-		fprintf(xfl, " +missing-arg-code-%d ", arg);
-	else
-		fprintf(xfl, " -%c ", optvec[v].aun.letter);
-	if  (term)
-		fputs("\\\n", xfl);
+        if  (optvec[v].isplus)
+                fprintf(xfl, " +%s ", optvec[v].aun.string);
+        else  if  (optvec[v].aun.letter == 0)
+                fprintf(xfl, " +missing-arg-code-%d ", arg);
+        else
+                fprintf(xfl, " -%c ", optvec[v].aun.letter);
+        if  (term)
+                fputs("\\\n", xfl);
 }

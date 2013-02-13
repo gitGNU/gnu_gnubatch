@@ -19,25 +19,25 @@
 #include <stdio.h>
 #include "helpargs.h"
 
-struct	optv	optvec[MAX_ANY_ARGS];
+struct  optv    optvec[MAX_ANY_ARGS];
 
 void  makeoptvec(const HelpargRef ha, const int firstarg, const int lastarg)
 {
-	int	i, v;
-	HelpargkeyRef	hk;
+        int     i, v;
+        HelpargkeyRef   hk;
 
-	for  (i = 0;  i < ARG_ENDV - ARG_STARTV + 1;  i++)  {
-		v = ha[i].value - firstarg;
-		if  (v >= 0 && v <= lastarg - firstarg)  {
-			optvec[v].isplus = 0;
-			optvec[v].aun.letter = i + ARG_STARTV;
-		}
-		for  (hk = ha[i].mult_chain;  hk;  hk = hk->next)  {
-			v = hk->value - firstarg;
-			if  (v >= 0  &&  v <= lastarg - firstarg  &&  !optvec[v].isplus  &&  optvec[v].aun.letter == 0)  {
-				optvec[v].isplus = 1;
-				optvec[v].aun.string = hk->chars;
-			}
-		}
-	}
+        for  (i = 0;  i < ARG_ENDV - ARG_STARTV + 1;  i++)  {
+                v = ha[i].value - firstarg;
+                if  (v >= 0 && v <= lastarg - firstarg)  {
+                        optvec[v].isplus = 0;
+                        optvec[v].aun.letter = i + ARG_STARTV;
+                }
+                for  (hk = ha[i].mult_chain;  hk;  hk = hk->next)  {
+                        v = hk->value - firstarg;
+                        if  (v >= 0  &&  v <= lastarg - firstarg  &&  !optvec[v].isplus  &&  optvec[v].aun.letter == 0)  {
+                                optvec[v].isplus = 1;
+                                optvec[v].aun.string = hk->chars;
+                        }
+                }
+        }
 }

@@ -17,18 +17,18 @@
 
 JFORMAT(fmt_exits)
 {
-#ifdef	CHARSPRINTF
-	if  (isreadable)  {
-		sprintf(bigbuff, "N(%d,%d),E(%d,%d)",
-			       jp->h.bj_exits.nlower, jp->h.bj_exits.nupper,
-			       jp->h.bj_exits.elower, jp->h.bj_exits.eupper);
-		return  (fmt_t) strlen(bigbuff);
-	}
+#ifdef  CHARSPRINTF
+        if  (isreadable)  {
+                sprintf(bigbuff, "N(%d,%d),E(%d,%d)",
+                               jp->h.bj_exits.nlower, jp->h.bj_exits.nupper,
+                               jp->h.bj_exits.elower, jp->h.bj_exits.eupper);
+                return  (fmt_t) strlen(bigbuff);
+        }
 #else
-	if  (isreadable)
-		return	(fmt_t) sprintf(bigbuff, "N(%d,%d),E(%d,%d)",
-					jp->h.bj_exits.nlower, jp->h.bj_exits.nupper,
-					jp->h.bj_exits.elower, jp->h.bj_exits.eupper);
+        if  (isreadable)
+                return  (fmt_t) sprintf(bigbuff, "N(%d,%d),E(%d,%d)",
+                                        jp->h.bj_exits.nlower, jp->h.bj_exits.nupper,
+                                        jp->h.bj_exits.elower, jp->h.bj_exits.eupper);
 #endif
-	return  0;
+        return  0;
 }

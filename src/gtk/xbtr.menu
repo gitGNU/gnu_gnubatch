@@ -1,79 +1,79 @@
 <ui>
   <menubar name='MenuBar'>
     <menu action='OptMenu'>
-	<menuitem action='Viewopts'/>
-	<menuitem action='Saveopts'/>
-	<separator/>
-	<menuitem action='Selectdir'/>
-	<separator/>
-	<menuitem action='Loaddefsc'/>
-	<menuitem action='Savedefsc'/>
-	<separator/>
-	<menuitem action='Loaddefsh'/>
-	<menuitem action='Savedefsh'/>
-	<separator/>
-	<menuitem action='Quit'/>
+        <menuitem action='Viewopts'/>
+        <menuitem action='Saveopts'/>
+        <separator/>
+        <menuitem action='Selectdir'/>
+        <separator/>
+        <menuitem action='Loaddefsc'/>
+        <menuitem action='Savedefsc'/>
+        <separator/>
+        <menuitem action='Loaddefsh'/>
+        <menuitem action='Savedefsh'/>
+        <separator/>
+        <menuitem action='Quit'/>
     </menu>
     <menu action='DefsMenu'>
-	<menuitem action='Defhost'/>
-	<separator/>
-	<menuitem action='Queued'/>
-	<menuitem action='Setrund'/>
-	<menuitem action='Setcancd'/>
-	<menuitem action='Timed'/>
-	<menuitem action='Titled'/>
-	<menuitem action='Processd'/>
-	<menuitem action='Runtimed'/>
-	<menuitem action='Maild'/>
-	<menuitem action='Permjd'/>
-	<separator/>
-	<menuitem action='Argsd'/>
-	<menuitem action='Envd'/>
-	<menuitem action='Redirsd'/>
-	<separator/>
-	<menuitem action='Condsd'/>
-	<menuitem action='Assesd'/>
+        <menuitem action='Defhost'/>
+        <separator/>
+        <menuitem action='Queued'/>
+        <menuitem action='Setrund'/>
+        <menuitem action='Setcancd'/>
+        <menuitem action='Timed'/>
+        <menuitem action='Titled'/>
+        <menuitem action='Processd'/>
+        <menuitem action='Runtimed'/>
+        <menuitem action='Maild'/>
+        <menuitem action='Permjd'/>
+        <separator/>
+        <menuitem action='Argsd'/>
+        <menuitem action='Envd'/>
+        <menuitem action='Redirsd'/>
+        <separator/>
+        <menuitem action='Condsd'/>
+        <menuitem action='Assesd'/>
     </menu>
     <menu action='FileMenu'>
-	<menuitem action='New'/>
-	<menuitem action='Open'/>
-	<menuitem action='Close'/>
-	<menuitem action='Cmdfile'/>
-	<menuitem action='Jobfile'/>
-	<menuitem action='Save'/>
-	<menuitem action='Edit'/>
-	<separator/>
-	<menuitem action='Delete'/>
-	<separator/>
-	<menuitem action='Submit'/>
-	<menuitem action='Rsubmit'/>
+        <menuitem action='New'/>
+        <menuitem action='Open'/>
+        <menuitem action='Close'/>
+        <menuitem action='Cmdfile'/>
+        <menuitem action='Jobfile'/>
+        <menuitem action='Save'/>
+        <menuitem action='Edit'/>
+        <separator/>
+        <menuitem action='Delete'/>
+        <separator/>
+        <menuitem action='Submit'/>
+        <menuitem action='Rsubmit'/>
     </menu>
     <menu action='JobMenu'>
-	<menuitem action='Queue'/>
-	<menuitem action='Setrun'/>
-	<menuitem action='Setcanc'/>
-	<menuitem action='Time'/>
-	<menuitem action='Title'/>
-	<menuitem action='Process'/>
-	<menuitem action='Runtime'/>
-	<menuitem action='Mail'/>
-	<menuitem action='Permj'/>
-	<separator/>
-	<menuitem action='Args'/>
-	<menuitem action='Env'/>
-	<menuitem action='Redirs'/>
-	<separator/>
-	<menuitem action='Conds'/>
-	<menuitem action='Asses'/>
+        <menuitem action='Queue'/>
+        <menuitem action='Setrun'/>
+        <menuitem action='Setcanc'/>
+        <menuitem action='Time'/>
+        <menuitem action='Title'/>
+        <menuitem action='Process'/>
+        <menuitem action='Runtime'/>
+        <menuitem action='Mail'/>
+        <menuitem action='Permj'/>
+        <separator/>
+        <menuitem action='Args'/>
+        <menuitem action='Env'/>
+        <menuitem action='Redirs'/>
+        <separator/>
+        <menuitem action='Conds'/>
+        <menuitem action='Asses'/>
     </menu>
     <menu action='HelpMenu'>
       <menuitem action='About'/>
     </menu>
   </menubar>
   <popup action="jpop">
-	<menuitem action="Edit"/>
-	<separator/>
-	<menuitem action="Submit"/>
-	<menuitem action="Rsubmit"/>
+        <menuitem action="Edit"/>
+        <separator/>
+        <menuitem action="Submit"/>
+        <menuitem action="Rsubmit"/>
   </popup>
 </ui>

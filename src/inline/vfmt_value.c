@@ -17,27 +17,27 @@
 
 VFORMAT(fmt_value)
 {
-	CBtconRef	cp = &vp->var_value;
+        CBtconRef       cp = &vp->var_value;
 
-	if  (isreadable)  {
-#ifdef	CHARSPRINTF
-		if  (cp->const_type == CON_STRING)
-			sprintf(bigbuff,
-				       strchr(cp->con_un.con_string, ' ') ||
-				       isdigit(cp->con_un.con_string[0])? "\"%s\"": "%s",
-				       cp->con_un.con_string);
-		else
-			sprintf(bigbuff, "%ld", (long) cp->con_un.con_long);
-		return  (fmt_t) strlen(bigbuff);
+        if  (isreadable)  {
+#ifdef  CHARSPRINTF
+                if  (cp->const_type == CON_STRING)
+                        sprintf(bigbuff,
+                                       strchr(cp->con_un.con_string, ' ') ||
+                                       isdigit(cp->con_un.con_string[0])? "\"%s\"": "%s",
+                                       cp->con_un.con_string);
+                else
+                        sprintf(bigbuff, "%ld", (long) cp->con_un.con_long);
+                return  (fmt_t) strlen(bigbuff);
 #else
-		if  (cp->const_type == CON_STRING)
-			return  (fmt_t) sprintf(bigbuff,
-						strchr(cp->con_un.con_string, ' ') ||
-						isdigit(cp->con_un.con_string[0])? "\"%s\"": "%s",
-						cp->con_un.con_string);
-		else
-			return  (fmt_t) sprintf(bigbuff, "%ld", (long) cp->con_un.con_long);
+                if  (cp->const_type == CON_STRING)
+                        return  (fmt_t) sprintf(bigbuff,
+                                                strchr(cp->con_un.con_string, ' ') ||
+                                                isdigit(cp->con_un.con_string[0])? "\"%s\"": "%s",
+                                                cp->con_un.con_string);
+                else
+                        return  (fmt_t) sprintf(bigbuff, "%ld", (long) cp->con_un.con_long);
 #endif
-	}
-	return  0;
+        }
+        return  0;
 }

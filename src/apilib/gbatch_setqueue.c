@@ -30,32 +30,32 @@ extern struct api_fd *gbatch_look_fd(const int);
 
 int  gbatch_setqueue(const int fd, const char *queuename)
 {
-	int	ret;
-	unsigned	length;
-	struct	api_fd	*fdp = gbatch_look_fd(fd);
-	struct	api_msg	msg;
+        int     ret;
+        unsigned        length;
+        struct  api_fd  *fdp = gbatch_look_fd(fd);
+        struct  api_msg msg;
 
-	if  (!fdp)
-		return  XB_INVALID_FD;
-	msg.code = API_SETQUEUE;
-	length = queuename && queuename[0]? strlen(queuename) + 1: 0;
-	msg.un.queuelength = htons((USHORT) length);
-	if  ((ret = gbatch_wmsg(fdp, &msg)))
-		return  ret;
-	if  (length != 0  &&  (ret = gbatch_write(fdp->sockfd, (char *) queuename, length)))
-		return  ret;
-	if  ((ret = gbatch_rmsg(fdp, &msg)))
-		return  ret;
-	if  (msg.retcode != 0)
-		return  (SHORT) ntohs(msg.retcode);
-	if  (fdp->queuename)  {
-		free(fdp->queuename);
-		fdp->queuename = (char *) 0;
-	}
-	if  (length != 0)  {
-		if  (!(fdp->queuename = malloc(length)))
-			return  XB_NOMEM;
-		BLOCK_COPY(fdp->queuename, queuename, length);
-	}
-	return  XB_OK;
+        if  (!fdp)
+                return  XB_INVALID_FD;
+        msg.code = API_SETQUEUE;
+        length = queuename && queuename[0]? strlen(queuename) + 1: 0;
+        msg.un.queuelength = htons((USHORT) length);
+        if  ((ret = gbatch_wmsg(fdp, &msg)))
+                return  ret;
+        if  (length != 0  &&  (ret = gbatch_write(fdp->sockfd, (char *) queuename, length)))
+                return  ret;
+        if  ((ret = gbatch_rmsg(fdp, &msg)))
+                return  ret;
+        if  (msg.retcode != 0)
+                return  (SHORT) ntohs(msg.retcode);
+        if  (fdp->queuename)  {
+                free(fdp->queuename);
+                fdp->queuename = (char *) 0;
+        }
+        if  (length != 0)  {
+                if  (!(fdp->queuename = malloc(length)))
+                        return  XB_NOMEM;
+                BLOCK_COPY(fdp->queuename, queuename, length);
+        }
+        return  XB_OK;
 }

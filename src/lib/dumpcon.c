@@ -24,12 +24,12 @@ void  dumpstr(FILE *, char *);
 
 void  dumpcon(FILE *dest, BtconRef con)
 {
-	if  (con->const_type == CON_STRING)  {
-		char	*str = con->con_un.con_string;
-		if  (isdigit(str[0]))
-			putc(':', dest);
-		dumpstr(dest, str);
-	}
-	else
-		fprintf(dest, "%ld", (long) con->con_un.con_long);
+        if  (con->const_type == CON_STRING)  {
+                char    *str = con->con_un.con_string;
+                if  (isdigit(str[0]))
+                        putc(':', dest);
+                dumpstr(dest, str);
+        }
+        else
+                fprintf(dest, "%ld", (long) con->con_un.con_long);
 }

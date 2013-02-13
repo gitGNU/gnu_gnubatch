@@ -17,41 +17,28 @@
 
 JFORMAT(fmt_cond)
 {
-	fmt_t  lng = 0;
-#ifdef	CHARSPRINTF
-	int	cnt;
+        fmt_t  lng = 0;
+#ifdef  CHARSPRINTF
+        int     cnt;
 #endif
-	if  (isreadable)  {
-		int	uc;
-		const	Btvar	*vp;
-		const	Jcond	*cp;
+        if  (isreadable)  {
+                int     uc;
+                const   Btvar   *vp;
+                const   Jcond   *cp;
 
-		for  (uc = 0;  uc < MAXCVARS;  uc++)  {
-			cp = &jp->h.bj_conds[uc];
-			if  (cp->bjc_compar == C_UNUSED)
-				break;
-			if  (uc != 0)
-				bigbuff[lng++] = ',';
-			vp = &Var_seg.vlist[cp->bjc_varind].Vent;
-#ifdef	CHARSPRINTF
-			if  (vp->var_id.hostid)  {
-				sprintf(&bigbuff[lng], "%s:", look_host(vp->var_id.hostid));
-				cnt = strlen(&bigbuff[lng]);
-				lng += cnt;
-			}
-			sprintf(&bigbuff[lng], "%s", vp->var_name);
-			cnt = strlen(&bigbuff[lng]);
-			lng += cnt;
-#else
-			if  (vp->var_id.hostid)
-				lng += sprintf(&bigbuff[lng], "%s:", look_host(vp->var_id.hostid));
-			lng += sprintf(&bigbuff[lng], "%s", vp->var_name);
+                for  (uc = 0;  uc < MAXCVARS;  uc++)  {
+                        cp = &jp->h.bj_conds[uc];
+                        if  (cp->bjc_compar == C_UNUSED)
+                                break;
+                        if  (uc != 0)
+                                bigbuff[lng++] = ',';
+                        vp = &Var_seg.vlist[cp->bjc_varind].Vent;
+			lng += strlen(strcpy(&bigbuff[lng], host_prefix_str(vp->var_id.hostid, vp->var_name)));
+                }
+        }
+#ifndef BTJLIST_INLINE
+        if  (lng > fwidth)
+                return  (int) strlen(strcpy(bigbuff, defcondstr));
 #endif
-		}
-	}
-#ifndef	BTJLIST_INLINE
-	if  (lng > fwidth)
-		return  (int) strlen(strcpy(bigbuff, defcondstr));
-#endif
-	return  lng;
+        return  lng;
 }

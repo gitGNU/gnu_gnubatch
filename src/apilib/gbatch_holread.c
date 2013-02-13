@@ -27,53 +27,53 @@ extern int  gbatch_rmsg(const struct api_fd *, struct api_msg *);
 extern int  gbatch_wmsg(const struct api_fd *, struct api_msg *);
 extern struct api_fd *gbatch_look_fd(const int);
 
-int	gbatch_holread(const int fd, const unsigned flags, int year, unsigned char **hols)
+int     gbatch_holread(const int fd, const unsigned flags, int year, unsigned char **hols)
 {
-	int		ret;
-	struct	api_fd	*fdp = gbatch_look_fd(fd);
-	struct	api_msg	msg;
+        int             ret;
+        struct  api_fd  *fdp = gbatch_look_fd(fd);
+        struct  api_msg msg;
 
-	if  (!fdp)
-		return  XB_INVALID_FD;
-	if  (year < 1990)  {
-		if  (year > 90 && year < 200)
-			year += 1900;
-		else
-			return  XB_INVALID_YEAR;
-	}
-	msg.code = API_HOLREAD;
-	msg.un.reader.flags = htonl(flags);
-	msg.un.reader.slotno = htonl(year);
-	if  ((ret = gbatch_wmsg(fdp, &msg)))
-		return  ret;
-	if  ((ret = gbatch_rmsg(fdp, &msg)))
-		return  ret;
-	if  (msg.retcode != 0)
-		return  (SHORT) ntohs(msg.retcode);
+        if  (!fdp)
+                return  XB_INVALID_FD;
+        if  (year < 1990)  {
+                if  (year > 90 && year < 200)
+                        year += 1900;
+                else
+                        return  XB_INVALID_YEAR;
+        }
+        msg.code = API_HOLREAD;
+        msg.un.reader.flags = htonl(flags);
+        msg.un.reader.slotno = htonl(year);
+        if  ((ret = gbatch_wmsg(fdp, &msg)))
+                return  ret;
+        if  ((ret = gbatch_rmsg(fdp, &msg)))
+                return  ret;
+        if  (msg.retcode != 0)
+                return  (SHORT) ntohs(msg.retcode);
 
-	/* Try to allocate enough space to hold the list.  If we don't
-	   succeed we'd better carry on reading it so we don't
-	   get out of sync.  */
+        /* Try to allocate enough space to hold the list.  If we don't
+           succeed we'd better carry on reading it so we don't
+           get out of sync.  */
 
-	if  (fdp->bufmax < YVECSIZE)  {
-		if  (fdp->bufmax != 0)  {
-			free(fdp->buff);
-			fdp->bufmax = 0;
-			fdp->buff = (char *) 0;
-		}
-		if  (!(fdp->buff = malloc(YVECSIZE)))  {
-			unsigned  char	slurp[YVECSIZE];
-			if  ((ret = gbatch_read(fdp->sockfd, (char *) slurp, sizeof(slurp))))
-				return  ret;
-			return  XB_NOMEM;
-		}
-		fdp->bufmax = YVECSIZE;
-	}
+        if  (fdp->bufmax < YVECSIZE)  {
+                if  (fdp->bufmax != 0)  {
+                        free(fdp->buff);
+                        fdp->bufmax = 0;
+                        fdp->buff = (char *) 0;
+                }
+                if  (!(fdp->buff = malloc(YVECSIZE)))  {
+                        unsigned  char  slurp[YVECSIZE];
+                        if  ((ret = gbatch_read(fdp->sockfd, (char *) slurp, sizeof(slurp))))
+                                return  ret;
+                        return  XB_NOMEM;
+                }
+                fdp->bufmax = YVECSIZE;
+        }
 
-	if  ((ret = gbatch_read(fdp->sockfd, fdp->buff, YVECSIZE)))
-		return  ret;
+        if  ((ret = gbatch_read(fdp->sockfd, fdp->buff, YVECSIZE)))
+                return  ret;
 
-	if  (hols)
-		*hols = (unsigned char *) fdp->buff;
-	return  XB_OK;
+        if  (hols)
+                *hols = (unsigned char *) fdp->buff;
+        return  XB_OK;
 }

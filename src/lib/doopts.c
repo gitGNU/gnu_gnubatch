@@ -27,115 +27,115 @@
 /* Put this here to resolve references in shared libraries.
    Some of these ought to be moved in due course.  */
 
-ULONG	Anychanges, Procparchanges, Condasschanges, Timechanges, Dispflags;
-int	arg_errnum;
+ULONG   Anychanges, Procparchanges, Condasschanges, Timechanges, Dispflags;
+int     arg_errnum;
 
 char **doopts(char **argv, HelpargRef Adesc, optparam *const optlist, const int minstate)
 {
-	char	*arg;
-	int		ad, rc;
-	HelpargkeyRef	ap;
+        char    *arg;
+        int             ad, rc;
+        HelpargkeyRef   ap;
 
  nexta:
-	for  (;;)  {
-		arg = *++argv;
-		if  (arg == (char *) 0 || (*arg != '-' && *arg != '+'))
-			return	argv;
+        for  (;;)  {
+                arg = *++argv;
+                if  (arg == (char *) 0 || (*arg != '-' && *arg != '+'))
+                        return  argv;
 
-		if  (*arg == '-')  {
+                if  (*arg == '-')  {
 
-			/* Treat -- as alternative to + to start keywords
-			   or -- on its own as end of arguments */
+                        /* Treat -- as alternative to + to start keywords
+                           or -- on its own as end of arguments */
 
-			if  (*++arg == '-')  {
-				if  (*++arg)
-					goto  keyw_arg;
-				return  ++argv;
-			}
+                        if  (*++arg == '-')  {
+                                if  (*++arg)
+                                        goto  keyw_arg;
+                                return  ++argv;
+                        }
 
-			/* Past initial '-', argv still on whole argument */
+                        /* Past initial '-', argv still on whole argument */
 
-			while  (*arg >= ARG_STARTV)  {
-				ad = Adesc[*arg - ARG_STARTV].value;
-				if  (ad == 0  ||  ad < minstate)  {
-					disp_str = *argv;
-					print_error($E{program arg error});
-					exit(E_USAGE);
-				}
+                        while  (*arg >= ARG_STARTV)  {
+                                ad = Adesc[*arg - ARG_STARTV].value;
+                                if  (ad == 0  ||  ad < minstate)  {
+                                        disp_str = *argv;
+                                        print_error($E{program arg error});
+                                        exit(E_USAGE);
+                                }
 
-				/* Each function returns:
-				   1 (OPTRESULT_ARG_OK)
-					if it eats the argument and it's OK
-				   2 (OPTRESULT_LAST_ARG_OK)
-				 	ditto but the argument must be last
-				   0 (OPTRESULT_OK)
-				 	if it ignores the argument.
-				  -1 (OPTRESULT_MISSARG) if no arg and one reqd
-				  -2 (OPTRESULT_ERROR) if something is wrong
-				        error code in arg_errnum. */
+                                /* Each function returns:
+                                   1 (OPTRESULT_ARG_OK)
+                                        if it eats the argument and it's OK
+                                   2 (OPTRESULT_LAST_ARG_OK)
+                                        ditto but the argument must be last
+                                   0 (OPTRESULT_OK)
+                                        if it ignores the argument.
+                                  -1 (OPTRESULT_MISSARG) if no arg and one reqd
+                                  -2 (OPTRESULT_ERROR) if something is wrong
+                                        error code in arg_errnum. */
 
-				if  (!*++arg)  { /* No trailing stuff after arg letter */
-					disp_str = argv[1];	/* Saves doing it later */
+                                if  (!*++arg)  { /* No trailing stuff after arg letter */
+                                        disp_str = argv[1];     /* Saves doing it later */
 
-					if  ((rc = (optlist[ad - minstate])(argv[1])) < OPTRESULT_OK)  {
-						if  (rc == OPTRESULT_MISSARG)  {
-							disp_str = *argv;
-							print_error($E{program opt expects arg});
-						}
-						else
-							print_error(arg_errnum);
-						exit(E_USAGE);
-					}
-					if  (rc > OPTRESULT_OK)  { /* Eaten the next arg */
-						if  (rc > OPTRESULT_ARG_OK) /* Last stop at once */
-							return  argv;
-						argv++;
-					}
-					goto  nexta;
-				}
+                                        if  ((rc = (optlist[ad - minstate])(argv[1])) < OPTRESULT_OK)  {
+                                                if  (rc == OPTRESULT_MISSARG)  {
+                                                        disp_str = *argv;
+                                                        print_error($E{program opt expects arg});
+                                                }
+                                                else
+                                                        print_error(arg_errnum);
+                                                exit(E_USAGE);
+                                        }
+                                        if  (rc > OPTRESULT_OK)  { /* Eaten the next arg */
+                                                if  (rc > OPTRESULT_ARG_OK) /* Last stop at once */
+                                                        return  argv;
+                                                argv++;
+                                        }
+                                        goto  nexta;
+                                }
 
-				/* Trailing stuff after arg letter, we incremented to it */
+                                /* Trailing stuff after arg letter, we incremented to it */
 
-				disp_str = arg;
-				if  ((rc = (optlist[ad - minstate])(arg)) > OPTRESULT_OK)  { /* Eaten */
-					if  (rc > OPTRESULT_ARG_OK)	/* Last of its kind */
-						return  argv;		/* Point to "this" */
-					goto  nexta;
-				}
+                                disp_str = arg;
+                                if  ((rc = (optlist[ad - minstate])(arg)) > OPTRESULT_OK)  { /* Eaten */
+                                        if  (rc > OPTRESULT_ARG_OK)     /* Last of its kind */
+                                                return  argv;           /* Point to "this" */
+                                        goto  nexta;
+                                }
 
-			}
-			continue;
-		}
+                        }
+                        continue;
+                }
 
-		arg++;		/* Increment past '+' */
+                arg++;          /* Increment past '+' */
 
-	keyw_arg:
+        keyw_arg:
 
-		for  (ap = Adesc[tolower(*arg) - ARG_STARTV].mult_chain;  ap;  ap = ap->next)
-			if  (ncstrcmp(arg, ap->chars) == 0)
-				goto  found;
+                for  (ap = Adesc[tolower(*arg) - ARG_STARTV].mult_chain;  ap;  ap = ap->next)
+                        if  (ncstrcmp(arg, ap->chars) == 0)
+                                goto  found;
 
-		disp_str = arg;
-		print_error($E{program arg bad string});
-		exit(E_USAGE);
+                disp_str = arg;
+                print_error($E{program arg bad string});
+                exit(E_USAGE);
 
-	found:
+        found:
 
-		disp_str = argv[1]; /* Saves doing it later */
-		if  ((rc = (optlist[ap->value - minstate])(argv[1])) < OPTRESULT_OK)  {
-			if  (rc == OPTRESULT_MISSARG)  {
-				disp_str = arg;
-				print_error($E{program opt expects arg});
-			}
-			else
-				print_error(arg_errnum); /* Routine set up disp_str etc */
-			exit(E_USAGE);
-		}
+                disp_str = argv[1]; /* Saves doing it later */
+                if  ((rc = (optlist[ap->value - minstate])(argv[1])) < OPTRESULT_OK)  {
+                        if  (rc == OPTRESULT_MISSARG)  {
+                                disp_str = arg;
+                                print_error($E{program opt expects arg});
+                        }
+                        else
+                                print_error(arg_errnum); /* Routine set up disp_str etc */
+                        exit(E_USAGE);
+                }
 
-		if  (rc > OPTRESULT_OK)  {			/* Eaten */
-			if  (rc > OPTRESULT_ARG_OK)		/* The end */
-				return  argv;
-			argv++;
-		}
-	}
+                if  (rc > OPTRESULT_OK)  {                      /* Eaten */
+                        if  (rc > OPTRESULT_ARG_OK)             /* The end */
+                                return  argv;
+                        argv++;
+                }
+        }
 }

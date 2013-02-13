@@ -17,12 +17,12 @@
 
 #include "config.h"
 #include <curses.h>
-#ifdef	HAVE_TERMIOS_H
+#ifdef  HAVE_TERMIOS_H
 #include <termios.h>
 #endif
 #include <ctype.h>
 #include <sys/types.h>
-#ifdef	HAVE_FCNTL_H
+#ifdef  HAVE_FCNTL_H
 #include <fcntl.h>
 #endif
 #include "incl_unix.h"
@@ -49,47 +49,47 @@
 #include "formats.h"
 #include "optflags.h"
 
-#define	DEFAULT_FORM1	" %22N %41V %13E"
-#define	DEFAULT_FORM2	"     %44C %7U %7G %7K"
+#define DEFAULT_FORM1   " %22N %41V %13E"
+#define DEFAULT_FORM2   "     %44C %7U %7G %7K"
 
-#define	LINESV		3
-#define	MAXVSTEP	3
+#define LINESV          3
+#define MAXVSTEP        3
 
-static	char	Filename[] = __FILE__;
-extern	LONG	Const_val;
+static  char    Filename[] = __FILE__;
+extern  LONG    Const_val;
 
-extern	Shipc	Oreq;
+extern  Shipc   Oreq;
 
-static	char	Cvar[BTV_NAME+1];
+static  char    Cvar[BTV_NAME+1];
 
-int	Vhline,
-	Veline;
+int     Vhline,
+        Veline;
 
-static	char	*bigbuff,
-		*var1_format,
-		*var2_format;
+static  char    *bigbuff,
+                *var1_format,
+                *var2_format;
 
-extern	int	VLINES;
+extern  int     VLINES;
 
-extern	WINDOW	*hvscr,
-		*tvscr,
-		*vscr,
-		*escr,
-		*hlpscr,
-		*Ew;
+extern  WINDOW  *hvscr,
+                *tvscr,
+                *vscr,
+                *escr,
+                *hlpscr,
+                *Ew;
 
-char	gv_export;
-extern	int	hadrfresh;
+char    gv_export;
+extern  int     hadrfresh;
 
-extern	SHORT	wh_v1titline, wh_v2titline;
-extern	char	*exportmark, *clustermark, *Curr_pwd;
+extern  SHORT   wh_v1titline, wh_v2titline;
+extern  char    *exportmark, *clustermark, *Curr_pwd;
 
-#define	NULLCP		(char *) 0
-#define	HELPLESS	((char **(*)()) 0)
+#define NULLCP          (char *) 0
+#define HELPLESS        ((char **(*)()) 0)
 
-static	struct	sctrl
+static  struct  sctrl
 cv_scomm = { $H{btq new variable comment}, HELPLESS, BTV_COMMENT, 0, 255, MAG_OK, 0L, 0L, NULLCP };
-static	SHORT	value_col, value_row;
+static  SHORT   value_col, value_row;
 
 void  con_refill(WINDOW *, int, int, BtconRef);
 void  dochelp(WINDOW *, int);
@@ -121,111 +121,105 @@ char *chk_wgets(WINDOW *, const int, struct sctrl *, const char *, const int);
 
 int  val_var(const char *name, const unsigned modeflag)
 {
-	int	first = 0, last = Var_seg.nvars, middle, s;
-	const	char	*colp;
-	BtvarRef	vp;
-	netid_t	hostid = 0;
+        int     first = 0, last = Var_seg.nvars, middle, s;
+        const   char    *colp;
+        BtvarRef        vp;
+        netid_t hostid = 0;
 
-	if  ((colp = strchr(name, ':')) != (char *) 0)  {
-		char	hname[HOSTNSIZE+1];
-		s = colp - name;
-		if  (s > HOSTNSIZE)
-			s = HOSTNSIZE;
-		strncpy(hname, name, s);
-		hname[s] = '\0';
-		if  ((hostid = look_hostname(hname)) == 0)
-			return  -1;
-		colp++;
-	}
-	else
-		colp = name;
+        if  ((colp = strchr(name, ':')) != (char *) 0)  {
+                char    hname[HOSTNSIZE+1];
+                s = colp - name;
+                if  (s > HOSTNSIZE)
+                        s = HOSTNSIZE;
+                strncpy(hname, name, s);
+                hname[s] = '\0';
+                if  ((hostid = look_int_hostname(hname)) == -1)
+                        return  -1;
+                colp++;
+        }
+        else
+                colp = name;
 
-	while  (first < last)  {
-		middle = (first + last) / 2;
-		vp = &vv_ptrs[middle].vep->Vent;
-		if  ((s = strcmp(colp, vp->var_name)) == 0)  {
-			if  (vp->var_id.hostid == hostid)  {
-				if  (mpermitted(&vp->var_mode, modeflag, mypriv->btu_priv))
-					return  middle;
-				return  -1;
-			}
-			if  (vp->var_id.hostid < hostid)
-				first = middle + 1;
-			else
-				last = middle;
-		}
-		else  if  (s > 0)
-			first = middle + 1;
-		else
-			last = middle;
-	}
-	return  -1;
+        while  (first < last)  {
+                middle = (first + last) / 2;
+                vp = &vv_ptrs[middle].vep->Vent;
+                if  ((s = strcmp(colp, vp->var_name)) == 0)  {
+                        if  (vp->var_id.hostid == hostid)  {
+                                if  (mpermitted(&vp->var_mode, modeflag, mypriv->btu_priv))
+                                        return  middle;
+                                return  -1;
+                        }
+                        if  (vp->var_id.hostid < hostid)
+                                first = middle + 1;
+                        else
+                                last = middle;
+                }
+                else  if  (s > 0)
+                        first = middle + 1;
+                else
+                        last = middle;
+        }
+        return  -1;
 }
 
 /* Generate matrix of variables accessible via a given mode for job vars.  */
 
-#define	INCVLIST	10
+#define INCVLIST        10
 
 static char **gen_vars(char *prefix, unsigned mode)
 {
-	unsigned	vcnt, maxr, countr;
-	char	**result;
-	int	sfl = 0;
+        unsigned        vcnt, maxr, countr;
+        char    **result;
+        int     sfl = 0;
 
-	if  ((result = (char **) malloc((Var_seg.nvars + 1)/2 * sizeof(char *))) == (char **) 0)
-		ABORT_NOMEM;
+        if  ((result = (char **) malloc((Var_seg.nvars + 1)/2 * sizeof(char *))) == (char **) 0)
+                ABORT_NOMEM;
 
-	maxr = (Var_seg.nvars + 1) / 2;
-	countr = 0;
-	if  (prefix)
-		sfl = strlen(prefix);
+        maxr = (Var_seg.nvars + 1) / 2;
+        countr = 0;
+        if  (prefix)
+                sfl = strlen(prefix);
 
-	for  (vcnt = 0;  vcnt < Var_seg.nvars;  vcnt++)  {
-		BtvarRef	vp = &vv_ptrs[vcnt].vep->Vent;
+        for  (vcnt = 0;  vcnt < Var_seg.nvars;  vcnt++)  {
+                BtvarRef        vp = &vv_ptrs[vcnt].vep->Vent;
 
-		/* Skip ones which don't match the prefix or not allowed.  */
+                /* Skip ones which don't match the prefix or not allowed.  */
 
-		if  (!mpermitted(&vp->var_mode, mode, mypriv->btu_priv))
-			continue;
-		if  (gv_export)  {
-			if  (!(vp->var_flags & VF_EXPORT)  &&  (vp->var_type != VT_MACHNAME || vp->var_id.hostid))
-				continue;
-		}
-		else  if  (vp->var_flags & VF_EXPORT)
-			continue;
-		if  (strncmp(vp->var_name, prefix, (unsigned) sfl) != 0)
-			continue;
-		if  (countr + 1 >= maxr)  {
-			maxr += INCVLIST;
-			if  ((result = (char**) realloc((char *) result, maxr * sizeof(char *))) == (char **) 0)
-				ABORT_NOMEM;
-		}
-		if  (vp->var_id.hostid)  {
-			char	hvname[HOSTNSIZE+BTV_NAME+2]; /* Max poss + ':' and final null */
-			sprintf(hvname, "%s:%s", look_host(vp->var_id.hostid), vp->var_name);
-			result[countr++] = stracpy(hvname);
-		}
-		else
-			result[countr++] = stracpy(vp->var_name);
-	}
+                if  (!mpermitted(&vp->var_mode, mode, mypriv->btu_priv))
+                        continue;
+                if  (gv_export)  {
+                        if  (!(vp->var_flags & VF_EXPORT)  &&  (vp->var_type != VT_MACHNAME || vp->var_id.hostid))
+                                continue;
+                }
+                else  if  (vp->var_flags & VF_EXPORT)
+                        continue;
+                if  (strncmp(vp->var_name, prefix, (unsigned) sfl) != 0)
+                        continue;
+                if  (countr + 1 >= maxr)  {
+                        maxr += INCVLIST;
+                        if  ((result = (char**) realloc((char *) result, maxr * sizeof(char *))) == (char **) 0)
+                                ABORT_NOMEM;
+                }
+                result[countr++] = stracpy(host_prefix_str(vp->var_id.hostid, vp->var_name));
+        }
 
-	if  (countr == 0)  {
-		free((char *) result);
-		return  (char **) 0;
-	}
+        if  (countr == 0)  {
+                free((char *) result);
+                return  (char **) 0;
+        }
 
-	result[countr] = (char *) 0;
-	return  result;
+        result[countr] = (char *) 0;
+        return  result;
 }
 
 char **gen_rvars(char *prefix)
 {
-	return  gen_vars(prefix, BTM_READ);
+        return  gen_vars(prefix, BTM_READ);
 }
 
 char **gen_wvars(char *prefix)
 {
-	return  gen_vars(prefix, BTM_WRITE);
+        return  gen_vars(prefix, BTM_WRITE);
 }
 
 /* Find current var in queue and adjust pointers as required.
@@ -235,74 +229,74 @@ char **gen_wvars(char *prefix)
 
 void  cvfind()
 {
-	int	first, last, middle;
+        int     first, last, middle;
 
-	if  (Dispflags & DF_SCRKEEP)  {
-		if  (Vhline >= Var_seg.nvars  &&  (Vhline = Var_seg.nvars - VLINES/LINESV) < 0)
-			Vhline = 0;
-		if  (Veline - Vhline >= VLINES/LINESV)
-			Veline = Vhline - VLINES/LINESV - LINESV;
-	}
-	else  if  (Cvar[0])  {
-		int	s, res = Veline;
+        if  (Dispflags & DF_SCRKEEP)  {
+                if  (Vhline >= Var_seg.nvars  &&  (Vhline = Var_seg.nvars - VLINES/LINESV) < 0)
+                        Vhline = 0;
+                if  (Veline - Vhline >= VLINES/LINESV)
+                        Veline = Vhline - VLINES/LINESV - LINESV;
+        }
+        else  if  (Cvar[0])  {
+                int     s, res = Veline;
 
-		if  (res >= Var_seg.nvars)  {
-			if  (Var_seg.nvars == 0)  {
-				Veline = 0;
-				Vhline = 0;
-				return;
-			}
-			res = Var_seg.nvars - 1;
-		}
+                if  (res >= Var_seg.nvars)  {
+                        if  (Var_seg.nvars == 0)  {
+                                Veline = 0;
+                                Vhline = 0;
+                                return;
+                        }
+                        res = Var_seg.nvars - 1;
+                }
 
-		if  ((s = strcmp(Cvar, vv_ptrs[res].vep->Vent.var_name)) == 0)
-			goto  done;
+                if  ((s = strcmp(Cvar, vv_ptrs[res].vep->Vent.var_name)) == 0)
+                        goto  done;
 
-		if  (s > 0)  {
-			first = res;
-			last = Var_seg.nvars;
-		}
-		else  {
-			first = 0;
-			last = res;
-		}
+                if  (s > 0)  {
+                        first = res;
+                        last = Var_seg.nvars;
+                }
+                else  {
+                        first = 0;
+                        last = res;
+                }
 
-		while  (first < last)  {
-			middle = (first + last) / 2;
-			if  ((s = strcmp(Cvar, vv_ptrs[middle].vep->Vent.var_name)) == 0)  {
-				res = middle;
-				goto  done;
-			}
-			if  (s > 0)
-				first = middle + 1;
-			else
-				last = middle;
-		}
+                while  (first < last)  {
+                        middle = (first + last) / 2;
+                        if  ((s = strcmp(Cvar, vv_ptrs[middle].vep->Vent.var_name)) == 0)  {
+                                res = middle;
+                                goto  done;
+                        }
+                        if  (s > 0)
+                                first = middle + 1;
+                        else
+                                last = middle;
+                }
 
-		if  (first >= Var_seg.nvars)  {
-			Veline = Var_seg.nvars - 1;
-			res = Veline - VLINES/LINESV + 1;
-			if  (res < Vhline)
-				Vhline = res;
-			return;
-		}
+                if  (first >= Var_seg.nvars)  {
+                        Veline = Var_seg.nvars - 1;
+                        res = Veline - VLINES/LINESV + 1;
+                        if  (res < Vhline)
+                                Vhline = res;
+                        return;
+                }
 
-		res = first;
-		strcpy(Cvar, vv_ptrs[res].vep->Vent.var_name);
+                res = first;
+                strcpy(Cvar, vv_ptrs[res].vep->Vent.var_name);
 
-	done:
-		/* Move top of screen line up/down queue by same
-		   amount as current var.  This code assumes that
-		   Veline - Vhline < VLINES/LINESV but that we
-		   may wind up with Vhline < 0; */
+        done:
+                /* Move top of screen line up/down queue by same
+                   amount as current var.  This code assumes that
+                   Veline - Vhline < VLINES/LINESV but that we
+                   may wind up with Vhline < 0; */
 
-		Vhline += res - Veline;
-		Veline = res;
-	}
+                Vhline += res - Veline;
+                Veline = res;
+        }
 }
 
-#define	BTQ_INLINE
-typedef	int	fmt_t;
+#define BTQ_INLINE
+typedef int     fmt_t;
 
 #include "inline/vfmt_comment.c"
 #include "inline/vfmt_group.c"
@@ -313,342 +307,342 @@ typedef	int	fmt_t;
 #include "inline/vfmt_user.c"
 #include "inline/vfmt_value.c"
 
-static	struct	formatdef
-	uppertab[] = { /* A-Z */
-	{	0,	0,		NULLCP, NULLCP,	0		},	/* A */
-	{	0,	0,		NULLCP, NULLCP,	0		},	/* B */
-	{	$P{var fmt title}+'C',20,NULLCP, NULLCP,fmt_comment	},	/* C */
-	{	0,	0,		NULLCP, NULLCP,	0		},	/* D */
-	{	$P{var fmt title}+'E',6,NULLCP, NULLCP,	fmt_export	},	/* E */
-	{	0,	0,		NULLCP, NULLCP,	0		},	/* F */
-	{	$P{var fmt title}+'G',UIDSIZE-2,NULLCP, NULLCP,fmt_group},	/* G */
-	{	0,	0,		NULLCP, NULLCP, 0		},	/* H */
-	{	0,	0,		NULLCP, NULLCP, 0		},	/* I */
-	{	0,	0,		NULLCP, NULLCP,	0		},	/* J */
-	{	$P{var fmt title}+'K',8,NULLCP, NULLCP,	fmt_cluster	},	/* K */
-	{	0,	0,		NULLCP, NULLCP, 0		},	/* L */
-	{	$P{var fmt title}+'M',10,NULLCP, NULLCP, fmt_mode	},	/* M */
-	{	$P{var fmt title}+'N',BTV_NAME-6,NULLCP, NULLCP, fmt_name},	/* N */
-	{	0,	0,		NULLCP, NULLCP,	0		},	/* O */
-	{	0,	0,		NULLCP, NULLCP, 0		},	/* P */
-	{	0,	0,		NULLCP, NULLCP,	0		},	/* Q */
-	{	0,	0,		NULLCP, NULLCP, 0		},	/* R */
-	{	0,	0,		NULLCP, NULLCP, 0		},	/* S */
-	{	0,	0,		NULLCP, NULLCP, 0		},	/* T */
-	{	$P{var fmt title}+'U',UIDSIZE-2,NULLCP,NULLCP,fmt_user	},	/* U */
-	{	$P{var fmt title}+'V',20,NULLCP, NULLCP,fmt_value	},	/* V */
-	{	0,	0,		NULLCP, NULLCP,	0		},	/* W */
-	{	0,	0,		NULLCP, NULLCP, 0		},	/* X */
-	{	0,	0,		NULLCP, NULLCP,	0		},	/* Y */
-	{	0,	0,		NULLCP, NULLCP,	0		}	/* Z */
+static  struct  formatdef
+        uppertab[] = { /* A-Z */
+        {       0,      0,              NULLCP, NULLCP, 0               },      /* A */
+        {       0,      0,              NULLCP, NULLCP, 0               },      /* B */
+        {       $P{var fmt title}+'C',20,NULLCP, NULLCP,fmt_comment     },      /* C */
+        {       0,      0,              NULLCP, NULLCP, 0               },      /* D */
+        {       $P{var fmt title}+'E',6,NULLCP, NULLCP, fmt_export      },      /* E */
+        {       0,      0,              NULLCP, NULLCP, 0               },      /* F */
+        {       $P{var fmt title}+'G',UIDSIZE-2,NULLCP, NULLCP,fmt_group},      /* G */
+        {       0,      0,              NULLCP, NULLCP, 0               },      /* H */
+        {       0,      0,              NULLCP, NULLCP, 0               },      /* I */
+        {       0,      0,              NULLCP, NULLCP, 0               },      /* J */
+        {       $P{var fmt title}+'K',8,NULLCP, NULLCP, fmt_cluster     },      /* K */
+        {       0,      0,              NULLCP, NULLCP, 0               },      /* L */
+        {       $P{var fmt title}+'M',10,NULLCP, NULLCP, fmt_mode       },      /* M */
+        {       $P{var fmt title}+'N',BTV_NAME-6,NULLCP, NULLCP, fmt_name},     /* N */
+        {       0,      0,              NULLCP, NULLCP, 0               },      /* O */
+        {       0,      0,              NULLCP, NULLCP, 0               },      /* P */
+        {       0,      0,              NULLCP, NULLCP, 0               },      /* Q */
+        {       0,      0,              NULLCP, NULLCP, 0               },      /* R */
+        {       0,      0,              NULLCP, NULLCP, 0               },      /* S */
+        {       0,      0,              NULLCP, NULLCP, 0               },      /* T */
+        {       $P{var fmt title}+'U',UIDSIZE-2,NULLCP,NULLCP,fmt_user  },      /* U */
+        {       $P{var fmt title}+'V',20,NULLCP, NULLCP,fmt_value       },      /* V */
+        {       0,      0,              NULLCP, NULLCP, 0               },      /* W */
+        {       0,      0,              NULLCP, NULLCP, 0               },      /* X */
+        {       0,      0,              NULLCP, NULLCP, 0               },      /* Y */
+        {       0,      0,              NULLCP, NULLCP, 0               }       /* Z */
 };
 
 /* Calculate length of format, also used in job list */
 
 int  format_len(const char *fmt)
 {
-	int	result = 1, nn;
+        int     result = 1, nn;
 
-	while  (*fmt)  {
-		if  (*fmt++ != '%')  {
-			result++;
-			continue;
-		}
-		if  (*fmt == '<')
-			fmt++;
-		nn = 0;
-		do  nn = nn * 10 + *fmt++ - '0';
-		while  (isdigit(*fmt));
-		result += nn;
-		if  (isalpha(*fmt))
-			fmt++;
-	}
-	return  result;
+        while  (*fmt)  {
+                if  (*fmt++ != '%')  {
+                        result++;
+                        continue;
+                }
+                if  (*fmt == '<')
+                        fmt++;
+                nn = 0;
+                do  nn = nn * 10 + *fmt++ - '0';
+                while  (isdigit(*fmt));
+                result += nn;
+                if  (isalpha(*fmt))
+                        fmt++;
+        }
+        return  result;
 }
 
 static char *vtitalloc(const char *fmt, const int len, const int vrow)
 {
-	int	nn;
-	char	*result = malloc((unsigned) len), *rp, *mp;
-	struct	formatdef	*fp;
+        int     nn;
+        char    *result = malloc((unsigned) len), *rp, *mp;
+        struct  formatdef       *fp;
 
-	if  (!result)
-		ABORT_NOMEM;
+        if  (!result)
+                ABORT_NOMEM;
 
-	rp = result;
+        rp = result;
 
-	while  (*fmt)  {
-		if  (*fmt != '%')  {
-			*rp++ = *fmt++;
-			continue;
-		}
-		fmt++;
+        while  (*fmt)  {
+                if  (*fmt != '%')  {
+                        *rp++ = *fmt++;
+                        continue;
+                }
+                fmt++;
 
-		/* Get width */
+                /* Get width */
 
-		if  (*fmt == '<')
-			fmt++;
-		nn = 0;
-		do  nn = nn * 10 + *fmt++ - '0';
-		while  (isdigit(*fmt));
+                if  (*fmt == '<')
+                        fmt++;
+                nn = 0;
+                do  nn = nn * 10 + *fmt++ - '0';
+                while  (isdigit(*fmt));
 
-		/* Get format char */
+                /* Get format char */
 
-		if  (isupper(*fmt))
-			fp = &uppertab[*fmt - 'A'];
-		else  {
-			if  (*fmt)
-				fmt++;
-			continue;
-		}
+                if  (isupper(*fmt))
+                        fp = &uppertab[*fmt - 'A'];
+                else  {
+                        if  (*fmt)
+                                fmt++;
+                        continue;
+                }
 
-		switch  (*fmt++)  {
-		case  'V':
-			value_col = (unsigned char) (rp - result);
-			value_row = (SHORT) vrow;
-			break;
-		case  'C':
-			cv_scomm.col = (SHORT) (rp - result);
-			break;
-		}
+                switch  (*fmt++)  {
+                case  'V':
+                        value_col = (unsigned char) (rp - result);
+                        value_row = (SHORT) vrow;
+                        break;
+                case  'C':
+                        cv_scomm.col = (SHORT) (rp - result);
+                        break;
+                }
 
-		if  (fp->statecode == 0)
-			continue;
+                if  (fp->statecode == 0)
+                        continue;
 
-		/* Get title message if we don't have it Insert into result */
+                /* Get title message if we don't have it Insert into result */
 
-		if  (!fp->msg)
-			fp->msg = gprompt(fp->statecode);
+                if  (!fp->msg)
+                        fp->msg = gprompt(fp->statecode);
 
-		mp = fp->msg;
-		while  (nn > 0  &&  *mp)  {
-			*rp++ = *mp++;
-			nn--;
-		}
-		while  (nn > 0)  {
-			*rp++ = ' ';
-			nn--;
-		}
-	}
+                mp = fp->msg;
+                while  (nn > 0  &&  *mp)  {
+                        *rp++ = *mp++;
+                        nn--;
+                }
+                while  (nn > 0)  {
+                        *rp++ = ' ';
+                        nn--;
+                }
+        }
 
-	/* Trim trailing spaces */
+        /* Trim trailing spaces */
 
-	for  (rp--;  rp >= result  &&  *rp == ' ';  rp--)
-		;
-	*++rp = '\0';
-	return  result;
+        for  (rp--;  rp >= result  &&  *rp == ' ';  rp--)
+                ;
+        *++rp = '\0';
+        return  result;
 }
 
 void  get_vartitle(char **t1, char **t2)
 {
-	int	obufl1, obufl2;
+        int     obufl1, obufl2;
 
-	if  (!var1_format  &&  !(var1_format = helpprmpt($P{Default var list fmt 1})))
-		var1_format = stracpy(DEFAULT_FORM1);
-	if  (!var2_format  &&  !(var2_format = helpprmpt($P{Default var list fmt 2})))
-		var2_format = stracpy(DEFAULT_FORM2);
+        if  (!var1_format  &&  !(var1_format = helpprmpt($P{Default var list fmt 1})))
+                var1_format = stracpy(DEFAULT_FORM1);
+        if  (!var2_format  &&  !(var2_format = helpprmpt($P{Default var list fmt 2})))
+                var2_format = stracpy(DEFAULT_FORM2);
 
-	/* Initial pass to discover how much space to allocate */
+        /* Initial pass to discover how much space to allocate */
 
-	obufl1 = format_len(var1_format);
-	obufl2 = format_len(var2_format);
+        obufl1 = format_len(var1_format);
+        obufl2 = format_len(var2_format);
 
-	/* Allocate space for title and results */
+        /* Allocate space for title and results */
 
-	if  (bigbuff)
-		free(bigbuff);
-	if  (!(bigbuff = malloc(2*sizeof(Btvar))))
-		ABORT_NOMEM;
+        if  (bigbuff)
+                free(bigbuff);
+        if  (!(bigbuff = malloc(2*sizeof(Btvar))))
+                ABORT_NOMEM;
 
-	/* Possible places for values.  */
+        /* Possible places for values.  */
 
-	cv_scomm.col = -1;
-	value_col = -1;
-	value_row = 0;
-	*t1 = vtitalloc(var1_format, obufl1, 0);
-	*t2 = vtitalloc(var2_format, obufl2, 1);
+        cv_scomm.col = -1;
+        value_col = -1;
+        value_row = 0;
+        *t1 = vtitalloc(var1_format, obufl1, 0);
+        *t2 = vtitalloc(var2_format, obufl2, 1);
 }
 
-#ifdef	HAVE_TERMINFO
-#define	DISP_CHAR(w, ch)	waddch(w, (chtype) ch);
+#ifdef  HAVE_TERMINFO
+#define DISP_CHAR(w, ch)        waddch(w, (chtype) ch);
 #else
-#define	DISP_CHAR(w, ch)	waddch(w, ch);
+#define DISP_CHAR(w, ch)        waddch(w, ch);
 #endif
 
 static void  vfillin(BtvarRef vp, const int row, const char *fmt)
 {
-	char	*lbp;
-	struct	formatdef  *fp;
-	int	currplace = -1, lastplace, nn, inlen, dummy;
-	int	isreadable = mpermitted(&vp->var_mode, BTM_READ, mypriv->btu_priv);
+        char    *lbp;
+        struct  formatdef  *fp;
+        int     currplace = -1, lastplace, nn, inlen, dummy;
+        int     isreadable = mpermitted(&vp->var_mode, BTM_READ, mypriv->btu_priv);
 
-	wmove(vscr, row, 0);
+        wmove(vscr, row, 0);
 
-	while  (*fmt)  {
-		if  (*fmt != '%')  {
-			DISP_CHAR(vscr, *fmt);
-			fmt++;
-			continue;
-		}
-		fmt++;
-		lastplace = -1;
-		if  (*fmt == '<')  {
-			lastplace = currplace;
-			fmt++;
-		}
-		nn = 0;
-		do  nn = nn * 10 + *fmt++ - '0';
-		while  (isdigit(*fmt));
-		if  (isupper(*fmt))
-			fp = &uppertab[*fmt - 'A'];
-		else  {
-			if  (*fmt)
-				fmt++;
-			continue;
-		}
-		fmt++;
-		if  (!fp->fmt_fn)
-			continue;
-		getyx(vscr, dummy, currplace);
-		inlen = (fp->fmt_fn)(vp, isreadable, nn);
-		lbp = bigbuff;
-		if  (inlen > nn  &&  lastplace >= 0)  {
-			wmove(vscr, row, lastplace);
-			nn = currplace + nn - lastplace;
-		}
-		while  (inlen > 0  &&  nn > 0)  {
-			DISP_CHAR(vscr, *lbp);
-			lbp++;
-			inlen--;
-			nn--;
-		}
-		if  (nn > 0)  {
-			int	ccol;
-			getyx(vscr, dummy, ccol);
-			wmove(vscr, dummy, ccol+nn);
-		}
-	}
+        while  (*fmt)  {
+                if  (*fmt != '%')  {
+                        DISP_CHAR(vscr, *fmt);
+                        fmt++;
+                        continue;
+                }
+                fmt++;
+                lastplace = -1;
+                if  (*fmt == '<')  {
+                        lastplace = currplace;
+                        fmt++;
+                }
+                nn = 0;
+                do  nn = nn * 10 + *fmt++ - '0';
+                while  (isdigit(*fmt));
+                if  (isupper(*fmt))
+                        fp = &uppertab[*fmt - 'A'];
+                else  {
+                        if  (*fmt)
+                                fmt++;
+                        continue;
+                }
+                fmt++;
+                if  (!fp->fmt_fn)
+                        continue;
+                getyx(vscr, dummy, currplace);
+                inlen = (fp->fmt_fn)(vp, isreadable, nn);
+                lbp = bigbuff;
+                if  (inlen > nn  &&  lastplace >= 0)  {
+                        wmove(vscr, row, lastplace);
+                        nn = currplace + nn - lastplace;
+                }
+                while  (inlen > 0  &&  nn > 0)  {
+                        DISP_CHAR(vscr, *lbp);
+                        lbp++;
+                        inlen--;
+                        nn--;
+                }
+                if  (nn > 0)  {
+                        int     ccol;
+                        getyx(vscr, dummy, ccol);
+                        wmove(vscr, dummy, ccol+nn);
+                }
+        }
 }
 
 /* Display contents of var file */
 
 static void  vdisplay()
 {
-	int	row, vcnt;
+        int     row, vcnt;
 
-#if	defined(OS_DYNIX) || defined(CURSES_MEGA_BUG)
-	wclear(vscr);
+#if     defined(OS_DYNIX) || defined(CURSES_MEGA_BUG)
+        wclear(vscr);
 #else
-	werase(vscr);
+        werase(vscr);
 #endif
 
-	/* Better not let too big a gap develop....  */
+        /* Better not let too big a gap develop....  */
 
-	if  (Vhline < - MAXVSTEP)
-		Vhline = 0;
+        if  (Vhline < - MAXVSTEP)
+                Vhline = 0;
 
-	if  ((vcnt = Vhline) < 0)  {
-		row = - Vhline * LINESV;
-		vcnt = 0;
-	}
-	else
-		row = 0;
+        if  ((vcnt = Vhline) < 0)  {
+                row = - Vhline * LINESV;
+                vcnt = 0;
+        }
+        else
+                row = 0;
 
-	for  (;  vcnt < Var_seg.nvars  &&  row < VLINES;  vcnt++, row += LINESV)  {
-		BtvarRef  vp = &vv_ptrs[vcnt].vep->Vent;
-		vfillin(vp, row, var1_format);
-		vfillin(vp, row+1, var2_format);
-	}
-#ifdef	CURSES_OVERLAP_BUG
-	if  (hvscr)  {
-		touchwin(hvscr);
-		wrefresh(hvscr);
-	}
-	if  (tvscr)  {
-		touchwin(tvscr);
-		wrefresh(tvscr);
-	}
-	touchwin(vscr);
+        for  (;  vcnt < Var_seg.nvars  &&  row < VLINES;  vcnt++, row += LINESV)  {
+                BtvarRef  vp = &vv_ptrs[vcnt].vep->Vent;
+                vfillin(vp, row, var1_format);
+                vfillin(vp, row+1, var2_format);
+        }
+#ifdef  CURSES_OVERLAP_BUG
+        if  (hvscr)  {
+                touchwin(hvscr);
+                wrefresh(hvscr);
+        }
+        if  (tvscr)  {
+                touchwin(tvscr);
+                wrefresh(tvscr);
+        }
+        touchwin(vscr);
 #endif
 }
 
 static char *gsearchs(const int isback)
 {
-	int	row;
-	char	*gstr;
-	struct	sctrl	ss;
-	static	char	*lastmstr;
-	static	char	*sforwmsg, *sbackwmsg;
+        int     row;
+        char    *gstr;
+        struct  sctrl   ss;
+        static  char    *lastmstr;
+        static  char    *sforwmsg, *sbackwmsg;
 
-	if  (!sforwmsg)  {
-		sforwmsg = gprompt($P{btq search forward});
-		sbackwmsg = gprompt($P{btq search backward});
-	}
+        if  (!sforwmsg)  {
+                sforwmsg = gprompt($P{btq search forward});
+                sbackwmsg = gprompt($P{btq search backward});
+        }
 
-	ss.helpcode = $H{btq search forward};
-	gstr = isback? sbackwmsg: sforwmsg;
-	ss.helpfn = HELPLESS;
-	ss.size = 30;
-	ss.retv = 0;
-	ss.col = strlen(gstr);
-	ss.magic_p = MAG_OK;
-	ss.min = 0L;
-	ss.vmax = 0L;
-	ss.msg = NULLCP;
-	row = (Veline - Vhline) * LINESV;
-	mvwaddstr(vscr, row, 0, gstr);
-	wclrtoeol(vscr);
+        ss.helpcode = $H{btq search forward};
+        gstr = isback? sbackwmsg: sforwmsg;
+        ss.helpfn = HELPLESS;
+        ss.size = 30;
+        ss.retv = 0;
+        ss.col = strlen(gstr);
+        ss.magic_p = MAG_OK;
+        ss.min = 0L;
+        ss.vmax = 0L;
+        ss.msg = NULLCP;
+        row = (Veline - Vhline) * LINESV;
+        mvwaddstr(vscr, row, 0, gstr);
+        wclrtoeol(vscr);
 
-	if  (lastmstr)  {
-		ws_fill(vscr, row, &ss, lastmstr);
-		gstr = wgets(vscr, row, &ss, lastmstr);
-		if  (!gstr)
-			return  NULLCP;
-		if  (gstr[0] == '\0')
-			return  lastmstr;
-	}
-	else  {
-		for  (;;)  {
-			gstr = wgets(vscr, row, &ss, "");
-			if  (!gstr)
-				return  NULLCP;
-			if  (gstr[0])
-				break;
-			doerror(vscr, $E{btq vlist no search string});
-		}
-	}
-	if  (lastmstr)
-		free(lastmstr);
-	return  lastmstr = stracpy(gstr);
+        if  (lastmstr)  {
+                ws_fill(vscr, row, &ss, lastmstr);
+                gstr = wgets(vscr, row, &ss, lastmstr);
+                if  (!gstr)
+                        return  NULLCP;
+                if  (gstr[0] == '\0')
+                        return  lastmstr;
+        }
+        else  {
+                for  (;;)  {
+                        gstr = wgets(vscr, row, &ss, "");
+                        if  (!gstr)
+                                return  NULLCP;
+                        if  (gstr[0])
+                                break;
+                        doerror(vscr, $E{btq vlist no search string});
+                }
+        }
+        if  (lastmstr)
+                free(lastmstr);
+        return  lastmstr = stracpy(gstr);
 }
 
 static int  smatchit(const char *vstr, const char *mstr)
 {
-	const	char	*tp, *mp;
-	while  (*vstr)  {
-		tp = vstr;
-		mp = mstr;
-		while  (*mp)  {
-			if  (*mp != '.'  &&  toupper(*mp) != toupper(*tp))
-				goto  ng;
-			mp++;
-			tp++;
-		}
-		return  1;
-	ng:
-		vstr++;
-	}
-	return  0;
+        const   char    *tp, *mp;
+        while  (*vstr)  {
+                tp = vstr;
+                mp = mstr;
+                while  (*mp)  {
+                        if  (*mp != '.'  &&  toupper(*mp) != toupper(*tp))
+                                goto  ng;
+                        mp++;
+                        tp++;
+                }
+                return  1;
+        ng:
+                vstr++;
+        }
+        return  0;
 }
 
 static int  smatch(const int mline, const char *mstr)
 {
-	CBtvarRef  vp = &vv_ptrs[mline].vep->Vent;
-	if  (smatchit(vp->var_name, mstr))
-		return  1;
-	if  (mpermitted(&vp->var_mode, BTM_READ, mypriv->btu_priv)  &&  smatchit(vp->var_comment, mstr))
-		return  1;
-	return  0;
+        CBtvarRef  vp = &vv_ptrs[mline].vep->Vent;
+        if  (smatchit(vp->var_name, mstr))
+                return  1;
+        if  (mpermitted(&vp->var_mode, BTM_READ, mypriv->btu_priv)  &&  smatchit(vp->var_comment, mstr))
+                return  1;
+        return  0;
 }
 
 /* Search for string in var name or comment.
@@ -658,655 +652,649 @@ static int  smatch(const int mline, const char *mstr)
 
 static int  dosearch(const int isback)
 {
-	char	*mstr = gsearchs(isback);
-	int	mline;
+        char    *mstr = gsearchs(isback);
+        int     mline;
 
-	if  (!mstr)
-		return  0;
+        if  (!mstr)
+                return  0;
 
-	if  (isback)  {
-		for  (mline = Veline - 1;  mline >= 0;  mline--)
-			if  (smatch(mline, mstr))
-				goto  gotit;
-		for  (mline = Var_seg.nvars - 1;  mline >= Veline;  mline--)
-			if  (smatch(mline, mstr))
-				goto  gotit;
-	}
-	else  {
-		for  (mline = Veline + 1;  (unsigned) mline < Var_seg.nvars;  mline++)
-			if  (smatch(mline, mstr))
-				goto  gotit;
-		for  (mline = 0;  mline <= Veline;  mline++)
-			if  (smatch(mline, mstr))
-				goto  gotit;
-	}
-	return  $E{btq vlist Search string not found};
+        if  (isback)  {
+                for  (mline = Veline - 1;  mline >= 0;  mline--)
+                        if  (smatch(mline, mstr))
+                                goto  gotit;
+                for  (mline = Var_seg.nvars - 1;  mline >= Veline;  mline--)
+                        if  (smatch(mline, mstr))
+                                goto  gotit;
+        }
+        else  {
+                for  (mline = Veline + 1;  (unsigned) mline < Var_seg.nvars;  mline++)
+                        if  (smatch(mline, mstr))
+                                goto  gotit;
+                for  (mline = 0;  mline <= Veline;  mline++)
+                        if  (smatch(mline, mstr))
+                                goto  gotit;
+        }
+        return  $E{btq vlist Search string not found};
 
  gotit:
-	Veline = mline;
-	if  (Veline < Vhline  ||  (Veline - Vhline) * LINESV >= VLINES)
-		Vhline = Veline;
-	return  0;
+        Veline = mline;
+        if  (Veline < Vhline  ||  (Veline - Vhline) * LINESV >= VLINES)
+                Vhline = Veline;
+        return  0;
 }
 
 static void  var_macro(BtvarRef vp, const int num)
 {
-	char	*prompt = helpprmpt(num + $P{Var macro}), *str;
-	static	char	*execprog;
-	PIDTYPE	pid;
-	int	status, refreshscr = 0;
-#ifdef	HAVE_TERMIOS_H
-	struct	termios	save;
-	extern	struct	termios	orig_term;
+        char    *prompt = helpprmpt(num + $P{Var macro}), *str;
+        static  char    *execprog;
+        PIDTYPE pid;
+        int     status, refreshscr = 0;
+#ifdef  HAVE_TERMIOS_H
+        struct  termios save;
+        extern  struct  termios orig_term;
 #else
-	struct	termio	save;
-	extern	struct	termio	orig_term;
+        struct  termio  save;
+        extern  struct  termio  orig_term;
 #endif
 
-	if  (!prompt)  {
-		disp_arg[0] = num;
-		doerror(vscr, $E{Macro error});
-		return;
-	}
-	if  (!execprog)
-		execprog = envprocess(EXECPROG);
+        if  (!prompt)  {
+                disp_arg[0] = num;
+                doerror(vscr, $E{Macro error});
+                return;
+        }
+        if  (!execprog)
+                execprog = envprocess(EXECPROG);
 
-	str = prompt;
-	if  (*str == '!')  {
-		str++;
-		refreshscr++;
-	}
+        str = prompt;
+        if  (*str == '!')  {
+                str++;
+                refreshscr++;
+        }
 
-	if  (num == 0)  {
-		int	vsy, vsx;
-		struct	sctrl	dd;
-		wclrtoeol(vscr);
-		waddstr(vscr, str);
-		getyx(vscr, vsy, vsx);
-		dd.helpcode = $H{Var macro};
-		dd.helpfn = HELPLESS;
-		dd.size = COLS - vsx;
-		dd.col = vsx;
-		dd.magic_p = MAG_P|MAG_OK;
-		dd.min = dd.vmax = 0;
-		dd.msg = (char *) 0;
-		str = wgets(vscr, vsy, &dd, "");
-		if  (!str || str[0] == '\0')  {
-			free(prompt);
-			return;
-		}
-		if  (*str == '!')  {
-			str++;
-			refreshscr++;
-		}
-	}
+        if  (num == 0)  {
+                int     vsy, vsx;
+                struct  sctrl   dd;
+                wclrtoeol(vscr);
+                waddstr(vscr, str);
+                getyx(vscr, vsy, vsx);
+                dd.helpcode = $H{Var macro};
+                dd.helpfn = HELPLESS;
+                dd.size = COLS - vsx;
+                dd.col = vsx;
+                dd.magic_p = MAG_P|MAG_OK;
+                dd.min = dd.vmax = 0;
+                dd.msg = (char *) 0;
+                str = wgets(vscr, vsy, &dd, "");
+                if  (!str || str[0] == '\0')  {
+                        free(prompt);
+                        return;
+                }
+                if  (*str == '!')  {
+                        str++;
+                        refreshscr++;
+                }
+        }
 
-	if  (refreshscr)  {
-#ifdef	HAVE_TERMIOS_H
-		tcgetattr(0, &save);
-		tcsetattr(0, TCSADRAIN, &orig_term);
+        if  (refreshscr)  {
+#ifdef  HAVE_TERMIOS_H
+                tcgetattr(0, &save);
+                tcsetattr(0, TCSADRAIN, &orig_term);
 #else
-		ioctl(0, TCGETA, &save);
-		ioctl(0, TCSETAW, &orig_term);
+                ioctl(0, TCGETA, &save);
+                ioctl(0, TCSETAW, &orig_term);
 #endif
-	}
+        }
 
-	if  ((pid = fork()) == 0)  {
-		char	*argbuf[3];
-		char	nbuf[BTV_NAME+HOSTNSIZE+2];
-		argbuf[0] = str;
-		if  (vp)  {
-			if  (vp->var_id.hostid)  {
-				sprintf(nbuf, "%s:%s", look_host(vp->var_id.hostid), vp->var_name);
-				argbuf[1] = nbuf;
-			}
-			else
-				argbuf[1] = vp->var_name;
-			argbuf[2] = (char *) 0;
-		}
-		else
-			argbuf[1] = (char *) 0;
-		if  (!refreshscr)  {
-			close(0);
-			close(1);
-			close(2);
-			Ignored_error = dup(dup(open("/dev/null", O_RDWR)));
-		}
-		Ignored_error = chdir(Curr_pwd);
-		execv(execprog, argbuf);
-		exit(255);
-	}
-	free(prompt);
-	if  (pid < 0)  {
-		doerror(vscr, $E{Macro fork failed});
-		return;
-	}
-#ifdef	HAVE_WAITPID
-	while  (waitpid(pid, &status, 0) < 0)
-		;
+        if  ((pid = fork()) == 0)  {
+                const  char    *argbuf[3];
+                argbuf[0] = str;
+                if  (vp)  {
+                        argbuf[1] = host_prefix_str(vp->var_id.hostid, vp->var_name);
+                        argbuf[2] = (const char *) 0;
+                }
+                else
+                        argbuf[1] = (const char *) 0;
+                if  (!refreshscr)  {
+                        close(0);
+                        close(1);
+                        close(2);
+                        Ignored_error = dup(dup(open("/dev/null", O_RDWR)));
+                }
+                Ignored_error = chdir(Curr_pwd);
+                execv(execprog, (char **) argbuf);
+                exit(255);
+        }
+        free(prompt);
+        if  (pid < 0)  {
+                doerror(vscr, $E{Macro fork failed});
+                return;
+        }
+#ifdef  HAVE_WAITPID
+        while  (waitpid(pid, &status, 0) < 0)
+                ;
 #else
-	while  (wait(&status) != pid)
-		;
+        while  (wait(&status) != pid)
+                ;
 #endif
 
-	if  (refreshscr)  {
-#ifdef	HAVE_TERMIOS_H
-		tcsetattr(0, TCSADRAIN, &save);
+        if  (refreshscr)  {
+#ifdef  HAVE_TERMIOS_H
+                tcsetattr(0, TCSADRAIN, &save);
 #else
-		ioctl(0, TCSETAW, &save);
+                ioctl(0, TCSETAW, &save);
 #endif
-		wrefresh(curscr);
-	}
-	if  (status != 0)  {
-		if  (status & 255)  {
-			disp_arg[0] = status & 255;
-			doerror(vscr, $E{Macro command gave signal});
-		}
-		else  {
-			disp_arg[0] = (status >> 8) & 255;
-			doerror(vscr, $E{Macro command error});
-		}
-	}
+                wrefresh(curscr);
+        }
+        if  (status != 0)  {
+                if  (status & 255)  {
+                        disp_arg[0] = status & 255;
+                        doerror(vscr, $E{Macro command gave signal});
+                }
+                else  {
+                        disp_arg[0] = (status >> 8) & 255;
+                        doerror(vscr, $E{Macro command error});
+                }
+        }
 }
 
 int  v_process()
 {
-	int	err_no, i, ret,	ch, currow;
-	unsigned	retc;
-	ULONG		Saveseq;
+        int     err_no, i, ret, ch, currow;
+        unsigned        retc;
+        ULONG           Saveseq;
 
-	char	*str;
+        char    *str;
 
  refillall:
-	if  (hvscr)  {
-		touchwin(hvscr);
-#ifdef	HAVE_TERMINFO
-		wnoutrefresh(hvscr);
+        if  (hvscr)  {
+                touchwin(hvscr);
+#ifdef  HAVE_TERMINFO
+                wnoutrefresh(hvscr);
 #else
-		wrefresh(hvscr);
+                wrefresh(hvscr);
 #endif
-	}
-	if  (tvscr)  {
-		touchwin(tvscr);
-#ifdef	HAVE_TERMINFO
-		wnoutrefresh(tvscr);
+        }
+        if  (tvscr)  {
+                touchwin(tvscr);
+#ifdef  HAVE_TERMINFO
+                wnoutrefresh(tvscr);
 #else
-		wrefresh(tvscr);
+                wrefresh(tvscr);
 #endif
-	}
+        }
 
  Vreset:
-	notebgwin(hvscr, vscr, tvscr);
-	Ew = vscr;
-	select_state($S{btq var list state});
+        notebgwin(hvscr, vscr, tvscr);
+        Ew = vscr;
+        select_state($S{btq var list state});
  Vdisp:
-	vdisplay();
-#ifdef	HAVE_TERMINFO
-	if  (hlpscr)  {
-		touchwin(hlpscr);
-		wnoutrefresh(vscr);
-		wnoutrefresh(hlpscr);
-	}
-	if  (escr)  {
-		touchwin(escr);
-		wnoutrefresh(vscr);
-		wnoutrefresh(escr);
-	}
+        vdisplay();
+#ifdef  HAVE_TERMINFO
+        if  (hlpscr)  {
+                touchwin(hlpscr);
+                wnoutrefresh(vscr);
+                wnoutrefresh(hlpscr);
+        }
+        if  (escr)  {
+                touchwin(escr);
+                wnoutrefresh(vscr);
+                wnoutrefresh(escr);
+        }
 #else
-	if  (hlpscr)  {
-		touchwin(hlpscr);
-		wrefresh(vscr);
-		wrefresh(hlpscr);
-	}
-	if  (escr)  {
-		touchwin(escr);
-		wrefresh(vscr);
-		wrefresh(escr);
-	}
+        if  (hlpscr)  {
+                touchwin(hlpscr);
+                wrefresh(vscr);
+                wrefresh(hlpscr);
+        }
+        if  (escr)  {
+                touchwin(escr);
+                wrefresh(vscr);
+                wrefresh(escr);
+        }
 #endif
 
  Vmove:
-	currow = (Veline - Vhline) * LINESV;
-	wmove(vscr, currow, 0);
-	if  (Var_seg.nvars != 0)
-		strcpy(Cvar, vv_ptrs[Veline].vep->Vent.var_name);
-	else
-		Cvar[0] = '\0';
+        currow = (Veline - Vhline) * LINESV;
+        wmove(vscr, currow, 0);
+        if  (Var_seg.nvars != 0)
+                strcpy(Cvar, vv_ptrs[Veline].vep->Vent.var_name);
+        else
+                Cvar[0] = '\0';
 
  Vrefresh:
 
 #ifdef HAVE_TERMINFO
-	wnoutrefresh(vscr);
-	doupdate();
+        wnoutrefresh(vscr);
+        doupdate();
 #else
-	wrefresh(vscr);
+        wrefresh(vscr);
 #endif
 
 nextin:
-	if  (hadrfresh)
-		return  -1;
+        if  (hadrfresh)
+                return  -1;
 
-	do  ch = getkey(MAG_A|MAG_P);
-	while  (ch == EOF  &&  (hlpscr || escr));
+        do  ch = getkey(MAG_A|MAG_P);
+        while  (ch == EOF  &&  (hlpscr || escr));
 
-	if  (hlpscr)  {
-		endhe(vscr, &hlpscr);
-		if  (Dispflags & DF_HELPCLR)
-			goto  nextin;
-	}
-	if  (escr)
-		endhe(vscr, &escr);
+        if  (hlpscr)  {
+                endhe(vscr, &hlpscr);
+                if  (Dispflags & DF_HELPCLR)
+                        goto  nextin;
+        }
+        if  (escr)
+                endhe(vscr, &escr);
 
-	switch  (ch)  {
-	case  EOF:
-		goto  nextin;
+        switch  (ch)  {
+        case  EOF:
+                goto  nextin;
 
-	/* Error case - bell character and try again.  */
+        /* Error case - bell character and try again.  */
 
-	default:
-		err_no = $E{btq vlist unknown command};
-	err:
-		doerror(vscr, err_no);
-		goto  nextin;
+        default:
+                err_no = $E{btq vlist unknown command};
+        err:
+                doerror(vscr, err_no);
+                goto  nextin;
 
-	case  $K{key help}:
-		disp_arg[7] = Const_val;
-		dochelp(vscr, $H{btq var list state});
-		goto  nextin;
+        case  $K{key help}:
+                disp_arg[7] = Const_val;
+                dochelp(vscr, $H{btq var list state});
+                goto  nextin;
 
-	case  $K{key refresh}:
-		wrefresh(curscr);
-		goto  Vrefresh;
+        case  $K{key refresh}:
+                wrefresh(curscr);
+                goto  Vrefresh;
 
-	/* Move up or down.  */
+        /* Move up or down.  */
 
-	case  $K{key cursor down}:
-		Veline++;
-		if  (Veline >= Var_seg.nvars)  {
-			Veline--;
-ev:			err_no = $E{btq vlist off end};
-			goto  err;
-		}
+        case  $K{key cursor down}:
+                Veline++;
+                if  (Veline >= Var_seg.nvars)  {
+                        Veline--;
+ev:                     err_no = $E{btq vlist off end};
+                        goto  err;
+                }
 
-		if  ((currow += LINESV) < VLINES)
-			goto  Vmove;
-		Vhline++;
-		goto  Vdisp;
+                if  ((currow += LINESV) < VLINES)
+                        goto  Vmove;
+                Vhline++;
+                goto  Vdisp;
 
-	case  $K{key cursor up}:
-		if  (Veline <= 0)  {
-bv:			err_no = $E{btq vlist off beginning};
-			goto  err;
-		}
-		Veline--;
-		if  ((currow -= LINESV) >= 0)
-			goto  Vmove;
-		Vhline = Veline;
-		goto  Vdisp;
+        case  $K{key cursor up}:
+                if  (Veline <= 0)  {
+bv:                     err_no = $E{btq vlist off beginning};
+                        goto  err;
+                }
+                Veline--;
+                if  ((currow -= LINESV) >= 0)
+                        goto  Vmove;
+                Vhline = Veline;
+                goto  Vdisp;
 
-	/* Half/Full screen up/down */
+        /* Half/Full screen up/down */
 
-	case  $K{key screen down}:
-		if  (Vhline + VLINES/LINESV >= Var_seg.nvars)
-			goto  ev;
-		Vhline += VLINES/LINESV;
-		Veline += VLINES/LINESV;
-		if  (Veline >= Var_seg.nvars)
-			Veline = Var_seg.nvars - 1;
-	redr:
-		vdisplay();
-		currow = (Veline - Vhline) * LINESV;
-		goto  Vmove;
+        case  $K{key screen down}:
+                if  (Vhline + VLINES/LINESV >= Var_seg.nvars)
+                        goto  ev;
+                Vhline += VLINES/LINESV;
+                Veline += VLINES/LINESV;
+                if  (Veline >= Var_seg.nvars)
+                        Veline = Var_seg.nvars - 1;
+        redr:
+                vdisplay();
+                currow = (Veline - Vhline) * LINESV;
+                goto  Vmove;
 
-	case  $K{key half screen down}:
-		i = VLINES / LINESV / 2;
-		if  (Vhline + i >= Var_seg.nvars)
-			goto  ev;
-		Vhline += i;
-		if  (Veline < Vhline)
-			Veline = Vhline;
-		goto  redr;
+        case  $K{key half screen down}:
+                i = VLINES / LINESV / 2;
+                if  (Vhline + i >= Var_seg.nvars)
+                        goto  ev;
+                Vhline += i;
+                if  (Veline < Vhline)
+                        Veline = Vhline;
+                goto  redr;
 
-	case  $K{key half screen up}:
-		if  (Vhline <= 0)
-			goto  bv;
-		Vhline -= VLINES / LINESV / 2;
-	restu:
-		vdisplay();
-		if  (Veline - Vhline >= VLINES/LINESV)
-			Veline = Vhline + VLINES/LINESV - 1;
-		goto  Vmove;
+        case  $K{key half screen up}:
+                if  (Vhline <= 0)
+                        goto  bv;
+                Vhline -= VLINES / LINESV / 2;
+        restu:
+                vdisplay();
+                if  (Veline - Vhline >= VLINES/LINESV)
+                        Veline = Vhline + VLINES/LINESV - 1;
+                goto  Vmove;
 
-	case  $K{key screen up}:
-		if  (Vhline <= 0)
-			goto  bv;
-		Vhline -= VLINES;
-		goto  restu;
+        case  $K{key screen up}:
+                if  (Vhline <= 0)
+                        goto  bv;
+                Vhline -= VLINES;
+                goto  restu;
 
-	case  $K{key top}:
-		if  (Vhline == Veline  ||  Veline == 0)  {
-			Vhline = 0;
-			Veline = 0;
-			goto  restu;
-		}
-		Veline = Vhline < 0?  0:  Vhline;
-		goto  Vmove;
+        case  $K{key top}:
+                if  (Vhline == Veline  ||  Veline == 0)  {
+                        Vhline = 0;
+                        Veline = 0;
+                        goto  restu;
+                }
+                Veline = Vhline < 0?  0:  Vhline;
+                goto  Vmove;
 
-	case  $K{key bottom}:
-		if  (Veline >= Vhline + VLINES/LINESV - 1  &&  Vhline + VLINES/LINESV < Var_seg.nvars)  {
-			if  (Var_seg.nvars > VLINES/LINESV)
-				Vhline = Var_seg.nvars - VLINES/LINESV;
-			else
-				Vhline = 0;
-			Veline = Var_seg.nvars - 1;
-			goto  restu;
-		}
-		Veline = Vhline + VLINES/LINESV - 1;
-		if  (Veline >= Var_seg.nvars)
-			Veline = Var_seg.nvars - 1;
-		goto  Vmove;
+        case  $K{key bottom}:
+                if  (Veline >= Vhline + VLINES/LINESV - 1  &&  Vhline + VLINES/LINESV < Var_seg.nvars)  {
+                        if  (Var_seg.nvars > VLINES/LINESV)
+                                Vhline = Var_seg.nvars - VLINES/LINESV;
+                        else
+                                Vhline = 0;
+                        Veline = Var_seg.nvars - 1;
+                        goto  restu;
+                }
+                Veline = Vhline + VLINES/LINESV - 1;
+                if  (Veline >= Var_seg.nvars)
+                        Veline = Var_seg.nvars - 1;
+                goto  Vmove;
 
-	case  $K{key search forward}:
-	case  $K{key search backward}:
-		if  ((err_no = dosearch(ch == $K{key search backward})) != 0)
-			doerror(vscr, err_no);
-		goto  Vdisp;
+        case  $K{key search forward}:
+        case  $K{key search backward}:
+                if  ((err_no = dosearch(ch == $K{key search backward})) != 0)
+                        doerror(vscr, err_no);
+                goto  Vdisp;
 
-		/* Go home.  */
+                /* Go home.  */
 
-	case  $K{key halt}:
-		return  0;
+        case  $K{key halt}:
+                return  0;
 
-	case  $K{key save opts}:
-		propts();
-		ret = -1;
-		goto  endop;
+        case  $K{key save opts}:
+                propts();
+                ret = -1;
+                goto  endop;
 
-	case  $K{btq vlist key jobs}:
+        case  $K{btq vlist key jobs}:
 #ifdef CURSES_MEGA_BUG
-		clear();
-		refresh();
+                clear();
+                refresh();
 #endif
-		return  1;
+                return  1;
 
-	case  $K{btq vlist key holidays}:
-#ifdef	CURSES_MEGA_BUG
-		clear();
-		refresh();
+        case  $K{btq vlist key holidays}:
+#ifdef  CURSES_MEGA_BUG
+                clear();
+                refresh();
 #endif
-		viewhols(vscr);
-#ifdef	CURSES_MEGA_BUG
-		clear();
-		refresh();
+                viewhols(vscr);
+#ifdef  CURSES_MEGA_BUG
+                clear();
+                refresh();
 #endif
-		goto  refillall;
+                goto  refillall;
 
-		/* And now for the stuff to change things.  */
+                /* And now for the stuff to change things.  */
 
-	case  $K{btq vlist key create}:
-		if  ((ret = createvar()) > 0)
-			strcpy(Cvar, Oreq.sh_un.sh_var.var_name);
-	endop:
-		/* Ret should be 0 if no changes to screen (apart from
-		   possible error message).
-		   Ret should be -1 if screen needs `touching' and resetting.
-		   Ret should be 1 if a signal is expected. */
+        case  $K{btq vlist key create}:
+                if  ((ret = createvar()) > 0)
+                        strcpy(Cvar, Oreq.sh_un.sh_var.var_name);
+        endop:
+                /* Ret should be 0 if no changes to screen (apart from
+                   possible error message).
+                   Ret should be -1 if screen needs `touching' and resetting.
+                   Ret should be 1 if a signal is expected. */
 
-		switch  (ret)  {
-		case  0:
-#ifdef	CURSES_MEGA_BUG
-			clear();
-			refresh();
-			break;
+                switch  (ret)  {
+                case  0:
+#ifdef  CURSES_MEGA_BUG
+                        clear();
+                        refresh();
+                        break;
 #else
-#ifdef	CURSES_OVERLAP_BUG
-			if  (hvscr)  {
-				touchwin(hvscr);
-				wrefresh(hvscr);
-			}
-			if  (tvscr)  {
-				touchwin(tvscr);
-				wrefresh(tvscr);
-			}
-			touchwin(vscr);
+#ifdef  CURSES_OVERLAP_BUG
+                        if  (hvscr)  {
+                                touchwin(hvscr);
+                                wrefresh(hvscr);
+                        }
+                        if  (tvscr)  {
+                                touchwin(tvscr);
+                                wrefresh(tvscr);
+                        }
+                        touchwin(vscr);
 #endif
-			goto  nextin;
+                        goto  nextin;
 #endif
-		case  1:
-			if  (hadrfresh)
-				return  -1;
-		}
+                case  1:
+                        if  (hadrfresh)
+                                return  -1;
+                }
 
-		/* In case a different key state was selected */
+                /* In case a different key state was selected */
 
-		select_state($S{btq var list state});
-		Ew = vscr;
-#ifdef	CURSES_OVERLAP_BUG
-		if  (hvscr)  {
-			touchwin(hvscr);
-			wrefresh(hvscr);
-		}
-		if  (tvscr)  {
-			touchwin(tvscr);
-			wrefresh(tvscr);
-		}
+                select_state($S{btq var list state});
+                Ew = vscr;
+#ifdef  CURSES_OVERLAP_BUG
+                if  (hvscr)  {
+                        touchwin(hvscr);
+                        wrefresh(hvscr);
+                }
+                if  (tvscr)  {
+                        touchwin(tvscr);
+                        wrefresh(tvscr);
+                }
 #endif
-		touchwin(vscr);
-		if  (escr)  {
-			touchwin(escr);
-#ifdef	HAVE_TERMINFO
-			wnoutrefresh(vscr);
-			wnoutrefresh(escr);
+                touchwin(vscr);
+                if  (escr)  {
+                        touchwin(escr);
+#ifdef  HAVE_TERMINFO
+                        wnoutrefresh(vscr);
+                        wnoutrefresh(escr);
 #else
-			wrefresh(vscr);
-			wrefresh(escr);
+                        wrefresh(vscr);
+                        wrefresh(escr);
 #endif
-		}
-#ifdef	OS_DYNIX
-		goto  Vdisp;
+                }
+#ifdef  OS_DYNIX
+                goto  Vdisp;
 #else
-		goto  Vmove;
+                goto  Vmove;
 #endif
 
-	case  $K{btq vlist key delete}:
-		if  (Veline >= Var_seg.nvars)  {
-nov:			err_no = $E{btq vlist no vars};
-			goto  err;
-		}
-		ret = delvar(&vv_ptrs[Veline].vep->Vent);
-		goto  endop;
+        case  $K{btq vlist key delete}:
+                if  (Veline >= Var_seg.nvars)  {
+nov:                    err_no = $E{btq vlist no vars};
+                        goto  err;
+                }
+                ret = delvar(&vv_ptrs[Veline].vep->Vent);
+                goto  endop;
 
-	case  $K{btq vlist key assign}:
-		if  (Veline >= Var_seg.nvars)
-			goto  nov;
-		ret = assvar(&vv_ptrs[Veline].vep->Vent, (Veline - Vhline) * LINESV + value_row, value_col, $P{btq prompt4 ass});
-		goto  endop;
+        case  $K{btq vlist key assign}:
+                if  (Veline >= Var_seg.nvars)
+                        goto  nov;
+                ret = assvar(&vv_ptrs[Veline].vep->Vent, (Veline - Vhline) * LINESV + value_row, value_col, $P{btq prompt4 ass});
+                goto  endop;
 
-	case  $K{btq vlist key setconst}:
-		ret = setconst((Veline - Vhline) * LINESV);
-		goto  endop;
+        case  $K{btq vlist key setconst}:
+                ret = setconst((Veline - Vhline) * LINESV);
+                goto  endop;
 
-	case  $K{btq vlist key add}:
-	case  $K{btq vlist key sub}:
-	case  $K{btq vlist key mult}:
-	case  $K{btq vlist key div}:
-	case  $K{btq vlist key mod}:
-		if  (Veline >= Var_seg.nvars)
-			goto  nov;
-		ret = arithvar(ch, &vv_ptrs[Veline].vep->Vent);
-		goto  endop;
+        case  $K{btq vlist key add}:
+        case  $K{btq vlist key sub}:
+        case  $K{btq vlist key mult}:
+        case  $K{btq vlist key div}:
+        case  $K{btq vlist key mod}:
+                if  (Veline >= Var_seg.nvars)
+                        goto  nov;
+                ret = arithvar(ch, &vv_ptrs[Veline].vep->Vent);
+                goto  endop;
 
-	case  $K{btq vlist key chmod}:
-		if  (Veline >= Var_seg.nvars)
-			goto  nov;
+        case  $K{btq vlist key chmod}:
+                if  (Veline >= Var_seg.nvars)
+                        goto  nov;
 #ifdef CURSES_MEGA_BUG
-		clear();
-		refresh();
+                clear();
+                refresh();
 #endif
-		ret = modvar(&vv_ptrs[Veline].vep->Vent);
-		goto  endop;
+                ret = modvar(&vv_ptrs[Veline].vep->Vent);
+                goto  endop;
 
-	case  $K{btq vlist key chown}:
-		if  (Veline >= Var_seg.nvars)
-			goto  nov;
+        case  $K{btq vlist key chown}:
+                if  (Veline >= Var_seg.nvars)
+                        goto  nov;
 #ifdef CURSES_MEGA_BUG
-		clear();
-		refresh();
+                clear();
+                refresh();
 #endif
-		ret = ownvar(&vv_ptrs[Veline].vep->Vent);
-		goto  endop;
+                ret = ownvar(&vv_ptrs[Veline].vep->Vent);
+                goto  endop;
 
-	case  $K{btq vlist key chgrp}:
-		if  (Veline >= Var_seg.nvars)
-			goto  nov;
+        case  $K{btq vlist key chgrp}:
+                if  (Veline >= Var_seg.nvars)
+                        goto  nov;
 #ifdef CURSES_MEGA_BUG
-		clear();
-		refresh();
+                clear();
+                refresh();
 #endif
-		ret = grpvar(&vv_ptrs[Veline].vep->Vent);
-		goto  endop;
+                ret = grpvar(&vv_ptrs[Veline].vep->Vent);
+                goto  endop;
 
-	case  $K{btq vlist key chcomm}:
-		if  (Veline >= Var_seg.nvars)
-			goto  nov;
-		Saveseq = vv_ptrs[Veline].vep->Vent.var_sequence;
-		str = chk_wgets(vscr, currow + 1, &cv_scomm, vv_ptrs[Veline].vep->Vent.var_comment, $P{btq prompt4 comm});
-		if  (str == (char *) 0)
-			goto  Vmove;
-		Oreq.sh_un.sh_var = vv_ptrs[Veline].vep->Vent;
-		strcpy(Oreq.sh_un.sh_var.var_comment, str);
-		qwvmsg(V_CHCOMM, (BtvarRef) 0, Saveseq);
-		if  ((retc = readreply()) == V_OK)  {
-			if  (hadrfresh)
-				return  -1;
-			goto  Vreset;
-		}
-		Ew = vscr;
-		select_state($S{btq var list state});
-		vdisplay();
-		wmove(vscr, currow, 0);
-#ifdef	HAVE_TERMINFO
-		wnoutrefresh(vscr);
+        case  $K{btq vlist key chcomm}:
+                if  (Veline >= Var_seg.nvars)
+                        goto  nov;
+                Saveseq = vv_ptrs[Veline].vep->Vent.var_sequence;
+                str = chk_wgets(vscr, currow + 1, &cv_scomm, vv_ptrs[Veline].vep->Vent.var_comment, $P{btq prompt4 comm});
+                if  (str == (char *) 0)
+                        goto  Vmove;
+                Oreq.sh_un.sh_var = vv_ptrs[Veline].vep->Vent;
+                strcpy(Oreq.sh_un.sh_var.var_comment, str);
+                qwvmsg(V_CHCOMM, (BtvarRef) 0, Saveseq);
+                if  ((retc = readreply()) == V_OK)  {
+                        if  (hadrfresh)
+                                return  -1;
+                        goto  Vreset;
+                }
+                Ew = vscr;
+                select_state($S{btq var list state});
+                vdisplay();
+                wmove(vscr, currow, 0);
+#ifdef  HAVE_TERMINFO
+                wnoutrefresh(vscr);
 #else
-		wrefresh(vscr);
+                wrefresh(vscr);
 #endif
-		qdoverror(retc, &Oreq.sh_un.sh_var);
-		goto  Vrefresh;
+                qdoverror(retc, &Oreq.sh_un.sh_var);
+                goto  Vrefresh;
 
-	case  $K{btq vlist key rename}:
-		if  (Veline >= Var_seg.nvars)
-			goto  nov;
-		ret = renvar(&vv_ptrs[Veline].vep->Vent);
-		goto  endop;
+        case  $K{btq vlist key rename}:
+                if  (Veline >= Var_seg.nvars)
+                        goto  nov;
+                ret = renvar(&vv_ptrs[Veline].vep->Vent);
+                goto  endop;
 
-	case  $K{btq vlist key sexport}:
-		if  (Veline >= Var_seg.nvars)
-			goto  nov;
-		Saveseq = vv_ptrs[Veline].vep->Vent.var_sequence;
-		Oreq.sh_un.sh_var = vv_ptrs[Veline].vep->Vent;
-		if  (Oreq.sh_un.sh_var.var_flags & VF_EXPORT)
-			goto  nextin;
-		Oreq.sh_un.sh_var.var_flags |= VF_EXPORT;
-	fset:
-		qwvmsg(V_CHFLAGS, (BtvarRef) 0, Saveseq);
-		if  ((retc = readreply()) == V_OK)  {
-			if  (hadrfresh)
-				return  -1;
-			goto  Vreset;
-		}
-		qdoverror(retc, &Oreq.sh_un.sh_var);
-		goto  Vrefresh;
+        case  $K{btq vlist key sexport}:
+                if  (Veline >= Var_seg.nvars)
+                        goto  nov;
+                Saveseq = vv_ptrs[Veline].vep->Vent.var_sequence;
+                Oreq.sh_un.sh_var = vv_ptrs[Veline].vep->Vent;
+                if  (Oreq.sh_un.sh_var.var_flags & VF_EXPORT)
+                        goto  nextin;
+                Oreq.sh_un.sh_var.var_flags |= VF_EXPORT;
+        fset:
+                qwvmsg(V_CHFLAGS, (BtvarRef) 0, Saveseq);
+                if  ((retc = readreply()) == V_OK)  {
+                        if  (hadrfresh)
+                                return  -1;
+                        goto  Vreset;
+                }
+                qdoverror(retc, &Oreq.sh_un.sh_var);
+                goto  Vrefresh;
 
-	case  $K{btq vlist key usexport}:
-		if  (Veline >= Var_seg.nvars)
-			goto  nov;
-		Saveseq = vv_ptrs[Veline].vep->Vent.var_sequence;
-		Oreq.sh_un.sh_var = vv_ptrs[Veline].vep->Vent;
-		if  (!(Oreq.sh_un.sh_var.var_flags & VF_EXPORT))
-			goto  nextin;
-		Oreq.sh_un.sh_var.var_flags &= ~VF_EXPORT;
-		goto  fset;
+        case  $K{btq vlist key usexport}:
+                if  (Veline >= Var_seg.nvars)
+                        goto  nov;
+                Saveseq = vv_ptrs[Veline].vep->Vent.var_sequence;
+                Oreq.sh_un.sh_var = vv_ptrs[Veline].vep->Vent;
+                if  (!(Oreq.sh_un.sh_var.var_flags & VF_EXPORT))
+                        goto  nextin;
+                Oreq.sh_un.sh_var.var_flags &= ~VF_EXPORT;
+                goto  fset;
 
-	case  $K{btq vlist key togexport}:
-		if  (Veline >= Var_seg.nvars)
-			goto  nov;
-		Saveseq = vv_ptrs[Veline].vep->Vent.var_sequence;
-		Oreq.sh_un.sh_var = vv_ptrs[Veline].vep->Vent;
-		Oreq.sh_un.sh_var.var_flags ^= VF_EXPORT;
-		goto  fset;
+        case  $K{btq vlist key togexport}:
+                if  (Veline >= Var_seg.nvars)
+                        goto  nov;
+                Saveseq = vv_ptrs[Veline].vep->Vent.var_sequence;
+                Oreq.sh_un.sh_var = vv_ptrs[Veline].vep->Vent;
+                Oreq.sh_un.sh_var.var_flags ^= VF_EXPORT;
+                goto  fset;
 
-	case  $K{btq vlist key scluster}:
-		if  (Veline >= Var_seg.nvars)
-			goto  nov;
-		Saveseq = vv_ptrs[Veline].vep->Vent.var_sequence;
-		Oreq.sh_un.sh_var = vv_ptrs[Veline].vep->Vent;
-		if  (Oreq.sh_un.sh_var.var_flags & VF_CLUSTER)
-			goto  nextin;
-		Oreq.sh_un.sh_var.var_flags |= VF_CLUSTER;
-		goto  fset;
+        case  $K{btq vlist key scluster}:
+                if  (Veline >= Var_seg.nvars)
+                        goto  nov;
+                Saveseq = vv_ptrs[Veline].vep->Vent.var_sequence;
+                Oreq.sh_un.sh_var = vv_ptrs[Veline].vep->Vent;
+                if  (Oreq.sh_un.sh_var.var_flags & VF_CLUSTER)
+                        goto  nextin;
+                Oreq.sh_un.sh_var.var_flags |= VF_CLUSTER;
+                goto  fset;
 
-	case  $K{btq vlist key uscluster}:
-		if  (Veline >= Var_seg.nvars)
-			goto  nov;
-		Saveseq = vv_ptrs[Veline].vep->Vent.var_sequence;
-		Oreq.sh_un.sh_var = vv_ptrs[Veline].vep->Vent;
-		if  (!(Oreq.sh_un.sh_var.var_flags & VF_CLUSTER))
-			goto  nextin;
-		Oreq.sh_un.sh_var.var_flags &= ~VF_CLUSTER;
-		goto  fset;
+        case  $K{btq vlist key uscluster}:
+                if  (Veline >= Var_seg.nvars)
+                        goto  nov;
+                Saveseq = vv_ptrs[Veline].vep->Vent.var_sequence;
+                Oreq.sh_un.sh_var = vv_ptrs[Veline].vep->Vent;
+                if  (!(Oreq.sh_un.sh_var.var_flags & VF_CLUSTER))
+                        goto  nextin;
+                Oreq.sh_un.sh_var.var_flags &= ~VF_CLUSTER;
+                goto  fset;
 
-	case  $K{btq vlist key togcluster}:
-		if  (Veline >= Var_seg.nvars)
-			goto  nov;
-		Saveseq = vv_ptrs[Veline].vep->Vent.var_sequence;
-		Oreq.sh_un.sh_var = vv_ptrs[Veline].vep->Vent;
-		Oreq.sh_un.sh_var.var_flags ^= VF_CLUSTER;
-		goto  fset;
+        case  $K{btq vlist key togcluster}:
+                if  (Veline >= Var_seg.nvars)
+                        goto  nov;
+                Saveseq = vv_ptrs[Veline].vep->Vent.var_sequence;
+                Oreq.sh_un.sh_var = vv_ptrs[Veline].vep->Vent;
+                Oreq.sh_un.sh_var.var_flags ^= VF_CLUSTER;
+                goto  fset;
 
-	case  $K{btq vlist key fmt1}:
-		{
-			char	*t1, *t2;
-			ret = fmtprocess(&var1_format, 'Y', uppertab, (struct formatdef *) 0);
-			get_vartitle(&t1, &t2);
-			if  (wh_v1titline >= 0)  {
-				wmove(hvscr, wh_v1titline, 0);
-				wclrtoeol(hvscr);
-				waddstr(hvscr, t1);
-			}
-			free(t1);
-			free(t2);
-			if  (ret)
-				offersave(var1_format, $P{Default var list fmt 1});
-			goto  refillall;
-		}
+        case  $K{btq vlist key fmt1}:
+                {
+                        char    *t1, *t2;
+                        ret = fmtprocess(&var1_format, 'Y', uppertab, (struct formatdef *) 0);
+                        get_vartitle(&t1, &t2);
+                        if  (wh_v1titline >= 0)  {
+                                wmove(hvscr, wh_v1titline, 0);
+                                wclrtoeol(hvscr);
+                                waddstr(hvscr, t1);
+                        }
+                        free(t1);
+                        free(t2);
+                        if  (ret)
+                                offersave(var1_format, $P{Default var list fmt 1});
+                        goto  refillall;
+                }
 
-	case  $K{btq vlist key fmt2}:
-		{
-			char	*t1, *t2;
-			ret = fmtprocess(&var2_format, 'Z', uppertab, (struct formatdef *) 0);
-			get_vartitle(&t1, &t2);
-			if  (wh_v2titline >= 0)  {
-				wmove(hvscr, wh_v2titline, 0);
-				wclrtoeol(hvscr);
-				waddstr(hvscr, t2);
-			}
-			free(t1);
-			free(t2);
-			if  (ret)
-				offersave(var2_format, $P{Default var list fmt 2});
-			goto  refillall;
-		}
+        case  $K{btq vlist key fmt2}:
+                {
+                        char    *t1, *t2;
+                        ret = fmtprocess(&var2_format, 'Z', uppertab, (struct formatdef *) 0);
+                        get_vartitle(&t1, &t2);
+                        if  (wh_v2titline >= 0)  {
+                                wmove(hvscr, wh_v2titline, 0);
+                                wclrtoeol(hvscr);
+                                waddstr(hvscr, t2);
+                        }
+                        free(t1);
+                        free(t2);
+                        if  (ret)
+                                offersave(var2_format, $P{Default var list fmt 2});
+                        goto  refillall;
+                }
 
-	case  $K{key exec}:  case  $K{key exec}+1:  case  $K{key exec}+2:
-	case  $K{key exec}+3:case  $K{key exec}+4:  case  $K{key exec}+5:
-	case  $K{key exec}+6:case  $K{key exec}+7:  case  $K{key exec}+8:
-	case  $K{key exec}+9:
-		var_macro(Veline >= Var_seg.nvars? (BtvarRef) 0: &vv_ptrs[Veline].vep->Vent, ch - $K{key exec});
-		vdisplay();
-		if  (escr)  {
-			touchwin(escr);
-			wrefresh(escr);
-		}
-		goto  Vmove;
-	}
+        case  $K{key exec}:  case  $K{key exec}+1:  case  $K{key exec}+2:
+        case  $K{key exec}+3:case  $K{key exec}+4:  case  $K{key exec}+5:
+        case  $K{key exec}+6:case  $K{key exec}+7:  case  $K{key exec}+8:
+        case  $K{key exec}+9:
+                var_macro(Veline >= Var_seg.nvars? (BtvarRef) 0: &vv_ptrs[Veline].vep->Vent, ch - $K{key exec});
+                vdisplay();
+                if  (escr)  {
+                        touchwin(escr);
+                        wrefresh(escr);
+                }
+                goto  Vmove;
+        }
 }

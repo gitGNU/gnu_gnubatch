@@ -1,22 +1,22 @@
 #
-#   Copyright 2009 Free Software Foundation, Inc.
+#   Copyright 2009 Free	Software Foundation, Inc.
 #
-#  This program is free software: you can redistribute it and/or modify
-#  it under the terms of the GNU General Public License as published by
-#  the Free Software Foundation, either version 3 of the License, or
-#  (at your option) any later version.
+#  This	program	is free	software: you can redistribute it and/or modify
+#  it under the	terms of the GNU General Public	License	as published by
+#  the Free Software Foundation, either	version	3 of the License, or
+#  (at your option) any	later version.
 #
-#  This program is distributed in the hope that it will be useful,
+#  This	program	is distributed in the hope that	it will	be useful,
 #  but WITHOUT ANY WARRANTY; without even the implied warranty of
-#  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.	 See the
 #  GNU General Public License for more details.
 #
-#   You should have received a copy of the GNU General Public License
-#  along with this program.  If not, see <http://www.gnu.org/licenses/>.
+#   You	should have received a copy of the GNU General Public License
+#  along with this program.  If	not, see <http://www.gnu.org/licenses/>.
 #
-#  Makefile for help files living in BASE/src/helpmsg
-#  Don't forget the versions in "src/helpmsg" are only stubs which "helpparse"
-#  extracts the real stuff from the message file and puts in the build directory
+#  Makefile for	help files living in BASE/src/helpmsg
+#  Don't forget	the versions in	"src/helpmsg" are only stubs which "helpparse"
+#  extracts the	real stuff from	the message file and puts in the build directory
 #
 
 SHELL		=	/bin/sh
@@ -28,22 +28,22 @@ RM		=	rm -f
 INSTALL		=	@INSTALL@
 INSTALL_DATA	=	@INSTALL_DATA@
 HELPFILES	=	btint-config btrest.help filemon.help xmbtq.help xmbtr.help xmbtuser.help
-SCREENHELP	=	btq.xterm btuser.xterm btq.wy60 btuser.wy60 btq.dumb btuser.dumb
+SCREENHELP	=	btq.xterm btuser.xterm btq.wy60	btuser.wy60 btq.dumb btuser.dumb
 
-# Build variants of screen help suitable for common terminals
-# Link xterm version of screen help files to btq.help and btuser.help
+# Build	variants of screen help	suitable for common terminals
+# Link xterm version of	screen help files to btq.help and btuser.help
 # as most people use xterms these days
 
 all:
 	./Maketerms.sh
 
 install:	all
-	$(INSTALL_DATA) $(HELPFILES) $(SCREENHELP) $(HELPFILEDIR)
-	cd $(HELPFILEDIR); ln -f btq.xterm btq.help; ln -f btuser.xterm btuser.help
+	$(INSTALL_DATA)	$(HELPFILES) $(SCREENHELP) $(HELPFILEDIR)
+	cd $(HELPFILEDIR); ln -f btq.xterm btq.help; ln	-f btuser.xterm	btuser.help
 
 install-strip:	all
-	$(INSTALL_DATA) $(HELPFILES) $(SCREENHELP) $(HELPFILEDIR)
-	cd $(HELPFILEDIR); ln -f btq.xterm btq.help; ln -f btuser.xterm btuser.help
+	$(INSTALL_DATA)	$(HELPFILES) $(SCREENHELP) $(HELPFILEDIR)
+	cd $(HELPFILEDIR); ln -f btq.xterm btq.help; ln	-f btuser.xterm	btuser.help
 
 clean:
 	$(RM) *.xterm *.nxterm *.vt100 *.vt220 *.vt320 *.wy60

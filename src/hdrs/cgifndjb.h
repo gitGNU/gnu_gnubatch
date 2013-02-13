@@ -15,12 +15,12 @@
    You should have received a copy of the GNU General Public License
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
-struct	jobswanted	{
-	jobno_t		jno;		/* Job number */
-	netid_t		host;		/* Host id */
-	CBtjobRef	jp;		/* Job structure pointer */
+struct  jobswanted      {
+        jobno_t         jno;            /* Job number */
+        netid_t         host;           /* Host id */
+        CBtjobRef       jp;             /* Job structure pointer */
 };
 
-extern	int	decode_jnum(char *, struct jobswanted *);
-extern	const	HashBtjob *find_job(struct jobswanted *);
-extern	void	decode_permflags(USHORT *, char *, const int, const int);
+extern  int     decode_jnum(char *, struct jobswanted *);
+extern  const   HashBtjob *find_job(struct jobswanted *);
+extern  void    decode_permflags(USHORT *, char *, const int, const int);

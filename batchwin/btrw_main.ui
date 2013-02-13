@@ -1,0 +1,607 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>MainWindow</class>
+ <widget class="QMainWindow" name="MainWindow">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>800</width>
+    <height>600</height>
+   </rect>
+  </property>
+  <property name="windowTitle">
+   <string>Administer saved job files</string>
+  </property>
+  <property name="windowIcon">
+   <iconset resource="resources.qrc">
+    <normaloff>:/Btrw icon</normaloff>:/Btrw icon</iconset>
+  </property>
+  <property name="toolTip">
+   <string/>
+  </property>
+  <widget class="QWidget" name="centralwidget">
+   <widget class="QTableWidget" name="joblist">
+    <property name="geometry">
+     <rect>
+      <x>0</x>
+      <y>10</y>
+      <width>791</width>
+      <height>491</height>
+     </rect>
+    </property>
+    <property name="contextMenuPolicy">
+     <enum>Qt::CustomContextMenu</enum>
+    </property>
+    <property name="selectionMode">
+     <enum>QAbstractItemView::SingleSelection</enum>
+    </property>
+    <property name="selectionBehavior">
+     <enum>QAbstractItemView::SelectRows</enum>
+    </property>
+    <attribute name="horizontalHeaderVisible">
+     <bool>true</bool>
+    </attribute>
+    <attribute name="verticalHeaderVisible">
+     <bool>false</bool>
+    </attribute>
+    <column>
+     <property name="text">
+      <string>Directory</string>
+     </property>
+    </column>
+    <column>
+     <property name="text">
+      <string>File</string>
+     </property>
+    </column>
+    <column>
+     <property name="text">
+      <string>Title</string>
+     </property>
+    </column>
+    <column>
+     <property name="text">
+      <string>CI</string>
+     </property>
+    </column>
+    <column>
+     <property name="text">
+      <string>Scr</string>
+     </property>
+    </column>
+    <column>
+     <property name="text">
+      <string>R/C</string>
+     </property>
+    </column>
+    <column>
+     <property name="text">
+      <string>Subm</string>
+     </property>
+    </column>
+    <column>
+     <property name="text">
+      <string>Ch</string>
+     </property>
+    </column>
+   </widget>
+  </widget>
+  <widget class="QMenuBar" name="menubar">
+   <property name="geometry">
+    <rect>
+     <x>0</x>
+     <y>0</y>
+     <width>800</width>
+     <height>25</height>
+    </rect>
+   </property>
+   <property name="defaultUp">
+    <bool>false</bool>
+   </property>
+   <widget class="QMenu" name="menu_File">
+    <property name="title">
+     <string>&amp;File</string>
+    </property>
+    <addaction name="action_new_job"/>
+    <addaction name="action_open_job"/>
+    <addaction name="action_save"/>
+    <addaction name="action_save_as"/>
+    <addaction name="action_saveall"/>
+    <addaction name="action_close"/>
+    <addaction name="action_closedel"/>
+    <addaction name="separator"/>
+    <addaction name="action_progopts"/>
+    <addaction name="separator"/>
+    <addaction name="action_quit"/>
+   </widget>
+   <widget class="QMenu" name="menu_Defaults">
+    <property name="title">
+     <string>&amp;Defaults</string>
+    </property>
+    <addaction name="action_def_setcanc"/>
+    <addaction name="separator"/>
+    <addaction name="action_def_set_time"/>
+    <addaction name="action_def_titprill"/>
+    <addaction name="action_def_procpar"/>
+    <addaction name="action_def_timelim"/>
+    <addaction name="action_def_perms"/>
+    <addaction name="action_def_mailwrite"/>
+    <addaction name="separator"/>
+    <addaction name="action_def_args"/>
+    <addaction name="action_def_redirs"/>
+    <addaction name="action_def_env"/>
+   </widget>
+   <widget class="QMenu" name="menu_job">
+    <property name="title">
+     <string>&amp;job</string>
+    </property>
+    <addaction name="action_job_setrun"/>
+    <addaction name="action_job_setcanc"/>
+    <addaction name="separator"/>
+    <addaction name="action_job_set_time"/>
+    <addaction name="action_job_titprill"/>
+    <addaction name="action_job_procpar"/>
+    <addaction name="action_job_timelim"/>
+    <addaction name="action_job_perms"/>
+    <addaction name="action_job_mailwrite"/>
+    <addaction name="separator"/>
+    <addaction name="action_job_args"/>
+    <addaction name="action_job_redirs"/>
+    <addaction name="action_job_env"/>
+   </widget>
+   <widget class="QMenu" name="menu_Submission">
+    <property name="title">
+     <string>&amp;Submission</string>
+    </property>
+    <addaction name="action_view_script"/>
+    <addaction name="action_edit_script"/>
+    <addaction name="separator"/>
+    <addaction name="action_submit_locally"/>
+    <addaction name="action_submit_remote"/>
+   </widget>
+   <widget class="QMenu" name="menu_Help">
+    <property name="title">
+     <string>&amp;Help</string>
+    </property>
+    <addaction name="action_About_BTRW"/>
+   </widget>
+   <widget class="QMenu" name="menu_Conditions">
+    <property name="title">
+     <string>&amp;Conditions</string>
+    </property>
+    <addaction name="action_job_conds"/>
+    <addaction name="action_job_asses"/>
+    <addaction name="separator"/>
+    <addaction name="action_def_conds"/>
+    <addaction name="action_def_asses"/>
+   </widget>
+   <addaction name="menu_File"/>
+   <addaction name="menu_Defaults"/>
+   <addaction name="menu_job"/>
+   <addaction name="menu_Conditions"/>
+   <addaction name="menu_Submission"/>
+   <addaction name="menu_Help"/>
+  </widget>
+  <widget class="QStatusBar" name="statusbar"/>
+  <widget class="QToolBar" name="toolBar">
+   <property name="windowTitle">
+    <string>toolBar</string>
+   </property>
+   <attribute name="toolBarArea">
+    <enum>TopToolBarArea</enum>
+   </attribute>
+   <attribute name="toolBarBreak">
+    <bool>false</bool>
+   </attribute>
+   <addaction name="action_new_job"/>
+   <addaction name="action_open_job"/>
+   <addaction name="action_save"/>
+   <addaction name="separator"/>
+   <addaction name="action_view_script"/>
+   <addaction name="action_edit_script"/>
+   <addaction name="separator"/>
+   <addaction name="action_submit_locally"/>
+   <addaction name="separator"/>
+   <addaction name="action_job_set_time"/>
+   <addaction name="action_job_titprill"/>
+   <addaction name="action_job_procpar"/>
+   <addaction name="separator"/>
+   <addaction name="action_job_conds"/>
+   <addaction name="action_job_asses"/>
+  </widget>
+  <action name="action_new_job">
+   <property name="icon">
+    <iconset resource="resources.qrc">
+     <normaloff>:/new job file</normaloff>:/new job file</iconset>
+   </property>
+   <property name="text">
+    <string>&amp;New job</string>
+   </property>
+   <property name="toolTip">
+    <string>Create a new job</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+N</string>
+   </property>
+  </action>
+  <action name="action_open_job">
+   <property name="icon">
+    <iconset resource="resources.qrc">
+     <normaloff>:/open job file</normaloff>:/open job file</iconset>
+   </property>
+   <property name="text">
+    <string>&amp;Open job</string>
+   </property>
+   <property name="toolTip">
+    <string>open an existing job file</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+O</string>
+   </property>
+  </action>
+  <action name="action_save">
+   <property name="icon">
+    <iconset resource="resources.qrc">
+     <normaloff>:/save job file</normaloff>:/save job file</iconset>
+   </property>
+   <property name="text">
+    <string>&amp;Save</string>
+   </property>
+   <property name="toolTip">
+    <string>save job to file</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+S</string>
+   </property>
+  </action>
+  <action name="action_save_as">
+   <property name="text">
+    <string>Save &amp;as</string>
+   </property>
+   <property name="toolTip">
+    <string>save job to prompted-for file name</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+Shift+S</string>
+   </property>
+  </action>
+  <action name="action_close">
+   <property name="text">
+    <string>&amp;Close</string>
+   </property>
+   <property name="toolTip">
+    <string>close job file</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+W</string>
+   </property>
+  </action>
+  <action name="action_progopts">
+   <property name="text">
+    <string>&amp;Program options</string>
+   </property>
+  </action>
+  <action name="action_quit">
+   <property name="icon">
+    <iconset resource="resources.qrc">
+     <normaloff>:/Quit program</normaloff>:/Quit program</iconset>
+   </property>
+   <property name="text">
+    <string>&amp;Quit</string>
+   </property>
+   <property name="toolTip">
+    <string>Quit program</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+Q</string>
+   </property>
+  </action>
+  <action name="action_def_setcanc">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>Set &amp;Cancelled</string>
+   </property>
+   <property name="toolTip">
+    <string>Select this if you want new jobs to be set by default to the cancelled state
+</string>
+   </property>
+  </action>
+  <action name="action_def_titprill">
+   <property name="text">
+    <string>&amp;Title priority load level</string>
+   </property>
+   <property name="toolTip">
+    <string>Set the default title, priority, load level and command interpreter</string>
+   </property>
+  </action>
+  <action name="action_def_procpar">
+   <property name="text">
+    <string>&amp;Process parameters</string>
+   </property>
+   <property name="toolTip">
+    <string>Set the default values for process parameters such as working directory,
+umask, exit code ranges</string>
+   </property>
+  </action>
+  <action name="action_def_timelim">
+   <property name="text">
+    <string>&amp;Time limits</string>
+   </property>
+   <property name="toolTip">
+    <string>Set various default time limits</string>
+   </property>
+  </action>
+  <action name="action_def_perms">
+   <property name="text">
+    <string>Per&amp;missions</string>
+   </property>
+   <property name="toolTip">
+    <string>Set the default job permissions</string>
+   </property>
+  </action>
+  <action name="action_def_mailwrite">
+   <property name="text">
+    <string>&amp;Mail / write</string>
+   </property>
+   <property name="toolTip">
+    <string>Set the default mail and write message options</string>
+   </property>
+  </action>
+  <action name="action_def_args">
+   <property name="text">
+    <string>Ar&amp;guments</string>
+   </property>
+   <property name="toolTip">
+    <string>Set the default job arguments</string>
+   </property>
+  </action>
+  <action name="action_def_redirs">
+   <property name="text">
+    <string>&amp;Redirections</string>
+   </property>
+   <property name="toolTip">
+    <string>Set the default job redirections</string>
+   </property>
+  </action>
+  <action name="action_job_setrun">
+   <property name="text">
+    <string>Set &amp;runnable</string>
+   </property>
+   <property name="shortcut">
+    <string>R</string>
+   </property>
+  </action>
+  <action name="action_job_setcanc">
+   <property name="text">
+    <string>Set &amp;cancelled</string>
+   </property>
+   <property name="shortcut">
+    <string>Z</string>
+   </property>
+  </action>
+  <action name="action_job_titprill">
+   <property name="icon">
+    <iconset resource="resources.qrc">
+     <normaloff>:/Title priority load level</normaloff>:/Title priority load level</iconset>
+   </property>
+   <property name="text">
+    <string>&amp;Title, priority, load level</string>
+   </property>
+   <property name="toolTip">
+    <string>Title, priority, load level, command interpreter</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+T</string>
+   </property>
+  </action>
+  <action name="action_job_procpar">
+   <property name="icon">
+    <iconset resource="resources.qrc">
+     <normaloff>:/Process parameters</normaloff>:/Process parameters</iconset>
+   </property>
+   <property name="text">
+    <string>&amp;Process parameters</string>
+   </property>
+   <property name="toolTip">
+    <string>Process parameters (directory, umask, ulimit) for the job</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+P</string>
+   </property>
+  </action>
+  <action name="action_job_timelim">
+   <property name="text">
+    <string>Time &amp;limits</string>
+   </property>
+   <property name="toolTip">
+    <string>Time limits for the job</string>
+   </property>
+  </action>
+  <action name="action_job_perms">
+   <property name="text">
+    <string>Per&amp;missions</string>
+   </property>
+   <property name="toolTip">
+    <string>Permissions on the job</string>
+   </property>
+  </action>
+  <action name="action_job_mailwrite">
+   <property name="text">
+    <string>&amp;Mail / Write</string>
+   </property>
+   <property name="toolTip">
+    <string>Mail / Write flag settings</string>
+   </property>
+  </action>
+  <action name="action_job_args">
+   <property name="text">
+    <string>&amp;Arguments</string>
+   </property>
+   <property name="toolTip">
+    <string>Edit the job arguments</string>
+   </property>
+  </action>
+  <action name="action_job_redirs">
+   <property name="text">
+    <string>&amp;Redirections</string>
+   </property>
+   <property name="toolTip">
+    <string>Edit the job redirections</string>
+   </property>
+  </action>
+  <action name="action_view_script">
+   <property name="icon">
+    <iconset resource="resources.qrc">
+     <normaloff>:/View job script</normaloff>:/View job script</iconset>
+   </property>
+   <property name="text">
+    <string>&amp;View script</string>
+   </property>
+   <property name="toolTip">
+    <string>View the script of the job (read-only)</string>
+   </property>
+  </action>
+  <action name="action_edit_script">
+   <property name="icon">
+    <iconset resource="resources.qrc">
+     <normaloff>:/Edit job script</normaloff>:/Edit job script</iconset>
+   </property>
+   <property name="text">
+    <string>&amp;Edit script</string>
+   </property>
+   <property name="toolTip">
+    <string>Edit script of job in selected editor</string>
+   </property>
+  </action>
+  <action name="action_submit_locally">
+   <property name="icon">
+    <iconset resource="resources.qrc">
+     <normaloff>:/Submit job</normaloff>:/Submit job</iconset>
+   </property>
+   <property name="text">
+    <string>&amp;Submit locally</string>
+   </property>
+   <property name="toolTip">
+    <string>Submit job to local/standard server</string>
+   </property>
+  </action>
+  <action name="action_submit_remote">
+   <property name="text">
+    <string>&amp;Submit remote</string>
+   </property>
+   <property name="toolTip">
+    <string>Submit job to alternative server</string>
+   </property>
+  </action>
+  <action name="action_About_BTRW">
+   <property name="text">
+    <string>&amp;About BTRW</string>
+   </property>
+  </action>
+  <action name="action_job_conds">
+   <property name="icon">
+    <iconset resource="resources.qrc">
+     <normaloff>:/Job conditions</normaloff>:/Job conditions</iconset>
+   </property>
+   <property name="text">
+    <string>&amp;Conditions</string>
+   </property>
+   <property name="toolTip">
+    <string>Set conditions on the job</string>
+   </property>
+  </action>
+  <action name="action_job_asses">
+   <property name="icon">
+    <iconset resource="resources.qrc">
+     <normaloff>:/Job assignments</normaloff>:/Job assignments</iconset>
+   </property>
+   <property name="text">
+    <string>&amp;Assignments</string>
+   </property>
+   <property name="toolTip">
+    <string>Set assignments on the job</string>
+   </property>
+  </action>
+  <action name="action_def_conds">
+   <property name="text">
+    <string>&amp;Default conditions</string>
+   </property>
+   <property name="toolTip">
+    <string>Set default conditions for new jobs</string>
+   </property>
+  </action>
+  <action name="action_def_asses">
+   <property name="text">
+    <string>D&amp;efault assignments</string>
+   </property>
+   <property name="toolTip">
+    <string>Set default assignments for new jobs</string>
+   </property>
+  </action>
+  <action name="action_closedel">
+   <property name="text">
+    <string>Close and &amp;Delete</string>
+   </property>
+   <property name="toolTip">
+    <string>This closes the job file and additionally deletes it.</string>
+   </property>
+  </action>
+  <action name="action_saveall">
+   <property name="text">
+    <string>Save A&amp;ll</string>
+   </property>
+   <property name="toolTip">
+    <string>Save all unsaved jobs</string>
+   </property>
+  </action>
+  <action name="action_def_env">
+   <property name="text">
+    <string>&amp;Environment</string>
+   </property>
+   <property name="toolTip">
+    <string>Set the default list of environment variables for the job</string>
+   </property>
+  </action>
+  <action name="action_job_env">
+   <property name="text">
+    <string>&amp;Environment</string>
+   </property>
+   <property name="toolTip">
+    <string>Edit the list of environment variables for the job</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+E</string>
+   </property>
+  </action>
+  <action name="action_job_set_time">
+   <property name="icon">
+    <iconset resource="resources.qrc">
+     <normaloff>:/Set time</normaloff>:/Set time</iconset>
+   </property>
+   <property name="text">
+    <string>&amp;Set time</string>
+   </property>
+   <property name="toolTip">
+    <string>Set time and repeat parameters for the job</string>
+   </property>
+   <property name="shortcut">
+    <string>T</string>
+   </property>
+  </action>
+  <action name="action_def_set_time">
+   <property name="text">
+    <string>&amp;Set time</string>
+   </property>
+   <property name="toolTip">
+    <string>Set the default time and repeat parameters</string>
+   </property>
+  </action>
+ </widget>
+ <resources>
+  <include location="resources.qrc"/>
+ </resources>
+ <connections/>
+</ui>

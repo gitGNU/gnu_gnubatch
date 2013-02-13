@@ -16,26 +16,26 @@
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
 if  (Anychanges & OF_ANY_FREEZE_WANTED)  {
-	int	ret1 = 0, ret2 = 0;
-	if  (Anychanges & OF_ANY_FREEZE_CURRENT)  {
-		char	*varname = make_varname();
-		if  (!Curr_pwd  &&  !(Curr_pwd = getenv("PWD")))
-			Curr_pwd = runpwd();
-		if  ((ret1 = proc_save_opts(Curr_pwd, varname, spit_options)) != 0)
-			print_error(ret1);
-	}
-	if  (Anychanges & OF_ANY_FREEZE_HOME)  {
-		char  *hd = envprocess("${HOME-/}");
-		char	*varname = make_varname();
-		if  ((ret2 = proc_save_opts(hd, varname, spit_options)) != 0)
-			print_error(ret2);
-		free(hd);
-	}
-#ifdef	FREEZE_EXIT
-	if  (argv[0] == (char *) 0)
-		exit(ret1 != 0  ||  ret2 != 0? E_SETUP: 0);
+        int     ret1 = 0, ret2 = 0;
+        if  (Anychanges & OF_ANY_FREEZE_CURRENT)  {
+                char    *varname = make_varname();
+                if  (!Curr_pwd  &&  !(Curr_pwd = getenv("PWD")))
+                        Curr_pwd = runpwd();
+                if  ((ret1 = proc_save_opts(Curr_pwd, varname, spit_options)) != 0)
+                        print_error(ret1);
+        }
+        if  (Anychanges & OF_ANY_FREEZE_HOME)  {
+                char  *hd = envprocess("${HOME-/}");
+                char    *varname = make_varname();
+                if  ((ret2 = proc_save_opts(hd, varname, spit_options)) != 0)
+                        print_error(ret2);
+                free(hd);
+        }
+#ifdef  FREEZE_EXIT
+        if  (argv[0] == (char *) 0)
+                exit(ret1 != 0  ||  ret2 != 0? E_SETUP: 0);
 #else
-	if  (ret1  ||  ret2)
-		exit(E_SETUP);
+        if  (ret1  ||  ret2)
+                exit(E_SETUP);
 #endif
 }

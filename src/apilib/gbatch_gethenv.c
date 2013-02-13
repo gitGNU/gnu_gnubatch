@@ -29,58 +29,58 @@ extern struct api_fd *gbatch_look_fd(const int);
 
 char **gbatch_gethenv(const int fd)
 {
-	int	ret;
-	unsigned	nitems, cnt;
-	struct	api_fd	*fdp = gbatch_look_fd(fd);
-	struct	api_msg		msg;
-	char	**result;
+        int     ret;
+        unsigned        nitems, cnt;
+        struct  api_fd  *fdp = gbatch_look_fd(fd);
+        struct  api_msg         msg;
+        char    **result;
 
-	if  (!fdp)  {
-		gbatch_dataerror = XB_INVALID_FD;
-		return  (char **) 0;
-	}
+        if  (!fdp)  {
+                gbatch_dataerror = XB_INVALID_FD;
+                return  (char **) 0;
+        }
 
-	msg.code = API_SENDENV;
-	if  ((ret = gbatch_wmsg(fdp, &msg))  ||  (ret = gbatch_rmsg(fdp, &msg)))  {
-		gbatch_dataerror = ret;
-		return  (char **) 0;
-	}
-	if  (msg.retcode != 0)  {
-		gbatch_dataerror = (SHORT) ntohs(msg.retcode);
-		return  (char **) 0;
-	}
-	nitems = ntohl(msg.un.r_lister.nitems);
-	if  (!(result = (char **) malloc((unsigned)(sizeof(char *) * (nitems + 1)))))  {
-		gbatch_dataerror = XB_NOMEM;
-		return  (char **) 0;
-	}
+        msg.code = API_SENDENV;
+        if  ((ret = gbatch_wmsg(fdp, &msg))  ||  (ret = gbatch_rmsg(fdp, &msg)))  {
+                gbatch_dataerror = ret;
+                return  (char **) 0;
+        }
+        if  (msg.retcode != 0)  {
+                gbatch_dataerror = (SHORT) ntohs(msg.retcode);
+                return  (char **) 0;
+        }
+        nitems = ntohl(msg.un.r_lister.nitems);
+        if  (!(result = (char **) malloc((unsigned)(sizeof(char *) * (nitems + 1)))))  {
+                gbatch_dataerror = XB_NOMEM;
+                return  (char **) 0;
+        }
 
-	/* Maximum length is in seq if we want it.  */
+        /* Maximum length is in seq if we want it.  */
 
-	for  (cnt = 0;  cnt < nitems;  cnt++)  {
-		ULONG	le;
-		unsigned  lng;
-		char	*rp;
-		if  ((ret = gbatch_read(fdp->sockfd, (char *) &le, sizeof(le))) != 0)  {
-		dataerr:
-			gbatch_dataerror = ret;
-		errrest:
-			while  (cnt != 0)
-				free(result[--cnt]);
-			free((char *) result);
-			return  (char **) 0;
-		}
-		lng = ntohl(le);
-		if  (!(rp = malloc(lng+1)))  {
-			gbatch_dataerror = XB_NOMEM;
-			goto  errrest;
-		}
-		if  ((ret = gbatch_read(fdp->sockfd, rp, lng+1)) != 0)  {
-			free(rp);
-			goto  dataerr;
-		}
-		result[cnt] = rp;
-	}
-	result[nitems+1] = (char *) 0;
-	return  result;
+        for  (cnt = 0;  cnt < nitems;  cnt++)  {
+                ULONG   le;
+                unsigned  lng;
+                char    *rp;
+                if  ((ret = gbatch_read(fdp->sockfd, (char *) &le, sizeof(le))) != 0)  {
+                dataerr:
+                        gbatch_dataerror = ret;
+                errrest:
+                        while  (cnt != 0)
+                                free(result[--cnt]);
+                        free((char *) result);
+                        return  (char **) 0;
+                }
+                lng = ntohl(le);
+                if  (!(rp = malloc(lng+1)))  {
+                        gbatch_dataerror = XB_NOMEM;
+                        goto  errrest;
+                }
+                if  ((ret = gbatch_read(fdp->sockfd, rp, lng+1)) != 0)  {
+                        free(rp);
+                        goto  dataerr;
+                }
+                result[cnt] = rp;
+        }
+        result[nitems+1] = (char *) 0;
+        return  result;
 }

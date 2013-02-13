@@ -34,20 +34,20 @@
 #include "shreq.h"
 #include "incl_unix.h"
 
-extern	int	Ctrl_chan;
-extern	long	mymtype;
+extern  int     Ctrl_chan;
+extern  long    mymtype;
 
 /* Get reply from scheduler */
 
 unsigned  readreply()
 {
-	Repmess	rr;
+        Repmess rr;
 
-	while  (msgrcv(Ctrl_chan, (struct msgbuf *) &rr, sizeof(Shreq), mymtype, 0) < 0)  {
-		if  (errno == EINTR)
-			continue;
-		exit(E_SHUTD);
-	}
+        while  (msgrcv(Ctrl_chan, (struct msgbuf *) &rr, sizeof(Shreq), mymtype, 0) < 0)  {
+                if  (errno == EINTR)
+                        continue;
+                exit(E_SHUTD);
+        }
 
-	return  rr.outmsg.mcode;
+        return  rr.outmsg.mcode;
 }

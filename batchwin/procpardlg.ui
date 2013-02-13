@@ -1,0 +1,528 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>procpardlg</class>
+ <widget class="QDialog" name="procpardlg">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>624</width>
+    <height>444</height>
+   </rect>
+  </property>
+  <property name="windowTitle">
+   <string>Process Parameters</string>
+  </property>
+  <widget class="QDialogButtonBox" name="buttonBox">
+   <property name="geometry">
+    <rect>
+     <x>410</x>
+     <y>390</y>
+     <width>191</width>
+     <height>32</height>
+    </rect>
+   </property>
+   <property name="orientation">
+    <enum>Qt::Horizontal</enum>
+   </property>
+   <property name="standardButtons">
+    <set>QDialogButtonBox::Cancel|QDialogButtonBox::Ok</set>
+   </property>
+  </widget>
+  <widget class="QLabel" name="label">
+   <property name="geometry">
+    <rect>
+     <x>30</x>
+     <y>20</y>
+     <width>81</width>
+     <height>17</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string>Editing job:</string>
+   </property>
+  </widget>
+  <widget class="QLabel" name="edjob">
+   <property name="geometry">
+    <rect>
+     <x>130</x>
+     <y>20</y>
+     <width>331</width>
+     <height>17</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string/>
+   </property>
+  </widget>
+  <widget class="QLabel" name="label_2">
+   <property name="geometry">
+    <rect>
+     <x>30</x>
+     <y>50</y>
+     <width>71</width>
+     <height>17</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string>Directory:</string>
+   </property>
+  </widget>
+  <widget class="QLineEdit" name="directory">
+   <property name="geometry">
+    <rect>
+     <x>130</x>
+     <y>50</y>
+     <width>461</width>
+     <height>27</height>
+    </rect>
+   </property>
+   <property name="toolTip">
+    <string>This is the working directory for the job.
+
+Remember you can use ~user to give the user's home directory or $HOME
+and so forth (but this will use the environment variables in the job).</string>
+   </property>
+  </widget>
+  <widget class="QGroupBox" name="groupBox">
+   <property name="geometry">
+    <rect>
+     <x>50</x>
+     <y>100</y>
+     <width>511</width>
+     <height>131</height>
+    </rect>
+   </property>
+   <property name="title">
+    <string>Umask - turn OFF</string>
+   </property>
+   <widget class="QCheckBox" name="um_ur">
+    <property name="geometry">
+     <rect>
+      <x>20</x>
+      <y>30</y>
+      <width>97</width>
+      <height>22</height>
+     </rect>
+    </property>
+    <property name="toolTip">
+     <string>Set Umask bit to turn off user read</string>
+    </property>
+    <property name="text">
+     <string>User Read</string>
+    </property>
+   </widget>
+   <widget class="QCheckBox" name="um_uw">
+    <property name="geometry">
+     <rect>
+      <x>20</x>
+      <y>60</y>
+      <width>97</width>
+      <height>22</height>
+     </rect>
+    </property>
+    <property name="toolTip">
+     <string>Set Umask bit to turn off user write</string>
+    </property>
+    <property name="text">
+     <string>User Write</string>
+    </property>
+   </widget>
+   <widget class="QCheckBox" name="um_ux">
+    <property name="geometry">
+     <rect>
+      <x>20</x>
+      <y>90</y>
+      <width>121</width>
+      <height>22</height>
+     </rect>
+    </property>
+    <property name="toolTip">
+     <string>Set Umask bit to turn off user execute/search</string>
+    </property>
+    <property name="text">
+     <string>User Execute</string>
+    </property>
+   </widget>
+   <widget class="QCheckBox" name="um_gx">
+    <property name="geometry">
+     <rect>
+      <x>160</x>
+      <y>90</y>
+      <width>131</width>
+      <height>22</height>
+     </rect>
+    </property>
+    <property name="toolTip">
+     <string>Set Umask bit to turn off group execute/search</string>
+    </property>
+    <property name="text">
+     <string>Group Execute</string>
+    </property>
+   </widget>
+   <widget class="QCheckBox" name="um_gr">
+    <property name="geometry">
+     <rect>
+      <x>160</x>
+      <y>30</y>
+      <width>111</width>
+      <height>22</height>
+     </rect>
+    </property>
+    <property name="toolTip">
+     <string>Set Umask bit to turn off group read</string>
+    </property>
+    <property name="text">
+     <string>Group Read</string>
+    </property>
+   </widget>
+   <widget class="QCheckBox" name="um_gw">
+    <property name="geometry">
+     <rect>
+      <x>160</x>
+      <y>60</y>
+      <width>121</width>
+      <height>22</height>
+     </rect>
+    </property>
+    <property name="toolTip">
+     <string>Set Umask bit to turn off group write</string>
+    </property>
+    <property name="text">
+     <string>Group Write</string>
+    </property>
+   </widget>
+   <widget class="QCheckBox" name="um_ow">
+    <property name="geometry">
+     <rect>
+      <x>340</x>
+      <y>60</y>
+      <width>121</width>
+      <height>22</height>
+     </rect>
+    </property>
+    <property name="toolTip">
+     <string>Set Umask bit to turn off others write</string>
+    </property>
+    <property name="text">
+     <string>Others Write</string>
+    </property>
+   </widget>
+   <widget class="QCheckBox" name="um_or">
+    <property name="geometry">
+     <rect>
+      <x>340</x>
+      <y>30</y>
+      <width>111</width>
+      <height>22</height>
+     </rect>
+    </property>
+    <property name="toolTip">
+     <string>Set Umask bit to turn off others read</string>
+    </property>
+    <property name="text">
+     <string>Others Read</string>
+    </property>
+   </widget>
+   <widget class="QCheckBox" name="um_ox">
+    <property name="geometry">
+     <rect>
+      <x>340</x>
+      <y>90</y>
+      <width>131</width>
+      <height>22</height>
+     </rect>
+    </property>
+    <property name="toolTip">
+     <string>Set Umask bit to turn off others execute/search</string>
+    </property>
+    <property name="text">
+     <string>Others Execute</string>
+    </property>
+   </widget>
+  </widget>
+  <widget class="QLabel" name="label_3">
+   <property name="geometry">
+    <rect>
+     <x>40</x>
+     <y>300</y>
+     <width>101</width>
+     <height>17</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string>Exits - Normal</string>
+   </property>
+  </widget>
+  <widget class="QSpinBox" name="norml">
+   <property name="geometry">
+    <rect>
+     <x>140</x>
+     <y>290</y>
+     <width>71</width>
+     <height>27</height>
+    </rect>
+   </property>
+   <property name="toolTip">
+    <string>This is the lower bound of exit codes considered &quot;normal&quot;</string>
+   </property>
+   <property name="maximum">
+    <number>255</number>
+   </property>
+  </widget>
+  <widget class="QLabel" name="label_4">
+   <property name="geometry">
+    <rect>
+     <x>220</x>
+     <y>290</y>
+     <width>21</width>
+     <height>21</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string>to</string>
+   </property>
+  </widget>
+  <widget class="QSpinBox" name="normu">
+   <property name="geometry">
+    <rect>
+     <x>250</x>
+     <y>290</y>
+     <width>71</width>
+     <height>27</height>
+    </rect>
+   </property>
+   <property name="toolTip">
+    <string>This is the upper bound of exit codes considered &quot;normal&quot;</string>
+   </property>
+   <property name="maximum">
+    <number>255</number>
+   </property>
+  </widget>
+  <widget class="QLabel" name="label_5">
+   <property name="geometry">
+    <rect>
+     <x>340</x>
+     <y>290</y>
+     <width>66</width>
+     <height>21</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string>Error</string>
+   </property>
+  </widget>
+  <widget class="QSpinBox" name="errl">
+   <property name="geometry">
+    <rect>
+     <x>400</x>
+     <y>290</y>
+     <width>71</width>
+     <height>27</height>
+    </rect>
+   </property>
+   <property name="toolTip">
+    <string>This is the lower bound of exit codes considered &quot;error&quot;</string>
+   </property>
+   <property name="maximum">
+    <number>255</number>
+   </property>
+   <property name="value">
+    <number>1</number>
+   </property>
+  </widget>
+  <widget class="QLabel" name="label_6">
+   <property name="geometry">
+    <rect>
+     <x>480</x>
+     <y>290</y>
+     <width>21</width>
+     <height>21</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string>to</string>
+   </property>
+  </widget>
+  <widget class="QSpinBox" name="erru">
+   <property name="geometry">
+    <rect>
+     <x>510</x>
+     <y>290</y>
+     <width>71</width>
+     <height>27</height>
+    </rect>
+   </property>
+   <property name="toolTip">
+    <string>This is the upper bound of exit codes considered &quot;error&quot;</string>
+   </property>
+   <property name="maximum">
+    <number>255</number>
+   </property>
+   <property name="value">
+    <number>255</number>
+   </property>
+  </widget>
+  <widget class="QLabel" name="label_7">
+   <property name="geometry">
+    <rect>
+     <x>40</x>
+     <y>240</y>
+     <width>51</width>
+     <height>17</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string>Ulimit</string>
+   </property>
+  </widget>
+  <widget class="QSpinBox" name="ulimitv">
+   <property name="geometry">
+    <rect>
+     <x>120</x>
+     <y>230</y>
+     <width>91</width>
+     <height>27</height>
+    </rect>
+   </property>
+   <property name="toolTip">
+    <string>This is the value of the ulimit. Set 0 to indicate unlimited</string>
+   </property>
+   <property name="maximum">
+    <number>1023</number>
+   </property>
+  </widget>
+  <widget class="QComboBox" name="ulimitmult">
+   <property name="geometry">
+    <rect>
+     <x>250</x>
+     <y>230</y>
+     <width>81</width>
+     <height>27</height>
+    </rect>
+   </property>
+   <property name="toolTip">
+    <string>Give a multiplier here for the ulimit</string>
+   </property>
+   <item>
+    <property name="text">
+     <string>Bytes</string>
+    </property>
+   </item>
+   <item>
+    <property name="text">
+     <string>KB</string>
+    </property>
+   </item>
+   <item>
+    <property name="text">
+     <string>MB</string>
+    </property>
+   </item>
+  </widget>
+  <widget class="QCheckBox" name="noadverr">
+   <property name="geometry">
+    <rect>
+     <x>50</x>
+     <y>350</y>
+     <width>181</width>
+     <height>22</height>
+    </rect>
+   </property>
+   <property name="toolTip">
+    <string>Select this if time is not to be advanced on error</string>
+   </property>
+   <property name="text">
+    <string>No advance on error</string>
+   </property>
+  </widget>
+  <widget class="QComboBox" name="exporttype">
+   <property name="geometry">
+    <rect>
+     <x>270</x>
+     <y>350</y>
+     <width>151</width>
+     <height>27</height>
+    </rect>
+   </property>
+   <property name="toolTip">
+    <string>Select export type
+
+Local means local only to current host
+Exported means visible on other hosts, not executable
+Remote runnable means it can run on other hosts.</string>
+   </property>
+   <item>
+    <property name="text">
+     <string>Local only</string>
+    </property>
+   </item>
+   <item>
+    <property name="text">
+     <string>Exported</string>
+    </property>
+   </item>
+   <item>
+    <property name="text">
+     <string>Remote runnable</string>
+    </property>
+   </item>
+  </widget>
+ </widget>
+ <tabstops>
+  <tabstop>directory</tabstop>
+  <tabstop>um_ur</tabstop>
+  <tabstop>um_uw</tabstop>
+  <tabstop>um_ux</tabstop>
+  <tabstop>um_gr</tabstop>
+  <tabstop>um_gw</tabstop>
+  <tabstop>um_gx</tabstop>
+  <tabstop>um_or</tabstop>
+  <tabstop>um_ow</tabstop>
+  <tabstop>um_ox</tabstop>
+  <tabstop>ulimitv</tabstop>
+  <tabstop>ulimitmult</tabstop>
+  <tabstop>norml</tabstop>
+  <tabstop>normu</tabstop>
+  <tabstop>errl</tabstop>
+  <tabstop>erru</tabstop>
+  <tabstop>noadverr</tabstop>
+  <tabstop>exporttype</tabstop>
+  <tabstop>buttonBox</tabstop>
+ </tabstops>
+ <resources/>
+ <connections>
+  <connection>
+   <sender>buttonBox</sender>
+   <signal>accepted()</signal>
+   <receiver>procpardlg</receiver>
+   <slot>accept()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>248</x>
+     <y>254</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>157</x>
+     <y>274</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>buttonBox</sender>
+   <signal>rejected()</signal>
+   <receiver>procpardlg</receiver>
+   <slot>reject()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>316</x>
+     <y>260</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>286</x>
+     <y>274</y>
+    </hint>
+   </hints>
+  </connection>
+ </connections>
+</ui>

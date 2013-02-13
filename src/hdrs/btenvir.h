@@ -15,29 +15,29 @@
    You should have received a copy of the GNU General Public License
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
-typedef	struct	{
-	USHORT		e_name;			/* Offset of name */
-	USHORT		e_value;		/* Offset of value */
+typedef struct  {
+        USHORT          e_name;                 /* Offset of name */
+        USHORT          e_value;                /* Offset of value */
 }  Envir, *EnvirRef;
 
-typedef	const	Envir	*CEnvirRef;
+typedef const   Envir   *CEnvirRef;
 
-typedef	struct	{
-	char	*e_name;			/* As strings */
-	char	*e_value;
+typedef struct  {
+        char    *e_name;                        /* As strings */
+        char    *e_value;
 }  Menvir, *MenvirRef;
 
-typedef	const	Menvir	*CMenvirRef;
+typedef const   Menvir  *CMenvirRef;
 
-typedef	USHORT	Jarg, *JargRef;
-typedef	const	USHORT	*CJargRef;
+typedef USHORT  Jarg, *JargRef;
+typedef const   USHORT  *CJargRef;
 
 /* Extract Args and Environment from job */
 
-#define	ARG_OF(jp, cnt)	&jp->bj_space[((JargRef) &jp->bj_space[jp->h.bj_arg])[cnt]]
-extern	void	unpackenv();
-#define	ENV_OF(jp, cnt, name, value)	unpackenv(jp, cnt, &name, &value)
+#define ARG_OF(jp, cnt) &jp->bj_space[((JargRef) &jp->bj_space[jp->h.bj_arg])[cnt]]
+extern  void    unpackenv();
+#define ENV_OF(jp, cnt, name, value)    unpackenv(jp, cnt, &name, &value)
 
 /* Only used by clients but define here */
 
-extern	Menvir	Envs[];
+extern  Menvir  Envs[];

@@ -22,5 +22,5 @@ extern int  wvmsg(unsigned, CBtvarRef, const ULONG);
 extern int  dojerror(const unsigned, CBtjobRef);
 extern int  doverror(unsigned, BtvarRef);
 
-extern	int	Ctrl_chan;
-extern	long	mymtype;
+extern  int     Ctrl_chan;
+extern  long    mymtype;

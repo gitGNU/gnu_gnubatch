@@ -1,25 +1,25 @@
 <ui>
   <menubar name='MenuBar'>
     <menu action='FileMenu'>
-	<menuitem action='Quit'/>
+        <menuitem action='Quit'/>
     </menu>
     <menu action='DefMenu'>
-	<menuitem action='Dpri'/>
-	<menuitem action='Dloadl'/>
-	<menuitem action='Djmode'/>
-	<menuitem action='Dvmode'/>
-	<menuitem action='Dpriv'/>
-	<separator/>
-	<menuitem action='Defcpy'/>
+        <menuitem action='Dpri'/>
+        <menuitem action='Dloadl'/>
+        <menuitem action='Djmode'/>
+        <menuitem action='Dvmode'/>
+        <menuitem action='Dpriv'/>
+        <separator/>
+        <menuitem action='Defcpy'/>
     </menu>
     <menu action='UserMenu'>
-	<menuitem action='upri'/>
-	<menuitem action='uloadl'/>
-	<menuitem action='ujmode'/>
-	<menuitem action='uvmode'/>
-	<menuitem action='upriv'/>
-	<separator/>
-	<menuitem action='copydef'/>
+        <menuitem action='upri'/>
+        <menuitem action='uloadl'/>
+        <menuitem action='ujmode'/>
+        <menuitem action='uvmode'/>
+        <menuitem action='upriv'/>
+        <separator/>
+        <menuitem action='copydef'/>
     </menu>
     <menu action='HelpMenu'>
       <menuitem action='About'/>

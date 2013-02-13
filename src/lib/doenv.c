@@ -22,12 +22,12 @@
 
 void  doenv(char *env, HelpargRef Adesc, optparam *const optlist, const int minstate)
 {
-	char	**evec;
+        char    **evec;
 
-	if  (env == (char *) 0)
-		return;
-	evec = makevec(env);
-	doopts(evec, Adesc, optlist, minstate);
-	free((char *) evec[0]);
-	free((char *) evec);
+        if  (env == (char *) 0)
+                return;
+        evec = makevec(env);
+        doopts(evec, Adesc, optlist, minstate);
+        free((char *) evec[0]);
+        free((char *) evec);
 }

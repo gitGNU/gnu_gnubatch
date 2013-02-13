@@ -17,6 +17,6 @@
 
 JFORMAT(fmt_dir)
 {
-	return  (isreadable  &&  jp->h.bj_direct >= 0) ?
-		(fmt_t) strlen(strcpy(bigbuff, &jp->bj_space[jp->h.bj_direct])): 0;
+        return  (isreadable  &&  jp->h.bj_direct >= 0) ?
+                (fmt_t) strlen(strcpy(bigbuff, &jp->bj_space[jp->h.bj_direct])): 0;
 }

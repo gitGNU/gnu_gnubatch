@@ -26,10 +26,10 @@
 
 int  lookup_alt(const char *val, HelpaltRef tab)
 {
-	int	i;
+        int     i;
 
-	for  (i = 0;  i < tab->numalt;  i++)
-		if  (strcmp(val, tab->list[i]) == 0)
-			return  tab->alt_nums[i];
-	return  -30000;
+        for  (i = 0;  i < tab->numalt;  i++)
+                if  (strcmp(val, tab->list[i]) == 0)
+                        return  tab->alt_nums[i];
+        return  -30000;
 }

@@ -17,5 +17,5 @@
 
 VFORMAT(fmt_group)
 {
-	return  (fmt_t) strlen(strcpy(bigbuff, vp->var_mode.o_group));
+        return  (fmt_t) strlen(strcpy(bigbuff, vp->var_mode.o_group));
 }

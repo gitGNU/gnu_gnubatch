@@ -17,5 +17,5 @@
 
 VFORMAT(fmt_user)
 {
-	return  (fmt_t) strlen(strcpy(bigbuff, vp->var_mode.o_user));
+        return  (fmt_t) strlen(strcpy(bigbuff, vp->var_mode.o_user));
 }

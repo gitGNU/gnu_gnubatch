@@ -27,73 +27,73 @@ extern int  gbatch_rmsg(const struct api_fd *, struct api_msg *);
 extern int  gbatch_wmsg(const struct api_fd *, struct api_msg *);
 extern struct api_fd *gbatch_look_fd(const int);
 
-int	gbatch_varlist(const int fd, const unsigned flags, int *np, slotno_t **slots)
+int     gbatch_varlist(const int fd, const unsigned flags, int *np, slotno_t **slots)
 {
-	int		ret;
-	unsigned	numvars;
-#ifndef	WORDS_BIGENDIAN
-	unsigned	cnt;
-	slotno_t  	*sp;
+        int             ret;
+        unsigned        numvars;
+#ifndef WORDS_BIGENDIAN
+        unsigned        cnt;
+        slotno_t        *sp;
 #endif
-	struct	api_fd	*fdp = gbatch_look_fd(fd);
-	struct	api_msg	msg;
+        struct  api_fd  *fdp = gbatch_look_fd(fd);
+        struct  api_msg msg;
 
-	if  (!fdp)
-		return  XB_INVALID_FD;
-	msg.code = API_VARLIST;
-	msg.un.lister.flags = htonl(flags);
-	if  ((ret = gbatch_wmsg(fdp, &msg)))
-		return  ret;
-	if  ((ret = gbatch_rmsg(fdp, &msg)))
-		return  ret;
-	if  (msg.retcode != 0)
-		return  (SHORT) ntohs(msg.retcode);
+        if  (!fdp)
+                return  XB_INVALID_FD;
+        msg.code = API_VARLIST;
+        msg.un.lister.flags = htonl(flags);
+        if  ((ret = gbatch_wmsg(fdp, &msg)))
+                return  ret;
+        if  ((ret = gbatch_rmsg(fdp, &msg)))
+                return  ret;
+        if  (msg.retcode != 0)
+                return  (SHORT) ntohs(msg.retcode);
 
-	/* Get number of printers */
+        /* Get number of printers */
 
-	fdp->vserial = ntohl(msg.un.r_lister.seq);
-	numvars = ntohl(msg.un.r_lister.nitems);
-	if  (np)
-		*np = (int) numvars;
+        fdp->vserial = ntohl(msg.un.r_lister.seq);
+        numvars = ntohl(msg.un.r_lister.nitems);
+        if  (np)
+                *np = (int) numvars;
 
-	/* Try to allocate enough space to hold the list.  If we don't
-	   succeed we'd better carry on reading it so we don't
-	   get out of sync.  */
+        /* Try to allocate enough space to hold the list.  If we don't
+           succeed we'd better carry on reading it so we don't
+           get out of sync.  */
 
-	if  (numvars != 0)  {
-		unsigned  nbytes = numvars * sizeof(slotno_t);
-		if  (nbytes > fdp->bufmax)  {
-			if  (fdp->bufmax != 0)  {
-				free(fdp->buff);
-				fdp->bufmax = 0;
-				fdp->buff = (char *) 0;
-			}
-			if  (!(fdp->buff = malloc(nbytes)))  {
-				unsigned  cnt;
-				for  (cnt = 0;  cnt < numvars;  cnt++)  {
-					ULONG  slurp;
-					if  ((ret = gbatch_read(fdp->sockfd, (char *) &slurp, sizeof(slurp))))
-						return  ret;
-				}
-				return  XB_NOMEM;
-			}
-			fdp->bufmax = nbytes;
-		}
-		if  ((ret = gbatch_read(fdp->sockfd, fdp->buff, nbytes)))
-			return  ret;
+        if  (numvars != 0)  {
+                unsigned  nbytes = numvars * sizeof(slotno_t);
+                if  (nbytes > fdp->bufmax)  {
+                        if  (fdp->bufmax != 0)  {
+                                free(fdp->buff);
+                                fdp->bufmax = 0;
+                                fdp->buff = (char *) 0;
+                        }
+                        if  (!(fdp->buff = malloc(nbytes)))  {
+                                unsigned  cnt;
+                                for  (cnt = 0;  cnt < numvars;  cnt++)  {
+                                        ULONG  slurp;
+                                        if  ((ret = gbatch_read(fdp->sockfd, (char *) &slurp, sizeof(slurp))))
+                                                return  ret;
+                                }
+                                return  XB_NOMEM;
+                        }
+                        fdp->bufmax = nbytes;
+                }
+                if  ((ret = gbatch_read(fdp->sockfd, fdp->buff, nbytes)))
+                        return  ret;
 
-#ifndef	WORDS_BIGENDIAN
-		sp = (slotno_t *) fdp->buff;
-		for  (cnt = 0;  cnt < numvars;  cnt++)  {
-			*sp = ntohl(*sp);
-			sp++;
-		}
+#ifndef WORDS_BIGENDIAN
+                sp = (slotno_t *) fdp->buff;
+                for  (cnt = 0;  cnt < numvars;  cnt++)  {
+                        *sp = ntohl(*sp);
+                        sp++;
+                }
 #endif
-	}
+        }
 
-	/* Set up answer */
+        /* Set up answer */
 
-	if  (slots)
-		*slots = (slotno_t *) fdp->buff;
-	return  XB_OK;
+        if  (slots)
+                *slots = (slotno_t *) fdp->buff;
+        return  XB_OK;
 }

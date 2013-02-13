@@ -15,10 +15,10 @@
    You should have received a copy of the GNU General Public License
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
-typedef	enum { NOTIFY_MAIL, NOTIFY_WRITE, NOTIFY_DOSWRITE } cmd_type;
+typedef enum { NOTIFY_MAIL, NOTIFY_WRITE, NOTIFY_DOSWRITE } cmd_type;
 
 /* The following f.d. numbers are used to pass standard output
    and standard error as input to the btmdisp prog. */
 
-#define	SOSTREAM	18
-#define	SESTREAM	19
+#define SOSTREAM        18
+#define SESTREAM        19

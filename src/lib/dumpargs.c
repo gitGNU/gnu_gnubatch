@@ -29,20 +29,20 @@ void  spitbtrstr(const int, FILE *, const int);
 
 void  dumpargs(FILE *xfl, CBtjobRef jp)
 {
-	int	cnt;
+        int     cnt;
 
-	spitbtrstr($A{btr arg cancarg}, xfl, 1);
-	for  (cnt = 0;  cnt < jp->h.bj_nargs;  cnt++)  {
-		const	char	*cp = ARG_OF(jp, cnt);
+        spitbtrstr($A{btr arg cancarg}, xfl, 1);
+        for  (cnt = 0;  cnt < jp->h.bj_nargs;  cnt++)  {
+                const   char    *cp = ARG_OF(jp, cnt);
 
-		spitbtrstr($A{btr arg argument}, xfl, 0);
-		putc('\'', xfl);
-		while  (*cp)  {
-			if  (*cp == '\'')
-				fputs("\'\\\'", xfl);
-			putc(*cp, xfl);
-			cp++;
-		}
-		fputs("\' \\\n", xfl);
-	}
+                spitbtrstr($A{btr arg argument}, xfl, 0);
+                putc('\'', xfl);
+                while  (*cp)  {
+                        if  (*cp == '\'')
+                                fputs("\'\\\'", xfl);
+                        putc(*cp, xfl);
+                        cp++;
+                }
+                fputs("\' \\\n", xfl);
+        }
 }

@@ -17,36 +17,36 @@
 
 static fmt_t  fmtmode(unsigned lng, const char *prefix, const unsigned md)
 {
-#ifdef	CHARSPRINTF
-	int	cnt;
-	sprintf(&bigbuff[lng], "%s:", prefix);
-	cnt = strlen(&bigbuff[lng]);
-	lng += cnt;
+#ifdef  CHARSPRINTF
+        int     cnt;
+        sprintf(&bigbuff[lng], "%s:", prefix);
+        cnt = strlen(&bigbuff[lng]);
+        lng += cnt;
 #else
-	lng += sprintf(&bigbuff[lng], "%s:", prefix);
+        lng += sprintf(&bigbuff[lng], "%s:", prefix);
 #endif
-	if  (md & BTM_READ)
-		bigbuff[lng++] = 'R';
-	if  (md & BTM_WRITE)
-		bigbuff[lng++] = 'W';
-	if  (md & BTM_SHOW)
-		bigbuff[lng++] = 'S';
-	if  (md & BTM_RDMODE)
-		bigbuff[lng++] = 'M';
-	if  (md & BTM_WRMODE)
-		bigbuff[lng++] = 'P';
-	if  (md & BTM_UGIVE)
-		bigbuff[lng++] = 'U';
-	if  (md & BTM_UTAKE)
-		bigbuff[lng++] = 'V';
-	if  (md & BTM_GGIVE)
-		bigbuff[lng++] = 'G';
-	if  (md & BTM_GTAKE)
-		bigbuff[lng++] = 'H';
-	if  (md & BTM_DELETE)
-		bigbuff[lng++] = 'D';
-	if  (md & BTM_KILL)
-		bigbuff[lng++] = 'K';
-	bigbuff[lng] = '\0';
-	return  lng;
+        if  (md & BTM_READ)
+                bigbuff[lng++] = 'R';
+        if  (md & BTM_WRITE)
+                bigbuff[lng++] = 'W';
+        if  (md & BTM_SHOW)
+                bigbuff[lng++] = 'S';
+        if  (md & BTM_RDMODE)
+                bigbuff[lng++] = 'M';
+        if  (md & BTM_WRMODE)
+                bigbuff[lng++] = 'P';
+        if  (md & BTM_UGIVE)
+                bigbuff[lng++] = 'U';
+        if  (md & BTM_UTAKE)
+                bigbuff[lng++] = 'V';
+        if  (md & BTM_GGIVE)
+                bigbuff[lng++] = 'G';
+        if  (md & BTM_GTAKE)
+                bigbuff[lng++] = 'H';
+        if  (md & BTM_DELETE)
+                bigbuff[lng++] = 'D';
+        if  (md & BTM_KILL)
+                bigbuff[lng++] = 'K';
+        bigbuff[lng] = '\0';
+        return  lng;
 }

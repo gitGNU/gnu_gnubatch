@@ -23,47 +23,47 @@
 
 char *helpprmpt(const int current_state)
 {
-	int	ch, perc;
-	long	lasttime = ftell(Cfile);
+        int     ch, perc;
+        long    lasttime = ftell(Cfile);
 
-	for  (;;)  {
-		ch = getc(Cfile);
-		if  (ch == EOF)  {
-			/* Contortions as prompts frequently follow each other */
-			if  (lasttime <= 0L)
-				return  (char *) 0;
-			fseek(Cfile, 0L, 0);
-			lasttime = 0L;
-			continue;
-		}
+        for  (;;)  {
+                ch = getc(Cfile);
+                if  (ch == EOF)  {
+                        /* Contortions as prompts frequently follow each other */
+                        if  (lasttime <= 0L)
+                                return  (char *) 0;
+                        fseek(Cfile, 0L, 0);
+                        lasttime = 0L;
+                        continue;
+                }
 
-		/* If line doesn't start with a digit ignore it */
+                /* If line doesn't start with a digit ignore it */
 
-		if  ((ch < '0' || ch > '9') && ch != '-')  {
-skipn:			while  (ch != '\n' && ch != EOF)
-				ch = getc(Cfile);
-			continue;
-		}
+                if  ((ch < '0' || ch > '9') && ch != '-')  {
+skipn:                  while  (ch != '\n' && ch != EOF)
+                                ch = getc(Cfile);
+                        continue;
+                }
 
-		/* Read leading state number
-		   If not current state forget it */
+                /* Read leading state number
+                   If not current state forget it */
 
-		ungetc(ch, Cfile);
-		if  (helprdn() != current_state)  {
-			do  ch = getc(Cfile);
-			while  (ch != '\n' && ch != EOF);
-			continue;
-		}
-		ch = getc(Cfile);
+                ungetc(ch, Cfile);
+                if  (helprdn() != current_state)  {
+                        do  ch = getc(Cfile);
+                        while  (ch != '\n' && ch != EOF);
+                        continue;
+                }
+                ch = getc(Cfile);
 
-		/* If it's not a 'p' ignore it.  */
+                /* If it's not a 'p' ignore it.  */
 
-		if  (ch != 'p' && ch != 'P')
-			goto  skipn;
+                if  (ch != 'p' && ch != 'P')
+                        goto  skipn;
 
-		if  ((ch = getc(Cfile)) != ':')
-			goto  skipn;
+                if  ((ch = getc(Cfile)) != ':')
+                        goto  skipn;
 
-		return	help_readl(&perc);
-	}
+                return  help_readl(&perc);
+        }
 }

@@ -15,7 +15,7 @@
    You should have received a copy of the GNU General Public License
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
-extern	void	setup_jmodebits(GtkWidget *, GtkWidget *[3][NUM_JMODEBITS], USHORT, USHORT, USHORT);
-extern	void	setup_vmodebits(GtkWidget *, GtkWidget *[3][NUM_VMODEBITS], USHORT, USHORT, USHORT);
-extern	void	read_jmodes(GtkWidget *[3][NUM_JMODEBITS], USHORT *, USHORT *, USHORT *);
-extern	void	read_vmodes(GtkWidget *[3][NUM_VMODEBITS], USHORT *, USHORT *, USHORT *);
+extern  void    setup_jmodebits(GtkWidget *, GtkWidget *[3][NUM_JMODEBITS], USHORT, USHORT, USHORT);
+extern  void    setup_vmodebits(GtkWidget *, GtkWidget *[3][NUM_VMODEBITS], USHORT, USHORT, USHORT);
+extern  void    read_jmodes(GtkWidget *[3][NUM_JMODEBITS], USHORT *, USHORT *, USHORT *);
+extern  void    read_vmodes(GtkWidget *[3][NUM_VMODEBITS], USHORT *, USHORT *, USHORT *);

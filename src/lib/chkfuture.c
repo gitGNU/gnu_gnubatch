@@ -18,10 +18,10 @@
 #include "config.h"
 #include <stdio.h>
 #include <sys/types.h>
-#ifdef	TIME_WITH_SYS_TIME
+#ifdef  TIME_WITH_SYS_TIME
 #include <sys/time.h>
 #include <time.h>
-#elif	defined(HAVE_SYS_TIME_H)
+#elif   defined(HAVE_SYS_TIME_H)
 #include <sys/time.h>
 #else
 #include <time.h>
@@ -40,39 +40,39 @@
 
 void  chkfuture(BtjobRef jp, const int verb)
 {
-	if  (jp->h.bj_times.tc_istime  &&  jp->h.bj_times.tc_nexttime <= jp->h.bj_time)  {
-		if  (jp->h.bj_times.tc_nexttime == 0L)
-			jp->h.bj_times.tc_nexttime = ((time((time_t *) 0) + 59L) / 60L) * 60L;
-		else  if  (jp->h.bj_progress == BJP_NONE  &&  Realuid != Daemuid  &&  Realuid != ROOTID)  {
-			if  (jp->h.bj_times.tc_repeat <= TC_RETAIN)  {
-				print_error($E{Time not in future});
-				exit(E_USAGE);
-			}
-			do  jp->h.bj_times.tc_nexttime = advtime(&jp->h.bj_times);
-			while  (jp->h.bj_times.tc_nexttime <= jp->h.bj_time);
-			if  (verb)  {
-				struct	tm	*t = localtime(&jp->h.bj_times.tc_nexttime);
-				int	day = t->tm_mday, mon = t->tm_mon+1;
-				char	tbuf[40];
-				/* More catering for those dyslexic yanks....  */
-#ifdef	HAVE_TM_ZONE
-				if  (t->tm_gmtoff <= -4 * 60 * 60)
+        if  (jp->h.bj_times.tc_istime  &&  jp->h.bj_times.tc_nexttime <= jp->h.bj_time)  {
+                if  (jp->h.bj_times.tc_nexttime == 0L)
+                        jp->h.bj_times.tc_nexttime = ((time((time_t *) 0) + 59L) / 60L) * 60L;
+                else  if  (jp->h.bj_progress == BJP_NONE  &&  Realuid != Daemuid  &&  Realuid != ROOTID)  {
+                        if  (jp->h.bj_times.tc_repeat <= TC_RETAIN)  {
+                                print_error($E{Time not in future});
+                                exit(E_USAGE);
+                        }
+                        do  jp->h.bj_times.tc_nexttime = advtime(&jp->h.bj_times);
+                        while  (jp->h.bj_times.tc_nexttime <= jp->h.bj_time);
+                        if  (verb)  {
+                                struct  tm      *t = localtime(&jp->h.bj_times.tc_nexttime);
+                                int     day = t->tm_mday, mon = t->tm_mon+1;
+                                char    tbuf[40];
+                                /* More catering for those dyslexic yanks....  */
+#ifdef  HAVE_TM_ZONE
+                                if  (t->tm_gmtoff <= -4 * 60 * 60)
 #else
-				if  (timezone >= 4 * 60 * 60)
+                                if  (timezone >= 4 * 60 * 60)
 #endif
-				{
-					int	tmp = mon;
-					mon = day;
-					day = tmp;
-				}
+                                {
+                                        int     tmp = mon;
+                                        mon = day;
+                                        day = tmp;
+                                }
 
-				sprintf(tbuf, "%.2d:%.2d %s %.2d/%.2d/%.4d",
-					t->tm_hour, t->tm_min,
-					disp_alt(t->tm_wday, days_abbrev),
-					day, mon, t->tm_year+1900);
-				disp_str = tbuf;
-				print_error($E{Past time incremented});
-			}
-		}
-	}
+                                sprintf(tbuf, "%.2d:%.2d %s %.2d/%.2d/%.4d",
+                                        t->tm_hour, t->tm_min,
+                                        disp_alt(t->tm_wday, days_abbrev),
+                                        day, mon, t->tm_year+1900);
+                                disp_str = tbuf;
+                                print_error($E{Past time incremented});
+                        }
+                }
+        }
 }

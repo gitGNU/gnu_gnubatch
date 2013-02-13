@@ -17,28 +17,28 @@
 
 JFORMAT(fmt_args)
 {
-	fmt_t	lng = 0;
-#ifdef	CHARSPRINTF
-	int	cnt;
+        fmt_t   lng = 0;
+#ifdef  CHARSPRINTF
+        int     cnt;
 #endif
-	if  (isreadable)  {
-		unsigned	ac;
-		for  (ac = 0;  ac < jp->h.bj_nargs;  ac++)  {
-			const	char	*arg = ARG_OF(jp, ac);
-			if  (ac != 0)
-				bigbuff[lng++] = ',';
-#ifdef	CHARSPRINTF
-			if  (strchr(arg, ' '))
-				sprintf(&bigbuff[lng], "\"%s\"", arg);
-			else
-				strcpy(&bigbuff[lng], arg);
-			cnt = strlen(&bigbuff[lng]);
-			lng += cnt;
+        if  (isreadable)  {
+                unsigned        ac;
+                for  (ac = 0;  ac < jp->h.bj_nargs;  ac++)  {
+                        const   char    *arg = ARG_OF(jp, ac);
+                        if  (ac != 0)
+                                bigbuff[lng++] = ',';
+#ifdef  CHARSPRINTF
+                        if  (strchr(arg, ' '))
+                                sprintf(&bigbuff[lng], "\"%s\"", arg);
+                        else
+                                strcpy(&bigbuff[lng], arg);
+                        cnt = strlen(&bigbuff[lng]);
+                        lng += cnt;
 #else
-			lng += sprintf(&bigbuff[lng], strchr(arg, ' ')? "\"%s\"": "%s", arg);
+                        lng += sprintf(&bigbuff[lng], strchr(arg, ' ')? "\"%s\"": "%s", arg);
 #endif
-		}
-	}
+                }
+        }
 
-	return  lng;
+        return  lng;
 }

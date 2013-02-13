@@ -28,96 +28,96 @@
 #include "optflags.h"
 #include "errnums.h"
 
-#ifndef	PATH_MAX
-#define	PATH_MAX	1024
+#ifndef PATH_MAX
+#define PATH_MAX        1024
 #endif
 
-static	char	Filename[] = __FILE__;
+static  char    Filename[] = __FILE__;
 
 /* Construct environment variable name from program name */
 
-char	*make_varname()
+char    *make_varname()
 {
-	char  *varname = malloc((unsigned) strlen(progname) + 1), *vp;
-	const  char  *pp;
+        char  *varname = malloc((unsigned) strlen(progname) + 1), *vp;
+        const  char  *pp;
 
-	if  (!varname)
-		ABORT_NOMEM;
+        if  (!varname)
+                ABORT_NOMEM;
 
-	pp = progname;
-	vp = varname;
+        pp = progname;
+        vp = varname;
 
-	while  (*pp)  {
-		int  ch = *pp++;
-		if  (!isalpha(ch))
-			*vp++ = '_';
-		else
-			*vp++ = toupper(ch);
-	}
-	*vp = '\0';
-	return  varname;
+        while  (*pp)  {
+                int  ch = *pp++;
+                if  (!isalpha(ch))
+                        *vp++ = '_';
+                else
+                        *vp++ = toupper(ch);
+        }
+        *vp = '\0';
+        return  varname;
 }
 
 char   **optprocess(char **argv, const Argdefault *defaultopts, optparam * const optlist, const int minstate, const int maxstate, const int keepargs)
 {
-	char	*loclist = envprocess(CONFIGPATH), *nxt, *name;
-	const	char	*configname = USER_CONFIG;
-	HelpargRef	avec = helpargs(defaultopts, minstate, maxstate);
-	int	hadargv = 0;
-	char	*Varname = make_varname();
+        char    *loclist = envprocess(CONFIGPATH), *nxt, *name;
+        const   char    *configname = USER_CONFIG;
+        HelpargRef      avec = helpargs(defaultopts, minstate, maxstate);
+        int     hadargv = 0;
+        char    *Varname = make_varname();
 
-	nxt = loclist;
-	for  (;;)  {
-		char	*colp, *dirname;
+        nxt = loclist;
+        for  (;;)  {
+                char    *colp, *dirname;
 
-		if  ((colp = strchr(nxt, ':')))
-			*colp = '\0';
+                if  ((colp = strchr(nxt, ':')))
+                        *colp = '\0';
 
-		if  (nxt[0] == '-'  &&  nxt[1] == '\0')  {	/* Process Command Line Options */
-			if  (!hadargv)
-				argv = doopts(&argv[0], avec, optlist, minstate);
-			hadargv++;
-		}
-		else  if  (*nxt == '\0'  ||  (nxt[0] == '!' && nxt[1] == '\0'))
-			doenv(getenv(Varname), avec, optlist, minstate);
-		else  {
-			char	cfilename[PATH_MAX];
-			if  (strchr(nxt, '~'))  {
-				if  (!(dirname = unameproc(nxt, ".", Realuid)))
-					goto  donxt;
-				if  (strchr(dirname, '$'))  {
-					char	*tmp = envprocess(dirname);
-					free(dirname);
-					dirname = tmp;
-				}
-				sprintf(cfilename, "%s/%s", dirname, configname);
-				free(dirname);
-			}
-			else  if  (strchr(nxt, '$'))  {
-				dirname = envprocess(nxt);
-				sprintf(cfilename, "%s/%s", dirname, configname);
-				free(dirname);
-			}
-			else
-				sprintf(cfilename, "%s/%s", nxt, configname);
+                if  (nxt[0] == '-'  &&  nxt[1] == '\0')  {      /* Process Command Line Options */
+                        if  (!hadargv)
+                                argv = doopts(&argv[0], avec, optlist, minstate);
+                        hadargv++;
+                }
+                else  if  (*nxt == '\0'  ||  (nxt[0] == '!' && nxt[1] == '\0'))
+                        doenv(getenv(Varname), avec, optlist, minstate);
+                else  {
+                        char    cfilename[PATH_MAX];
+                        if  (strchr(nxt, '~'))  {
+                                if  (!(dirname = unameproc(nxt, ".", Realuid)))
+                                        goto  donxt;
+                                if  (strchr(dirname, '$'))  {
+                                        char    *tmp = envprocess(dirname);
+                                        free(dirname);
+                                        dirname = tmp;
+                                }
+                                sprintf(cfilename, "%s/%s", dirname, configname);
+                                free(dirname);
+                        }
+                        else  if  (strchr(nxt, '$'))  {
+                                dirname = envprocess(nxt);
+                                sprintf(cfilename, "%s/%s", dirname, configname);
+                                free(dirname);
+                        }
+                        else
+                                sprintf(cfilename, "%s/%s", nxt, configname);
 
-			if  ((name = rdoptfile(cfilename, Varname)))  {
-				doenv(name, avec, optlist, minstate);
-				free(name);
-			}
-		}
-	donxt:
-		if  (!colp)
-			break;
-		*colp++ = ':';
-		nxt = colp;
-	}
-	close_optfile();
+                        if  ((name = rdoptfile(cfilename, Varname)))  {
+                                doenv(name, avec, optlist, minstate);
+                                free(name);
+                        }
+                }
+        donxt:
+                if  (!colp)
+                        break;
+                *colp++ = ':';
+                nxt = colp;
+        }
+        close_optfile();
 
-	if  (keepargs || Anychanges & OF_ANY_FREEZE_WANTED)
-		makeoptvec(avec, minstate, maxstate);
-	freehelpargs(avec);
-	if  (!hadargv)
-		argv++;
-	return  argv;
+        if  (keepargs || Anychanges & OF_ANY_FREEZE_WANTED)
+                makeoptvec(avec, minstate, maxstate);
+        freehelpargs(avec);
+        if  (!hadargv)
+                argv++;
+        return  argv;
 }

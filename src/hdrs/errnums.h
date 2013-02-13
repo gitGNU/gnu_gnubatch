@@ -18,21 +18,21 @@
 /* These are all parameters which programs can plug values into
    for displaying error etc messages with */
 
-extern	LONG	disp_arg[];
-extern	double	disp_float;
-extern	const	char	*disp_str,
-			*disp_str2,
-			*progname;
-extern	FILE	*Cfile;
+extern  LONG    disp_arg[];
+extern  double  disp_float;
+extern  const   char    *disp_str,
+                        *disp_str2,
+                        *progname;
+extern  FILE    *Cfile;
 
-extern	void	count_hv(char **, int *, int *);
-extern	void	freehelp(char **);
-extern	void	print_error(int);
-extern	void	fprint_error(FILE *, int);
+extern  void    count_hv(char **, int *, int *);
+extern  void    freehelp(char **);
+extern  void    print_error(int);
+extern  void    fprint_error(FILE *, int);
 
 /* These really want replacing with "stringvecs" as arrays of char arrays
    are messy. */
 
-extern	char	**helpvec(const int, const char);
-extern	char	**helphdr(const int);
-extern	char	**mmangle(char **);
+extern  char    **helpvec(const int, const char);
+extern  char    **helphdr(const int);
+extern  char    **mmangle(char **);

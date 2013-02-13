@@ -15,15 +15,15 @@
    You should have received a copy of the GNU General Public License
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
-struct	jobswanted	{
-	slotno_t	slot;		/* Slot number */
-	jobno_t		jno;		/* Job number */
-	netid_t		host;		/* Host id */
+struct  jobswanted      {
+        slotno_t        slot;           /* Slot number */
+        jobno_t         jno;            /* Job number */
+        netid_t         host;           /* Host id */
 };
 
-struct	var_with_slot  {
-	slotno_t	slot;
-	apiBtvar	var;
+struct  var_with_slot  {
+        slotno_t        slot;
+        apiBtvar        var;
 };
 
 extern int  sort_j(apiBtjob *, apiBtjob *);
@@ -38,8 +38,8 @@ extern int  rjarg_queue(apiBtjob *, char *);
 extern int  rjarg_title(apiBtjob *, char *);
 extern void  decode_permflags(USHORT *, char *, const int, const int);
 
-extern	int		xbapi_fd;
-extern	apiBtuser	userpriv;
+extern  int             xbapi_fd;
+extern  apiBtuser       userpriv;
 
-extern	int			Nvars;
-extern	struct	var_with_slot	*var_sl_list;
+extern  int                     Nvars;
+extern  struct  var_with_slot   *var_sl_list;

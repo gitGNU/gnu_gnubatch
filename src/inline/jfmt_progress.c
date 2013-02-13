@@ -17,26 +17,26 @@
 
 JFORMAT(fmt_progress)
 {
-#ifdef	CHARSPRINTF
-	if  (jp->h.bj_progress == BJP_RUNNING  &&  jp->h.bj_runhostid != jp->h.bj_hostid)  {
-		if  (jp->h.bj_runhostid == 0)
-			strcpy(bigbuff, localrun);
-		else
-			sprintf(bigbuff, "%s:%s", disp_alt((int) jp->h.bj_progress, progresslist),
-				       look_host(jp->h.bj_runhostid));
-	}
-	else
-		strcpy(bigbuff, disp_alt((int) jp->h.bj_progress, progresslist));
+#ifdef  CHARSPRINTF
+        if  (jp->h.bj_progress == BJP_RUNNING  &&  jp->h.bj_runhostid != jp->h.bj_hostid)  {
+                if  (jp->h.bj_runhostid == 0)
+                        strcpy(bigbuff, localrun);
+                else
+                        sprintf(bigbuff, "%s:%s", disp_alt((int) jp->h.bj_progress, progresslist),
+                                       look_host(jp->h.bj_runhostid));
+        }
+        else
+                strcpy(bigbuff, disp_alt((int) jp->h.bj_progress, progresslist));
 
-	return  (fmt_t) strlen(bigbuff);
+        return  (fmt_t) strlen(bigbuff);
 #else
-	if  (jp->h.bj_progress == BJP_RUNNING  &&  jp->h.bj_runhostid != jp->h.bj_hostid)  {
-		if  (jp->h.bj_runhostid == 0)
-			return  (fmt_t) strlen(strcpy(bigbuff, localrun));
-		return  (fmt_t) sprintf(bigbuff, "%s:%s", disp_alt((int) jp->h.bj_progress, progresslist),
-					   look_host(jp->h.bj_runhostid));
-	}
-	else
-		return  (fmt_t) strlen(strcpy(bigbuff, disp_alt((int) jp->h.bj_progress, progresslist)));
+        if  (jp->h.bj_progress == BJP_RUNNING  &&  jp->h.bj_runhostid != jp->h.bj_hostid)  {
+                if  (jp->h.bj_runhostid == 0)
+                        return  (fmt_t) strlen(strcpy(bigbuff, localrun));
+                return  (fmt_t) sprintf(bigbuff, "%s:%s", disp_alt((int) jp->h.bj_progress, progresslist),
+                                           look_host(jp->h.bj_runhostid));
+        }
+        else
+                return  (fmt_t) strlen(strcpy(bigbuff, disp_alt((int) jp->h.bj_progress, progresslist)));
 #endif
 }

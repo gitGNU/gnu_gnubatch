@@ -32,15 +32,15 @@ then
     cd trial
     cat >Imakefile <<'EOF'
 findappd:
-	@echo $(XAPPLOADDIR)
+        @echo $(XAPPLOADDIR)
 EOF
     if xmkmf >/dev/null 2>&1
     then
-	Appdefloc=`make findappd 2>/dev/null`
-	cd ..
-	rm -rf trial
-	echo $Appdefloc
-	exit 0
+        Appdefloc=`make findappd 2>/dev/null`
+        cd ..
+        rm -rf trial
+        echo $Appdefloc
+        exit 0
     fi
     cd ..
     rm -rf trial

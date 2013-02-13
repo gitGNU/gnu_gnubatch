@@ -27,30 +27,30 @@ extern int  gbatch_rmsg(const struct api_fd *, struct api_msg *);
 extern int  gbatch_wmsg(const struct api_fd *, struct api_msg *);
 extern struct api_fd *gbatch_look_fd(const int);
 
-int	gbatch_holupd(const int fd, const unsigned flags, int year, unsigned char *hols)
+int     gbatch_holupd(const int fd, const unsigned flags, int year, unsigned char *hols)
 {
-	int		ret;
-	struct	api_fd	*fdp = gbatch_look_fd(fd);
-	struct	api_msg	msg;
+        int             ret;
+        struct  api_fd  *fdp = gbatch_look_fd(fd);
+        struct  api_msg msg;
 
-	if  (!fdp)
-		return  XB_INVALID_FD;
-	if  (year < 1990)  {
-		if  (year > 90 && year < 200)
-			year += 1900;
-		else
-			return  XB_INVALID_YEAR;
-	}
-	msg.code = API_HOLUPD;
-	msg.un.reader.flags = htonl(flags);
-	msg.un.reader.slotno = htonl(year);
-	if  ((ret = gbatch_wmsg(fdp, &msg)))
-		return  ret;
-	if  ((ret = gbatch_write(fdp->sockfd, (char *) hols, YVECSIZE)))
-		return  ret;
-	if  ((ret = gbatch_rmsg(fdp, &msg)))
-		return  ret;
-	if  (msg.retcode != 0)
-		return  (SHORT) ntohs(msg.retcode);
-	return  XB_OK;
+        if  (!fdp)
+                return  XB_INVALID_FD;
+        if  (year < 1990)  {
+                if  (year > 90 && year < 200)
+                        year += 1900;
+                else
+                        return  XB_INVALID_YEAR;
+        }
+        msg.code = API_HOLUPD;
+        msg.un.reader.flags = htonl(flags);
+        msg.un.reader.slotno = htonl(year);
+        if  ((ret = gbatch_wmsg(fdp, &msg)))
+                return  ret;
+        if  ((ret = gbatch_write(fdp->sockfd, (char *) hols, YVECSIZE)))
+                return  ret;
+        if  ((ret = gbatch_rmsg(fdp, &msg)))
+                return  ret;
+        if  (msg.retcode != 0)
+                return  (SHORT) ntohs(msg.retcode);
+        return  XB_OK;
 }

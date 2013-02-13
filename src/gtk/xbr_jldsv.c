@@ -23,10 +23,10 @@
 #include <sys/ipc.h>
 #include <sys/sem.h>
 #include <sys/shm.h>
-#ifdef	TIME_WITH_SYS_TIME
+#ifdef  TIME_WITH_SYS_TIME
 #include <sys/time.h>
 #include <time.h>
-#elif	defined(HAVE_SYS_TIME_H)
+#elif   defined(HAVE_SYS_TIME_H)
 #include <sys/time.h>
 #else
 #include <time.h>
@@ -61,18 +61,18 @@
 #include "optflags.h"
 #include "gtk_lib.h"
 
-static	char	Filename[] = __FILE__;
+static  char    Filename[] = __FILE__;
 
-#define	XMBTR_INLINE	1
+#define XMBTR_INLINE    1
 
-static	HelpargRef	btr_avec;
+static  HelpargRef      btr_avec;
 
 /* This is the var name which options get saved under */
 
-static	char	Varname[] = "GBCH_R";
+static  char    Varname[] = "GBCH_R";
 
-extern	char	*rdoptfile(const char *, const char *);
-extern	void	checksetmode(const int, const ushort *, const ushort, USHORT *);
+extern  char    *rdoptfile(const char *, const char *);
+extern  void    checksetmode(const int, const ushort *, const ushort, USHORT *);
 
 #ifdef DO_NOT_DEFINE
 /* This is just to force the inclusion of help
@@ -122,25 +122,25 @@ $H{Bad grace time}
 $H{Could repeat endlessly}
 #endif
 
-extern	char	*Curr_pwd;
+extern  char    *Curr_pwd;
 
-static	struct	pend_job	*cjob;
+static  struct  pend_job        *cjob;
 
 OPTION(o_explain)
 {
-	return  OPTRESULT_OK;
+        return  OPTRESULT_OK;
 }
 
 OPTION(o_noverbose)
 {
-	cjob->Verbose = 0;
-	return  OPTRESULT_OK;
+        cjob->Verbose = 0;
+        return  OPTRESULT_OK;
 }
 
 OPTION(o_verbose)
 {
-	cjob->Verbose = 1;
-	return  OPTRESULT_OK;
+        cjob->Verbose = 1;
+        return  OPTRESULT_OK;
 }
 
 DEOPTION(o_condcrit);
@@ -193,74 +193,74 @@ DEOPTION(o_catchup);
 
 OPTION(o_owner)
 {
-#ifdef	INCLUDE_LOAD_CHOWNS
-	int_ugid_t	nuid;
+#ifdef  INCLUDE_LOAD_CHOWNS
+        int_ugid_t      nuid;
 #endif
 
-	if  (!arg)
-		return  OPTRESULT_MISSARG;
+        if  (!arg)
+                return  OPTRESULT_MISSARG;
 
-#ifdef	INCLUDE_LOAD_CHOWNS
-	Anychanges |= OF_ANY_DOING_SOMETHING;
-	Procparchanges |= OF_OWNER_CHANGE;
+#ifdef  INCLUDE_LOAD_CHOWNS
+        Anychanges |= OF_ANY_DOING_SOMETHING;
+        Procparchanges |= OF_OWNER_CHANGE;
 
-	if  ((nuid = lookup_uname(arg)) == UNKNOWN_UID)  {
-		arg_errnum = $EH{Unknown owner};
-		return  OPTRESULT_ERROR;
-	}
-	if  (cjob->userid != nuid && (mypriv->btu_priv & BTM_WADMIN) == 0)  {
-		arg_errnum = $EH{Cannot set owner};
-		return  OPTRESULT_ERROR;
-	}
-	cjob->userid = nuid;
+        if  ((nuid = lookup_uname(arg)) == UNKNOWN_UID)  {
+                arg_errnum = $EH{Unknown owner};
+                return  OPTRESULT_ERROR;
+        }
+        if  (cjob->userid != nuid && (mypriv->btu_priv & BTM_WADMIN) == 0)  {
+                arg_errnum = $EH{Cannot set owner};
+                return  OPTRESULT_ERROR;
+        }
+        cjob->userid = nuid;
 #endif
-	return  OPTRESULT_ARG_OK;
+        return  OPTRESULT_ARG_OK;
 }
 
 OPTION(o_group)
 {
-#ifdef	INCLUDE_LOAD_CHOWNS
-	int_ugid_t	ngid;
+#ifdef  INCLUDE_LOAD_CHOWNS
+        int_ugid_t      ngid;
 #endif
 
-	if  (!arg)
-		return  OPTRESULT_MISSARG;
+        if  (!arg)
+                return  OPTRESULT_MISSARG;
 
-#ifdef	INCLUDE_LOAD_CHOWNS
-	Anychanges |= OF_ANY_DOING_SOMETHING;
-	Procparchanges |= OF_GROUP_CHANGE;
+#ifdef  INCLUDE_LOAD_CHOWNS
+        Anychanges |= OF_ANY_DOING_SOMETHING;
+        Procparchanges |= OF_GROUP_CHANGE;
 
-	if  ((ngid = lookup_gname(arg)) == UNKNOWN_GID)  {
-		arg_errnum = $EH{Unknown group};
-		return  OPTRESULT_ERROR;
-	}
-	if  (cjob->grpid != ngid  &&  (mypriv->btu_priv & BTM_WADMIN) == 0)  {
-		arg_errnum = $EH{Cannot set group};
-		return  OPTRESULT_ERROR;
-	}
-	cjob->grpid = ngid;
+        if  ((ngid = lookup_gname(arg)) == UNKNOWN_GID)  {
+                arg_errnum = $EH{Unknown group};
+                return  OPTRESULT_ERROR;
+        }
+        if  (cjob->grpid != ngid  &&  (mypriv->btu_priv & BTM_WADMIN) == 0)  {
+                arg_errnum = $EH{Cannot set group};
+                return  OPTRESULT_ERROR;
+        }
+        cjob->grpid = ngid;
 #endif
-	return  OPTRESULT_ARG_OK;
+        return  OPTRESULT_ARG_OK;
 }
 
 OPTION(o_freezecd)
 {
-	return  OPTRESULT_OK;
+        return  OPTRESULT_OK;
 }
 
 OPTION(o_freezehd)
 {
-	return  OPTRESULT_OK;
+        return  OPTRESULT_OK;
 }
 
-OPTION(o_jobqueue)		/* Home-grown version */
+OPTION(o_jobqueue)              /* Home-grown version */
 {
-	if  (!arg)
-		return  OPTRESULT_MISSARG;
-	if  (cjob->jobqueue)
-		free(cjob->jobqueue);
-	cjob->jobqueue = (arg[0] && (arg[0] != '-' || arg[1])) ? stracpy(arg): (char *) 0;
-	return  OPTRESULT_ARG_OK;
+        if  (!arg)
+                return  OPTRESULT_MISSARG;
+        if  (cjob->jobqueue)
+                free(cjob->jobqueue);
+        cjob->jobqueue = (arg[0] && (arg[0] != '-' || arg[1])) ? stracpy(arg): (char *) 0;
+        return  OPTRESULT_ARG_OK;
 }
 
 /* Dummy version as we don't currently support remote queueing (maybe
@@ -268,20 +268,20 @@ OPTION(o_jobqueue)		/* Home-grown version */
 
 OPTION(o_queuehost)
 {
-	if  (!arg)
-		return  OPTRESULT_MISSARG;
-	return  OPTRESULT_ARG_OK;
+        if  (!arg)
+                return  OPTRESULT_MISSARG;
+        return  OPTRESULT_ARG_OK;
 }
 
 
 OPTION(o_localenv)
 {
-	return  OPTRESULT_OK;
+        return  OPTRESULT_OK;
 }
 
 OPTION(o_outsideenv)
 {
-	return  OPTRESULT_OK;
+        return  OPTRESULT_OK;
 }
 
 #include "inline/btradefs.c"
@@ -289,164 +289,164 @@ OPTION(o_outsideenv)
 
 /* This is a version of doopts from the library which doesn't print errors.  */
 
-static	char	*dooptsarg;	/* Need to save it in case it gets deallocated */
+static  char    *dooptsarg;     /* Need to save it in case it gets deallocated */
 
 static char **my_doopts(char **argv)
 {
-	char	*arg;
-	int		ad, rc;
-	HelpargkeyRef	ap;
+        char    *arg;
+        int             ad, rc;
+        HelpargkeyRef   ap;
 
-	if  (dooptsarg)  {
-		free(dooptsarg);
-		dooptsarg = (char *) 0;
-	}
+        if  (dooptsarg)  {
+                free(dooptsarg);
+                dooptsarg = (char *) 0;
+        }
  nexta:
-	for  (;;)  {
-		arg = *++argv;
-		if  (arg == (char *) 0 || (*arg != '-' && *arg != '+'))
-			return	argv;
+        for  (;;)  {
+                arg = *++argv;
+                if  (arg == (char *) 0 || (*arg != '-' && *arg != '+'))
+                        return  argv;
 
-		if  (*arg == '-')  {
+                if  (*arg == '-')  {
 
-			/* Treat -- as alternative to + to start keywords
-			   or -- on its own as end of arguments */
+                        /* Treat -- as alternative to + to start keywords
+                           or -- on its own as end of arguments */
 
-			if  (*++arg == '-')  {
-				if  (*++arg)
-					goto  keyw_arg;
-				return  ++argv;
-			}
+                        if  (*++arg == '-')  {
+                                if  (*++arg)
+                                        goto  keyw_arg;
+                                return  ++argv;
+                        }
 
-			/* Past initial '-', argv still on whole argument */
+                        /* Past initial '-', argv still on whole argument */
 
-			do	{
-				ad = btr_avec[*arg - ARG_STARTV].value;
-				if  (ad < $A{btr arg explain})  {
-					disp_str = dooptsarg = stracpy(*argv);
-					arg_errnum = $EH{program arg error};
-					return  (char **) 0;
-				}
+                        do      {
+                                ad = btr_avec[*arg - ARG_STARTV].value;
+                                if  (ad < $A{btr arg explain})  {
+                                        disp_str = dooptsarg = stracpy(*argv);
+                                        arg_errnum = $EH{program arg error};
+                                        return  (char **) 0;
+                                }
 
-				/*	Each function returns:
-				 	1 (OPTRESULT_ARG_OK)
-						if it eats the argument and it's OK
-					2 (OPTRESULT_LAST_ARG_OK)
-						ditto but the argument must be last
-					0 (OPTRESULT_OK)
-						if it ignores the argument.
-					-1 (OPTRESULT_MISSARG) if no arg and one reqd
-					-2 (OPTRESULT_ERROR) if something is wrong
-						error code in arg_errnum. */
+                                /*      Each function returns:
+                                        1 (OPTRESULT_ARG_OK)
+                                                if it eats the argument and it's OK
+                                        2 (OPTRESULT_LAST_ARG_OK)
+                                                ditto but the argument must be last
+                                        0 (OPTRESULT_OK)
+                                                if it ignores the argument.
+                                        -1 (OPTRESULT_MISSARG) if no arg and one reqd
+                                        -2 (OPTRESULT_ERROR) if something is wrong
+                                                error code in arg_errnum. */
 
-				if  (!*++arg)  {
-					disp_str = argv[1];
-					if  ((rc = (optprocs[ad - $A{btr arg explain}])(argv[1])) < OPTRESULT_OK)  {
-						if  (rc == OPTRESULT_MISSARG)  {
-							arg_errnum = $EH{program opt expects arg};
-							disp_str = dooptsarg = stracpy(*argv);
-						}
-						else
-							disp_str = dooptsarg = stracpy(disp_str);
-						return  (char **) 0;
-					}
-					if  (rc > OPTRESULT_OK)  { /* Eaten the next arg */
-						if  (rc > OPTRESULT_ARG_OK)
-							return  argv;
-						argv++;
-					}
-					goto  nexta;
-				}
+                                if  (!*++arg)  {
+                                        disp_str = argv[1];
+                                        if  ((rc = (optprocs[ad - $A{btr arg explain}])(argv[1])) < OPTRESULT_OK)  {
+                                                if  (rc == OPTRESULT_MISSARG)  {
+                                                        arg_errnum = $EH{program opt expects arg};
+                                                        disp_str = dooptsarg = stracpy(*argv);
+                                                }
+                                                else
+                                                        disp_str = dooptsarg = stracpy(disp_str);
+                                                return  (char **) 0;
+                                        }
+                                        if  (rc > OPTRESULT_OK)  { /* Eaten the next arg */
+                                                if  (rc > OPTRESULT_ARG_OK)
+                                                        return  argv;
+                                                argv++;
+                                        }
+                                        goto  nexta;
+                                }
 
-				/* Trailing stuff after arg letter, we incremented to it */
+                                /* Trailing stuff after arg letter, we incremented to it */
 
-				disp_str = arg;
-				if  ((rc = (optprocs[ad - $A{btr arg explain}])(arg)) > OPTRESULT_OK)  { /* Eaten */
-					if  (rc > OPTRESULT_ARG_OK)		/* Last of its kind */
-						return  argv;
-					goto  nexta;
-				}
-			}  while  (*arg);
-			continue;
-		}
+                                disp_str = arg;
+                                if  ((rc = (optprocs[ad - $A{btr arg explain}])(arg)) > OPTRESULT_OK)  { /* Eaten */
+                                        if  (rc > OPTRESULT_ARG_OK)             /* Last of its kind */
+                                                return  argv;
+                                        goto  nexta;
+                                }
+                        }  while  (*arg);
+                        continue;
+                }
 
-		arg++;		/* Increment past '+' */
+                arg++;          /* Increment past '+' */
 
-	keyw_arg:
-		for  (ap = btr_avec[tolower(*arg) - ARG_STARTV].mult_chain;  ap;  ap = ap->next)
-			if  (ncstrcmp(arg, ap->chars) == 0)
-				goto  found;
+        keyw_arg:
+                for  (ap = btr_avec[tolower(*arg) - ARG_STARTV].mult_chain;  ap;  ap = ap->next)
+                        if  (ncstrcmp(arg, ap->chars) == 0)
+                                goto  found;
 
-		disp_str = dooptsarg = stracpy(arg);
-		arg_errnum = $EH{program arg bad string};
-		return  (char **) 0;
+                disp_str = dooptsarg = stracpy(arg);
+                arg_errnum = $EH{program arg bad string};
+                return  (char **) 0;
 
-	found:
+        found:
 
-		disp_str = argv[1];
-		if  ((rc = (optprocs[ap->value - $A{btr arg explain}])(argv[1])) < OPTRESULT_OK)  {
-			if  (rc == OPTRESULT_MISSARG)  {
-				disp_str = dooptsarg = stracpy(arg);
-				arg_errnum = $EH{program opt expects arg};
-			}
-			else
-				disp_str = dooptsarg = stracpy(disp_str);
-			return  (char **) 0;
-		}
+                disp_str = argv[1];
+                if  ((rc = (optprocs[ap->value - $A{btr arg explain}])(argv[1])) < OPTRESULT_OK)  {
+                        if  (rc == OPTRESULT_MISSARG)  {
+                                disp_str = dooptsarg = stracpy(arg);
+                                arg_errnum = $EH{program opt expects arg};
+                        }
+                        else
+                                disp_str = dooptsarg = stracpy(disp_str);
+                        return  (char **) 0;
+                }
 
-		if  (rc > OPTRESULT_OK)  {		/* Eaten */
-			if  (rc > OPTRESULT_ARG_OK)	/* The end */
-				return  argv;
-			argv++;
-		}
-	}
+                if  (rc > OPTRESULT_OK)  {              /* Eaten */
+                        if  (rc > OPTRESULT_ARG_OK)     /* The end */
+                                return  argv;
+                        argv++;
+                }
+        }
 }
 
 static int  fixcsvars()
 {
-	int	nn;
-	ULONG	Saveseq;
+        int     nn;
+        ULONG   Saveseq;
 
-	/* Don't worry if none are specified */
+        /* Don't worry if none are specified */
 
-	if  (Condcnt <= 0  &&  Asscnt <= 0)
-		return  0;
+        if  (Condcnt <= 0  &&  Asscnt <= 0)
+                return  0;
 
-	rvarfile(1);
+        rvarfile(1);
 
-	for  (nn = 0;  nn < Condcnt;  nn++)  {
-		struct	scond	*sp = &Condlist[nn];
-		JcondRef	jc = &JREQ->h.bj_conds[nn];
-		vhash_t	vp = lookupvar(sp->vd.var, sp->vd.hostid, BTM_READ, &Saveseq);
+        for  (nn = 0;  nn < Condcnt;  nn++)  {
+                struct  scond   *sp = &Condlist[nn];
+                JcondRef        jc = &JREQ->h.bj_conds[nn];
+                vhash_t vp = lookupvar(sp->vd.var, sp->vd.hostid, BTM_READ, &Saveseq);
 
-		if  (vp < 0)  {
-			disp_str = sp->vd.var;
-			return  $EH{Unreadable variable};
-		}
-		jc->bjc_compar = sp->compar;
-		jc->bjc_varind = vp;
-		jc->bjc_value = sp->value;
-		jc->bjc_iscrit = sp->vd.hostid? sp->vd.crit: 0;
-	}
+                if  (vp < 0)  {
+                        disp_str = sp->vd.var;
+                        return  $EH{Unreadable variable};
+                }
+                jc->bjc_compar = sp->compar;
+                jc->bjc_varind = vp;
+                jc->bjc_value = sp->value;
+                jc->bjc_iscrit = sp->vd.hostid? sp->vd.crit: 0;
+        }
 
-	for  (nn = 0;  nn < Asscnt;  nn++)  {
-		struct	Sass	*sp = &Asslist[nn];
-		JassRef	ja = &JREQ->h.bj_asses[nn];
-		vhash_t	vp = lookupvar(sp->vd.var, sp->vd.hostid, (unsigned)(sp->op == BJA_ASSIGN? BTM_WRITE: BTM_READ|BTM_WRITE), &Saveseq);
+        for  (nn = 0;  nn < Asscnt;  nn++)  {
+                struct  Sass    *sp = &Asslist[nn];
+                JassRef ja = &JREQ->h.bj_asses[nn];
+                vhash_t vp = lookupvar(sp->vd.var, sp->vd.hostid, (unsigned)(sp->op == BJA_ASSIGN? BTM_WRITE: BTM_READ|BTM_WRITE), &Saveseq);
 
-		if  (vp < 0)  {
-			disp_str = sp->vd.var;
-			return  $EH{Unwritable variable};
-		}
+                if  (vp < 0)  {
+                        disp_str = sp->vd.var;
+                        return  $EH{Unwritable variable};
+                }
 
-		ja->bja_flags = sp->flags;
-		ja->bja_op = sp->op;
-		ja->bja_varind = vp;
-		ja->bja_con = sp->con;
-		ja->bja_iscrit = sp->vd.hostid? sp->vd.crit: 0;
-	}
+                ja->bja_flags = sp->flags;
+                ja->bja_op = sp->op;
+                ja->bja_varind = vp;
+                ja->bja_con = sp->con;
+                ja->bja_iscrit = sp->vd.hostid? sp->vd.crit: 0;
+        }
 
-	return  0;
+        return  0;
 }
 
 /* Read environment.
@@ -454,611 +454,611 @@ static int  fixcsvars()
 
 static int  read_envir(char **envlist)
 {
-	char	**ep;
-	int	envcount = 0;
+        char    **ep;
+        int     envcount = 0;
 
-	for  (ep = envlist;  *ep;  ep++)  {
-		char	*eqp, *ncopy;
-		if  (!(eqp = strchr(*ep, '='))) /* Don't understand no = */
-			continue;
-		if  (envcount < MAXJENVIR)  {
-			unsigned  lng = eqp - *ep;
-			if  ((ncopy = malloc(lng + 1)) == (char *) 0)
-				ABORT_NOMEM;
-			BLOCK_COPY(ncopy, *ep, lng);
-			ncopy[lng] = '\0';
-			Envs[envcount].e_name = ncopy;
-			Envs[envcount].e_value = stracpy(eqp + 1);
-		}
-		envcount++;
-	}
-	if  (envcount > MAXJENVIR)  {
-		disp_arg[0] = envcount;
-		disp_arg[1] = MAXJENVIR;
-		JREQ->h.bj_nenv = MAXJENVIR;
-		return  $EH{Too large environment};
-	}
-	else
-		JREQ->h.bj_nenv = (USHORT) envcount;
-	return  0;
+        for  (ep = envlist;  *ep;  ep++)  {
+                char    *eqp, *ncopy;
+                if  (!(eqp = strchr(*ep, '='))) /* Don't understand no = */
+                        continue;
+                if  (envcount < MAXJENVIR)  {
+                        unsigned  lng = eqp - *ep;
+                        if  ((ncopy = malloc(lng + 1)) == (char *) 0)
+                                ABORT_NOMEM;
+                        BLOCK_COPY(ncopy, *ep, lng);
+                        ncopy[lng] = '\0';
+                        Envs[envcount].e_name = ncopy;
+                        Envs[envcount].e_value = stracpy(eqp + 1);
+                }
+                envcount++;
+        }
+        if  (envcount > MAXJENVIR)  {
+                disp_arg[0] = envcount;
+                disp_arg[1] = MAXJENVIR;
+                JREQ->h.bj_nenv = MAXJENVIR;
+                return  $EH{Too large environment};
+        }
+        else
+                JREQ->h.bj_nenv = (USHORT) envcount;
+        return  0;
 }
 
 void  job_initialise(struct pend_job *pj, char *dname, char *fname)
 {
-	*pj = default_pend;
-	if  (!(pj->job = (BtjobRef) malloc(sizeof(Btjob))))
-		ABORT_NOMEM;
-	*pj->job = default_job;
-	pj->changes = 1;
-	pj->nosubmit = 1;
-	pj->directory = dname;	/* Already stracpyed */
-	if  (pj->jobqueue)
-		pj->jobqueue = stracpy(pj->jobqueue);	/* Lets have a unique copy. */
-	pj->jobfile_name = (char *) 0;
-	pj->cmdfile_name = fname; /* Already stracpyed */
+        *pj = default_pend;
+        if  (!(pj->job = (BtjobRef) malloc(sizeof(Btjob))))
+                ABORT_NOMEM;
+        *pj->job = default_job;
+        pj->changes = 1;
+        pj->nosubmit = 1;
+        pj->directory = dname;  /* Already stracpyed */
+        if  (pj->jobqueue)
+                pj->jobqueue = stracpy(pj->jobqueue);   /* Lets have a unique copy. */
+        pj->jobfile_name = (char *) 0;
+        pj->cmdfile_name = fname; /* Already stracpyed */
 }
 
 static void  cleanupspace(char **envlist)
 {
-	unsigned	cnt;
+        unsigned        cnt;
 
-	if  (envlist)  {
-		char	**ep;
-		for  (ep = envlist; *ep;  ep++)
-			free(*ep);
-		free((char *) envlist);
-	}
-	if  (job_title)  {
-		free(job_title);
-		job_title = (char *) 0;
-	}
-	if  (job_cwd)  {
-		free(job_cwd);
-		job_cwd = (char *) 0;
-	}
-	for  (cnt = 0;  cnt < JREQ->h.bj_nargs;  cnt++)
-		free(Args[cnt]);
-	for  (cnt = 0;  cnt < JREQ->h.bj_nenv;  cnt++)  {
-		free(Envs[cnt].e_name);
-		free(Envs[cnt].e_value);
-	}
-	for  (cnt = 0;  cnt < JREQ->h.bj_nredirs;  cnt++)
-		if  (Redirs[cnt].action < RD_ACT_CLOSE)  {
-			free(Redirs[cnt].un.buffer);
-			Redirs[cnt].un.buffer = (char *) 0;
-		}
-	Argcnt = Redircnt = 0;
-	o_canccond((char *) 0);
-	o_cancset((char *) 0);
+        if  (envlist)  {
+                char    **ep;
+                for  (ep = envlist; *ep;  ep++)
+                        free(*ep);
+                free((char *) envlist);
+        }
+        if  (job_title)  {
+                free(job_title);
+                job_title = (char *) 0;
+        }
+        if  (job_cwd)  {
+                free(job_cwd);
+                job_cwd = (char *) 0;
+        }
+        for  (cnt = 0;  cnt < JREQ->h.bj_nargs;  cnt++)
+                free(Args[cnt]);
+        for  (cnt = 0;  cnt < JREQ->h.bj_nenv;  cnt++)  {
+                free(Envs[cnt].e_name);
+                free(Envs[cnt].e_value);
+        }
+        for  (cnt = 0;  cnt < JREQ->h.bj_nredirs;  cnt++)
+                if  (Redirs[cnt].action < RD_ACT_CLOSE)  {
+                        free(Redirs[cnt].un.buffer);
+                        Redirs[cnt].un.buffer = (char *) 0;
+                }
+        Argcnt = Redircnt = 0;
+        o_canccond((char *) 0);
+        o_cancset((char *) 0);
 }
 
 /* Load up a job from file */
 
-#define	INIT_JENV	50
-#define	INC_JENV	20
+#define INIT_JENV       50
+#define INC_JENV        20
 
 int  job_load(struct pend_job *pj)
 {
-	FILE	*fp;
-	char	**envlist = (char **) 0, *ep, *envp, *ntit, *fulltit;
-	int	lng = 0, ret;
-	unsigned	envcnt = 0, envmax = 0;
-	time_t	now;
-	char	ebuf[2048];
+        FILE    *fp;
+        char    **envlist = (char **) 0, *ep, *envp, *ntit, *fulltit;
+        int     lng = 0, ret;
+        unsigned        envcnt = 0, envmax = 0;
+        time_t  now;
+        char    ebuf[2048];
 
-	/* Set current pending job up for all the option routines.
-	   Initialise system defaults.  */
+        /* Set current pending job up for all the option routines.
+           Initialise system defaults.  */
 
-	cjob = pj;
-	JREQ = cjob->job;
-	Dispflags = 0;
-	sflags = def_assflags;
-	Mode_arg = &JREQ->h.bj_mode;
-	BLOCK_ZERO(JREQ, sizeof(Btjob));
-	BLOCK_ZERO(Mode_set, 3); /* KLUDGE!!!!!!! */
-	JREQ->h.bj_pri = mypriv->btu_defp;
-	strcpy(JREQ->h.bj_cmdinterp, Ci_list[CI_STDSHELL].ci_name);
-	JREQ->h.bj_ll = Ci_list[CI_STDSHELL].ci_ll;
-	/*JREQ->h.bj_times.tc_istime = 0;	 No time spec */
-	JREQ->h.bj_times.tc_repeat = TC_DELETE;
-	JREQ->h.bj_times.tc_nposs = TC_WAIT1;
-	JREQ->h.bj_times.tc_nvaldays = (USHORT) defavoid;
-	JREQ->h.bj_exits.elower = 1;
-	JREQ->h.bj_exits.eupper = 255;
-	/*JREQ->h.bj_jflags = 0;		The default case */
+        cjob = pj;
+        JREQ = cjob->job;
+        Dispflags = 0;
+        sflags = def_assflags;
+        Mode_arg = &JREQ->h.bj_mode;
+        BLOCK_ZERO(JREQ, sizeof(Btjob));
+        BLOCK_ZERO(Mode_set, 3); /* KLUDGE!!!!!!! */
+        JREQ->h.bj_pri = mypriv->btu_defp;
+        strcpy(JREQ->h.bj_cmdinterp, Ci_list[CI_STDSHELL].ci_name);
+        JREQ->h.bj_ll = Ci_list[CI_STDSHELL].ci_ll;
+        /*JREQ->h.bj_times.tc_istime = 0;        No time spec */
+        JREQ->h.bj_times.tc_repeat = TC_DELETE;
+        JREQ->h.bj_times.tc_nposs = TC_WAIT1;
+        JREQ->h.bj_times.tc_nvaldays = (USHORT) defavoid;
+        JREQ->h.bj_exits.elower = 1;
+        JREQ->h.bj_exits.eupper = 255;
+        /*JREQ->h.bj_jflags = 0;                The default case */
 
-	/* Open the job file and parse */
+        /* Open the job file and parse */
 
-	sprintf(ebuf, "%s -r %s/%s", ldsvprog, pj->directory, pj->cmdfile_name);
+        sprintf(ebuf, "%s -r %s/%s", ldsvprog, pj->directory, pj->cmdfile_name);
 
-	fp = popen(ebuf, "r");
+        fp = popen(ebuf, "r");
 
-	if  (!fp)
-		return  $EH{xmbtr cannot open cmd file};
+        if  (!fp)
+                return  $EH{xmbtr cannot open cmd file};
 
-	while  (fgets(ebuf, sizeof(ebuf), fp))  {
-		int	namel, vall;
+        while  (fgets(ebuf, sizeof(ebuf), fp))  {
+                int     namel, vall;
 
-		lng = strlen(ebuf);
+                lng = strlen(ebuf);
 
-		if  (ebuf[0] == '#')
-			continue;
+                if  (ebuf[0] == '#')
+                        continue;
 
-		/* If we didn't get the newline on the end, we have
-		   too big a line to understand.  Trim off
-		   trailing whitespace \ and \n */
+                /* If we didn't get the newline on the end, we have
+                   too big a line to understand.  Trim off
+                   trailing whitespace \ and \n */
 
-		if  (lng < 4  ||  ebuf[--lng] != '\n'  ||  ebuf[--lng] != '\\')
-			goto  badfmt;
+                if  (lng < 4  ||  ebuf[--lng] != '\n'  ||  ebuf[--lng] != '\\')
+                        goto  badfmt;
 
-		while  (isspace(ebuf[lng-1]))
-			lng--;
+                while  (isspace(ebuf[lng-1]))
+                        lng--;
 
-		ebuf[lng] = '\0';
+                ebuf[lng] = '\0';
 
-		/* If it's the start of the argument list, go to next stage.  */
+                /* If it's the start of the argument list, go to next stage.  */
 
-		if  (strncmp(ebuf, BTR_PROGRAM, sizeof(BTR_PROGRAM)-1) == 0)
-			break;
+                if  (strncmp(ebuf, BTR_PROGRAM, sizeof(BTR_PROGRAM)-1) == 0)
+                        break;
 
-		/* If it's not an environment variable, give up */
+                /* If it's not an environment variable, give up */
 
-		if  (!(ep = strchr(ebuf, '=')))
-			goto  badfmt;
+                if  (!(ep = strchr(ebuf, '=')))
+                        goto  badfmt;
 
-		/* Kill the = to give us a name */
+                /* Kill the = to give us a name */
 
-		if  ((namel = ep - ebuf) <= 0)
-			goto  badfmt;
-		*ep++ = 0;
+                if  ((namel = ep - ebuf) <= 0)
+                        goto  badfmt;
+                *ep++ = 0;
 
-		/* If environment var has quotes round it, strip them.  */
+                /* If environment var has quotes round it, strip them.  */
 
-		if  (*ep == '\'' || *ep == '\"')  {
-			if  (ebuf[lng-1] != *ep)
-				goto  badfmt;
-			ebuf[--lng] = '\0';
-			ep++;
-		}
+                if  (*ep == '\'' || *ep == '\"')  {
+                        if  (ebuf[lng-1] != *ep)
+                                goto  badfmt;
+                        ebuf[--lng] = '\0';
+                        ep++;
+                }
 
-		vall = lng - (ep - ebuf);
+                vall = lng - (ep - ebuf);
 
-		if  (!(envp = malloc((unsigned) (namel + vall + 2))))
-			ABORT_NOMEM;
+                if  (!(envp = malloc((unsigned) (namel + vall + 2))))
+                        ABORT_NOMEM;
 
-		sprintf(envp, "%s=%s", ebuf, ep);
+                sprintf(envp, "%s=%s", ebuf, ep);
 
-		if  (envcnt >= envmax)  {
-			if  (envmax == 0)  {
-				envmax = INIT_JENV;
-				envlist = (char **) malloc((INIT_JENV + 1) * sizeof(char *));
-			}
-			else  {
-				envmax += INC_JENV;
-				envlist = (char **) realloc((char *) envlist, (unsigned)((envmax+1) * sizeof(char *)));
-			}
-			if  (!envlist)
-				ABORT_NOMEM;
-		}
-		envlist[envcnt++] = envp;
-	}
+                if  (envcnt >= envmax)  {
+                        if  (envmax == 0)  {
+                                envmax = INIT_JENV;
+                                envlist = (char **) malloc((INIT_JENV + 1) * sizeof(char *));
+                        }
+                        else  {
+                                envmax += INC_JENV;
+                                envlist = (char **) realloc((char *) envlist, (unsigned)((envmax+1) * sizeof(char *)));
+                        }
+                        if  (!envlist)
+                                ABORT_NOMEM;
+                }
+                envlist[envcnt++] = envp;
+        }
 
 
-	if  (envlist)
-		envlist[envcnt] = (char *) 0;
+        if  (envlist)
+                envlist[envcnt] = (char *) 0;
 
-	/* Done environment variables, now for arguments */
+        /* Done environment variables, now for arguments */
 
-	ep = &ebuf[sizeof(BTR_PROGRAM)];		/* Past 'btr ' */
-	for  (;;)  {
-		char	**argvec, **reta;
-		int	lng;
+        ep = &ebuf[sizeof(BTR_PROGRAM)];                /* Past 'btr ' */
+        for  (;;)  {
+                char    **argvec, **reta;
+                int     lng;
 
-		while  (isspace(*ep))
-			ep++;
+                while  (isspace(*ep))
+                        ep++;
 
-		/* Arguments start with - or + */
+                /* Arguments start with - or + */
 
-		if  (*ep != '-' && *ep != '+')
-			goto  badfmt;
+                if  (*ep != '-' && *ep != '+')
+                        goto  badfmt;
 
-		/* Build up pseudo-vector and parse
-		   Errors get put in arg_errnum.  */
+                /* Build up pseudo-vector and parse
+                   Errors get put in arg_errnum.  */
 
-		argvec = makevec(ep);
-		reta = my_doopts(argvec);
-		checksetmode(0, (const USHORT *) 0, mypriv->btu_jflags[0], &JREQ->h.bj_mode.u_flags);
-		checksetmode(1, (const USHORT *) 0, mypriv->btu_jflags[1], &JREQ->h.bj_mode.g_flags);
-		checksetmode(2, (const USHORT *) 0, mypriv->btu_jflags[2], &JREQ->h.bj_mode.o_flags);
-		free(argvec[0]);
-		free((char *) argvec);
-		if  (!reta)
-			goto  reterr;
+                argvec = makevec(ep);
+                reta = my_doopts(argvec);
+                checksetmode(0, (const USHORT *) 0, mypriv->btu_jflags[0], &JREQ->h.bj_mode.u_flags);
+                checksetmode(1, (const USHORT *) 0, mypriv->btu_jflags[1], &JREQ->h.bj_mode.g_flags);
+                checksetmode(2, (const USHORT *) 0, mypriv->btu_jflags[2], &JREQ->h.bj_mode.o_flags);
+                free(argvec[0]);
+                free((char *) argvec);
+                if  (!reta)
+                        goto  reterr;
 
-		/* Read next argument line.
-		   Final line ends with a file name.  */
+                /* Read next argument line.
+                   Final line ends with a file name.  */
 
-		do  if  (!fgets(ebuf, sizeof(ebuf), fp))
-			goto  badfmt;
-		while  (ebuf[0] == '#');
+                do  if  (!fgets(ebuf, sizeof(ebuf), fp))
+                        goto  badfmt;
+                while  (ebuf[0] == '#');
 
-		/* Trim off trailing \ns and \s */
+                /* Trim off trailing \ns and \s */
 
-		lng = strlen(ebuf);
-		if  (lng < 2  ||  ebuf[--lng] != '\n')
-			goto  badfmt;
-		ebuf[lng] = '\0';
+                lng = strlen(ebuf);
+                if  (lng < 2  ||  ebuf[--lng] != '\n')
+                        goto  badfmt;
+                ebuf[lng] = '\0';
 
-		if  (ebuf[0] == '/')		/* Final line */
-			break;
-		if  (ebuf[--lng] != '\\')
-			goto  badfmt;
-		ebuf[lng] = '\0';
-		ep = ebuf;
-	}
+                if  (ebuf[0] == '/')            /* Final line */
+                        break;
+                if  (ebuf[--lng] != '\\')
+                        goto  badfmt;
+                ebuf[lng] = '\0';
+                ep = ebuf;
+        }
 
-	if  ((ret = repmnthfix(&JREQ->h.bj_times)) != 0)  {
-		arg_errnum = ret;
-		goto  reterr;
-	}
+        if  ((ret = repmnthfix(&JREQ->h.bj_times)) != 0)  {
+                arg_errnum = ret;
+                goto  reterr;
+        }
 
-	/* And now we have the job file.
-	   We assume that they go in pairs.  */
+        /* And now we have the job file.
+           We assume that they go in pairs.  */
 
-	while  (lng > 0  &&  isspace(ebuf[lng-1]))
-		lng--;
+        while  (lng > 0  &&  isspace(ebuf[lng-1]))
+                lng--;
 
-	if  (pj->jobfile_name)
-		free(pj->jobfile_name);
+        if  (pj->jobfile_name)
+                free(pj->jobfile_name);
 
-	pj->jobfile_name = (ep = strrchr(ebuf, '/')) ? stracpy(ep+1): stracpy(ebuf);
+        pj->jobfile_name = (ep = strrchr(ebuf, '/')) ? stracpy(ep+1): stracpy(ebuf);
 
-	/* Set up variables in job.  */
+        /* Set up variables in job.  */
 
-	if  ((arg_errnum = fixcsvars()))
-		goto  reterr;
-	if  (envlist  &&  (arg_errnum = read_envir(envlist)))
-		goto  reterr;
+        if  ((arg_errnum = fixcsvars()))
+                goto  reterr;
+        if  (envlist  &&  (arg_errnum = read_envir(envlist)))
+                goto  reterr;
 
-	if  (!(ntit = job_title))
-		ntit = stracpy(pj->jobfile_name);
-	if  (strchr(ntit, ':')  ||  !pj->jobqueue)
-		fulltit = stracpy(ntit);
-	else  {
-		if  (!(fulltit = malloc((unsigned) (strlen(pj->jobqueue) + strlen(ntit) + 2))))
-			ABORT_NOMEM;
-		sprintf(fulltit, "%s:%s", pj->jobqueue, ntit);
-	}
-	pj->job->h.bj_nargs = Argcnt;
-	pj->job->h.bj_nredirs = Redircnt;
-	ret = packjstring(pj->job, job_cwd? job_cwd: Curr_pwd, fulltit, Redirs, Envs, Args);
-	free(fulltit);
-	if  (!ret)  {
-		arg_errnum = $EH{Too many job strings};
-		/* Turn off everything that might be half-baked.  */
-		pj->job->h.bj_title = pj->job->h.bj_direct = -1;
-		pj->job->h.bj_nargs = pj->job->h.bj_nenv = pj->job->h.bj_nredirs = 0;
-		goto  reterr;
-	}
+        if  (!(ntit = job_title))
+                ntit = stracpy(pj->jobfile_name);
+        if  (strchr(ntit, ':')  ||  !pj->jobqueue)
+                fulltit = stracpy(ntit);
+        else  {
+                if  (!(fulltit = malloc((unsigned) (strlen(pj->jobqueue) + strlen(ntit) + 2))))
+                        ABORT_NOMEM;
+                sprintf(fulltit, "%s:%s", pj->jobqueue, ntit);
+        }
+        pj->job->h.bj_nargs = Argcnt;
+        pj->job->h.bj_nredirs = Redircnt;
+        ret = packjstring(pj->job, job_cwd? job_cwd: Curr_pwd, fulltit, Redirs, Envs, Args);
+        free(fulltit);
+        if  (!ret)  {
+                arg_errnum = $EH{Too many job strings};
+                /* Turn off everything that might be half-baked.  */
+                pj->job->h.bj_title = pj->job->h.bj_direct = -1;
+                pj->job->h.bj_nargs = pj->job->h.bj_nenv = pj->job->h.bj_nredirs = 0;
+                goto  reterr;
+        }
 
-	pclose(fp);
-	cleanupspace(envlist);
-	if  (pj->job->h.bj_times.tc_istime  &&  pj->job->h.bj_times.tc_nexttime < time((time_t *) 0))
-		doinfo($E{xmbtr loaded job not future});
-	return  0;
+        pclose(fp);
+        cleanupspace(envlist);
+        if  (pj->job->h.bj_times.tc_istime  &&  pj->job->h.bj_times.tc_nexttime < time((time_t *) 0))
+                doinfo($E{xmbtr loaded job not future});
+        return  0;
 
  badfmt:
-	arg_errnum = $EH{xmbtr bad fmt cmd file};
+        arg_errnum = $EH{xmbtr bad fmt cmd file};
  reterr:
-	pclose(fp);
-	cleanupspace(envlist);
-	/* Clear these out so we don't get left with something half-baked.  */
-	BLOCK_ZERO(pj->job->h.bj_conds, sizeof(pj->job->h.bj_conds));
-	BLOCK_ZERO(pj->job->h.bj_asses, sizeof(pj->job->h.bj_asses));
-	time(&now);
-	if  (pj->job->h.bj_times.tc_istime  &&  pj->job->h.bj_times.tc_nexttime < now)
-		pj->job->h.bj_times.tc_nexttime = now + 60L;
-	return  arg_errnum;
+        pclose(fp);
+        cleanupspace(envlist);
+        /* Clear these out so we don't get left with something half-baked.  */
+        BLOCK_ZERO(pj->job->h.bj_conds, sizeof(pj->job->h.bj_conds));
+        BLOCK_ZERO(pj->job->h.bj_asses, sizeof(pj->job->h.bj_asses));
+        time(&now);
+        if  (pj->job->h.bj_times.tc_istime  &&  pj->job->h.bj_times.tc_nexttime < now)
+                pj->job->h.bj_times.tc_nexttime = now + 60L;
+        return  arg_errnum;
 }
 
 void  dumphdrs(BtjobRef jp, FILE *xfl)
 {
-	spitbtrstr($A{btr arg nomess}, xfl, 1);
-	if  (jp->h.bj_jflags & BJ_WRT)
-		spitbtrstr($A{btr arg write}, xfl, 1);
-	if  (jp->h.bj_jflags & BJ_MAIL)
-		spitbtrstr($A{btr arg mail}, xfl, 1);
+        spitbtrstr($A{btr arg nomess}, xfl, 1);
+        if  (jp->h.bj_jflags & BJ_WRT)
+                spitbtrstr($A{btr arg write}, xfl, 1);
+        if  (jp->h.bj_jflags & BJ_MAIL)
+                spitbtrstr($A{btr arg mail}, xfl, 1);
 
-	spitbtrstr($A{btr arg interp}, xfl, 0);
-	fprintf(xfl, "%s \\\n",	jp->h.bj_cmdinterp);
-	spitbtrstr($A{btr arg ll}, xfl, 0);
-	fprintf(xfl, "%d \\\n", jp->h.bj_ll);
-	spitbtrstr($A{btr arg pri}, xfl, 0);
-	fprintf(xfl, "%d \\\n", jp->h.bj_pri);
+        spitbtrstr($A{btr arg interp}, xfl, 0);
+        fprintf(xfl, "%s \\\n", jp->h.bj_cmdinterp);
+        spitbtrstr($A{btr arg ll}, xfl, 0);
+        fprintf(xfl, "%d \\\n", jp->h.bj_ll);
+        spitbtrstr($A{btr arg pri}, xfl, 0);
+        fprintf(xfl, "%d \\\n", jp->h.bj_pri);
 
-	spitbtrstr(jp->h.bj_progress < BJP_DONE? $A{btr arg norm}:
-		   jp->h.bj_progress == BJP_DONE? $A{btr arg done}: $A{btr arg canc}, xfl, 1);
+        spitbtrstr(jp->h.bj_progress < BJP_DONE? $A{btr arg norm}:
+                   jp->h.bj_progress == BJP_DONE? $A{btr arg done}: $A{btr arg canc}, xfl, 1);
 
-	dumptime(xfl, &jp->h.bj_times);
+        dumptime(xfl, &jp->h.bj_times);
 
-	if  (jp->h.bj_jflags & BJ_REMRUNNABLE)
-		spitbtrstr($A{btr arg fullexport}, xfl, 1);
-	else  if  (jp->h.bj_jflags & BJ_EXPORT)
-		spitbtrstr($A{btr arg export}, xfl, 1);
-	else
-		spitbtrstr($A{btr arg loco}, xfl, 1);
-	spitbtrstr($A{btr arg mode}, xfl, 0);
-	dumpmode(xfl, "U", jp->h.bj_mode.u_flags);
-	dumpmode(xfl, ",G", jp->h.bj_mode.g_flags);
-	dumpmode(xfl, ",O", jp->h.bj_mode.o_flags);
-	fputs(" \\\n", xfl);
-	rvarfile(1);
-	dumpconds(xfl, jp->h.bj_conds);
-	dumpasses(xfl, jp->h.bj_asses);
+        if  (jp->h.bj_jflags & BJ_REMRUNNABLE)
+                spitbtrstr($A{btr arg fullexport}, xfl, 1);
+        else  if  (jp->h.bj_jflags & BJ_EXPORT)
+                spitbtrstr($A{btr arg export}, xfl, 1);
+        else
+                spitbtrstr($A{btr arg loco}, xfl, 1);
+        spitbtrstr($A{btr arg mode}, xfl, 0);
+        dumpmode(xfl, "U", jp->h.bj_mode.u_flags);
+        dumpmode(xfl, ",G", jp->h.bj_mode.g_flags);
+        dumpmode(xfl, ",O", jp->h.bj_mode.o_flags);
+        fputs(" \\\n", xfl);
+        rvarfile(1);
+        dumpconds(xfl, jp->h.bj_conds);
+        dumpasses(xfl, jp->h.bj_asses);
 }
 
 int  job_save(struct pend_job *pj)
 {
-	BtjobRef	jp = pj->job;
-	FILE		*xfl;
-	unsigned	cnt;
-	char		*path;
-	int		um;
+        BtjobRef        jp = pj->job;
+        FILE            *xfl;
+        unsigned        cnt;
+        char            *path;
+        int             um;
 
-	if  (!(path = malloc((unsigned) (strlen(ldsvprog) + strlen(pj->directory) + strlen(pj->cmdfile_name) + 10))))
-		ABORT_NOMEM;
-	sprintf(path, "%s -w %s/%s", ldsvprog, pj->directory, pj->cmdfile_name);
+        if  (!(path = malloc((unsigned) (strlen(ldsvprog) + strlen(pj->directory) + strlen(pj->cmdfile_name) + 10))))
+                ABORT_NOMEM;
+        sprintf(path, "%s -w %s/%s", ldsvprog, pj->directory, pj->cmdfile_name);
 
-	um = umask(Save_umask);
-	xfl = popen(path, "w");
-	umask(um);
+        um = umask(Save_umask);
+        xfl = popen(path, "w");
+        umask(um);
 
-	if  (!xfl)  {
-		free(path);
-		return  $EH{xmbtr cannot write cmd file};
-	}
-	free(path);
+        if  (!xfl)  {
+                free(path);
+                return  $EH{xmbtr cannot write cmd file};
+        }
+        free(path);
 
-	/* Put a comment to trigger shell things in.  */
+        /* Put a comment to trigger shell things in.  */
 
-	fputs("#! /bin/sh\n", xfl);
+        fputs("#! /bin/sh\n", xfl);
 
-	/* Handle environment
-	   We insert this in front of the command to look like this
-	   ENV1='VAL1' \
-	   ENV2='VAL2' \
-	   ....
-	   ENVn='VALn' command */
+        /* Handle environment
+           We insert this in front of the command to look like this
+           ENV1='VAL1' \
+           ENV2='VAL2' \
+           ....
+           ENVn='VALn' command */
 
-	for  (cnt = 0;  cnt < jp->h.bj_nenv;  cnt++)  {
-		char	*name, *value, *vp, *qp;
+        for  (cnt = 0;  cnt < jp->h.bj_nenv;  cnt++)  {
+                char    *name, *value, *vp, *qp;
 
-		ENV_OF(jp, cnt, name, value);
+                ENV_OF(jp, cnt, name, value);
 
-		/* Ignore assignments to the variable PWD because we
-		   (think we've) already taken care of that and
-		   because many shells break if we try to assign
-		   to it.  */
+                /* Ignore assignments to the variable PWD because we
+                   (think we've) already taken care of that and
+                   because many shells break if we try to assign
+                   to it.  */
 
-		if  (strcmp(name, "PWD") == 0)
-			continue;
+                if  (strcmp(name, "PWD") == 0)
+                        continue;
 
-		/* Put quotes round the value, in case they've got
-		   funny chars in. This won't quite handle env
-		   vars with \ns in but since most other software
-		   (including most shells) can't either we're in
-		   great company.  */
+                /* Put quotes round the value, in case they've got
+                   funny chars in. This won't quite handle env
+                   vars with \ns in but since most other software
+                   (including most shells) can't either we're in
+                   great company.  */
 
-		fprintf(xfl, "%s=\'", name);
+                fprintf(xfl, "%s=\'", name);
 
-		/* The following loop is in case we have one or more
-		   single quotes in the string. We replace the
-		   quote with '\'' (i.e. ending ' an escaped '
-		   restart ') vp start of (rest of) string, qp
-		   quote posn.  */
+                /* The following loop is in case we have one or more
+                   single quotes in the string. We replace the
+                   quote with '\'' (i.e. ending ' an escaped '
+                   restart ') vp start of (rest of) string, qp
+                   quote posn.  */
 
-		for  (vp = value;  (qp = strchr(vp, '\''));  vp = qp + 1)  {
-			while  (vp < qp)  {
-				putc(*vp, xfl);
-				vp++;
-			}
-			fputs("\'\\\'\'", xfl);
-		}
-		fprintf(xfl, "%s\' \\\n", vp);
-	}
+                for  (vp = value;  (qp = strchr(vp, '\''));  vp = qp + 1)  {
+                        while  (vp < qp)  {
+                                putc(*vp, xfl);
+                                vp++;
+                        }
+                        fputs("\'\\\'\'", xfl);
+                }
+                fprintf(xfl, "%s\' \\\n", vp);
+        }
 
-	/* Finished with environment, now for btr command & args.  */
+        /* Finished with environment, now for btr command & args.  */
 
-	fputs(BTR_PROGRAM, xfl);
-	spitbtrstr(pj->Verbose? $A{btr arg verb}: $A{btr arg noverb}, xfl, 1);
-	if  (jp->h.bj_title >= 0)  {
-		char	*title = &jp->bj_space[jp->h.bj_title];
-		char	*colp;
-		if  ((colp = strchr(title, ':')))  {
-			spitbtrstr($A{btr arg queue}, xfl, 0);
-			fprintf(xfl, "\'%.*s\' \\\n", (int) (colp - title), title);
-			title = colp + 1;
-		}
-		else  if  (pj->jobqueue)  {
-			spitbtrstr($A{btr arg queue}, xfl, 0);
-			fprintf(xfl, "\'%s\' \\\n", pj->jobqueue);
-		}
-		spitbtrstr($A{btr arg title}, xfl, 0);
-		fprintf(xfl, "\'%s\' \\\n", title);
-	}
-	else  if  (pj->jobqueue)  {
-		spitbtrstr($A{btr arg queue}, xfl, 0);
-		fprintf(xfl, "\'%s\' \\\n", pj->jobqueue);
-	}
+        fputs(BTR_PROGRAM, xfl);
+        spitbtrstr(pj->Verbose? $A{btr arg verb}: $A{btr arg noverb}, xfl, 1);
+        if  (jp->h.bj_title >= 0)  {
+                char    *title = &jp->bj_space[jp->h.bj_title];
+                char    *colp;
+                if  ((colp = strchr(title, ':')))  {
+                        spitbtrstr($A{btr arg queue}, xfl, 0);
+                        fprintf(xfl, "\'%.*s\' \\\n", (int) (colp - title), title);
+                        title = colp + 1;
+                }
+                else  if  (pj->jobqueue)  {
+                        spitbtrstr($A{btr arg queue}, xfl, 0);
+                        fprintf(xfl, "\'%s\' \\\n", pj->jobqueue);
+                }
+                spitbtrstr($A{btr arg title}, xfl, 0);
+                fprintf(xfl, "\'%s\' \\\n", title);
+        }
+        else  if  (pj->jobqueue)  {
+                spitbtrstr($A{btr arg queue}, xfl, 0);
+                fprintf(xfl, "\'%s\' \\\n", pj->jobqueue);
+        }
 
-	dumphdrs(jp, xfl);
+        dumphdrs(jp, xfl);
 
-	if  (pj->userid != Realuid)  {
-		spitbtrstr($A{btr arg setu}, xfl, 0);
-		fprintf(xfl, "%s \\\n", jp->h.bj_mode.o_user);
-	}
-	if  (pj->grpid != Realgid)  {
-		spitbtrstr($A{btr arg setg}, xfl, 0);
-		fprintf(xfl, "%s \\\n", jp->h.bj_mode.o_group);
-	}
+        if  (pj->userid != Realuid)  {
+                spitbtrstr($A{btr arg setu}, xfl, 0);
+                fprintf(xfl, "%s \\\n", jp->h.bj_mode.o_user);
+        }
+        if  (pj->grpid != Realgid)  {
+                spitbtrstr($A{btr arg setg}, xfl, 0);
+                fprintf(xfl, "%s \\\n", jp->h.bj_mode.o_group);
+        }
 
-	dumpecrun(xfl, jp);
-	spitbtrstr($A{btr arg dir}, xfl, 0);
-	fprintf(xfl, "%s \\\n", jp->h.bj_direct >= 0? &jp->bj_space[jp->h.bj_direct]: pj->directory);
-	spitbtrstr(jp->h.bj_jflags & BJ_NOADVIFERR? $A{btr arg noadverr}: $A{btr arg adverr}, xfl, 1);
+        dumpecrun(xfl, jp);
+        spitbtrstr($A{btr arg dir}, xfl, 0);
+        fprintf(xfl, "%s \\\n", jp->h.bj_direct >= 0? &jp->bj_space[jp->h.bj_direct]: pj->directory);
+        spitbtrstr(jp->h.bj_jflags & BJ_NOADVIFERR? $A{btr arg noadverr}: $A{btr arg adverr}, xfl, 1);
 
-	dumpredirs(xfl, jp);
-	dumpargs(xfl, jp);
+        dumpredirs(xfl, jp);
+        dumpargs(xfl, jp);
 
-	fprintf(xfl, "%s/%s\n", pj->directory, pj->jobfile_name);
-	pclose(xfl);
-	return  0;
+        fprintf(xfl, "%s/%s\n", pj->directory, pj->jobfile_name);
+        pclose(xfl);
+        return  0;
 }
 
 void  cb_loaddefsb(const int ishomed)
 {
-	const	char	*configname = USER_CONFIG;
-	char		*name;
-	char		**ret = (char **) 0;
-	int		had = 0;
+        const   char    *configname = USER_CONFIG;
+        char            *name;
+        char            **ret = (char **) 0;
+        int             had = 0;
 
-	if  (ishomed)  {
-		char	hdname[16+14];
-		strcpy(hdname, "$HOME/");
-		strcat(hdname, configname);
-		if  ((name = rdoptfile(hdname, Varname)))  {
-			char	**evec = makevec(name);
-			init_defaults();
-			cjob = &default_pend;
-			JREQ = default_pend.job;
-			Mode_arg = &default_pend.job->h.bj_mode;
-			ret = my_doopts(evec);
-			free(evec[0]);
-			free((char *) evec);
-			free(name);
-			had++;
-		}
-	}
-	else  {
-		char	*path;
-		if  (!(path = malloc((unsigned) (strlen(Curr_pwd) + strlen(configname) + 2))))
-			ABORT_NOMEM;
-		sprintf(path, "%s/%s", Curr_pwd, configname);
-		if  ((name = rdoptfile(path, Varname)))  {
-			char	**evec = makevec(name);
-			init_defaults();
-			cjob = &default_pend;
-			JREQ = default_pend.job;
-			Mode_arg = &default_pend.job->h.bj_mode;
-			ret = my_doopts(evec);
-			free(evec[0]);
-			free((char *) evec);
-			free(name);
-			had++;
-		}
-		free(path);
-	}
+        if  (ishomed)  {
+                char    hdname[16+14];
+                strcpy(hdname, "$HOME/");
+                strcat(hdname, configname);
+                if  ((name = rdoptfile(hdname, Varname)))  {
+                        char    **evec = makevec(name);
+                        init_defaults();
+                        cjob = &default_pend;
+                        JREQ = default_pend.job;
+                        Mode_arg = &default_pend.job->h.bj_mode;
+                        ret = my_doopts(evec);
+                        free(evec[0]);
+                        free((char *) evec);
+                        free(name);
+                        had++;
+                }
+        }
+        else  {
+                char    *path;
+                if  (!(path = malloc((unsigned) (strlen(Curr_pwd) + strlen(configname) + 2))))
+                        ABORT_NOMEM;
+                sprintf(path, "%s/%s", Curr_pwd, configname);
+                if  ((name = rdoptfile(path, Varname)))  {
+                        char    **evec = makevec(name);
+                        init_defaults();
+                        cjob = &default_pend;
+                        JREQ = default_pend.job;
+                        Mode_arg = &default_pend.job->h.bj_mode;
+                        ret = my_doopts(evec);
+                        free(evec[0]);
+                        free((char *) evec);
+                        free(name);
+                        had++;
+                }
+                free(path);
+        }
 
-	if  (!had)
-		return;
+        if  (!had)
+                return;
 
-	checksetmode(0, (const USHORT *) 0, mypriv->btu_jflags[0], &default_job.h.bj_mode.u_flags);
-	checksetmode(1, (const USHORT *) 0, mypriv->btu_jflags[1], &default_job.h.bj_mode.g_flags);
-	checksetmode(2, (const USHORT *) 0, mypriv->btu_jflags[2], &default_job.h.bj_mode.o_flags);
-	fixcsvars();
-	default_job.h.bj_nargs = Argcnt;
-	default_job.h.bj_nredirs = Redircnt;
-	if  (!packjstring(&default_job, Curr_pwd, job_title, Redirs, Envs, Args))  {
-		ret = (char **) 0;
-		arg_errnum = $EH{Too many job strings defaults};
-	}
-	cleanupspace((char **) 0);
-	repmnthfix(&default_job.h.bj_times);
+        checksetmode(0, (const USHORT *) 0, mypriv->btu_jflags[0], &default_job.h.bj_mode.u_flags);
+        checksetmode(1, (const USHORT *) 0, mypriv->btu_jflags[1], &default_job.h.bj_mode.g_flags);
+        checksetmode(2, (const USHORT *) 0, mypriv->btu_jflags[2], &default_job.h.bj_mode.o_flags);
+        fixcsvars();
+        default_job.h.bj_nargs = Argcnt;
+        default_job.h.bj_nredirs = Redircnt;
+        if  (!packjstring(&default_job, Curr_pwd, job_title, Redirs, Envs, Args))  {
+                ret = (char **) 0;
+                arg_errnum = $EH{Too many job strings defaults};
+        }
+        cleanupspace((char **) 0);
+        repmnthfix(&default_job.h.bj_times);
 
-	if  (!ret)  {
-		time_t		now;
+        if  (!ret)  {
+                time_t          now;
 
-		doerror(arg_errnum);
+                doerror(arg_errnum);
 
-		/* Clear these out so we don't get left with something
-		   half-baked. Silently adjust the time.  */
+                /* Clear these out so we don't get left with something
+                   half-baked. Silently adjust the time.  */
 
-		default_job.h.bj_title = default_job.h.bj_direct = -1;
-		default_job.h.bj_nargs = default_job.h.bj_nenv = default_job.h.bj_nredirs = 0;
-		BLOCK_ZERO(default_job.h.bj_conds, sizeof(default_job.h.bj_conds));
-		BLOCK_ZERO(default_job.h.bj_asses, sizeof(default_job.h.bj_asses));
-		time(&now);
-		if  (default_job.h.bj_times.tc_istime  &&  default_job.h.bj_times.tc_nexttime < now)
-			default_job.h.bj_times.tc_nexttime = now + 60L;
-	}
+                default_job.h.bj_title = default_job.h.bj_direct = -1;
+                default_job.h.bj_nargs = default_job.h.bj_nenv = default_job.h.bj_nredirs = 0;
+                BLOCK_ZERO(default_job.h.bj_conds, sizeof(default_job.h.bj_conds));
+                BLOCK_ZERO(default_job.h.bj_asses, sizeof(default_job.h.bj_asses));
+                time(&now);
+                if  (default_job.h.bj_times.tc_istime  &&  default_job.h.bj_times.tc_nexttime < now)
+                        default_job.h.bj_times.tc_nexttime = now + 60L;
+        }
 }
 
 void  cb_loaddefs(GtkAction *act)
 {
-	cb_loaddefsb(strcmp(gtk_action_get_name(act), "Loaddefsh") == 0);
+        cb_loaddefsb(strcmp(gtk_action_get_name(act), "Loaddefsh") == 0);
 }
 
 void  init_defaults()
 {
-	int	ret;
-	char	**sq_env;
-	extern	char	**environ, **xenviron;
+        int     ret;
+        char    **sq_env;
+        extern  char    **environ, **xenviron;
 
-	default_pend.job = &default_job;
-	default_pend.userid = Realuid;
-	default_pend.grpid = Realgid;
-	default_pend.directory = stracpy(Curr_pwd);
-	default_job.h.bj_slotno = -1;
-	default_job.h.bj_umask = Save_umask;
-	default_job.h.bj_ulimit = 0L;
-	default_job.h.bj_ll = Ci_list[CI_STDSHELL].ci_ll;
-	strcpy(default_job.h.bj_cmdinterp, Ci_list[CI_STDSHELL].ci_name);
-	default_job.h.bj_times.tc_repeat = TC_DELETE;
-	default_job.h.bj_times.tc_nposs = TC_WAIT1;
-	default_job.h.bj_times.tc_nvaldays = (USHORT) defavoid;
-	default_job.h.bj_exits.elower = 1;
-	default_job.h.bj_exits.eupper = 255;
-	default_job.h.bj_pri = mypriv->btu_defp;
-	default_job.h.bj_mode.u_flags = mypriv->btu_jflags[0];
-	default_job.h.bj_mode.g_flags = mypriv->btu_jflags[1];
-	default_job.h.bj_mode.o_flags = mypriv->btu_jflags[2];
-	default_job.h.bj_nargs = 0;
-	default_job.h.bj_nredirs = 0;
-	cjob = &default_pend;
-	JREQ = default_pend.job;
-	sq_env = squash_envir(xenviron, environ);
-	ret = read_envir(sq_env);
-	if  (sq_env != environ)
-		free((char *) sq_env);
-	if  (ret)  {
-		print_error(ret);
-		exit(E_LIMIT);
-	}
-	packjstring(&default_job, Curr_pwd, (char *) 0, (Mredir *) 0, Envs, (char **) 0);
+        default_pend.job = &default_job;
+        default_pend.userid = Realuid;
+        default_pend.grpid = Realgid;
+        default_pend.directory = stracpy(Curr_pwd);
+        default_job.h.bj_slotno = -1;
+        default_job.h.bj_umask = Save_umask;
+        default_job.h.bj_ulimit = 0L;
+        default_job.h.bj_ll = Ci_list[CI_STDSHELL].ci_ll;
+        strcpy(default_job.h.bj_cmdinterp, Ci_list[CI_STDSHELL].ci_name);
+        default_job.h.bj_times.tc_repeat = TC_DELETE;
+        default_job.h.bj_times.tc_nposs = TC_WAIT1;
+        default_job.h.bj_times.tc_nvaldays = (USHORT) defavoid;
+        default_job.h.bj_exits.elower = 1;
+        default_job.h.bj_exits.eupper = 255;
+        default_job.h.bj_pri = mypriv->btu_defp;
+        default_job.h.bj_mode.u_flags = mypriv->btu_jflags[0];
+        default_job.h.bj_mode.g_flags = mypriv->btu_jflags[1];
+        default_job.h.bj_mode.o_flags = mypriv->btu_jflags[2];
+        default_job.h.bj_nargs = 0;
+        default_job.h.bj_nredirs = 0;
+        cjob = &default_pend;
+        JREQ = default_pend.job;
+        sq_env = squash_envir(xenviron, environ);
+        ret = read_envir(sq_env);
+        if  (sq_env != environ)
+                free((char *) sq_env);
+        if  (ret)  {
+                print_error(ret);
+                exit(E_LIMIT);
+        }
+        packjstring(&default_job, Curr_pwd, (char *) 0, (Mredir *) 0, Envs, (char **) 0);
 }
 
 void  load_options()
 {
-	btr_avec = helpargs(Adefs, $A{btr arg explain}, $S{Largest btr arg});
-	makeoptvec(btr_avec, $A{btr arg explain}, $S{Largest btr arg});
-	cb_loaddefsb(1);
-	cb_loaddefsb(0);
+        btr_avec = helpargs(Adefs, $A{btr arg explain}, $S{Largest btr arg});
+        makeoptvec(btr_avec, $A{btr arg explain}, $S{Largest btr arg});
+        cb_loaddefsb(1);
+        cb_loaddefsb(0);
 }
 
 #include "inline/spopts_jd.c"
 
 void  cb_savedefs(GtkAction *act)
 {
-	int	ret;
+        int     ret;
 
-	if  (strcmp(gtk_action_get_name(act), "Savedefsh") == 0)  {
-		char  *hd = envprocess("${HOME-/}");
-		ret = proc_save_opts(hd, Varname, spit_options);
-		free(hd);
-	}
-	else
-		ret = proc_save_opts(Curr_pwd, Varname, spit_options);
+        if  (strcmp(gtk_action_get_name(act), "Savedefsh") == 0)  {
+                char  *hd = envprocess("${HOME-/}");
+                ret = proc_save_opts(hd, Varname, spit_options);
+                free(hd);
+        }
+        else
+                ret = proc_save_opts(Curr_pwd, Varname, spit_options);
 
-	if  (ret)
-		doerror(ret);
+        if  (ret)
+                doerror(ret);
 }

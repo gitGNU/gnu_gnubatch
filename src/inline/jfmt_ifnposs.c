@@ -17,7 +17,7 @@
 
 JFORMAT(fmt_ifnposs)
 {
-	if  (isreadable  &&  jp->h.bj_times.tc_istime != 0)
-		return  strlen(strcpy(bigbuff, disp_alt(jp->h.bj_times.tc_nposs, ifnposses)));
-	return  0;
+        if  (isreadable  &&  jp->h.bj_times.tc_istime != 0)
+                return  strlen(strcpy(bigbuff, disp_alt(jp->h.bj_times.tc_nposs, ifnposses)));
+        return  0;
 }

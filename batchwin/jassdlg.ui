@@ -1,0 +1,2246 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>jassdlg</class>
+ <widget class="QDialog" name="jassdlg">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>1069</width>
+    <height>458</height>
+   </rect>
+  </property>
+  <property name="windowTitle">
+   <string>Assignments for job</string>
+  </property>
+  <widget class="QDialogButtonBox" name="buttonBox">
+   <property name="geometry">
+    <rect>
+     <x>840</x>
+     <y>420</y>
+     <width>191</width>
+     <height>32</height>
+    </rect>
+   </property>
+   <property name="orientation">
+    <enum>Qt::Horizontal</enum>
+   </property>
+   <property name="standardButtons">
+    <set>QDialogButtonBox::Cancel|QDialogButtonBox::Ok</set>
+   </property>
+  </widget>
+  <widget class="QLabel" name="label">
+   <property name="geometry">
+    <rect>
+     <x>40</x>
+     <y>30</y>
+     <width>141</width>
+     <height>17</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string>Assignments for job</string>
+   </property>
+  </widget>
+  <widget class="QLabel" name="edjob">
+   <property name="geometry">
+    <rect>
+     <x>180</x>
+     <y>30</y>
+     <width>331</width>
+     <height>17</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string/>
+   </property>
+  </widget>
+  <widget class="QLabel" name="label_2">
+   <property name="geometry">
+    <rect>
+     <x>50</x>
+     <y>60</y>
+     <width>66</width>
+     <height>17</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string>Variable</string>
+   </property>
+  </widget>
+  <widget class="QLabel" name="label_3">
+   <property name="geometry">
+    <rect>
+     <x>170</x>
+     <y>60</y>
+     <width>41</width>
+     <height>17</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string>Op</string>
+   </property>
+  </widget>
+  <widget class="QLabel" name="label_4">
+   <property name="geometry">
+    <rect>
+     <x>340</x>
+     <y>60</y>
+     <width>81</width>
+     <height>17</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string>When Done</string>
+   </property>
+  </widget>
+  <widget class="QLabel" name="label_5">
+   <property name="geometry">
+    <rect>
+     <x>640</x>
+     <y>60</y>
+     <width>71</width>
+     <height>17</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string>Text Value</string>
+   </property>
+  </widget>
+  <widget class="QLabel" name="label_6">
+   <property name="geometry">
+    <rect>
+     <x>900</x>
+     <y>60</y>
+     <width>51</width>
+     <height>17</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string>Int Val</string>
+   </property>
+  </widget>
+  <widget class="QWidget" name="">
+   <property name="geometry">
+    <rect>
+     <x>30</x>
+     <y>90</y>
+     <width>1001</width>
+     <height>301</height>
+    </rect>
+   </property>
+   <layout class="QGridLayout" name="gridLayout">
+    <item row="0" column="0">
+     <widget class="QComboBox" name="assvar0">
+      <property name="toolTip">
+       <string>This is the variable to be assigned to</string>
+      </property>
+      <item>
+       <property name="text">
+        <string>(no variable)</string>
+       </property>
+      </item>
+     </widget>
+    </item>
+    <item row="0" column="1">
+     <widget class="QComboBox" name="assop0">
+      <property name="toolTip">
+       <string>This is the operation to be performed</string>
+      </property>
+      <item>
+       <property name="text">
+        <string>(none)</string>
+       </property>
+      </item>
+      <item>
+       <property name="text">
+        <string>Set</string>
+       </property>
+      </item>
+      <item>
+       <property name="text">
+        <string>Add</string>
+       </property>
+      </item>
+      <item>
+       <property name="text">
+        <string>Subtract</string>
+       </property>
+      </item>
+      <item>
+       <property name="text">
+        <string>Multiply</string>
+       </property>
+      </item>
+      <item>
+       <property name="text">
+        <string>Divide</string>
+       </property>
+      </item>
+      <item>
+       <property name="text">
+        <string>Modulus</string>
+       </property>
+      </item>
+      <item>
+       <property name="text">
+        <string>Set Exit</string>
+       </property>
+      </item>
+      <item>
+       <property name="text">
+        <string>Set Signal</string>
+       </property>
+      </item>
+     </widget>
+    </item>
+    <item row="0" column="2">
+     <widget class="QCheckBox" name="FS0">
+      <property name="font">
+       <font>
+        <pointsize>9</pointsize>
+        <weight>75</weight>
+        <italic>true</italic>
+        <bold>true</bold>
+       </font>
+      </property>
+      <property name="toolTip">
+       <string>Indicates that the operation is to be performed when the job starts</string>
+      </property>
+      <property name="text">
+       <string>S</string>
+      </property>
+     </widget>
+    </item>
+    <item row="0" column="3">
+     <widget class="QCheckBox" name="FN0">
+      <property name="font">
+       <font>
+        <pointsize>9</pointsize>
+        <weight>75</weight>
+        <italic>true</italic>
+        <bold>true</bold>
+       </font>
+      </property>
+      <property name="toolTip">
+       <string>Indicates that the operation is to be performed when the job
+exits normally (as indicated by the exit code settings).</string>
+      </property>
+      <property name="text">
+       <string>N</string>
+      </property>
+     </widget>
+    </item>
+    <item row="0" column="4">
+     <widget class="QCheckBox" name="FE0">
+      <property name="font">
+       <font>
+        <pointsize>9</pointsize>
+        <weight>75</weight>
+        <italic>true</italic>
+        <bold>true</bold>
+       </font>
+      </property>
+      <property name="toolTip">
+       <string>Indicates that the operation is to be performed when the job
+exits with an error code (as indicated by the exit code settings).</string>
+      </property>
+      <property name="text">
+       <string>E</string>
+      </property>
+     </widget>
+    </item>
+    <item row="0" column="5">
+     <widget class="QCheckBox" name="FA0">
+      <property name="font">
+       <font>
+        <pointsize>9</pointsize>
+        <weight>75</weight>
+        <italic>true</italic>
+        <bold>true</bold>
+       </font>
+      </property>
+      <property name="toolTip">
+       <string>Indicates that the operation is to be performed when the job
+aborts - either exits with a signal, or with an error code not covered
+by the job exit code settings.</string>
+      </property>
+      <property name="text">
+       <string>A</string>
+      </property>
+     </widget>
+    </item>
+    <item row="0" column="6">
+     <widget class="QCheckBox" name="FC0">
+      <property name="font">
+       <font>
+        <pointsize>9</pointsize>
+        <weight>75</weight>
+        <italic>true</italic>
+        <bold>true</bold>
+       </font>
+      </property>
+      <property name="toolTip">
+       <string>Indicates that the operation is to be performed when the job
+is cancelled (killed with a signal before it is run).</string>
+      </property>
+      <property name="text">
+       <string>C</string>
+      </property>
+     </widget>
+    </item>
+    <item row="0" column="7">
+     <widget class="QCheckBox" name="FR0">
+      <property name="font">
+       <font>
+        <pointsize>9</pointsize>
+        <weight>75</weight>
+        <italic>true</italic>
+        <bold>true</bold>
+       </font>
+      </property>
+      <property name="toolTip">
+       <string>Indicates that the exit code operations (N E A C) are to be reversed if
+possible.
+
+Note that only add subtract multiply and divide can be reversed.</string>
+      </property>
+      <property name="text">
+       <string>R</string>
+      </property>
+     </widget>
+    </item>
+    <item row="0" column="8">
+     <widget class="QLineEdit" name="textval0">
+      <property name="enabled">
+       <bool>false</bool>
+      </property>
+      <property name="font">
+       <font>
+        <family>Courier New</family>
+        <weight>50</weight>
+        <italic>false</italic>
+        <bold>false</bold>
+       </font>
+      </property>
+      <property name="toolTip">
+       <string>Give the text value to be assigned here</string>
+      </property>
+      <property name="maxLength">
+       <number>49</number>
+      </property>
+     </widget>
+    </item>
+    <item row="0" column="9">
+     <widget class="QCheckBox" name="asstext0">
+      <property name="font">
+       <font>
+        <pointsize>11</pointsize>
+       </font>
+      </property>
+      <property name="toolTip">
+       <string>Indicate that the value to be assigned is text</string>
+      </property>
+      <property name="text">
+       <string>Text</string>
+      </property>
+     </widget>
+    </item>
+    <item row="0" column="10">
+     <widget class="QSpinBox" name="intval0">
+      <property name="toolTip">
+       <string>Give the integer value to be used here</string>
+      </property>
+      <property name="minimum">
+       <number>-1000000</number>
+      </property>
+      <property name="maximum">
+       <number>1000000</number>
+      </property>
+      <property name="value">
+       <number>0</number>
+      </property>
+     </widget>
+    </item>
+    <item row="0" column="11">
+     <widget class="QCheckBox" name="ac0">
+      <property name="toolTip">
+       <string>This is a critical assignment
+
+If set and the host with the variable is not running, then the job is held.
+
+If it is not set and the host with the variable is not running, then the
+assignment is ignored.</string>
+      </property>
+      <property name="text">
+       <string>Acrit</string>
+      </property>
+     </widget>
+    </item>
+    <item row="1" column="0">
+     <widget class="QComboBox" name="assvar1">
+      <property name="toolTip">
+       <string>This is the variable to be assigned to</string>
+      </property>
+      <item>
+       <property name="text">
+        <string>(no variable)</string>
+       </property>
+      </item>
+     </widget>
+    </item>
+    <item row="1" column="1">
+     <widget class="QComboBox" name="assop1">
+      <property name="toolTip">
+       <string>This is the operation to be performed</string>
+      </property>
+      <item>
+       <property name="text">
+        <string>(none)</string>
+       </property>
+      </item>
+      <item>
+       <property name="text">
+        <string>Set</string>
+       </property>
+      </item>
+      <item>
+       <property name="text">
+        <string>Add</string>
+       </property>
+      </item>
+      <item>
+       <property name="text">
+        <string>Subtract</string>
+       </property>
+      </item>
+      <item>
+       <property name="text">
+        <string>Multiply</string>
+       </property>
+      </item>
+      <item>
+       <property name="text">
+        <string>Divide</string>
+       </property>
+      </item>
+      <item>
+       <property name="text">
+        <string>Modulus</string>
+       </property>
+      </item>
+      <item>
+       <property name="text">
+        <string>Set Exit</string>
+       </property>
+      </item>
+      <item>
+       <property name="text">
+        <string>Set Signal</string>
+       </property>
+      </item>
+     </widget>
+    </item>
+    <item row="1" column="2">
+     <widget class="QCheckBox" name="FS1">
+      <property name="font">
+       <font>
+        <pointsize>9</pointsize>
+        <weight>75</weight>
+        <italic>true</italic>
+        <bold>true</bold>
+       </font>
+      </property>
+      <property name="toolTip">
+       <string>Indicates that the operation is to be performed when the job starts</string>
+      </property>
+      <property name="text">
+       <string>S</string>
+      </property>
+     </widget>
+    </item>
+    <item row="1" column="3">
+     <widget class="QCheckBox" name="FN1">
+      <property name="font">
+       <font>
+        <pointsize>9</pointsize>
+        <weight>75</weight>
+        <italic>true</italic>
+        <bold>true</bold>
+       </font>
+      </property>
+      <property name="toolTip">
+       <string>Indicates that the operation is to be performed when the job
+exits normally (as indicated by the exit code settings).</string>
+      </property>
+      <property name="text">
+       <string>N</string>
+      </property>
+     </widget>
+    </item>
+    <item row="1" column="4">
+     <widget class="QCheckBox" name="FE1">
+      <property name="font">
+       <font>
+        <pointsize>9</pointsize>
+        <weight>75</weight>
+        <italic>true</italic>
+        <bold>true</bold>
+       </font>
+      </property>
+      <property name="toolTip">
+       <string>Indicates that the operation is to be performed when the job
+exits with an error code (as indicated by the exit code settings).</string>
+      </property>
+      <property name="text">
+       <string>E</string>
+      </property>
+     </widget>
+    </item>
+    <item row="1" column="5">
+     <widget class="QCheckBox" name="FA1">
+      <property name="font">
+       <font>
+        <pointsize>9</pointsize>
+        <weight>75</weight>
+        <italic>true</italic>
+        <bold>true</bold>
+       </font>
+      </property>
+      <property name="toolTip">
+       <string>Indicates that the operation is to be performed when the job
+aborts - either exits with a signal, or with an error code not covered
+by the job exit code settings.</string>
+      </property>
+      <property name="text">
+       <string>A</string>
+      </property>
+     </widget>
+    </item>
+    <item row="1" column="6">
+     <widget class="QCheckBox" name="FC1">
+      <property name="font">
+       <font>
+        <pointsize>9</pointsize>
+        <weight>75</weight>
+        <italic>true</italic>
+        <bold>true</bold>
+       </font>
+      </property>
+      <property name="toolTip">
+       <string>Indicates that the operation is to be performed when the job
+is cancelled (killed with a signal before it is run).</string>
+      </property>
+      <property name="text">
+       <string>C</string>
+      </property>
+     </widget>
+    </item>
+    <item row="1" column="7">
+     <widget class="QCheckBox" name="FR1">
+      <property name="font">
+       <font>
+        <pointsize>9</pointsize>
+        <weight>75</weight>
+        <italic>true</italic>
+        <bold>true</bold>
+       </font>
+      </property>
+      <property name="toolTip">
+       <string>Indicates that the exit code operations (N E A C) are to be reversed if
+possible.
+
+Note that only add subtract multiply and divide can be reversed.</string>
+      </property>
+      <property name="text">
+       <string>R</string>
+      </property>
+     </widget>
+    </item>
+    <item row="1" column="8">
+     <widget class="QLineEdit" name="textval1">
+      <property name="enabled">
+       <bool>false</bool>
+      </property>
+      <property name="font">
+       <font>
+        <family>Courier New</family>
+        <weight>50</weight>
+        <italic>false</italic>
+        <bold>false</bold>
+       </font>
+      </property>
+      <property name="toolTip">
+       <string>Give the text value to be assigned here</string>
+      </property>
+      <property name="maxLength">
+       <number>49</number>
+      </property>
+     </widget>
+    </item>
+    <item row="1" column="9">
+     <widget class="QCheckBox" name="asstext1">
+      <property name="font">
+       <font>
+        <pointsize>11</pointsize>
+       </font>
+      </property>
+      <property name="toolTip">
+       <string>Indicate that the value to be assigned is text</string>
+      </property>
+      <property name="text">
+       <string>Text</string>
+      </property>
+     </widget>
+    </item>
+    <item row="1" column="10">
+     <widget class="QSpinBox" name="intval1">
+      <property name="toolTip">
+       <string>Give the integer value to be used here</string>
+      </property>
+      <property name="minimum">
+       <number>-1000000</number>
+      </property>
+      <property name="maximum">
+       <number>1000000</number>
+      </property>
+      <property name="value">
+       <number>0</number>
+      </property>
+     </widget>
+    </item>
+    <item row="1" column="11">
+     <widget class="QCheckBox" name="ac1">
+      <property name="toolTip">
+       <string>This is a critical assignment
+
+If set and the host with the variable is not running, then the job is held.
+
+If it is not set and the host with the variable is not running, then the
+assignment is ignored.</string>
+      </property>
+      <property name="text">
+       <string>Acrit</string>
+      </property>
+     </widget>
+    </item>
+    <item row="2" column="0">
+     <widget class="QComboBox" name="assvar2">
+      <property name="toolTip">
+       <string>This is the variable to be assigned to</string>
+      </property>
+      <item>
+       <property name="text">
+        <string>(no variable)</string>
+       </property>
+      </item>
+     </widget>
+    </item>
+    <item row="2" column="1">
+     <widget class="QComboBox" name="assop2">
+      <property name="toolTip">
+       <string>This is the operation to be performed</string>
+      </property>
+      <item>
+       <property name="text">
+        <string>(none)</string>
+       </property>
+      </item>
+      <item>
+       <property name="text">
+        <string>Set</string>
+       </property>
+      </item>
+      <item>
+       <property name="text">
+        <string>Add</string>
+       </property>
+      </item>
+      <item>
+       <property name="text">
+        <string>Subtract</string>
+       </property>
+      </item>
+      <item>
+       <property name="text">
+        <string>Multiply</string>
+       </property>
+      </item>
+      <item>
+       <property name="text">
+        <string>Divide</string>
+       </property>
+      </item>
+      <item>
+       <property name="text">
+        <string>Modulus</string>
+       </property>
+      </item>
+      <item>
+       <property name="text">
+        <string>Set Exit</string>
+       </property>
+      </item>
+      <item>
+       <property name="text">
+        <string>Set Signal</string>
+       </property>
+      </item>
+     </widget>
+    </item>
+    <item row="2" column="2">
+     <widget class="QCheckBox" name="FS2">
+      <property name="font">
+       <font>
+        <pointsize>9</pointsize>
+        <weight>75</weight>
+        <italic>true</italic>
+        <bold>true</bold>
+       </font>
+      </property>
+      <property name="toolTip">
+       <string>Indicates that the operation is to be performed when the job starts</string>
+      </property>
+      <property name="text">
+       <string>S</string>
+      </property>
+     </widget>
+    </item>
+    <item row="2" column="3">
+     <widget class="QCheckBox" name="FN2">
+      <property name="font">
+       <font>
+        <pointsize>9</pointsize>
+        <weight>75</weight>
+        <italic>true</italic>
+        <bold>true</bold>
+       </font>
+      </property>
+      <property name="toolTip">
+       <string>Indicates that the operation is to be performed when the job
+exits normally (as indicated by the exit code settings).</string>
+      </property>
+      <property name="text">
+       <string>N</string>
+      </property>
+     </widget>
+    </item>
+    <item row="2" column="4">
+     <widget class="QCheckBox" name="FE2">
+      <property name="font">
+       <font>
+        <pointsize>9</pointsize>
+        <weight>75</weight>
+        <italic>true</italic>
+        <bold>true</bold>
+       </font>
+      </property>
+      <property name="toolTip">
+       <string>Indicates that the operation is to be performed when the job
+exits with an error code (as indicated by the exit code settings).</string>
+      </property>
+      <property name="text">
+       <string>E</string>
+      </property>
+     </widget>
+    </item>
+    <item row="2" column="5">
+     <widget class="QCheckBox" name="FA2">
+      <property name="font">
+       <font>
+        <pointsize>9</pointsize>
+        <weight>75</weight>
+        <italic>true</italic>
+        <bold>true</bold>
+       </font>
+      </property>
+      <property name="toolTip">
+       <string>Indicates that the operation is to be performed when the job
+aborts - either exits with a signal, or with an error code not covered
+by the job exit code settings.</string>
+      </property>
+      <property name="text">
+       <string>A</string>
+      </property>
+     </widget>
+    </item>
+    <item row="2" column="6">
+     <widget class="QCheckBox" name="FC2">
+      <property name="font">
+       <font>
+        <pointsize>9</pointsize>
+        <weight>75</weight>
+        <italic>true</italic>
+        <bold>true</bold>
+       </font>
+      </property>
+      <property name="toolTip">
+       <string>Indicates that the operation is to be performed when the job
+is cancelled (killed with a signal before it is run).</string>
+      </property>
+      <property name="text">
+       <string>C</string>
+      </property>
+     </widget>
+    </item>
+    <item row="2" column="7">
+     <widget class="QCheckBox" name="FR2">
+      <property name="font">
+       <font>
+        <pointsize>9</pointsize>
+        <weight>75</weight>
+        <italic>true</italic>
+        <bold>true</bold>
+       </font>
+      </property>
+      <property name="toolTip">
+       <string>Indicates that the exit code operations (N E A C) are to be reversed if
+possible.
+
+Note that only add subtract multiply and divide can be reversed.</string>
+      </property>
+      <property name="text">
+       <string>R</string>
+      </property>
+     </widget>
+    </item>
+    <item row="2" column="8">
+     <widget class="QLineEdit" name="textval2">
+      <property name="enabled">
+       <bool>false</bool>
+      </property>
+      <property name="font">
+       <font>
+        <family>Courier New</family>
+        <weight>50</weight>
+        <italic>false</italic>
+        <bold>false</bold>
+       </font>
+      </property>
+      <property name="toolTip">
+       <string>Give the text value to be assigned here</string>
+      </property>
+      <property name="maxLength">
+       <number>49</number>
+      </property>
+     </widget>
+    </item>
+    <item row="2" column="9">
+     <widget class="QCheckBox" name="asstext2">
+      <property name="font">
+       <font>
+        <pointsize>11</pointsize>
+       </font>
+      </property>
+      <property name="toolTip">
+       <string>Indicate that the value to be assigned is text</string>
+      </property>
+      <property name="text">
+       <string>Text</string>
+      </property>
+     </widget>
+    </item>
+    <item row="2" column="10">
+     <widget class="QSpinBox" name="intval2">
+      <property name="toolTip">
+       <string>Give the integer value to be used here</string>
+      </property>
+      <property name="minimum">
+       <number>-1000000</number>
+      </property>
+      <property name="maximum">
+       <number>1000000</number>
+      </property>
+      <property name="value">
+       <number>0</number>
+      </property>
+     </widget>
+    </item>
+    <item row="2" column="11">
+     <widget class="QCheckBox" name="ac2">
+      <property name="toolTip">
+       <string>This is a critical assignment
+
+If set and the host with the variable is not running, then the job is held.
+
+If it is not set and the host with the variable is not running, then the
+assignment is ignored.</string>
+      </property>
+      <property name="text">
+       <string>Acrit</string>
+      </property>
+     </widget>
+    </item>
+    <item row="3" column="0">
+     <widget class="QComboBox" name="assvar3">
+      <property name="toolTip">
+       <string>This is the variable to be assigned to</string>
+      </property>
+      <item>
+       <property name="text">
+        <string>(no variable)</string>
+       </property>
+      </item>
+     </widget>
+    </item>
+    <item row="3" column="1">
+     <widget class="QComboBox" name="assop3">
+      <property name="toolTip">
+       <string>This is the operation to be performed</string>
+      </property>
+      <item>
+       <property name="text">
+        <string>(none)</string>
+       </property>
+      </item>
+      <item>
+       <property name="text">
+        <string>Set</string>
+       </property>
+      </item>
+      <item>
+       <property name="text">
+        <string>Add</string>
+       </property>
+      </item>
+      <item>
+       <property name="text">
+        <string>Subtract</string>
+       </property>
+      </item>
+      <item>
+       <property name="text">
+        <string>Multiply</string>
+       </property>
+      </item>
+      <item>
+       <property name="text">
+        <string>Divide</string>
+       </property>
+      </item>
+      <item>
+       <property name="text">
+        <string>Modulus</string>
+       </property>
+      </item>
+      <item>
+       <property name="text">
+        <string>Set Exit</string>
+       </property>
+      </item>
+      <item>
+       <property name="text">
+        <string>Set Signal</string>
+       </property>
+      </item>
+     </widget>
+    </item>
+    <item row="3" column="2">
+     <widget class="QCheckBox" name="FS3">
+      <property name="font">
+       <font>
+        <pointsize>9</pointsize>
+        <weight>75</weight>
+        <italic>true</italic>
+        <bold>true</bold>
+       </font>
+      </property>
+      <property name="toolTip">
+       <string>Indicates that the operation is to be performed when the job starts</string>
+      </property>
+      <property name="text">
+       <string>S</string>
+      </property>
+     </widget>
+    </item>
+    <item row="3" column="3">
+     <widget class="QCheckBox" name="FN3">
+      <property name="font">
+       <font>
+        <pointsize>9</pointsize>
+        <weight>75</weight>
+        <italic>true</italic>
+        <bold>true</bold>
+       </font>
+      </property>
+      <property name="toolTip">
+       <string>Indicates that the operation is to be performed when the job
+exits normally (as indicated by the exit code settings).</string>
+      </property>
+      <property name="text">
+       <string>N</string>
+      </property>
+     </widget>
+    </item>
+    <item row="3" column="4">
+     <widget class="QCheckBox" name="FE3">
+      <property name="font">
+       <font>
+        <pointsize>9</pointsize>
+        <weight>75</weight>
+        <italic>true</italic>
+        <bold>true</bold>
+       </font>
+      </property>
+      <property name="toolTip">
+       <string>Indicates that the operation is to be performed when the job
+exits with an error code (as indicated by the exit code settings).</string>
+      </property>
+      <property name="text">
+       <string>E</string>
+      </property>
+     </widget>
+    </item>
+    <item row="3" column="5">
+     <widget class="QCheckBox" name="FA3">
+      <property name="font">
+       <font>
+        <pointsize>9</pointsize>
+        <weight>75</weight>
+        <italic>true</italic>
+        <bold>true</bold>
+       </font>
+      </property>
+      <property name="toolTip">
+       <string>Indicates that the operation is to be performed when the job
+aborts - either exits with a signal, or with an error code not covered
+by the job exit code settings.</string>
+      </property>
+      <property name="text">
+       <string>A</string>
+      </property>
+     </widget>
+    </item>
+    <item row="3" column="6">
+     <widget class="QCheckBox" name="FC3">
+      <property name="font">
+       <font>
+        <pointsize>9</pointsize>
+        <weight>75</weight>
+        <italic>true</italic>
+        <bold>true</bold>
+       </font>
+      </property>
+      <property name="toolTip">
+       <string>Indicates that the operation is to be performed when the job
+is cancelled (killed with a signal before it is run).</string>
+      </property>
+      <property name="text">
+       <string>C</string>
+      </property>
+     </widget>
+    </item>
+    <item row="3" column="7">
+     <widget class="QCheckBox" name="FR3">
+      <property name="font">
+       <font>
+        <pointsize>9</pointsize>
+        <weight>75</weight>
+        <italic>true</italic>
+        <bold>true</bold>
+       </font>
+      </property>
+      <property name="toolTip">
+       <string>Indicates that the exit code operations (N E A C) are to be reversed if
+possible.
+
+Note that only add subtract multiply and divide can be reversed.</string>
+      </property>
+      <property name="text">
+       <string>R</string>
+      </property>
+     </widget>
+    </item>
+    <item row="3" column="8">
+     <widget class="QLineEdit" name="textval3">
+      <property name="enabled">
+       <bool>false</bool>
+      </property>
+      <property name="font">
+       <font>
+        <family>Courier New</family>
+        <weight>50</weight>
+        <italic>false</italic>
+        <bold>false</bold>
+       </font>
+      </property>
+      <property name="toolTip">
+       <string>Give the text value to be assigned here</string>
+      </property>
+      <property name="maxLength">
+       <number>49</number>
+      </property>
+     </widget>
+    </item>
+    <item row="3" column="9">
+     <widget class="QCheckBox" name="asstext3">
+      <property name="font">
+       <font>
+        <pointsize>11</pointsize>
+       </font>
+      </property>
+      <property name="toolTip">
+       <string>Indicate that the value to be assigned is text</string>
+      </property>
+      <property name="text">
+       <string>Text</string>
+      </property>
+     </widget>
+    </item>
+    <item row="3" column="10">
+     <widget class="QSpinBox" name="intval3">
+      <property name="toolTip">
+       <string>Give the integer value to be used here</string>
+      </property>
+      <property name="minimum">
+       <number>-1000000</number>
+      </property>
+      <property name="maximum">
+       <number>1000000</number>
+      </property>
+      <property name="value">
+       <number>0</number>
+      </property>
+     </widget>
+    </item>
+    <item row="3" column="11">
+     <widget class="QCheckBox" name="ac3">
+      <property name="toolTip">
+       <string>This is a critical assignment
+
+If set and the host with the variable is not running, then the job is held.
+
+If it is not set and the host with the variable is not running, then the
+assignment is ignored.</string>
+      </property>
+      <property name="text">
+       <string>Acrit</string>
+      </property>
+     </widget>
+    </item>
+    <item row="4" column="0">
+     <widget class="QComboBox" name="assvar4">
+      <property name="toolTip">
+       <string>This is the variable to be assigned to</string>
+      </property>
+      <item>
+       <property name="text">
+        <string>(no variable)</string>
+       </property>
+      </item>
+     </widget>
+    </item>
+    <item row="4" column="1">
+     <widget class="QComboBox" name="assop4">
+      <property name="toolTip">
+       <string>This is the operation to be performed</string>
+      </property>
+      <item>
+       <property name="text">
+        <string>(none)</string>
+       </property>
+      </item>
+      <item>
+       <property name="text">
+        <string>Set</string>
+       </property>
+      </item>
+      <item>
+       <property name="text">
+        <string>Add</string>
+       </property>
+      </item>
+      <item>
+       <property name="text">
+        <string>Subtract</string>
+       </property>
+      </item>
+      <item>
+       <property name="text">
+        <string>Multiply</string>
+       </property>
+      </item>
+      <item>
+       <property name="text">
+        <string>Divide</string>
+       </property>
+      </item>
+      <item>
+       <property name="text">
+        <string>Modulus</string>
+       </property>
+      </item>
+      <item>
+       <property name="text">
+        <string>Set Exit</string>
+       </property>
+      </item>
+      <item>
+       <property name="text">
+        <string>Set Signal</string>
+       </property>
+      </item>
+     </widget>
+    </item>
+    <item row="4" column="2">
+     <widget class="QCheckBox" name="FS4">
+      <property name="font">
+       <font>
+        <pointsize>9</pointsize>
+        <weight>75</weight>
+        <italic>true</italic>
+        <bold>true</bold>
+       </font>
+      </property>
+      <property name="toolTip">
+       <string>Indicates that the operation is to be performed when the job starts</string>
+      </property>
+      <property name="text">
+       <string>S</string>
+      </property>
+     </widget>
+    </item>
+    <item row="4" column="3">
+     <widget class="QCheckBox" name="FN4">
+      <property name="font">
+       <font>
+        <pointsize>9</pointsize>
+        <weight>75</weight>
+        <italic>true</italic>
+        <bold>true</bold>
+       </font>
+      </property>
+      <property name="toolTip">
+       <string>Indicates that the operation is to be performed when the job
+exits normally (as indicated by the exit code settings).</string>
+      </property>
+      <property name="text">
+       <string>N</string>
+      </property>
+     </widget>
+    </item>
+    <item row="4" column="4">
+     <widget class="QCheckBox" name="FE4">
+      <property name="font">
+       <font>
+        <pointsize>9</pointsize>
+        <weight>75</weight>
+        <italic>true</italic>
+        <bold>true</bold>
+       </font>
+      </property>
+      <property name="toolTip">
+       <string>Indicates that the operation is to be performed when the job
+exits with an error code (as indicated by the exit code settings).</string>
+      </property>
+      <property name="text">
+       <string>E</string>
+      </property>
+     </widget>
+    </item>
+    <item row="4" column="5">
+     <widget class="QCheckBox" name="FA4">
+      <property name="font">
+       <font>
+        <pointsize>9</pointsize>
+        <weight>75</weight>
+        <italic>true</italic>
+        <bold>true</bold>
+       </font>
+      </property>
+      <property name="toolTip">
+       <string>Indicates that the operation is to be performed when the job
+aborts - either exits with a signal, or with an error code not covered
+by the job exit code settings.</string>
+      </property>
+      <property name="text">
+       <string>A</string>
+      </property>
+     </widget>
+    </item>
+    <item row="4" column="6">
+     <widget class="QCheckBox" name="FC4">
+      <property name="font">
+       <font>
+        <pointsize>9</pointsize>
+        <weight>75</weight>
+        <italic>true</italic>
+        <bold>true</bold>
+       </font>
+      </property>
+      <property name="toolTip">
+       <string>Indicates that the operation is to be performed when the job
+is cancelled (killed with a signal before it is run).</string>
+      </property>
+      <property name="text">
+       <string>C</string>
+      </property>
+     </widget>
+    </item>
+    <item row="4" column="7">
+     <widget class="QCheckBox" name="FR4">
+      <property name="font">
+       <font>
+        <pointsize>9</pointsize>
+        <weight>75</weight>
+        <italic>true</italic>
+        <bold>true</bold>
+       </font>
+      </property>
+      <property name="toolTip">
+       <string>Indicates that the exit code operations (N E A C) are to be reversed if
+possible.
+
+Note that only add subtract multiply and divide can be reversed.</string>
+      </property>
+      <property name="text">
+       <string>R</string>
+      </property>
+     </widget>
+    </item>
+    <item row="4" column="8">
+     <widget class="QLineEdit" name="textval4">
+      <property name="enabled">
+       <bool>false</bool>
+      </property>
+      <property name="font">
+       <font>
+        <family>Courier New</family>
+        <weight>50</weight>
+        <italic>false</italic>
+        <bold>false</bold>
+       </font>
+      </property>
+      <property name="toolTip">
+       <string>Give the text value to be assigned here</string>
+      </property>
+      <property name="maxLength">
+       <number>49</number>
+      </property>
+     </widget>
+    </item>
+    <item row="4" column="9">
+     <widget class="QCheckBox" name="asstext4">
+      <property name="font">
+       <font>
+        <pointsize>11</pointsize>
+       </font>
+      </property>
+      <property name="toolTip">
+       <string>Indicate that the value to be assigned is text</string>
+      </property>
+      <property name="text">
+       <string>Text</string>
+      </property>
+     </widget>
+    </item>
+    <item row="4" column="10">
+     <widget class="QSpinBox" name="intval4">
+      <property name="toolTip">
+       <string>Give the integer value to be used here</string>
+      </property>
+      <property name="minimum">
+       <number>-1000000</number>
+      </property>
+      <property name="maximum">
+       <number>1000000</number>
+      </property>
+      <property name="value">
+       <number>0</number>
+      </property>
+     </widget>
+    </item>
+    <item row="4" column="11">
+     <widget class="QCheckBox" name="ac4">
+      <property name="toolTip">
+       <string>This is a critical assignment
+
+If set and the host with the variable is not running, then the job is held.
+
+If it is not set and the host with the variable is not running, then the
+assignment is ignored.</string>
+      </property>
+      <property name="text">
+       <string>Acrit</string>
+      </property>
+     </widget>
+    </item>
+    <item row="5" column="0">
+     <widget class="QComboBox" name="assvar5">
+      <property name="toolTip">
+       <string>This is the variable to be assigned to</string>
+      </property>
+      <item>
+       <property name="text">
+        <string>(no variable)</string>
+       </property>
+      </item>
+     </widget>
+    </item>
+    <item row="5" column="1">
+     <widget class="QComboBox" name="assop5">
+      <property name="toolTip">
+       <string>This is the operation to be performed</string>
+      </property>
+      <item>
+       <property name="text">
+        <string>(none)</string>
+       </property>
+      </item>
+      <item>
+       <property name="text">
+        <string>Set</string>
+       </property>
+      </item>
+      <item>
+       <property name="text">
+        <string>Add</string>
+       </property>
+      </item>
+      <item>
+       <property name="text">
+        <string>Subtract</string>
+       </property>
+      </item>
+      <item>
+       <property name="text">
+        <string>Multiply</string>
+       </property>
+      </item>
+      <item>
+       <property name="text">
+        <string>Divide</string>
+       </property>
+      </item>
+      <item>
+       <property name="text">
+        <string>Modulus</string>
+       </property>
+      </item>
+      <item>
+       <property name="text">
+        <string>Set Exit</string>
+       </property>
+      </item>
+      <item>
+       <property name="text">
+        <string>Set Signal</string>
+       </property>
+      </item>
+     </widget>
+    </item>
+    <item row="5" column="2">
+     <widget class="QCheckBox" name="FS5">
+      <property name="font">
+       <font>
+        <pointsize>9</pointsize>
+        <weight>75</weight>
+        <italic>true</italic>
+        <bold>true</bold>
+       </font>
+      </property>
+      <property name="toolTip">
+       <string>Indicates that the operation is to be performed when the job starts</string>
+      </property>
+      <property name="text">
+       <string>S</string>
+      </property>
+     </widget>
+    </item>
+    <item row="5" column="3">
+     <widget class="QCheckBox" name="FN5">
+      <property name="font">
+       <font>
+        <pointsize>9</pointsize>
+        <weight>75</weight>
+        <italic>true</italic>
+        <bold>true</bold>
+       </font>
+      </property>
+      <property name="toolTip">
+       <string>Indicates that the operation is to be performed when the job
+exits normally (as indicated by the exit code settings).</string>
+      </property>
+      <property name="text">
+       <string>N</string>
+      </property>
+     </widget>
+    </item>
+    <item row="5" column="4">
+     <widget class="QCheckBox" name="FE5">
+      <property name="font">
+       <font>
+        <pointsize>9</pointsize>
+        <weight>75</weight>
+        <italic>true</italic>
+        <bold>true</bold>
+       </font>
+      </property>
+      <property name="toolTip">
+       <string>Indicates that the operation is to be performed when the job
+exits with an error code (as indicated by the exit code settings).</string>
+      </property>
+      <property name="text">
+       <string>E</string>
+      </property>
+     </widget>
+    </item>
+    <item row="5" column="5">
+     <widget class="QCheckBox" name="FA5">
+      <property name="font">
+       <font>
+        <pointsize>9</pointsize>
+        <weight>75</weight>
+        <italic>true</italic>
+        <bold>true</bold>
+       </font>
+      </property>
+      <property name="toolTip">
+       <string>Indicates that the operation is to be performed when the job
+aborts - either exits with a signal, or with an error code not covered
+by the job exit code settings.</string>
+      </property>
+      <property name="text">
+       <string>A</string>
+      </property>
+     </widget>
+    </item>
+    <item row="5" column="6">
+     <widget class="QCheckBox" name="FC5">
+      <property name="font">
+       <font>
+        <pointsize>9</pointsize>
+        <weight>75</weight>
+        <italic>true</italic>
+        <bold>true</bold>
+       </font>
+      </property>
+      <property name="toolTip">
+       <string>Indicates that the operation is to be performed when the job
+is cancelled (killed with a signal before it is run).</string>
+      </property>
+      <property name="text">
+       <string>C</string>
+      </property>
+     </widget>
+    </item>
+    <item row="5" column="7">
+     <widget class="QCheckBox" name="FR5">
+      <property name="font">
+       <font>
+        <pointsize>9</pointsize>
+        <weight>75</weight>
+        <italic>true</italic>
+        <bold>true</bold>
+       </font>
+      </property>
+      <property name="toolTip">
+       <string>Indicates that the exit code operations (N E A C) are to be reversed if
+possible.
+
+Note that only add subtract multiply and divide can be reversed.</string>
+      </property>
+      <property name="text">
+       <string>R</string>
+      </property>
+     </widget>
+    </item>
+    <item row="5" column="8">
+     <widget class="QLineEdit" name="textval5">
+      <property name="enabled">
+       <bool>false</bool>
+      </property>
+      <property name="font">
+       <font>
+        <family>Courier New</family>
+        <weight>50</weight>
+        <italic>false</italic>
+        <bold>false</bold>
+       </font>
+      </property>
+      <property name="toolTip">
+       <string>Give the text value to be assigned here</string>
+      </property>
+      <property name="maxLength">
+       <number>49</number>
+      </property>
+     </widget>
+    </item>
+    <item row="5" column="9">
+     <widget class="QCheckBox" name="asstext5">
+      <property name="font">
+       <font>
+        <pointsize>11</pointsize>
+       </font>
+      </property>
+      <property name="toolTip">
+       <string>Indicate that the value to be assigned is text</string>
+      </property>
+      <property name="text">
+       <string>Text</string>
+      </property>
+     </widget>
+    </item>
+    <item row="5" column="10">
+     <widget class="QSpinBox" name="intval5">
+      <property name="toolTip">
+       <string>Give the integer value to be used here</string>
+      </property>
+      <property name="minimum">
+       <number>-1000000</number>
+      </property>
+      <property name="maximum">
+       <number>1000000</number>
+      </property>
+      <property name="value">
+       <number>0</number>
+      </property>
+     </widget>
+    </item>
+    <item row="5" column="11">
+     <widget class="QCheckBox" name="ac5">
+      <property name="toolTip">
+       <string>This is a critical assignment
+
+If set and the host with the variable is not running, then the job is held.
+
+If it is not set and the host with the variable is not running, then the
+assignment is ignored.</string>
+      </property>
+      <property name="text">
+       <string>Acrit</string>
+      </property>
+     </widget>
+    </item>
+    <item row="6" column="0">
+     <widget class="QComboBox" name="assvar6">
+      <property name="toolTip">
+       <string>This is the variable to be assigned to</string>
+      </property>
+      <item>
+       <property name="text">
+        <string>(no variable)</string>
+       </property>
+      </item>
+     </widget>
+    </item>
+    <item row="6" column="1">
+     <widget class="QComboBox" name="assop6">
+      <property name="toolTip">
+       <string>This is the operation to be performed</string>
+      </property>
+      <item>
+       <property name="text">
+        <string>(none)</string>
+       </property>
+      </item>
+      <item>
+       <property name="text">
+        <string>Set</string>
+       </property>
+      </item>
+      <item>
+       <property name="text">
+        <string>Add</string>
+       </property>
+      </item>
+      <item>
+       <property name="text">
+        <string>Subtract</string>
+       </property>
+      </item>
+      <item>
+       <property name="text">
+        <string>Multiply</string>
+       </property>
+      </item>
+      <item>
+       <property name="text">
+        <string>Divide</string>
+       </property>
+      </item>
+      <item>
+       <property name="text">
+        <string>Modulus</string>
+       </property>
+      </item>
+      <item>
+       <property name="text">
+        <string>Set Exit</string>
+       </property>
+      </item>
+      <item>
+       <property name="text">
+        <string>Set Signal</string>
+       </property>
+      </item>
+     </widget>
+    </item>
+    <item row="6" column="2">
+     <widget class="QCheckBox" name="FS6">
+      <property name="font">
+       <font>
+        <pointsize>9</pointsize>
+        <weight>75</weight>
+        <italic>true</italic>
+        <bold>true</bold>
+       </font>
+      </property>
+      <property name="toolTip">
+       <string>Indicates that the operation is to be performed when the job starts</string>
+      </property>
+      <property name="text">
+       <string>S</string>
+      </property>
+     </widget>
+    </item>
+    <item row="6" column="3">
+     <widget class="QCheckBox" name="FN6">
+      <property name="font">
+       <font>
+        <pointsize>9</pointsize>
+        <weight>75</weight>
+        <italic>true</italic>
+        <bold>true</bold>
+       </font>
+      </property>
+      <property name="toolTip">
+       <string>Indicates that the operation is to be performed when the job
+exits normally (as indicated by the exit code settings).</string>
+      </property>
+      <property name="text">
+       <string>N</string>
+      </property>
+     </widget>
+    </item>
+    <item row="6" column="4">
+     <widget class="QCheckBox" name="FE6">
+      <property name="font">
+       <font>
+        <pointsize>9</pointsize>
+        <weight>75</weight>
+        <italic>true</italic>
+        <bold>true</bold>
+       </font>
+      </property>
+      <property name="toolTip">
+       <string>Indicates that the operation is to be performed when the job
+exits with an error code (as indicated by the exit code settings).</string>
+      </property>
+      <property name="text">
+       <string>E</string>
+      </property>
+     </widget>
+    </item>
+    <item row="6" column="5">
+     <widget class="QCheckBox" name="FA6">
+      <property name="font">
+       <font>
+        <pointsize>9</pointsize>
+        <weight>75</weight>
+        <italic>true</italic>
+        <bold>true</bold>
+       </font>
+      </property>
+      <property name="toolTip">
+       <string>Indicates that the operation is to be performed when the job
+aborts - either exits with a signal, or with an error code not covered
+by the job exit code settings.</string>
+      </property>
+      <property name="text">
+       <string>A</string>
+      </property>
+     </widget>
+    </item>
+    <item row="6" column="6">
+     <widget class="QCheckBox" name="FC6">
+      <property name="font">
+       <font>
+        <pointsize>9</pointsize>
+        <weight>75</weight>
+        <italic>true</italic>
+        <bold>true</bold>
+       </font>
+      </property>
+      <property name="toolTip">
+       <string>Indicates that the operation is to be performed when the job
+is cancelled (killed with a signal before it is run).</string>
+      </property>
+      <property name="text">
+       <string>C</string>
+      </property>
+     </widget>
+    </item>
+    <item row="6" column="7">
+     <widget class="QCheckBox" name="FR6">
+      <property name="font">
+       <font>
+        <pointsize>9</pointsize>
+        <weight>75</weight>
+        <italic>true</italic>
+        <bold>true</bold>
+       </font>
+      </property>
+      <property name="toolTip">
+       <string>Indicates that the exit code operations (N E A C) are to be reversed if
+possible.
+
+Note that only add subtract multiply and divide can be reversed.</string>
+      </property>
+      <property name="text">
+       <string>R</string>
+      </property>
+     </widget>
+    </item>
+    <item row="6" column="8">
+     <widget class="QLineEdit" name="textval6">
+      <property name="enabled">
+       <bool>false</bool>
+      </property>
+      <property name="font">
+       <font>
+        <family>Courier New</family>
+        <weight>50</weight>
+        <italic>false</italic>
+        <bold>false</bold>
+       </font>
+      </property>
+      <property name="toolTip">
+       <string>Give the text value to be assigned here</string>
+      </property>
+      <property name="maxLength">
+       <number>49</number>
+      </property>
+     </widget>
+    </item>
+    <item row="6" column="9">
+     <widget class="QCheckBox" name="asstext6">
+      <property name="font">
+       <font>
+        <pointsize>11</pointsize>
+       </font>
+      </property>
+      <property name="toolTip">
+       <string>Indicate that the value to be assigned is text</string>
+      </property>
+      <property name="text">
+       <string>Text</string>
+      </property>
+     </widget>
+    </item>
+    <item row="6" column="10">
+     <widget class="QSpinBox" name="intval6">
+      <property name="toolTip">
+       <string>Give the integer value to be used here</string>
+      </property>
+      <property name="minimum">
+       <number>-1000000</number>
+      </property>
+      <property name="maximum">
+       <number>1000000</number>
+      </property>
+      <property name="value">
+       <number>0</number>
+      </property>
+     </widget>
+    </item>
+    <item row="6" column="11">
+     <widget class="QCheckBox" name="ac6">
+      <property name="toolTip">
+       <string>This is a critical assignment
+
+If set and the host with the variable is not running, then the job is held.
+
+If it is not set and the host with the variable is not running, then the
+assignment is ignored.</string>
+      </property>
+      <property name="text">
+       <string>Acrit</string>
+      </property>
+     </widget>
+    </item>
+    <item row="7" column="0">
+     <widget class="QComboBox" name="assvar7">
+      <property name="toolTip">
+       <string>This is the variable to be assigned to</string>
+      </property>
+      <item>
+       <property name="text">
+        <string>(no variable)</string>
+       </property>
+      </item>
+     </widget>
+    </item>
+    <item row="7" column="1">
+     <widget class="QComboBox" name="assop7">
+      <property name="toolTip">
+       <string>This is the operation to be performed</string>
+      </property>
+      <item>
+       <property name="text">
+        <string>(none)</string>
+       </property>
+      </item>
+      <item>
+       <property name="text">
+        <string>Set</string>
+       </property>
+      </item>
+      <item>
+       <property name="text">
+        <string>Add</string>
+       </property>
+      </item>
+      <item>
+       <property name="text">
+        <string>Subtract</string>
+       </property>
+      </item>
+      <item>
+       <property name="text">
+        <string>Multiply</string>
+       </property>
+      </item>
+      <item>
+       <property name="text">
+        <string>Divide</string>
+       </property>
+      </item>
+      <item>
+       <property name="text">
+        <string>Modulus</string>
+       </property>
+      </item>
+      <item>
+       <property name="text">
+        <string>Set Exit</string>
+       </property>
+      </item>
+      <item>
+       <property name="text">
+        <string>Set Signal</string>
+       </property>
+      </item>
+     </widget>
+    </item>
+    <item row="7" column="2">
+     <widget class="QCheckBox" name="FS7">
+      <property name="font">
+       <font>
+        <pointsize>9</pointsize>
+        <weight>75</weight>
+        <italic>true</italic>
+        <bold>true</bold>
+       </font>
+      </property>
+      <property name="toolTip">
+       <string>Indicates that the operation is to be performed when the job starts</string>
+      </property>
+      <property name="text">
+       <string>S</string>
+      </property>
+     </widget>
+    </item>
+    <item row="7" column="3">
+     <widget class="QCheckBox" name="FN7">
+      <property name="font">
+       <font>
+        <pointsize>9</pointsize>
+        <weight>75</weight>
+        <italic>true</italic>
+        <bold>true</bold>
+       </font>
+      </property>
+      <property name="toolTip">
+       <string>Indicates that the operation is to be performed when the job
+exits normally (as indicated by the exit code settings).</string>
+      </property>
+      <property name="text">
+       <string>N</string>
+      </property>
+     </widget>
+    </item>
+    <item row="7" column="4">
+     <widget class="QCheckBox" name="FE7">
+      <property name="font">
+       <font>
+        <pointsize>9</pointsize>
+        <weight>75</weight>
+        <italic>true</italic>
+        <bold>true</bold>
+       </font>
+      </property>
+      <property name="toolTip">
+       <string>Indicates that the operation is to be performed when the job
+exits with an error code (as indicated by the exit code settings).</string>
+      </property>
+      <property name="text">
+       <string>E</string>
+      </property>
+     </widget>
+    </item>
+    <item row="7" column="5">
+     <widget class="QCheckBox" name="FA7">
+      <property name="font">
+       <font>
+        <pointsize>9</pointsize>
+        <weight>75</weight>
+        <italic>true</italic>
+        <bold>true</bold>
+       </font>
+      </property>
+      <property name="toolTip">
+       <string>Indicates that the operation is to be performed when the job
+aborts - either exits with a signal, or with an error code not covered
+by the job exit code settings.</string>
+      </property>
+      <property name="text">
+       <string>A</string>
+      </property>
+     </widget>
+    </item>
+    <item row="7" column="6">
+     <widget class="QCheckBox" name="FC7">
+      <property name="font">
+       <font>
+        <pointsize>9</pointsize>
+        <weight>75</weight>
+        <italic>true</italic>
+        <bold>true</bold>
+       </font>
+      </property>
+      <property name="toolTip">
+       <string>Indicates that the operation is to be performed when the job
+is cancelled (killed with a signal before it is run).</string>
+      </property>
+      <property name="text">
+       <string>C</string>
+      </property>
+     </widget>
+    </item>
+    <item row="7" column="7">
+     <widget class="QCheckBox" name="FR7">
+      <property name="font">
+       <font>
+        <pointsize>9</pointsize>
+        <weight>75</weight>
+        <italic>true</italic>
+        <bold>true</bold>
+       </font>
+      </property>
+      <property name="toolTip">
+       <string>Indicates that the exit code operations (N E A C) are to be reversed if
+possible.
+
+Note that only add subtract multiply and divide can be reversed.</string>
+      </property>
+      <property name="text">
+       <string>R</string>
+      </property>
+     </widget>
+    </item>
+    <item row="7" column="8">
+     <widget class="QLineEdit" name="textval7">
+      <property name="enabled">
+       <bool>false</bool>
+      </property>
+      <property name="font">
+       <font>
+        <family>Courier New</family>
+        <weight>50</weight>
+        <italic>false</italic>
+        <bold>false</bold>
+       </font>
+      </property>
+      <property name="toolTip">
+       <string>Give the text value to be assigned here</string>
+      </property>
+      <property name="maxLength">
+       <number>49</number>
+      </property>
+     </widget>
+    </item>
+    <item row="7" column="9">
+     <widget class="QCheckBox" name="asstext7">
+      <property name="font">
+       <font>
+        <pointsize>11</pointsize>
+       </font>
+      </property>
+      <property name="toolTip">
+       <string>Indicate that the value to be assigned is text</string>
+      </property>
+      <property name="text">
+       <string>Text</string>
+      </property>
+     </widget>
+    </item>
+    <item row="7" column="10">
+     <widget class="QSpinBox" name="intval7">
+      <property name="toolTip">
+       <string>Give the integer value to be used here</string>
+      </property>
+      <property name="minimum">
+       <number>-1000000</number>
+      </property>
+      <property name="maximum">
+       <number>1000000</number>
+      </property>
+      <property name="value">
+       <number>0</number>
+      </property>
+     </widget>
+    </item>
+    <item row="7" column="11">
+     <widget class="QCheckBox" name="ac7">
+      <property name="toolTip">
+       <string>This is a critical assignment
+
+If set and the host with the variable is not running, then the job is held.
+
+If it is not set and the host with the variable is not running, then the
+assignment is ignored.</string>
+      </property>
+      <property name="text">
+       <string>Acrit</string>
+      </property>
+     </widget>
+    </item>
+   </layout>
+  </widget>
+ </widget>
+ <tabstops>
+  <tabstop>assvar0</tabstop>
+  <tabstop>assop0</tabstop>
+  <tabstop>FS0</tabstop>
+  <tabstop>FN0</tabstop>
+  <tabstop>FE0</tabstop>
+  <tabstop>FA0</tabstop>
+  <tabstop>FC0</tabstop>
+  <tabstop>FR0</tabstop>
+  <tabstop>textval0</tabstop>
+  <tabstop>asstext0</tabstop>
+  <tabstop>intval0</tabstop>
+  <tabstop>ac0</tabstop>
+  <tabstop>assvar1</tabstop>
+  <tabstop>assop1</tabstop>
+  <tabstop>FS1</tabstop>
+  <tabstop>FN1</tabstop>
+  <tabstop>FE1</tabstop>
+  <tabstop>FA1</tabstop>
+  <tabstop>FC1</tabstop>
+  <tabstop>FR1</tabstop>
+  <tabstop>textval1</tabstop>
+  <tabstop>asstext1</tabstop>
+  <tabstop>intval1</tabstop>
+  <tabstop>ac1</tabstop>
+  <tabstop>assvar2</tabstop>
+  <tabstop>assop2</tabstop>
+  <tabstop>FS2</tabstop>
+  <tabstop>FN2</tabstop>
+  <tabstop>FE2</tabstop>
+  <tabstop>FA2</tabstop>
+  <tabstop>FC2</tabstop>
+  <tabstop>FR2</tabstop>
+  <tabstop>textval2</tabstop>
+  <tabstop>asstext2</tabstop>
+  <tabstop>intval2</tabstop>
+  <tabstop>ac2</tabstop>
+  <tabstop>assvar3</tabstop>
+  <tabstop>assop3</tabstop>
+  <tabstop>FS3</tabstop>
+  <tabstop>FN3</tabstop>
+  <tabstop>FE3</tabstop>
+  <tabstop>FA3</tabstop>
+  <tabstop>FC3</tabstop>
+  <tabstop>FR3</tabstop>
+  <tabstop>textval3</tabstop>
+  <tabstop>asstext3</tabstop>
+  <tabstop>intval3</tabstop>
+  <tabstop>ac3</tabstop>
+  <tabstop>assvar4</tabstop>
+  <tabstop>assop4</tabstop>
+  <tabstop>FS4</tabstop>
+  <tabstop>FN4</tabstop>
+  <tabstop>FE4</tabstop>
+  <tabstop>FA4</tabstop>
+  <tabstop>FC4</tabstop>
+  <tabstop>FR4</tabstop>
+  <tabstop>textval4</tabstop>
+  <tabstop>asstext4</tabstop>
+  <tabstop>intval4</tabstop>
+  <tabstop>ac4</tabstop>
+  <tabstop>assvar5</tabstop>
+  <tabstop>assop5</tabstop>
+  <tabstop>FS5</tabstop>
+  <tabstop>FN5</tabstop>
+  <tabstop>FE5</tabstop>
+  <tabstop>FA5</tabstop>
+  <tabstop>FC5</tabstop>
+  <tabstop>FR5</tabstop>
+  <tabstop>textval5</tabstop>
+  <tabstop>asstext5</tabstop>
+  <tabstop>intval5</tabstop>
+  <tabstop>ac5</tabstop>
+  <tabstop>assvar6</tabstop>
+  <tabstop>assop6</tabstop>
+  <tabstop>FS6</tabstop>
+  <tabstop>FN6</tabstop>
+  <tabstop>FE6</tabstop>
+  <tabstop>FA6</tabstop>
+  <tabstop>FC6</tabstop>
+  <tabstop>FR6</tabstop>
+  <tabstop>textval6</tabstop>
+  <tabstop>asstext6</tabstop>
+  <tabstop>intval6</tabstop>
+  <tabstop>ac6</tabstop>
+  <tabstop>assvar7</tabstop>
+  <tabstop>assop7</tabstop>
+  <tabstop>FS7</tabstop>
+  <tabstop>FN7</tabstop>
+  <tabstop>FE7</tabstop>
+  <tabstop>FA7</tabstop>
+  <tabstop>FC7</tabstop>
+  <tabstop>FR7</tabstop>
+  <tabstop>textval7</tabstop>
+  <tabstop>asstext7</tabstop>
+  <tabstop>intval7</tabstop>
+  <tabstop>ac7</tabstop>
+  <tabstop>buttonBox</tabstop>
+ </tabstops>
+ <resources/>
+ <connections>
+  <connection>
+   <sender>buttonBox</sender>
+   <signal>accepted()</signal>
+   <receiver>jassdlg</receiver>
+   <slot>accept()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>248</x>
+     <y>254</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>157</x>
+     <y>274</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>buttonBox</sender>
+   <signal>rejected()</signal>
+   <receiver>jassdlg</receiver>
+   <slot>reject()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>316</x>
+     <y>260</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>286</x>
+     <y>274</y>
+    </hint>
+   </hints>
+  </connection>
+ </connections>
+</ui>

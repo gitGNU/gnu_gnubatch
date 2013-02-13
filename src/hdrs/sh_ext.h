@@ -15,44 +15,44 @@
    You should have received a copy of the GNU General Public License
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
-#ifdef	NETWORK_VERSION
-extern	int	Network_ok;	/* 0=Networking turned off even though code there */
+#ifdef  NETWORK_VERSION
+extern  int     Network_ok;     /* 0=Networking turned off even though code there */
 #endif
 
-extern	PIDTYPE	child_pid;	/* Slave process pid */
+extern  PIDTYPE child_pid;      /* Slave process pid */
 
-extern	int	jqpend,		/* Pending changes to job list */
-		vqpend,		/* Pending changes to var list */
-		qchanges;	/* Pending changes anywhere - notify people */
+extern  int     jqpend,         /* Pending changes to job list */
+                vqpend,         /* Pending changes to var list */
+                qchanges;       /* Pending changes anywhere - notify people */
 
-extern	unsigned	Startlim,	/* Limit on jobs to start */
-			Startwait,	/* Wait time */
-			being_started;	/* Actually being started */
+extern  unsigned        Startlim,       /* Limit on jobs to start */
+                        Startwait,      /* Wait time */
+                        being_started;  /* Actually being started */
 
-extern	LONG	Max_ll,		/* Maximum load level */
-		Current_ll;	/* Current load level */
+extern  LONG    Max_ll,         /* Maximum load level */
+                Current_ll;     /* Current load level */
 
-extern	int	Ctrl_chan;	/* Msgid for message queue */
-#ifndef	USING_FLOCK
-extern	int	Sem_chan;	/* Semid for semaphore list */
+extern  int     Ctrl_chan;      /* Msgid for message queue */
+#ifndef USING_FLOCK
+extern  int     Sem_chan;       /* Semid for semaphore list */
 #endif
 
-extern	int		nosetpgrp;
-extern	float		pri_decrement;
+extern  int             nosetpgrp;
+extern  float           pri_decrement;
 
-#ifdef	NETWORK_VERSION
-extern	SHORT	viewsock;
+#ifdef  NETWORK_VERSION
+extern  SHORT   viewsock;
 
-extern	USHORT		lportnum,		/* These are all htons-ified */
-			vportnum,
-			pportnum;
+extern  USHORT          lportnum,               /* These are all htons-ified */
+                        vportnum,
+                        pportnum;
 
-extern	int		Netsync_req;
-extern	PIDTYPE		Netm_pid;
-extern	netid_t		myhostid;
-extern	slotno_t	machname_slot;/* Slot number of "machine name" variable */
+extern  int             Netsync_req;
+extern  PIDTYPE         Netm_pid;
+extern  netid_t         myhostid;
+extern  slotno_t        machname_slot;/* Slot number of "machine name" variable */
 
-extern	unsigned	lumpsize, lumpwait;
+extern  unsigned        lumpsize, lumpwait;
 #endif
 
 extern void  lockjobs();
@@ -133,7 +133,7 @@ extern PIDTYPE  forksafe();
 extern vhash_t  findvar(const vident *);
 extern vhash_t  lookvar(Vref *);
 extern BtvarRef  locvarind(ShreqRef, const vhash_t);
-#ifdef	NETWORK_VERSION
+#ifdef  NETWORK_VERSION
 extern void  attach_hosts();
 extern void  ci_broadcast();
 extern void  ci_delhost(const unsigned);

@@ -1,18 +1,18 @@
-#   Makefile.in -- Makefile for API library
+#   Makefile.in	-- Makefile for	API library
 #
-#   Copyright 2009 Free Software Foundation, Inc.
+#   Copyright 2009 Free	Software Foundation, Inc.
 #
-#   This program is free software: you can redistribute it and/or modify
+#   This program is free software: you can redistribute	it and/or modify
 #   it under the terms of the GNU General Public License as published by
-#   the Free Software Foundation, either version 3 of the License, or
-#   (at your option) any later version.
+#   the	Free Software Foundation, either version 3 of the License, or
+#   (at	your option) any later version.
 #
-#   This program is distributed in the hope that it will be useful,
-#   but WITHOUT ANY WARRANTY; without even the implied warranty of
-#   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-#   GNU General Public License for more details.
+#   This program is distributed	in the hope that it will be useful,
+#   but	WITHOUT	ANY WARRANTY; without even the implied warranty	of
+#   MERCHANTABILITY or FITNESS FOR A PARTICULAR	PURPOSE.  See the
+#   GNU	General	Public License for more	details.
 #
-#   You should have received a copy of the GNU General Public License
+#   You	should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 #
 #	Makefile for API library
@@ -24,10 +24,10 @@ SHELL		=	/bin/sh
 PARENT		=	..
 BASE		=	../..
 AR		=	ar
-CC		=	libtool --mode=compile @CC@
+CC		=	libtool	--mode=compile @CC@
 RM		=	rm -f
 HDRS		=	$(PARENT)/hdrs
-CCFLAGS		=	-O @gcc_useful_options@ @funny_compiler_options@
+CCFLAGS		=	-O @gcc_useful_options@	@funny_compiler_options@
 CFLAGS		=	$(CCFLAGS) -I$(HDRS)
 LIBDIR		=	$(DESTDIR)@libdir@
 RPATH		=	@libdir@
@@ -76,9 +76,9 @@ OBJECTS=gbatch_ciadd.o\
 LIBOBJECTS=$(OBJECTS:.o=.lo)
 
 all:	gbatch.h $(OBJECTS)
-	libtool --mode=link @CC@ $(CCFLAGS) -o $(APILIB) $(LIBOBJECTS) -rpath $(RPATH) -version-info 1:0:0
+	libtool	--mode=link @CC@ $(CCFLAGS) -o $(APILIB) $(LIBOBJECTS) -rpath $(RPATH) -version-info 1:0:0
 
-# Build header out of the bits
+# Build	header out of the bits
 
 gbatch.h:	gbatch.pre\
 		gbatch.post\
@@ -88,24 +88,24 @@ gbatch.h:	gbatch.pre\
 		$(HDRS)/btconst.h\
 		$(HDRS)/btmode.h\
 		$(HDRS)/timecon.h
-	sh ./Hdrmake.sh $(BASE)/config.h $(HDRS)
+	sh ./Hdrmake.sh	$(BASE)/config.h $(HDRS)
 
 install: all
 	$(INSTALL) -d -m 755 $(LIBDIR)
 	$(INSTALL) -d -m 755 $(INCLUDEDIR)
-	libtool --mode=install $(INSTALL) $(APILIB) $(LIBDIR)
-	$(INSTALL_DATA) gbatch.h $(INCLUDEDIR)
-	$(INSTALL_DATA) $(APILIB) $(LIBDIR)
+	libtool	--mode=install $(INSTALL) $(APILIB) $(LIBDIR)
+	$(INSTALL_DATA)	gbatch.h $(INCLUDEDIR)
+	$(INSTALL_DATA)	$(APILIB) $(LIBDIR)
 
 install_strip: all
 	$(INSTALL) -d -m 755 $(LIBDIR)
 	$(INSTALL) -d -m 755 $(INCLUDEDIR)
-	libtool --mode=install $(INSTALL) -s $(APILIB) $(LIBDIR)
-	$(INSTALL_DATA) gbatch.h $(INCLUDEDIR)
-	$(INSTALL_DATA) $(APILIB) $(LIBDIR)
+	libtool	--mode=install $(INSTALL) -s $(APILIB) $(LIBDIR)
+	$(INSTALL_DATA)	gbatch.h $(INCLUDEDIR)
+	$(INSTALL_DATA)	$(APILIB) $(LIBDIR)
 
 clean:
-	$(RM) gbatch.h *.[oa] *.ln *.so *.la *.lo
+	$(RM) gbatch.h *.[oa] *.ln *.so	*.la *.lo
 	$(RM) -r .libs
 
 distclean:	clean

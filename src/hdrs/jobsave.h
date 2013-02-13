@@ -15,53 +15,53 @@
    You should have received a copy of the GNU General Public License
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
-struct	Jsave	{
-	jobno_t		sj_job;
-	time_t		sj_time;
-	time_t		sj_stime;
-	time_t		sj_etime;
+struct  Jsave   {
+        jobno_t         sj_job;
+        time_t          sj_time;
+        time_t          sj_stime;
+        time_t          sj_etime;
 
-	unsigned  char	sj_progress;
-	unsigned  char  sj_pri;
-	SHORT		sj_wpri;
+        unsigned  char  sj_progress;
+        unsigned  char  sj_pri;
+        SHORT           sj_wpri;
 
-	USHORT		sj_ll;
-	USHORT		sj_umask;
+        USHORT          sj_ll;
+        USHORT          sj_umask;
 
-	USHORT		sj_nredirs,
-			sj_nargs,
-			sj_nenv;
-	SHORT		sj_redirs;
+        USHORT          sj_nredirs,
+                        sj_nargs,
+                        sj_nenv;
+        SHORT           sj_redirs;
 
-	SHORT		sj_env;
-	SHORT		sj_arg;
-	SHORT		sj_title;
-	SHORT		sj_direct;
+        SHORT           sj_env;
+        SHORT           sj_arg;
+        SHORT           sj_title;
+        SHORT           sj_direct;
 
-	USHORT		sj_jflags;
-	USHORT		sj_autoksig;
+        USHORT          sj_jflags;
+        USHORT          sj_autoksig;
 
-	USHORT		sj_runon;
-	USHORT		sj_deltime;
+        USHORT          sj_runon;
+        USHORT          sj_deltime;
 
-	Btmode		sj_mode;
-	char		sj_cmdinterp[CI_MAXNAME+1];
-	struct Sjcond	{
-		unsigned  char	sjc_compar;
-		unsigned  char	sjc_crit;
-		Vref		sjc_varind;
-		Btcon		sjc_value;
-	}  sj_conds[MAXCVARS];
-	struct	Sjass	{
-		USHORT		sja_flags;
-		unsigned  char	sja_op;
-		unsigned  char	sja_crit;
-		Vref		sja_varind;
-		Btcon		sja_con;
-	}  sj_asses[MAXSEVARS];
-	Timecon		sj_times;
-	ULONG		sj_runtime;
-	LONG		sj_ulimit;
-	Exits		sj_exits;
-	char		sj_space[JOBSPACE];
+        Btmode          sj_mode;
+        char            sj_cmdinterp[CI_MAXNAME+1];
+        struct Sjcond   {
+                unsigned  char  sjc_compar;
+                unsigned  char  sjc_crit;
+                Vref            sjc_varind;
+                Btcon           sjc_value;
+        }  sj_conds[MAXCVARS];
+        struct  Sjass   {
+                USHORT          sja_flags;
+                unsigned  char  sja_op;
+                unsigned  char  sja_crit;
+                Vref            sja_varind;
+                Btcon           sja_con;
+        }  sj_asses[MAXSEVARS];
+        Timecon         sj_times;
+        ULONG           sj_runtime;
+        LONG            sj_ulimit;
+        Exits           sj_exits;
+        char            sj_space[JOBSPACE];
 };

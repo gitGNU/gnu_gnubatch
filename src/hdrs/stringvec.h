@@ -15,12 +15,12 @@
    You should have received a copy of the GNU General Public License
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
-#define	STRINGVEC_INIT	10
-#define STRINGVEC_INC	5
+#define STRINGVEC_INIT  10
+#define STRINGVEC_INC   5
 
-struct	stringvec  {
-	int	memb_cnt, memb_max;
-	char	**memb_list;
+struct  stringvec  {
+        int     memb_cnt, memb_max;
+        char    **memb_list;
 };
 
 extern void  stringvec_init(struct stringvec *);
@@ -32,6 +32,6 @@ extern void  stringvec_replace(struct stringvec *, const unsigned, const char *)
 extern void  stringvec_free(struct stringvec *);
 extern char **stringvec_chararray(struct stringvec *);
 
-#define	is_init(sv)	((sv).memb_list != (char **) 0)
-#define	stringvec_count(sv)  (sv).memb_cnt
-#define	stringvec_nth(sv, n) (sv).memb_list[n]
+#define is_init(sv)     ((sv).memb_list != (char **) 0)
+#define stringvec_count(sv)  (sv).memb_cnt
+#define stringvec_nth(sv, n) (sv).memb_list[n]

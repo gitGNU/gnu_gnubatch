@@ -17,13 +17,13 @@
 
 JFORMAT(fmt_queue)
 {
-	if  (isreadable)  {
-		const	char	*colp, *title = title_of(jp);
-		if  ((colp = strchr(title, ':')))  {
-			strncpy(bigbuff, title, colp - title);
-			bigbuff[colp - title] = '\0';
-			return  (fmt_t) (colp - title);
-		}
-	}
-	return  0;
+        if  (isreadable)  {
+                const   char    *colp, *title = title_of(jp);
+                if  ((colp = strchr(title, ':')))  {
+                        strncpy(bigbuff, title, colp - title);
+                        bigbuff[colp - title] = '\0';
+                        return  (fmt_t) (colp - title);
+                }
+        }
+        return  0;
 }

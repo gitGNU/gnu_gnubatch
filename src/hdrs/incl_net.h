@@ -15,23 +15,23 @@
    You should have received a copy of the GNU General Public License
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
-#ifdef	NETWORK_VERSION
+#ifdef  NETWORK_VERSION
 #include <netdb.h>
 #include <sys/socket.h>
-#ifdef	HAVE_SYS_SELECT_H
+#ifdef  HAVE_SYS_SELECT_H
 #include <sys/select.h>
 #endif
-#if	defined(i386) && defined(__GNUC__)
-#define	NO_ASM
+#if     defined(i386) && defined(__GNUC__)
+#define NO_ASM
 #endif
 #include <netinet/in.h>
 #include <arpa/inet.h>
-#ifndef	AF_INET
-#define	AF_INET	2
+#ifndef AF_INET
+#define AF_INET 2
 #endif
 #endif
 #ifndef INADDR_LOOPBACK
-#define INADDR_LOOPBACK	((in_addr_t) 0x7f000001) /* Inet 127.0.0.1.  */
+#define INADDR_LOOPBACK ((in_addr_t) 0x7f000001) /* Inet 127.0.0.1.  */
 #endif
 
-extern	struct	servent *env_getserv(const char *, const int);
+extern  struct  servent *env_getserv(const char *, const int);

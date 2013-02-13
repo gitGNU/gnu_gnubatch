@@ -17,153 +17,153 @@
 
 JFORMAT(fmt_redirs)
 {
-	fmt_t  lng = 0;
-#ifdef	CHARSPRINTF
-	int	cnt;
+        fmt_t  lng = 0;
+#ifdef  CHARSPRINTF
+        int     cnt;
 #endif
-	if  (isreadable)  {
-		unsigned	rc;
-		for  (rc = 0;  rc < jp->h.bj_nredirs;  rc++)  {
-			CRedirRef	rp = REDIR_OF(jp, rc);
-			if  (rc != 0)
-				bigbuff[lng++] = ',';
-			switch  (rp->action)  {
-			case  RD_ACT_RD:
-#ifdef	CHARSPRINTF
-				if  (rp->fd != 0)  {
-					sprintf(&bigbuff[lng], "%d", rp->fd);
-					cnt = strlen(&bigbuff[lng]);
-					lng += cnt;
-				}
+        if  (isreadable)  {
+                unsigned        rc;
+                for  (rc = 0;  rc < jp->h.bj_nredirs;  rc++)  {
+                        CRedirRef       rp = REDIR_OF(jp, rc);
+                        if  (rc != 0)
+                                bigbuff[lng++] = ',';
+                        switch  (rp->action)  {
+                        case  RD_ACT_RD:
+#ifdef  CHARSPRINTF
+                                if  (rp->fd != 0)  {
+                                        sprintf(&bigbuff[lng], "%d", rp->fd);
+                                        cnt = strlen(&bigbuff[lng]);
+                                        lng += cnt;
+                                }
 #else
-				if  (rp->fd != 0)
-					lng += sprintf(&bigbuff[lng], "%d", rp->fd);
+                                if  (rp->fd != 0)
+                                        lng += sprintf(&bigbuff[lng], "%d", rp->fd);
 #endif
-				bigbuff[lng++] = '<';
-				break;
-			case  RD_ACT_WRT:
-#ifdef	CHARSPRINTF
-				if  (rp->fd != 1)  {
-					sprintf(&bigbuff[lng], "%d", rp->fd);
-					cnt = strlen(&bigbuff[lng]);
-					lng += cnt;
-				}
+                                bigbuff[lng++] = '<';
+                                break;
+                        case  RD_ACT_WRT:
+#ifdef  CHARSPRINTF
+                                if  (rp->fd != 1)  {
+                                        sprintf(&bigbuff[lng], "%d", rp->fd);
+                                        cnt = strlen(&bigbuff[lng]);
+                                        lng += cnt;
+                                }
 #else
-				if  (rp->fd != 1)
-					lng += sprintf(&bigbuff[lng], "%d", rp->fd);
+                                if  (rp->fd != 1)
+                                        lng += sprintf(&bigbuff[lng], "%d", rp->fd);
 #endif
-				bigbuff[lng++] = '>';
-				break;
-			case  RD_ACT_APPEND:
-#ifdef	CHARSPRINTF
-				if  (rp->fd != 1)  {
-					sprintf(&bigbuff[lng], "%d", rp->fd);
-					cnt = strlen(&bigbuff[lng]);
-					lng += cnt;
-				}
+                                bigbuff[lng++] = '>';
+                                break;
+                        case  RD_ACT_APPEND:
+#ifdef  CHARSPRINTF
+                                if  (rp->fd != 1)  {
+                                        sprintf(&bigbuff[lng], "%d", rp->fd);
+                                        cnt = strlen(&bigbuff[lng]);
+                                        lng += cnt;
+                                }
 #else
-				if  (rp->fd != 1)
-					lng += sprintf(&bigbuff[lng], "%d", rp->fd);
+                                if  (rp->fd != 1)
+                                        lng += sprintf(&bigbuff[lng], "%d", rp->fd);
 #endif
-				bigbuff[lng++] = '>';
-				bigbuff[lng++] = '>';
-				break;
-			case  RD_ACT_RDWR:
-#ifdef	CHARSPRINTF
-				if  (rp->fd != 0)  {
-					sprintf(&bigbuff[lng], "%d", rp->fd);
-					cnt = strlen(&bigbuff[lng]);
-					lng += cnt;
-				}
+                                bigbuff[lng++] = '>';
+                                bigbuff[lng++] = '>';
+                                break;
+                        case  RD_ACT_RDWR:
+#ifdef  CHARSPRINTF
+                                if  (rp->fd != 0)  {
+                                        sprintf(&bigbuff[lng], "%d", rp->fd);
+                                        cnt = strlen(&bigbuff[lng]);
+                                        lng += cnt;
+                                }
 #else
-				if  (rp->fd != 0)
-					lng += sprintf(&bigbuff[lng], "%d", rp->fd);
+                                if  (rp->fd != 0)
+                                        lng += sprintf(&bigbuff[lng], "%d", rp->fd);
 #endif
-				bigbuff[lng++] = '<';
-				bigbuff[lng++] = '>';
-				break;
-			case  RD_ACT_RDWRAPP:
-#ifdef	CHARSPRINTF
-				if  (rp->fd != 0)  {
-					sprintf(&bigbuff[lng], "%d", rp->fd);
-					cnt = strlen(&bigbuff[lng]);
-					lng += cnt;
-				}
+                                bigbuff[lng++] = '<';
+                                bigbuff[lng++] = '>';
+                                break;
+                        case  RD_ACT_RDWRAPP:
+#ifdef  CHARSPRINTF
+                                if  (rp->fd != 0)  {
+                                        sprintf(&bigbuff[lng], "%d", rp->fd);
+                                        cnt = strlen(&bigbuff[lng]);
+                                        lng += cnt;
+                                }
 #else
-				if  (rp->fd != 0)
-					lng += sprintf(&bigbuff[lng], "%d", rp->fd);
+                                if  (rp->fd != 0)
+                                        lng += sprintf(&bigbuff[lng], "%d", rp->fd);
 #endif
-				bigbuff[lng++] = '<';
-				bigbuff[lng++] = '>';
-				bigbuff[lng++] = '>';
-				break;
-			case  RD_ACT_PIPEO:
-#ifdef	CHARSPRINTF
-				if  (rp->fd != 1)  {
-					sprintf(&bigbuff[lng], "%d", rp->fd);
-					cnt = strlen(&bigbuff[lng]);
-					lng += cnt;
-				}
+                                bigbuff[lng++] = '<';
+                                bigbuff[lng++] = '>';
+                                bigbuff[lng++] = '>';
+                                break;
+                        case  RD_ACT_PIPEO:
+#ifdef  CHARSPRINTF
+                                if  (rp->fd != 1)  {
+                                        sprintf(&bigbuff[lng], "%d", rp->fd);
+                                        cnt = strlen(&bigbuff[lng]);
+                                        lng += cnt;
+                                }
 #else
-				if  (rp->fd != 1)
-					lng += sprintf(&bigbuff[lng], "%d", rp->fd);
+                                if  (rp->fd != 1)
+                                        lng += sprintf(&bigbuff[lng], "%d", rp->fd);
 #endif
-				bigbuff[lng++] = '|';
-				break;
-			case  RD_ACT_PIPEI:
-#ifdef	CHARSPRINTF
-				if  (rp->fd != 0)  {
-					sprintf(&bigbuff[lng], "%d", rp->fd);
-					cnt = strlen(&bigbuff[lng]);
-					lng += cnt;
-				}
+                                bigbuff[lng++] = '|';
+                                break;
+                        case  RD_ACT_PIPEI:
+#ifdef  CHARSPRINTF
+                                if  (rp->fd != 0)  {
+                                        sprintf(&bigbuff[lng], "%d", rp->fd);
+                                        cnt = strlen(&bigbuff[lng]);
+                                        lng += cnt;
+                                }
 #else
-				if  (rp->fd != 0)
-					lng += sprintf(&bigbuff[lng], "%d", rp->fd);
+                                if  (rp->fd != 0)
+                                        lng += sprintf(&bigbuff[lng], "%d", rp->fd);
 #endif
-				bigbuff[lng++] = '<';
-				bigbuff[lng++] = '|';
-				break;
-			case  RD_ACT_CLOSE:
-#ifdef	CHARSPRINTF
-				if  (rp->fd != 1)  {
-					sprintf(&bigbuff[lng], "%d", rp->fd);
-					cnt = strlen(&bigbuff[lng]);
-					lng += cnt;
-				}
+                                bigbuff[lng++] = '<';
+                                bigbuff[lng++] = '|';
+                                break;
+                        case  RD_ACT_CLOSE:
+#ifdef  CHARSPRINTF
+                                if  (rp->fd != 1)  {
+                                        sprintf(&bigbuff[lng], "%d", rp->fd);
+                                        cnt = strlen(&bigbuff[lng]);
+                                        lng += cnt;
+                                }
 #else
-				if  (rp->fd != 1)
-					lng += sprintf(&bigbuff[lng], "%d", rp->fd);
+                                if  (rp->fd != 1)
+                                        lng += sprintf(&bigbuff[lng], "%d", rp->fd);
 #endif
-				bigbuff[lng++] = '>';
-				bigbuff[lng++] = '&';
-				bigbuff[lng++] = '-';
-				continue;
-			case  RD_ACT_DUP:
-#ifdef	CHARSPRINTF
-				if  (rp->fd != 1)  {
-					sprintf(&bigbuff[lng], "%d", rp->fd);
-					cnt = strlen(&bigbuff[lng]);
-					lng += cnt;
-				}
-				sprintf(&bigbuff[lng], ">&%d", rp->arg);
-				cnt = strlen(&bigbuff[lng]);
-				lng += cnt;
+                                bigbuff[lng++] = '>';
+                                bigbuff[lng++] = '&';
+                                bigbuff[lng++] = '-';
+                                continue;
+                        case  RD_ACT_DUP:
+#ifdef  CHARSPRINTF
+                                if  (rp->fd != 1)  {
+                                        sprintf(&bigbuff[lng], "%d", rp->fd);
+                                        cnt = strlen(&bigbuff[lng]);
+                                        lng += cnt;
+                                }
+                                sprintf(&bigbuff[lng], ">&%d", rp->arg);
+                                cnt = strlen(&bigbuff[lng]);
+                                lng += cnt;
 #else
-				if  (rp->fd != 1)
-					lng += sprintf(&bigbuff[lng], "%d", rp->fd);
-				lng += sprintf(&bigbuff[lng], ">&%d", rp->arg);
+                                if  (rp->fd != 1)
+                                        lng += sprintf(&bigbuff[lng], "%d", rp->fd);
+                                lng += sprintf(&bigbuff[lng], ">&%d", rp->arg);
 #endif
-				continue;
-			}
-#ifdef	CHARSPRINTF
-			strlen(strcpy(&bigbuff[lng], &jp->bj_space[rp->arg]));
-			cnt = strlen(&bigbuff[lng]);
-			lng += cnt;
+                                continue;
+                        }
+#ifdef  CHARSPRINTF
+                        strlen(strcpy(&bigbuff[lng], &jp->bj_space[rp->arg]));
+                        cnt = strlen(&bigbuff[lng]);
+                        lng += cnt;
 #else
-			lng += strlen(strcpy(&bigbuff[lng], &jp->bj_space[rp->arg]));
+                        lng += strlen(strcpy(&bigbuff[lng], &jp->bj_space[rp->arg]));
 #endif
-		}
-	}
-	return  lng;
+                }
+        }
+        return  lng;
 }

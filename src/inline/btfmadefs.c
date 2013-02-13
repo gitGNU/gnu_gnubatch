@@ -15,7 +15,7 @@
    You should have received a copy of the GNU General Public License
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
-const	Argdefault	Adefs[] = {
+const   Argdefault      Adefs[] = {
   {  '?', $A{btfilemon arg explain} },
   {  'd', $A{btfilemon arg daemon} },
   {  'n', $A{btfilemon arg nodaemon} },

@@ -20,129 +20,129 @@
 
 static int  ematch(char *pattern, char *value)
 {
-	int	cnt, nott;
-	char	*cp;
+        int     cnt, nott;
+        char    *cp;
 
-	for  (;;)  {
+        for  (;;)  {
 
-		switch  (*pattern)  {
-		case  '\0':
-			if  (*value == '\0' || *value == ':')
-				return  1;
-			return  0;
+                switch  (*pattern)  {
+                case  '\0':
+                        if  (*value == '\0' || *value == ':')
+                                return  1;
+                        return  0;
 
-		default:
-			if  (*pattern != *value)
-				return  0;
-			pattern++;
-			value++;
-			continue;
+                default:
+                        if  (*pattern != *value)
+                                return  0;
+                        pattern++;
+                        value++;
+                        continue;
 
-		case  '?':
-			if  (*value == '\0' ||  *value == ':')
-				return  0;
-			pattern++;
-			value++;
-			continue;
+                case  '?':
+                        if  (*value == '\0' ||  *value == ':')
+                                return  0;
+                        pattern++;
+                        value++;
+                        continue;
 
-		case  '*':
-			pattern++;
-			cp = strchr(value, ':');
-			for  (cnt = cp? cp - value: strlen(value); cnt >= 0;  cnt--)
-				if  (ematch(pattern, value+cnt))
-					return  1;
-			return  0;
+                case  '*':
+                        pattern++;
+                        cp = strchr(value, ':');
+                        for  (cnt = cp? cp - value: strlen(value); cnt >= 0;  cnt--)
+                                if  (ematch(pattern, value+cnt))
+                                        return  1;
+                        return  0;
 
-		case  '[':
-			if  (*value == '\0' ||  *value == ':')
-				return  0;
-			nott = 0;
-			if  (*++pattern == '!')  {
-				nott = 1;
-				pattern++;
-			}
+                case  '[':
+                        if  (*value == '\0' ||  *value == ':')
+                                return  0;
+                        nott = 0;
+                        if  (*++pattern == '!')  {
+                                nott = 1;
+                                pattern++;
+                        }
 
-			/* Safety in case pattern truncated */
+                        /* Safety in case pattern truncated */
 
-			if  (*pattern == '\0')
-				return  0;
+                        if  (*pattern == '\0')
+                                return  0;
 
-			do  {
-				int  lrange, hrange;
+                        do  {
+                                int  lrange, hrange;
 
-				/* Initialise limits of range */
+                                /* Initialise limits of range */
 
-				lrange = hrange = *pattern++;
-				if  (*pattern == '-')  {
-					hrange = *++pattern;
+                                lrange = hrange = *pattern++;
+                                if  (*pattern == '-')  {
+                                        hrange = *++pattern;
 
-					if  (hrange == 0) /* Safety in case trunacated */
-						return  0;
+                                        if  (hrange == 0) /* Safety in case trunacated */
+                                                return  0;
 
-					/* Be relaxed about backwards ranges */
+                                        /* Be relaxed about backwards ranges */
 
-					if  (hrange < lrange)  {
-						int	tmp = hrange;
-						hrange = lrange;
-						lrange = tmp;
-					}
-					pattern++; /* Past rhs of range */
-				}
+                                        if  (hrange < lrange)  {
+                                                int     tmp = hrange;
+                                                hrange = lrange;
+                                                lrange = tmp;
+                                        }
+                                        pattern++; /* Past rhs of range */
+                                }
 
-				/* If value matches, and we are excluding range, then pattern
-				   doesn't and we quit. Otherwise we skip to the end.  */
+                                /* If value matches, and we are excluding range, then pattern
+                                   doesn't and we quit. Otherwise we skip to the end.  */
 
-				if  (*value >= lrange  &&  *value <= hrange)  {
-					if  (nott)
-						return  0;
-					while  (*pattern  &&  *pattern != ']')
-						pattern++;
-					if  (*pattern == '\0') /* Safety */
-						return  0;
-					pattern++;
-					goto  endpat;
-				}
+                                if  (*value >= lrange  &&  *value <= hrange)  {
+                                        if  (nott)
+                                                return  0;
+                                        while  (*pattern  &&  *pattern != ']')
+                                                pattern++;
+                                        if  (*pattern == '\0') /* Safety */
+                                                return  0;
+                                        pattern++;
+                                        goto  endpat;
+                                }
 
-			}  while  (*pattern  &&  *pattern != ']');
+                        }  while  (*pattern  &&  *pattern != ']');
 
-			if  (*pattern == '\0') /* Safety */
-				return  0;
+                        if  (*pattern == '\0') /* Safety */
+                                return  0;
 
-			while  (*pattern++ != ']')
-				;
-			if  (!nott)
-				return  0;
-		endpat:
-			value++;
-			continue;
-		}
-	}
+                        while  (*pattern++ != ']')
+                                ;
+                        if  (!nott)
+                                return  0;
+                endpat:
+                        value++;
+                        continue;
+                }
+        }
 }
 
 int  qmatch(char *pattern, char *value)
 {
-	int	res;
-	char	*cp;
+        int     res;
+        char    *cp;
 
-	do  {
-		/* Allow for ,-separated alternatives.  There isn't a
-		   potential bug here with [,.] because we only
-		   allow names with alphanumerics and _ in.  */
+        do  {
+                /* Allow for ,-separated alternatives.  There isn't a
+                   potential bug here with [,.] because we only
+                   allow names with alphanumerics and _ in.  */
 
-		cp = strchr(pattern, ',');
-		if  (cp)  {
-			*cp = '\0';
-			res = ematch(pattern, value);
-			*cp = ',';
-			pattern = cp + 1;
-		}
-		else
-			res = ematch(pattern, value);
-		if  (res)
-			return  1;
-	}  while  (cp);
+                cp = strchr(pattern, ',');
+                if  (cp)  {
+                        *cp = '\0';
+                        res = ematch(pattern, value);
+                        *cp = ',';
+                        pattern = cp + 1;
+                }
+                else
+                        res = ematch(pattern, value);
+                if  (res)
+                        return  1;
+        }  while  (cp);
 
-	/* Not found...  */
+        /* Not found...  */
 
-	return  0;
+        return  0;
 }

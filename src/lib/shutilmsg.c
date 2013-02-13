@@ -39,42 +39,42 @@
 #include "shreq.h"
 #include "shutilmsg.h"
 
-#ifdef	USING_MMAP
+#ifdef  USING_MMAP
 void  sync_xfermmap();
 #endif
 
-int	Ctrl_chan;				/* Define this here */
-long	mymtype;				/* Define this here */
+int     Ctrl_chan;                              /* Define this here */
+long    mymtype;                                /* Define this here */
 
 /* Send params job message to scheduler */
 
 int  wjimsg_param(const unsigned code, const LONG param, CBtjobRef jp)
 {
-	Shipc	Oreq;
-	int	blkcount = MSGQ_BLOCKS;
+        Shipc   Oreq;
+        int     blkcount = MSGQ_BLOCKS;
 
-	mymtype = MTOFFSET + (Oreq.sh_params.upid = getpid());
-	Oreq.sh_mtype = TO_SCHED;
-	Oreq.sh_params.uuid = Realuid;
-	Oreq.sh_params.ugid = Realgid;
-	Oreq.sh_params.mcode = code;
-	Oreq.sh_params.param = param;
-	Oreq.sh_un.jobref.hostid = jp->h.bj_hostid;
-	Oreq.sh_un.jobref.slotno = jp->h.bj_slotno;
-	while  (msgsnd(Ctrl_chan, (struct msgbuf *) &Oreq, sizeof(Shreq) + sizeof(jident), IPC_NOWAIT) < 0)  {
-		if  (errno != EAGAIN)
-			return  $E{IPC msg q error};
-		blkcount--;
-		if  (blkcount <= 0)
-			return  $E{IPC msg q full};
-		sleep(MSGQ_BLOCKWAIT);
-	}
-	return  0;
+        mymtype = MTOFFSET + (Oreq.sh_params.upid = getpid());
+        Oreq.sh_mtype = TO_SCHED;
+        Oreq.sh_params.uuid = Realuid;
+        Oreq.sh_params.ugid = Realgid;
+        Oreq.sh_params.mcode = code;
+        Oreq.sh_params.param = param;
+        Oreq.sh_un.jobref.hostid = jp->h.bj_hostid;
+        Oreq.sh_un.jobref.slotno = jp->h.bj_slotno;
+        while  (msgsnd(Ctrl_chan, (struct msgbuf *) &Oreq, sizeof(Shreq) + sizeof(jident), IPC_NOWAIT) < 0)  {
+                if  (errno != EAGAIN)
+                        return  $E{IPC msg q error};
+                blkcount--;
+                if  (blkcount <= 0)
+                        return  $E{IPC msg q full};
+                sleep(MSGQ_BLOCKWAIT);
+        }
+        return  0;
 }
 
 int  wjimsg(const unsigned code, CBtjobRef jp)
 {
-	return  wjimsg_param(code, 0L, jp);
+        return  wjimsg_param(code, 0L, jp);
 }
 
 
@@ -82,88 +82,88 @@ int  wjimsg(const unsigned code, CBtjobRef jp)
 
 int  wjxfermsg(const unsigned code, const ULONG indx)
 {
-	Shipc		Oreq;
-	int	blkcount = MSGQ_BLOCKS;
+        Shipc           Oreq;
+        int     blkcount = MSGQ_BLOCKS;
 
-	BLOCK_ZERO(&Oreq, sizeof(Oreq));
-	mymtype = MTOFFSET + (Oreq.sh_params.upid = getpid());
-	Oreq.sh_mtype = TO_SCHED;
-	Oreq.sh_params.uuid = Realuid;
-	Oreq.sh_params.ugid = Realgid;
-	Oreq.sh_params.mcode = code;
-	Oreq.sh_un.sh_jobindex = indx;
-#ifdef	USING_MMAP
-	sync_xfermmap();
+        BLOCK_ZERO(&Oreq, sizeof(Oreq));
+        mymtype = MTOFFSET + (Oreq.sh_params.upid = getpid());
+        Oreq.sh_mtype = TO_SCHED;
+        Oreq.sh_params.uuid = Realuid;
+        Oreq.sh_params.ugid = Realgid;
+        Oreq.sh_params.mcode = code;
+        Oreq.sh_un.sh_jobindex = indx;
+#ifdef  USING_MMAP
+        sync_xfermmap();
 #endif
-	while  (msgsnd(Ctrl_chan, (struct msgbuf *) &Oreq, sizeof(Shreq) + sizeof(ULONG), IPC_NOWAIT) < 0)  {
-		if  (errno != EAGAIN)
-			return  $E{IPC msg q error};
-		blkcount--;
-		if  (blkcount <= 0)
-			return  $E{IPC msg q full};
-		sleep(MSGQ_BLOCKWAIT);
-	}
-	return  0;
+        while  (msgsnd(Ctrl_chan, (struct msgbuf *) &Oreq, sizeof(Shreq) + sizeof(ULONG), IPC_NOWAIT) < 0)  {
+                if  (errno != EAGAIN)
+                        return  $E{IPC msg q error};
+                blkcount--;
+                if  (blkcount <= 0)
+                        return  $E{IPC msg q full};
+                sleep(MSGQ_BLOCKWAIT);
+        }
+        return  0;
 }
 
 /* Send var-type message to scheduler */
 
 int  wvmsg(unsigned code, CBtvarRef vp, const ULONG seq)
 {
-	Shipc		Oreq;
-	int	blkcount = MSGQ_BLOCKS;
+        Shipc           Oreq;
+        int     blkcount = MSGQ_BLOCKS;
 
-	BLOCK_ZERO(&Oreq, sizeof(Oreq));
-	mymtype = MTOFFSET + (Oreq.sh_params.upid = getpid());
-	Oreq.sh_mtype = TO_SCHED;
-	Oreq.sh_params.uuid = Realuid;
-	Oreq.sh_params.ugid = Realgid;
-	Oreq.sh_params.mcode = code;
-	Oreq.sh_un.sh_var = *vp;
-	Oreq.sh_un.sh_var.var_sequence = seq;
-	while  (msgsnd(Ctrl_chan, (struct msgbuf *) &Oreq, sizeof(Shreq) + sizeof(Btvar), IPC_NOWAIT) < 0)  {
-		if  (errno != EAGAIN)
-			return  $E{IPC msg q error};
-		blkcount--;
-		if  (blkcount <= 0)
-			return  $E{IPC msg q full};
-		sleep(MSGQ_BLOCKWAIT);
-	}
-	return  0;
+        BLOCK_ZERO(&Oreq, sizeof(Oreq));
+        mymtype = MTOFFSET + (Oreq.sh_params.upid = getpid());
+        Oreq.sh_mtype = TO_SCHED;
+        Oreq.sh_params.uuid = Realuid;
+        Oreq.sh_params.ugid = Realgid;
+        Oreq.sh_params.mcode = code;
+        Oreq.sh_un.sh_var = *vp;
+        Oreq.sh_un.sh_var.var_sequence = seq;
+        while  (msgsnd(Ctrl_chan, (struct msgbuf *) &Oreq, sizeof(Shreq) + sizeof(Btvar), IPC_NOWAIT) < 0)  {
+                if  (errno != EAGAIN)
+                        return  $E{IPC msg q error};
+                blkcount--;
+                if  (blkcount <= 0)
+                        return  $E{IPC msg q full};
+                sleep(MSGQ_BLOCKWAIT);
+        }
+        return  0;
 }
 
 /* Display job-type error message */
 
 int  dojerror(const unsigned retc, CBtjobRef jp)
 {
-	switch  (retc & REQ_TYPE)  {
-	default:
-		disp_arg[0] = retc;
-		return  $E{Unexpected sched message};
-	case  JOB_REPLY:
-		disp_str = title_of(jp);
-		disp_arg[0] = jp->h.bj_job;
-		return  (retc & ~REQ_TYPE) + $E{Base for scheduler job errors};
-	case  NET_REPLY:
-		disp_str = title_of(jp);
-		disp_arg[0] = jp->h.bj_job;
-		return  (retc & ~REQ_TYPE) + $E{Base for scheduler net errors};
-	}
+        switch  (retc & REQ_TYPE)  {
+        default:
+                disp_arg[0] = retc;
+                return  $E{Unexpected sched message};
+        case  JOB_REPLY:
+                disp_str = title_of(jp);
+                disp_arg[0] = jp->h.bj_job;
+                return  (retc & ~REQ_TYPE) + $E{Base for scheduler job errors};
+        case  NET_REPLY:
+                disp_str = title_of(jp);
+                disp_arg[0] = jp->h.bj_job;
+                return  (retc & ~REQ_TYPE) + $E{Base for scheduler net errors};
+        }
 }
 
 /* Display var-type error message */
 
 int  doverror(unsigned retc, BtvarRef vp)
 {
-	switch  (retc & REQ_TYPE)  {
-	default:
-		disp_arg[0] = retc;
-		return  $E{Unexpected sched message};
-	case  VAR_REPLY:
-		disp_str = vp->var_name;
-		return  (int) ((retc & ~REQ_TYPE) + $E{Base for scheduler var errors});
-	case  NET_REPLY:
-		disp_str = vp->var_name;
-		return  (int) ((retc & ~REQ_TYPE) + $E{Base for scheduler net errors});
-	}
+        switch  (retc & REQ_TYPE)  {
+        default:
+                disp_arg[0] = retc;
+                return  $E{Unexpected sched message};
+        case  VAR_REPLY:
+                disp_str = vp->var_name;
+                return  (int) ((retc & ~REQ_TYPE) + $E{Base for scheduler var errors});
+        case  NET_REPLY:
+                disp_str = vp->var_name;
+                return  (int) ((retc & ~REQ_TYPE) + $E{Base for scheduler net errors});
+        }
 }

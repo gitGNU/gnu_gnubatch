@@ -24,22 +24,22 @@ extern void  doerror(WINDOW *, int);
 
 HelpaltRef  galts(WINDOW *wp, const int state, const int num)
 {
-	HelpaltRef	a = helprdalt(state);
+        HelpaltRef      a = helprdalt(state);
 
-	if  (a == (HelpaltRef) 0)  {
-		disp_arg[9] = state;
-		doerror(wp, $E{Missing alternative code});
-		return  (HelpaltRef) 0;
-	}
+        if  (a == (HelpaltRef) 0)  {
+                disp_arg[9] = state;
+                doerror(wp, $E{Missing alternative code});
+                return  (HelpaltRef) 0;
+        }
 
-	if  (a->numalt != num)  {
-		disp_arg[9] = state;
-		disp_arg[8] = num;
-		disp_arg[7] = a->numalt;
-		doerror(wp, $E{Wrong number alternatives});
-		freealts(a);
-		return  (HelpaltRef) 0;
-	}
+        if  (a->numalt != num)  {
+                disp_arg[9] = state;
+                disp_arg[8] = num;
+                disp_arg[7] = a->numalt;
+                doerror(wp, $E{Wrong number alternatives});
+                freealts(a);
+                return  (HelpaltRef) 0;
+        }
 
-	return  a;
+        return  a;
 }

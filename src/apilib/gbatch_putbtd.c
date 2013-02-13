@@ -30,36 +30,36 @@ extern struct api_fd *gbatch_look_fd(const int);
 
 int  gbatch_putbtd(const int fd, const apiBtdef *res)
 {
-	int			ret, cnt;
-	struct	api_fd		*fdp = gbatch_look_fd(fd);
-	struct	api_msg		msg;
-	Btdef		buf;
+        int                     ret, cnt;
+        struct  api_fd          *fdp = gbatch_look_fd(fd);
+        struct  api_msg         msg;
+        Btdef           buf;
 
-	if  (!fdp)
-		return  XB_INVALID_FD;
-	msg.code = API_PUTBTD;
+        if  (!fdp)
+                return  XB_INVALID_FD;
+        msg.code = API_PUTBTD;
 
-	/* And now do all the byte-swapping */
+        /* And now do all the byte-swapping */
 
-	buf.btd_version = res->btd_version; /* Actually this is ignored */
-	buf.btd_minp = res->btd_minp;
-	buf.btd_maxp = res->btd_maxp;
-	buf.btd_defp = res->btd_defp;
-	buf.btd_maxll = htons(res->btd_maxll);
-	buf.btd_totll = htons(res->btd_totll);
-	buf.btd_spec_ll = htons(res->btd_spec_ll);
-	buf.btd_priv = htonl(res->btd_priv);
-	for  (cnt = 0;  cnt < 3;  cnt++)  {
-		buf.btd_jflags[cnt] = htons(res->btd_jflags[cnt]);
-		buf.btd_vflags[cnt] = htons(res->btd_vflags[cnt]);
-	}
-	if  ((ret = gbatch_wmsg(fdp, &msg)))
-		return  ret;
-	if  ((ret = gbatch_write(fdp->sockfd, (char *) &buf, sizeof(buf))))
-		return  ret;
-	if  ((ret = gbatch_rmsg(fdp, &msg)))
-		return  ret;
-	if  (msg.retcode != 0)
-		return  (SHORT) ntohs(msg.retcode);
-	return  XB_OK;
+        buf.btd_version = res->btd_version; /* Actually this is ignored */
+        buf.btd_minp = res->btd_minp;
+        buf.btd_maxp = res->btd_maxp;
+        buf.btd_defp = res->btd_defp;
+        buf.btd_maxll = htons(res->btd_maxll);
+        buf.btd_totll = htons(res->btd_totll);
+        buf.btd_spec_ll = htons(res->btd_spec_ll);
+        buf.btd_priv = htonl(res->btd_priv);
+        for  (cnt = 0;  cnt < 3;  cnt++)  {
+                buf.btd_jflags[cnt] = htons(res->btd_jflags[cnt]);
+                buf.btd_vflags[cnt] = htons(res->btd_vflags[cnt]);
+        }
+        if  ((ret = gbatch_wmsg(fdp, &msg)))
+                return  ret;
+        if  ((ret = gbatch_write(fdp->sockfd, (char *) &buf, sizeof(buf))))
+                return  ret;
+        if  ((ret = gbatch_rmsg(fdp, &msg)))
+                return  ret;
+        if  (msg.retcode != 0)
+                return  (SHORT) ntohs(msg.retcode);
+        return  XB_OK;
 }

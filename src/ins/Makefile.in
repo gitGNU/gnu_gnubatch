@@ -1,17 +1,17 @@
-#  Copyright 2009 Free Software Foundation, Inc.
+#  Copyright 2009 Free Software	Foundation, Inc.
 
-#  This program is free software: you can redistribute it and/or modify
-#  it under the terms of the GNU General Public License as published by
-#  the Free Software Foundation, either version 3 of the License, or
-#  (at your option) any later version.
+#  This	program	is free	software: you can redistribute it and/or modify
+#  it under the	terms of the GNU General Public	License	as published by
+#  the Free Software Foundation, either	version	3 of the License, or
+#  (at your option) any	later version.
 
-#  This program is distributed in the hope that it will be useful,
+#  This	program	is distributed in the hope that	it will	be useful,
 #  but WITHOUT ANY WARRANTY; without even the implied warranty of
-#  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.	 See the
 #  GNU General Public License for more details.
 
 #  You should have received a copy of the GNU General Public License
-#  along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
+#  along with this program.  If	not, see <http://www.gnu.org/licenses/>.  */
 
 SHELL		=	/bin/sh
 @SET_MAKE@
@@ -22,7 +22,7 @@ BASE		=	../..
 HDRS		=	$(PARENT)/hdrs
 YACC		=	@YACC@
 CC		=	@CC@
-CCFLAGS		=	-O @gcc_useful_options@ @funny_compiler_options@
+CCFLAGS		=	-O @gcc_useful_options@	@funny_compiler_options@
 LDFLAGS		=
 LIBS		=	@LIBS@
 LIBNET		=	@SOCKLIBS@
@@ -35,7 +35,7 @@ RM		=	rm -f
 INSTALL		=	@INSTALL@
 INSTALL_DATA	=	@INSTALL_DATA@
 BATCHUSER	=	@BATCHUSER@
-USERMODES	=	-o $(BATCHUSER) -g root -m 755
+USERMODES	=	-o $(BATCHUSER)	-g root	-m 755
 BINDIR		=	$(DESTDIR)@bindir@
 SBINDIR		=	$(DESTDIR)@sbindir@
 INTBINDIR	=	$(DESTDIR)@pkgexecdir@
@@ -46,26 +46,26 @@ STAGED_INSTALL	=	false
 all:	gbch-atcover gbch-btuconv gbch-ciconv gbch-cjlist gbch-cvlist gbch-ripc
 
 gbch-atcover:	atcover.o
-	$(CC) $(LDFLAGS) -o $@ atcover.o $(LIB) $(LIBS)
+	$(CC) $(LDFLAGS) -o $@ atcover.o $(LIB)	$(LIBS)
 
 gbch-btuconv:	btuconv.o convcomm.o
-	$(CC) $(LDFLAGS) -o $@ btuconv.o convcomm.o $(LIB) $(LIBCLIENT) $(LIBNET) $(LIBS)
+	$(CC) $(LDFLAGS) -o $@ btuconv.o convcomm.o $(LIB) $(LIBCLIENT)	$(LIBNET) $(LIBS)
 
 gbch-ciconv:	ciconv.o convcomm.o
-	$(CC) $(LDFLAGS) -o $@ ciconv.o convcomm.o $(LIB) $(LIBCLIENT) $(LIBS)
+	$(CC) $(LDFLAGS) -o $@ ciconv.o	convcomm.o $(LIB) $(LIBCLIENT) $(LIBS)
 
 gbch-cjlist:	cjlist.o convcomm.o
-	$(CC) $(LDFLAGS) -o $@ cjlist.o convcomm.o $(LIB) $(LIBCLIENT) $(LIBNET) $(LIBS)
+	$(CC) $(LDFLAGS) -o $@ cjlist.o	convcomm.o $(LIB) $(LIBCLIENT) $(LIBNET) $(LIBS)
 
 gbch-cvlist:	cvlist.o convcomm.o
-	$(CC) $(LDFLAGS) -o $@ cvlist.o convcomm.o $(LIB) $(LIBCLIENT) $(LIBNET) $(LIBS)
+	$(CC) $(LDFLAGS) -o $@ cvlist.o	convcomm.o $(LIB) $(LIBCLIENT) $(LIBNET) $(LIBS)
 
 gbch-ripc:	ripc.o
 	$(CC) $(LDFLAGS) -o $@ ripc.o $(LIB) $(LIBNET) $(LIBS) -lm
 
 install:	all
 	$(INSTALL) $(PROGS) $(SBINDIR)
-	$(INSTALL) $(USERPROGS) $(BINDIR)
+	$(INSTALL) $(USERPROGS)	$(BINDIR)
 
 install-strip:	all
 	$(INSTALL) -s $(PROGS) $(SBINDIR)

@@ -17,72 +17,65 @@
 
 JFORMAT(fmt_assfull)
 {
-	fmt_t  lng = 0;
-#ifdef	CHARSPRINTF
-	int	cnt;
+        fmt_t  lng = 0;
+#ifdef  CHARSPRINTF
+        int     cnt;
 #endif
-	if  (isreadable)  {
-		int	uc;
-		const	Btvar	*vp;
-		const	Jass	*ap;
+        if  (isreadable)  {
+                int     uc;
+                const   Btvar   *vp;
+                const   Jass    *ap;
 
-		for  (uc = 0;  uc < MAXSEVARS;  uc++)  {
-			ap = &jp->h.bj_asses[uc];
-			if  (ap->bja_op == BJA_NONE)
-				break;
-			if  (uc != 0)
-				bigbuff[lng++] = ',';
-			if  (ap->bja_op < BJA_SEXIT)  {
-				if  (ap->bja_flags & BJA_START)
-					bigbuff[lng++] = 'S';
-				if  (ap->bja_flags & BJA_REVERSE)
-					bigbuff[lng++] = 'R';
-				if  (ap->bja_flags & BJA_OK)
-					bigbuff[lng++] = 'N';
-				if  (ap->bja_flags & BJA_ERROR)
-					bigbuff[lng++] = 'E';
-				if  (ap->bja_flags & BJA_ABORT)
-					bigbuff[lng++] = 'A';
-				if  (ap->bja_flags & BJA_CANCEL)
-					bigbuff[lng++] = 'C';
-				bigbuff[lng++] = ':';
-			};
-			vp = &Var_seg.vlist[ap->bja_varind].Vent;
-#ifdef	CHARSPRINTF
-			if  (vp->var_id.hostid)  {
-				sprintf(&bigbuff[lng], "%s:", look_host(vp->var_id.hostid));
-				cnt = strlen(&bigbuff[lng]);
-				lng += cnt;
-			}
-			sprintf(&bigbuff[lng], "%s%s", vp->var_name, assname[ap->bja_op-1]);
-			cnt = strlen(&bigbuff[lng]);
-			lng += cnt;
-			if  (ap->bja_op >= BJA_SEXIT)
-				strcpy(&bigbuff[lng], ap->bja_op == BJA_SEXIT? exitcodename: signalname);
-			else  if  (ap->bja_con.const_type == CON_STRING)
-				sprintf(&bigbuff[lng],
-					       strchr(ap->bja_con.con_un.con_string, ' ') ||
-					       isdigit(ap->bja_con.con_un.con_string[0])?
-					       "\"%s\"": "%s", ap->bja_con.con_un.con_string);
-			else
-				sprintf(&bigbuff[lng], "%ld", (long) ap->bja_con.con_un.con_long);
-			cnt = strlen(&bigbuff[lng]);
-			lng += cnt;
+                for  (uc = 0;  uc < MAXSEVARS;  uc++)  {
+                        ap = &jp->h.bj_asses[uc];
+                        if  (ap->bja_op == BJA_NONE)
+                                break;
+                        if  (uc != 0)
+                                bigbuff[lng++] = ',';
+                        if  (ap->bja_op < BJA_SEXIT)  {
+                                if  (ap->bja_flags & BJA_START)
+                                        bigbuff[lng++] = 'S';
+                                if  (ap->bja_flags & BJA_REVERSE)
+                                        bigbuff[lng++] = 'R';
+                                if  (ap->bja_flags & BJA_OK)
+                                        bigbuff[lng++] = 'N';
+                                if  (ap->bja_flags & BJA_ERROR)
+                                        bigbuff[lng++] = 'E';
+                                if  (ap->bja_flags & BJA_ABORT)
+                                        bigbuff[lng++] = 'A';
+                                if  (ap->bja_flags & BJA_CANCEL)
+                                        bigbuff[lng++] = 'C';
+                                bigbuff[lng++] = ':';
+                        };
+                        vp = &Var_seg.vlist[ap->bja_varind].Vent;
+#ifdef  CHARSPRINTF
+			sprintf(&bigbuff[lng], "%s%s", host_prefix_str(vp->var_id.hostid, vp->var_name), assname[ap->bja_op-1]);
+                        cnt = strlen(&bigbuff[lng]);
+                        lng += cnt;
+                        if  (ap->bja_op >= BJA_SEXIT)
+                                strcpy(&bigbuff[lng], ap->bja_op == BJA_SEXIT? exitcodename: signalname);
+                        else  if  (ap->bja_con.const_type == CON_STRING)
+                                sprintf(&bigbuff[lng],
+                                               strchr(ap->bja_con.con_un.con_string, ' ') ||
+                                               isdigit(ap->bja_con.con_un.con_string[0])?
+                                               "\"%s\"": "%s", ap->bja_con.con_un.con_string);
+                        else
+                                sprintf(&bigbuff[lng], "%ld", (long) ap->bja_con.con_un.con_long);
+                        cnt = strlen(&bigbuff[lng]);
+                        lng += cnt;
 #else
-			if  (vp->var_id.hostid)
-				lng += sprintf(&bigbuff[lng], "%s:", look_host(vp->var_id.hostid));
-			lng += sprintf(&bigbuff[lng], "%s%s", vp->var_name, assname[ap->bja_op-1]);
-			if  (ap->bja_op >= BJA_SEXIT)
-				lng += strlen(strcpy(&bigbuff[lng], ap->bja_op == BJA_SEXIT? exitcodename: signalname));
-			else  if  (ap->bja_con.const_type == CON_STRING)
-				lng += sprintf(&bigbuff[lng],
-					       strchr(ap->bja_con.con_un.con_string, ' ') ||
-					       isdigit(ap->bja_con.con_un.con_string[0])?
-					       "\"%s\"": "%s", ap->bja_con.con_un.con_string);
-			else
-				lng += sprintf(&bigbuff[lng], "%ld", (long) ap->bja_con.con_un.con_long);
+			lng += sprintf(&bigbuff[lng], "%s%s", host_prefix_str(vp->var_id.hostid, vp->var_name), assname[ap->bja_op-1]);
+                        if  (ap->bja_op >= BJA_SEXIT)
+                                lng += strlen(strcpy(&bigbuff[lng], ap->bja_op == BJA_SEXIT? exitcodename: signalname));
+                        else  if  (ap->bja_con.const_type == CON_STRING)
+                                lng += sprintf(&bigbuff[lng],
+                                               strchr(ap->bja_con.con_un.con_string, ' ') ||
+                                               isdigit(ap->bja_con.con_un.con_string[0])?
+                                               "\"%s\"": "%s", ap->bja_con.con_un.con_string);
+                        else
+                                lng += sprintf(&bigbuff[lng], "%ld", (long) ap->bja_con.con_un.con_long);
 #endif
-		}
-	}
-	return  lng;
+                }
+        }
+        return  lng;
 }

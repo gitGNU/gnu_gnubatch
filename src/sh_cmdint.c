@@ -18,7 +18,7 @@
 #include "config.h"
 #include <stdio.h>
 #include <sys/types.h>
-#ifdef	HAVE_FCNTL_H
+#ifdef  HAVE_FCNTL_H
 #include <fcntl.h>
 #endif
 #include "incl_unix.h"
@@ -45,37 +45,37 @@
 
 void  initcifile()
 {
-	char	*cifile;
-	BtuserRef	g;
-	Cmdint		madeup;
+        char    *cifile;
+        BtuserRef       g;
+        Cmdint          madeup;
 
-	if  (!open_ci(O_RDONLY))
-		return;
+        if  (!open_ci(O_RDONLY))
+                return;
 
-	cifile = envprocess(BTCI);
-	disp_str = cifile;
-	if  ((Ci_fd = open(cifile, O_RDWR|O_CREAT|O_TRUNC, CMODE)) < 0)
-		panic($E{Panic cannot create CI file});
+        cifile = envprocess(BTCI);
+        disp_str = cifile;
+        if  ((Ci_fd = open(cifile, O_RDWR|O_CREAT|O_TRUNC, CMODE)) < 0)
+                panic($E{Panic cannot create CI file});
 
-#ifdef	HAVE_FCHOWN
-	if  (Daemuid != ROOTID)
-		Ignored_error = fchown(Ci_fd, Daemuid, Daemgid);
+#ifdef  HAVE_FCHOWN
+        if  (Daemuid != ROOTID)
+                Ignored_error = fchown(Ci_fd, Daemuid, Daemgid);
 #else
-	if  (Daemuid != ROOTID)
-		Ignored_error = chown(cifile, Daemuid, Daemgid);
+        if  (Daemuid != ROOTID)
+                Ignored_error = chown(cifile, Daemuid, Daemgid);
 #endif
-	free(cifile);
+        free(cifile);
 
-	/* Initialise one entry, to be "/bin/sh" */
+        /* Initialise one entry, to be "/bin/sh" */
 
-	strcpy(madeup.ci_name, DEF_CI_NAME);
-	strcpy(madeup.ci_path, DEF_CI_PATH);
-	strcpy(madeup.ci_args, DEF_CI_ARGS);
-	madeup.ci_ll = (g = getbtuentry(Daemuid))? g->btu_spec_ll: U_DF_SPECLL;
-	madeup.ci_nice = DEF_CI_NICE;
-	madeup.ci_flags = 0;
-	Ignored_error = write(Ci_fd, (char *) &madeup, sizeof(madeup));
-	close(Ci_fd);
-	if  (open_ci(O_RDONLY))
-		panic($E{Panic cannot read CI file});
+        strcpy(madeup.ci_name, DEF_CI_NAME);
+        strcpy(madeup.ci_path, DEF_CI_PATH);
+        strcpy(madeup.ci_args, DEF_CI_ARGS);
+        madeup.ci_ll = (g = getbtuentry(Daemuid))? g->btu_spec_ll: U_DF_SPECLL;
+        madeup.ci_nice = DEF_CI_NICE;
+        madeup.ci_flags = 0;
+        Ignored_error = write(Ci_fd, (char *) &madeup, sizeof(madeup));
+        close(Ci_fd);
+        if  (open_ci(O_RDONLY))
+                panic($E{Panic cannot read CI file});
 }

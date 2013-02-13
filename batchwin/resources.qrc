@@ -1,0 +1,37 @@
+<RCC>
+  <qresource>
+    <file alias="Submitted">images/submitted.png</file>
+    <file alias="Unsubmitted">images/unsubmitted.png</file>
+    <file alias="Changed">images/changed.png</file>
+    <file alias="Saved">images/saved.png</file>
+    <file alias="No script">images/noscript.png</file>
+    <file alias="Has script">images/hasscript.png</file>
+    <file alias="Process parameters">images/procpar.png</file>
+    <file alias="Program optons">images/progopts.png</file>
+    <file alias="Submit job">images/jobsubmit.png</file>
+    <file alias="Edit job script">images/jobedit.png</file>
+    <file alias="save job file">images/filesave.png</file>
+    <file alias="open job file">images/fileopen.png</file>
+    <file alias="new job file">images/filenew.png</file>
+    <file alias="Btqw Icon">images/btqw.png</file>
+    <file alias="Btrw icon">images/btrw.png</file>
+    <file alias="Advance time">images/advtime.png</file>
+    <file alias="Job assignments">images/assjob.png</file>
+    <file alias="Job conditions">images/condset.png</file>
+    <file alias="Delete job">images/deljob.png</file>
+    <file alias="Quit program">images/exit.png</file>
+    <file alias="Force run">images/forcerun.png</file>
+    <file alias="Go job">images/gojob.png</file>
+    <file alias="Interrupt signal">images/intjob.png</file>
+    <file alias="Quit signal">images/quitjob.png</file>
+    <file alias="Set cancelled">images/setcanc.png</file>
+    <file alias="Set runnable">images/setrun.png</file>
+    <file alias="Set time">images/timeset.png</file>
+    <file alias="Title priority load level">images/titprill.png</file>
+    <file alias="Assign var">images/vass.png</file>
+    <file alias="Decrement var">images/vdecr.png</file>
+    <file alias="View job script">images/viewjob.png</file>
+    <file alias="Increment var">images/vincr.png</file>
+    <file alias="Window options">images/winopts.png</file>
+  </qresource>
+</RCC>

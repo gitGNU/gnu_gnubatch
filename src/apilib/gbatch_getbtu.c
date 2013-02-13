@@ -29,50 +29,50 @@ extern int  gbatch_rmsg(const struct api_fd *, struct api_msg *);
 extern int  gbatch_wmsg(const struct api_fd *, struct api_msg *);
 extern struct api_fd *gbatch_look_fd(const int);
 
-int	gbatch_getbtu(const int fd, const char *username, char *groupname, apiBtuser *res)
+int     gbatch_getbtu(const int fd, const char *username, char *groupname, apiBtuser *res)
 {
-	int	ret, cnt;
-	struct	api_fd	*fdp = gbatch_look_fd(fd);
-	struct	api_msg		msg;
-	struct	ua_reply	buf;
+        int     ret, cnt;
+        struct  api_fd  *fdp = gbatch_look_fd(fd);
+        struct  api_msg         msg;
+        struct  ua_reply        buf;
 
-	if  (!fdp)
-		return  XB_INVALID_FD;
-	BLOCK_ZERO(&msg, sizeof(msg));
-	msg.code = API_GETBTU;
-	if  (username  &&  username[0])
-		strncpy(msg.un.us.username, username, UIDSIZE);
-	if  ((ret = gbatch_wmsg(fdp, &msg)))
-		return  ret;
-	if  ((ret = gbatch_rmsg(fdp, &msg)))
-		return  ret;
-	if  (msg.retcode != 0)
-		return  (SHORT) ntohs(msg.retcode);
+        if  (!fdp)
+                return  XB_INVALID_FD;
+        BLOCK_ZERO(&msg, sizeof(msg));
+        msg.code = API_GETBTU;
+        if  (username  &&  username[0])
+                strncpy(msg.un.us.username, username, UIDSIZE);
+        if  ((ret = gbatch_wmsg(fdp, &msg)))
+                return  ret;
+        if  ((ret = gbatch_rmsg(fdp, &msg)))
+                return  ret;
+        if  (msg.retcode != 0)
+                return  (SHORT) ntohs(msg.retcode);
 
-	/* The message is followed by the details.  */
+        /* The message is followed by the details.  */
 
-	if  ((ret = gbatch_read(fdp->sockfd, (char *) &buf, sizeof(buf))))
-		return  ret;
+        if  ((ret = gbatch_read(fdp->sockfd, (char *) &buf, sizeof(buf))))
+                return  ret;
 
-	if  (groupname)  {
-		strncpy(groupname, buf.ua_gname, UIDSIZE);
-		groupname[UIDSIZE] = '\0';
-	}
+        if  (groupname)  {
+                strncpy(groupname, buf.ua_gname, UIDSIZE);
+                groupname[UIDSIZE] = '\0';
+        }
 
-	/* And now do all the byte-swapping */
+        /* And now do all the byte-swapping */
 
-	res->btu_user = ntohl(buf.ua_perm.btu_user);
-	res->btu_minp = buf.ua_perm.btu_minp;
-	res->btu_maxp = buf.ua_perm.btu_maxp;
-	res->btu_defp = buf.ua_perm.btu_defp;
-	res->btu_maxll = ntohs(buf.ua_perm.btu_maxll);
-	res->btu_totll = ntohs(buf.ua_perm.btu_totll);
-	res->btu_spec_ll = ntohs(buf.ua_perm.btu_spec_ll);
-	res->btu_priv = ntohl(buf.ua_perm.btu_priv);
+        res->btu_user = ntohl(buf.ua_perm.btu_user);
+        res->btu_minp = buf.ua_perm.btu_minp;
+        res->btu_maxp = buf.ua_perm.btu_maxp;
+        res->btu_defp = buf.ua_perm.btu_defp;
+        res->btu_maxll = ntohs(buf.ua_perm.btu_maxll);
+        res->btu_totll = ntohs(buf.ua_perm.btu_totll);
+        res->btu_spec_ll = ntohs(buf.ua_perm.btu_spec_ll);
+        res->btu_priv = ntohl(buf.ua_perm.btu_priv);
 
-	for  (cnt = 0;  cnt < 3;  cnt++)  {
-		res->btu_jflags[cnt] = ntohs(buf.ua_perm.btu_jflags[cnt]);
-		res->btu_vflags[cnt] = ntohs(buf.ua_perm.btu_vflags[cnt]);
-	}
-	return  XB_OK;
+        for  (cnt = 0;  cnt < 3;  cnt++)  {
+                res->btu_jflags[cnt] = ntohs(buf.ua_perm.btu_jflags[cnt]);
+                res->btu_vflags[cnt] = ntohs(buf.ua_perm.btu_vflags[cnt]);
+        }
+        return  XB_OK;
 }

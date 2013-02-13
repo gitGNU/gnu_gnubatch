@@ -15,23 +15,23 @@
    You should have received a copy of the GNU General Public License
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
-extern	char	*makebigvec(char **);
-extern	void	doerror(int);
-extern	int	Confirm(int);
-extern	void	gtk_chk_uid();
+extern  char    *makebigvec(char **);
+extern  void    doerror(int);
+extern  int     Confirm(int);
+extern  void    gtk_chk_uid();
 
 /* Functions to make "gprompt"-stuff easier */
 
-extern	GtkWidget  *gprompt_label(const int);
-extern	GtkWidget  *gprompt_button(const int);
-extern	GtkWidget  *gprompt_checkbutton(const int);
-extern	GtkWidget  *gprompt_radiobutton(const int);
-extern	GtkWidget  *gprompt_radiobutton_fromwidget(GtkWidget *, const int);
-extern	GtkWidget  *gprompt_dialog(GtkWidget *, const int);
-extern	GtkWidget  *slider_with_buttons(GtkWidget *, const int, unsigned, const int);
+extern  GtkWidget  *gprompt_label(const int);
+extern  GtkWidget  *gprompt_button(const int);
+extern  GtkWidget  *gprompt_checkbutton(const int);
+extern  GtkWidget  *gprompt_radiobutton(const int);
+extern  GtkWidget  *gprompt_radiobutton_fromwidget(GtkWidget *, const int);
+extern  GtkWidget  *gprompt_dialog(GtkWidget *, const int);
+extern  GtkWidget  *slider_with_buttons(GtkWidget *, const int, unsigned, const int);
 
 /* For check buttons where you get a cascade of signals if you set any */
 
-extern	void	setifnotset(GtkWidget *);
-extern	void	unsetifset(GtkWidget *);
+extern  void    setifnotset(GtkWidget *);
+extern  void    unsetifset(GtkWidget *);
 

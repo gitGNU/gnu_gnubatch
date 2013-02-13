@@ -25,25 +25,25 @@
 
 int  mpermitted(CBtmodeRef md, const unsigned flag, const ULONG Fileprivs)
 {
-	USHORT	uf = md->u_flags;
-	USHORT	gf = md->g_flags;
-	USHORT	of = md->o_flags;
+        USHORT  uf = md->u_flags;
+        USHORT  gf = md->g_flags;
+        USHORT  of = md->o_flags;
 
-	if  (Fileprivs & BTM_ORP_UG)  {
-		uf |= gf;
-		gf |= uf;
-	}
-	if  (Fileprivs & BTM_ORP_UO)  {
-		uf |= of;
-		of |= uf;
-	}
-	if  (Fileprivs & BTM_ORP_GO)  {
-		gf |= of;
-		of |= gf;
-	}
-	if  (md->o_uid == Realuid)
-		return  (uf & flag) == flag;
-	if  (md->o_gid == Realgid)
-		return  (gf & flag) == flag;
-	return  (of & flag) == flag;
+        if  (Fileprivs & BTM_ORP_UG)  {
+                uf |= gf;
+                gf |= uf;
+        }
+        if  (Fileprivs & BTM_ORP_UO)  {
+                uf |= of;
+                of |= uf;
+        }
+        if  (Fileprivs & BTM_ORP_GO)  {
+                gf |= of;
+                of |= gf;
+        }
+        if  (md->o_uid == Realuid)
+                return  (uf & flag) == flag;
+        if  (md->o_gid == Realgid)
+                return  (gf & flag) == flag;
+        return  (of & flag) == flag;
 }

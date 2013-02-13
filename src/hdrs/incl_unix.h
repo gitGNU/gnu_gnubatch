@@ -15,43 +15,43 @@
    You should have received a copy of the GNU General Public License
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
-#ifdef	HAVE_STDLIB_H
+#ifdef  HAVE_STDLIB_H
 #include <stdlib.h>
 #endif
-#ifdef	HAVE_MALLOC_H
+#ifdef  HAVE_MALLOC_H
 #include <malloc.h>
 #endif
-#ifdef	HAVE_MEMORY_H
+#ifdef  HAVE_MEMORY_H
 #include <memory.h>
 #endif
-#ifdef	HAVE_UNISTD_H
+#ifdef  HAVE_UNISTD_H
 #include <unistd.h>
 #endif
-#ifdef	HAVE_WAIT_H
+#ifdef  HAVE_WAIT_H
 #include <wait.h>
 #endif
 
-#define	QSORTP1	(void *)
-#define	QSORTP4	(int (*)(const void *,const void *))
+#define QSORTP1 (void *)
+#define QSORTP4 (int (*)(const void *,const void *))
 
-#ifdef	STDC_HEADERS
+#ifdef  STDC_HEADERS
 #include <string.h>
 #else
-#ifndef	HAVE_STRCHR
-#define	strchr	index
-#define	strrchr	rindex
+#ifndef HAVE_STRCHR
+#define strchr  index
+#define strrchr rindex
 #endif
 #endif /* !STDC_HEADERS */
 
-#ifdef	HAVE_MEMCPY
-#define	BLOCK_COPY(to, from, count)	memcpy((char *) (to), (char *) (from), (unsigned) (count))
-#define	BLOCK_ZERO(to, count)		memset((char *) (to), 0, (unsigned) (count))
-#elif	defined(HAVE_BCOPY)
-#define	BLOCK_COPY(to, from, count)	bcopy((char *) (from), (char *) (to), (unsigned) (count))
-#define	BLOCK_ZERO(to, count)		bzero((char *) (to), (unsigned) (count))
+#ifdef  HAVE_MEMCPY
+#define BLOCK_COPY(to, from, count)     memcpy((char *) (to), (char *) (from), (unsigned) (count))
+#define BLOCK_ZERO(to, count)           memset((char *) (to), 0, (unsigned) (count))
+#elif   defined(HAVE_BCOPY)
+#define BLOCK_COPY(to, from, count)     bcopy((char *) (from), (char *) (to), (unsigned) (count))
+#define BLOCK_ZERO(to, count)           bzero((char *) (to), (unsigned) (count))
 #else
-#define	BLOCK_COPY(to, from, count)	undefined_block_copy_routine(to, from, count);
-#define	BLOCK_ZERO(to, count)		undefined_block_zero_routine(to, count);
+#define BLOCK_COPY(to, from, count)     undefined_block_copy_routine(to, from, count);
+#define BLOCK_ZERO(to, count)           undefined_block_zero_routine(to, count);
 #endif
 
 /* These are our own string-ish things */
@@ -65,9 +65,9 @@ extern char *stracpy(const char *);
 extern char *runpwd();
 
 extern void  nomem(const char *, const int);
-#define	ABORT_NOMEM	nomem(Filename, __LINE__)
-#define	ABORT_NOMEMINL	nomem(__FILE__, __LINE__)
+#define ABORT_NOMEM     nomem(Filename, __LINE__)
+#define ABORT_NOMEMINL  nomem(__FILE__, __LINE__)
 
 /* This is to shut compilers up about errors which don't matter */
 
-extern	int	Ignored_error;
+extern  int     Ignored_error;

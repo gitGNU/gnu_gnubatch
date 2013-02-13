@@ -1,0 +1,426 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>deftimepardlg</class>
+ <widget class="QDialog" name="deftimepardlg">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>754</width>
+    <height>321</height>
+   </rect>
+  </property>
+  <property name="windowTitle">
+   <string>Default time parameters</string>
+  </property>
+  <widget class="QDialogButtonBox" name="buttonBox">
+   <property name="geometry">
+    <rect>
+     <x>460</x>
+     <y>260</y>
+     <width>241</width>
+     <height>32</height>
+    </rect>
+   </property>
+   <property name="orientation">
+    <enum>Qt::Horizontal</enum>
+   </property>
+   <property name="standardButtons">
+    <set>QDialogButtonBox::Cancel|QDialogButtonBox::Ok</set>
+   </property>
+  </widget>
+  <widget class="QSpinBox" name="repunits">
+   <property name="geometry">
+    <rect>
+     <x>90</x>
+     <y>70</y>
+     <width>60</width>
+     <height>27</height>
+    </rect>
+   </property>
+   <property name="toolTip">
+    <string>Number of units of the repeat given</string>
+   </property>
+   <property name="minimum">
+    <number>1</number>
+   </property>
+   <property name="maximum">
+    <number>60</number>
+   </property>
+   <property name="value">
+    <number>1</number>
+   </property>
+  </widget>
+  <widget class="QLabel" name="label_3">
+   <property name="geometry">
+    <rect>
+     <x>90</x>
+     <y>230</y>
+     <width>111</width>
+     <height>17</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string>If not possible</string>
+   </property>
+  </widget>
+  <widget class="QComboBox" name="ifnposs">
+   <property name="geometry">
+    <rect>
+     <x>240</x>
+     <y>220</y>
+     <width>151</width>
+     <height>27</height>
+    </rect>
+   </property>
+   <property name="currentIndex">
+    <number>1</number>
+   </property>
+   <item>
+    <property name="text">
+     <string>Skip to next</string>
+    </property>
+   </item>
+   <item>
+    <property name="text">
+     <string>Delay current</string>
+    </property>
+   </item>
+   <item>
+    <property name="text">
+     <string>Delay and adjust</string>
+    </property>
+   </item>
+   <item>
+    <property name="text">
+     <string>Catch up</string>
+    </property>
+   </item>
+  </widget>
+  <widget class="QLabel" name="label_4">
+   <property name="geometry">
+    <rect>
+     <x>520</x>
+     <y>40</y>
+     <width>141</width>
+     <height>17</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string>D of M or from end</string>
+   </property>
+  </widget>
+  <widget class="QSpinBox" name="monthday">
+   <property name="geometry">
+    <rect>
+     <x>520</x>
+     <y>70</y>
+     <width>60</width>
+     <height>27</height>
+    </rect>
+   </property>
+   <property name="toolTip">
+    <string>Set the target day of the month for monthly repeats
+
+For month relative to the beginning repeats, this gives the target day of the
+month. If this is not acceptable, then the following day is tried until acceptable.
+
+For month relative to the end repeats this gives the number of days back from
+the end of the month, possibly zero days, so if the month has 31 days, 0 would
+aim for 31st, 1 would aim for 30th and so on. If the day of the week thereby
+selected is unacceptable the preceding day is tried until acceptable.
+
+Note that the display of month days in month relative to the end has been
+changed relative to previous software hopefully to make it more
+understandable.</string>
+   </property>
+   <property name="minimum">
+    <number>0</number>
+   </property>
+   <property name="maximum">
+    <number>31</number>
+   </property>
+   <property name="singleStep">
+    <number>1</number>
+   </property>
+   <property name="value">
+    <number>1</number>
+   </property>
+  </widget>
+  <widget class="QGroupBox" name="groupBox">
+   <property name="geometry">
+    <rect>
+     <x>90</x>
+     <y>110</y>
+     <width>411</width>
+     <height>91</height>
+    </rect>
+   </property>
+   <property name="toolTip">
+    <string>Select days to avoid when calculating repeat</string>
+   </property>
+   <property name="title">
+    <string>Avoiding days</string>
+   </property>
+   <widget class="QCheckBox" name="avSun">
+    <property name="geometry">
+     <rect>
+      <x>0</x>
+      <y>30</y>
+      <width>97</width>
+      <height>22</height>
+     </rect>
+    </property>
+    <property name="toolTip">
+     <string>Set Sunday as a day to avoid when calculating repeats</string>
+    </property>
+    <property name="text">
+     <string>Sunday</string>
+    </property>
+   </widget>
+   <widget class="QCheckBox" name="avMon">
+    <property name="geometry">
+     <rect>
+      <x>90</x>
+      <y>30</y>
+      <width>97</width>
+      <height>22</height>
+     </rect>
+    </property>
+    <property name="toolTip">
+     <string>Set Monday as a day to avoid when calculating repeats</string>
+    </property>
+    <property name="text">
+     <string>Monday</string>
+    </property>
+   </widget>
+   <widget class="QCheckBox" name="avTue">
+    <property name="geometry">
+     <rect>
+      <x>180</x>
+      <y>30</y>
+      <width>97</width>
+      <height>22</height>
+     </rect>
+    </property>
+    <property name="toolTip">
+     <string>Set Tuesday as a day to avoid when calculating repeats</string>
+    </property>
+    <property name="text">
+     <string>Tuesday</string>
+    </property>
+   </widget>
+   <widget class="QCheckBox" name="avWed">
+    <property name="geometry">
+     <rect>
+      <x>270</x>
+      <y>30</y>
+      <width>111</width>
+      <height>22</height>
+     </rect>
+    </property>
+    <property name="toolTip">
+     <string>Set Wednesday as a day to avoid when calculating repeats</string>
+    </property>
+    <property name="text">
+     <string>Wednesday</string>
+    </property>
+   </widget>
+   <widget class="QCheckBox" name="avThu">
+    <property name="geometry">
+     <rect>
+      <x>0</x>
+      <y>60</y>
+      <width>97</width>
+      <height>22</height>
+     </rect>
+    </property>
+    <property name="toolTip">
+     <string>Set Thursday as a day to avoid when calculating repeats</string>
+    </property>
+    <property name="text">
+     <string>Thursday</string>
+    </property>
+   </widget>
+   <widget class="QCheckBox" name="avFri">
+    <property name="geometry">
+     <rect>
+      <x>90</x>
+      <y>60</y>
+      <width>97</width>
+      <height>22</height>
+     </rect>
+    </property>
+    <property name="toolTip">
+     <string>Set Friday as a day to avoid when calculating repeats</string>
+    </property>
+    <property name="text">
+     <string>Friday</string>
+    </property>
+   </widget>
+   <widget class="QCheckBox" name="avSat">
+    <property name="geometry">
+     <rect>
+      <x>180</x>
+      <y>60</y>
+      <width>97</width>
+      <height>22</height>
+     </rect>
+    </property>
+    <property name="toolTip">
+     <string>Set Saturday as a day to avoid when calculating repeats</string>
+    </property>
+    <property name="text">
+     <string>Saturday</string>
+    </property>
+   </widget>
+   <widget class="QCheckBox" name="avHol">
+    <property name="geometry">
+     <rect>
+      <x>270</x>
+      <y>60</y>
+      <width>97</width>
+      <height>22</height>
+     </rect>
+    </property>
+    <property name="toolTip">
+     <string>Avoid one of the table of holidays when calculating repeats.
+</string>
+    </property>
+    <property name="text">
+     <string>Holiday</string>
+    </property>
+   </widget>
+  </widget>
+  <widget class="QComboBox" name="repstyle">
+   <property name="geometry">
+    <rect>
+     <x>220</x>
+     <y>70</y>
+     <width>261</width>
+     <height>27</height>
+    </rect>
+   </property>
+   <property name="toolTip">
+    <string>Set here what style of repeat you require.
+Either set to delete at the end, to retain as &quot;done&quot; with manual reset or as
+auto-repeat by the intervals given and number of units as given in the box.</string>
+   </property>
+   <property name="currentIndex">
+    <number>1</number>
+   </property>
+   <item>
+    <property name="text">
+     <string>Delete at end</string>
+    </property>
+   </item>
+   <item>
+    <property name="text">
+     <string>Retain as done</string>
+    </property>
+   </item>
+   <item>
+    <property name="text">
+     <string>Minutes</string>
+    </property>
+   </item>
+   <item>
+    <property name="text">
+     <string>Hours</string>
+    </property>
+   </item>
+   <item>
+    <property name="text">
+     <string>Days</string>
+    </property>
+   </item>
+   <item>
+    <property name="text">
+     <string>Weeks</string>
+    </property>
+   </item>
+   <item>
+    <property name="text">
+     <string>Months (relative to the beginning)</string>
+    </property>
+   </item>
+   <item>
+    <property name="text">
+     <string>Months (relative to the end)</string>
+    </property>
+   </item>
+   <item>
+    <property name="text">
+     <string>Years</string>
+    </property>
+   </item>
+  </widget>
+  <widget class="QCheckBox" name="timeisset">
+   <property name="geometry">
+    <rect>
+     <x>70</x>
+     <y>30</y>
+     <width>201</width>
+     <height>22</height>
+    </rect>
+   </property>
+   <property name="toolTip">
+    <string>Indicate job has time set as opposed to being a &quot;do when possible&quot; job.</string>
+   </property>
+   <property name="text">
+    <string>Set up a time parameter</string>
+   </property>
+  </widget>
+ </widget>
+ <tabstops>
+  <tabstop>timeisset</tabstop>
+  <tabstop>repunits</tabstop>
+  <tabstop>repstyle</tabstop>
+  <tabstop>monthday</tabstop>
+  <tabstop>avSun</tabstop>
+  <tabstop>avMon</tabstop>
+  <tabstop>avTue</tabstop>
+  <tabstop>avWed</tabstop>
+  <tabstop>avThu</tabstop>
+  <tabstop>avFri</tabstop>
+  <tabstop>avSat</tabstop>
+  <tabstop>avHol</tabstop>
+  <tabstop>ifnposs</tabstop>
+  <tabstop>buttonBox</tabstop>
+ </tabstops>
+ <resources/>
+ <connections>
+  <connection>
+   <sender>buttonBox</sender>
+   <signal>accepted()</signal>
+   <receiver>deftimepardlg</receiver>
+   <slot>accept()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>248</x>
+     <y>254</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>157</x>
+     <y>274</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>buttonBox</sender>
+   <signal>rejected()</signal>
+   <receiver>deftimepardlg</receiver>
+   <slot>reject()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>316</x>
+     <y>260</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>286</x>
+     <y>274</y>
+    </hint>
+   </hints>
+  </connection>
+ </connections>
+</ui>

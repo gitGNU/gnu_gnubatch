@@ -17,5 +17,5 @@
 
 JFORMAT(fmt_group)
 {
-	return  (fmt_t) strlen(strcpy(bigbuff, jp->h.bj_mode.o_group));
+        return  (fmt_t) strlen(strcpy(bigbuff, jp->h.bj_mode.o_group));
 }

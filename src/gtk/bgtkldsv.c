@@ -26,44 +26,44 @@
 #include "files.h"
 #include "ecodes.h"
 
-#define	BUFFSIZE	256
+#define BUFFSIZE        256
 
 int  readfile(char *fl)
 {
-	FILE  *inf = fopen(fl, "r");
-	size_t	nb;
-	char	buf[1024];
+        FILE  *inf = fopen(fl, "r");
+        size_t  nb;
+        char    buf[1024];
 
-	if  (!inf)
-		return  E_NOJOB;
+        if  (!inf)
+                return  E_NOJOB;
 
-	while  ((nb = fread(buf, 1, sizeof(buf), inf))  !=  0)
-		fwrite(buf, 1, nb, stdout);
-	fclose(inf);
-	return  0;
+        while  ((nb = fread(buf, 1, sizeof(buf), inf))  !=  0)
+                fwrite(buf, 1, nb, stdout);
+        fclose(inf);
+        return  0;
 }
 
-int	writefile(char *fl)
+int     writefile(char *fl)
 {
-	FILE  *outf = fopen(fl, "w");
-	size_t	nb;
-	char	buf[1024];
-	int	um = umask(0);
-	umask(um);
+        FILE  *outf = fopen(fl, "w");
+        size_t  nb;
+        char    buf[1024];
+        int     um = umask(0);
+        umask(um);
 
-	if  (!outf)
-		return  E_NOJOB;
-	while  ((nb = fread(buf, 1, sizeof(buf), stdin))  !=  0)
-		fwrite(buf, 1, nb, outf);
-	/* This is to try to turn on executable bits */
-#ifdef	HAVE_FCHMOD
-	fchmod(fileno(outf), 0777 & ~um);
+        if  (!outf)
+                return  E_NOJOB;
+        while  ((nb = fread(buf, 1, sizeof(buf), stdin))  !=  0)
+                fwrite(buf, 1, nb, outf);
+        /* This is to try to turn on executable bits */
+#ifdef  HAVE_FCHMOD
+        fchmod(fileno(outf), 0777 & ~um);
 #endif
-	fclose(outf);
-#ifndef	HAVE_FCHMOD
-	chmod(fl, 0777 & ~um);
+        fclose(outf);
+#ifndef HAVE_FCHMOD
+        chmod(fl, 0777 & ~um);
 #endif
-	return  0;
+        return  0;
 }
 
 /*  Arguments are:
@@ -73,55 +73,55 @@ int	writefile(char *fl)
 
 MAINFN_TYPE  main(int argc, char **argv)
 {
-	struct  passwd  *pw = getpwnam(BATCHUNAME);
-	uid_t  duid = ROOTID, myuid = getuid(), mygid = getgid();
+        struct  passwd  *pw = getpwnam(BATCHUNAME);
+        uid_t  duid = ROOTID, myuid = getuid(), mygid = getgid();
 
-	versionprint(argv, "$Revision: 1.6 $", 1);
+        versionprint(argv, "$Revision: 1.7 $", 1);
 
-	/* Get batch uid */
+        /* Get batch uid */
 
-	if  (pw)
-		duid = pw->pw_uid;
-	endpwent();
+        if  (pw)
+                duid = pw->pw_uid;
+        endpwent();
 
-	/* If the real user id is "batch" this is either because we have invoked the
-	   original ui program as batch or because we have invoked a GTK program which
-	   switched the real uid to batch. In such cases we fish the uid out of the
-	   home directory and use that.
+        /* If the real user id is "batch" this is either because we have invoked the
+           original ui program as batch or because we have invoked a GTK program which
+           switched the real uid to batch. In such cases we fish the uid out of the
+           home directory and use that.
 
-	   Refuse to work if no home directory or it looks strange */
+           Refuse to work if no home directory or it looks strange */
 
-	if  (myuid == duid)  {
-		char	*homed = getenv("HOME");
-		struct  stat  sbuf;
+        if  (myuid == duid)  {
+                char    *homed = getenv("HOME");
+                struct  stat  sbuf;
 
-		if  (!homed  ||  stat(homed, &sbuf) < 0  ||  (sbuf.st_mode & S_IFMT) != S_IFDIR)
-			exit(E_SETUP);
+                if  (!homed  ||  stat(homed, &sbuf) < 0  ||  (sbuf.st_mode & S_IFMT) != S_IFDIR)
+                        exit(E_SETUP);
 
-		myuid = sbuf.st_uid;
-		mygid = sbuf.st_gid;
-	}
+                myuid = sbuf.st_uid;
+                mygid = sbuf.st_gid;
+        }
 
-	/* Switch completely to the user id and do the bizniz. */
+        /* Switch completely to the user id and do the bizniz. */
 
-	setgid(mygid);
-	setuid(myuid);
+        setgid(mygid);
+        setuid(myuid);
 
-	/* If we haven't got the right arguments then just quit.
-	   This is only meant to be run by xbtr.
-	   Maybe one day we'll have a more sophisticated routine. */
+        /* If we haven't got the right arguments then just quit.
+           This is only meant to be run by xbtr.
+           Maybe one day we'll have a more sophisticated routine. */
 
-	if  (argc != 3  ||  argv[1][0] != '-')
-		return  E_USAGE;
+        if  (argc != 3  ||  argv[1][0] != '-')
+                return  E_USAGE;
 
-	switch  (argv[1][1])  {
-	default:
-		return  E_USAGE;
-	case  'r':
-		return  readfile(argv[2]);
-	case  'w':
-		return  writefile(argv[2]);
-	case  'd':
-		return  unlink(argv[2]) >= 0? 0: E_NOJOB;
-	}
+        switch  (argv[1][1])  {
+        default:
+                return  E_USAGE;
+        case  'r':
+                return  readfile(argv[2]);
+        case  'w':
+                return  writefile(argv[2]);
+        case  'd':
+                return  unlink(argv[2]) >= 0? 0: E_NOJOB;
+        }
 }

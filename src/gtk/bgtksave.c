@@ -26,26 +26,26 @@
 #include "files.h"
 #include "ecodes.h"
 
-#define	BUFFSIZE	256
+#define BUFFSIZE        256
 
 /* Field names are alternate arguments */
 
 int  isfld(char *buff, char **argv)
 {
-	char	*ep = strchr(buff, '=');
-	char	**ap;
-	unsigned  lng = ep - buff;
+        char    *ep = strchr(buff, '=');
+        char    **ap;
+        unsigned  lng = ep - buff;
 
-	if  (!ep)
-		return  0;
+        if  (!ep)
+                return  0;
 
-	for  (ap = argv + 1;  *ap;  ap += 2)  {
-		if  (lng != strlen(*ap))
-			continue;
-		if  (strncmp(buff, *ap, lng) == 0)
-			return  1;
-	}
-	return  0;
+        for  (ap = argv + 1;  *ap;  ap += 2)  {
+                if  (lng != strlen(*ap))
+                        continue;
+                if  (strncmp(buff, *ap, lng) == 0)
+                        return  1;
+        }
+        return  0;
 }
 
 /*  Arguments are:
@@ -59,60 +59,60 @@ int  isfld(char *buff, char **argv)
 
 MAINFN_TYPE  main(int argc, char **argv)
 {
-	char	*homed;
-	int	oldumask, cnt;
-	FILE	*xtfile;
+        char    *homed;
+        int     oldumask, cnt;
+        FILE    *xtfile;
 
-	versionprint(argv, "$Revision: 1.6 $", 1);
+        versionprint(argv, "$Revision: 1.7 $", 1);
 
-	/* If we haven't got the right arguments then just quit.
-	   This is only meant to be run by xbtq.
-	   Maybe one day we'll have a more sophisticated routine. */
+        /* If we haven't got the right arguments then just quit.
+           This is only meant to be run by xbtq.
+           Maybe one day we'll have a more sophisticated routine. */
 
-	if  ((argc & 1) == 0)
-		return  E_USAGE;
+        if  ((argc & 1) == 0)
+                return  E_USAGE;
 
-	if  (!(homed = getenv("HOME")))  {
-		struct  passwd  *pw = getpwuid(getuid());
-		if  (!pw)
-			return  E_SETUP;
-		homed = pw->pw_dir;
-	}
+        if  (!(homed = getenv("HOME")))  {
+                struct  passwd  *pw = getpwuid(getuid());
+                if  (!pw)
+                        return  E_SETUP;
+                homed = pw->pw_dir;
+        }
 
-	if  (chdir(homed) < 0)
-		return  E_SETUP;
+        if  (chdir(homed) < 0)
+                return  E_SETUP;
 
-	/* Set umask so anyone can read the file (home dir mush be at least 0111). */
+        /* Set umask so anyone can read the file (home dir mush be at least 0111). */
 
-	oldumask = umask(0);
-	umask(oldumask & ~0444);
+        oldumask = umask(0);
+        umask(oldumask & ~0444);
 
-	if  ((xtfile = fopen(USER_CONFIG, "r")))  {
-		FILE  *tmpf = tmpfile();
-		char	buffer[BUFFSIZE];
+        if  ((xtfile = fopen(USER_CONFIG, "r")))  {
+                FILE  *tmpf = tmpfile();
+                char    buffer[BUFFSIZE];
 
-		while  (fgets(buffer, BUFFSIZE, xtfile))  {
-			if  (!isfld(buffer, argv))
-				fputs(buffer, tmpf);
-		}
-		rewind(tmpf);
-		fclose(xtfile);
-		if  (!(xtfile = fopen(USER_CONFIG, "w")))
-			return  E_NOPRIV;
-		while  (fgets(buffer, BUFFSIZE, tmpf))
-			fputs(buffer, xtfile);
-	}
-	else  if  (!(xtfile = fopen(USER_CONFIG, "w")))
-		return  E_NOPRIV;
+                while  (fgets(buffer, BUFFSIZE, xtfile))  {
+                        if  (!isfld(buffer, argv))
+                                fputs(buffer, tmpf);
+                }
+                rewind(tmpf);
+                fclose(xtfile);
+                if  (!(xtfile = fopen(USER_CONFIG, "w")))
+                        return  E_NOPRIV;
+                while  (fgets(buffer, BUFFSIZE, tmpf))
+                        fputs(buffer, xtfile);
+        }
+        else  if  (!(xtfile = fopen(USER_CONFIG, "w")))
+                return  E_NOPRIV;
 
-	/* Now stick the new stuff on the end of the file */
+        /* Now stick the new stuff on the end of the file */
 
-	for  (cnt = 1;  cnt < argc;  cnt += 2)  {
-		char	*fld = argv[cnt];
-		char	*val = argv[cnt+1];
-		if  (strcmp(val, "-") != 0)
-			fprintf(xtfile, "%s=%s\n", fld, val);
-	}
+        for  (cnt = 1;  cnt < argc;  cnt += 2)  {
+                char    *fld = argv[cnt];
+                char    *val = argv[cnt+1];
+                if  (strcmp(val, "-") != 0)
+                        fprintf(xtfile, "%s=%s\n", fld, val);
+        }
 
-	return  0;
+        return  0;
 }

@@ -32,114 +32,114 @@ extern struct api_fd *gbatch_look_fd(const int);
 
 static int  var_readrest(struct api_fd *fdp, apiBtvar *result)
 {
-	int	ret;
-	struct	varnetmsg	res;
+        int     ret;
+        struct  varnetmsg       res;
 
-	if  ((ret = gbatch_read(fdp->sockfd, (char *) &res, sizeof(res))) != 0)
-		return  ret;
+        if  ((ret = gbatch_read(fdp->sockfd, (char *) &res, sizeof(res))) != 0)
+                return  ret;
 
-	/* And now do all the byte-swapping */
+        /* And now do all the byte-swapping */
 
-	BLOCK_ZERO(result, sizeof(apiBtvar));
-	result->var_id.hostid = res.vid.hostid;
-	result->var_id.slotno = ntohl(res.vid.slotno);
-	result->var_c_time = ntohl(res.nm_c_time);
-	result->var_type = res.nm_type;
-	result->var_flags = res.nm_flags;
-	strncpy(result->var_name, res.nm_name, BTV_NAME);
-	strncpy(result->var_comment, res.nm_comment, BTV_COMMENT);
-	gbatch_mode_unpack(&result->var_mode, &res.nm_mode);
-	if  ((result->var_value.const_type = res.nm_consttype) == CON_STRING)
-		strncpy(result->var_value.con_un.con_string, res.nm_un.nm_string, BTC_VALUE);
-	else
-		result->var_value.con_un.con_long = ntohl(res.nm_un.nm_long);
-	return  XB_OK;
+        BLOCK_ZERO(result, sizeof(apiBtvar));
+        result->var_id.hostid = res.vid.hostid;
+        result->var_id.slotno = ntohl(res.vid.slotno);
+        result->var_c_time = ntohl(res.nm_c_time);
+        result->var_type = res.nm_type;
+        result->var_flags = res.nm_flags;
+        strncpy(result->var_name, res.nm_name, BTV_NAME);
+        strncpy(result->var_comment, res.nm_comment, BTV_COMMENT);
+        gbatch_mode_unpack(&result->var_mode, &res.nm_mode);
+        if  ((result->var_value.const_type = res.nm_consttype) == CON_STRING)
+                strncpy(result->var_value.con_un.con_string, res.nm_un.nm_string, BTC_VALUE);
+        else
+                result->var_value.con_un.con_long = ntohl(res.nm_un.nm_long);
+        return  XB_OK;
 
 }
 
-int	gbatch_varread(const int fd, const unsigned flags, const slotno_t slotno, apiBtvar *result)
+int     gbatch_varread(const int fd, const unsigned flags, const slotno_t slotno, apiBtvar *result)
 {
-	int			ret;
-	struct	api_fd		*fdp = gbatch_look_fd(fd);
-	struct	api_msg		msg;
+        int                     ret;
+        struct  api_fd          *fdp = gbatch_look_fd(fd);
+        struct  api_msg         msg;
 
-	if  (!fdp)
-		return  XB_INVALID_FD;
-	msg.code = API_VARREAD;
-	msg.un.reader.flags = htonl(flags);
-	msg.un.reader.seq = htonl(fdp->vserial);
-	msg.un.reader.slotno = htonl(slotno);
-	if  ((ret = gbatch_wmsg(fdp, &msg)))
-		return  ret;
-	if  ((ret = gbatch_rmsg(fdp, &msg)))
-		return  ret;
-	if  (msg.un.r_reader.seq != 0)
-		fdp->vserial = ntohl(msg.un.r_reader.seq);
-	if  (msg.retcode != 0)
-		return  (SHORT) ntohs(msg.retcode);
-	/* The message is followed by the var details, held in
-	   varnetmsg format.  */
-	return  var_readrest(fdp, result);
+        if  (!fdp)
+                return  XB_INVALID_FD;
+        msg.code = API_VARREAD;
+        msg.un.reader.flags = htonl(flags);
+        msg.un.reader.seq = htonl(fdp->vserial);
+        msg.un.reader.slotno = htonl(slotno);
+        if  ((ret = gbatch_wmsg(fdp, &msg)))
+                return  ret;
+        if  ((ret = gbatch_rmsg(fdp, &msg)))
+                return  ret;
+        if  (msg.un.r_reader.seq != 0)
+                fdp->vserial = ntohl(msg.un.r_reader.seq);
+        if  (msg.retcode != 0)
+                return  (SHORT) ntohs(msg.retcode);
+        /* The message is followed by the var details, held in
+           varnetmsg format.  */
+        return  var_readrest(fdp, result);
 }
 
-int	gbatch_varfindslot(const int fd, const unsigned flags, const char *name, const netid_t nid, slotno_t *slotno)
+int     gbatch_varfindslot(const int fd, const unsigned flags, const char *name, const netid_t nid, slotno_t *slotno)
 {
-	int		ret;
-	struct	api_fd	*fdp = gbatch_look_fd(fd);
-	struct	api_msg		msg;
-	char	vname[BTV_NAME+1];
+        int             ret;
+        struct  api_fd  *fdp = gbatch_look_fd(fd);
+        struct  api_msg         msg;
+        char    vname[BTV_NAME+1];
 
-	if  (!fdp)
-		return  XB_INVALID_FD;
+        if  (!fdp)
+                return  XB_INVALID_FD;
 
-	strncpy(vname, name, BTV_NAME);
-	vname[BTV_NAME] = '\0';
+        strncpy(vname, name, BTV_NAME);
+        vname[BTV_NAME] = '\0';
 
-	msg.code = API_FINDVARSLOT;
-	msg.un.varfind.flags = htonl(flags);
-	msg.un.varfind.netid = nid;
-	if  ((ret = gbatch_wmsg(fdp, &msg)))
-		return  ret;
-	if  ((ret = gbatch_write(fdp->sockfd, vname, sizeof(vname))))
-		return  ret;
-	if  ((ret = gbatch_rmsg(fdp, &msg)))
-		return  ret;
-	if  (msg.un.r_find.seq != 0)
-		fdp->vserial = ntohl(msg.un.r_find.seq);
-	if  (msg.retcode != 0)
-		return  (SHORT) ntohs(msg.retcode);
-	if  (slotno)
-		*slotno = ntohl(msg.un.r_find.slotno);
-	return  XB_OK;
+        msg.code = API_FINDVARSLOT;
+        msg.un.varfind.flags = htonl(flags);
+        msg.un.varfind.netid = nid;
+        if  ((ret = gbatch_wmsg(fdp, &msg)))
+                return  ret;
+        if  ((ret = gbatch_write(fdp->sockfd, vname, sizeof(vname))))
+                return  ret;
+        if  ((ret = gbatch_rmsg(fdp, &msg)))
+                return  ret;
+        if  (msg.un.r_find.seq != 0)
+                fdp->vserial = ntohl(msg.un.r_find.seq);
+        if  (msg.retcode != 0)
+                return  (SHORT) ntohs(msg.retcode);
+        if  (slotno)
+                *slotno = ntohl(msg.un.r_find.slotno);
+        return  XB_OK;
 }
 
-int	gbatch_varfind(const int fd, const unsigned flags, const char *name, const netid_t nid, slotno_t *slotno, apiBtvar *result)
+int     gbatch_varfind(const int fd, const unsigned flags, const char *name, const netid_t nid, slotno_t *slotno, apiBtvar *result)
 {
-	int		ret;
-	struct	api_fd	*fdp = gbatch_look_fd(fd);
-	struct	api_msg		msg;
-	char	vname[BTV_NAME+1];
+        int             ret;
+        struct  api_fd  *fdp = gbatch_look_fd(fd);
+        struct  api_msg         msg;
+        char    vname[BTV_NAME+1];
 
-	if  (!fdp)
-		return  XB_INVALID_FD;
+        if  (!fdp)
+                return  XB_INVALID_FD;
 
-	strncpy(vname, name, BTV_NAME);
-	vname[BTV_NAME] = '\0';
+        strncpy(vname, name, BTV_NAME);
+        vname[BTV_NAME] = '\0';
 
-	msg.code = API_FINDVAR;
-	msg.un.varfind.flags = htonl(flags);
-	msg.un.varfind.netid = nid;
-	if  ((ret = gbatch_wmsg(fdp, &msg)))
-		return  ret;
-	if  ((ret = gbatch_write(fdp->sockfd, vname, sizeof(vname))))
-		return  ret;
-	if  ((ret = gbatch_rmsg(fdp, &msg)))
-		return  ret;
-	if  (msg.un.r_find.seq != 0)
-		fdp->vserial = ntohl(msg.un.r_find.seq);
-	if  (msg.retcode != 0)
-		return  (SHORT) ntohs(msg.retcode);
-	if  (slotno)
-		*slotno = ntohl(msg.un.r_find.slotno);
-	return  var_readrest(fdp, result);
+        msg.code = API_FINDVAR;
+        msg.un.varfind.flags = htonl(flags);
+        msg.un.varfind.netid = nid;
+        if  ((ret = gbatch_wmsg(fdp, &msg)))
+                return  ret;
+        if  ((ret = gbatch_write(fdp->sockfd, vname, sizeof(vname))))
+                return  ret;
+        if  ((ret = gbatch_rmsg(fdp, &msg)))
+                return  ret;
+        if  (msg.un.r_find.seq != 0)
+                fdp->vserial = ntohl(msg.un.r_find.seq);
+        if  (msg.retcode != 0)
+                return  (SHORT) ntohs(msg.retcode);
+        if  (slotno)
+                *slotno = ntohl(msg.un.r_find.slotno);
+        return  var_readrest(fdp, result);
 }

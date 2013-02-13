@@ -17,28 +17,28 @@
 
 JFORMAT(fmt_xit)
 {
-#ifdef	CHARSPRINTF
-	if  (isreadable)  {
-		sprintf(bigbuff, "%*u", fwidth, jp->h.bj_lastexit >> 8);
-		return  (fmt_t) strlen(bigbuff);
-	}
+#ifdef  CHARSPRINTF
+        if  (isreadable)  {
+                sprintf(bigbuff, "%*u", fwidth, jp->h.bj_lastexit >> 8);
+                return  (fmt_t) strlen(bigbuff);
+        }
 #else
-	if  (isreadable)
-		return	(fmt_t) sprintf(bigbuff, "%*u", fwidth, jp->h.bj_lastexit >> 8);
+        if  (isreadable)
+                return  (fmt_t) sprintf(bigbuff, "%*u", fwidth, jp->h.bj_lastexit >> 8);
 #endif
-	return  0;
+        return  0;
 }
 
 JFORMAT(fmt_sig)
 {
-#ifdef	CHARSPRINTF
-	if  (isreadable)  {
-		sprintf(bigbuff, "%*u", fwidth, jp->h.bj_lastexit & 255);
-		return  (fmt_t) strlen(bigbuff);
-	}
+#ifdef  CHARSPRINTF
+        if  (isreadable)  {
+                sprintf(bigbuff, "%*u", fwidth, jp->h.bj_lastexit & 255);
+                return  (fmt_t) strlen(bigbuff);
+        }
 #else
-	if  (isreadable)
-		return	(fmt_t) sprintf(bigbuff, "%*u", fwidth, jp->h.bj_lastexit & 255);
+        if  (isreadable)
+                return  (fmt_t) sprintf(bigbuff, "%*u", fwidth, jp->h.bj_lastexit & 255);
 #endif
-	return  0;
+        return  0;
 }

@@ -27,71 +27,71 @@ extern int  gbatch_rmsg(const struct api_fd *, struct api_msg *);
 extern int  gbatch_wmsg(const struct api_fd *, struct api_msg *);
 extern struct api_fd *gbatch_look_fd(const int);
 
-int	gbatch_ciread(const int fd, const unsigned flags, int *nci, Cmdint **cis)
+int     gbatch_ciread(const int fd, const unsigned flags, int *nci, Cmdint **cis)
 {
-	int		ret;
-	unsigned	numcis;
-#ifndef	WORDS_BIGENDIAN
-	unsigned	cnt;
-	Cmdint		*cilist;
+        int             ret;
+        unsigned        numcis;
+#ifndef WORDS_BIGENDIAN
+        unsigned        cnt;
+        Cmdint          *cilist;
 #endif
-	struct	api_fd	*fdp = gbatch_look_fd(fd);
-	struct	api_msg	msg;
+        struct  api_fd  *fdp = gbatch_look_fd(fd);
+        struct  api_msg msg;
 
-	if  (!fdp)
-		return  XB_INVALID_FD;
-	msg.code = API_CIREAD;
-	msg.un.lister.flags = htonl(flags);
-	if  ((ret = gbatch_wmsg(fdp, &msg)))
-		return  ret;
-	if  ((ret = gbatch_rmsg(fdp, &msg)))
-		return  ret;
-	if  (msg.retcode != 0)
-		return  (SHORT) ntohs(msg.retcode);
+        if  (!fdp)
+                return  XB_INVALID_FD;
+        msg.code = API_CIREAD;
+        msg.un.lister.flags = htonl(flags);
+        if  ((ret = gbatch_wmsg(fdp, &msg)))
+                return  ret;
+        if  ((ret = gbatch_rmsg(fdp, &msg)))
+                return  ret;
+        if  (msg.retcode != 0)
+                return  (SHORT) ntohs(msg.retcode);
 
-	/* Get number of cis */
+        /* Get number of cis */
 
-	numcis = ntohl(msg.un.r_lister.nitems);
-	if  (nci)
-		*nci = (int) numcis;
+        numcis = ntohl(msg.un.r_lister.nitems);
+        if  (nci)
+                *nci = (int) numcis;
 
-	/* Try to allocate enough space to hold the list.  If we don't
-	   succeed we'd better carry on reading it so we don't
-	   get out of sync.  */
+        /* Try to allocate enough space to hold the list.  If we don't
+           succeed we'd better carry on reading it so we don't
+           get out of sync.  */
 
-	if  (numcis != 0)  {
-		unsigned  nbytes = numcis * sizeof(Cmdint);
-		if  (nbytes > fdp->bufmax)  {
-			if  (fdp->bufmax != 0)  {
-				free(fdp->buff);
-				fdp->bufmax = 0;
-				fdp->buff = (char *) 0;
-			}
-			if  (!(fdp->buff = malloc(nbytes)))  {
-				unsigned  cnt;
-				for  (cnt = 0;  cnt < numcis;  cnt++)  {
-					Cmdint	slurp;
-					if  ((ret = gbatch_read(fdp->sockfd, (char *) &slurp, sizeof(slurp))))
-						return  ret;
-				}
-				return  XB_NOMEM;
-			}
-			fdp->bufmax = nbytes;
-		}
+        if  (numcis != 0)  {
+                unsigned  nbytes = numcis * sizeof(Cmdint);
+                if  (nbytes > fdp->bufmax)  {
+                        if  (fdp->bufmax != 0)  {
+                                free(fdp->buff);
+                                fdp->bufmax = 0;
+                                fdp->buff = (char *) 0;
+                        }
+                        if  (!(fdp->buff = malloc(nbytes)))  {
+                                unsigned  cnt;
+                                for  (cnt = 0;  cnt < numcis;  cnt++)  {
+                                        Cmdint  slurp;
+                                        if  ((ret = gbatch_read(fdp->sockfd, (char *) &slurp, sizeof(slurp))))
+                                                return  ret;
+                                }
+                                return  XB_NOMEM;
+                        }
+                        fdp->bufmax = nbytes;
+                }
 
-		if  ((ret = gbatch_read(fdp->sockfd, fdp->buff, nbytes)))
-			return  ret;
+                if  ((ret = gbatch_read(fdp->sockfd, fdp->buff, nbytes)))
+                        return  ret;
 
-#ifndef	WORDS_BIGENDIAN
-		cilist = (Cmdint *) fdp->buff;
-		for  (cnt = 0;  cnt < numcis;  cilist++, cnt++)
-			cilist->ci_ll = ntohs(cilist->ci_ll);
+#ifndef WORDS_BIGENDIAN
+                cilist = (Cmdint *) fdp->buff;
+                for  (cnt = 0;  cnt < numcis;  cilist++, cnt++)
+                        cilist->ci_ll = ntohs(cilist->ci_ll);
 #endif
-	}
+        }
 
-	/* Set up answer */
+        /* Set up answer */
 
-	if  (cis)
-		*cis = (Cmdint *) fdp->buff;
-	return  XB_OK;
+        if  (cis)
+                *cis = (Cmdint *) fdp->buff;
+        return  XB_OK;
 }

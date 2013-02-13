@@ -37,12 +37,12 @@ cat $CONFIG >>gbatch.h
 
 for file in defaults bjparam btconst btmode timecon
 do
-	cat - <<EOF >>gbatch.h
+        cat - <<EOF >>gbatch.h
 
 /* This section built from $file.h */
 
 EOF
-	sed -e '/extern /d' $HDRS/$file.h >>gbatch.h
+        sed -e '/extern /d' $HDRS/$file.h >>gbatch.h
 done
 
 # Copy error codes only out of xbapi_int.h and rename

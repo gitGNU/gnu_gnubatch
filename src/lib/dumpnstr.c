@@ -21,8 +21,8 @@
 
 void  dumpnstr(FILE *dest, char *str, int len)
 {
-	if  (strchr(str, ' ') || strchr(str, '\t'))
-		fprintf(dest, "\'%*.*s\'", len, len, str);
-	else
-		fprintf(dest, "%*.*s", len, len, str);
+        if  (strchr(str, ' ') || strchr(str, '\t'))
+                fprintf(dest, "\'%*.*s\'", len, len, str);
+        else
+                fprintf(dest, "%*.*s", len, len, str);
 }

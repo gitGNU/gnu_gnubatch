@@ -1,0 +1,31 @@
+  Copyright 2013 Free Software Foundation, Inc.
+
+  Copying and distribution of this file, with or without modification,
+  are permitted in any medium without royalty provided the copyright
+  notice and this notice are preserved.
+
+----------------------------------------------------------------------
+
+This is an alternative interface written in PyQt format.
+
+It was mainly intended as a Windows Client interface but there seemed no
+point in it not being a UNIX or GNU/Linux one too so here it is.
+
+At the present time this hasn't been tested on Windows so it probably
+wants packaging up with a current version of Python and PyQt for Windows.
+
+I believe that it is mostly debugged and working but there probably
+need to be a few interface fixes.
+
+The stuff for packing up structs and such is hypersensitive to changes
+in sizes of some of the constants so they desperately want recoding
+in XML.
+
+Only downside of that is that it makes a dependency on having libxml
+on other platforms than GNU/Linux.
+
+I'll also do the documentation for it real soon now...
+
+John Collins
+13th February 2013
+

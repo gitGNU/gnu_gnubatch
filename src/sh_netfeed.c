@@ -17,11 +17,11 @@
 
 #include "config.h"
 #include <stdio.h>
-#ifdef	NETWORK_VERSION
+#ifdef  NETWORK_VERSION
 #include "incl_sig.h"
 #include <sys/types.h>
 #include <sys/ipc.h>
-#ifdef	HAVE_FCNTL_H
+#ifdef  HAVE_FCNTL_H
 #include <fcntl.h>
 #endif
 #include "incl_unix.h"
@@ -45,69 +45,69 @@
 
 static  void  feed_pr(const jobno_t jobno, const char *prefix, const int sock, const int del)
 {
-	int	ffd, bytes;
-	char	*fname;
-	char	buffer[1024];
+        int     ffd, bytes;
+        char    *fname;
+        char    buffer[1024];
 
-	if  ((ffd = open(fname = mkspid(prefix, jobno), O_RDONLY)) >= 0)  {
-		while  ((bytes = read(ffd, buffer, sizeof(buffer))) > 0)
-			Ignored_error = write(sock, buffer, (unsigned) bytes);
-		close(ffd);
-		if  (del)
-			unlink(fname);
-	}
+        if  ((ffd = open(fname = mkspid(prefix, jobno), O_RDONLY)) >= 0)  {
+                while  ((bytes = read(ffd, buffer, sizeof(buffer))) > 0)
+                        Ignored_error = write(sock, buffer, (unsigned) bytes);
+                close(ffd);
+                if  (del)
+                        unlink(fname);
+        }
 }
 
 /* Process request from another machine to read job / stdout / stderr file */
 
 void  feed_req()
 {
-	int		sock;
-	PIDTYPE		ret;
-	struct	feeder	rq;
-	SOCKLEN_T	sinl;
-	struct	sockaddr  sin;
+        int             sock;
+        PIDTYPE         ret;
+        struct  feeder  rq;
+        SOCKLEN_T       sinl;
+        struct  sockaddr  sin;
 
-	sinl = sizeof(sin);
-	if  ((sock = accept(viewsock, &sin, &sinl)) < 0)
-		return;
+        sinl = sizeof(sin);
+        if  ((sock = accept(viewsock, &sin, &sinl)) < 0)
+                return;
 
-	if  (read(sock, (char *) &rq, sizeof(rq)) != sizeof(rq))  {
-		close(sock);
-		return;
-	}
-	if  ((ret = forksafe()) < 0)
-		panic($E{Cannot fork});
-	if  (ret != 0)  {
-		close(sock);
-		return;
-	}
+        if  (read(sock, (char *) &rq, sizeof(rq)) != sizeof(rq))  {
+                close(sock);
+                return;
+        }
+        if  ((ret = forksafe()) < 0)
+                panic($E{Cannot fork});
+        if  (ret != 0)  {
+                close(sock);
+                return;
+        }
 
-	/* We are now a separate process */
+        /* We are now a separate process */
 
-	switch  (rq.fdtype)  {
-	case  FEED_JOB:
-	default:
-		feed_pr(ntohl(rq.jobno), SPNAM, sock, 0);
-		exit(0);
-	case  FEED_SO:
-		feed_pr(ntohl(rq.jobno), SONAM, sock, 1);
-		exit(0);
-	case  FEED_SE:
-		feed_pr(ntohl(rq.jobno), SENAM, sock, 1);
-		exit(0);
-	}
+        switch  (rq.fdtype)  {
+        case  FEED_JOB:
+        default:
+                feed_pr(ntohl(rq.jobno), SPNAM, sock, 0);
+                exit(0);
+        case  FEED_SO:
+                feed_pr(ntohl(rq.jobno), SONAM, sock, 1);
+                exit(0);
+        case  FEED_SE:
+                feed_pr(ntohl(rq.jobno), SENAM, sock, 1);
+                exit(0);
+        }
 }
 
-#else	/* !NETWORK_VERSION */
+#else   /* !NETWORK_VERSION */
 
 /* This "routine" isn't strictly necessary but some C compilers winge
    if they are given a .c file with no code so here is some....  */
 
 
-void	feed_req()
+void    feed_req()
 {
-	return;
+        return;
 }
 
-#endif	/* !NETWORK_VERSION */
+#endif  /* !NETWORK_VERSION */

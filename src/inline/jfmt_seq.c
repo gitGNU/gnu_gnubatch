@@ -17,10 +17,10 @@
 
 JFORMAT(fmt_seq)
 {
-#ifdef	CHARSPRINTF
-	sprintf(bigbuff, "%*d", fwidth, jcnt);
-	return  strlen(bigbuff);
+#ifdef  CHARSPRINTF
+        sprintf(bigbuff, "%*d", fwidth, jcnt);
+        return  strlen(bigbuff);
 #else
-	return  (fmt_t) sprintf(bigbuff, "%*d", fwidth, jcnt);
+        return  (fmt_t) sprintf(bigbuff, "%*d", fwidth, jcnt);
 #endif
 }

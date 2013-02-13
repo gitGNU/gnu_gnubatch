@@ -17,8 +17,8 @@
 
 /*
  * btcharge:
- *	print/manipulate charging details
- *	Deprecated August 2010
+ *      print/manipulate charging details
+ *      Deprecated August 2010
  */
 
 #include "config.h"
@@ -32,35 +32,35 @@
 #include "helpargs.h"
 #include "files.h"
 
-static	char	Filename[] = __FILE__;
+static  char    Filename[] = __FILE__;
 
 void  nomem(const char *fl, const int ln)
 {
-	fprintf(stderr, "%s:Mem alloc fault: %s line %d\n", progname, fl, ln);
-	exit(E_NOMEM);
+        fprintf(stderr, "%s:Mem alloc fault: %s line %d\n", progname, fl, ln);
+        exit(E_NOMEM);
 }
 
 MAINFN_TYPE  main(int argc, char **argv)
 {
-#if	defined(NHONSUID) || defined(DEBUG)
-	int_ugid_t	chk_uid;
+#if     defined(NHONSUID) || defined(DEBUG)
+        int_ugid_t      chk_uid;
 #endif
 
-	versionprint(argv, "$Revision: 1.6 $", 0);
+        versionprint(argv, "$Revision: 1.7 $", 0);
 
-	if  ((progname = strrchr(argv[0], '/')))
-		progname++;
-	else
-		progname = argv[0];
+        if  ((progname = strrchr(argv[0], '/')))
+                progname++;
+        else
+                progname = argv[0];
 
-	init_mcfile();
-	Realuid = getuid();
-	Realgid = getgid();
-	Effuid = geteuid();
-	Effgid = getegid();
-	INIT_DAEMUID
-	Cfile = open_cfile(MISC_UCONFIG, "btrest.help");
-	SCRAMBLID_CHECK
-	print_error($E{btcharge explain});
-	return  E_USAGE;
+        init_mcfile();
+        Realuid = getuid();
+        Realgid = getgid();
+        Effuid = geteuid();
+        Effgid = getegid();
+        INIT_DAEMUID
+        Cfile = open_cfile(MISC_UCONFIG, "btrest.help");
+        SCRAMBLID_CHECK
+        print_error($E{btcharge explain});
+        return  E_USAGE;
 }

@@ -27,23 +27,23 @@ extern struct api_fd *gbatch_look_fd(const int);
 
 int  gbatch_vardel(const int fd, const unsigned flags, const slotno_t slotno)
 {
-	int	ret;
-	struct	api_fd	*fdp = gbatch_look_fd(fd);
-	struct	api_msg	msg;
+        int     ret;
+        struct  api_fd  *fdp = gbatch_look_fd(fd);
+        struct  api_msg msg;
 
-	if  (!fdp)
-		return  XB_INVALID_FD;
-	msg.code = API_VARDEL;
-	msg.un.reader.flags = htonl(flags);
-	msg.un.reader.seq = htonl(fdp->vserial);
-	msg.un.reader.slotno = htonl(slotno);
-	if  ((ret = gbatch_wmsg(fdp, &msg)))
-		return  ret;
-	if  ((ret = gbatch_rmsg(fdp, &msg)))
-		return  ret;
-	if  (msg.un.r_reader.seq != 0)
-		fdp->jserial = ntohl(msg.un.r_reader.seq);
-	if  (msg.retcode != 0)
-		return  (SHORT) ntohs(msg.retcode);
-	return  XB_OK;
+        if  (!fdp)
+                return  XB_INVALID_FD;
+        msg.code = API_VARDEL;
+        msg.un.reader.flags = htonl(flags);
+        msg.un.reader.seq = htonl(fdp->vserial);
+        msg.un.reader.slotno = htonl(slotno);
+        if  ((ret = gbatch_wmsg(fdp, &msg)))
+                return  ret;
+        if  ((ret = gbatch_rmsg(fdp, &msg)))
+                return  ret;
+        if  (msg.un.r_reader.seq != 0)
+                fdp->jserial = ntohl(msg.un.r_reader.seq);
+        if  (msg.retcode != 0)
+                return  (SHORT) ntohs(msg.retcode);
+        return  XB_OK;
 }

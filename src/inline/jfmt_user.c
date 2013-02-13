@@ -17,5 +17,5 @@
 
 JFORMAT(fmt_user)
 {
-	return  (fmt_t) strlen(strcpy(bigbuff, jp->h.bj_mode.o_user));
+        return  (fmt_t) strlen(strcpy(bigbuff, jp->h.bj_mode.o_user));
 }

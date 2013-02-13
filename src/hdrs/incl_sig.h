@@ -17,48 +17,48 @@
 
 #include <signal.h>
 
-#ifdef	HAVE_SIGSET
-#define	signal	sigset
+#ifdef  HAVE_SIGSET
+#define signal  sigset
 #endif
 
-#if	!(defined(HAVE_SIGSET) || (defined(HAVE_SIGVEC) && defined(SV_INTERRUPT)) || defined(HAVE_SIGVECTOR) || defined(HAVE_SIGACTION))
-#define	UNSAFE_SIGNALS
+#if     !(defined(HAVE_SIGSET) || (defined(HAVE_SIGVEC) && defined(SV_INTERRUPT)) || defined(HAVE_SIGVECTOR) || defined(HAVE_SIGACTION))
+#define UNSAFE_SIGNALS
 #endif
 
-#ifdef	HAVE_SIGACTION
-#define	STRUCT_SIG
-#define	sigact_routine	sigaction
-#define	sigstruct_name	sigaction
-#define	sighandler_el	sa_handler
-#define	sigmask_clear(X)	sigemptyset(&X.sa_mask)
-#define	sigflags_el	sa_flags
-#define	SIGVEC_INTFLAG	0
-#ifdef	SA_NODEFER
-#define	SIGACT_INTSELF	SA_NODEFER
+#ifdef  HAVE_SIGACTION
+#define STRUCT_SIG
+#define sigact_routine  sigaction
+#define sigstruct_name  sigaction
+#define sighandler_el   sa_handler
+#define sigmask_clear(X)        sigemptyset(&X.sa_mask)
+#define sigflags_el     sa_flags
+#define SIGVEC_INTFLAG  0
+#ifdef  SA_NODEFER
+#define SIGACT_INTSELF  SA_NODEFER
 #else
-#define	SIGACT_INTSELF	0
+#define SIGACT_INTSELF  0
 #endif
-#elif	defined(HAVE_SIGVECTOR)
-#define	STRUCT_SIG
-#define	sigact_routine	sigvector
-#define	sigstruct_name	sigvec
-#define	sighandler_el	sv_handler
-#define	sigmask_clear(X)	X.sv_mask = 0
-#define	sigflags_el	sv_flags
-#define	SIGVEC_INTFLAG	0
-#define	SIGACT_INTSELF	0
-#elif	defined(HAVE_SIGVEC) && defined(SV_INTERRUPT)
-#define	STRUCT_SIG
-#define	sigact_routine	sigvec
-#define	sigstruct_name	sigvec
-#define	sighandler_el	sv_handler
-#define	sigmask_clear(X)	X.sv_mask = 0
-#define	sigflags_el	sv_flags
-#define	SIGVEC_INTFLAG	SV_INTERRUPT
-#define	SIGACT_INTSELF	0
+#elif   defined(HAVE_SIGVECTOR)
+#define STRUCT_SIG
+#define sigact_routine  sigvector
+#define sigstruct_name  sigvec
+#define sighandler_el   sv_handler
+#define sigmask_clear(X)        X.sv_mask = 0
+#define sigflags_el     sv_flags
+#define SIGVEC_INTFLAG  0
+#define SIGACT_INTSELF  0
+#elif   defined(HAVE_SIGVEC) && defined(SV_INTERRUPT)
+#define STRUCT_SIG
+#define sigact_routine  sigvec
+#define sigstruct_name  sigvec
+#define sighandler_el   sv_handler
+#define sigmask_clear(X)        X.sv_mask = 0
+#define sigflags_el     sv_flags
+#define SIGVEC_INTFLAG  SV_INTERRUPT
+#define SIGACT_INTSELF  0
 #else
-#define	sigvec_routine	cockup in incl_sig
+#define sigvec_routine  cockup in incl_sig
 #endif
-#ifdef	OS_FREEBSD
-#define	SIGCLD	SIGCHLD
+#ifdef  OS_FREEBSD
+#define SIGCLD  SIGCHLD
 #endif

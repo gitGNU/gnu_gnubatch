@@ -22,28 +22,28 @@
 
 void  dumpmode(FILE *outf, char *prefix, unsigned md)
 {
-	fprintf(outf, "%s:", prefix);
+        fprintf(outf, "%s:", prefix);
 
-	if  (md & BTM_READ)
-		putc('R', outf);
-	if  (md & BTM_WRITE)
-		putc('W', outf);
-	if  (md & BTM_SHOW)
-		putc('S', outf);
-	if  (md & BTM_RDMODE)
-		putc('M', outf);
-	if  (md & BTM_WRMODE)
-		putc('P', outf);
-	if  (md & BTM_UGIVE)
-		putc('U', outf);
-	if  (md & BTM_UTAKE)
-		putc('V', outf);
-	if  (md & BTM_GGIVE)
-		putc('G', outf);
-	if  (md & BTM_GTAKE)
-		putc('H', outf);
-	if  (md & BTM_DELETE)
-		putc('D', outf);
-	if  (md & BTM_KILL)
-		putc('K', outf);
+        if  (md & BTM_READ)
+                putc('R', outf);
+        if  (md & BTM_WRITE)
+                putc('W', outf);
+        if  (md & BTM_SHOW)
+                putc('S', outf);
+        if  (md & BTM_RDMODE)
+                putc('M', outf);
+        if  (md & BTM_WRMODE)
+                putc('P', outf);
+        if  (md & BTM_UGIVE)
+                putc('U', outf);
+        if  (md & BTM_UTAKE)
+                putc('V', outf);
+        if  (md & BTM_GGIVE)
+                putc('G', outf);
+        if  (md & BTM_GTAKE)
+                putc('H', outf);
+        if  (md & BTM_DELETE)
+                putc('D', outf);
+        if  (md & BTM_KILL)
+                putc('K', outf);
 }

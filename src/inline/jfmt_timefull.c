@@ -17,27 +17,27 @@
 
 JFORMAT(fmt_timefull)
 {
-	if  (isreadable  &&  jp->h.bj_times.tc_istime != 0)  {
-		time_t	w = jp->h.bj_times.tc_nexttime;
-		struct	tm  *t = localtime(&w);
-		int	day = t->tm_mday, mon = t->tm_mon+1;
-#ifdef	HAVE_TM_ZONE
-		if  (t->tm_gmtoff <= -4 * 60 * 60)
+        if  (isreadable  &&  jp->h.bj_times.tc_istime != 0)  {
+                time_t  w = jp->h.bj_times.tc_nexttime;
+                struct  tm  *t = localtime(&w);
+                int     day = t->tm_mday, mon = t->tm_mon+1;
+#ifdef  HAVE_TM_ZONE
+                if  (t->tm_gmtoff <= -4 * 60 * 60)
 #else
-		if  (timezone >= 4 * 60 * 60)
+                if  (timezone >= 4 * 60 * 60)
 #endif
-		{
-			day = mon;
-			mon = t->tm_mday;
-		}
-#ifdef	CHARSPRINTF
-		sprintf(bigbuff, "%.2d/%.2d/%.4d %.2d:%.2d",
-			day, mon, t->tm_year+1900, t->tm_hour, t->tm_min);
-		return  (fmt_t) strlen(bigbuff);
+                {
+                        day = mon;
+                        mon = t->tm_mday;
+                }
+#ifdef  CHARSPRINTF
+                sprintf(bigbuff, "%.2d/%.2d/%.4d %.2d:%.2d",
+                        day, mon, t->tm_year+1900, t->tm_hour, t->tm_min);
+                return  (fmt_t) strlen(bigbuff);
 #else
-		return  (fmt_t) sprintf(bigbuff, "%.2d/%.2d/%.4d %.2d:%.2d",
-					   day, mon, t->tm_year+1900, t->tm_hour, t->tm_min);
+                return  (fmt_t) sprintf(bigbuff, "%.2d/%.2d/%.4d %.2d:%.2d",
+                                           day, mon, t->tm_year+1900, t->tm_hour, t->tm_min);
 #endif
-	}
-	return  0;
+        }
+        return  0;
 }

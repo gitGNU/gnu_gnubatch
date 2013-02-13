@@ -15,41 +15,41 @@
    You should have received a copy of the GNU General Public License
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
-struct	pend_job	{
-	char		*directory;
-	char		*cmdfile_name;
-	char		*jobfile_name;
-	char		*jobqueue;
-	int		changes;
-	int		nosubmit;
-	char		Verbose;
-	int_ugid_t	userid;
-	int_ugid_t	grpid;
-	Btjob		*job;
+struct  pend_job        {
+        char            *directory;
+        char            *cmdfile_name;
+        char            *jobfile_name;
+        char            *jobqueue;
+        int             changes;
+        int             nosubmit;
+        char            Verbose;
+        int_ugid_t      userid;
+        int_ugid_t      grpid;
+        Btjob           *job;
 };
 
-#define	JCMDFILE_JOB	1
-#define	JCMDFILE_CMD	2
+#define JCMDFILE_JOB    1
+#define JCMDFILE_CMD    2
 
-extern	unsigned		pend_njobs, pend_max;
-extern	struct	pend_job	*pend_list;
-extern	struct	pend_job	default_pend, *cjob;
-extern	Btjob			default_job;
-extern	USHORT			def_assflags, defavoid;
+extern  unsigned                pend_njobs, pend_max;
+extern  struct  pend_job        *pend_list;
+extern  struct  pend_job        default_pend, *cjob;
+extern  Btjob                   default_job;
+extern  USHORT                  def_assflags, defavoid;
 
-extern	char	xterm_edit;	/* Invoke "xterm" to run editor */
-extern	char	*editor_name;	/* Name of favourite editor */
+extern  char    xterm_edit;     /* Invoke "xterm" to run editor */
+extern  char    *editor_name;   /* Name of favourite editor */
 
-extern	char	*spdir;		/* Spool directory, typically /usr/spool/batch */
+extern  char    *spdir;         /* Spool directory, typically /usr/spool/batch */
 
-extern	int	Ctrl_chan;
+extern  int     Ctrl_chan;
 
 /* X stuff */
 
-extern	Widget	jtitwid,	/* Job title window */
-		jwid;		/* Job scroll list */
+extern  Widget  jtitwid,        /* Job title window */
+                jwid;           /* Job scroll list */
 
-extern	XtIntervalId	Ptimeout;
+extern  XtIntervalId    Ptimeout;
 
 extern void  cb_defhost(Widget, int);
 extern void  cb_direct(Widget, int);

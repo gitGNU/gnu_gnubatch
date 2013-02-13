@@ -17,7 +17,7 @@
 
 JFORMAT(fmt_interp)
 {
-	if  (isreadable)
-		return  (fmt_t) strlen(strcpy(bigbuff, jp->h.bj_cmdinterp));
-	return  0;
+        if  (isreadable)
+                return  (fmt_t) strlen(strcpy(bigbuff, jp->h.bj_cmdinterp));
+        return  0;
 }

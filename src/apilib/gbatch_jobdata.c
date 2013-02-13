@@ -31,100 +31,100 @@ extern struct api_fd *gbatch_look_fd(const int);
 
 static void  soakupdata(const struct api_fd *fdp)
 {
-	int	bcount;
-	struct	api_msg	msg;
-	char	buffer[XBA_BUFFSIZE];
+        int     bcount;
+        struct  api_msg msg;
+        char    buffer[XBA_BUFFSIZE];
 
-	while  (gbatch_rmsg(fdp, &msg) == 0  &&  msg.code == API_DATAOUT  &&
-		(bcount = (SHORT) ntohs(msg.un.jobdata.nbytes)) > 0)
-		if  (gbatch_read(fdp->sockfd, buffer, (unsigned) bcount) != 0)
-			return;
+        while  (gbatch_rmsg(fdp, &msg) == 0  &&  msg.code == API_DATAOUT  &&
+                (bcount = (SHORT) ntohs(msg.un.jobdata.nbytes)) > 0)
+                if  (gbatch_read(fdp->sockfd, buffer, (unsigned) bcount) != 0)
+                        return;
 }
 
 FILE *gbatch_jobdata(const int fd, const unsigned flags, const slotno_t slotno)
 {
-	int	ret;
-	PIDTYPE	cpid;
-	struct	api_fd	*fdp = gbatch_look_fd(fd);
-	struct	api_msg	msg;
-	int	pfd[2];
+        int     ret, ignored;
+        PIDTYPE cpid;
+        struct  api_fd  *fdp = gbatch_look_fd(fd);
+        struct  api_msg msg;
+        int     pfd[2];
 
-	if  (!fdp)  {
-		gbatch_dataerror = XB_INVALID_FD;
-		return  (FILE *) 0;
-	}
-	msg.code = API_JOBDATA;
-	msg.un.reader.flags = htonl(flags);
-	msg.un.reader.seq = htonl(fdp->jserial);
-	msg.un.reader.slotno = htonl(slotno);
-	if  ((ret = gbatch_wmsg(fdp, &msg)))  {
-		gbatch_dataerror = ret;
-		return  (FILE *) 0;
-	}
-	if  ((ret = gbatch_rmsg(fdp, &msg)))  {
-		gbatch_dataerror = ret;
-		return  (FILE *) 0;
-	}
-	if  (msg.un.r_reader.seq != 0)
-		fdp->jserial = ntohl(msg.un.jobdata.seq);
-	if  (msg.retcode != 0)  {
-		gbatch_dataerror = (SHORT) ntohs(msg.retcode);
-		return  (FILE *) 0;
-	}
+        if  (!fdp)  {
+                gbatch_dataerror = XB_INVALID_FD;
+                return  (FILE *) 0;
+        }
+        msg.code = API_JOBDATA;
+        msg.un.reader.flags = htonl(flags);
+        msg.un.reader.seq = htonl(fdp->jserial);
+        msg.un.reader.slotno = htonl(slotno);
+        if  ((ret = gbatch_wmsg(fdp, &msg)))  {
+                gbatch_dataerror = ret;
+                return  (FILE *) 0;
+        }
+        if  ((ret = gbatch_rmsg(fdp, &msg)))  {
+                gbatch_dataerror = ret;
+                return  (FILE *) 0;
+        }
+        if  (msg.un.r_reader.seq != 0)
+                fdp->jserial = ntohl(msg.un.jobdata.seq);
+        if  (msg.retcode != 0)  {
+                gbatch_dataerror = (SHORT) ntohs(msg.retcode);
+                return  (FILE *) 0;
+        }
 
-	/* Ok blast away at the job data */
+        /* Ok blast away at the job data */
 
-	if  (pipe(pfd) < 0)  {
-		gbatch_dataerror = XB_CHILDPROC;
-		soakupdata(fdp);
-		return  (FILE *) 0;
-	}
-	if  ((cpid = fork()) != 0)  {
-		int	status;
-		PIDTYPE	rpid;
+        if  (pipe(pfd) < 0)  {
+                gbatch_dataerror = XB_CHILDPROC;
+                soakupdata(fdp);
+                return  (FILE *) 0;
+        }
+        if  ((cpid = fork()) != 0)  {
+                int     status;
+                PIDTYPE rpid;
 
-		if  (cpid < 0)  {
-			gbatch_dataerror = XB_CHILDPROC;
-			soakupdata(fdp);
-			return  (FILE *) 0;
-		}
-		close(pfd[1]);
-#ifdef	HAVE_WAITPID
-		while  ((rpid = waitpid(cpid, &status, 0)) < 0  &&  errno == EINTR)
-			;
+                if  (cpid < 0)  {
+                        gbatch_dataerror = XB_CHILDPROC;
+                        soakupdata(fdp);
+                        return  (FILE *) 0;
+                }
+                close(pfd[1]);
+#ifdef  HAVE_WAITPID
+                while  ((rpid = waitpid(cpid, &status, 0)) < 0  &&  errno == EINTR)
+                        ;
 #else
-		while  ((rpid = wait(&status)) != cpid  &&  (rpid >= 0  ||  errno == EINTR))
-			;
+                while  ((rpid = wait(&status)) != cpid  &&  (rpid >= 0  ||  errno == EINTR))
+                        ;
 #endif
-		if  (rpid < 0  ||  status != 0)  {
-			gbatch_dataerror = XB_CHILDPROC;
-			soakupdata(fdp);
-			return  (FILE *) 0;
-		}
-		return fdopen(pfd[0], "r");
-	}
-	else  {
-		int	bcount;
-		char	buffer[XBA_BUFFSIZE];
+                if  (rpid < 0  ||  status != 0)  {
+                        gbatch_dataerror = XB_CHILDPROC;
+                        soakupdata(fdp);
+                        return  (FILE *) 0;
+                }
+                return fdopen(pfd[0], "r");
+        }
+        else  {
+                int     bcount;
+                char    buffer[XBA_BUFFSIZE];
 
-		/* Child process....
-		   Fork again so parent doesn't have to worry about
-		   zombies other than me on a Monday morning.  */
+                /* Child process....
+                   Fork again so parent doesn't have to worry about
+                   zombies other than me on a Monday morning.  */
 
-		close(pfd[0]);
-		signal(SIGPIPE, SIG_IGN);
+                close(pfd[0]);
+                signal(SIGPIPE, SIG_IGN);
 
-		if  ((cpid = fork()) != 0)
-			_exit(cpid < 0? 255: 0);
+                if  ((cpid = fork()) != 0)
+                        _exit(cpid < 0? 255: 0);
 
-		while  (gbatch_rmsg(fdp, &msg) == 0  &&  msg.code == API_DATAOUT  &&
-			(bcount = (SHORT) ntohs(msg.un.jobdata.nbytes)) > 0)  {
-			if  (gbatch_read(fdp->sockfd, buffer, (unsigned) bcount) != 0)
-				_exit(0);
-			write(pfd[1], buffer, bcount);
-		}
-		close(pfd[1]);
-		_exit(0);
-		return  0;		/* Silence compilers */
-	}
+                while  (gbatch_rmsg(fdp, &msg) == 0  &&  msg.code == API_DATAOUT  &&
+                        (bcount = (SHORT) ntohs(msg.un.jobdata.nbytes)) > 0)  {
+                        if  (gbatch_read(fdp->sockfd, buffer, (unsigned) bcount) != 0)
+                                _exit(0);
+                        ignored = write(pfd[1], buffer, bcount);
+                }
+                close(pfd[1]);
+                _exit(0);
+                return  0;              /* Silence compilers */
+        }
 }

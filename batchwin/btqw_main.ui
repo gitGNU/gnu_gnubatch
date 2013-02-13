@@ -1,0 +1,996 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>MainWindow</class>
+ <widget class="QMainWindow" name="MainWindow">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>800</width>
+    <height>600</height>
+   </rect>
+  </property>
+  <property name="windowTitle">
+   <string>BTQW</string>
+  </property>
+  <property name="windowIcon">
+   <iconset resource="resources.qrc">
+    <normaloff>:/Btqw Icon</normaloff>:/Btqw Icon</iconset>
+  </property>
+  <widget class="QWidget" name="centralwidget"/>
+  <widget class="QMenuBar" name="menubar">
+   <property name="geometry">
+    <rect>
+     <x>0</x>
+     <y>0</y>
+     <width>800</width>
+     <height>25</height>
+    </rect>
+   </property>
+   <widget class="QMenu" name="menu_File">
+    <property name="title">
+     <string>&amp;File</string>
+    </property>
+    <addaction name="action_Time_defaults"/>
+    <addaction name="separator"/>
+    <addaction name="action_Program_options"/>
+    <addaction name="separator"/>
+    <addaction name="action_Server_list"/>
+    <addaction name="separator"/>
+    <addaction name="action_Port_settings"/>
+    <addaction name="separator"/>
+    <addaction name="action_Save_As"/>
+    <addaction name="separator"/>
+    <addaction name="action_Quit"/>
+   </widget>
+   <widget class="QMenu" name="menu_Window">
+    <property name="title">
+     <string>&amp;Window</string>
+    </property>
+    <addaction name="action_New_job_window"/>
+    <addaction name="action_New_variable_window"/>
+    <addaction name="action_Window_options"/>
+    <addaction name="separator"/>
+    <addaction name="action_Cascade"/>
+    <addaction name="action_Tile_vertically"/>
+    <addaction name="action_Tile_horizontally"/>
+    <addaction name="separator"/>
+    <addaction name="action_list_format"/>
+   </widget>
+   <widget class="QMenu" name="menu_Action">
+    <property name="title">
+     <string>&amp;Action</string>
+    </property>
+    <addaction name="separator"/>
+    <addaction name="action_set_runnable"/>
+    <addaction name="action_setcanc"/>
+    <addaction name="action_force_run"/>
+    <addaction name="action_go_job"/>
+    <addaction name="action_interrupt_job"/>
+    <addaction name="action_quit_job"/>
+    <addaction name="action_othersig"/>
+   </widget>
+   <widget class="QMenu" name="menu_Jobs">
+    <property name="title">
+     <string>&amp;Jobs</string>
+    </property>
+    <addaction name="action_View_job"/>
+    <addaction name="separator"/>
+    <addaction name="action_advance_time"/>
+    <addaction name="separator"/>
+    <addaction name="action_time"/>
+    <addaction name="action_titprill"/>
+    <addaction name="action_procpar"/>
+    <addaction name="action_time_limits"/>
+    <addaction name="action_mailwrt"/>
+    <addaction name="separator"/>
+    <addaction name="action_Arguments"/>
+    <addaction name="action_Environment"/>
+    <addaction name="action_Redirections"/>
+    <addaction name="separator"/>
+    <addaction name="action_Unqueue_Job"/>
+    <addaction name="action_Copy_Job"/>
+    <addaction name="separator"/>
+   </widget>
+   <widget class="QMenu" name="menu_Conds">
+    <property name="title">
+     <string>&amp;Conditions</string>
+    </property>
+    <addaction name="action_Job_Conditions"/>
+    <addaction name="action_Job_Assignments"/>
+   </widget>
+   <widget class="QMenu" name="menu_Search">
+    <property name="title">
+     <string>&amp;Search</string>
+    </property>
+    <addaction name="action_Search_for"/>
+    <addaction name="action_Search_forwards"/>
+    <addaction name="action_Search_Backwards"/>
+   </widget>
+   <widget class="QMenu" name="menu_Help">
+    <property name="title">
+     <string>&amp;Help</string>
+    </property>
+    <addaction name="action_About_BTQW"/>
+   </widget>
+   <widget class="QMenu" name="menu_Variables">
+    <property name="title">
+     <string>&amp;Variables</string>
+    </property>
+    <addaction name="action_Assign"/>
+    <addaction name="action_Increment"/>
+    <addaction name="action_Decrement"/>
+    <addaction name="action_Multiply"/>
+    <addaction name="action_Divide"/>
+    <addaction name="action_Remainder"/>
+    <addaction name="separator"/>
+    <addaction name="action_Set_comment"/>
+    <addaction name="separator"/>
+    <addaction name="action_Set_constant"/>
+   </widget>
+   <widget class="QMenu" name="menuCreate">
+    <property name="title">
+     <string>Create/Delete</string>
+    </property>
+    <addaction name="action_Create_Jobs"/>
+    <addaction name="action_delete_job"/>
+    <addaction name="action_JPermissions"/>
+    <addaction name="separator"/>
+    <addaction name="action_Create_Variable"/>
+    <addaction name="action_Delete_Variable"/>
+    <addaction name="action_VPermissions"/>
+   </widget>
+   <addaction name="menu_File"/>
+   <addaction name="menu_Window"/>
+   <addaction name="menu_Action"/>
+   <addaction name="menuCreate"/>
+   <addaction name="menu_Jobs"/>
+   <addaction name="menu_Conds"/>
+   <addaction name="menu_Variables"/>
+   <addaction name="menu_Search"/>
+   <addaction name="menu_Help"/>
+  </widget>
+  <widget class="QStatusBar" name="statusbar"/>
+  <widget class="QToolBar" name="toolBar">
+   <property name="windowTitle">
+    <string>toolBar</string>
+   </property>
+   <attribute name="toolBarArea">
+    <enum>TopToolBarArea</enum>
+   </attribute>
+   <attribute name="toolBarBreak">
+    <bool>false</bool>
+   </attribute>
+   <addaction name="action_Program_options"/>
+   <addaction name="action_Window_options"/>
+   <addaction name="separator"/>
+   <addaction name="action_View_job"/>
+   <addaction name="action_titprill"/>
+   <addaction name="action_procpar"/>
+   <addaction name="action_delete_job"/>
+   <addaction name="action_set_runnable"/>
+   <addaction name="action_setcanc"/>
+   <addaction name="separator"/>
+   <addaction name="action_force_run"/>
+   <addaction name="action_go_job"/>
+   <addaction name="action_advance_time"/>
+   <addaction name="separator"/>
+   <addaction name="action_interrupt_job"/>
+   <addaction name="action_quit_job"/>
+   <addaction name="separator"/>
+   <addaction name="action_time"/>
+   <addaction name="action_Job_Conditions"/>
+   <addaction name="action_Job_Assignments"/>
+   <addaction name="separator"/>
+   <addaction name="action_Assign"/>
+   <addaction name="action_Increment"/>
+   <addaction name="action_Decrement"/>
+  </widget>
+  <action name="action_Program_options">
+   <property name="icon">
+    <iconset resource="resources.qrc">
+     <normaloff>:/Program optons</normaloff>:/Program optons</iconset>
+   </property>
+   <property name="text">
+    <string>&amp;Program options</string>
+   </property>
+   <property name="toolTip">
+    <string>Set overall program options, confirmation of job abort etc</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+P</string>
+   </property>
+   <property name="shortcutContext">
+    <enum>Qt::ApplicationShortcut</enum>
+   </property>
+  </action>
+  <action name="action_Display_options">
+   <property name="text">
+    <string>&amp;Display options</string>
+   </property>
+   <property name="toolTip">
+    <string>Set the defaults for which items are displayed</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+D</string>
+   </property>
+  </action>
+  <action name="action_Save_options">
+   <property name="icon">
+    <iconset resource="resources.qrc">
+     <normaloff>:/save job file</normaloff>:/save job file</iconset>
+   </property>
+   <property name="text">
+    <string>&amp;Save options</string>
+   </property>
+   <property name="toolTip">
+    <string>Save options to config file</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+S</string>
+   </property>
+   <property name="shortcutContext">
+    <enum>Qt::ApplicationShortcut</enum>
+   </property>
+  </action>
+  <action name="action_Network_stats">
+   <property name="text">
+    <string>&amp;Network stats</string>
+   </property>
+   <property name="toolTip">
+    <string>Display connection statistics to other hosts on network</string>
+   </property>
+  </action>
+  <action name="action_User_Permissions">
+   <property name="text">
+    <string>&amp;User Permissions</string>
+   </property>
+   <property name="toolTip">
+    <string>Display user permissions on the current server</string>
+   </property>
+  </action>
+  <action name="action_Quit">
+   <property name="icon">
+    <iconset resource="resources.qrc">
+     <normaloff>:/Quit program</normaloff>:/Quit program</iconset>
+   </property>
+   <property name="text">
+    <string>&amp;Quit</string>
+   </property>
+   <property name="toolTip">
+    <string>Quit saving program options</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+Q</string>
+   </property>
+   <property name="shortcutContext">
+    <enum>Qt::ApplicationShortcut</enum>
+   </property>
+  </action>
+  <action name="action_Window_options">
+   <property name="icon">
+    <iconset resource="resources.qrc">
+     <normaloff>:/Window options</normaloff>:/Window options</iconset>
+   </property>
+   <property name="text">
+    <string>&amp;Window Options</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+O</string>
+   </property>
+  </action>
+  <action name="action_New_job_window">
+   <property name="text">
+    <string>New &amp;job window</string>
+   </property>
+   <property name="toolTip">
+    <string>Create new job window (you can separately change viewing options)</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+Shift+J</string>
+   </property>
+  </action>
+  <action name="action_New_variable_window">
+   <property name="text">
+    <string>New &amp;variable window</string>
+   </property>
+   <property name="toolTip">
+    <string>Create new variable display window (you can separately change viewing options)</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+Shift+V</string>
+   </property>
+  </action>
+  <action name="action_Cascade">
+   <property name="text">
+    <string>&amp;Cascade</string>
+   </property>
+   <property name="toolTip">
+    <string>Cascade job and variable windows</string>
+   </property>
+  </action>
+  <action name="action_Tile_vertically">
+   <property name="text">
+    <string>&amp;Tile vertically</string>
+   </property>
+   <property name="toolTip">
+    <string>Tile job and variable windows vertically</string>
+   </property>
+  </action>
+  <action name="action_Tile_horizontally">
+   <property name="text">
+    <string>&amp;Tile horizontally</string>
+   </property>
+   <property name="toolTip">
+    <string>Tile job and variable windows horizontally</string>
+   </property>
+  </action>
+  <action name="action_list_format">
+   <property name="text">
+    <string>&amp;Set list format</string>
+   </property>
+   <property name="toolTip">
+    <string>Set which attributes of jobs or variables you want displayed in currently-selected window</string>
+   </property>
+  </action>
+  <action name="action_delete_job">
+   <property name="enabled">
+    <bool>false</bool>
+   </property>
+   <property name="icon">
+    <iconset resource="resources.qrc">
+     <normaloff>:/Delete job</normaloff>:/Delete job</iconset>
+   </property>
+   <property name="text">
+    <string>&amp;Delete Job</string>
+   </property>
+   <property name="toolTip">
+    <string>Delete job (which should not be running - kill it first)</string>
+   </property>
+   <property name="shortcut">
+    <string>Del</string>
+   </property>
+  </action>
+  <action name="action_JPermissions">
+   <property name="enabled">
+    <bool>false</bool>
+   </property>
+   <property name="text">
+    <string>Job &amp;Permissions</string>
+   </property>
+   <property name="toolTip">
+    <string>Set the permissions on the selected job</string>
+   </property>
+  </action>
+  <action name="action_titprill">
+   <property name="enabled">
+    <bool>false</bool>
+   </property>
+   <property name="icon">
+    <iconset resource="resources.qrc">
+     <normaloff>:/Title priority load level</normaloff>:/Title priority load level</iconset>
+   </property>
+   <property name="text">
+    <string>&amp;Title prio, load level</string>
+   </property>
+   <property name="toolTip">
+    <string>Set title, priority, load level, command interpreter</string>
+   </property>
+   <property name="shortcut">
+    <string>P</string>
+   </property>
+  </action>
+  <action name="action_set_runnable">
+   <property name="enabled">
+    <bool>false</bool>
+   </property>
+   <property name="icon">
+    <iconset resource="resources.qrc">
+     <normaloff>:/Set runnable</normaloff>:/Set runnable</iconset>
+   </property>
+   <property name="text">
+    <string>Set &amp;runnable</string>
+   </property>
+   <property name="toolTip">
+    <string>Set the job to be runnable</string>
+   </property>
+   <property name="shortcut">
+    <string>R</string>
+   </property>
+  </action>
+  <action name="action_setcanc">
+   <property name="enabled">
+    <bool>false</bool>
+   </property>
+   <property name="icon">
+    <iconset resource="resources.qrc">
+     <normaloff>:/Set cancelled</normaloff>:/Set cancelled</iconset>
+   </property>
+   <property name="text">
+    <string>Set &amp;cancelled</string>
+   </property>
+   <property name="toolTip">
+    <string>Set the job to cancelled state (does not activate cancelled assignment)</string>
+   </property>
+   <property name="shortcut">
+    <string>Z</string>
+   </property>
+  </action>
+  <action name="action_interrupt_job">
+   <property name="enabled">
+    <bool>false</bool>
+   </property>
+   <property name="icon">
+    <iconset resource="resources.qrc">
+     <normaloff>:/Interrupt signal</normaloff>:/Interrupt signal</iconset>
+   </property>
+   <property name="text">
+    <string>&amp;Interrupt job</string>
+   </property>
+   <property name="toolTip">
+    <string>Send &quot;interrupt&quot; signal to job</string>
+   </property>
+   <property name="shortcut">
+    <string>Shift+Y</string>
+   </property>
+  </action>
+  <action name="action_quit_job">
+   <property name="enabled">
+    <bool>false</bool>
+   </property>
+   <property name="icon">
+    <iconset resource="resources.qrc">
+     <normaloff>:/Quit signal</normaloff>:/Quit signal</iconset>
+   </property>
+   <property name="text">
+    <string>&amp;Quit job</string>
+   </property>
+   <property name="toolTip">
+    <string>Send &quot;quit&quot; signal to job</string>
+   </property>
+   <property name="shortcut">
+    <string>Shift+N</string>
+   </property>
+  </action>
+  <action name="action_othersig">
+   <property name="enabled">
+    <bool>false</bool>
+   </property>
+   <property name="text">
+    <string>&amp;Other signal</string>
+   </property>
+   <property name="toolTip">
+    <string>Send selected signal to job</string>
+   </property>
+   <property name="shortcut">
+    <string>!</string>
+   </property>
+  </action>
+  <action name="action_View_job">
+   <property name="enabled">
+    <bool>false</bool>
+   </property>
+   <property name="icon">
+    <iconset resource="resources.qrc">
+     <normaloff>:/View job script</normaloff>:/View job script</iconset>
+   </property>
+   <property name="text">
+    <string>&amp;View job</string>
+   </property>
+   <property name="toolTip">
+    <string>View the job script in a new window</string>
+   </property>
+   <property name="shortcut">
+    <string>Shift+I</string>
+   </property>
+  </action>
+  <action name="action_advance_time">
+   <property name="enabled">
+    <bool>false</bool>
+   </property>
+   <property name="icon">
+    <iconset resource="resources.qrc">
+     <normaloff>:/Advance time</normaloff>:/Advance time</iconset>
+   </property>
+   <property name="text">
+    <string>&amp;Advance Time</string>
+   </property>
+   <property name="toolTip">
+    <string>Advance time of job to next repeat time</string>
+   </property>
+   <property name="shortcut">
+    <string>F</string>
+   </property>
+  </action>
+  <action name="action_time_limits">
+   <property name="enabled">
+    <bool>false</bool>
+   </property>
+   <property name="text">
+    <string>Time &amp;limits</string>
+   </property>
+   <property name="toolTip">
+    <string>Set time limits and automatic signal to job</string>
+   </property>
+   <property name="shortcut">
+    <string>Shift+L</string>
+   </property>
+  </action>
+  <action name="action_procpar">
+   <property name="enabled">
+    <bool>false</bool>
+   </property>
+   <property name="icon">
+    <iconset resource="resources.qrc">
+     <normaloff>:/Process parameters</normaloff>:/Process parameters</iconset>
+   </property>
+   <property name="text">
+    <string>&amp;Process Parameters</string>
+   </property>
+   <property name="toolTip">
+    <string>Set process parameters (umask, directory etc) on job</string>
+   </property>
+   <property name="shortcut">
+    <string>O</string>
+   </property>
+  </action>
+  <action name="action_time">
+   <property name="enabled">
+    <bool>false</bool>
+   </property>
+   <property name="icon">
+    <iconset resource="resources.qrc">
+     <normaloff>:/Set time</normaloff>:/Set time</iconset>
+   </property>
+   <property name="text">
+    <string>&amp;Time</string>
+   </property>
+   <property name="iconText">
+    <string>Time</string>
+   </property>
+   <property name="toolTip">
+    <string>Set next time and repeat parameters on job</string>
+   </property>
+   <property name="shortcut">
+    <string>T</string>
+   </property>
+  </action>
+  <action name="action_mailwrt">
+   <property name="enabled">
+    <bool>false</bool>
+   </property>
+   <property name="text">
+    <string>&amp;Mail and write</string>
+   </property>
+   <property name="toolTip">
+    <string>Set user and message completion options on job</string>
+   </property>
+   <property name="shortcut">
+    <string>Shift+M</string>
+   </property>
+  </action>
+  <action name="action_Unqueue_job">
+   <property name="text">
+    <string>Un&amp;queue job</string>
+   </property>
+   <property name="toolTip">
+    <string>Take job off the queue and make a re-queueable file</string>
+   </property>
+   <property name="shortcut">
+    <string>Shift+U</string>
+   </property>
+  </action>
+  <action name="action_Search_for">
+   <property name="text">
+    <string>&amp;Search for...</string>
+   </property>
+   <property name="toolTip">
+    <string>Search for a string in current window</string>
+   </property>
+   <property name="shortcut">
+    <string>Shift+F</string>
+   </property>
+  </action>
+  <action name="action_Search_forwards">
+   <property name="text">
+    <string>Search &amp;forwards</string>
+   </property>
+   <property name="toolTip">
+    <string>Repeat last search going forwards</string>
+   </property>
+   <property name="shortcut">
+    <string>F3, Ctrl+G</string>
+   </property>
+  </action>
+  <action name="action_Search_Backwards">
+   <property name="text">
+    <string>Search &amp;backwards</string>
+   </property>
+   <property name="toolTip">
+    <string>Repeat last search going backwards</string>
+   </property>
+   <property name="shortcut">
+    <string>F4</string>
+   </property>
+  </action>
+  <action name="action_About_BTQW">
+   <property name="text">
+    <string>&amp;About BTQW</string>
+   </property>
+   <property name="iconText">
+    <string>About BTQW</string>
+   </property>
+  </action>
+  <action name="action_force_run">
+   <property name="enabled">
+    <bool>false</bool>
+   </property>
+   <property name="icon">
+    <iconset resource="resources.qrc">
+     <normaloff>:/Force run</normaloff>:/Force run</iconset>
+   </property>
+   <property name="text">
+    <string>&amp;Force run</string>
+   </property>
+   <property name="toolTip">
+    <string>Set job runnable if not and try to force it to run, bypassing the time setting
+(but not the conditions)</string>
+   </property>
+  </action>
+  <action name="action_Server_list">
+   <property name="text">
+    <string>&amp;Server list</string>
+   </property>
+   <property name="toolTip">
+    <string>Display list of servers and connection status</string>
+   </property>
+  </action>
+  <action name="action_Port_settings">
+   <property name="text">
+    <string>P&amp;ort settings</string>
+   </property>
+   <property name="toolTip">
+    <string>Adjust port settings for access (use with care)</string>
+   </property>
+  </action>
+  <action name="action_Save_As">
+   <property name="text">
+    <string>Save &amp;As...</string>
+   </property>
+   <property name="toolTip">
+    <string>Specify an alternative saved configuration file</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+Shift+S</string>
+   </property>
+  </action>
+  <action name="action_Time_defaults">
+   <property name="text">
+    <string>&amp;Time defaults</string>
+   </property>
+  </action>
+  <action name="action_Condition_defaults">
+   <property name="text">
+    <string>&amp;Condition defaults</string>
+   </property>
+   <property name="toolTip">
+    <string>Set default condition parameters for creating new conditions</string>
+   </property>
+  </action>
+  <action name="action_Assignment_defaults">
+   <property name="text">
+    <string>&amp;Assignment defaults</string>
+   </property>
+   <property name="toolTip">
+    <string>Set default assignment parameters for creating new assignments</string>
+   </property>
+  </action>
+  <action name="action_go_job">
+   <property name="enabled">
+    <bool>false</bool>
+   </property>
+   <property name="icon">
+    <iconset resource="resources.qrc">
+     <normaloff>:/Go job</normaloff>:/Go job</iconset>
+   </property>
+   <property name="text">
+    <string>&amp;Go job</string>
+   </property>
+   <property name="toolTip">
+    <string>Force job to run but advance the time to the next repeat if applicable</string>
+   </property>
+  </action>
+  <action name="action_Arguments">
+   <property name="enabled">
+    <bool>false</bool>
+   </property>
+   <property name="text">
+    <string>&amp;Arguments</string>
+   </property>
+   <property name="toolTip">
+    <string>Set command line arguments to pass to the job script</string>
+   </property>
+   <property name="shortcut">
+    <string>A</string>
+   </property>
+  </action>
+  <action name="action_Environment">
+   <property name="enabled">
+    <bool>false</bool>
+   </property>
+   <property name="text">
+    <string>&amp;Environment</string>
+   </property>
+   <property name="toolTip">
+    <string>Set environment variables to pass to the job script</string>
+   </property>
+   <property name="shortcut">
+    <string>E</string>
+   </property>
+  </action>
+  <action name="action_Redirections">
+   <property name="enabled">
+    <bool>false</bool>
+   </property>
+   <property name="text">
+    <string>&amp;Redirections</string>
+   </property>
+   <property name="toolTip">
+    <string>Set I/O redirections to pass to the job script</string>
+   </property>
+   <property name="shortcut">
+    <string>I</string>
+   </property>
+  </action>
+  <action name="action_Invoke_BTRW">
+   <property name="icon">
+    <iconset resource="resources.qrc">
+     <normaloff>:/Btrw icon</normaloff>:/Btrw icon</iconset>
+   </property>
+   <property name="text">
+    <string>&amp;Invoke BTRW</string>
+   </property>
+   <property name="shortcut">
+    <string>Shift+W</string>
+   </property>
+  </action>
+  <action name="action_Unqueue_Job">
+   <property name="enabled">
+    <bool>false</bool>
+   </property>
+   <property name="text">
+    <string>&amp;Unqueue Job</string>
+   </property>
+   <property name="toolTip">
+    <string>Unqueue Job, making a copy in an XML file on the local disk</string>
+   </property>
+   <property name="shortcut">
+    <string>Shift+U</string>
+   </property>
+  </action>
+  <action name="action_Copy_Job">
+   <property name="enabled">
+    <bool>false</bool>
+   </property>
+   <property name="text">
+    <string>&amp;Copy job</string>
+   </property>
+   <property name="toolTip">
+    <string>Copy job to an XML file on the local disk but do not delete the job.</string>
+   </property>
+   <property name="shortcut">
+    <string>C</string>
+   </property>
+  </action>
+  <action name="action_Job_Conditions">
+   <property name="enabled">
+    <bool>false</bool>
+   </property>
+   <property name="icon">
+    <iconset resource="resources.qrc">
+     <normaloff>:/Job conditions</normaloff>:/Job conditions</iconset>
+   </property>
+   <property name="text">
+    <string>Job &amp;Conditions</string>
+   </property>
+   <property name="toolTip">
+    <string>Set the Job Conditions</string>
+   </property>
+   <property name="shortcut">
+    <string>Shift+C</string>
+   </property>
+  </action>
+  <action name="action_Job_Assignments">
+   <property name="enabled">
+    <bool>false</bool>
+   </property>
+   <property name="icon">
+    <iconset resource="resources.qrc">
+     <normaloff>:/Job assignments</normaloff>:/Job assignments</iconset>
+   </property>
+   <property name="text">
+    <string>Job &amp;Assignments</string>
+   </property>
+   <property name="toolTip">
+    <string>Set Job Assignments</string>
+   </property>
+   <property name="shortcut">
+    <string>Shift+A</string>
+   </property>
+  </action>
+  <action name="action_Assign">
+   <property name="enabled">
+    <bool>false</bool>
+   </property>
+   <property name="icon">
+    <iconset resource="resources.qrc">
+     <normaloff>:/Assign var</normaloff>:/Assign var</iconset>
+   </property>
+   <property name="text">
+    <string>&amp;Assign</string>
+   </property>
+   <property name="toolTip">
+    <string>Assign a given value to the variable</string>
+   </property>
+   <property name="shortcut">
+    <string>=</string>
+   </property>
+  </action>
+  <action name="action_Increment">
+   <property name="enabled">
+    <bool>false</bool>
+   </property>
+   <property name="icon">
+    <iconset resource="resources.qrc">
+     <normaloff>:/Increment var</normaloff>:/Increment var</iconset>
+   </property>
+   <property name="text">
+    <string>&amp;Increment</string>
+   </property>
+   <property name="toolTip">
+    <string>Increment variable by the amount given in the set constant</string>
+   </property>
+   <property name="shortcut">
+    <string>+</string>
+   </property>
+  </action>
+  <action name="action_Decrement">
+   <property name="enabled">
+    <bool>false</bool>
+   </property>
+   <property name="icon">
+    <iconset resource="resources.qrc">
+     <normaloff>:/Decrement var</normaloff>:/Decrement var</iconset>
+   </property>
+   <property name="text">
+    <string>&amp;Decrement</string>
+   </property>
+   <property name="toolTip">
+    <string>Decrement variable by amount given in the set constant</string>
+   </property>
+   <property name="shortcut">
+    <string>-</string>
+   </property>
+  </action>
+  <action name="action_Multiply">
+   <property name="enabled">
+    <bool>false</bool>
+   </property>
+   <property name="text">
+    <string>&amp;Multiply</string>
+   </property>
+   <property name="toolTip">
+    <string>Multiply variable by amount given in set constant</string>
+   </property>
+   <property name="shortcut">
+    <string>*</string>
+   </property>
+  </action>
+  <action name="action_Divide">
+   <property name="enabled">
+    <bool>false</bool>
+   </property>
+   <property name="text">
+    <string>&amp;Divide</string>
+   </property>
+   <property name="toolTip">
+    <string>Divide variable by amount given in set constant</string>
+   </property>
+   <property name="shortcut">
+    <string>/</string>
+   </property>
+  </action>
+  <action name="action_Remainder">
+   <property name="enabled">
+    <bool>false</bool>
+   </property>
+   <property name="text">
+    <string>&amp;Remainder</string>
+   </property>
+   <property name="toolTip">
+    <string>Replace variable value by remainder when divided by set constant</string>
+   </property>
+   <property name="shortcut">
+    <string>%</string>
+   </property>
+  </action>
+  <action name="action_Set_comment">
+   <property name="enabled">
+    <bool>false</bool>
+   </property>
+   <property name="text">
+    <string>&amp;Set comment</string>
+   </property>
+   <property name="toolTip">
+    <string>Set comment on variable</string>
+   </property>
+   <property name="shortcut">
+    <string>&quot;</string>
+   </property>
+  </action>
+  <action name="action_Set_constant">
+   <property name="text">
+    <string>Set &amp;constant</string>
+   </property>
+   <property name="toolTip">
+    <string>Set constant to use in arithmetic operations</string>
+   </property>
+   <property name="shortcut">
+    <string>@</string>
+   </property>
+  </action>
+  <action name="action_VPermissions">
+   <property name="enabled">
+    <bool>false</bool>
+   </property>
+   <property name="text">
+    <string>Variable &amp;Permissions</string>
+   </property>
+   <property name="toolTip">
+    <string>Set permissions on the selected variable</string>
+   </property>
+  </action>
+  <action name="action_Create_Jobs">
+   <property name="text">
+    <string>Create &amp;Jobs</string>
+   </property>
+   <property name="toolTip">
+    <string>Enter window for creating jobs</string>
+   </property>
+   <property name="statusTip">
+    <string>This option invokes the BTRW program</string>
+   </property>
+  </action>
+  <action name="action_Create_Variable">
+   <property name="text">
+    <string>Create &amp;Variable</string>
+   </property>
+   <property name="toolTip">
+    <string>Create a Variable</string>
+   </property>
+  </action>
+  <action name="action_Delete_Job">
+   <property name="text">
+    <string>Delete Job</string>
+   </property>
+   <property name="toolTip">
+    <string>Delete currently-selected Job</string>
+   </property>
+  </action>
+  <action name="action_Delete_Variable">
+   <property name="enabled">
+    <bool>false</bool>
+   </property>
+   <property name="text">
+    <string>Delete Variable</string>
+   </property>
+   <property name="toolTip">
+    <string>Delete Currently-selected Variable</string>
+   </property>
+  </action>
+ </widget>
+ <resources>
+  <include location="resources.qrc"/>
+ </resources>
+ <connections/>
+</ui>

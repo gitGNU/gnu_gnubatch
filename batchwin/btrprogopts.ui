@@ -1,0 +1,253 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>btrwprogopts</class>
+ <widget class="QDialog" name="btrwprogopts">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>507</width>
+    <height>394</height>
+   </rect>
+  </property>
+  <property name="windowTitle">
+   <string>Program Options</string>
+  </property>
+  <widget class="QDialogButtonBox" name="buttonBox">
+   <property name="geometry">
+    <rect>
+     <x>290</x>
+     <y>350</y>
+     <width>191</width>
+     <height>32</height>
+    </rect>
+   </property>
+   <property name="orientation">
+    <enum>Qt::Horizontal</enum>
+   </property>
+   <property name="standardButtons">
+    <set>QDialogButtonBox::Cancel|QDialogButtonBox::Ok</set>
+   </property>
+  </widget>
+  <widget class="QLabel" name="label">
+   <property name="geometry">
+    <rect>
+     <x>30</x>
+     <y>40</y>
+     <width>101</width>
+     <height>17</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string>Main Server</string>
+   </property>
+  </widget>
+  <widget class="QComboBox" name="defserver">
+   <property name="geometry">
+    <rect>
+     <x>140</x>
+     <y>40</y>
+     <width>191</width>
+     <height>27</height>
+    </rect>
+   </property>
+   <property name="toolTip">
+    <string>This is the server normally used to submit jobs unless another is selected</string>
+   </property>
+   <property name="editable">
+    <bool>true</bool>
+   </property>
+  </widget>
+  <widget class="QCheckBox" name="useexted">
+   <property name="geometry">
+    <rect>
+     <x>30</x>
+     <y>130</y>
+     <width>141</width>
+     <height>22</height>
+    </rect>
+   </property>
+   <property name="toolTip">
+    <string>Select this if you want to use an external editor</string>
+   </property>
+   <property name="text">
+    <string>External Editor</string>
+   </property>
+  </widget>
+  <widget class="QLineEdit" name="edname">
+   <property name="enabled">
+    <bool>false</bool>
+   </property>
+   <property name="geometry">
+    <rect>
+     <x>30</x>
+     <y>170</y>
+     <width>261</width>
+     <height>27</height>
+    </rect>
+   </property>
+   <property name="toolTip">
+    <string>Give the name of an external editor to use here</string>
+   </property>
+  </widget>
+  <widget class="QCheckBox" name="interm">
+   <property name="enabled">
+    <bool>false</bool>
+   </property>
+   <property name="geometry">
+    <rect>
+     <x>40</x>
+     <y>210</y>
+     <width>121</width>
+     <height>22</height>
+    </rect>
+   </property>
+   <property name="toolTip">
+    <string>Run external editor via shell</string>
+   </property>
+   <property name="text">
+    <string>Run in shell</string>
+   </property>
+  </widget>
+  <widget class="QLineEdit" name="shellarg">
+   <property name="enabled">
+    <bool>false</bool>
+   </property>
+   <property name="geometry">
+    <rect>
+     <x>120</x>
+     <y>310</y>
+     <width>231</width>
+     <height>27</height>
+    </rect>
+   </property>
+   <property name="toolTip">
+    <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;This is the argument to be passed to the terminal program to make it take the rest of the command line as arguments to passed to the editor.&lt;/p&gt;&lt;p&gt;For &lt;span style=&quot; font-weight:600;&quot;&gt;xterm&lt;/span&gt; and &lt;span style=&quot; font-weight:600;&quot;&gt;konsole&lt;/span&gt; the argument &lt;span style=&quot; font-weight:600;&quot;&gt;-e&lt;/span&gt; is used.&lt;/p&gt;&lt;p&gt;For &lt;span style=&quot; font-weight:600;&quot;&gt;gnome-terminal&lt;/span&gt; the argumens &lt;span style=&quot; font-weight:600;&quot;&gt;--disable-factory&lt;/span&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;-x&lt;/span&gt; is used.&lt;/p&gt;&lt;p&gt;For other terminal programs you may need to consult the manual&lt;br/&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+   </property>
+   <property name="text">
+    <string>e</string>
+   </property>
+  </widget>
+  <widget class="QLabel" name="label_3">
+   <property name="geometry">
+    <rect>
+     <x>30</x>
+     <y>320</y>
+     <width>66</width>
+     <height>17</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string>Argument</string>
+   </property>
+  </widget>
+  <widget class="QComboBox" name="shell">
+   <property name="enabled">
+    <bool>false</bool>
+   </property>
+   <property name="geometry">
+    <rect>
+     <x>120</x>
+     <y>260</y>
+     <width>231</width>
+     <height>27</height>
+    </rect>
+   </property>
+   <property name="toolTip">
+    <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;For external editors which have to be run in a shell, this is the name of the terminal program to use.&lt;/p&gt;&lt;p&gt;Alternatives of &lt;span style=&quot; font-style:italic;&quot;&gt;xterm&lt;/span&gt;, &lt;span style=&quot; font-style:italic;&quot;&gt;konsole&lt;/span&gt; and &lt;span style=&quot; font-style:italic;&quot;&gt;gnome-terminal&lt;/span&gt; are known about, but you can put another one in if you wish.&lt;/p&gt;&lt;p&gt;You can add additional options like &lt;span style=&quot; font-weight:600;&quot;&gt;-bg blue&lt;/span&gt; or similar here&lt;/p&gt;&lt;p&gt;In most cases you will have to supply an argument to the command to make it interpret the rest of the command line as arguments to the editor, which is done in the following argument.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+   </property>
+   <property name="editable">
+    <bool>true</bool>
+   </property>
+   <item>
+    <property name="text">
+     <string>xterm</string>
+    </property>
+   </item>
+   <item>
+    <property name="text">
+     <string>gnome-terminal</string>
+    </property>
+   </item>
+   <item>
+    <property name="text">
+     <string>konsole</string>
+    </property>
+   </item>
+  </widget>
+  <widget class="QLabel" name="label_2">
+   <property name="geometry">
+    <rect>
+     <x>30</x>
+     <y>260</y>
+     <width>66</width>
+     <height>17</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string>Terminal</string>
+   </property>
+  </widget>
+  <widget class="QCheckBox" name="verbose">
+   <property name="geometry">
+    <rect>
+     <x>30</x>
+     <y>90</y>
+     <width>111</width>
+     <height>22</height>
+    </rect>
+   </property>
+   <property name="toolTip">
+    <string>Display results of submission even if successful</string>
+   </property>
+   <property name="text">
+    <string>Verbose</string>
+   </property>
+  </widget>
+ </widget>
+ <tabstops>
+  <tabstop>defserver</tabstop>
+  <tabstop>verbose</tabstop>
+  <tabstop>useexted</tabstop>
+  <tabstop>edname</tabstop>
+  <tabstop>interm</tabstop>
+  <tabstop>shell</tabstop>
+  <tabstop>shellarg</tabstop>
+  <tabstop>buttonBox</tabstop>
+ </tabstops>
+ <resources/>
+ <connections>
+  <connection>
+   <sender>buttonBox</sender>
+   <signal>accepted()</signal>
+   <receiver>btrwprogopts</receiver>
+   <slot>accept()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>290</x>
+     <y>310</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>157</x>
+     <y>274</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>buttonBox</sender>
+   <signal>rejected()</signal>
+   <receiver>btrwprogopts</receiver>
+   <slot>reject()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>306</x>
+     <y>310</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>286</x>
+     <y>274</y>
+    </hint>
+   </hints>
+  </connection>
+ </connections>
+</ui>

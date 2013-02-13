@@ -28,11 +28,11 @@
 
 int  spit_msg(FILE *dest, CBtjobRef jp, int cancont)
 {
-	if  ((jp->h.bj_jflags & (BJ_MAIL|BJ_WRT)) != (BJ_MAIL|BJ_WRT))
-		cancont = spitoption($A{btr arg nomess}, $A{btr arg explain}, dest, ' ', cancont);
-	if  (jp->h.bj_jflags & BJ_MAIL)
-		cancont = spitoption($A{btr arg mail}, $A{btr arg explain}, dest, ' ', cancont);
-	if  (jp->h.bj_jflags & BJ_WRT)
-		cancont = spitoption($A{btr arg write}, $A{btr arg explain}, dest, ' ', cancont);
-	return  cancont;
+        if  ((jp->h.bj_jflags & (BJ_MAIL|BJ_WRT)) != (BJ_MAIL|BJ_WRT))
+                cancont = spitoption($A{btr arg nomess}, $A{btr arg explain}, dest, ' ', cancont);
+        if  (jp->h.bj_jflags & BJ_MAIL)
+                cancont = spitoption($A{btr arg mail}, $A{btr arg explain}, dest, ' ', cancont);
+        if  (jp->h.bj_jflags & BJ_WRT)
+                cancont = spitoption($A{btr arg write}, $A{btr arg explain}, dest, ' ', cancont);
+        return  cancont;
 }

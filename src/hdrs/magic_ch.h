@@ -15,14 +15,14 @@
    You should have received a copy of the GNU General Public License
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
-#define	MAG_A	1			/*  Alphabetic chars can be magic  */
-#define	MAG_P	2			/*  Any printing chars can be magic */
-#define	MAG_R	4			/*  Return value in retv  */
-#define	MAG_OK	8			/*  Wgets - allow non-alpha chars  */
-#define	MAG_CRS	16			/*  Cursor up/down */
-#define	MAG_NAME	32		/*  Force it to be a name */
-#define	MAG_OCTAL	64		/*  Octal numbers (yuk) */
-#define	MAG_NL	128			/*  Treat null input as leave unch */
+#define MAG_A   1                       /*  Alphabetic chars can be magic  */
+#define MAG_P   2                       /*  Any printing chars can be magic */
+#define MAG_R   4                       /*  Return value in retv  */
+#define MAG_OK  8                       /*  Wgets - allow non-alpha chars  */
+#define MAG_CRS 16                      /*  Cursor up/down */
+#define MAG_NAME        32              /*  Force it to be a name */
+#define MAG_OCTAL       64              /*  Octal numbers (yuk) */
+#define MAG_NL  128                     /*  Treat null input as leave unch */
 
 extern int  getkey(const unsigned);
 void  endwinkeys();

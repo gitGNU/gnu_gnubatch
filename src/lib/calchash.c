@@ -26,9 +26,9 @@
 
 unsigned  calchash(const char *cp)
 {
-	ULONG  result = 0;
+        ULONG  result = 0;
 
-	while  (*cp)
-		result = (result << 5) ^ *cp++ ^ ((result >> 27) & 0x1f);
-	return  result % VAR_HASHMOD;
+        while  (*cp)
+                result = (result << 5) ^ *cp++ ^ ((result >> 27) & 0x1f);
+        return  result % VAR_HASHMOD;
 }

@@ -17,5 +17,5 @@
 
 JFORMAT(fmt_orighost)
 {
-	return  (fmt_t) strlen(strcpy(bigbuff, look_host(jp->h.bj_orighostid == 0? myhostid: jp->h.bj_orighostid)));
+	return  (fmt_t) strlen(strcpy(bigbuff, look_int_host(jp->h.bj_orighostid)));
 }

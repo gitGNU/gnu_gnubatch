@@ -17,19 +17,19 @@
 
 VFORMAT(fmt_export)
 {
-#ifdef	BTVLIST_INLINE
-	static	char	*exportmark;
-	if  (!exportmark)
-		exportmark = gprompt($P{Variable exported flag});
+#ifdef  BTVLIST_INLINE
+        static  char    *exportmark;
+        if  (!exportmark)
+                exportmark = gprompt($P{Variable exported flag});
 #endif
-	return  vp->var_flags & VF_EXPORT? (fmt_t) strlen(strcpy(bigbuff, exportmark)): 0;
+        return  vp->var_flags & VF_EXPORT? (fmt_t) strlen(strcpy(bigbuff, exportmark)): 0;
 }
 VFORMAT(fmt_cluster)
 {
-#ifdef	BTVLIST_INLINE
-	static	char	*clustermark;
-	if  (!clustermark)
-		clustermark = gprompt($P{Variable clustered flag});
+#ifdef  BTVLIST_INLINE
+        static  char    *clustermark;
+        if  (!clustermark)
+                clustermark = gprompt($P{Variable clustered flag});
 #endif
-	return  vp->var_flags & VF_CLUSTER? (fmt_t) strlen(strcpy(bigbuff, clustermark)): 0;
+        return  vp->var_flags & VF_CLUSTER? (fmt_t) strlen(strcpy(bigbuff, clustermark)): 0;
 }

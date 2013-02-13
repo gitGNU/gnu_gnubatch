@@ -22,146 +22,146 @@
 #include "helpargs.h"
 #include "optflags.h"
 
-char	*Restru,				/* Define these here */
-	*Restrg;
+char    *Restru,                                /* Define these here */
+        *Restrg;
 
 EOPTION(o_incnull)
 {
-	Dispflags &= ~DF_SUPPNULL;
-	return  OPTRESULT_OK;
+        Dispflags &= ~DF_SUPPNULL;
+        return  OPTRESULT_OK;
 }
 
 EOPTION(o_noincnull)
 {
-	Dispflags |= DF_SUPPNULL;
-	return  OPTRESULT_OK;
+        Dispflags |= DF_SUPPNULL;
+        return  OPTRESULT_OK;
 }
 
 EOPTION(o_localonly)
 {
-	Dispflags |= DF_LOCALONLY;
-	return  OPTRESULT_OK;
+        Dispflags |= DF_LOCALONLY;
+        return  OPTRESULT_OK;
 }
 
 EOPTION(o_nolocalonly)
 {
-	Dispflags &= ~DF_LOCALONLY;
-	return  OPTRESULT_OK;
+        Dispflags &= ~DF_LOCALONLY;
+        return  OPTRESULT_OK;
 }
 
 EOPTION(o_scrkeep)
 {
-	Dispflags |= DF_SCRKEEP;
-	return  OPTRESULT_OK;
+        Dispflags |= DF_SCRKEEP;
+        return  OPTRESULT_OK;
 }
 
 EOPTION(o_noscrkeep)
 {
-	Dispflags &= ~DF_SCRKEEP;
-	return  OPTRESULT_OK;
+        Dispflags &= ~DF_SCRKEEP;
+        return  OPTRESULT_OK;
 }
 
 EOPTION(o_confabort)
 {
-	Dispflags |= DF_CONFABORT;
-	return  OPTRESULT_OK;
+        Dispflags |= DF_CONFABORT;
+        return  OPTRESULT_OK;
 }
 
 EOPTION(o_noconfabort)
 {
-	Dispflags &= ~DF_CONFABORT;
-	return  OPTRESULT_OK;
+        Dispflags &= ~DF_CONFABORT;
+        return  OPTRESULT_OK;
 }
 
 EOPTION(o_justu)
 {
-	if  (!arg)
-		return  OPTRESULT_MISSARG;
-	if  (Restru)
-		free(Restru);
-	Restru = (arg[0] && (arg[0] != '-' || arg[1]))? stracpy(arg): (char *) 0;
-	return  OPTRESULT_ARG_OK;
+        if  (!arg)
+                return  OPTRESULT_MISSARG;
+        if  (Restru)
+                free(Restru);
+        Restru = (arg[0] && (arg[0] != '-' || arg[1]))? stracpy(arg): (char *) 0;
+        return  OPTRESULT_ARG_OK;
 }
 
 EOPTION(o_justg)
 {
-	if  (!arg)
-		return  OPTRESULT_MISSARG;
-	if  (Restrg)
-		free(Restrg);
-	Restrg = (arg[0] && (arg[0] != '-' || arg[1]))? stracpy(arg): (char *) 0;
-	return  OPTRESULT_ARG_OK;
+        if  (!arg)
+                return  OPTRESULT_MISSARG;
+        if  (Restrg)
+                free(Restrg);
+        Restrg = (arg[0] && (arg[0] != '-' || arg[1]))? stracpy(arg): (char *) 0;
+        return  OPTRESULT_ARG_OK;
 }
 
 EOPTION(o_jobqueue)
 {
-	if  (!arg)
-		return  OPTRESULT_MISSARG;
+        if  (!arg)
+                return  OPTRESULT_MISSARG;
 
-	Anychanges |= OF_ANY_DOING_SOMETHING | OF_ANY_DOING_CHANGE;
-	Procparchanges |= OF_JOBQUEUE_CHANGES;
-	if  (jobqueue)
-		free(jobqueue);
-	jobqueue = (arg[0] && (arg[0] != '-' || arg[1])) ? stracpy(arg): (char *) 0;
-	return  OPTRESULT_ARG_OK;
+        Anychanges |= OF_ANY_DOING_SOMETHING | OF_ANY_DOING_CHANGE;
+        Procparchanges |= OF_JOBQUEUE_CHANGES;
+        if  (jobqueue)
+                free(jobqueue);
+        jobqueue = (arg[0] && (arg[0] != '-' || arg[1])) ? stracpy(arg): (char *) 0;
+        return  OPTRESULT_ARG_OK;
 }
 
 EOPTION(o_helpclr)
 {
-	Dispflags |= DF_HELPCLR;
-	return  OPTRESULT_OK;
+        Dispflags |= DF_HELPCLR;
+        return  OPTRESULT_OK;
 }
 
 EOPTION(o_nohelpclr)
 {
-	Dispflags &= ~DF_HELPCLR;
-	return  OPTRESULT_OK;
+        Dispflags &= ~DF_HELPCLR;
+        return  OPTRESULT_OK;
 }
 
 EOPTION(o_helpbox)
 {
-	Dispflags |= DF_HELPBOX;
-	return  OPTRESULT_OK;
+        Dispflags |= DF_HELPBOX;
+        return  OPTRESULT_OK;
 }
 
 EOPTION(o_nohelpbox)
 {
-	Dispflags &= ~DF_HELPBOX;
-	return  OPTRESULT_OK;
+        Dispflags &= ~DF_HELPBOX;
+        return  OPTRESULT_OK;
 }
 
 EOPTION(o_errbox)
 {
-	Dispflags |= DF_ERRBOX;
-	return  OPTRESULT_OK;
+        Dispflags |= DF_ERRBOX;
+        return  OPTRESULT_OK;
 }
 
 EOPTION(o_noerrbox)
 {
-	Dispflags &= ~DF_ERRBOX;
-	return  OPTRESULT_OK;
+        Dispflags &= ~DF_ERRBOX;
+        return  OPTRESULT_OK;
 }
 
 EOPTION(o_header)
 {
-	Dispflags |= DF_HAS_HDR;
-	return  OPTRESULT_OK;
+        Dispflags |= DF_HAS_HDR;
+        return  OPTRESULT_OK;
 }
 
 EOPTION(o_noheader)
 {
-	Dispflags &= ~DF_HAS_HDR;
-	return  OPTRESULT_OK;
+        Dispflags &= ~DF_HAS_HDR;
+        return  OPTRESULT_OK;
 }
 
 EOPTION(o_freezecd)
 {
-	Anychanges |= OF_ANY_FREEZE_WANTED | OF_ANY_FREEZE_CURRENT;
-	return  OPTRESULT_OK;
+        Anychanges |= OF_ANY_FREEZE_WANTED | OF_ANY_FREEZE_CURRENT;
+        return  OPTRESULT_OK;
 }
 
 EOPTION(o_freezehd)
 {
-	Anychanges |= OF_ANY_FREEZE_WANTED | OF_ANY_FREEZE_HOME;
-	return  OPTRESULT_OK;
+        Anychanges |= OF_ANY_FREEZE_WANTED | OF_ANY_FREEZE_HOME;
+        return  OPTRESULT_OK;
 }

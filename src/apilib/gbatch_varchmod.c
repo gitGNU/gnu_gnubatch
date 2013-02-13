@@ -29,30 +29,30 @@ extern int  gbatch_write(const int, char *, unsigned);
 extern void  gbatch_mode_pack(Btmode *, const Btmode *);
 extern struct api_fd *gbatch_look_fd(const int);
 
-int	gbatch_varchmod(const int fd, const unsigned flags, const slotno_t slotno, const Btmode *newmode)
+int     gbatch_varchmod(const int fd, const unsigned flags, const slotno_t slotno, const Btmode *newmode)
 {
-	int	ret;
-	struct	api_fd	*fdp = gbatch_look_fd(fd);
-	struct	api_msg	msg;
-	struct	varnetmsg	res;
+        int     ret;
+        struct  api_fd  *fdp = gbatch_look_fd(fd);
+        struct  api_msg msg;
+        struct  varnetmsg       res;
 
-	if  (!fdp)
-		return  XB_INVALID_FD;
-	msg.code = API_VARCHMOD;
-	msg.un.reader.flags = htonl(flags);
-	msg.un.reader.seq = htonl(fdp->vserial);
-	msg.un.reader.slotno = htonl(slotno);
-	BLOCK_ZERO(&res, sizeof(res)); /* All this is a bit wasteful really but who cares */
-	gbatch_mode_pack(&res.nm_mode, newmode);
-	if  ((ret = gbatch_wmsg(fdp, &msg)))
-		return  ret;
-	if  ((ret = gbatch_write(fdp->sockfd, (char *) &res, sizeof(res))))
-		return  ret;
-	if  ((ret = gbatch_rmsg(fdp, &msg)))
-		return  ret;
-	if  (msg.un.r_reader.seq != 0)
-		fdp->vserial = ntohl(msg.un.r_reader.seq);
-	if  (msg.retcode != 0)
-		return  (SHORT) ntohs(msg.retcode);
-	return  XB_OK;
+        if  (!fdp)
+                return  XB_INVALID_FD;
+        msg.code = API_VARCHMOD;
+        msg.un.reader.flags = htonl(flags);
+        msg.un.reader.seq = htonl(fdp->vserial);
+        msg.un.reader.slotno = htonl(slotno);
+        BLOCK_ZERO(&res, sizeof(res)); /* All this is a bit wasteful really but who cares */
+        gbatch_mode_pack(&res.nm_mode, newmode);
+        if  ((ret = gbatch_wmsg(fdp, &msg)))
+                return  ret;
+        if  ((ret = gbatch_write(fdp->sockfd, (char *) &res, sizeof(res))))
+                return  ret;
+        if  ((ret = gbatch_rmsg(fdp, &msg)))
+                return  ret;
+        if  (msg.un.r_reader.seq != 0)
+                fdp->vserial = ntohl(msg.un.r_reader.seq);
+        if  (msg.retcode != 0)
+                return  (SHORT) ntohs(msg.retcode);
+        return  XB_OK;
 }

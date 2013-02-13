@@ -15,24 +15,24 @@
    You should have received a copy of the GNU General Public License
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
-struct	sctrl	{
-	int	helpcode;		/*  Help code (see help file)  */
-	char	**(*helpfn)();		/*  Routine which will return block
-					    of specific possibilities  */
-	USHORT	size;			/*  Size of field  */
-	SHORT	retv;			/*  Return value for MAG_R  */
-	SHORT	col;			/*  Position on screen or -1 */
-	unsigned  char	magic_p;	/*  Magic printing chars  */
-	LONG	min, vmax;		/*  Min/max values  */
-	char	*msg;			/*  Special description (if any) */
+struct  sctrl   {
+        int     helpcode;               /*  Help code (see help file)  */
+        char    **(*helpfn)();          /*  Routine which will return block
+                                            of specific possibilities  */
+        USHORT  size;                   /*  Size of field  */
+        SHORT   retv;                   /*  Return value for MAG_R  */
+        SHORT   col;                    /*  Position on screen or -1 */
+        unsigned  char  magic_p;        /*  Magic printing chars  */
+        LONG    min, vmax;              /*  Min/max values  */
+        char    *msg;                   /*  Special description (if any) */
 };
 
 /* Mapping of format characters (assumed A-Z a-z) and format routines */
 
-struct	formatdef  {
-	SHORT	statecode;	/* Code number for heading if applicable */
-	SHORT	sugg_width;	/* Suggested width */
-	char	*msg;		/* Heading */
-	char	*explain;	/* More detailed explanation */
-	int	(*fmt_fn)();
+struct  formatdef  {
+        SHORT   statecode;      /* Code number for heading if applicable */
+        SHORT   sugg_width;     /* Suggested width */
+        char    *msg;           /* Heading */
+        char    *explain;       /* More detailed explanation */
+        int     (*fmt_fn)();
 };

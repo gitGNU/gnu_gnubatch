@@ -15,12 +15,12 @@
    You should have received a copy of the GNU General Public License
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
-extern	void	setupkeys();
-extern	void	select_state(const int);
-extern	void	reset_state();
-extern	int	helpnstate(const int);
-extern	int	helprdn();
+extern  void    setupkeys();
+extern  void    select_state(const int);
+extern  void    reset_state();
+extern  int     helpnstate(const int);
+extern  int     helprdn();
 
-extern	char	*help_readl(int *);
-extern	char	*helpprmpt(const int);
-extern	char	*gprompt(const int);
+extern  char    *help_readl(int *);
+extern  char    *helpprmpt(const int);
+extern  char    *gprompt(const int);

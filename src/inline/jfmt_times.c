@@ -17,75 +17,75 @@
 
 static fmt_t  ptimes(const time_t w)
 {
-	if  (w != 0)  {
-		time_t	now = time((time_t *) 0);
-		struct	tm  *t = localtime(&w);
-		int	t1 = t->tm_hour, t2 = t->tm_min;
-		int	sep = ':';
+        if  (w != 0)  {
+                time_t  now = time((time_t *) 0);
+                struct  tm  *t = localtime(&w);
+                int     t1 = t->tm_hour, t2 = t->tm_min;
+                int     sep = ':';
 
-		now = (now / (24L * 60L * 60L)) * 24L * 60L * 60L;
+                now = (now / (24L * 60L * 60L)) * 24L * 60L * 60L;
 
-		if  (w < now || w - now > 24 * 60 * 60)  {
-			t1 = t->tm_mday;
-			t2 = t->tm_mon+1;
-#ifdef	HAVE_TM_ZONE
-			if  (t->tm_gmtoff <= -4 * 60 * 60)
+                if  (w < now || w - now > 24 * 60 * 60)  {
+                        t1 = t->tm_mday;
+                        t2 = t->tm_mon+1;
+#ifdef  HAVE_TM_ZONE
+                        if  (t->tm_gmtoff <= -4 * 60 * 60)
 #else
-			if  (timezone >= 4 * 60 * 60)
+                        if  (timezone >= 4 * 60 * 60)
 #endif
-			{
-				t1 = t2;
-				t2 = t->tm_mday;
-			}
-			sep = '/';
-		}
-		sprintf(bigbuff, "%.2d%c%.2d", t1, sep, t2);
-		return  5;
-	}
-	return  0;
+                        {
+                                t1 = t2;
+                                t2 = t->tm_mday;
+                        }
+                        sep = '/';
+                }
+                sprintf(bigbuff, "%.2d%c%.2d", t1, sep, t2);
+                return  5;
+        }
+        return  0;
 }
 
 JFORMAT(fmt_otime)
 {
-	if  (!isreadable)
-		return  0;
-	return  ptimes(jp->h.bj_time);
+        if  (!isreadable)
+                return  0;
+        return  ptimes(jp->h.bj_time);
 }
 JFORMAT(fmt_stime)
 {
-	if  (!isreadable)
-		return  0;
-	return  ptimes(jp->h.bj_stime);
+        if  (!isreadable)
+                return  0;
+        return  ptimes(jp->h.bj_stime);
 }
 JFORMAT(fmt_etime)
 {
-	if  (!isreadable)
-		return  0;
-	return  ptimes(jp->h.bj_etime);
+        if  (!isreadable)
+                return  0;
+        return  ptimes(jp->h.bj_etime);
 }
 JFORMAT(fmt_itime)
 {
 
-	switch  (jp->h.bj_progress)  {
-	default:
-		return  0;
+        switch  (jp->h.bj_progress)  {
+        default:
+                return  0;
 
-	case  BJP_FINISHED:
-	case  BJP_ERROR:
-	case  BJP_ABORTED:
-		return  fmt_etime(jp, isreadable, fwidth);
-	case  BJP_STARTUP1:
-	case  BJP_STARTUP2:
-	case  BJP_RUNNING:
-		return  fmt_stime(jp, isreadable, fwidth);
-	case  BJP_DONE:
-		if  (jp->h.bj_etime)
-			return  fmt_etime(jp, isreadable, fwidth);
-	case  BJP_CANCELLED:
-		return  fmt_time(jp, isreadable, fwidth);
-	case  BJP_NONE:
-		if  (!jp->h.bj_times.tc_istime  &&  jp->h.bj_times.tc_nexttime < time((time_t *) 0))
-			return  fmt_etime(jp, isreadable, fwidth);
-		return  fmt_time(jp, isreadable, fwidth);
-	}
+        case  BJP_FINISHED:
+        case  BJP_ERROR:
+        case  BJP_ABORTED:
+                return  fmt_etime(jp, isreadable, fwidth);
+        case  BJP_STARTUP1:
+        case  BJP_STARTUP2:
+        case  BJP_RUNNING:
+                return  fmt_stime(jp, isreadable, fwidth);
+        case  BJP_DONE:
+                if  (jp->h.bj_etime)
+                        return  fmt_etime(jp, isreadable, fwidth);
+        case  BJP_CANCELLED:
+                return  fmt_time(jp, isreadable, fwidth);
+        case  BJP_NONE:
+                if  (!jp->h.bj_times.tc_istime  &&  jp->h.bj_times.tc_nexttime < time((time_t *) 0))
+                        return  fmt_etime(jp, isreadable, fwidth);
+                return  fmt_time(jp, isreadable, fwidth);
+        }
 }

@@ -30,33 +30,33 @@ extern int  gbatch_wmsg(const struct api_fd *, struct api_msg *);
 extern unsigned  gbatch_jobswap(struct jobnetmsg *, const apiBtjob *);
 extern struct api_fd *gbatch_look_fd(const int);
 
-int	gbatch_jobupd(const int fd, const unsigned flags, const slotno_t slotno, apiBtjob *newjob)
+int     gbatch_jobupd(const int fd, const unsigned flags, const slotno_t slotno, apiBtjob *newjob)
 {
-	int			ret;
-	unsigned		length;
-	struct	api_fd		*fdp = gbatch_look_fd(fd);
-	struct	api_msg		msg;
-	struct	jobnetmsg	res;
+        int                     ret;
+        unsigned                length;
+        struct  api_fd          *fdp = gbatch_look_fd(fd);
+        struct  api_msg         msg;
+        struct  jobnetmsg       res;
 
-	if  (!fdp)
-		return  XB_INVALID_FD;
+        if  (!fdp)
+                return  XB_INVALID_FD;
 
-	msg.code = API_JOBUPD;
-	msg.un.reader.flags = htonl(flags);
-	msg.un.reader.seq = htonl(fdp->jserial);
-	msg.un.reader.slotno = htonl(slotno);
+        msg.code = API_JOBUPD;
+        msg.un.reader.flags = htonl(flags);
+        msg.un.reader.seq = htonl(fdp->jserial);
+        msg.un.reader.slotno = htonl(slotno);
 
-	length = gbatch_jobswap(&res, newjob);
+        length = gbatch_jobswap(&res, newjob);
 
-	if  ((ret = gbatch_wmsg(fdp, &msg)))
-		return  ret;
-	if  ((ret = gbatch_write(fdp->sockfd, (char *) &res, length)))
-		return  ret;
-	if  ((ret = gbatch_rmsg(fdp, &msg)))
-		return  ret;
-	if  (msg.un.r_reader.seq != 0)
-		fdp->jserial = ntohl(msg.un.r_reader.seq);
-	if  (msg.retcode != 0)
-		return  (SHORT) ntohs(msg.retcode);
-	return  XB_OK;
+        if  ((ret = gbatch_wmsg(fdp, &msg)))
+                return  ret;
+        if  ((ret = gbatch_write(fdp->sockfd, (char *) &res, length)))
+                return  ret;
+        if  ((ret = gbatch_rmsg(fdp, &msg)))
+                return  ret;
+        if  (msg.un.r_reader.seq != 0)
+                fdp->jserial = ntohl(msg.un.r_reader.seq);
+        if  (msg.retcode != 0)
+                return  (SHORT) ntohs(msg.retcode);
+        return  XB_OK;
 }

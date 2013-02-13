@@ -17,26 +17,26 @@
 
 JFORMAT(fmt_env)
 {
-	fmt_t  lng = 0;
-#ifdef	CHARSPRINTF
-	int	cnt;
+        fmt_t  lng = 0;
+#ifdef  CHARSPRINTF
+        int     cnt;
 #endif
-	if  (isreadable)  {
-		unsigned	ec;
-		for  (ec = 0;  ec < jp->h.bj_nenv;  ec++)  {
-			char	*name, *value;
+        if  (isreadable)  {
+                unsigned        ec;
+                for  (ec = 0;  ec < jp->h.bj_nenv;  ec++)  {
+                        char    *name, *value;
 
-			ENV_OF(jp, ec, name, value);
-			if  (ec != 0)
-				bigbuff[lng++] = ',';
-#ifdef	CHARSPRINTF
-			sprintf(&bigbuff[lng], strchr(value, ' ')? "%s=\"%s\"": "%s=%s", name, value);
-			cnt = strlen(&bigbuff[lng]);
-			lng += cnt;
+                        ENV_OF(jp, ec, name, value);
+                        if  (ec != 0)
+                                bigbuff[lng++] = ',';
+#ifdef  CHARSPRINTF
+                        sprintf(&bigbuff[lng], strchr(value, ' ')? "%s=\"%s\"": "%s=%s", name, value);
+                        cnt = strlen(&bigbuff[lng]);
+                        lng += cnt;
 #else
-			lng += sprintf(&bigbuff[lng], strchr(value, ' ')? "%s=\"%s\"": "%s=%s", name, value);
+                        lng += sprintf(&bigbuff[lng], strchr(value, ' ')? "%s=\"%s\"": "%s=%s", name, value);
 #endif
-		}
-	}
-	return  lng;
+                }
+        }
+        return  lng;
 }

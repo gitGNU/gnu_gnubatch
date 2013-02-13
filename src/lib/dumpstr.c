@@ -21,8 +21,8 @@
 
 void  dumpstr(FILE *dest, char *str)
 {
-	if  (strchr(str, ' ') || strchr(str, '\t'))
-		fprintf(dest, "\'%s\'", str);
-	else
-		fputs(str, dest);
+        if  (strchr(str, ' ') || strchr(str, '\t'))
+                fprintf(dest, "\'%s\'", str);
+        else
+                fputs(str, dest);
 }

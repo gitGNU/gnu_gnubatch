@@ -17,34 +17,24 @@
 
 JFORMAT(fmt_ass)
 {
-	fmt_t  lng = 0;
-#ifdef	CHARSPRINTF
-	int	cnt;
+        fmt_t  lng = 0;
+#ifdef  CHARSPRINTF
+        int     cnt;
 #endif
-	if  (isreadable)  {
-		int	uc;
-		const	Btvar	*vp;
-		const	Jass	*ap;
+        if  (isreadable)  {
+                int     uc;
+                const   Btvar   *vp;
+                const   Jass    *ap;
 
-		for  (uc = 0;  uc < MAXSEVARS;  uc++)  {
-			ap = &jp->h.bj_asses[uc];
-			if  (ap->bja_op == BJA_NONE)
-				break;
-			if  (uc != 0)
-				bigbuff[lng++] = ',';
-			vp = &Var_seg.vlist[ap->bja_varind].Vent;
-#ifdef	CHARSPRINTF
-			if  (vp->var_id.hostid)  {
-				sprintf(&bigbuff[lng], "%s:", look_host(vp->var_id.hostid));
-				cnt = strlen(&bigbuff[lng]);
-				lng += cnt;
-			}
-#else
-			if  (vp->var_id.hostid)
-				lng += sprintf(&bigbuff[lng], "%s:", look_host(vp->var_id.hostid));
-#endif
-			lng += strlen(strcpy(&bigbuff[lng], vp->var_name));
-		}
-	}
-	return  lng;
+                for  (uc = 0;  uc < MAXSEVARS;  uc++)  {
+                        ap = &jp->h.bj_asses[uc];
+                        if  (ap->bja_op == BJA_NONE)
+                                break;
+                        if  (uc != 0)
+                                bigbuff[lng++] = ',';
+                        vp = &Var_seg.vlist[ap->bja_varind].Vent;
+			lng += strlen(strcpy(&bigbuff[lng], host_prefix_str(vp->var_id.hostid, vp->var_name)));
+                }
+        }
+        return  lng;
 }

@@ -17,31 +17,31 @@
 
 JFORMAT(fmt_jobno)
 {
-#ifdef	BTJLIST_INLINE
-#ifdef	CHARSPRINTF
-	if  (jp->h.bj_hostid)
-		sprintf(bigbuff, "%s:%.*ld", look_host(jp->h.bj_hostid), jno_width, (long) jp->h.bj_job);
-	else
-		sprintf(bigbuff, "%.*ld", jno_width, (long) jp->h.bj_job);
-	return  (fmt_t) strlen(bigbuff);
+#ifdef  BTJLIST_INLINE
+#ifdef  CHARSPRINTF
+        if  (jp->h.bj_hostid)
+                sprintf(bigbuff, "%s:%.*ld", look_host(jp->h.bj_hostid), jno_width, (long) jp->h.bj_job);
+        else
+                sprintf(bigbuff, "%.*ld", jno_width, (long) jp->h.bj_job);
+        return  (fmt_t) strlen(bigbuff);
 #else
-	if  (jp->h.bj_hostid)
-		return  (fmt_t) sprintf(bigbuff, "%s:%.*ld", look_host(jp->h.bj_hostid), (int) jno_width, (long) jp->h.bj_job);
-	else
-		return  (fmt_t) sprintf(bigbuff, "%.*ld", (int) jno_width, (long) jp->h.bj_job);
+        if  (jp->h.bj_hostid)
+                return  (fmt_t) sprintf(bigbuff, "%s:%.*ld", look_host(jp->h.bj_hostid), (int) jno_width, (long) jp->h.bj_job);
+        else
+                return  (fmt_t) sprintf(bigbuff, "%.*ld", (int) jno_width, (long) jp->h.bj_job);
 #endif
 #else
-#ifdef	CHARSPRINTF
-	if  (jp->h.bj_hostid)
-		sprintf(bigbuff, "%s:%ld", look_host(jp->h.bj_hostid), (long) jp->h.bj_job);
-	else
-		sprintf(bigbuff, "%ld", (long) jp->h.bj_job);
-	return  (fmt_t) strlen(bigbuff);
+#ifdef  CHARSPRINTF
+        if  (jp->h.bj_hostid)
+                sprintf(bigbuff, "%s:%ld", look_host(jp->h.bj_hostid), (long) jp->h.bj_job);
+        else
+                sprintf(bigbuff, "%ld", (long) jp->h.bj_job);
+        return  (fmt_t) strlen(bigbuff);
 #else
-	if  (jp->h.bj_hostid)
-		return  (fmt_t) sprintf(bigbuff, "%s:%ld", look_host(jp->h.bj_hostid), (long) jp->h.bj_job);
-	else
-		return  (fmt_t) sprintf(bigbuff, "%ld", (long) jp->h.bj_job);
+        if  (jp->h.bj_hostid)
+                return  (fmt_t) sprintf(bigbuff, "%s:%ld", look_host(jp->h.bj_hostid), (long) jp->h.bj_job);
+        else
+                return  (fmt_t) sprintf(bigbuff, "%ld", (long) jp->h.bj_job);
 #endif
 #endif
 }

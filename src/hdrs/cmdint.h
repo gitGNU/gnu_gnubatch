@@ -15,24 +15,24 @@
    You should have received a copy of the GNU General Public License
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
-typedef	struct	{
-	USHORT		ci_ll;		/*  Default load level */
-	unsigned  char  ci_nice;	/*  Nice value */
-	unsigned  char	ci_flags;	/*  Flags for cmd int */
-	char	ci_name[CI_MAXNAME+1];	/*  Name (e.g. shell) */
-	char	ci_path[CI_MAXFPATH+1];	/*  Path name */
-	char	ci_args[CI_MAXARGS+1];	/*  Arg list */
+typedef struct  {
+        USHORT          ci_ll;          /*  Default load level */
+        unsigned  char  ci_nice;        /*  Nice value */
+        unsigned  char  ci_flags;       /*  Flags for cmd int */
+        char    ci_name[CI_MAXNAME+1];  /*  Name (e.g. shell) */
+        char    ci_path[CI_MAXFPATH+1]; /*  Path name */
+        char    ci_args[CI_MAXARGS+1];  /*  Arg list */
 }  Cmdint, *CmdintRef;
 
-typedef	const	Cmdint	*CCmdintRef;
+typedef const   Cmdint  *CCmdintRef;
 
-#define	CI_STDSHELL	0		/* Standard shell */
+#define CI_STDSHELL     0               /* Standard shell */
 
-#define	CIF_SETARG0	(1 << 0)	/* Flag to set arg0 from job title */
-#define	CIF_INTERPARGS	(1 << 1) 	/* Flag to set to interpolate $1 etc args ourselves */
+#define CIF_SETARG0     (1 << 0)        /* Flag to set arg0 from job title */
+#define CIF_INTERPARGS  (1 << 1)        /* Flag to set to interpolate $1 etc args ourselves */
 
-extern	CmdintRef	Ci_list;
-extern	int		Ci_num, Ci_fd;
+extern  CmdintRef       Ci_list;
+extern  int             Ci_num, Ci_fd;
 
 extern int  open_ci(const int);
 extern void  rereadcif();

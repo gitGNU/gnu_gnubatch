@@ -22,17 +22,17 @@
 
 int  helprdn()
 {
-	int	ch, result = 0, minus = 0;
+        int     ch, result = 0, minus = 0;
 
-	if  ((ch = getc(Cfile)) == '-')  {
-		minus = 1;
-		ch = getc(Cfile);
-	}
+        if  ((ch = getc(Cfile)) == '-')  {
+                minus = 1;
+                ch = getc(Cfile);
+        }
 
-	while  (isdigit(ch))  {
-		result = result * 10 + ch - '0';
-		ch = getc(Cfile);
-	}
-	ungetc(ch, Cfile);
-	return  minus? -result: result;
+        while  (isdigit(ch))  {
+                result = result * 10 + ch - '0';
+                ch = getc(Cfile);
+        }
+        ungetc(ch, Cfile);
+        return  minus? -result: result;
 }

@@ -32,36 +32,36 @@ extern struct api_fd *gbatch_look_fd(const int);
 
 int  gbatch_varadd(const int fd, const apiBtvar *newvar)
 {
-	int	ret;
-	struct	api_fd	*fdp = gbatch_look_fd(fd);
-	struct	api_msg		msg;
-	struct	varnetmsg	res;
+        int     ret;
+        struct  api_fd  *fdp = gbatch_look_fd(fd);
+        struct  api_msg         msg;
+        struct  varnetmsg       res;
 
-	if  (!fdp)
-		return  XB_INVALID_FD;
-	msg.code = API_VARADD;
-	BLOCK_ZERO(&res, sizeof(res));
-	res.nm_type = newvar->var_type;
-	res.nm_flags = newvar->var_flags;
-	strncpy(res.nm_name, newvar->var_name, BTV_NAME);
-	strncpy(res.nm_comment, newvar->var_comment, BTV_COMMENT);
-	gbatch_mode_pack(&res.nm_mode, &newvar->var_mode);
-	if  ((res.nm_consttype = newvar->var_value.const_type) == CON_STRING)
-		strncpy(res.nm_un.nm_string, newvar->var_value.con_un.con_string, BTC_VALUE);
-	else  {
-		res.nm_consttype = CON_LONG;
-		res.nm_un.nm_long = htonl(newvar->var_value.con_un.con_long);
-	}
+        if  (!fdp)
+                return  XB_INVALID_FD;
+        msg.code = API_VARADD;
+        BLOCK_ZERO(&res, sizeof(res));
+        res.nm_type = newvar->var_type;
+        res.nm_flags = newvar->var_flags;
+        strncpy(res.nm_name, newvar->var_name, BTV_NAME);
+        strncpy(res.nm_comment, newvar->var_comment, BTV_COMMENT);
+        gbatch_mode_pack(&res.nm_mode, &newvar->var_mode);
+        if  ((res.nm_consttype = newvar->var_value.const_type) == CON_STRING)
+                strncpy(res.nm_un.nm_string, newvar->var_value.con_un.con_string, BTC_VALUE);
+        else  {
+                res.nm_consttype = CON_LONG;
+                res.nm_un.nm_long = htonl(newvar->var_value.con_un.con_long);
+        }
 
-	if  ((ret = gbatch_wmsg(fdp, &msg)))
-		return  ret;
-	if  ((ret = gbatch_write(fdp->sockfd, (char *) &res, sizeof(res))))
-		return  ret;
-	if  ((ret = gbatch_rmsg(fdp, &msg)))
-		return  ret;
-	if  (msg.un.r_reader.seq != 0)
-		fdp->vserial = ntohl(msg.un.r_reader.seq);
-	if  (msg.retcode != 0)
-		return  (SHORT) ntohs(msg.retcode);
-	return  XB_OK;
+        if  ((ret = gbatch_wmsg(fdp, &msg)))
+                return  ret;
+        if  ((ret = gbatch_write(fdp->sockfd, (char *) &res, sizeof(res))))
+                return  ret;
+        if  ((ret = gbatch_rmsg(fdp, &msg)))
+                return  ret;
+        if  (msg.un.r_reader.seq != 0)
+                fdp->vserial = ntohl(msg.un.r_reader.seq);
+        if  (msg.retcode != 0)
+                return  (SHORT) ntohs(msg.retcode);
+        return  XB_OK;
 }

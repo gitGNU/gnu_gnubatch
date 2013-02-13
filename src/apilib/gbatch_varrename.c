@@ -28,29 +28,29 @@ extern int  gbatch_wmsg(const struct api_fd *, struct api_msg *);
 extern int  gbatch_write(const int, char *, unsigned);
 extern struct api_fd *gbatch_look_fd(const int);
 
-int	gbatch_varrename(const int fd, const unsigned flags, const slotno_t slotno, const char *newname)
+int     gbatch_varrename(const int fd, const unsigned flags, const slotno_t slotno, const char *newname)
 {
-	int	ret;
-	struct	api_fd	*fdp = gbatch_look_fd(fd);
-	struct	api_msg	msg;
-	char	nbuf[BTV_NAME+1];
+        int     ret;
+        struct  api_fd  *fdp = gbatch_look_fd(fd);
+        struct  api_msg msg;
+        char    nbuf[BTV_NAME+1];
 
-	if  (!fdp)
-		return  XB_INVALID_FD;
-	msg.code = API_VARRENAME;
-	msg.un.reader.flags = htonl(flags);
-	msg.un.reader.seq = htonl(fdp->vserial);
-	msg.un.reader.slotno = htonl(slotno);
-	strncpy(nbuf, newname, BTV_NAME);
-	if  ((ret = gbatch_wmsg(fdp, &msg)))
-		return  ret;
-	if  ((ret = gbatch_write(fdp->sockfd, nbuf, sizeof(nbuf))))
-		return  ret;
-	if  ((ret = gbatch_rmsg(fdp, &msg)))
-		return  ret;
-	if  (msg.un.r_reader.seq != 0)
-		fdp->vserial = ntohl(msg.un.r_reader.seq);
-	if  (msg.retcode != 0)
-		return  (SHORT) ntohs(msg.retcode);
-	return  XB_OK;
+        if  (!fdp)
+                return  XB_INVALID_FD;
+        msg.code = API_VARRENAME;
+        msg.un.reader.flags = htonl(flags);
+        msg.un.reader.seq = htonl(fdp->vserial);
+        msg.un.reader.slotno = htonl(slotno);
+        strncpy(nbuf, newname, BTV_NAME);
+        if  ((ret = gbatch_wmsg(fdp, &msg)))
+                return  ret;
+        if  ((ret = gbatch_write(fdp->sockfd, nbuf, sizeof(nbuf))))
+                return  ret;
+        if  ((ret = gbatch_rmsg(fdp, &msg)))
+                return  ret;
+        if  (msg.un.r_reader.seq != 0)
+                fdp->vserial = ntohl(msg.un.r_reader.seq);
+        if  (msg.retcode != 0)
+                return  (SHORT) ntohs(msg.retcode);
+        return  XB_OK;
 }

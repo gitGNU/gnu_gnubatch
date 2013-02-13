@@ -17,14 +17,14 @@
 
 JFORMAT(fmt_prio)
 {
-#ifdef	CHARSPRINTF
-	if  (isreadable)  {
-		sprintf(bigbuff, "%*u", fwidth, jp->h.bj_pri);
-		return  (fmt_t) strlen(bigbuff);
-	}
+#ifdef  CHARSPRINTF
+        if  (isreadable)  {
+                sprintf(bigbuff, "%*u", fwidth, jp->h.bj_pri);
+                return  (fmt_t) strlen(bigbuff);
+        }
 #else
-	if  (isreadable)
-		return	(fmt_t) sprintf(bigbuff, "%*u", fwidth, jp->h.bj_pri);
+        if  (isreadable)
+                return  (fmt_t) sprintf(bigbuff, "%*u", fwidth, jp->h.bj_pri);
 #endif
-	return  0;
+        return  0;
 }

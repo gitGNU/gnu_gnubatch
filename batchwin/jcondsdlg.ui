@@ -1,0 +1,1266 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>jcondsdlg</class>
+ <widget class="QDialog" name="jcondsdlg">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>852</width>
+    <height>488</height>
+   </rect>
+  </property>
+  <property name="windowTitle">
+   <string>Conditions for job</string>
+  </property>
+  <widget class="QDialogButtonBox" name="buttonBox">
+   <property name="geometry">
+    <rect>
+     <x>630</x>
+     <y>440</y>
+     <width>191</width>
+     <height>32</height>
+    </rect>
+   </property>
+   <property name="orientation">
+    <enum>Qt::Horizontal</enum>
+   </property>
+   <property name="standardButtons">
+    <set>QDialogButtonBox::Cancel|QDialogButtonBox::Ok</set>
+   </property>
+  </widget>
+  <widget class="QLabel" name="edjob">
+   <property name="geometry">
+    <rect>
+     <x>170</x>
+     <y>20</y>
+     <width>331</width>
+     <height>17</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string/>
+   </property>
+  </widget>
+  <widget class="QLabel" name="label">
+   <property name="geometry">
+    <rect>
+     <x>30</x>
+     <y>20</y>
+     <width>141</width>
+     <height>17</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string>Conditions for job</string>
+   </property>
+  </widget>
+  <widget class="QLabel" name="label_2">
+   <property name="geometry">
+    <rect>
+     <x>60</x>
+     <y>60</y>
+     <width>66</width>
+     <height>17</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string>Variable</string>
+   </property>
+  </widget>
+  <widget class="QLabel" name="label_3">
+   <property name="geometry">
+    <rect>
+     <x>160</x>
+     <y>60</y>
+     <width>41</width>
+     <height>17</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string>Op</string>
+   </property>
+  </widget>
+  <widget class="QLabel" name="label_4">
+   <property name="geometry">
+    <rect>
+     <x>410</x>
+     <y>60</y>
+     <width>71</width>
+     <height>17</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string>Text Value</string>
+   </property>
+  </widget>
+  <widget class="QLabel" name="label_5">
+   <property name="geometry">
+    <rect>
+     <x>640</x>
+     <y>60</y>
+     <width>66</width>
+     <height>17</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string>Int Val</string>
+   </property>
+  </widget>
+  <widget class="QWidget" name="">
+   <property name="geometry">
+    <rect>
+     <x>40</x>
+     <y>90</y>
+     <width>761</width>
+     <height>336</height>
+    </rect>
+   </property>
+   <layout class="QGridLayout" name="gridLayout">
+    <item row="0" column="0">
+     <widget class="QComboBox" name="condvar0">
+      <property name="toolTip">
+       <string>This is the variable whose value is to be inspected</string>
+      </property>
+      <item>
+       <property name="text">
+        <string>(no variable)</string>
+       </property>
+      </item>
+     </widget>
+    </item>
+    <item row="0" column="1">
+     <widget class="QComboBox" name="condop0">
+      <property name="toolTip">
+       <string>This is the operation</string>
+      </property>
+      <item>
+       <property name="text">
+        <string>n/a</string>
+       </property>
+      </item>
+      <item>
+       <property name="text">
+        <string>=</string>
+       </property>
+      </item>
+      <item>
+       <property name="text">
+        <string>!=</string>
+       </property>
+      </item>
+      <item>
+       <property name="text">
+        <string>&lt;</string>
+       </property>
+      </item>
+      <item>
+       <property name="text">
+        <string>&lt;=</string>
+       </property>
+      </item>
+      <item>
+       <property name="text">
+        <string>&gt;</string>
+       </property>
+      </item>
+      <item>
+       <property name="text">
+        <string>&gt;=</string>
+       </property>
+      </item>
+     </widget>
+    </item>
+    <item row="0" column="2">
+     <widget class="QCheckBox" name="condtext0">
+      <property name="font">
+       <font>
+        <pointsize>11</pointsize>
+       </font>
+      </property>
+      <property name="toolTip">
+       <string>Indicate that the value to be compared is text</string>
+      </property>
+      <property name="text">
+       <string>Text</string>
+      </property>
+     </widget>
+    </item>
+    <item row="0" column="3">
+     <widget class="QLineEdit" name="textval0">
+      <property name="enabled">
+       <bool>false</bool>
+      </property>
+      <property name="font">
+       <font>
+        <family>Courier New</family>
+        <weight>50</weight>
+        <italic>false</italic>
+        <bold>false</bold>
+       </font>
+      </property>
+      <property name="toolTip">
+       <string>Give the text value to be compared here</string>
+      </property>
+      <property name="maxLength">
+       <number>49</number>
+      </property>
+     </widget>
+    </item>
+    <item row="0" column="4">
+     <widget class="QSpinBox" name="intval0">
+      <property name="toolTip">
+       <string>Give the integer value to be compared here</string>
+      </property>
+      <property name="minimum">
+       <number>-1000000</number>
+      </property>
+      <property name="maximum">
+       <number>1000000</number>
+      </property>
+      <property name="value">
+       <number>0</number>
+      </property>
+     </widget>
+    </item>
+    <item row="0" column="5">
+     <widget class="QCheckBox" name="cc0">
+      <property name="toolTip">
+       <string>This is a critical condition
+
+If host with variable is not running do not run the job, if not set, in
+this case ignore the condition.</string>
+      </property>
+      <property name="text">
+       <string>CCrit</string>
+      </property>
+     </widget>
+    </item>
+    <item row="1" column="0">
+     <widget class="QComboBox" name="condvar1">
+      <property name="toolTip">
+       <string>This is the variable whose value is to be inspected</string>
+      </property>
+      <item>
+       <property name="text">
+        <string>(no variable)</string>
+       </property>
+      </item>
+     </widget>
+    </item>
+    <item row="1" column="1">
+     <widget class="QComboBox" name="condop1">
+      <property name="toolTip">
+       <string>This is the operation</string>
+      </property>
+      <item>
+       <property name="text">
+        <string>n/a</string>
+       </property>
+      </item>
+      <item>
+       <property name="text">
+        <string>=</string>
+       </property>
+      </item>
+      <item>
+       <property name="text">
+        <string>!=</string>
+       </property>
+      </item>
+      <item>
+       <property name="text">
+        <string>&lt;</string>
+       </property>
+      </item>
+      <item>
+       <property name="text">
+        <string>&lt;=</string>
+       </property>
+      </item>
+      <item>
+       <property name="text">
+        <string>&gt;</string>
+       </property>
+      </item>
+      <item>
+       <property name="text">
+        <string>&gt;=</string>
+       </property>
+      </item>
+     </widget>
+    </item>
+    <item row="1" column="2">
+     <widget class="QCheckBox" name="condtext1">
+      <property name="font">
+       <font>
+        <pointsize>11</pointsize>
+       </font>
+      </property>
+      <property name="toolTip">
+       <string>Indicate that the value to be compared is text</string>
+      </property>
+      <property name="text">
+       <string>Text</string>
+      </property>
+     </widget>
+    </item>
+    <item row="1" column="3">
+     <widget class="QLineEdit" name="textval1">
+      <property name="enabled">
+       <bool>false</bool>
+      </property>
+      <property name="font">
+       <font>
+        <family>Courier New</family>
+        <weight>50</weight>
+        <italic>false</italic>
+        <bold>false</bold>
+       </font>
+      </property>
+      <property name="toolTip">
+       <string>Give the text value to be compared here</string>
+      </property>
+      <property name="maxLength">
+       <number>49</number>
+      </property>
+     </widget>
+    </item>
+    <item row="1" column="4">
+     <widget class="QSpinBox" name="intval1">
+      <property name="toolTip">
+       <string>Give the integer value to be compared here</string>
+      </property>
+     </widget>
+    </item>
+    <item row="1" column="5">
+     <widget class="QCheckBox" name="cc1">
+      <property name="toolTip">
+       <string>This is a critical condition
+
+If host with variable is not running do not run the job, if not set, in
+this case ignore the condition.</string>
+      </property>
+      <property name="text">
+       <string>CCrit</string>
+      </property>
+     </widget>
+    </item>
+    <item row="2" column="0">
+     <widget class="QComboBox" name="condvar2">
+      <property name="toolTip">
+       <string>This is the variable whose value is to be inspected</string>
+      </property>
+      <item>
+       <property name="text">
+        <string>(no variable)</string>
+       </property>
+      </item>
+     </widget>
+    </item>
+    <item row="2" column="1">
+     <widget class="QComboBox" name="condop2">
+      <property name="toolTip">
+       <string>This is the operation</string>
+      </property>
+      <item>
+       <property name="text">
+        <string>n/a</string>
+       </property>
+      </item>
+      <item>
+       <property name="text">
+        <string>=</string>
+       </property>
+      </item>
+      <item>
+       <property name="text">
+        <string>!=</string>
+       </property>
+      </item>
+      <item>
+       <property name="text">
+        <string>&lt;</string>
+       </property>
+      </item>
+      <item>
+       <property name="text">
+        <string>&lt;=</string>
+       </property>
+      </item>
+      <item>
+       <property name="text">
+        <string>&gt;</string>
+       </property>
+      </item>
+      <item>
+       <property name="text">
+        <string>&gt;=</string>
+       </property>
+      </item>
+     </widget>
+    </item>
+    <item row="2" column="2">
+     <widget class="QCheckBox" name="condtext2">
+      <property name="toolTip">
+       <string>Indicate that the value to be compared is text</string>
+      </property>
+      <property name="text">
+       <string>Text</string>
+      </property>
+     </widget>
+    </item>
+    <item row="2" column="3">
+     <widget class="QLineEdit" name="textval2">
+      <property name="enabled">
+       <bool>false</bool>
+      </property>
+      <property name="font">
+       <font>
+        <family>Courier New</family>
+       </font>
+      </property>
+      <property name="toolTip">
+       <string>Give the text value to be compared here</string>
+      </property>
+      <property name="maxLength">
+       <number>49</number>
+      </property>
+     </widget>
+    </item>
+    <item row="2" column="4">
+     <widget class="QSpinBox" name="intval2">
+      <property name="toolTip">
+       <string>Give the integer value to be compared here</string>
+      </property>
+     </widget>
+    </item>
+    <item row="2" column="5">
+     <widget class="QCheckBox" name="cc2">
+      <property name="toolTip">
+       <string>This is a critical condition
+
+If host with variable is not running do not run the job, if not set, in
+this case ignore the condition.</string>
+      </property>
+      <property name="text">
+       <string>CCrit</string>
+      </property>
+     </widget>
+    </item>
+    <item row="3" column="0">
+     <widget class="QComboBox" name="condvar3">
+      <property name="toolTip">
+       <string>This is the variable whose value is to be inspected</string>
+      </property>
+      <item>
+       <property name="text">
+        <string>(no variable)</string>
+       </property>
+      </item>
+     </widget>
+    </item>
+    <item row="3" column="1">
+     <widget class="QComboBox" name="condop3">
+      <property name="toolTip">
+       <string>This is the operation</string>
+      </property>
+      <item>
+       <property name="text">
+        <string>n/a</string>
+       </property>
+      </item>
+      <item>
+       <property name="text">
+        <string>=</string>
+       </property>
+      </item>
+      <item>
+       <property name="text">
+        <string>!=</string>
+       </property>
+      </item>
+      <item>
+       <property name="text">
+        <string>&lt;</string>
+       </property>
+      </item>
+      <item>
+       <property name="text">
+        <string>&lt;=</string>
+       </property>
+      </item>
+      <item>
+       <property name="text">
+        <string>&gt;</string>
+       </property>
+      </item>
+      <item>
+       <property name="text">
+        <string>&gt;=</string>
+       </property>
+      </item>
+     </widget>
+    </item>
+    <item row="3" column="2">
+     <widget class="QCheckBox" name="condtext3">
+      <property name="toolTip">
+       <string>Indicate that the value to be compared is text</string>
+      </property>
+      <property name="text">
+       <string>Text</string>
+      </property>
+     </widget>
+    </item>
+    <item row="3" column="3">
+     <widget class="QLineEdit" name="textval3">
+      <property name="enabled">
+       <bool>false</bool>
+      </property>
+      <property name="font">
+       <font>
+        <family>Courier New</family>
+       </font>
+      </property>
+      <property name="toolTip">
+       <string>Give the text value to be compared here</string>
+      </property>
+      <property name="maxLength">
+       <number>49</number>
+      </property>
+     </widget>
+    </item>
+    <item row="3" column="4">
+     <widget class="QSpinBox" name="intval3">
+      <property name="toolTip">
+       <string>Give the integer value to be compared here</string>
+      </property>
+     </widget>
+    </item>
+    <item row="3" column="5">
+     <widget class="QCheckBox" name="cc3">
+      <property name="toolTip">
+       <string>This is a critical condition
+
+If host with variable is not running do not run the job, if not set, in
+this case ignore the condition.</string>
+      </property>
+      <property name="text">
+       <string>CCrit</string>
+      </property>
+     </widget>
+    </item>
+    <item row="4" column="0">
+     <widget class="QComboBox" name="condvar4">
+      <property name="toolTip">
+       <string>This is the variable whose value is to be inspected</string>
+      </property>
+      <item>
+       <property name="text">
+        <string>(no variable)</string>
+       </property>
+      </item>
+     </widget>
+    </item>
+    <item row="4" column="1">
+     <widget class="QComboBox" name="condop4">
+      <property name="toolTip">
+       <string>This is the operation</string>
+      </property>
+      <item>
+       <property name="text">
+        <string>n/a</string>
+       </property>
+      </item>
+      <item>
+       <property name="text">
+        <string>=</string>
+       </property>
+      </item>
+      <item>
+       <property name="text">
+        <string>!=</string>
+       </property>
+      </item>
+      <item>
+       <property name="text">
+        <string>&lt;</string>
+       </property>
+      </item>
+      <item>
+       <property name="text">
+        <string>&lt;=</string>
+       </property>
+      </item>
+      <item>
+       <property name="text">
+        <string>&gt;</string>
+       </property>
+      </item>
+      <item>
+       <property name="text">
+        <string>&gt;=</string>
+       </property>
+      </item>
+     </widget>
+    </item>
+    <item row="4" column="2">
+     <widget class="QCheckBox" name="condtext4">
+      <property name="toolTip">
+       <string>Indicate that the value to be compared is text</string>
+      </property>
+      <property name="text">
+       <string>Text</string>
+      </property>
+     </widget>
+    </item>
+    <item row="4" column="3">
+     <widget class="QLineEdit" name="textval4">
+      <property name="enabled">
+       <bool>false</bool>
+      </property>
+      <property name="font">
+       <font>
+        <family>Courier New</family>
+       </font>
+      </property>
+      <property name="toolTip">
+       <string>Give the text value to be compared here</string>
+      </property>
+      <property name="maxLength">
+       <number>49</number>
+      </property>
+     </widget>
+    </item>
+    <item row="4" column="4">
+     <widget class="QSpinBox" name="intval4">
+      <property name="toolTip">
+       <string>Give the integer value to be compared here</string>
+      </property>
+     </widget>
+    </item>
+    <item row="4" column="5">
+     <widget class="QCheckBox" name="cc4">
+      <property name="toolTip">
+       <string>This is a critical condition
+
+If host with variable is not running do not run the job, if not set, in
+this case ignore the condition.</string>
+      </property>
+      <property name="text">
+       <string>CCrit</string>
+      </property>
+     </widget>
+    </item>
+    <item row="5" column="0">
+     <widget class="QComboBox" name="condvar5">
+      <property name="toolTip">
+       <string>This is the variable whose value is to be inspected</string>
+      </property>
+      <item>
+       <property name="text">
+        <string>(no variable)</string>
+       </property>
+      </item>
+     </widget>
+    </item>
+    <item row="5" column="1">
+     <widget class="QComboBox" name="condop5">
+      <property name="toolTip">
+       <string>This is the operation</string>
+      </property>
+      <item>
+       <property name="text">
+        <string>n/a</string>
+       </property>
+      </item>
+      <item>
+       <property name="text">
+        <string>=</string>
+       </property>
+      </item>
+      <item>
+       <property name="text">
+        <string>!=</string>
+       </property>
+      </item>
+      <item>
+       <property name="text">
+        <string>&lt;</string>
+       </property>
+      </item>
+      <item>
+       <property name="text">
+        <string>&lt;=</string>
+       </property>
+      </item>
+      <item>
+       <property name="text">
+        <string>&gt;</string>
+       </property>
+      </item>
+      <item>
+       <property name="text">
+        <string>&gt;=</string>
+       </property>
+      </item>
+     </widget>
+    </item>
+    <item row="5" column="2">
+     <widget class="QCheckBox" name="condtext5">
+      <property name="toolTip">
+       <string>Indicate that the value to be compared is text</string>
+      </property>
+      <property name="text">
+       <string>Text</string>
+      </property>
+     </widget>
+    </item>
+    <item row="5" column="3">
+     <widget class="QLineEdit" name="textval5">
+      <property name="enabled">
+       <bool>false</bool>
+      </property>
+      <property name="font">
+       <font>
+        <family>Courier New</family>
+       </font>
+      </property>
+      <property name="toolTip">
+       <string>Give the text value to be compared here</string>
+      </property>
+      <property name="maxLength">
+       <number>49</number>
+      </property>
+     </widget>
+    </item>
+    <item row="5" column="4">
+     <widget class="QSpinBox" name="intval5">
+      <property name="toolTip">
+       <string>Give the integer value to be compared here</string>
+      </property>
+     </widget>
+    </item>
+    <item row="5" column="5">
+     <widget class="QCheckBox" name="cc5">
+      <property name="toolTip">
+       <string>This is a critical condition
+
+If host with variable is not running do not run the job, if not set, in
+this case ignore the condition.</string>
+      </property>
+      <property name="text">
+       <string>CCrit</string>
+      </property>
+     </widget>
+    </item>
+    <item row="6" column="0">
+     <widget class="QComboBox" name="condvar6">
+      <property name="toolTip">
+       <string>This is the variable whose value is to be inspected</string>
+      </property>
+      <item>
+       <property name="text">
+        <string>(no variable)</string>
+       </property>
+      </item>
+     </widget>
+    </item>
+    <item row="6" column="1">
+     <widget class="QComboBox" name="condop6">
+      <property name="toolTip">
+       <string>This is the operation</string>
+      </property>
+      <item>
+       <property name="text">
+        <string>n/a</string>
+       </property>
+      </item>
+      <item>
+       <property name="text">
+        <string>=</string>
+       </property>
+      </item>
+      <item>
+       <property name="text">
+        <string>!=</string>
+       </property>
+      </item>
+      <item>
+       <property name="text">
+        <string>&lt;</string>
+       </property>
+      </item>
+      <item>
+       <property name="text">
+        <string>&lt;=</string>
+       </property>
+      </item>
+      <item>
+       <property name="text">
+        <string>&gt;</string>
+       </property>
+      </item>
+      <item>
+       <property name="text">
+        <string>&gt;=</string>
+       </property>
+      </item>
+     </widget>
+    </item>
+    <item row="6" column="2">
+     <widget class="QCheckBox" name="condtext6">
+      <property name="toolTip">
+       <string>Indicate that the value to be compared is text</string>
+      </property>
+      <property name="text">
+       <string>Text</string>
+      </property>
+     </widget>
+    </item>
+    <item row="6" column="3">
+     <widget class="QLineEdit" name="textval6">
+      <property name="enabled">
+       <bool>false</bool>
+      </property>
+      <property name="font">
+       <font>
+        <family>Courier New</family>
+       </font>
+      </property>
+      <property name="toolTip">
+       <string>Give the text value to be compared here</string>
+      </property>
+      <property name="maxLength">
+       <number>49</number>
+      </property>
+     </widget>
+    </item>
+    <item row="6" column="4">
+     <widget class="QSpinBox" name="intval6">
+      <property name="toolTip">
+       <string>Give the integer value to be compared here</string>
+      </property>
+     </widget>
+    </item>
+    <item row="6" column="5">
+     <widget class="QCheckBox" name="cc6">
+      <property name="toolTip">
+       <string>This is a critical condition
+
+If host with variable is not running do not run the job, if not set, in
+this case ignore the condition.</string>
+      </property>
+      <property name="text">
+       <string>CCrit</string>
+      </property>
+     </widget>
+    </item>
+    <item row="7" column="0">
+     <widget class="QComboBox" name="condvar7">
+      <property name="toolTip">
+       <string>This is the variable whose value is to be inspected</string>
+      </property>
+      <item>
+       <property name="text">
+        <string>(no variable)</string>
+       </property>
+      </item>
+     </widget>
+    </item>
+    <item row="7" column="1">
+     <widget class="QComboBox" name="condop7">
+      <property name="toolTip">
+       <string>This is the operation</string>
+      </property>
+      <item>
+       <property name="text">
+        <string>n/a</string>
+       </property>
+      </item>
+      <item>
+       <property name="text">
+        <string>=</string>
+       </property>
+      </item>
+      <item>
+       <property name="text">
+        <string>!=</string>
+       </property>
+      </item>
+      <item>
+       <property name="text">
+        <string>&lt;</string>
+       </property>
+      </item>
+      <item>
+       <property name="text">
+        <string>&lt;=</string>
+       </property>
+      </item>
+      <item>
+       <property name="text">
+        <string>&gt;</string>
+       </property>
+      </item>
+      <item>
+       <property name="text">
+        <string>&gt;=</string>
+       </property>
+      </item>
+     </widget>
+    </item>
+    <item row="7" column="2">
+     <widget class="QCheckBox" name="condtext7">
+      <property name="toolTip">
+       <string>Indicate that the value to be compared is text</string>
+      </property>
+      <property name="text">
+       <string>Text</string>
+      </property>
+     </widget>
+    </item>
+    <item row="7" column="3">
+     <widget class="QLineEdit" name="textval7">
+      <property name="enabled">
+       <bool>false</bool>
+      </property>
+      <property name="font">
+       <font>
+        <family>Courier New</family>
+       </font>
+      </property>
+      <property name="toolTip">
+       <string>Give the text value to be compared here</string>
+      </property>
+      <property name="maxLength">
+       <number>49</number>
+      </property>
+     </widget>
+    </item>
+    <item row="7" column="4">
+     <widget class="QSpinBox" name="intval7">
+      <property name="toolTip">
+       <string>Give the integer value to be compared here</string>
+      </property>
+     </widget>
+    </item>
+    <item row="7" column="5">
+     <widget class="QCheckBox" name="cc7">
+      <property name="toolTip">
+       <string>This is a critical condition
+
+If host with variable is not running do not run the job, if not set, in
+this case ignore the condition.</string>
+      </property>
+      <property name="text">
+       <string>CCrit</string>
+      </property>
+     </widget>
+    </item>
+    <item row="8" column="0">
+     <widget class="QComboBox" name="condvar8">
+      <property name="toolTip">
+       <string>This is the variable whose value is to be inspected</string>
+      </property>
+      <item>
+       <property name="text">
+        <string>(no variable)</string>
+       </property>
+      </item>
+     </widget>
+    </item>
+    <item row="8" column="1">
+     <widget class="QComboBox" name="condop8">
+      <property name="toolTip">
+       <string>This is the operation</string>
+      </property>
+      <item>
+       <property name="text">
+        <string>n/a</string>
+       </property>
+      </item>
+      <item>
+       <property name="text">
+        <string>=</string>
+       </property>
+      </item>
+      <item>
+       <property name="text">
+        <string>!=</string>
+       </property>
+      </item>
+      <item>
+       <property name="text">
+        <string>&lt;</string>
+       </property>
+      </item>
+      <item>
+       <property name="text">
+        <string>&lt;=</string>
+       </property>
+      </item>
+      <item>
+       <property name="text">
+        <string>&gt;</string>
+       </property>
+      </item>
+      <item>
+       <property name="text">
+        <string>&gt;=</string>
+       </property>
+      </item>
+     </widget>
+    </item>
+    <item row="8" column="2">
+     <widget class="QCheckBox" name="condtext8">
+      <property name="toolTip">
+       <string>Indicate that the value to be compared is text</string>
+      </property>
+      <property name="text">
+       <string>Text</string>
+      </property>
+     </widget>
+    </item>
+    <item row="8" column="3">
+     <widget class="QLineEdit" name="textval8">
+      <property name="enabled">
+       <bool>false</bool>
+      </property>
+      <property name="font">
+       <font>
+        <family>Courier New</family>
+       </font>
+      </property>
+      <property name="toolTip">
+       <string>Give the text value to be compared here</string>
+      </property>
+      <property name="maxLength">
+       <number>49</number>
+      </property>
+     </widget>
+    </item>
+    <item row="8" column="4">
+     <widget class="QSpinBox" name="intval8">
+      <property name="toolTip">
+       <string>Give the integer value to be compared here</string>
+      </property>
+     </widget>
+    </item>
+    <item row="8" column="5">
+     <widget class="QCheckBox" name="cc8">
+      <property name="toolTip">
+       <string>This is a critical condition
+
+If host with variable is not running do not run the job, if not set, in
+this case ignore the condition.</string>
+      </property>
+      <property name="text">
+       <string>CCrit</string>
+      </property>
+     </widget>
+    </item>
+    <item row="9" column="0">
+     <widget class="QComboBox" name="condvar9">
+      <property name="toolTip">
+       <string>This is the variable whose value is to be inspected</string>
+      </property>
+      <item>
+       <property name="text">
+        <string>(no variable)</string>
+       </property>
+      </item>
+     </widget>
+    </item>
+    <item row="9" column="1">
+     <widget class="QComboBox" name="condop9">
+      <property name="toolTip">
+       <string>This is the operation</string>
+      </property>
+      <item>
+       <property name="text">
+        <string>n/a</string>
+       </property>
+      </item>
+      <item>
+       <property name="text">
+        <string>=</string>
+       </property>
+      </item>
+      <item>
+       <property name="text">
+        <string>!=</string>
+       </property>
+      </item>
+      <item>
+       <property name="text">
+        <string>&lt;</string>
+       </property>
+      </item>
+      <item>
+       <property name="text">
+        <string>&lt;=</string>
+       </property>
+      </item>
+      <item>
+       <property name="text">
+        <string>&gt;</string>
+       </property>
+      </item>
+      <item>
+       <property name="text">
+        <string>&gt;=</string>
+       </property>
+      </item>
+     </widget>
+    </item>
+    <item row="9" column="2">
+     <widget class="QCheckBox" name="condtext9">
+      <property name="toolTip">
+       <string>Indicate that the value to be compared is text</string>
+      </property>
+      <property name="text">
+       <string>Text</string>
+      </property>
+     </widget>
+    </item>
+    <item row="9" column="3">
+     <widget class="QLineEdit" name="textval9">
+      <property name="enabled">
+       <bool>false</bool>
+      </property>
+      <property name="font">
+       <font>
+        <family>Courier New</family>
+       </font>
+      </property>
+      <property name="toolTip">
+       <string>Give the text value to be compared here</string>
+      </property>
+      <property name="maxLength">
+       <number>49</number>
+      </property>
+     </widget>
+    </item>
+    <item row="9" column="4">
+     <widget class="QSpinBox" name="intval9">
+      <property name="toolTip">
+       <string>Give the integer value to be compared here</string>
+      </property>
+     </widget>
+    </item>
+    <item row="9" column="5">
+     <widget class="QCheckBox" name="cc9">
+      <property name="toolTip">
+       <string>This is a critical condition
+
+If host with variable is not running do not run the job, if not set, in
+this case ignore the condition.</string>
+      </property>
+      <property name="text">
+       <string>CCrit</string>
+      </property>
+     </widget>
+    </item>
+   </layout>
+  </widget>
+ </widget>
+ <tabstops>
+  <tabstop>condvar0</tabstop>
+  <tabstop>condop0</tabstop>
+  <tabstop>condtext0</tabstop>
+  <tabstop>textval0</tabstop>
+  <tabstop>intval0</tabstop>
+  <tabstop>cc0</tabstop>
+  <tabstop>condvar1</tabstop>
+  <tabstop>condop1</tabstop>
+  <tabstop>condtext1</tabstop>
+  <tabstop>textval1</tabstop>
+  <tabstop>intval1</tabstop>
+  <tabstop>cc1</tabstop>
+  <tabstop>condvar2</tabstop>
+  <tabstop>condop2</tabstop>
+  <tabstop>condtext2</tabstop>
+  <tabstop>textval2</tabstop>
+  <tabstop>intval2</tabstop>
+  <tabstop>cc2</tabstop>
+  <tabstop>condvar3</tabstop>
+  <tabstop>condop3</tabstop>
+  <tabstop>condtext3</tabstop>
+  <tabstop>textval3</tabstop>
+  <tabstop>intval3</tabstop>
+  <tabstop>cc3</tabstop>
+  <tabstop>condvar4</tabstop>
+  <tabstop>condop4</tabstop>
+  <tabstop>condtext4</tabstop>
+  <tabstop>textval4</tabstop>
+  <tabstop>intval4</tabstop>
+  <tabstop>cc4</tabstop>
+  <tabstop>condvar5</tabstop>
+  <tabstop>condop5</tabstop>
+  <tabstop>condtext5</tabstop>
+  <tabstop>textval5</tabstop>
+  <tabstop>intval5</tabstop>
+  <tabstop>cc5</tabstop>
+  <tabstop>condvar6</tabstop>
+  <tabstop>condop6</tabstop>
+  <tabstop>condtext6</tabstop>
+  <tabstop>textval6</tabstop>
+  <tabstop>intval6</tabstop>
+  <tabstop>cc6</tabstop>
+  <tabstop>condvar7</tabstop>
+  <tabstop>condop7</tabstop>
+  <tabstop>condtext7</tabstop>
+  <tabstop>textval7</tabstop>
+  <tabstop>intval7</tabstop>
+  <tabstop>cc7</tabstop>
+  <tabstop>condvar8</tabstop>
+  <tabstop>condop8</tabstop>
+  <tabstop>condtext8</tabstop>
+  <tabstop>textval8</tabstop>
+  <tabstop>intval8</tabstop>
+  <tabstop>cc8</tabstop>
+  <tabstop>condvar9</tabstop>
+  <tabstop>condop9</tabstop>
+  <tabstop>condtext9</tabstop>
+  <tabstop>textval9</tabstop>
+  <tabstop>intval9</tabstop>
+  <tabstop>cc9</tabstop>
+  <tabstop>buttonBox</tabstop>
+ </tabstops>
+ <resources/>
+ <connections>
+  <connection>
+   <sender>buttonBox</sender>
+   <signal>accepted()</signal>
+   <receiver>jcondsdlg</receiver>
+   <slot>accept()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>248</x>
+     <y>254</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>157</x>
+     <y>274</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>buttonBox</sender>
+   <signal>rejected()</signal>
+   <receiver>jcondsdlg</receiver>
+   <slot>reject()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>316</x>
+     <y>260</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>286</x>
+     <y>274</y>
+    </hint>
+   </hints>
+  </connection>
+ </connections>
+</ui>

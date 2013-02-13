@@ -1,18 +1,18 @@
 #
-#   Copyright 2009 Free Software Foundation, Inc.
+#   Copyright 2009 Free	Software Foundation, Inc.
 #
-#  This program is free software: you can redistribute it and/or modify
-#  it under the terms of the GNU General Public License as published by
-#  the Free Software Foundation, either version 3 of the License, or
-#  (at your option) any later version.
+#  This	program	is free	software: you can redistribute it and/or modify
+#  it under the	terms of the GNU General Public	License	as published by
+#  the Free Software Foundation, either	version	3 of the License, or
+#  (at your option) any	later version.
 #
-#  This program is distributed in the hope that it will be useful,
+#  This	program	is distributed in the hope that	it will	be useful,
 #  but WITHOUT ANY WARRANTY; without even the implied warranty of
-#  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.	 See the
 #  GNU General Public License for more details.
 #
-#   You should have received a copy of the GNU General Public License
-#  along with this program.  If not, see <http://www.gnu.org/licenses/>.
+#   You	should have received a copy of the GNU General Public License
+#  along with this program.  If	not, see <http://www.gnu.org/licenses/>.
 #
 #	Makefile for local CGI programs
 #
@@ -22,14 +22,14 @@ SHELL		=	/bin/sh
 prefix		=	@prefix@
 exec_prefix	=	@exec_prefix@
 CC		=	@CC@
-CCFLAGS		=	-O @gcc_useful_options@ @funny_compiler_options@
-SHLIBCC		=	libtool --mode=link $(CC) $(CCFLAGS)
+CCFLAGS		=	-O @gcc_useful_options@	@funny_compiler_options@
+SHLIBCC		=	libtool	--mode=link $(CC) $(CCFLAGS)
 LDFLAGS		=
 LIBS		=	@LIBS@
 LIBDIR		=	@libdir@
 LIBNET		=	@SOCKLIBS@
 MV		=	mv
-RM		= 	rm -f
+RM		=	rm -f
 PARENT		=	..
 BASE		=	../..
 INLINE		=	$(PARENT)/inline
@@ -42,8 +42,8 @@ CFLAGS		=	$(CCFLAGS) -I$(HDRS) -I$(PARENT) -I$(BASE)
 INSTALL		=	@INSTALL@
 INSTALL_DATA	=	@INSTALL_DATA@
 BATCHUSER	=	@BATCHUSER@
-USERMODES	=	-o $(BATCHUSER) -g root -m 4755
-CGIMODES	=	-o $(BATCHUSER) -g root -m 6755
+USERMODES	=	-o $(BATCHUSER)	-g root	-m 4755
+CGIMODES	=	-o $(BATCHUSER)	-g root	-m 6755
 BINDIR		=	$(DESTDIR)@bindir@
 INTBINDIR	=	$(DESTDIR)@pkgexecdir@
 CGIBINDIR	=	$(INTBINDIR)/cgi-bin
@@ -53,7 +53,7 @@ PROGS=btjccgi btjcgi btjcrcgi btjdcgi btjvcgi btvccgi btvcgi
 all:	$(PROGS)
 
 btjcgi:		btjcgi.o $(LIB)
-	$(SHLIBCC) -o btjcgi $(LDFLAGS) btjcgi.o $(SHLIB) $(SHLIBCLIENT) $(LIBNET) $(LIBS)
+	$(SHLIBCC) -o btjcgi $(LDFLAGS)	btjcgi.o $(SHLIB) $(SHLIBCLIENT) $(LIBNET) $(LIBS)
 
 btjccgi:		btjccgi.o $(LIB)
 	$(SHLIBCC) -o btjccgi $(LDFLAGS) btjccgi.o $(SHLIB) $(SHLIBCLIENT) $(LIBNET) $(LIBS)
@@ -68,18 +68,18 @@ btjvcgi:		btjvcgi.o $(LIB)
 	$(SHLIBCC) -o btjvcgi $(LDFLAGS) btjvcgi.o $(SHLIB) $(SHLIBCLIENT) $(LIBNET) $(LIBS)
 
 btvcgi:	btvcgi.o $(LIB)
-	$(SHLIBCC) -o btvcgi $(LDFLAGS) btvcgi.o $(SHLIB) $(SHLIBCLIENT) $(LIBNET) $(LIBS)
+	$(SHLIBCC) -o btvcgi $(LDFLAGS)	btvcgi.o $(SHLIB) $(SHLIBCLIENT) $(LIBNET) $(LIBS)
 
 btvccgi:btvccgi.o $(LIB)
 	$(SHLIBCC) -o btvccgi $(LDFLAGS) btvccgi.o $(SHLIB) $(SHLIBCLIENT) $(LIBNET) $(LIBS)
 
 install:
 	$(INSTALL) -d $(CGIBINDIR)
-	libtool --mode=install $(INSTALL) $(CGIMODES) $(PROGS) $(CGIBINDIR)
+	libtool	--mode=install $(INSTALL) $(CGIMODES) $(PROGS) $(CGIBINDIR)
 
 install-strip:
 	$(INSTALL) -d $(CGIBINDIR)
-	libtool --mode=install $(INSTALL) -s $(CGIMODES) $(PROGS) $(CGIBINDIR)
+	libtool	--mode=install $(INSTALL) -s $(CGIMODES) $(PROGS) $(CGIBINDIR)
 
 #	Clean-ups.
 

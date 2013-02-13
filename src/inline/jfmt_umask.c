@@ -17,9 +17,9 @@
 
 JFORMAT(fmt_umask)
 {
-	if  (isreadable)  {
-		sprintf(bigbuff, "%.3o", jp->h.bj_umask);
-		return  3;
-	}
-	return  0;
+        if  (isreadable)  {
+                sprintf(bigbuff, "%.3o", jp->h.bj_umask);
+                return  3;
+        }
+        return  0;
 }

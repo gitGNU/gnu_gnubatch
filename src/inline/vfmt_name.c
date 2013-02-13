@@ -17,13 +17,6 @@
 
 VFORMAT(fmt_name)
 {
-	if  (vp->var_id.hostid)  {
-#ifdef	CHARSPRINTF
-		sprintf(bigbuff, "%s:%s", look_host(vp->var_id.hostid), vp->var_name);
-		return  (fmt_t) strlen(bigbuff);
-#else
-		return  (fmt_t)  sprintf(bigbuff, "%s:%s", look_host(vp->var_id.hostid), vp->var_name);
-#endif
-	}
-	return  (fmt_t) strlen(strcpy(bigbuff, vp->var_name));
+	return  (fmt_t) strlen(strcpy(bigbuff, host_prefix_str(vp->var_id.hostid, vp->var_name)));
 }
+

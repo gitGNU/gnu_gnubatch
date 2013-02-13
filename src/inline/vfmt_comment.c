@@ -17,5 +17,5 @@
 
 VFORMAT(fmt_comment)
 {
-	return  isreadable? (fmt_t) strlen(strcpy(bigbuff, vp->var_comment)): 0;
+        return  isreadable? (fmt_t) strlen(strcpy(bigbuff, vp->var_comment)): 0;
 }

@@ -28,20 +28,20 @@ extern struct api_fd *gbatch_look_fd(const int);
 
 int  gbatch_cidel(const int fd, const unsigned flags, const unsigned cinum)
 {
-	int		ret;
-	struct	api_fd	*fdp = gbatch_look_fd(fd);
-	struct	api_msg	msg;
+        int             ret;
+        struct  api_fd  *fdp = gbatch_look_fd(fd);
+        struct  api_msg msg;
 
-	if  (!fdp)
-		return  XB_INVALID_FD;
-	msg.code = API_CIDEL;
-	msg.un.reader.flags = htonl(flags);
-	msg.un.reader.slotno = htonl(cinum);
-	if  ((ret = gbatch_wmsg(fdp, &msg)))
-		return  ret;
-	if  ((ret = gbatch_rmsg(fdp, &msg)))
-		return  ret;
-	if  (msg.retcode != 0)
-		return  (SHORT) ntohs(msg.retcode);
-	return  XB_OK;
+        if  (!fdp)
+                return  XB_INVALID_FD;
+        msg.code = API_CIDEL;
+        msg.un.reader.flags = htonl(flags);
+        msg.un.reader.slotno = htonl(cinum);
+        if  ((ret = gbatch_wmsg(fdp, &msg)))
+                return  ret;
+        if  ((ret = gbatch_rmsg(fdp, &msg)))
+                return  ret;
+        if  (msg.retcode != 0)
+                return  (SHORT) ntohs(msg.retcode);
+        return  XB_OK;
 }

@@ -23,16 +23,16 @@
 
 FILE *open_icfile()
 {
-	char	*filename;
-	FILE	*res;
+        char    *filename;
+        FILE    *res;
 
-	filename = envprocess(INT_CONFIG);
-	if  ((res = fopen(filename, "r")) == (FILE *) 0)  {
-		fprintf(stderr,
-			"Help cannot open internal config file `%s'\n",
-			filename);
-		return  (FILE *) 0;
-	}
-	free(filename);
-	return  res;
+        filename = envprocess(INT_CONFIG);
+        if  ((res = fopen(filename, "r")) == (FILE *) 0)  {
+                fprintf(stderr,
+                        "Help cannot open internal config file `%s'\n",
+                        filename);
+                return  (FILE *) 0;
+        }
+        free(filename);
+        return  res;
 }

@@ -17,14 +17,14 @@
 
 JFORMAT(fmt_title)
 {
-	if  (isreadable)  {
-		const	char  *title = title_of(jp);
-		if  (jobqueue)  {
-			const	char	*colp;
-			if  ((colp = strchr(title, ':')))
-				title = colp + 1;
-		}
-		return  (fmt_t) strlen(strcpy(bigbuff, title));
-	}
-	return  0;
+        if  (isreadable)  {
+                const   char  *title = title_of(jp);
+                if  (jobqueue)  {
+                        const   char    *colp;
+                        if  ((colp = strchr(title, ':')))
+                                title = colp + 1;
+                }
+                return  (fmt_t) strlen(strcpy(bigbuff, title));
+        }
+        return  0;
 }

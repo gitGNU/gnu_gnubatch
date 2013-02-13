@@ -15,12 +15,12 @@
    You should have received a copy of the GNU General Public License
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
-#define	CONNECTPORT_NAME1	"gnubatch"
-#define	CONNECTPORT_NAME2	"btsched"
-#define	CONNECTPORT_NAME3	"xibatch"		/* For all those folk out there */
-#define	CONNECTPORT_NAME4	"batch"
-#define	VIEWPORT_NAME1		"gnubatch-feeder"
-#define	VIEWPORT_NAME2		"btq"
-#define	GBNETSERV_PORT		"gnubatch-netsrv"
-#define	API_DEFAULT_SERVICE	"gnubatch-api"
-#define	API_MON_SERVICE		"gnubatch-api"
+#define CONNECTPORT_NAME1       "gnubatch"
+#define CONNECTPORT_NAME2       "btsched"
+#define CONNECTPORT_NAME3       "xibatch"               /* For all those folk out there */
+#define CONNECTPORT_NAME4       "batch"
+#define VIEWPORT_NAME1          "gnubatch-feeder"
+#define VIEWPORT_NAME2          "btq"
+#define GBNETSERV_PORT          "gnubatch-netsrv"
+#define API_DEFAULT_SERVICE     "gnubatch-api"
+#define API_MON_SERVICE         "gnubatch-api"

@@ -29,62 +29,62 @@ void  spitbtrstr(const int, FILE *, const int);
 
 void  dumpredirs(FILE *xfl, CBtjobRef jp)
 {
-	int	cnt;
+        int     cnt;
 
-	spitbtrstr($A{btr arg cancio}, xfl, 1);
-	for  (cnt = 0;  cnt < jp->h.bj_nredirs;  cnt++)  {
-		RedirRef	rp = REDIR_OF(jp, cnt);
+        spitbtrstr($A{btr arg cancio}, xfl, 1);
+        for  (cnt = 0;  cnt < jp->h.bj_nredirs;  cnt++)  {
+                RedirRef        rp = REDIR_OF(jp, cnt);
 
-		spitbtrstr($A{btr arg io}, xfl, 0);
-		putc('\'', xfl);
+                spitbtrstr($A{btr arg io}, xfl, 0);
+                putc('\'', xfl);
 
-		switch  (rp->action)  {
-		case  RD_ACT_RD:
-			if  (rp->fd != 0)
-				fprintf(xfl, "%d", rp->fd);
-			putc('<', xfl);
-			break;
-		case  RD_ACT_WRT:
-			if  (rp->fd != 1)
-				fprintf(xfl, "%d", rp->fd);
-			putc('>', xfl);
-			break;
-		case  RD_ACT_APPEND:
-			if  (rp->fd != 1)
-				fprintf(xfl, "%d", rp->fd);
-			fputs(">>", xfl);
-			break;
-		case  RD_ACT_RDWR:
-			if  (rp->fd != 0)
-				fprintf(xfl, "%d", rp->fd);
-			fputs("<>", xfl);
-			break;
-		case  RD_ACT_RDWRAPP:
-			if  (rp->fd != 0)
-				fprintf(xfl, "%d", rp->fd);
-			fputs("<>>", xfl);
-			break;
-		case  RD_ACT_PIPEO:
-			if  (rp->fd != 1)
-				fprintf(xfl, "%d", rp->fd);
-			putc('|', xfl);
-			break;
-		case  RD_ACT_PIPEI:
-			if  (rp->fd != 0)
-				fprintf(xfl, "%d", rp->fd);
-			fputs("<|", xfl);
-			break;
-		case  RD_ACT_CLOSE:
-			if  (rp->fd != 1)
-				fprintf(xfl, "%d", rp->fd);
-			fputs(">&-\' \\\n", xfl);
-			continue;
-		case  RD_ACT_DUP:
-			if  (rp->fd != 1)
-				fprintf(xfl, "%d", rp->fd);
-			fprintf(xfl, ">&%d\' \\\n", rp->arg);
-			continue;
-		}
-		fprintf(xfl, "%s\' \\\n", &jp->bj_space[rp->arg]);
-	}
+                switch  (rp->action)  {
+                case  RD_ACT_RD:
+                        if  (rp->fd != 0)
+                                fprintf(xfl, "%d", rp->fd);
+                        putc('<', xfl);
+                        break;
+                case  RD_ACT_WRT:
+                        if  (rp->fd != 1)
+                                fprintf(xfl, "%d", rp->fd);
+                        putc('>', xfl);
+                        break;
+                case  RD_ACT_APPEND:
+                        if  (rp->fd != 1)
+                                fprintf(xfl, "%d", rp->fd);
+                        fputs(">>", xfl);
+                        break;
+                case  RD_ACT_RDWR:
+                        if  (rp->fd != 0)
+                                fprintf(xfl, "%d", rp->fd);
+                        fputs("<>", xfl);
+                        break;
+                case  RD_ACT_RDWRAPP:
+                        if  (rp->fd != 0)
+                                fprintf(xfl, "%d", rp->fd);
+                        fputs("<>>", xfl);
+                        break;
+                case  RD_ACT_PIPEO:
+                        if  (rp->fd != 1)
+                                fprintf(xfl, "%d", rp->fd);
+                        putc('|', xfl);
+                        break;
+                case  RD_ACT_PIPEI:
+                        if  (rp->fd != 0)
+                                fprintf(xfl, "%d", rp->fd);
+                        fputs("<|", xfl);
+                        break;
+                case  RD_ACT_CLOSE:
+                        if  (rp->fd != 1)
+                                fprintf(xfl, "%d", rp->fd);
+                        fputs(">&-\' \\\n", xfl);
+                        continue;
+                case  RD_ACT_DUP:
+                        if  (rp->fd != 1)
+                                fprintf(xfl, "%d", rp->fd);
+                        fprintf(xfl, ">&%d\' \\\n", rp->arg);
+                        continue;
+                }
+                fprintf(xfl, "%s\' \\\n", &jp->bj_space[rp->arg]);
+        }
 }

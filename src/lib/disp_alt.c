@@ -23,19 +23,19 @@
 
 char *disp_alt(int val, HelpaltRef tab)
 {
-	int	i;
-	char	**emess;
+        int     i;
+        char    **emess;
 
-	for  (i = 0;  i < tab->numalt;  i++)
-		if  (val == tab->alt_nums[i])
-			return  tab->list[i];
+        for  (i = 0;  i < tab->numalt;  i++)
+                if  (val == tab->alt_nums[i])
+                        return  tab->list[i];
 
-	disp_arg[9] = val;
-	emess = helpvec($E{Scrambled state code}, 'E');
-	if  (emess[0] == (char *) 0)  {
-		free((char *) emess);
-		disp_arg[9] = $E{Scrambled state code};
-		emess = helpvec($E{Missing error code}, 'E');
-	}
-	return  emess[0]?  emess[0]: "Total cockup";
+        disp_arg[9] = val;
+        emess = helpvec($E{Scrambled state code}, 'E');
+        if  (emess[0] == (char *) 0)  {
+                free((char *) emess);
+                disp_arg[9] = $E{Scrambled state code};
+                emess = helpvec($E{Missing error code}, 'E');
+        }
+        return  emess[0]?  emess[0]: "Total cockup";
 }

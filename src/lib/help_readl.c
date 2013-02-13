@@ -20,24 +20,24 @@
 #include "incl_unix.h"
 #include "errnums.h"
 
-static	char	Filename[] = __FILE__;
+static  char    Filename[] = __FILE__;
 
-char	*help_readl(int *percentflag)
+char    *help_readl(int *percentflag)
 {
-	long	w = ftell(Cfile);
-	unsigned	l = 1;		/*  Final null  */
-	int	ch;
-	char	*result, *rp;
+        long    w = ftell(Cfile);
+        unsigned        l = 1;          /*  Final null  */
+        int     ch;
+        char    *result, *rp;
 
-	while  ((ch = getc(Cfile)) != '\n' && ch != EOF)
-		l++;
+        while  ((ch = getc(Cfile)) != '\n' && ch != EOF)
+                l++;
 
-	fseek(Cfile, w, 0);
-	if  ((rp = result = malloc(l)) == (char *) 0)
-		ABORT_NOMEM;
-	while  ((ch = getc(Cfile)) != '\n' && ch != EOF)
-		if  ((*rp++ = (char) ch) == '%')
-			*percentflag |= 1;
-	*rp = '\0';
-	return  result;
+        fseek(Cfile, w, 0);
+        if  ((rp = result = malloc(l)) == (char *) 0)
+                ABORT_NOMEM;
+        while  ((ch = getc(Cfile)) != '\n' && ch != EOF)
+                if  ((*rp++ = (char) ch) == '%')
+                        *percentflag |= 1;
+        *rp = '\0';
+        return  result;
 }

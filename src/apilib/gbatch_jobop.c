@@ -26,27 +26,27 @@ extern int  gbatch_wmsg(const struct api_fd *, struct api_msg *);
 extern int  gbatch_write(const int, char *, unsigned);
 extern struct api_fd *gbatch_look_fd(const int);
 
-int	gbatch_jobop(const int fd, const unsigned flags, const slotno_t slotno, const unsigned op, const unsigned param)
+int     gbatch_jobop(const int fd, const unsigned flags, const slotno_t slotno, const unsigned op, const unsigned param)
 {
-	int	ret;
-	struct	api_fd	*fdp = gbatch_look_fd(fd);
-	struct	api_msg		msg;
+        int     ret;
+        struct  api_fd  *fdp = gbatch_look_fd(fd);
+        struct  api_msg         msg;
 
-	if  (!fdp)
-		return  XB_INVALID_FD;
-	msg.code = API_JOBOP;
-	msg.un.jop.flags = htonl(flags);
-	msg.un.jop.seq = htonl(fdp->jserial);
-	msg.un.jop.slotno = htonl(slotno);
-	msg.un.jop.op = htonl(op);
-	msg.un.jop.param = htonl(param);
-	if  ((ret = gbatch_wmsg(fdp, &msg)))
-		return  ret;
-	if  ((ret = gbatch_rmsg(fdp, &msg)))
-		return  ret;
-	if  (msg.un.r_reader.seq != 0)
-		fdp->jserial = ntohl(msg.un.r_reader.seq);
-	if  (msg.retcode != 0)
-		return  (SHORT) ntohs(msg.retcode);
-	return  XB_OK;
+        if  (!fdp)
+                return  XB_INVALID_FD;
+        msg.code = API_JOBOP;
+        msg.un.jop.flags = htonl(flags);
+        msg.un.jop.seq = htonl(fdp->jserial);
+        msg.un.jop.slotno = htonl(slotno);
+        msg.un.jop.op = htonl(op);
+        msg.un.jop.param = htonl(param);
+        if  ((ret = gbatch_wmsg(fdp, &msg)))
+                return  ret;
+        if  ((ret = gbatch_rmsg(fdp, &msg)))
+                return  ret;
+        if  (msg.un.r_reader.seq != 0)
+                fdp->jserial = ntohl(msg.un.r_reader.seq);
+        if  (msg.retcode != 0)
+                return  (SHORT) ntohs(msg.retcode);
+        return  XB_OK;
 }

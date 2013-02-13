@@ -23,46 +23,46 @@
 
 int  helpnstate(const int current_state)
 {
-	int	ch, result, hadeof = 0;
+        int     ch, result, hadeof = 0;
 
-	for  (;;)  {
-		ch = getc(Cfile);
-		if  (ch == EOF)  {
-			if  (hadeof)
-				return  0;	/* Invalid result */
-			hadeof++;
-			fseek(Cfile, 0L, 0);
-			continue;
-		}
+        for  (;;)  {
+                ch = getc(Cfile);
+                if  (ch == EOF)  {
+                        if  (hadeof)
+                                return  0;      /* Invalid result */
+                        hadeof++;
+                        fseek(Cfile, 0L, 0);
+                        continue;
+                }
 
-		/* If line doesn't start with a digit ignore it */
+                /* If line doesn't start with a digit ignore it */
 
-		if  (!isdigit(ch) && ch != '-')  {
-			while  (ch != '\n'  &&  ch != EOF)
-				ch = getc(Cfile);
-			continue;
-		}
+                if  (!isdigit(ch) && ch != '-')  {
+                        while  (ch != '\n'  &&  ch != EOF)
+                                ch = getc(Cfile);
+                        continue;
+                }
 
-		/* Read leading state number.
-		   If not current state forget it */
+                /* Read leading state number.
+                   If not current state forget it */
 
-		ungetc(ch, Cfile);
-		if  (helprdn() != current_state)  {
-			do  ch = getc(Cfile);
-			while  (ch != '\n' && ch != EOF);
-			continue;
-		}
-		ch = getc(Cfile);
+                ungetc(ch, Cfile);
+                if  (helprdn() != current_state)  {
+                        do  ch = getc(Cfile);
+                        while  (ch != '\n' && ch != EOF);
+                        continue;
+                }
+                ch = getc(Cfile);
 
-		/* Only interested in 'N's */
+                /* Only interested in 'N's */
 
-		if  (ch == 'N'  ||  ch == 'n')  {
-			result = helprdn();
-			do  ch = getc(Cfile);
-			while  (ch != '\n'  &&  ch != EOF);
-			return  result;
-		}
-		while  (ch != '\n'  &&  ch != EOF)
-			ch = getc(Cfile);
-	}
+                if  (ch == 'N'  ||  ch == 'n')  {
+                        result = helprdn();
+                        do  ch = getc(Cfile);
+                        while  (ch != '\n'  &&  ch != EOF);
+                        return  result;
+                }
+                while  (ch != '\n'  &&  ch != EOF)
+                        ch = getc(Cfile);
+        }
 }

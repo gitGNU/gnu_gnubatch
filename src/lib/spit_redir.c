@@ -27,53 +27,53 @@
 
 void  spit_redir(FILE *dest, const unsigned fd, const unsigned action, const unsigned arg, const char *buff)
 {
-	putc(' ', dest);
-	switch  (action)  {
-	case  RD_ACT_RD:
-		if  (fd != 0)
-			fprintf(dest, "%u", fd);
-		putc('<', dest);
-		break;
-	case  RD_ACT_WRT:
-		if  (fd != 1)
-			fprintf(dest, "%u", fd);
-		putc('>', dest);
-		break;
-	case  RD_ACT_APPEND:
-		if  (fd != 1)
-			fprintf(dest, "%u", fd);
-		fputs(">>", dest);
-		break;
-	case  RD_ACT_RDWR:
-		if  (fd != 0)
-			fprintf(dest, "%u", fd);
-		fputs("<>", dest);
-		break;
-	case  RD_ACT_RDWRAPP:
-		if  (fd != 0)
-			fprintf(dest, "%u", fd);
-		fputs("<>>", dest);
-		break;
-	case  RD_ACT_PIPEO:
-		if  (fd != 1)
-			fprintf(dest, "%u", fd);
-		putc('|', dest);
-		break;
-	case  RD_ACT_PIPEI:
-		if  (fd != 0)
-			fprintf(dest, "%u", fd);
-		fputs("<|", dest);
-		break;
-	case  RD_ACT_CLOSE:
-		if  (fd != 1)
-			fprintf(dest, "%u", fd);
-		fputs(">&-", dest);
-		return;
-	case  RD_ACT_DUP:
-		if  (fd != 1)
-			fprintf(dest, "%u", fd);
-		fprintf(dest, ">&%u", arg);
-		return;
-	}
-	fprintf(dest, "%s", buff);
+        putc(' ', dest);
+        switch  (action)  {
+        case  RD_ACT_RD:
+                if  (fd != 0)
+                        fprintf(dest, "%u", fd);
+                putc('<', dest);
+                break;
+        case  RD_ACT_WRT:
+                if  (fd != 1)
+                        fprintf(dest, "%u", fd);
+                putc('>', dest);
+                break;
+        case  RD_ACT_APPEND:
+                if  (fd != 1)
+                        fprintf(dest, "%u", fd);
+                fputs(">>", dest);
+                break;
+        case  RD_ACT_RDWR:
+                if  (fd != 0)
+                        fprintf(dest, "%u", fd);
+                fputs("<>", dest);
+                break;
+        case  RD_ACT_RDWRAPP:
+                if  (fd != 0)
+                        fprintf(dest, "%u", fd);
+                fputs("<>>", dest);
+                break;
+        case  RD_ACT_PIPEO:
+                if  (fd != 1)
+                        fprintf(dest, "%u", fd);
+                putc('|', dest);
+                break;
+        case  RD_ACT_PIPEI:
+                if  (fd != 0)
+                        fprintf(dest, "%u", fd);
+                fputs("<|", dest);
+                break;
+        case  RD_ACT_CLOSE:
+                if  (fd != 1)
+                        fprintf(dest, "%u", fd);
+                fputs(">&-", dest);
+                return;
+        case  RD_ACT_DUP:
+                if  (fd != 1)
+                        fprintf(dest, "%u", fd);
+                fprintf(dest, ">&%u", arg);
+                return;
+        }
+        fprintf(dest, "%s", buff);
 }

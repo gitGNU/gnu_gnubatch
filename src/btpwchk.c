@@ -17,7 +17,7 @@
 
 #include "config.h"
 #include <stdio.h>
-#ifdef	SHADOW_PW
+#ifdef  SHADOW_PW
 #include <shadow.h>
 #endif
 #include <pwd.h>
@@ -25,7 +25,7 @@
 #include "incl_unix.h"
 #include "files.h"
 
-FILE	*Cfile;					/* Need definition of this here */
+FILE    *Cfile;                                 /* Need definition of this here */
 
 /* I don't know where to find this routine in the general case but I
    hope that this will work instead of groping around zillions of
@@ -35,34 +35,34 @@ char *crypt(const char *, const char *);
 
 void  nomem(const char *a, const int b)
 {
-	exit(255);
+        exit(255);
 }
 
 FILE *open_pwfile()
 {
-	char	*fname = envprocess(XIPWFILE);
-	FILE	*pwf = fopen(fname, "r");
-	free(fname);
-	return  pwf;
+        char    *fname = envprocess(XIPWFILE);
+        FILE    *pwf = fopen(fname, "r");
+        free(fname);
+        return  pwf;
 }
 
 char *get_pwfile(FILE *pwf, const char *nam)
 {
-	char	buf[120];
+        char    buf[120];
 
-	while  (fgets(buf, sizeof(buf), pwf))  {
-		int	lng = strlen(buf) - 1;
-		char	*cp;
-		if  (buf[lng] == '\n')
-			buf[lng] = '\0';
-		cp = strchr(buf, ':');
-		if  (!cp)
-			continue;
-		*cp = '\0';
-		if  (ncstrcmp(nam, buf) == 0)
-			return  stracpy(cp+1);
-	}
-	return  (char *) 0;
+        while  (fgets(buf, sizeof(buf), pwf))  {
+                int     lng = strlen(buf) - 1;
+                char    *cp;
+                if  (buf[lng] == '\n')
+                        buf[lng] = '\0';
+                cp = strchr(buf, ':');
+                if  (!cp)
+                        continue;
+                *cp = '\0';
+                if  (ncstrcmp(nam, buf) == 0)
+                        return  stracpy(cp+1);
+        }
+        return  (char *) 0;
 }
 
 /* Take a user name as 1st argument and a password as standard input
@@ -71,64 +71,64 @@ char *get_pwfile(FILE *pwf, const char *nam)
 
 MAINFN_TYPE  main(int argc, char **argv)
 {
-	char	*username = argv[1], *pw;
-	FILE	*xipwf;
-	int	lng;
-	char	inbuf[80];
-#ifdef	SHADOW_PW
-	struct	spwd	*pwe;
+        char    *username = argv[1], *pw;
+        FILE    *xipwf;
+        int     lng;
+        char    inbuf[80];
+#ifdef  SHADOW_PW
+        struct  spwd    *pwe;
 #else
-	struct	passwd	*pwe;
+        struct  passwd  *pwe;
 #endif
 
-	versionprint(argv, "$Revision: 1.6 $", 1);
+        versionprint(argv, "$Revision: 1.7 $", 1);
 
-	init_mcfile();
+        init_mcfile();
 
-	if  (argc != 2)  {
-		putchar('2');
-		return  2;
-	}
+        if  (argc != 2)  {
+                putchar('2');
+                return  2;
+        }
 
-	if  (!fgets(inbuf, sizeof(inbuf), stdin))  {
-		putchar('3');
-		return  3;
-	}
+        if  (!fgets(inbuf, sizeof(inbuf), stdin))  {
+                putchar('3');
+                return  3;
+        }
 
-	lng = strlen(inbuf) - 1;
-	if  (inbuf[lng] == '\n')
-		inbuf[lng] = '\0';
+        lng = strlen(inbuf) - 1;
+        if  (inbuf[lng] == '\n')
+                inbuf[lng] = '\0';
 
-	if  ((xipwf = open_pwfile()))  {
-		pw = get_pwfile(xipwf, username);
-		fclose(xipwf);
-		if  (!pw)  {
-			putchar('5');
-			return  5;
-		}
-	}
-	else  {
-#ifdef	SHADOW_PW
-		if  (!(pwe = getspnam(username)))  {
-			putchar('4');
-			return  4;
-		}
-		pw = pwe->sp_pwdp;
+        if  ((xipwf = open_pwfile()))  {
+                pw = get_pwfile(xipwf, username);
+                fclose(xipwf);
+                if  (!pw)  {
+                        putchar('5');
+                        return  5;
+                }
+        }
+        else  {
+#ifdef  SHADOW_PW
+                if  (!(pwe = getspnam(username)))  {
+                        putchar('4');
+                        return  4;
+                }
+                pw = pwe->sp_pwdp;
 #else
-		if  (!(pwe = getpwnam(username)))  {
-			putchar('4');
-			return  4;
-		}
-		pw = pwe->pw_passwd;
+                if  (!(pwe = getpwnam(username)))  {
+                        putchar('4');
+                        return  4;
+                }
+                pw = pwe->pw_passwd;
 #endif
-	}
+        }
 
-	if  (strcmp(pw, crypt(inbuf, pw)) == 0)  {
-		putchar('0');
-		return  0;
-	}
-	else  {
-		putchar('1');
-		return  1;
-	}
+        if  (strcmp(pw, crypt(inbuf, pw)) == 0)  {
+                putchar('0');
+                return  0;
+        }
+        else  {
+                putchar('1');
+                return  1;
+        }
 }

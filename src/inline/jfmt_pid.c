@@ -17,14 +17,14 @@
 
 JFORMAT(fmt_pid)
 {
-#ifdef	CHARSPRINTF
-	if  (isreadable  &&  jp->h.bj_pid != 0)  {
-		sprintf(bigbuff, "%*ld", fwidth, (long) jp->h.bj_pid);
-		return  (fmt_t) strlen(bigbuff);
-	}
+#ifdef  CHARSPRINTF
+        if  (isreadable  &&  jp->h.bj_pid != 0)  {
+                sprintf(bigbuff, "%*ld", fwidth, (long) jp->h.bj_pid);
+                return  (fmt_t) strlen(bigbuff);
+        }
 #else
-	if  (isreadable  &&  jp->h.bj_pid != 0)
-		return	(fmt_t) sprintf(bigbuff, "%*ld", fwidth, (long) jp->h.bj_pid);
+        if  (isreadable  &&  jp->h.bj_pid != 0)
+                return  (fmt_t) sprintf(bigbuff, "%*ld", fwidth, (long) jp->h.bj_pid);
 #endif
-	return  0;
+        return  0;
 }

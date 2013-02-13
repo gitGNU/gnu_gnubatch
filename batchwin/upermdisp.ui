@@ -1,0 +1,1313 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>userperms</class>
+ <widget class="QDialog" name="userperms">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>672</width>
+    <height>834</height>
+   </rect>
+  </property>
+  <property name="windowTitle">
+   <string>User permissions</string>
+  </property>
+  <widget class="QDialogButtonBox" name="buttonBox">
+   <property name="geometry">
+    <rect>
+     <x>490</x>
+     <y>780</y>
+     <width>111</width>
+     <height>32</height>
+    </rect>
+   </property>
+   <property name="orientation">
+    <enum>Qt::Horizontal</enum>
+   </property>
+   <property name="standardButtons">
+    <set>QDialogButtonBox::Ok</set>
+   </property>
+  </widget>
+  <widget class="QLabel" name="label">
+   <property name="geometry">
+    <rect>
+     <x>30</x>
+     <y>30</y>
+     <width>191</width>
+     <height>17</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string>User permissions on server</string>
+   </property>
+  </widget>
+  <widget class="QLineEdit" name="servname">
+   <property name="geometry">
+    <rect>
+     <x>220</x>
+     <y>20</y>
+     <width>321</width>
+     <height>27</height>
+    </rect>
+   </property>
+   <property name="toolTip">
+    <string>This is the server to which the permissions apply</string>
+   </property>
+   <property name="frame">
+    <bool>false</bool>
+   </property>
+   <property name="readOnly">
+    <bool>true</bool>
+   </property>
+  </widget>
+  <widget class="QLabel" name="label_2">
+   <property name="geometry">
+    <rect>
+     <x>30</x>
+     <y>60</y>
+     <width>101</width>
+     <height>17</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string>User Name</string>
+   </property>
+  </widget>
+  <widget class="QLineEdit" name="username">
+   <property name="geometry">
+    <rect>
+     <x>220</x>
+     <y>50</y>
+     <width>231</width>
+     <height>27</height>
+    </rect>
+   </property>
+   <property name="toolTip">
+    <string>This is the user name on the server</string>
+   </property>
+   <property name="frame">
+    <bool>false</bool>
+   </property>
+   <property name="readOnly">
+    <bool>true</bool>
+   </property>
+  </widget>
+  <widget class="QCheckBox" name="radminperm">
+   <property name="geometry">
+    <rect>
+     <x>30</x>
+     <y>240</y>
+     <width>151</width>
+     <height>22</height>
+    </rect>
+   </property>
+   <property name="toolTip">
+    <string>User can read admin file</string>
+   </property>
+   <property name="text">
+    <string>Read admin file</string>
+   </property>
+  </widget>
+  <widget class="QCheckBox" name="wadminperm">
+   <property name="geometry">
+    <rect>
+     <x>30</x>
+     <y>270</y>
+     <width>171</width>
+     <height>22</height>
+    </rect>
+   </property>
+   <property name="toolTip">
+    <string>User can edit admin file of permissions</string>
+   </property>
+   <property name="text">
+    <string>Write admin file</string>
+   </property>
+  </widget>
+  <widget class="QCheckBox" name="createperm">
+   <property name="geometry">
+    <rect>
+     <x>30</x>
+     <y>300</y>
+     <width>141</width>
+     <height>22</height>
+    </rect>
+   </property>
+   <property name="toolTip">
+    <string>User can create objects (jobs and variables)</string>
+   </property>
+   <property name="text">
+    <string>Create things</string>
+   </property>
+  </widget>
+  <widget class="QCheckBox" name="chpermperm">
+   <property name="geometry">
+    <rect>
+     <x>30</x>
+     <y>330</y>
+     <width>311</width>
+     <height>22</height>
+    </rect>
+   </property>
+   <property name="toolTip">
+    <string>User can adjust default priority and permissions</string>
+   </property>
+   <property name="text">
+    <string>Change default prio/perms</string>
+   </property>
+  </widget>
+  <widget class="QCheckBox" name="spcreateperm">
+   <property name="geometry">
+    <rect>
+     <x>30</x>
+     <y>360</y>
+     <width>161</width>
+     <height>22</height>
+    </rect>
+   </property>
+   <property name="toolTip">
+    <string>User can create command interpreters</string>
+   </property>
+   <property name="text">
+    <string>Special Create</string>
+   </property>
+  </widget>
+  <widget class="QCheckBox" name="or_ug_perm">
+   <property name="geometry">
+    <rect>
+     <x>290</x>
+     <y>240</y>
+     <width>181</width>
+     <height>22</height>
+    </rect>
+   </property>
+   <property name="toolTip">
+    <string>Combine user and group permissions</string>
+   </property>
+   <property name="text">
+    <string>OR User/Group perms</string>
+   </property>
+  </widget>
+  <widget class="QCheckBox" name="or_uo_perm">
+   <property name="geometry">
+    <rect>
+     <x>290</x>
+     <y>270</y>
+     <width>191</width>
+     <height>22</height>
+    </rect>
+   </property>
+   <property name="toolTip">
+    <string>Combine user and other permissions</string>
+   </property>
+   <property name="text">
+    <string>OR User/Other perms</string>
+   </property>
+  </widget>
+  <widget class="QCheckBox" name="or_go_perm">
+   <property name="geometry">
+    <rect>
+     <x>290</x>
+     <y>300</y>
+     <width>191</width>
+     <height>22</height>
+    </rect>
+   </property>
+   <property name="toolTip">
+    <string>Combine group and other permissions</string>
+   </property>
+   <property name="text">
+    <string>OR Group/Other perms</string>
+   </property>
+  </widget>
+  <widget class="QCheckBox" name="sstopperm">
+   <property name="geometry">
+    <rect>
+     <x>290</x>
+     <y>330</y>
+     <width>181</width>
+     <height>22</height>
+    </rect>
+   </property>
+   <property name="toolTip">
+    <string>User can stop the scheduler</string>
+   </property>
+   <property name="text">
+    <string>Stop Scheduler</string>
+   </property>
+  </widget>
+  <widget class="QLabel" name="label_3">
+   <property name="geometry">
+    <rect>
+     <x>30</x>
+     <y>130</y>
+     <width>62</width>
+     <height>17</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string>Min Pri</string>
+   </property>
+  </widget>
+  <widget class="QLabel" name="label_4">
+   <property name="geometry">
+    <rect>
+     <x>30</x>
+     <y>160</y>
+     <width>62</width>
+     <height>17</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string>Def Pri</string>
+   </property>
+  </widget>
+  <widget class="QLabel" name="label_5">
+   <property name="geometry">
+    <rect>
+     <x>30</x>
+     <y>190</y>
+     <width>62</width>
+     <height>17</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string>Max Pri</string>
+   </property>
+  </widget>
+  <widget class="QLineEdit" name="minpri">
+   <property name="geometry">
+    <rect>
+     <x>90</x>
+     <y>120</y>
+     <width>81</width>
+     <height>27</height>
+    </rect>
+   </property>
+   <property name="toolTip">
+    <string>This is the minimum allowed priority</string>
+   </property>
+   <property name="frame">
+    <bool>false</bool>
+   </property>
+   <property name="readOnly">
+    <bool>true</bool>
+   </property>
+  </widget>
+  <widget class="QLineEdit" name="defpri">
+   <property name="geometry">
+    <rect>
+     <x>90</x>
+     <y>150</y>
+     <width>81</width>
+     <height>27</height>
+    </rect>
+   </property>
+   <property name="toolTip">
+    <string>This is the default priority</string>
+   </property>
+   <property name="frame">
+    <bool>false</bool>
+   </property>
+   <property name="readOnly">
+    <bool>true</bool>
+   </property>
+  </widget>
+  <widget class="QLineEdit" name="maxpri">
+   <property name="geometry">
+    <rect>
+     <x>90</x>
+     <y>180</y>
+     <width>81</width>
+     <height>27</height>
+    </rect>
+   </property>
+   <property name="toolTip">
+    <string>This is the maximum priority</string>
+   </property>
+   <property name="frame">
+    <bool>false</bool>
+   </property>
+   <property name="readOnly">
+    <bool>true</bool>
+   </property>
+  </widget>
+  <widget class="QLabel" name="label_6">
+   <property name="geometry">
+    <rect>
+     <x>30</x>
+     <y>90</y>
+     <width>101</width>
+     <height>17</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string>Group Name</string>
+   </property>
+  </widget>
+  <widget class="QLineEdit" name="groupname">
+   <property name="geometry">
+    <rect>
+     <x>220</x>
+     <y>80</y>
+     <width>231</width>
+     <height>27</height>
+    </rect>
+   </property>
+   <property name="toolTip">
+    <string>This is the group name on the server</string>
+   </property>
+   <property name="frame">
+    <bool>false</bool>
+   </property>
+   <property name="readOnly">
+    <bool>true</bool>
+   </property>
+  </widget>
+  <widget class="QLabel" name="label_7">
+   <property name="geometry">
+    <rect>
+     <x>220</x>
+     <y>190</y>
+     <width>62</width>
+     <height>17</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string>Spec C LL</string>
+   </property>
+  </widget>
+  <widget class="QLineEdit" name="totll">
+   <property name="geometry">
+    <rect>
+     <x>300</x>
+     <y>150</y>
+     <width>81</width>
+     <height>27</height>
+    </rect>
+   </property>
+   <property name="toolTip">
+    <string notr="true">This is the total load level for jobs running at once</string>
+   </property>
+   <property name="frame">
+    <bool>false</bool>
+   </property>
+   <property name="readOnly">
+    <bool>true</bool>
+   </property>
+  </widget>
+  <widget class="QLabel" name="label_8">
+   <property name="geometry">
+    <rect>
+     <x>220</x>
+     <y>160</y>
+     <width>62</width>
+     <height>17</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string>Tot LL</string>
+   </property>
+  </widget>
+  <widget class="QLineEdit" name="maxll">
+   <property name="geometry">
+    <rect>
+     <x>300</x>
+     <y>120</y>
+     <width>81</width>
+     <height>27</height>
+    </rect>
+   </property>
+   <property name="toolTip">
+    <string>This is the maximum load level for any one job</string>
+   </property>
+   <property name="frame">
+    <bool>false</bool>
+   </property>
+   <property name="readOnly">
+    <bool>true</bool>
+   </property>
+  </widget>
+  <widget class="QLabel" name="label_9">
+   <property name="geometry">
+    <rect>
+     <x>220</x>
+     <y>130</y>
+     <width>62</width>
+     <height>17</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string>Max LL</string>
+   </property>
+  </widget>
+  <widget class="QLineEdit" name="speccll">
+   <property name="geometry">
+    <rect>
+     <x>300</x>
+     <y>180</y>
+     <width>81</width>
+     <height>27</height>
+    </rect>
+   </property>
+   <property name="toolTip">
+    <string>This is the special create load level (if creating command interpreters)</string>
+   </property>
+   <property name="frame">
+    <bool>false</bool>
+   </property>
+   <property name="readOnly">
+    <bool>true</bool>
+   </property>
+  </widget>
+  <widget class="QLabel" name="label_10">
+   <property name="geometry">
+    <rect>
+     <x>210</x>
+     <y>370</y>
+     <width>161</width>
+     <height>20</height>
+    </rect>
+   </property>
+   <property name="font">
+    <font>
+     <weight>75</weight>
+     <bold>true</bold>
+    </font>
+   </property>
+   <property name="text">
+    <string>Default permissions</string>
+   </property>
+  </widget>
+  <widget class="QTabWidget" name="permtab">
+   <property name="geometry">
+    <rect>
+     <x>60</x>
+     <y>410</y>
+     <width>471</width>
+     <height>356</height>
+    </rect>
+   </property>
+   <property name="currentIndex">
+    <number>2</number>
+   </property>
+   <widget class="QWidget" name="juser">
+    <attribute name="title">
+     <string>Job-user</string>
+    </attribute>
+    <layout class="QHBoxLayout" name="horizontalLayout_5">
+     <item>
+      <layout class="QGridLayout" name="gridLayout">
+       <item row="0" column="0">
+        <widget class="QCheckBox" name="ju_read">
+         <property name="toolTip">
+          <string>User can read details of jobs</string>
+         </property>
+         <property name="text">
+          <string>Read Job</string>
+         </property>
+        </widget>
+       </item>
+       <item row="1" column="0">
+        <widget class="QCheckBox" name="ju_write">
+         <property name="toolTip">
+          <string>User can update details of jobs</string>
+         </property>
+         <property name="text">
+          <string>Write job</string>
+         </property>
+        </widget>
+       </item>
+       <item row="2" column="0">
+        <widget class="QCheckBox" name="ju_show">
+         <property name="toolTip">
+          <string>User can see job exists</string>
+         </property>
+         <property name="text">
+          <string>Reveal job</string>
+         </property>
+        </widget>
+       </item>
+       <item row="3" column="0">
+        <widget class="QCheckBox" name="ju_rperm">
+         <property name="toolTip">
+          <string>User can read job permissions</string>
+         </property>
+         <property name="text">
+          <string>Read perms job</string>
+         </property>
+        </widget>
+       </item>
+       <item row="4" column="0">
+        <widget class="QCheckBox" name="ju_wperm">
+         <property name="toolTip">
+          <string>User can update job permissions</string>
+         </property>
+         <property name="text">
+          <string>Write perms job</string>
+         </property>
+        </widget>
+       </item>
+       <item row="5" column="0">
+        <widget class="QCheckBox" name="ju_utake">
+         <property name="toolTip">
+          <string>User can acquire job</string>
+         </property>
+         <property name="text">
+          <string>Acquire ownership job</string>
+         </property>
+        </widget>
+       </item>
+       <item row="6" column="0">
+        <widget class="QCheckBox" name="ju_gtake">
+         <property name="toolTip">
+          <string>User can acquire job for group owner</string>
+         </property>
+         <property name="text">
+          <string>Acquire group ownership job</string>
+         </property>
+        </widget>
+       </item>
+       <item row="7" column="0">
+        <widget class="QCheckBox" name="ju_ugive">
+         <property name="toolTip">
+          <string>User can give away job</string>
+         </property>
+         <property name="text">
+          <string>Give away owner job</string>
+         </property>
+        </widget>
+       </item>
+       <item row="9" column="0">
+        <widget class="QCheckBox" name="ju_del">
+         <property name="toolTip">
+          <string>User can delete job</string>
+         </property>
+         <property name="text">
+          <string>Delete job</string>
+         </property>
+        </widget>
+       </item>
+       <item row="10" column="0">
+        <widget class="QCheckBox" name="ju_kill">
+         <property name="toolTip">
+          <string>User can kill job</string>
+         </property>
+         <property name="text">
+          <string>Kill job</string>
+         </property>
+        </widget>
+       </item>
+       <item row="8" column="0">
+        <widget class="QCheckBox" name="ju_ggive">
+         <property name="toolTip">
+          <string>User can give away group ownership</string>
+         </property>
+         <property name="text">
+          <string>Give away group owner job</string>
+         </property>
+        </widget>
+       </item>
+      </layout>
+     </item>
+    </layout>
+   </widget>
+   <widget class="QWidget" name="jgroup">
+    <attribute name="title">
+     <string>Job-group</string>
+    </attribute>
+    <layout class="QHBoxLayout" name="horizontalLayout_4">
+     <item>
+      <layout class="QGridLayout" name="gridLayout_2">
+       <item row="0" column="0">
+        <widget class="QCheckBox" name="jg_read">
+         <property name="toolTip">
+          <string>Group can read details of jobs</string>
+         </property>
+         <property name="text">
+          <string>Read Job</string>
+         </property>
+        </widget>
+       </item>
+       <item row="1" column="0">
+        <widget class="QCheckBox" name="jg_write">
+         <property name="toolTip">
+          <string>Group can update details of jobs</string>
+         </property>
+         <property name="text">
+          <string>Write job</string>
+         </property>
+        </widget>
+       </item>
+       <item row="2" column="0">
+        <widget class="QCheckBox" name="jg_show">
+         <property name="toolTip">
+          <string>Group can see job exists</string>
+         </property>
+         <property name="text">
+          <string>Reveal job</string>
+         </property>
+        </widget>
+       </item>
+       <item row="3" column="0">
+        <widget class="QCheckBox" name="jg_rperm">
+         <property name="toolTip">
+          <string>Group can read job permissions</string>
+         </property>
+         <property name="text">
+          <string>Read perms job</string>
+         </property>
+        </widget>
+       </item>
+       <item row="4" column="0">
+        <widget class="QCheckBox" name="jg_wperm">
+         <property name="toolTip">
+          <string>Group can update job permissions</string>
+         </property>
+         <property name="text">
+          <string>Write perms job</string>
+         </property>
+        </widget>
+       </item>
+       <item row="5" column="0">
+        <widget class="QCheckBox" name="jg_utake">
+         <property name="toolTip">
+          <string>Group can acquire job for user</string>
+         </property>
+         <property name="text">
+          <string>Acquire ownership job</string>
+         </property>
+        </widget>
+       </item>
+       <item row="6" column="0">
+        <widget class="QCheckBox" name="jg_gtake">
+         <property name="toolTip">
+          <string>Group can acquire job for group owner</string>
+         </property>
+         <property name="text">
+          <string>Acquire group ownership job</string>
+         </property>
+        </widget>
+       </item>
+       <item row="7" column="0">
+        <widget class="QCheckBox" name="jg_ugive">
+         <property name="toolTip">
+          <string>Group can give away job owner</string>
+         </property>
+         <property name="text">
+          <string>Give away owner job</string>
+         </property>
+        </widget>
+       </item>
+       <item row="9" column="0">
+        <widget class="QCheckBox" name="jg_del">
+         <property name="toolTip">
+          <string>Group can delete job</string>
+         </property>
+         <property name="text">
+          <string>Delete job</string>
+         </property>
+        </widget>
+       </item>
+       <item row="10" column="0">
+        <widget class="QCheckBox" name="jg_kill">
+         <property name="toolTip">
+          <string>Group can kill job</string>
+         </property>
+         <property name="text">
+          <string>Kill job</string>
+         </property>
+        </widget>
+       </item>
+       <item row="8" column="0">
+        <widget class="QCheckBox" name="jg_ggive">
+         <property name="toolTip">
+          <string>Group can give away group ownership</string>
+         </property>
+         <property name="text">
+          <string>Give away group owner job</string>
+         </property>
+        </widget>
+       </item>
+      </layout>
+     </item>
+    </layout>
+   </widget>
+   <widget class="QWidget" name="jother">
+    <attribute name="title">
+     <string>Job-other</string>
+    </attribute>
+    <layout class="QHBoxLayout" name="horizontalLayout_3">
+     <item>
+      <layout class="QGridLayout" name="gridLayout_3">
+       <item row="0" column="0">
+        <widget class="QCheckBox" name="jo_read">
+         <property name="toolTip">
+          <string>Others can read details of jobs</string>
+         </property>
+         <property name="text">
+          <string>Read Job</string>
+         </property>
+        </widget>
+       </item>
+       <item row="1" column="0">
+        <widget class="QCheckBox" name="jo_write">
+         <property name="toolTip">
+          <string>Others can update details of jobs</string>
+         </property>
+         <property name="text">
+          <string>Write job</string>
+         </property>
+        </widget>
+       </item>
+       <item row="2" column="0">
+        <widget class="QCheckBox" name="jo_show">
+         <property name="toolTip">
+          <string>Others can see job exists</string>
+         </property>
+         <property name="text">
+          <string>Reveal job</string>
+         </property>
+        </widget>
+       </item>
+       <item row="3" column="0">
+        <widget class="QCheckBox" name="jo_rperm">
+         <property name="toolTip">
+          <string>Others can read job permissions</string>
+         </property>
+         <property name="text">
+          <string>Read perms job</string>
+         </property>
+        </widget>
+       </item>
+       <item row="4" column="0">
+        <widget class="QCheckBox" name="jo_wperm">
+         <property name="toolTip">
+          <string>Others can update job permissions</string>
+         </property>
+         <property name="text">
+          <string>Write perms job</string>
+         </property>
+        </widget>
+       </item>
+       <item row="5" column="0">
+        <widget class="QCheckBox" name="jo_utake">
+         <property name="toolTip">
+          <string>Others can acquire job for owner</string>
+         </property>
+         <property name="text">
+          <string>Acquire ownership job</string>
+         </property>
+        </widget>
+       </item>
+       <item row="6" column="0">
+        <widget class="QCheckBox" name="jo_gtake">
+         <property name="toolTip">
+          <string>Others can acquire job for group owner</string>
+         </property>
+         <property name="text">
+          <string>Acquire group ownership job</string>
+         </property>
+        </widget>
+       </item>
+       <item row="7" column="0">
+        <widget class="QCheckBox" name="jo_ugive">
+         <property name="toolTip">
+          <string>Others can give away job</string>
+         </property>
+         <property name="text">
+          <string>Give away owner job</string>
+         </property>
+        </widget>
+       </item>
+       <item row="9" column="0">
+        <widget class="QCheckBox" name="jo_del">
+         <property name="toolTip">
+          <string>Others can delete job</string>
+         </property>
+         <property name="text">
+          <string>Delete job</string>
+         </property>
+        </widget>
+       </item>
+       <item row="10" column="0">
+        <widget class="QCheckBox" name="jo_kill">
+         <property name="toolTip">
+          <string>Others can kill job</string>
+         </property>
+         <property name="text">
+          <string>Kill job</string>
+         </property>
+        </widget>
+       </item>
+       <item row="8" column="0">
+        <widget class="QCheckBox" name="jo_ggive">
+         <property name="toolTip">
+          <string>Others can give away group ownership</string>
+         </property>
+         <property name="text">
+          <string>Give away group owner job</string>
+         </property>
+        </widget>
+       </item>
+      </layout>
+     </item>
+    </layout>
+   </widget>
+   <widget class="QWidget" name="vuser">
+    <attribute name="title">
+     <string>Var-user</string>
+    </attribute>
+    <layout class="QHBoxLayout" name="horizontalLayout_2">
+     <item>
+      <layout class="QGridLayout" name="gridLayout_4">
+       <item row="0" column="0">
+        <widget class="QCheckBox" name="vu_read">
+         <property name="toolTip">
+          <string>User can read details of variable</string>
+         </property>
+         <property name="text">
+          <string>Read variable</string>
+         </property>
+        </widget>
+       </item>
+       <item row="1" column="0">
+        <widget class="QCheckBox" name="vu_write">
+         <property name="toolTip">
+          <string>User can update details of variable</string>
+         </property>
+         <property name="text">
+          <string>Write variable</string>
+         </property>
+        </widget>
+       </item>
+       <item row="2" column="0">
+        <widget class="QCheckBox" name="vu_show">
+         <property name="toolTip">
+          <string>User can see variable exists</string>
+         </property>
+         <property name="text">
+          <string>Reveal variable</string>
+         </property>
+        </widget>
+       </item>
+       <item row="3" column="0">
+        <widget class="QCheckBox" name="vu_rperm">
+         <property name="toolTip">
+          <string>User can read variable permissions</string>
+         </property>
+         <property name="text">
+          <string>Read perms variable</string>
+         </property>
+        </widget>
+       </item>
+       <item row="4" column="0">
+        <widget class="QCheckBox" name="vu_wperm">
+         <property name="toolTip">
+          <string>User can update variable permissions</string>
+         </property>
+         <property name="text">
+          <string>Write perms variable</string>
+         </property>
+        </widget>
+       </item>
+       <item row="5" column="0">
+        <widget class="QCheckBox" name="vu_utake">
+         <property name="toolTip">
+          <string>User can acquire variable</string>
+         </property>
+         <property name="text">
+          <string>Acquire ownership variable</string>
+         </property>
+        </widget>
+       </item>
+       <item row="6" column="0">
+        <widget class="QCheckBox" name="vu_gtake">
+         <property name="toolTip">
+          <string>User can acquire variable for group owner</string>
+         </property>
+         <property name="text">
+          <string>Acquire group ownership variable</string>
+         </property>
+        </widget>
+       </item>
+       <item row="7" column="0">
+        <widget class="QCheckBox" name="vu_ugive">
+         <property name="toolTip">
+          <string>User can give away variable</string>
+         </property>
+         <property name="text">
+          <string>Give away owner variable</string>
+         </property>
+        </widget>
+       </item>
+       <item row="9" column="0">
+        <widget class="QCheckBox" name="vu_del">
+         <property name="toolTip">
+          <string>User can delete variable</string>
+         </property>
+         <property name="text">
+          <string>Delete variable</string>
+         </property>
+        </widget>
+       </item>
+       <item row="8" column="0">
+        <widget class="QCheckBox" name="vu_ggive">
+         <property name="toolTip">
+          <string>User can give away group ownership</string>
+         </property>
+         <property name="text">
+          <string>Give away group owner variable</string>
+         </property>
+        </widget>
+       </item>
+      </layout>
+     </item>
+    </layout>
+   </widget>
+   <widget class="QWidget" name="vgroup">
+    <attribute name="title">
+     <string>Var-group</string>
+    </attribute>
+    <layout class="QHBoxLayout" name="horizontalLayout">
+     <item>
+      <layout class="QGridLayout" name="gridLayout_5">
+       <item row="0" column="0">
+        <widget class="QCheckBox" name="vg_read">
+         <property name="toolTip">
+          <string>Group can read details of variable</string>
+         </property>
+         <property name="text">
+          <string>Read variable</string>
+         </property>
+        </widget>
+       </item>
+       <item row="1" column="0">
+        <widget class="QCheckBox" name="vg_write">
+         <property name="toolTip">
+          <string>Group can update details of variable</string>
+         </property>
+         <property name="text">
+          <string>Write variable</string>
+         </property>
+        </widget>
+       </item>
+       <item row="2" column="0">
+        <widget class="QCheckBox" name="vg_show">
+         <property name="toolTip">
+          <string>Group can see variable exists</string>
+         </property>
+         <property name="text">
+          <string>Reveal variable</string>
+         </property>
+        </widget>
+       </item>
+       <item row="3" column="0">
+        <widget class="QCheckBox" name="vg_rperm">
+         <property name="toolTip">
+          <string>Group can read variable permissions</string>
+         </property>
+         <property name="text">
+          <string>Read perms variable</string>
+         </property>
+        </widget>
+       </item>
+       <item row="4" column="0">
+        <widget class="QCheckBox" name="vg_wperm">
+         <property name="toolTip">
+          <string>Group can update variable permissions</string>
+         </property>
+         <property name="text">
+          <string>Write perms variable</string>
+         </property>
+        </widget>
+       </item>
+       <item row="5" column="0">
+        <widget class="QCheckBox" name="vg_utake">
+         <property name="toolTip">
+          <string>Group can acquire variable</string>
+         </property>
+         <property name="text">
+          <string>Acquire ownership variable</string>
+         </property>
+        </widget>
+       </item>
+       <item row="6" column="0">
+        <widget class="QCheckBox" name="vg_gtake">
+         <property name="toolTip">
+          <string>Group can acquire variable for group owner</string>
+         </property>
+         <property name="text">
+          <string>Acquire group ownership variable</string>
+         </property>
+        </widget>
+       </item>
+       <item row="7" column="0">
+        <widget class="QCheckBox" name="vg_ugive">
+         <property name="toolTip">
+          <string>Group can give away variable</string>
+         </property>
+         <property name="text">
+          <string>Give away owner variable</string>
+         </property>
+        </widget>
+       </item>
+       <item row="8" column="0">
+        <widget class="QCheckBox" name="vg_ggive">
+         <property name="toolTip">
+          <string>Group can give away group ownership</string>
+         </property>
+         <property name="text">
+          <string>Give away group owner variable</string>
+         </property>
+        </widget>
+       </item>
+       <item row="9" column="0">
+        <widget class="QCheckBox" name="vg_del">
+         <property name="toolTip">
+          <string>Group can delete variable</string>
+         </property>
+         <property name="text">
+          <string>Delete variable</string>
+         </property>
+        </widget>
+       </item>
+      </layout>
+     </item>
+    </layout>
+   </widget>
+   <widget class="QWidget" name="vother">
+    <attribute name="title">
+     <string>Var-other</string>
+    </attribute>
+    <layout class="QHBoxLayout">
+     <item>
+      <layout class="QGridLayout" name="gridLayout_6">
+       <item row="0" column="0">
+        <widget class="QCheckBox" name="vo_read">
+         <property name="toolTip">
+          <string>Others can read details of variable</string>
+         </property>
+         <property name="text">
+          <string>Read variable</string>
+         </property>
+        </widget>
+       </item>
+       <item row="1" column="0">
+        <widget class="QCheckBox" name="vo_write">
+         <property name="toolTip">
+          <string>Others can update details of variable</string>
+         </property>
+         <property name="text">
+          <string>Write variable</string>
+         </property>
+        </widget>
+       </item>
+       <item row="2" column="0">
+        <widget class="QCheckBox" name="vo_show">
+         <property name="toolTip">
+          <string>Others can see variable exists</string>
+         </property>
+         <property name="text">
+          <string>Reveal variable</string>
+         </property>
+        </widget>
+       </item>
+       <item row="3" column="0">
+        <widget class="QCheckBox" name="vo_rperm">
+         <property name="toolTip">
+          <string>Others can read variable permissions</string>
+         </property>
+         <property name="text">
+          <string>Read perms variable</string>
+         </property>
+        </widget>
+       </item>
+       <item row="4" column="0">
+        <widget class="QCheckBox" name="vo_wperm">
+         <property name="toolTip">
+          <string>Others can update variable permissions</string>
+         </property>
+         <property name="text">
+          <string>Write perms variable</string>
+         </property>
+        </widget>
+       </item>
+       <item row="5" column="0">
+        <widget class="QCheckBox" name="vo_utake">
+         <property name="toolTip">
+          <string>Others can acquire variable for user</string>
+         </property>
+         <property name="text">
+          <string>Acquire ownership variable</string>
+         </property>
+        </widget>
+       </item>
+       <item row="6" column="0">
+        <widget class="QCheckBox" name="vo_gtake">
+         <property name="toolTip">
+          <string>Others can acquire variable for group owner</string>
+         </property>
+         <property name="text">
+          <string>Acquire group ownership variable</string>
+         </property>
+        </widget>
+       </item>
+       <item row="7" column="0">
+        <widget class="QCheckBox" name="vo_ugive">
+         <property name="toolTip">
+          <string>Others can give away variable</string>
+         </property>
+         <property name="text">
+          <string>Give away owner variable</string>
+         </property>
+        </widget>
+       </item>
+       <item row="8" column="0">
+        <widget class="QCheckBox" name="vo_ggive">
+         <property name="toolTip">
+          <string>Others can give away group ownership</string>
+         </property>
+         <property name="text">
+          <string>Give away group owner variable</string>
+         </property>
+        </widget>
+       </item>
+       <item row="9" column="0">
+        <widget class="QCheckBox" name="vo_del">
+         <property name="toolTip">
+          <string>Others can delete variable</string>
+         </property>
+         <property name="text">
+          <string>Delete variable</string>
+         </property>
+        </widget>
+       </item>
+      </layout>
+     </item>
+    </layout>
+   </widget>
+  </widget>
+ </widget>
+ <tabstops>
+  <tabstop>servname</tabstop>
+  <tabstop>username</tabstop>
+  <tabstop>groupname</tabstop>
+  <tabstop>minpri</tabstop>
+  <tabstop>defpri</tabstop>
+  <tabstop>maxpri</tabstop>
+  <tabstop>maxll</tabstop>
+  <tabstop>totll</tabstop>
+  <tabstop>speccll</tabstop>
+  <tabstop>radminperm</tabstop>
+  <tabstop>wadminperm</tabstop>
+  <tabstop>createperm</tabstop>
+  <tabstop>chpermperm</tabstop>
+  <tabstop>spcreateperm</tabstop>
+  <tabstop>or_ug_perm</tabstop>
+  <tabstop>or_uo_perm</tabstop>
+  <tabstop>or_go_perm</tabstop>
+  <tabstop>sstopperm</tabstop>
+  <tabstop>permtab</tabstop>
+  <tabstop>ju_read</tabstop>
+  <tabstop>ju_write</tabstop>
+  <tabstop>ju_show</tabstop>
+  <tabstop>ju_rperm</tabstop>
+  <tabstop>ju_wperm</tabstop>
+  <tabstop>ju_utake</tabstop>
+  <tabstop>ju_gtake</tabstop>
+  <tabstop>ju_ugive</tabstop>
+  <tabstop>ju_ggive</tabstop>
+  <tabstop>ju_del</tabstop>
+  <tabstop>ju_kill</tabstop>
+  <tabstop>jg_read</tabstop>
+  <tabstop>jg_write</tabstop>
+  <tabstop>jg_show</tabstop>
+  <tabstop>jg_rperm</tabstop>
+  <tabstop>jg_wperm</tabstop>
+  <tabstop>jg_utake</tabstop>
+  <tabstop>jg_gtake</tabstop>
+  <tabstop>jg_ugive</tabstop>
+  <tabstop>jg_ggive</tabstop>
+  <tabstop>jg_del</tabstop>
+  <tabstop>jg_kill</tabstop>
+  <tabstop>jo_read</tabstop>
+  <tabstop>jo_write</tabstop>
+  <tabstop>jo_show</tabstop>
+  <tabstop>jo_rperm</tabstop>
+  <tabstop>jo_wperm</tabstop>
+  <tabstop>jo_utake</tabstop>
+  <tabstop>jo_gtake</tabstop>
+  <tabstop>jo_ugive</tabstop>
+  <tabstop>jo_ggive</tabstop>
+  <tabstop>jo_del</tabstop>
+  <tabstop>jo_kill</tabstop>
+  <tabstop>vu_read</tabstop>
+  <tabstop>vu_write</tabstop>
+  <tabstop>vu_show</tabstop>
+  <tabstop>vu_rperm</tabstop>
+  <tabstop>vu_wperm</tabstop>
+  <tabstop>vu_utake</tabstop>
+  <tabstop>vu_gtake</tabstop>
+  <tabstop>vu_ugive</tabstop>
+  <tabstop>vu_ggive</tabstop>
+  <tabstop>vu_del</tabstop>
+  <tabstop>vg_read</tabstop>
+  <tabstop>vg_write</tabstop>
+  <tabstop>vg_show</tabstop>
+  <tabstop>vg_rperm</tabstop>
+  <tabstop>vg_wperm</tabstop>
+  <tabstop>vg_utake</tabstop>
+  <tabstop>vg_gtake</tabstop>
+  <tabstop>vg_ugive</tabstop>
+  <tabstop>vg_ggive</tabstop>
+  <tabstop>vg_del</tabstop>
+  <tabstop>vo_read</tabstop>
+  <tabstop>vo_write</tabstop>
+  <tabstop>vo_show</tabstop>
+  <tabstop>vo_rperm</tabstop>
+  <tabstop>vo_wperm</tabstop>
+  <tabstop>vo_utake</tabstop>
+  <tabstop>vo_gtake</tabstop>
+  <tabstop>vo_ugive</tabstop>
+  <tabstop>vo_ggive</tabstop>
+  <tabstop>vo_del</tabstop>
+  <tabstop>buttonBox</tabstop>
+ </tabstops>
+ <resources/>
+ <connections>
+  <connection>
+   <sender>buttonBox</sender>
+   <signal>accepted()</signal>
+   <receiver>userperms</receiver>
+   <slot>accept()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>248</x>
+     <y>254</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>157</x>
+     <y>274</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>buttonBox</sender>
+   <signal>rejected()</signal>
+   <receiver>userperms</receiver>
+   <slot>reject()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>316</x>
+     <y>260</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>286</x>
+     <y>274</y>
+    </hint>
+   </hints>
+  </connection>
+ </connections>
+</ui>

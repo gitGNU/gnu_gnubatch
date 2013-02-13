@@ -26,22 +26,22 @@
 
 void  gbatch_mode_pack(Btmode *dest, const Btmode *src)
 {
-	strcpy(dest->o_user, src->o_user);
-	strcpy(dest->c_user, src->c_user);
-	strcpy(dest->o_group, src->o_group);
-	strcpy(dest->c_group, src->c_group);
-	dest->u_flags = htons(src->u_flags);
-	dest->g_flags = htons(src->g_flags);
-	dest->o_flags = htons(src->o_flags);
+        strcpy(dest->o_user, src->o_user);
+        strcpy(dest->c_user, src->c_user);
+        strcpy(dest->o_group, src->o_group);
+        strcpy(dest->c_group, src->c_group);
+        dest->u_flags = htons(src->u_flags);
+        dest->g_flags = htons(src->g_flags);
+        dest->o_flags = htons(src->o_flags);
 }
 
 void  gbatch_mode_unpack(Btmode *dest, const Btmode *src)
 {
-	strcpy(dest->o_user, src->o_user);
-	strcpy(dest->c_user, src->c_user);
-	strcpy(dest->o_group, src->o_group);
-	strcpy(dest->c_group, src->c_group);
-	dest->u_flags = ntohs(src->u_flags);
-	dest->g_flags = ntohs(src->g_flags);
-	dest->o_flags = ntohs(src->o_flags);
+        strcpy(dest->o_user, src->o_user);
+        strcpy(dest->c_user, src->c_user);
+        strcpy(dest->o_group, src->o_group);
+        strcpy(dest->c_group, src->c_group);
+        dest->u_flags = ntohs(src->u_flags);
+        dest->g_flags = ntohs(src->g_flags);
+        dest->o_flags = ntohs(src->o_flags);
 }

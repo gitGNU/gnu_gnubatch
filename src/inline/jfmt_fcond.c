@@ -17,53 +17,46 @@
 
 JFORMAT(fmt_condfull)
 {
-	fmt_t  lng = 0;
-#ifdef	CHARSPRINTF
-	int	cnt;
+        fmt_t  lng = 0;
+#ifdef  CHARSPRINTF
+        int     cnt;
 #endif
-	if  (isreadable)  {
-		int	uc;
-		const  Btvar	*vp;
-		const  Jcond	*cp;
-		for  (uc = 0;  uc < MAXCVARS;  uc++)  {
-			cp = &jp->h.bj_conds[uc];
-			if  (cp->bjc_compar == C_UNUSED)
-				break;
-			if  (uc != 0)
-				bigbuff[lng++] = ',';
-			vp = &Var_seg.vlist[cp->bjc_varind].Vent;
-#ifdef	CHARSPRINTF
-			if  (vp->var_id.hostid)  {
-				sprintf(&bigbuff[lng], "%s:", look_host(vp->var_id.hostid));
-				cnt = strlen(&bigbuff[lng]);
-				lng += cnt;
-			}
-			sprintf(&bigbuff[lng], "%s%s", vp->var_name, condname[cp->bjc_compar-1]);
-			cnt = strlen(&bigbuff[lng]);
-			lng += cnt;
-			if  (cp->bjc_value.const_type == CON_STRING)
-				sprintf(&bigbuff[lng],
-					       strchr(cp->bjc_value.con_un.con_string, ' ') ||
-					       isdigit(cp->bjc_value.con_un.con_string[0])?
-					       "\"%s\"": "%s", cp->bjc_value.con_un.con_string);
-			else
-				sprintf(&bigbuff[lng], "%ld", (long) cp->bjc_value.con_un.con_long);
-			cnt = strlen(&bigbuff[lng]);
-			lng += cnt;
+        if  (isreadable)  {
+                int     uc;
+                const  Btvar    *vp;
+                const  Jcond    *cp;
+                for  (uc = 0;  uc < MAXCVARS;  uc++)  {
+                        cp = &jp->h.bj_conds[uc];
+                        if  (cp->bjc_compar == C_UNUSED)
+                                break;
+                        if  (uc != 0)
+                                bigbuff[lng++] = ',';
+                        vp = &Var_seg.vlist[cp->bjc_varind].Vent;
+#ifdef  CHARSPRINTF
+			sprintf(&bigbuff[lng], "%s%s", host_prefix_str(vp->var_id.hostid, vp->var_name), condname[cp->bjc_compar-1]);
+                        cnt = strlen(&bigbuff[lng]);
+                        lng += cnt;
+                        if  (cp->bjc_value.const_type == CON_STRING)
+                                sprintf(&bigbuff[lng],
+                                               strchr(cp->bjc_value.con_un.con_string, ' ') ||
+                                               isdigit(cp->bjc_value.con_un.con_string[0])?
+                                               "\"%s\"": "%s", cp->bjc_value.con_un.con_string);
+                        else
+                                sprintf(&bigbuff[lng], "%ld", (long) cp->bjc_value.con_un.con_long);
+                        cnt = strlen(&bigbuff[lng]);
+                        lng += cnt;
 #else
-			if  (vp->var_id.hostid)
-				lng += sprintf(&bigbuff[lng], "%s:", look_host(vp->var_id.hostid));
-			lng += sprintf(&bigbuff[lng], "%s%s", vp->var_name, condname[cp->bjc_compar-1]);
-			if  (cp->bjc_value.const_type == CON_STRING)
-				lng += sprintf(&bigbuff[lng],
-					       strchr(cp->bjc_value.con_un.con_string, ' ') ||
-					       isdigit(cp->bjc_value.con_un.con_string[0])?
-					       "\"%s\"": "%s", cp->bjc_value.con_un.con_string);
-			else
-				lng += sprintf(&bigbuff[lng], "%ld", (long) cp->bjc_value.con_un.con_long);
+			lng += sprintf(&bigbuff[lng], "%s%s", host_prefix_str(vp->var_id.hostid, vp->var_name), condname[cp->bjc_compar-1]);
+                        if  (cp->bjc_value.const_type == CON_STRING)
+                                lng += sprintf(&bigbuff[lng],
+                                               strchr(cp->bjc_value.con_un.con_string, ' ') ||
+                                               isdigit(cp->bjc_value.con_un.con_string[0])?
+                                               "\"%s\"": "%s", cp->bjc_value.con_un.con_string);
+                        else
+                                lng += sprintf(&bigbuff[lng], "%ld", (long) cp->bjc_value.con_un.con_long);
 #endif
-		}
-	}
+                }
+        }
 
-	return  lng;
+        return  lng;
 }

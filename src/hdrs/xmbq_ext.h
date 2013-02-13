@@ -15,25 +15,25 @@
    You should have received a copy of the GNU General Public License
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
-extern	char	*spdir;		/* Spool directory, typically /usr/spool/batch */
+extern  char    *spdir;         /* Spool directory, typically /usr/spool/batch */
 
-extern	int	Ctrl_chan;
-extern	Shipc	Oreq;
+extern  int     Ctrl_chan;
+extern  Shipc   Oreq;
 
-extern	int		Const_val;
-extern	BtjobRef	cjob;
-extern	BtvarRef	cvar;
+extern  int             Const_val;
+extern  BtjobRef        cjob;
+extern  BtvarRef        cvar;
 
 /* X stuff */
 
-extern	Widget	jtitwid,	/* Job title window */
-		vtitwid,	/* Var title window */
-		jwid,		/* Job scroll list */
-		vwid;		/* Variable scroll list */
+extern  Widget  jtitwid,        /* Job title window */
+                vtitwid,        /* Var title window */
+                jwid,           /* Job scroll list */
+                vwid;           /* Variable scroll list */
 
-extern	XtIntervalId	Ptimeout;
+extern  XtIntervalId    Ptimeout;
 
-#define	VLINES		2	/* Number of lines we burn up */
+#define VLINES          2       /* Number of lines we burn up */
 
 extern void  CreateActionEndDlg(Widget, Widget, XtCallbackProc, int);
 extern void  CreateEditDlg(Widget, char *, Widget *, Widget *, Widget *, const int);

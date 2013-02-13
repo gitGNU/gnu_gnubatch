@@ -20,118 +20,118 @@
 #include "incl_unix.h"
 #include "stringvec.h"
 
-static	char	Filename[] = __FILE__;
+static  char    Filename[] = __FILE__;
 
 void  stringvec_init(struct stringvec *sv)
 {
-	sv->memb_cnt = 0;
-	sv->memb_max = STRINGVEC_INIT;
-	sv->memb_list = (char **) malloc(STRINGVEC_INIT * sizeof(char *));
-	if  (!sv->memb_list)
-		ABORT_NOMEM;
+        sv->memb_cnt = 0;
+        sv->memb_max = STRINGVEC_INIT;
+        sv->memb_list = (char **) malloc(STRINGVEC_INIT * sizeof(char *));
+        if  (!sv->memb_list)
+                ABORT_NOMEM;
 }
 
 void  stringvec_insert_unique(struct stringvec *sv, const char *newitem)
 {
-	int  first = 0, last = sv->memb_cnt;
+        int  first = 0, last = sv->memb_cnt;
 
-	/* This is binary search and insert */
+        /* This is binary search and insert */
 
-	while  (first < last)  {
-		int	mid = (first + last) / 2;
-		int	cmp = strcmp(sv->memb_list[mid], newitem);
-		if  (cmp == 0)
-			return;
-		if  (cmp < 0)
-			first = mid + 1;
-		else
-			last = mid;
-	}
+        while  (first < last)  {
+                int     mid = (first + last) / 2;
+                int     cmp = strcmp(sv->memb_list[mid], newitem);
+                if  (cmp == 0)
+                        return;
+                if  (cmp < 0)
+                        first = mid + 1;
+                else
+                        last = mid;
+        }
 
-	/* Ready to insert at "first", move rest up */
+        /* Ready to insert at "first", move rest up */
 
-	if  (sv->memb_cnt >= sv->memb_max)  {
-		sv->memb_max += STRINGVEC_INC;
-		sv->memb_list = realloc(sv->memb_list, (unsigned) (sv->memb_max * sizeof(char *)));
-		if  (!sv->memb_list)
-			ABORT_NOMEM;
-	}
-	for  (last = sv->memb_cnt;  last > first;  last--)
-		sv->memb_list[last] = sv->memb_list[last-1];
+        if  (sv->memb_cnt >= sv->memb_max)  {
+                sv->memb_max += STRINGVEC_INC;
+                sv->memb_list = realloc(sv->memb_list, (unsigned) (sv->memb_max * sizeof(char *)));
+                if  (!sv->memb_list)
+                        ABORT_NOMEM;
+        }
+        for  (last = sv->memb_cnt;  last > first;  last--)
+                sv->memb_list[last] = sv->memb_list[last-1];
 
-	sv->memb_list[first] = stracpy(newitem);
-	sv->memb_cnt++;
+        sv->memb_list[first] = stracpy(newitem);
+        sv->memb_cnt++;
 }
 
 static void  test_realloc(struct stringvec *sv)
 {
-	if  (sv->memb_cnt >= sv->memb_max)  {
-		sv->memb_max += STRINGVEC_INC;
-		sv->memb_list = realloc(sv->memb_list, (unsigned) (sv->memb_max * sizeof(char *)));
-		if  (!sv->memb_list)
-			ABORT_NOMEM;
-	}
+        if  (sv->memb_cnt >= sv->memb_max)  {
+                sv->memb_max += STRINGVEC_INC;
+                sv->memb_list = realloc(sv->memb_list, (unsigned) (sv->memb_max * sizeof(char *)));
+                if  (!sv->memb_list)
+                        ABORT_NOMEM;
+        }
 }
 
 void  stringvec_append(struct stringvec *sv, const char *newitem)
 {
-	test_realloc(sv);
-	sv->memb_list[sv->memb_cnt] = stracpy(newitem);
-	sv->memb_cnt++;
+        test_realloc(sv);
+        sv->memb_list[sv->memb_cnt] = stracpy(newitem);
+        sv->memb_cnt++;
 }
 
 void  stringvec_insert(struct stringvec *sv, const int which, const char *newitem)
 {
-	int	lim = which, cnt;
-	if  (lim > sv->memb_cnt  ||  lim < 0)
-		lim = sv->memb_cnt;
-	test_realloc(sv);
-	for  (cnt = sv->memb_cnt;  cnt > lim;  cnt--)
-		sv->memb_list[cnt] = sv->memb_list[cnt-1];
-	sv->memb_list[lim] = stracpy(newitem);
-	sv->memb_cnt++;
+        int     lim = which, cnt;
+        if  (lim > sv->memb_cnt  ||  lim < 0)
+                lim = sv->memb_cnt;
+        test_realloc(sv);
+        for  (cnt = sv->memb_cnt;  cnt > lim;  cnt--)
+                sv->memb_list[cnt] = sv->memb_list[cnt-1];
+        sv->memb_list[lim] = stracpy(newitem);
+        sv->memb_cnt++;
 }
 
 void  stringvec_delete(struct stringvec *sv, const unsigned which)
 {
-	if  (which < (unsigned) sv->memb_cnt)  {
-		unsigned  cnt;
-		free(sv->memb_list[which]);
-		for  (cnt = which+1;  cnt < (unsigned) sv->memb_cnt;  cnt++)
-			sv->memb_list[cnt-1] = sv->memb_list[cnt];
-		sv->memb_cnt--;
-	}
+        if  (which < (unsigned) sv->memb_cnt)  {
+                unsigned  cnt;
+                free(sv->memb_list[which]);
+                for  (cnt = which+1;  cnt < (unsigned) sv->memb_cnt;  cnt++)
+                        sv->memb_list[cnt-1] = sv->memb_list[cnt];
+                sv->memb_cnt--;
+        }
 }
 
 void  stringvec_replace(struct stringvec *sv, const unsigned which, const char *newitem)
 {
-	if  (which < (unsigned) sv->memb_cnt)  {
-		free(sv->memb_list[which]);
-		sv->memb_list[which] = stracpy(newitem);
-	}
+        if  (which < (unsigned) sv->memb_cnt)  {
+                free(sv->memb_list[which]);
+                sv->memb_list[which] = stracpy(newitem);
+        }
 }
 
 void  stringvec_free(struct stringvec *sv)
 {
-	int	cnt;
-	for  (cnt = 0;  cnt < sv->memb_cnt;  cnt++)
-		free(sv->memb_list[cnt]);
-	free((char *) sv->memb_list);
+        int     cnt;
+        for  (cnt = 0;  cnt < sv->memb_cnt;  cnt++)
+                free(sv->memb_list[cnt]);
+        free((char *) sv->memb_list);
 }
 
 /* One day, my boy, all these will be stringvecs */
 
 char **stringvec_chararray(struct stringvec *sv)
 {
-	char	**result = (char **) malloc((unsigned) (sv->memb_cnt + 1) * sizeof(char *)), **rp;
-	int	cnt;
+        char    **result = (char **) malloc((unsigned) (sv->memb_cnt + 1) * sizeof(char *)), **rp;
+        int     cnt;
 
-	if  (!result)
-		ABORT_NOMEM;
+        if  (!result)
+                ABORT_NOMEM;
 
-	rp = result;
-	for  (cnt = 0;  cnt < sv->memb_cnt;  cnt++)
-		*rp++ = stracpy(sv->memb_list[cnt]);
-	*rp = 0;
-	return  result;
+        rp = result;
+        for  (cnt = 0;  cnt < sv->memb_cnt;  cnt++)
+                *rp++ = stracpy(sv->memb_list[cnt]);
+        *rp = 0;
+        return  result;
 }

@@ -15,21 +15,21 @@
    You should have received a copy of the GNU General Public License
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
-enum  casc_type	{ SEP, DSEP, ITEM };
+enum  casc_type { SEP, DSEP, ITEM };
 
-typedef	struct	{
-	enum	casc_type	type;
-	char			*name;
-	void			(*callback)();
-	int			callback_data;
+typedef struct  {
+        enum    casc_type       type;
+        char                    *name;
+        void                    (*callback)();
+        int                     callback_data;
 }  casc_button;
 
-typedef	struct	{
-	char		*pull_name;	/* Name of pulldown item */
-	int		nitems;		/* Number of items */
-	int		helpnum;
-	casc_button	*items;	/* List of items */
-	char		ishelp;		/* Mark as help */
+typedef struct  {
+        char            *pull_name;     /* Name of pulldown item */
+        int             nitems;         /* Number of items */
+        int             helpnum;
+        casc_button     *items; /* List of items */
+        char            ishelp;         /* Mark as help */
 }  pull_button;
 
 extern Widget  BuildPulldown(Widget, pull_button *);

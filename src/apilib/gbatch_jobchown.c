@@ -28,40 +28,40 @@ extern int  gbatch_wmsg(const struct api_fd *, struct api_msg *);
 extern int  gbatch_write(const int, char *, unsigned);
 extern struct api_fd *gbatch_look_fd(const int);
 
-int	gbatch_jobchown(const int fd, const unsigned flags, const slotno_t slotno, const char *newuser)
+int     gbatch_jobchown(const int fd, const unsigned flags, const slotno_t slotno, const char *newuser)
 {
-	int	ret;
-	struct	api_fd	*fdp = gbatch_look_fd(fd);
-	struct	api_msg	msg;
-	struct	jugmsg	res;
+        int     ret;
+        struct  api_fd  *fdp = gbatch_look_fd(fd);
+        struct  api_msg msg;
+        struct  jugmsg  res;
 
-	if  (!fdp)
-		return  XB_INVALID_FD;
-	msg.code = API_JOBCHOWN;
-	msg.un.reader.flags = htonl(flags);
-	msg.un.reader.seq = htonl(fdp->jserial);
-	msg.un.reader.slotno = htonl(slotno);
+        if  (!fdp)
+                return  XB_INVALID_FD;
+        msg.code = API_JOBCHOWN;
+        msg.un.reader.flags = htonl(flags);
+        msg.un.reader.seq = htonl(fdp->jserial);
+        msg.un.reader.slotno = htonl(slotno);
 
-	/* Might be worth mentioning the thinking here - We have a
-	   "jid" field in "struct jugmsg" which we could use in
-	   place of the ones in "msg", but those typically refer
-	   to the Owning machine, not the one we are talking to
-	   the xbnetserv process of, hence we use the ones in
-	   "msg" for consistency.  We could equally well define
-	   something other than a "struct jugmsg" but this isn't
-	   invoked often enough to make it worthwhile.  */
+        /* Might be worth mentioning the thinking here - We have a
+           "jid" field in "struct jugmsg" which we could use in
+           place of the ones in "msg", but those typically refer
+           to the Owning machine, not the one we are talking to
+           the xbnetserv process of, hence we use the ones in
+           "msg" for consistency.  We could equally well define
+           something other than a "struct jugmsg" but this isn't
+           invoked often enough to make it worthwhile.  */
 
-	BLOCK_ZERO(&res, sizeof(res));
-	strncpy(res.newug, newuser, UIDSIZE);
-	if  ((ret = gbatch_wmsg(fdp, &msg)))
-		return  ret;
-	if  ((ret = gbatch_write(fdp->sockfd, (char *) &res, sizeof(res))))
-		return  ret;
-	if  ((ret = gbatch_rmsg(fdp, &msg)))
-		return  ret;
-	if  (msg.un.r_reader.seq != 0)
-		fdp->jserial = ntohl(msg.un.r_reader.seq);
-	if  (msg.retcode != 0)
-		return  (SHORT) ntohs(msg.retcode);
-	return  GBATCH_OK;
+        BLOCK_ZERO(&res, sizeof(res));
+        strncpy(res.newug, newuser, UIDSIZE);
+        if  ((ret = gbatch_wmsg(fdp, &msg)))
+                return  ret;
+        if  ((ret = gbatch_write(fdp->sockfd, (char *) &res, sizeof(res))))
+                return  ret;
+        if  ((ret = gbatch_rmsg(fdp, &msg)))
+                return  ret;
+        if  (msg.un.r_reader.seq != 0)
+                fdp->jserial = ntohl(msg.un.r_reader.seq);
+        if  (msg.retcode != 0)
+                return  (SHORT) ntohs(msg.retcode);
+        return  GBATCH_OK;
 }
