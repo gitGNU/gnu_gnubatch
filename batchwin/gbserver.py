@@ -76,8 +76,8 @@ class gbserver:
             except socket.gaierror as e:
                 raise ServError("Host name " + host + " - " + e.argb[1])
             self.servname = host
-            self.alias = alias
             self.namebyip = False
+        self.alias = alias
         self.servip = gbnetid.gbnetid(n)
         self.autoconn = ac
 
@@ -230,7 +230,7 @@ class servlist():
     def add(self, srv):
         """Add server to list"""
         self.serversbyip[srv.get_servaddr().ipaddr()] = srv
-        if len(srv.servname) != 0:
+        if len(srv.servname) != 0 and not srv.namebyip:
             self.serversbyname[srv.servname] = srv
             self.serversanyname[srv.servname] = srv
         if len(srv.alias) != 0:
@@ -286,7 +286,7 @@ class servlist():
         if sname not in self.serversanyname: return
         srv = self.serversanyname[sname]
         del self.serversbyip[srv.servip.ipaddr()]
-        if len(srv.servname) != 0:
+        if len(srv.servname) != 0 and not srv.namebyip:
             del self.serversanyname[srv.servname]
             del self.serversbyname[srv.servname]
         if len(srv.alias) != 0:

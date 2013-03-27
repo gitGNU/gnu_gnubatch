@@ -39,8 +39,6 @@
     <addaction name="separator"/>
     <addaction name="action_Port_settings"/>
     <addaction name="separator"/>
-    <addaction name="action_Save_As"/>
-    <addaction name="separator"/>
     <addaction name="action_Quit"/>
    </widget>
    <widget class="QMenu" name="menu_Window">
@@ -87,10 +85,6 @@
     <addaction name="action_Arguments"/>
     <addaction name="action_Environment"/>
     <addaction name="action_Redirections"/>
-    <addaction name="separator"/>
-    <addaction name="action_Unqueue_Job"/>
-    <addaction name="action_Copy_Job"/>
-    <addaction name="separator"/>
    </widget>
    <widget class="QMenu" name="menu_Conds">
     <property name="title">
@@ -139,6 +133,9 @@
     <addaction name="action_Create_Variable"/>
     <addaction name="action_Delete_Variable"/>
     <addaction name="action_VPermissions"/>
+    <addaction name="separator"/>
+    <addaction name="action_Unqueue_Job"/>
+    <addaction name="action_Copy_Job"/>
    </widget>
    <addaction name="menu_File"/>
    <addaction name="menu_Window"/>
@@ -567,17 +564,6 @@
    </property>
    <property name="shortcut">
     <string>Shift+M</string>
-   </property>
-  </action>
-  <action name="action_Unqueue_job">
-   <property name="text">
-    <string>Un&amp;queue job</string>
-   </property>
-   <property name="toolTip">
-    <string>Take job off the queue and make a re-queueable file</string>
-   </property>
-   <property name="shortcut">
-    <string>Shift+U</string>
    </property>
   </action>
   <action name="action_Search_for">

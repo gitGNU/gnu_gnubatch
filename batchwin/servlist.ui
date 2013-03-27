@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>832</width>
-    <height>465</height>
+    <width>659</width>
+    <height>566</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -16,8 +16,8 @@
   <widget class="QDialogButtonBox" name="buttonBox">
    <property name="geometry">
     <rect>
-     <x>560</x>
-     <y>400</y>
+     <x>410</x>
+     <y>490</y>
      <width>191</width>
      <height>41</height>
     </rect>
@@ -32,8 +32,8 @@
   <widget class="QPushButton" name="Newserv">
    <property name="geometry">
     <rect>
-     <x>20</x>
-     <y>410</y>
+     <x>30</x>
+     <y>500</y>
      <width>93</width>
      <height>31</height>
     </rect>
@@ -48,8 +48,8 @@
   <widget class="QPushButton" name="Delserv">
    <property name="geometry">
     <rect>
-     <x>140</x>
-     <y>410</y>
+     <x>220</x>
+     <y>500</y>
      <width>93</width>
      <height>31</height>
     </rect>
@@ -90,9 +90,9 @@
   <widget class="QTableWidget" name="servlist">
    <property name="geometry">
     <rect>
-     <x>20</x>
-     <y>110</y>
-     <width>801</width>
+     <x>30</x>
+     <y>150</y>
+     <width>571</width>
      <height>231</height>
     </rect>
    </property>
@@ -153,9 +153,9 @@
   <widget class="QPushButton" name="dispUperms">
    <property name="geometry">
     <rect>
-     <x>540</x>
-     <y>370</y>
-     <width>211</width>
+     <x>220</x>
+     <y>440</y>
+     <width>141</width>
      <height>27</height>
     </rect>
    </property>
@@ -195,8 +195,8 @@
   <widget class="QPushButton" name="connectserv">
    <property name="geometry">
     <rect>
-     <x>20</x>
-     <y>370</y>
+     <x>30</x>
+     <y>400</y>
      <width>141</width>
      <height>27</height>
     </rect>
@@ -211,8 +211,8 @@
   <widget class="QPushButton" name="disconnserv">
    <property name="geometry">
     <rect>
-     <x>200</x>
-     <y>370</y>
+     <x>30</x>
+     <y>440</y>
      <width>141</width>
      <height>27</height>
     </rect>
@@ -227,8 +227,8 @@
   <widget class="QLabel" name="label_3">
    <property name="geometry">
     <rect>
-     <x>520</x>
-     <y>60</y>
+     <x>30</x>
+     <y>110</y>
      <width>41</width>
      <height>17</height>
     </rect>
@@ -240,8 +240,8 @@
   <widget class="QComboBox" name="laport">
    <property name="geometry">
     <rect>
-     <x>590</x>
-     <y>60</y>
+     <x>210</x>
+     <y>100</y>
      <width>78</width>
      <height>27</height>
     </rect>
@@ -294,9 +294,9 @@
   <widget class="QPushButton" name="getlafrom">
    <property name="geometry">
     <rect>
-     <x>390</x>
-     <y>370</y>
-     <width>98</width>
+     <x>220</x>
+     <y>400</y>
+     <width>141</width>
      <height>27</height>
     </rect>
    </property>
@@ -304,14 +304,14 @@
     <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Click to say that you want to get the local IP address from the selected server.&lt;/p&gt;&lt;p&gt;It will try some likely ports, starting with what you put in the port number at the top.&lt;/p&gt;&lt;p&gt;&lt;br/&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
    </property>
    <property name="text">
-    <string>LA from</string>
+    <string>L.A. From server</string>
    </property>
   </widget>
   <widget class="QPushButton" name="setla">
    <property name="geometry">
     <rect>
-     <x>710</x>
-     <y>60</y>
+     <x>390</x>
+     <y>100</y>
      <width>61</width>
      <height>27</height>
     </rect>
@@ -323,22 +323,6 @@
     <string>Set</string>
    </property>
   </widget>
-  <zorder>buttonBox</zorder>
-  <zorder>Newserv</zorder>
-  <zorder>Delserv</zorder>
-  <zorder>label</zorder>
-  <zorder>lahost</zorder>
-  <zorder>servlist</zorder>
-  <zorder>dispUperms</zorder>
-  <zorder>label_2</zorder>
-  <zorder>wusername</zorder>
-  <zorder>connectserv</zorder>
-  <zorder>disconnserv</zorder>
-  <zorder>label_3</zorder>
-  <zorder>laport</zorder>
-  <zorder>getlafrom</zorder>
-  <zorder>setla</zorder>
-  <zorder>setla</zorder>
  </widget>
  <tabstops>
   <tabstop>wusername</tabstop>
@@ -347,11 +331,11 @@
   <tabstop>setla</tabstop>
   <tabstop>servlist</tabstop>
   <tabstop>connectserv</tabstop>
+  <tabstop>getlafrom</tabstop>
   <tabstop>disconnserv</tabstop>
+  <tabstop>dispUperms</tabstop>
   <tabstop>Newserv</tabstop>
   <tabstop>Delserv</tabstop>
-  <tabstop>getlafrom</tabstop>
-  <tabstop>dispUperms</tabstop>
   <tabstop>buttonBox</tabstop>
  </tabstops>
  <resources/>

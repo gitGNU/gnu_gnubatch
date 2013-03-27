@@ -29,6 +29,7 @@ from PyQt4.QtGui import *
 from PyQt4.QtNetwork import *
 
 import resources_rc
+import version
 import ui_btqw_main
 import ui_portdlg
 import ui_servlist
@@ -63,28 +64,7 @@ import btclasses
 import varops
 import jobldsv
 
-WIN = sys.platform == "win32"
-locale.setlocale(locale.LC_ALL, os.environ['LANG'])
-
-if WIN:
-    import wininfo
-    filelocloc = "Software\\FSF\\GNUBatch\\serverdets"
-    def savelocloc(fname):
-        """Save location of current config file"""
-        try:
-            wininfo.saveregstring(filelocloc, fname)
-        except wininfo.winerror as e:
-            QMessageBox.warning(mw, "Save registry error", "Could not save config file location in registry")
-else:
-    import pwd
-    def savelocloc(fname):
-        """Save location of current config file"""
-        try:
-            fll = open(filelocloc,'w')
-            fll.write(fname + '\n')
-            fll.close()
-        except IOError:
-            QMessageBox.warning(mw, "Save file error", "Could not save config file location")
+locale.setlocale(locale.LC_ALL, os.getenv('LANG', 'C'))
 
 def isAlive(qobj):
     """Report if window has been deleted or not"""
@@ -319,7 +299,7 @@ class BtqwMainwin(QMainWindow, ui_btqw_main.Ui_MainWindow):
         self.action_advance_time.setEnabled(jobson)
         self.action_set_runnable.setEnabled(jobson)
         self.action_setcanc.setEnabled(jobson)
-        self.action_Unqueue_job.setEnabled(jobson)
+        self.action_Unqueue_Job.setEnabled(jobson)
         self.action_Copy_Job.setEnabled(jobson)
         self.action_Delete_Variable.setEnabled(varson)
         self.action_Assign.setEnabled(varson)
@@ -745,16 +725,6 @@ This might make a previously invisible job visible or vice versa"""
         if dlg.exec_():
             btqwopts.Options.timedefs.copyfrom_dlg(dlg)
 
-    def on_action_Save_As_triggered(self, checked = None):
-        """Change saved file"""
-        if checked is None: return
-        newf = QFileDialog.getSaveFileName(self, self.tr("Select file to save"), btqwopts.Options.configfile, self.tr("Saved data (*.xbs)"))
-        if  newf.length() == 0:
-            return
-        newf = str(newf)
-        btqwopts.configfile = newf
-        savelocloc(newf)
-
     def on_action_Server_list_triggered(self, checked = None):
         if checked is None: return
         cservlistdlg.update_server_list(self)
@@ -1116,14 +1086,17 @@ This might make a previously invisible job visible or vice versa"""
     def on_action_Create_Jobs_triggered(self, checked = None):
         if checked is None: return
         indir = os.path.dirname(sys.argv[0])
-        execfile = "btrw.py"
+        if btqwopts.WIN:
+            execfile = "btrw.exe"
+        else:
+            execfile = "btrw.py"
         if len(indir) != 0:
             execfile = os.path.join(indir, execfile)
         if not os.path.exists(execfile):
             QMessageBox.warning(self, "Program not found", "Cannot find BTRW executable " + execfile)
             return
-        if WIN:
-            os.spawn(P_NOWAIT, sys.executable, "BTRW", execfile)
+        if btqwopts.WIN:
+            os.spawnl(os.P_NOWAIT, execfile, "BTRW")
         else:
             cpid = os.fork()
             if cpid == 0:
@@ -1200,7 +1173,7 @@ This might make a previously invisible job visible or vice versa"""
         njob = copy.copy(cjob)
         njob.bj_times.tc_nexttime = newtime
         self.client_conns[cjob.ipaddr()].chgjobhdr(njob)
-        
+
     def on_action_set_runnable_triggered(self, checked = None):
         if checked is None: return
         cjob = self.getselectedjob()
@@ -1542,18 +1515,20 @@ This might make a previously invisible job visible or vice versa"""
     def on_action_About_BTQW_triggered(self, checked = None):
         if checked is None: return
         QMessageBox.about(self, "About BTQW",
-                                """<b>Btqw</b> v 1.7
+                                """<b>Btqw</b> v %s
                                 <p>Copyright &copy; %d Free Software Foundation
-                                <p>Python %s - Qt %s""" % (time.localtime().tm_year, platform.python_version(), QT_VERSION_STR))
+                                <p>Python %s - Qt %s""" % (version.VERSION, time.localtime().tm_year, platform.python_version(), QT_VERSION_STR))
 
 # We now save the files in the User's directory for Windows
 # or $HOME/.gbatch/ for UNIX
 # We also grab the Windows user or the logged-in user if on UNIX/Linux
 
 if btqwopts.WIN:
+    import win32api
     floc = os.path.expanduser('~\\btqw.xbs')
-    winuser = wininfo.getwinuser()
+    winuser = win32api.GetUserName()
 else:
+    import pwd
     # I think we want the home directory of the su-ed to user so we don't
     # end up saving a config file unwriteable by the user
     # If we don't know who it is, then use HOME or if all else fails

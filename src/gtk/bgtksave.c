@@ -63,7 +63,7 @@ MAINFN_TYPE  main(int argc, char **argv)
         int     oldumask, cnt;
         FILE    *xtfile;
 
-        versionprint(argv, "$Revision: 1.7 $", 1);
+        versionprint(argv, "$Revision: 1,8 $", 1);
 
         /* If we haven't got the right arguments then just quit.
            This is only meant to be run by xbtq.

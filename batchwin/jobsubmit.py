@@ -257,12 +257,12 @@ def send_jobhdr(serv, msg):
         try:
             uac.waitreply()
         except uaclient.uaclientException as err:
-            raise SubmError("Timeout problem from server on submit")
+            raise SubmError("Timeout problem (jobhdr) from server on submit")
 
         indata = uac.sockfd.recv(uaclient.CL_SV_BUFFSIZE)
 
         if len(indata) != uaclient.Client_if.size:
-            raise SumbError("Unexpected reply size from server on submit")
+            raise SubmError("Unexpected reply size from server on submit")
 
         retcode, param = uaclient.Client_if.unpack(indata)
 
@@ -295,12 +295,12 @@ def send_jobdata(serv, data):
         try:
             uac.waitreply()
         except uaclient.uaclientException as err:
-            raise SubmError("Timeout problem from server on submit")
+            raise SubmError("Timeout problem (jobdata) from server on submit")
 
         indata = uac.sockfd.recv(uaclient.CL_SV_BUFFSIZE)
 
         if len(indata) != uaclient.Client_if.size:
-            raise SumbError("Unexpected reply size from server on submit")
+            raise SubmError("Unexpected reply size from server on submit")
 
         retcode, param = uaclient.Client_if.unpack(indata)
 
@@ -313,14 +313,14 @@ def send_endjob(serv):
     uac = serv.uasock
     uac.sockfd.sendto(ni_jobhdr.pack(uaclient.CL_SV_ENDJOB, ni_jobhdr.size, serv.perms.username, serv.perms.groupname), uac.hostadd)
     try:
-        uac.waitreply()
+        uac.waitreply(200.0)
     except uaclient.uaclientException as err:
-        raise SubmError("Timeout problem from server on submit")
+        raise SubmError("Timeout problem (endjob) from server on submit")
 
     indata = uac.sockfd.recv(uaclient.CL_SV_BUFFSIZE)
 
     if len(indata) != uaclient.Client_if.size:
-        raise SumbError("Unexpected reply size from server on submit")
+        raise SubmError("Unexpected reply size from server on submit")
 
     retcode, param = uaclient.Client_if.unpack(indata)
 

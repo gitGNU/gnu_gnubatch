@@ -34,6 +34,7 @@ from PyQt4.QtGui import *
 from PyQt4.QtNetwork import *
 
 import resources_rc
+import version
 import ui_btrw_main
 import ui_btrprogopts
 import ui_jobviewdlg
@@ -63,11 +64,11 @@ RUNC_COLUMN = 5
 SUBM_COLUMN = 6
 CH_COLUMN = 7
 
-WIN = sys.platform == "win32"
-locale.setlocale(locale.LC_ALL, os.environ['LANG'])
+locale.setlocale(locale.LC_ALL, os.getenv('LANG', 'C'))
 
-if WIN:
+if btqwopts.WIN:
     import wininfo
+    import win32api
     filelocloc = "Software\\FSF\\GNUBatch\\serverdets"
     def savelocloc(fname):
         """Save location of current config file"""
@@ -301,7 +302,7 @@ Generally ignore errors"""
         return True
 
     def getprefserv(self):
-        """Get server structure for prefered host"""
+        """Get server structure for preferred host"""
         hostn = btqwopts.Options.btrwopts.prefhost
         if hostn is None or len(hostn) == 0:
             QMessageBox.warning(self, "No default host", "You need to have a default host set up to get permissions from")
@@ -311,7 +312,7 @@ Generally ignore errors"""
         except KeyError:
             QMessageBox.warning(self, "Unknown server", "The default server name of " + hostn + " is not known")
             return None
-        if serv.isok or btqwopts.Options.servlist.perform_login(self, serv):
+        if serv.isok or btqwopts.Options.servers.perform_login(self, serv):
             return serv
         QMessageBox.warning(self, "Cannot get permissions", "Cannot get permissions from default server " + hostn)
         return None
@@ -972,6 +973,8 @@ Generally ignore errors"""
             jobnum = jobsubmit.job_submit(serv, cjob)
         except jobsubmit.SubmError as err:
             QMessageBox.warning(self, "Submit problem", err.args[0])
+            serv.uasock.closeReopen()
+            serv.isok = False
             return
         if btqwopts.Options.btrwopts.verbose:
             QMessageBox.information(self, "Submission OK", "Job submitted OK, job number is " + str(jobnum))
@@ -1020,9 +1023,9 @@ Generally ignore errors"""
     def on_action_About_BTRW_triggered(self, checked = None):
         if checked is None: return
         QMessageBox.about(self, "About BTRW",
-                                """<b>Btrw</b> v 1.7
+                                """<b>Btrw</b> v %s
                                 <p>Copyright &copy; %d Free Software Foundation
-                                <p>Python %s - Qt %s""" % (time.localtime().tm_year, platform.python_version(), QT_VERSION_STR))
+                                <p>Python %s - Qt %s""" % (version.VERSION, time.localtime().tm_year, platform.python_version(), QT_VERSION_STR))
 
 # We now save the files in the User's directory for Windows
 # or $HOME/.gbatch/ for UNIX
@@ -1030,7 +1033,7 @@ Generally ignore errors"""
 
 if btqwopts.WIN:
     floc = os.path.expanduser('~\\btqw.xbs')
-    winuser = wininfo.getwinuser()
+    winuser = win32api.GetUserName()
 else:
     # If we don't know who it is, then use HOME or if all else fails
     # the current directory

@@ -74,6 +74,12 @@ install-strip:	all
 	cd $(UTILDIR);make install-strip prefix="$(prefix)" exec_prefix="$(exec_prefix)" datarootdir="$(datarootdir)"
 	cd $(BUILDDIR);$(MAKE) install-strip prefix="$(prefix)" exec_prefix="$(exec_prefix)" datarootdir="$(datarootdir)"
 	cd doc;$(MAKE) install prefix="$(prefix)" exec_prefix="$(exec_prefix)" datarootdir="$(datarootdir)"
+	$(INSTALL) -d -o $(BATCHUSER) -g root -m 755 $(SYSCONFD)
+	[ -f $(SYSCONFD)/$(CONFFILE) ] || $(INSTALL) -o root -m 644 $(CONFFILE) $(SYSCONFD)
+	echo '# Get local address from GNU' >$(HOSTFILE)
+	echo >>$(HOSTFILE)
+	echo 'localaddress GSN(www.gnu.org,80)' >>$(HOSTFILE)
+	[ -f $(SYSCONFD)/$(HOSTFILE) ] || $(INSTALL) -o root -m 644 $(HOSTFILE) $(SYSCONFD)
 	$(STAGED_INSTALL) || $(BINDIR)/gbch-uchange -R
 	$(STAGED_INSTALL) || $(BINDIR)/gbch-uchange -p ALL `who am i|sed -e 's/ .*//'`
 

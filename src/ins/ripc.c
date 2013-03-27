@@ -1224,7 +1224,8 @@ int  varshminit(struct shmid_ds *sp, struct stat *fsb)
                 Var_seg.inf.seg = buffer;
                 Var_seg.dptr = (struct vshm_hdr *) buffer;
                 Var_seg.vhash = (vhash_t *) (buffer + sizeof(struct vshm_hdr));
-                Var_seg.vlist = (struct Ventry *) ((char *) Var_seg.vhash + VAR_HASHMOD * sizeof(vhash_t));
+		Var_seg.vidhash = (vhash_t *) ((char *) Var_seg.vhash + VAR_HASHMOD * sizeof(vhash_t));
+		Var_seg.vlist = (struct Ventry *) ((char *) Var_seg.vidhash + VAR_HASHMOD * sizeof(vhash_t));
                 Var_seg.Nvars = Var_seg.dptr->vs_maxvars;
                 return  -1;
         }
@@ -1252,7 +1253,8 @@ int  varshminit(struct shmid_ds *sp, struct stat *fsb)
                         goto  here;
                 }
                 Var_seg.vhash = (vhash_t *) (Var_seg.inf.seg + sizeof(struct vshm_hdr));
-                Var_seg.vlist = (struct Ventry *) ((char *) Var_seg.vhash + VAR_HASHMOD * sizeof(vhash_t));
+		Var_seg.vidhash = (vhash_t *) ((char *) Var_seg.vhash + VAR_HASHMOD * sizeof(vhash_t));
+		Var_seg.vlist = (struct Ventry *) ((char *) Var_seg.vidhash + VAR_HASHMOD * sizeof(vhash_t));
                 Var_seg.Nvars = Var_seg.dptr->vs_maxvars;
 
                 /* If we didn't have a semaphore, see if we have a lock file */
@@ -1919,7 +1921,7 @@ MAINFN_TYPE  main(int argc, char **argv)
         double  daemtime = 0.0;
         extern  char    *optarg;
 
-        versionprint(argv, "$Revision: 1.7 $", 0);
+        versionprint(argv, "$Revision: 1,8 $", 0);
 
         while  ((c = getopt(argc, argv, "rdFAD:P:o:nxabB:N:S:Gl:L:X:")) != EOF)
                 switch  (c)  {

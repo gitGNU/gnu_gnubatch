@@ -36,7 +36,7 @@ class OptError(Exception):
     pass
 
 class Btrwopts:
-    """Class fo optoins specific to btrw"""
+    """Class for options specific to btrw"""
 
     def __init__(self):
         self.btrwgeom = QRect(10, 10, 600, 400)

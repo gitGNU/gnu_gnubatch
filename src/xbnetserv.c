@@ -1268,7 +1268,7 @@ MAINFN_TYPE  main(int argc, char **argv)
         struct  sigstruct_name  zign;
 #endif
 
-        versionprint(argv, "$Revision: 1.7 $", 1);
+        versionprint(argv, "$Revision: 1,8 $", 1);
 
         if  ((progname = strrchr(argv[0], '/')))
                 progname++;

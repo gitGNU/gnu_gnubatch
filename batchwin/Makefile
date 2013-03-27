@@ -167,7 +167,7 @@ resources_rc.py:	resources.qrc
 	pyrcc4 -o $@ $?
 
 clean:
-	rm -f ui_*.py *_rc.py
+	rm -f ui_*.py *_rc.py *.pyc
 
 distclean: clean
 	rm -f config.py

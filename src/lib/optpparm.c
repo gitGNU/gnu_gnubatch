@@ -671,12 +671,10 @@ EOPTION(o_queuehost)
                 Out_host = 0L;
                 return  OPTRESULT_ARG_OK;
         }
-        if  (!(Out_host = look_hostname(arg)))  {
+        if  ((Out_host = look_int_hostname(arg)) == -1)  {
                 arg_errnum = $E{Unknown queue host};
                 return  OPTRESULT_ERROR;
         }
-        if  (Out_host == myhostid) /* Not an error - zaps it */
-                Out_host = 0L;
         return  OPTRESULT_ARG_OK;
 }
 

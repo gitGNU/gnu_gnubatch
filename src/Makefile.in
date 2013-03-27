@@ -224,6 +224,7 @@ install: all
 	$(INSTALL) -d -o $(BATCHUSER) -g root -m 755 $(INTBINDIR)
 	$(INSTALL) -d -o $(BATCHUSER) -g root -m 755 $(SPHELPDIR)
 	cd lib;$(MAKE) install prefix="$(prefix)" exec_prefix="$(exec_prefix)"
+	-ldconfig
 	libtool --mode=install $(INSTALL) $(USERMODES) $(USERBINS) $(BINDIR)
 	libtool --mode=install $(INSTALL) $(NOSETMODES) $(NOSETUBINS) $(BINDIR)
 	cd $(BINDIR);for p in $(BTSTARTLNKS); do ln -f gbch-start $$p; done
@@ -246,6 +247,7 @@ install-strip: all
 	$(INSTALL) -d -o $(BATCHUSER) -g root -m 755 $(INTBINDIR)
 	$(INSTALL) -d -o $(BATCHUSER) -g root -m 755 $(SPHELPDIR)
 	cd lib;$(MAKE) install prefix="$(prefix)" exec_prefix="$(exec_prefix)"
+	-ldconfig
 	libtool --mode=install $(INSTALL) -s $(USERMODES) $(USERBINS) $(BINDIR)
 	libtool --mode=install $(INSTALL) -s $(NOSETMODES) $(NOSETUBINS) $(BINDIR)
 	cd $(BINDIR);for p in $(BTSTARTLNKS); do ln -f gbch-start $$p; done

@@ -237,6 +237,11 @@ class uaclient:
         """Finished with socket"""
         self.sockfd.close()
 
+    def closeReopen(self):
+        """Close and reopen socket in case we get confused by incoming data later"""
+        self.sockfd.close()
+        self.sockfd = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+
     def isopen(self):
         """Verify that the socket hasn't been closed"""
         try:
@@ -245,9 +250,9 @@ class uaclient:
         except socket.error:
             return False
 
-    def waitreply(self):
+    def waitreply(self, multiplier = 1.0):
         """Wait for a reply on the socket"""
-        obs = select.select([self.sockfd.fileno()],[],[], btqwopts.Options.udpwaittime/1000.0)
+        obs = select.select([self.sockfd.fileno()],[],[], (btqwopts.Options.udpwaittime/1000.0) * multiplier)
         if len(obs[0]) == 0:
             raise uaclientException("Reply timeout from server", code=TIMEOUTERROR, retryable=False)
 
@@ -359,15 +364,8 @@ class uaclient:
         return string.split(username, '\x00')[0]
 
     def ualogout(self):
-        """Try to log out"""
+        """Try to log out, no reply expected"""
         self.sockfd.sendto(Login_struct.pack(UAL_LOGOUT, '', '', ''), self.hostadd)
-        self.waitreply()
-        indata = self.sockfd.recv(CL_SV_BUFFSIZE)
-        if len(indata) != Login_struct.size:
-            raise uaclientException("Unexpected size logout buffer", length=len(indata), explength=Login_struct.size, retryable=False)
-        ecode, username, pw, mach = Login_struct.unpack(indata)
-        if ecode != UAL_OK:
-            raise uaclientException("Error in logout", code=ecode, retryable=False)
 
     def getbtuser(self):
         """Get user permissions"""

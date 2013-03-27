@@ -116,18 +116,6 @@ def pushwrite(sock, data):
         l -= nb
         data = data[nb:]
 
-def pullin(sock, length):
-    """Read data from socket up to given length"""
-    res = ""
-    while length > 0:
-        buf = sock.read(length)
-        nb = len(buf)
-        if nb <= 0:
-            raise netmsg.msgexception("Error reading on socket from " + str(sock.peerAddress().toString()))
-        length -= nb
-        res += buf
-    return res
-
 class gbclient(QObject):
     """Responsible for managing connection with a server"""
 
@@ -145,6 +133,10 @@ class gbclient(QObject):
         self.socket.readyRead.connect(callw.readready)
         self.socket.disconnected.connect(callw.servdisc)
         self.socket.error.connect(callw.serverror)
+        self.msglength = 4
+        self.pendinglength = 4      # Length of code and length
+        self.pendingcode = 0
+        self.pendingmsg = ""
 
     def __hash__(self):
         return gbnetid.gbnetid.__hash__(self.host)
@@ -182,31 +174,79 @@ class gbclient(QObject):
 
     def readready(self):
         """Process incoming message"""
-        while self.socket.bytesAvailable() > 0:
-            codebytes = pullin(self.socket, 4)
-            (code,length) = struct.unpack('!2H', codebytes)
-            if  length <= 4:
-                raise netmsg.msgexception("Unexpected message length %d" % length)
 
-            # Now we look up the code
-            # If we don't understand it give up
+        # We may get readready called with only half a message available to read
+        # but even if the rest of the message arrives whilst we're looking at it,
+        # we have to read what we can and exit waiting for another call
 
-            if code not in Decodemsg:
-                raise netmsg.msgexception("Unexpected code %d in message" % code)
+        while 1:
 
-            # Get the class we're reading in from the code and the function to apply
-            # Certain message types (currently only jobs with strings)
-            # might require stuff on the end - get from the length being greater
+            # How much we are expecting - might be nothing if nothing there
 
-            msgtype, proc = Decodemsg[code]
-            msg = msgtype()
-            msg.decode_rest(code, length, pullin(self.socket, msgtype.size))
-            if length != msgtype.size+4:
-                # If it's not a job header we don't like it
-                if not isinstance(msg, netmsg.jobhnetmsg):
-                    raise netmsg.msgexception("unexpected message length %d expecting %d" % (length, msgtype.size))
-                msg.decode_strings(pullin(self.socket, length-msgtype.size-4))
-            proc(msg, self)
+            tocome = self.socket.bytesAvailable()
+            if tocome == 0:  return
+            if tocome > self.pendinglength:
+                tocome = self.pendinglength
+
+            # Read what we can
+
+            buf = self.socket.read(tocome)
+            nb = len(buf)
+            if nb <= 0:
+                raise netmsg.msgexception("Error  on socket from " + str(sock.peerAddress().toString()))
+
+            # Add what we've read to the bit we have to read
+
+            self.pendinglength -= nb
+            self.pendingmsg += buf
+            if self.pendinglength > 0: continue     # Expecting more
+
+            # OK got the buffer we are looking for, decide what to do according to pendingcode
+
+            if self.pendingcode == 0:
+
+                # Just getting code and length
+
+                (code, length) = struct.unpack("!2H", self.pendingmsg)
+                if  length <= 4:
+                    raise netmsg.msgexception("Unexpected message length %d" % length)
+
+                # Now we look up the code
+                # If we don't understand it give up
+
+                if code not in Decodemsg:
+                    raise netmsg.msgexception("Unexpected code %d in message" % code)
+
+                self.pendingcode = code
+                self.msglength = length
+                self.pendinglength = length - 4         # Supplied length includes code and length
+                self.pendingmsg = ""
+
+            else:
+                # We've got the message, so decode it
+
+                # Get the class we're reading in from the code and the function to apply
+                # Certain message types (currently only jobs with strings)
+                # might require stuff on the end - get from the length being greater
+
+                msgtype, proc = Decodemsg[self.pendingcode]
+                msg = msgtype()
+                msg.decode_rest(self.pendingcode, self.msglength, self.pendingmsg[0:msgtype.size])
+                if self.msglength != msgtype.size+4:
+                    # If it's not a job header we don't like it
+                    if not isinstance(msg, netmsg.jobhnetmsg):
+                        raise netmsg.msgexception("unexpected message length %d expecting %d" % (self.msglength, msgtype.size))
+                    msg.decode_strings(self.pendingmsg[msgtype.size:])
+
+                # Actually do the business
+
+                proc(msg, self)
+
+                # Reset pointers to expect code/length next time
+
+                self.pendingcode = 0
+                self.pendingmsg = ""
+                self.pendinglength = self.msglength = 4
 
     def ispermitted(self, modestr, perm):
         """See if specified operation is permitted by the given server"""
@@ -224,7 +264,7 @@ class gbclient(QObject):
 
     def serverror(self, error):
         """Note error from server"""
-        if self.state == gbsclient.STATE_NULL: return
+        if self.state == gbclient.STATE_NULL: return
         if self.socket.error() == -1: return
         self.caller.serverdisconn(self)
 

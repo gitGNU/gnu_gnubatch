@@ -150,7 +150,7 @@ static  void    mangline(char **mp)
 
                         dellng++;
 
-                        switch  (perc[2])  {
+                        switch  (perc[1])  {
                         case  'N':
                                 ins = look_host((netid_t) disp_arg[n]);
                                 break;

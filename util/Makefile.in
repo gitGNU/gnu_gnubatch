@@ -36,7 +36,8 @@ YFLAGS		=	-d
 LEX		=	@LEX@
 LEXLIB		=	@LEXLIB@
 RM		=	rm -f
-PROGS		=	gbch-pmenu gbch-hostedit gbch-xhostedit gbch-passwd
+PROGS		=	gbch-pmenu gbch-hostedit gbch-passwd
+XPROGS		=	gbch-xhostedit
 BUILDPROGS	=	helpparse
 BINDIR		=	$(DESTDIR)@bindir@
 SBINDIR		=	$(DESTDIR)@sbindir@
@@ -72,16 +73,19 @@ install:	all
 	$(INSTALL) -d $(SBINDIR)
 	$(INSTALL) -d $(BINDIR)
 	$(INSTALL) $(PROGS) $(SBINDIR)
+	-$(INSTALL) $(XPROGS) $(SBINDIR)
 #	$(INSTALL) shmdump $(BINDIR)
 
 install-strip:	all
 	$(INSTALL) -d $(SBINDIR)
 	$(INSTALL) -d $(BINDIR)
 	$(INSTALL) -s $(PROGS) $(SBINDIR)
+	-$(INSTALL) -s $(XPROGS) $(SBINDIR)
 #	$(INSTALL) -s shmdump $(BINDIR)
 
 clean:
-	$(RM) *.o helpparse $(BUILDPROGS) $(PROGS) shmdump
+	$(RM) *.o helpparse $(BUILDPROGS) $(PROGS) $(XPROGS) shmdump
 
 distclean:	clean
 	$(RM) Makefile
+

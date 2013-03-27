@@ -17,8 +17,8 @@
 
 #include "config.h"
 
-static  char    rcsid1[] = "@(#) $Id: xmbtq.c,v 1.7 2009/02/18 06:51:32 toadwarble Exp $";              /* We use these in the about message */
-static  char    rcsid2[] = "@(#) $Revision: 1.7 $";
+static  char    rcsid1[] = "@(#) $Id: xmbtq.c,v 1,8 2009/02/18 06:51:32 toadwarble Exp $";              /* We use these in the about message */
+static  char    rcsid2[] = "@(#) $Revision: 1,8 $";
 
 #include <stdio.h>
 #include <sys/types.h>
@@ -1002,7 +1002,7 @@ MAINFN_TYPE  main(int argc, char **argv)
         int_ugid_t      chk_uid;
 #endif
 
-        versionprint(argv, "$Revision: 1.7 $", 0);
+        versionprint(argv, "$Revision: 1,8 $", 0);
 
         if  ((progname = strrchr(argv[0], '/')))
                 progname++;

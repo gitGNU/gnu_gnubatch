@@ -49,7 +49,6 @@ extern  USHORT          lportnum,               /* These are all htons-ified */
 
 extern  int             Netsync_req;
 extern  PIDTYPE         Netm_pid;
-extern  netid_t         myhostid;
 extern  slotno_t        machname_slot;/* Slot number of "machine name" variable */
 
 extern  unsigned        lumpsize, lumpwait;

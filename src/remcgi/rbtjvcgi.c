@@ -90,7 +90,7 @@ MAINFN_TYPE  main(int argc, char **argv)
         char    *realuname, **newargs;
         int_ugid_t      chku;
 
-        versionprint(argv, "$Revision: 1.7 $", 0);
+        versionprint(argv, "$Revision: 1,8 $", 0);
 
         if  ((progname = strrchr(argv[0], '/')))
                 progname++;
