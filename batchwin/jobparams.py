@@ -57,6 +57,14 @@ class Ctitprilldlg(QDialog, ui_titprilldlg.Ui_titprilldlg):
             self.rounddll.setEnabled(False)
             self.roundull.setEnabled(False)
 
+    def init_queues(self, qset, cqueue):
+        """Set up queue combo"""
+        qset.add("")
+        qset.add(cqueue)
+        for q in qset:
+            self.queue.addItem(q)
+        self.queue.lineEdit().setText(cqueue)
+
     def init_pri(self, curr, minp, maxp):
         """Initialise priority and set limits"""
         if minp <= maxp:

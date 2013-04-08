@@ -57,6 +57,11 @@
     </column>
     <column>
      <property name="text">
+      <string>Queue</string>
+     </property>
+    </column>
+    <column>
+     <property name="text">
       <string>Title</string>
      </property>
     </column>
@@ -597,6 +602,11 @@ umask, exit code ranges</string>
    </property>
    <property name="toolTip">
     <string>Set the default time and repeat parameters</string>
+   </property>
+  </action>
+  <action name="action_queue_prefix">
+   <property name="text">
+    <string>&amp;Queue prefix</string>
    </property>
   </action>
  </widget>

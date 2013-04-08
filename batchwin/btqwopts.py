@@ -48,6 +48,7 @@ class Btrwopts:
         self.inshell = False
         self.shell = "xterm"
         self.shellarg = "-e"
+        self.qprefixes = []
         self.defjob = None          # Saved job details
         self.recentfiles = None
 
@@ -81,6 +82,12 @@ class Btrwopts:
                 while not gc.isNull():
                     self.cwidths.append(int(xmlutil.getText(gc)))
                     gc = gc.nextSibling()
+            elif tagn == "qprefs":
+                self.qprefixes = []
+                gc = child.firstChild()
+                while not gc.isNull():
+                    self.qprefixes.append(xmlutil.getText(gc))
+                    gc = gc.nextSibling()
             elif tagn == "defjob":
                 self.defjob = btclasses.btjob()
                 self.defjob.load(child)
@@ -109,6 +116,10 @@ class Btrwopts:
             for c in self.cwidths:
                 xmlutil.save_xml_string(doc, cw, "w", str(c))
             node.appendChild(cw)
+        qp = doc.createElement("qprefs")
+        for p in self.qprefixes:
+            xmlutil.save_xml_string(doc, qp, "p", p)
+        node.appendChild(qp)
         if self.defjob:
             self.defjob.save(doc, node, "defjob")
         if self.recentfiles and len(self.recentfiles) != 0:

@@ -465,6 +465,31 @@ class btjob(gbident.gbident):
         self.bj_env = srcj.bj_env
         self.bj_redirs = srcj.bj_redirs
 
+    def queue_title(self):
+        """Split job title field into separate pieces and return pair"""
+        bits = self.bj_title.split(':', 1)
+        if len(bits) == 2: return bits
+        return ('', bits[0])
+
+    def queueof(self):
+        """Get the queue name of the job"""
+        return self.queue_title()[0]
+
+    def titleof(self, dispq = ""):
+        """Return the title of the job stripping off the queue name if it matches the arg"""
+        if len(dispq) == 0:
+            return self.bj_title
+        q, tit = self.queue_title()
+        if len(q) == 0 or q == dispq: return tit
+        return self.bj_title
+
+    def set_title(self, qnam, titnam):
+        """Set title from queue name and title"""
+        if len(qnam) == 0:
+            self.bj_title = titnam
+        else:
+            self.bj_title = qnam + ':' + titnam
+
     def load(self, node):
         """Load job from XML DOM"""
         child = node.firstChild()

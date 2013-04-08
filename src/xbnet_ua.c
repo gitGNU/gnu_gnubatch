@@ -1563,22 +1563,25 @@ unsigned  process_alarm()
         for  (cnt = 0;  cnt < NETHASHMOD;  cnt++)  {
                 struct  udp_conn        **hpp, *hp;
 
+            restartch:
+
+            	/* Have to restart chain at the beginning as freeing hp below clobbers pointer */
+
                 hpp = &conn_hash[cnt];
 
                 while  ((hp = *hpp))  {
                         long  tdiff = (long) (hp->lastop + timeouts) - now;
                         if  (tdiff <= 0)  {
+                        	/* Take off chain and free stuff */
                                 *hpp = hp->next;
-                                hpp = &hp->next;
                                 free(hp->username);
                                 free(hp->groupname);
                                 free((char *) hp);
+                                goto  restartch;
                         }
-                        else  {
-                                if  (mintime == 0 || mintime > (unsigned) tdiff)
-                                        mintime = (unsigned) tdiff;
-                                hpp = &hp->next;
-                        }
+                        if  (mintime == 0 || mintime > (unsigned) tdiff)
+                        	mintime = (unsigned) tdiff;
+                        hpp = &hp->next;
                 }
         }
 

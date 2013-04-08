@@ -57,12 +57,13 @@ import ctimedlgs
 
 DIR_COLUMN = 0
 FILE_COLUMN = 1
-TITLE_COLUMN = 2
-CI_COLUMN = 3
-HAS_COLUMN = 4
-RUNC_COLUMN = 5
-SUBM_COLUMN = 6
-CH_COLUMN = 7
+QUEUE_COLUMN = 2
+TITLE_COLUMN = 3
+CI_COLUMN = 4
+HAS_COLUMN = 5
+RUNC_COLUMN = 6
+SUBM_COLUMN = 7
+CH_COLUMN = 8
 
 locale.setlocale(locale.LC_ALL, os.getenv('LANG', 'C'))
 
@@ -320,8 +321,10 @@ Generally ignore errors"""
     def getservperms(self):
         """Get perms structure for server"""
         if self.servperms is not None: return self.servperms
-        self.servperms = serv = self.getprefserv()
-        if serv is not None: return serv.perms
+        serv = self.getprefserv()
+        if serv is not None:
+            self.servperms = serv.perms
+            return serv.perms
         return None
 
     def listvars_perm(self, perm):
@@ -396,7 +399,9 @@ Generally ignore errors"""
         else:
             self.setup_stringbox(rownum, DIR_COLUMN, "")
             self.setup_stringbox(rownum, FILE_COLUMN, "")
-        self.setup_stringbox(rownum, TITLE_COLUMN, job.bj_title)
+        qname, tit = job.queue_title()
+        self.setup_stringbox(rownum, QUEUE_COLUMN, qname)
+        self.setup_stringbox(rownum, TITLE_COLUMN, tit)
         self.setup_stringbox(rownum, CI_COLUMN, job.bj_cmdinterp)
         st = "Run"
         if job.bj_progress == btclasses.btjob.BJP_CANCELLED: st = "Canc"
@@ -542,7 +547,7 @@ Generally ignore errors"""
                      continue
             bwo.verbose = dlg.verbose.isChecked()
             bwo.useexted = ue
-            bwo.inshell = sh
+            bwo.inshell = ish
             newh = str(dlg.defserver.currentText())
             if bwo.prefhost is None:
                 bwo.prefhost = newh
@@ -563,7 +568,7 @@ Generally ignore errors"""
             QMessageBox.warning(self, "No script", "Job does not currently have a script to view")
             return
         dlg = Cjobview(self)
-        dlg.jobdescr.setText("Job")
+        dlg.jobdescr.setText("Job " + cjob.bj_title + " c/i " + cjob.bj_cmdinterp)
         dlg.jobtext.appendPlainText(cjob.script)
         dlg.jobtext.moveCursor(QTextCursor.Start) # So find finds from beginning
         dlg.show()
@@ -595,7 +600,7 @@ Generally ignore errors"""
         else:
             # Use Qt dialog to edit it
             dlg = Cjobedit(self)
-            dlg.jobdescr.setText("Job")
+            dlg.jobdescr.setText("Job " + cjob.bj_title + " c/i " + cjob.bj_cmdinterp)
             if cjob.script is not None:
                 dlg.jobtext.appendPlainText(cjob.script)
             dlg.jobtext.moveCursor(QTextCursor.Start)
@@ -633,6 +638,12 @@ Generally ignore errors"""
             self.fillrow(cjob)
             self.updateUI()
 
+    def getqueues(self):
+        """Get a list of the current queues and ones we've ever encountered"""
+        qset = set(btqwopts.Options.btrwopts.qprefixes)
+        qset |= set([j.queueof() for j in self.jobs])
+        return qset
+
     def on_action_def_titprill_triggered(self, checked = None):
         if checked is None: return
         cjob = self.getdefaultjob()
@@ -645,10 +656,12 @@ Generally ignore errors"""
         dlg.init_cmdints(self.cilist, cjob.bj_cmdinterp, (perms.btu_priv & btuser.btuser.BTM_SPCREATE) != 0)
         dlg.init_pri(cjob.bj_pri, perms.btu_minp, perms.btu_maxp)
         dlg.edjob.setText("Defaults")
-        dlg.title.setText(cjob.bj_title)
+        qnam, tit = cjob.queue_title()
+        dlg.init_queues(self.getqueues(), qnam)
+        dlg.title.setText(tit)
         dlg.llev.setValue(cjob.bj_ll)
         if dlg.exec_():
-            cjob.bj_title = str(dlg.title.text())
+            cjob.set_title(str(dlg.queue.lineEdit().text()), str(dlg.title.text()))
             cjob.bj_pri = dlg.priority.value()
             cjob.bj_ll = dlg.llev.value()
             cjob.bj_cmdinterp = str(dlg.cmdint.currentText())
@@ -665,11 +678,13 @@ Generally ignore errors"""
         dlg.init_cmdints(self.cilist, cjob.bj_cmdinterp, (perms.btu_priv & btuser.btuser.BTM_SPCREATE) != 0)
         dlg.init_pri(cjob.bj_pri, perms.btu_minp, perms.btu_maxp)
         dlg.edjob.setText(cjob.jobname())
-        dlg.title.setText(cjob.bj_title)
+        qnam, tit = cjob.queue_title()
+        dlg.init_queues(self.getqueues(), qnam)
+        dlg.title.setText(tit)
         pri = cjob.bj_pri
         dlg.llev.setValue(cjob.bj_ll)
         if dlg.exec_():
-            cjob.bj_title = str(dlg.title.text())
+            cjob.set_title(str(dlg.queue.lineEdit().text()), str(dlg.title.text()))
             cjob.bj_pri = dlg.priority.value()
             cjob.bj_ll = dlg.llev.value()
             cjob.bj_cmdinterp = str(dlg.cmdint.currentText())
@@ -1009,6 +1024,7 @@ Generally ignore errors"""
         if not self.oktoclose(): return
         btqwopts.Options.btrwopts.btrwgeom = self.geometry()
         btqwopts.Options.btrwopts.cwidths = self.get_cwidths()
+        btqwopts.Options.btrwopts.qprefixes = list(self.getqueues())
         btqwopts.save_options(self.get_recentfiles())
         QApplication.exit(0)
 

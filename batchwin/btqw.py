@@ -924,12 +924,14 @@ This might make a previously invisible job visible or vice versa"""
         dlg.init_cmdints(self.cilist, cjob.bj_cmdinterp, (uperm.btu_priv & btuser.btuser.BTM_SPCREATE) != 0)
         dlg.init_pri(cjob.bj_pri, uperm.btu_minp, uperm.btu_maxp)
         dlg.edjob.setText(jobmodel.fmt_jobno(cjob, self))
-        dlg.title.setText(cjob.bj_title)
+        qnam, tit = cjob.queue_title()
+        dlg.init_queues(set(globlists.get_queue_names()), qnam)
+        dlg.title.setText(tit)
         pri = cjob.bj_pri
         dlg.llev.setValue(cjob.bj_ll)
         if dlg.exec_():
             njob = copy.deepcopy(cjob)
-            njob.bj_title = str(dlg.title.text())
+            njob.set_title(str(dlg.queue.lineEdit().text()), str(dlg.title.text()))
             njob.bj_pri = dlg.priority.value()
             njob.bj_ll = dlg.llev.value()
             njob.bj_cmdinterp = str(dlg.cmdint.currentText())
