@@ -4528,23 +4528,12 @@ will always take effect in this directory unless overridden
 on the command line, current directory or environment?
 Your home directory is %s"
 
-P,H{Save in current home directory} ++
-"Save in home (also current) directory? ",
-"Do you want to save them in your home directory which is
-is also your current directory?
-(i.e. %s)"
-
-P,H{Save format codes} ++
+P,H{Save format codes} = 754
 "Save format codes?",
 "Do you want to save the format field codes just set to
 recover them on entry?"
 
-P,H{Sure you want to overwrite} ++
-"Overwrite existing file?",
-"Are you sure that you want to overwrite the existing file
-%s"
-
-P,H{btq fmt field width} ++
+P,H{btq fmt field width} = 756
 "Width of field",
 "This is the maximum width of the field"
 
@@ -4558,11 +4547,7 @@ P,H{btq fmt sep val} ++
 "This is the field to generate the separator with. Enter nothing
 to just give a single space."
 
-P,H{btq fmt what file} ++
-"What file: ",
-"What file name would you like to save the new message file in."
-
-E{Screen opts unknown command} ++
+E{Screen opts unknown command} = 760
 "Unknown command - setting screen options"
 
 [
@@ -4909,11 +4894,7 @@ to save in."
 H{xmbtq sel file dialog} ++
 "Please use this dialog to specify the file you want to submit."
 
-H{xmbtq save help dialog} ++
-"Please use this dialog to save the new help file
-containing the new screen formats."
-
-H{xmbtr options dialog help} ++
+H{xmbtr options dialog help} = 542
 "Use this dialog to select your chosen editor, and whether
 you need or want to invoke it in an ""xterm""."
 
@@ -4936,7 +4917,7 @@ H{xmbtr select dir dialog help} ++
 H{xmbtr select queue dialog help} ++
 "Use this to select the queue, user, group names and verbose names."
 
-P,H{xmbtq suspicious path name} = ROUND(@, 50)
+P,H{xmbtq suspicious path name} = 550
 "Suspicious path name - are you sure?",
 "The path name `%t' you have given for the command
 interpreter '%s' does not look like an executable
@@ -4963,12 +4944,7 @@ P,H{xmbtq confirm delete log file} ++
 "Are you sure that you want to clear the log file.",
 "(I just thought I'd ask as it will go for good)."
 
-P,H{xmbtq confirm overwrite} ++
-"Are you sure you want to overfile this?",
-"Are you sure that you want to overwrite %s
-with a new file?"
-
-P,H{Confirm write options} ++
+P,H{Confirm write options} = 556
 "Write options to file",
 "This will write your currently-selected options
 to a resources file ~/XI for selection next time."
@@ -5457,36 +5433,7 @@ E,H{xmbtq var macro exit code} ++
 "Your variable macro failed, giving an exit code
 of %d0. I don't know what this means!"
 
-E,H{xmbtq help file not regular} ++
-"Your proposed saved help file is not a regular file",
-"You are trying to save to a directory or something."
-
-E,H{xmbtq help file would overwrite} ++
-"Your proposed saved help file would overwrite the current one.",
-"You are trying to write to your current message file. Please
-use a new one."
-
-E,H{xmbtq cannot write help file} ++
-"Cannot open %s for writing.",
-"I cannot write to %s to create the file."
-
-E,H{xmbtq cannot create help file} ++
-"Cannot create %s",
-"I cannot create %s to write the new file."
-
-E,H{xmbtq cannot open appdefaults} ++
-"Trouble opening application defaults file",
-"I am trying to open your ""application defaults"" file to
-create you a new copy in your home directory but I cannot.
-This is strange!"
-
-E,H{xmbtq cannot create app resource} ++
-"Trouble creating application resource file",
-"I am trying to write to your home directory to create
-a new application resource file, but I cannot write in
-that directory. (Are you running under ""su""?)"
-
-E,H{xmbtr cannot fork for editor} ++
+E,H{xmbtr cannot fork for editor} = 302
 "Cannot fork",
 "Sorry, but I cannot fork to create your editor process."
 

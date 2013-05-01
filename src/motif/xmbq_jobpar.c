@@ -380,7 +380,7 @@ static Widget  CreateVselDlg(Widget formw, const vhash_t existind, int writevars
 
         if  (existind >= 0)  {
                 BtvarRef        vp = &Var_seg.vlist[existind].Vent;
-                XmTextSetString(workw[WORKW_JVARNAME], (char *) host_prefix_str(vp->var_id.hostid, vp->var_name));
+                XmTextSetString(workw[WORKW_JVARNAME], (char *) VAR_NAME(vp));
         }
         return  workw[WORKW_JVARNAME];
 }
@@ -2013,7 +2013,7 @@ static void  endjunqueue(Widget w, int data)
                 *ap++ = (arg0 = strrchr(udprog, '/'))? arg0 + 1: udprog;
                 if  (copyonly)
                         *ap++ = "-n";
-                *ap++ = host_prefix_long(cjob->h.bj_hostid, cjob->h.bj_job);
+                *ap++ = JOB_NUMBER(cjob);
                 *ap++ = Last_unqueue_dir;
                 *ap++ = cftxt;
                 *ap++ = jftxt;
@@ -2136,7 +2136,7 @@ static void  endjfreeze(Widget w, int data)
                         arg0 = udprog;
                 else
                         arg0++;
-                execl(udprog, arg0, abuf, ismc? envprocess("$HOME"): Curr_pwd, host_prefix_long(cjob->h.bj_hostid, cjob->h.bj_job), (char *) 0);
+                execl(udprog, arg0, abuf, ismc? "~": Curr_pwd, JOB_NUMBER(cjob), (char *) 0);
                 exit(E_SETUP);
         }
         XtDestroyWidget(GetTopShell(w));

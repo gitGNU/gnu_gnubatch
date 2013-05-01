@@ -15,7 +15,8 @@
    You should have received a copy of the GNU General Public License
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
-void    close_optfile();
-char    *rdoptfile(const char *, const char *);
-FILE    *open_cfile(const char *, const char *);
-FILE    *open_icfile();
+extern	void    close_optfile();
+extern	char    *rdoptfile(const char *, const char *);
+extern	FILE    *open_cfile(const char *, const char *);
+extern	FILE    *open_icfile();
+extern char    *optkeyword(const char *);

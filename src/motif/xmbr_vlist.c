@@ -159,7 +159,7 @@ static char **gen_vars(int isexport, unsigned mode)
                         if  ((result = (char**) realloc((char *) result, maxr * sizeof(char *))) == (char **) 0)
                                 ABORT_NOMEM;
                 }
-                result[countr++] = stracpy(host_prefix_str(vp->var_id.hostid, vp->var_name));
+                result[countr++] = stracpy(VAR_NAME(vp));
         }
 
         if  (countr == 0)  {

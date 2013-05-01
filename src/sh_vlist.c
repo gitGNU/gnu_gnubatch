@@ -71,9 +71,7 @@ BtvarRef        Clsvp;
 static  char    vfilename[] = VFILE;
 static  int     vfilefd;
 
-#ifdef  NETWORK_VERSION
 slotno_t        machname_slot;  /* Slot number of "machine name" variable */
-#endif
 
 #define visible(sr, md)         shmpermitted(sr, md, BTM_SHOW)
 
@@ -312,13 +310,10 @@ static void  initsvs(const LONG initll)
 
         initsvar("LOGJOBS", "Job Log", $P{Sysvarname log jobs}, VT_LOGJOBS, VF_STRINGONLY, &mod, &con);
         initsvar("LOGVARS", "Var Log", $P{Sysvarname log vars}, VT_LOGVARS, VF_STRINGONLY, &mod, &con);
-#ifdef  NETWORK_VERSION
         if  (Network_ok)
                 initsvmachine();
-#endif
 }
 
-#ifdef  NETWORK_VERSION
 void  initsvmachine()
 {
         int     nn;
@@ -365,7 +360,6 @@ void  initsvmachine()
         strncpy(con.con_un.con_string, get_myhostname(), BTC_VALUE);
         machname_slot = initsvar("MACHINE", "Host name", $P{Sysvarname machine}, VT_MACHNAME, VF_STRINGONLY, &mod, &con);
 }
-#endif
 
 /* Set up pointer to `Current_load' */
 
@@ -508,12 +502,8 @@ void  creatvfile(LONG vsize, const LONG initll)
         while  (read(vfilefd, (char *) &inv, sizeof(inv)) == sizeof(inv))  {
                 if  (inv.var_type)
                         setsysval(&inv);
-#ifdef  NETWORK_VERSION
                 if  (!Network_ok)
                         inv.var_flags &= ~(VF_EXPORT|VF_CLUSTER);
-#else
-                inv.var_flags &= ~(VF_EXPORT|VF_CLUSTER);
-#endif
                 addhash(&inv);
         }
 
@@ -725,10 +715,8 @@ int  growvseg()
         msync(newseg, Var_seg.inf.segsize, MS_ASYNC|MS_INVALIDATE);
 #endif
         tellchild(O_VREMAP, 0L);
-#ifdef  NETWORK_VERSION
         if  (Netm_pid)
                 kill(Netm_pid, NETSHUTSIG);
-#endif
         qchanges++;
         vqpend++;
         return  1;              /* Victory */
@@ -883,7 +871,7 @@ vhash_t  findvar(const vident *id)
                 struct  Ventry  *fp = &Var_seg.vlist[hp];
                 vident  *vidp = &fp->Vent.var_id;
                 if  (vidp->hostid == id->hostid  &&  vidp->slotno == id->slotno)
-                                return  hp;
+                        return  hp;
                 hp = fp->Vidnext;
         }
         return  -1;
@@ -897,8 +885,6 @@ vhash_t  lookvar(Vref *vrr)
 {
         vhash_t hp;
         struct  Ventry  *fp;
-
-#ifdef  NETWORK_VERSION
 
         /* My host id is saved in Vrefs as 0 */
 
@@ -932,7 +918,6 @@ vhash_t  lookvar(Vref *vrr)
                 return  addnamehash(&skelvar);
         }
         else
-#endif
                 for  (hp = Var_seg.vhash[calchash(vrr->sv_name)];  hp >= 0;  hp = fp->Vnext)  {
                         fp = &Var_seg.vlist[hp];
                         if  (strcmp(fp->Vent.var_name, vrr->sv_name) == 0)  {
@@ -943,7 +928,6 @@ vhash_t  lookvar(Vref *vrr)
         return  -1L;
 }
 
-#ifdef  NETWORK_VERSION
 int  is_skeleton(const vhash_t ind)
 {
         BtvarRef        vp = &Var_seg.vlist[ind].Vent;
@@ -967,7 +951,6 @@ static int  clustwouldclash(BtvarRef vp)
         }
         return  0;
 }
-#endif
 
 /* Return pointer to variable specified by job in similar way.  */
 
@@ -1033,15 +1016,12 @@ int  var_create(ShreqRef sr, BtvarRef vp)
         vp->var_sequence = 1;
         vp->var_c_time = time(&vp->var_m_time);
         vp->var_type = 0;
-#ifdef  NETWORK_VERSION
         if  (Network_ok)
                 vp->var_flags &= VF_EXPORT|VF_CLUSTER;  /* Everything should be 0 except...
                                                            System vars are the owning machine's problem */
         else
                 vp->var_flags = 0;
-#else
-        vp->var_flags = 0;
-#endif
+
         /* Skip checks if variable comes from another machine - that
            is its problem not mine.  */
 
@@ -1070,12 +1050,9 @@ int  var_create(ShreqRef sr, BtvarRef vp)
            first such variable will be recognised.  */
 
         if  ((ind = findvarbyname(sr, vp, &ret)) >= 0)  {
-#ifdef  NETWORK_VERSION
                 BtvarRef  orig = &Var_seg.vlist[ind].Vent;
                 if  (vp->var_id.hostid == 0 || !(orig->var_flags & VF_SKELETON))
-#endif
                         return  V_EXISTS;
-#ifdef  NETWORK_VERSION
                 lockvars();
                 *orig = *vp;
                 unlockvars();
@@ -1086,7 +1063,6 @@ int  var_create(ShreqRef sr, BtvarRef vp)
                 qchanges++;
                 vqpend++;
                 return  V_OK;
-#endif
         }
         else  if  ((vp->var_flags & (VF_EXPORT|VF_CLUSTER)) == VF_CLUSTER)
                 ret = V_NOTEXPORT;
@@ -1100,15 +1076,11 @@ int  var_create(ShreqRef sr, BtvarRef vp)
                 else
                         ret = V_OK;
                 unlockvars();
-#ifdef  NETWORK_VERSION
                 if  (vp->var_id.hostid == 0)  {
                         if  (vp->var_flags & VF_EXPORT)
                                 var_broadcast(vp, V_CREATE);
-#endif
                         logvar(vp, $S{log code create}, $S{log source manual}, 0L, sr->uuid, sr->ugid, (BtjobRef) 0);
-#ifdef  NETWORK_VERSION
                 }
-#endif
         }
 
         return  ret;
@@ -1130,15 +1102,11 @@ int  var_delete(ShreqRef sr, BtvarRef vp)
                         ret = V_NOPERM;
                 else  if  (reqdforjobs(vind, 0))
                         ret = V_INUSE;
-#ifdef  NETWORK_VERSION
                 else  if  (targ->var_id.hostid)
                         ret = V_DELREMOTE;
-#endif
                 else  {
-#ifdef  NETWORK_VERSION
                         if  (targ->var_flags & VF_EXPORT)
                                 var_broadcast(targ, V_DELETED);
-#endif
                         logvar(targ, $S{log code delete}, $S{log source manual}, 0L, sr->uuid, sr->ugid, (BtjobRef) 0);
                         lockvars();
                         delhash(targ);
@@ -1149,7 +1117,6 @@ int  var_delete(ShreqRef sr, BtvarRef vp)
         return  ret;
 }
 
-#ifdef  NETWORK_VERSION
 /* Reflect above at remote end */
 
 void  var_remdelete(BtvarRef vp)
@@ -1220,8 +1187,6 @@ void  net_vclear(const netid_t hostid)
         }
         unlockvars();
 }
-#endif
-
 /* Assign a new value.  */
 
 int  var_assign(ShreqRef sr, BtvarRef vp)
@@ -1232,11 +1197,9 @@ int  var_assign(ShreqRef sr, BtvarRef vp)
 
         if  ((vind = findvarbyname(sr, vp, &ret)) >= 0)  {
                 targ = &Var_seg.vlist[vind].Vent;
-#ifdef  NETWORK_VERSION
                 /* Remote assigns are the remote machine's problem */
                 if  (targ->var_id.hostid)
                         return  var_sendupdate(targ, vp, sr);
-#endif
 
                 if  (!shmpermitted(sr, &targ->var_mode, BTM_WRITE))  {
                         ret = V_NOPERM;
@@ -1283,10 +1246,8 @@ int  var_assign(ShreqRef sr, BtvarRef vp)
                 targ->var_m_time = time((time_t *) 0);
                 targ->var_sequence++;
                 unlockvars();
-#ifdef  NETWORK_VERSION
                 if  (targ->var_flags & VF_EXPORT)
                         var_broadcast(targ, V_ASSIGNED);
-#endif
                 Var_seg.dptr->vs_serial++;
                 qchanges++;
                 vqpend++;
@@ -1297,7 +1258,6 @@ int  var_assign(ShreqRef sr, BtvarRef vp)
         return  ret;
 }
 
-#ifdef  NETWORK_VERSION
 /* Receive broadcast of var assignment.  */
 
 void  var_remassign(BtvarRef vp)
@@ -1326,7 +1286,6 @@ void  var_remassign(BtvarRef vp)
                 }
         }
 }
-#endif
 
 int  var_chown(ShreqRef sr, BtvarRef vp)
 {
@@ -1344,10 +1303,8 @@ int  var_chown(ShreqRef sr, BtvarRef vp)
         if  (sr->hostid == 0  &&  targ->var_sequence > vp->var_sequence)
                 return  V_SYNC;
 
-#ifdef  NETWORK_VERSION
         if  (targ->var_id.hostid)
                 return  var_sendugupdate(targ, sr);
-#endif
 
         /* Are we giving it away?  */
 
@@ -1388,10 +1345,8 @@ int  var_chown(ShreqRef sr, BtvarRef vp)
         qchanges++;
         vqpend++;
         logvar(targ, $S{log code chown}, $S{log source manual}, sr->hostid, sr->uuid, sr->ugid, (BtjobRef) 0);
-#ifdef  NETWORK_VERSION
         if  (targ->var_flags & VF_EXPORT)
                 var_broadcast(targ, V_CHMOGED);
-#endif
         return  V_OK;
 }
 
@@ -1407,10 +1362,8 @@ int  var_chgrp(ShreqRef sr, BtvarRef vp)
         if  (sr->hostid == 0  &&  targ->var_sequence > vp->var_sequence)
                 return V_SYNC;
 
-#ifdef  NETWORK_VERSION
         if  (targ->var_id.hostid)
                 return  var_sendugupdate(targ, sr);
-#endif
 
         /* Are we giving it away?  */
 
@@ -1449,15 +1402,12 @@ int  var_chgrp(ShreqRef sr, BtvarRef vp)
         Var_seg.dptr->vs_serial++;
         qchanges++;
         vqpend++;
-#ifdef  NETWORK_VERSION
         if  (targ->var_flags & VF_EXPORT)
                 var_broadcast(targ, V_CHMOGED);
-#endif
         logvar(targ, $S{log code chgrp}, $S{log source manual}, sr->hostid, sr->uuid, sr->ugid, (BtjobRef) 0);
         return  V_OK;
 }
 
-#ifdef  NETWORK_VERSION
 /* Acknowledge change of owner/group/mode on remote variable.
    We may have to delete it if it now clashes */
 
@@ -1491,7 +1441,6 @@ void  var_remchmog(BtvarRef vp)
         qchanges++;
         vqpend++;
 }
-#endif
 
 int  var_chmod(ShreqRef sr, BtvarRef vp)
 {
@@ -1503,10 +1452,8 @@ int  var_chmod(ShreqRef sr, BtvarRef vp)
                 targ = &Var_seg.vlist[vind].Vent;
                 if  (sr->hostid == 0  &&  targ->var_sequence > vp->var_sequence)
                         ret = V_SYNC;
-#ifdef  NETWORK_VERSION
                 else  if  (targ->var_id.hostid)
                         return  var_sendupdate(targ, vp, sr);
-#endif
                 else  if  (!shmpermitted(sr, &targ->var_mode, BTM_WRMODE))
                         ret = V_NOPERM;
                 else  if  (!checkminmode(&vp->var_mode))
@@ -1522,10 +1469,8 @@ int  var_chmod(ShreqRef sr, BtvarRef vp)
                         Var_seg.dptr->vs_serial++;
                         qchanges++;
                         vqpend++;
-#ifdef  NETWORK_VERSION
                         if  (targ->var_flags & VF_EXPORT)
                                 var_broadcast(targ, V_CHMOGED);
-#endif
                         logvar(targ, $S{log code chmod}, $S{log source manual}, sr->hostid, sr->uuid, sr->ugid, (BtjobRef) 0);
                         ret = V_OK;
                 }
@@ -1543,10 +1488,8 @@ int  var_chcomm(ShreqRef sr, BtvarRef vp)
                 targ = &Var_seg.vlist[vind].Vent;
                 if  (sr->hostid == 0  &&  targ->var_sequence > vp->var_sequence)
                         ret = V_SYNC;
-#ifdef  NETWORK_VERSION
                 else  if  (targ->var_id.hostid)
                         return  var_sendupdate(targ, vp, sr);
-#endif
                 else  if  (!shmpermitted(sr, &vp->var_mode, BTM_WRITE))
                         ret = V_NOPERM;
                 else  {
@@ -1557,10 +1500,8 @@ int  var_chcomm(ShreqRef sr, BtvarRef vp)
                         vqpend++;
                         strncpy(targ->var_comment, vp->var_comment, BTV_COMMENT);
                         targ->var_comment[BTV_COMMENT] = '\0';
-#ifdef  NETWORK_VERSION
                         if  (targ->var_flags & VF_EXPORT)
                                 var_broadcast(targ, V_ASSIGNED);
-#endif
                         logvar(targ, $S{log code chcomment}, $S{log source manual}, sr->hostid, sr->uuid, sr->ugid, (BtjobRef) 0);
                         ret = V_OK;
                 }
@@ -1598,7 +1539,6 @@ int  var_chflags(ShreqRef sr, BtvarRef vp)
                 return  V_NOPERM;
         if  (((diffs = targ->var_flags ^ vp->var_flags) & (VF_EXPORT|VF_CLUSTER)) == 0) /* No change */
                 return  V_OK;
-#ifdef  NETWORK_VERSION
         if  (!Network_ok)  {
                 if  (!(targ->var_flags & (VF_EXPORT|VF_CLUSTER)))
                         return  V_OK;
@@ -1653,11 +1593,6 @@ int  var_chflags(ShreqRef sr, BtvarRef vp)
                 targ->var_flags |= VF_EXPORT;
                 var_broadcast(targ, V_CREATE);
         }
-#else  /* Not network version */
-        if  (!(targ->var_flags & (VF_EXPORT|VF_CLUSTER)))
-                return  V_OK;
-        targ->var_flags &= ~(VF_EXPORT|VF_CLUSTER);
-#endif /* Not network version */
 
 vupd:
         targ->var_m_time = time((time_t *) 0);
@@ -1705,10 +1640,8 @@ int  var_rename(ShreqRef sr, BtvarRef vp, char *newname)
                                 addhash(vp);
                                 unlockvars();
                                 logvar(vp, $S{log code rename}, $S{log source manual}, 0, sr->uuid, sr->ugid, (BtjobRef) 0);
-#ifdef  NETWORK_VERSION
                                 if  (targ->var_flags & VF_EXPORT)
                                         var_broadcast(targ, V_RENAMED);
-#endif
                                 jqpend++;       /* Force save of job file which has vars by name in */
                                 ret = V_OK;
                         }
@@ -1717,7 +1650,6 @@ int  var_rename(ShreqRef sr, BtvarRef vp, char *newname)
         return  ret;
 }
 
-#ifdef  NETWORK_VERSION
 vhash_t  myvariable(BtvarRef vp, BtmodeRef jmode, const unsigned perms)
 {
         vhash_t retvh;
@@ -1777,7 +1709,6 @@ void  var_remchname(BtvarRef vp)
         addhash(vp);    /* Restores the ID hash */
         unlockvars();
 }
-#endif
 
 /* Return value of variable if a long.  */
 
@@ -1813,14 +1744,13 @@ int  varcomp(JcondRef cr, BtjobhRef jp)
 
         if  (!Var_seg.vlist[varind].Vused)
                 return  COMPAR_UNDEF;
-#ifdef  NETWORK_VERSION
         if  (vp->var_id.hostid  &&  vp->var_flags & VF_CLUSTER)  {
                 varind = myvariable(vp, &jp->bj_mode, BTM_READ);
                 if  (varind < 0  ||  !Var_seg.vlist[varind].Vused)
                         return  COMPAR_UNDEF;
                 vp = &Var_seg.vlist[varind].Vent;
         }
-#endif
+
         switch  (cp->const_type)  {
         case  CON_LONG:
                 lval = varlvalue(vp);
@@ -1895,9 +1825,7 @@ void  adjust_ll(const LONG amt)
         if  (Clsvp)  {
                 Clsvp->var_value.con_un.con_long += amt;
                 Var_seg.dptr->vs_serial++;
-#ifdef  NETWORK_VERSION
                 if  (Clsvp->var_flags & VF_EXPORT)
                         var_broadcast(Clsvp, V_ASSIGNED);
-#endif
         }
 }

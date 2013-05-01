@@ -108,3 +108,5 @@ extern Widget  CreateGselDialog(Widget, Widget, char *, int, unsigned);
 extern Widget  CreateUselDialog(Widget, Widget, char *, int, unsigned);
 
 extern struct pend_job *job_or_deflt(const int);
+
+#define DEFAULT_EDITOR_NAME     "vi"

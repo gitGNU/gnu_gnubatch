@@ -33,7 +33,7 @@ JFORMAT(fmt_condfull)
                                 bigbuff[lng++] = ',';
                         vp = &Var_seg.vlist[cp->bjc_varind].Vent;
 #ifdef  CHARSPRINTF
-			sprintf(&bigbuff[lng], "%s%s", host_prefix_str(vp->var_id.hostid, vp->var_name), condname[cp->bjc_compar-1]);
+                        sprintf(&bigbuff[lng], "%s%s", VAR_NAME(vp), condname[cp->bjc_compar-1]);
                         cnt = strlen(&bigbuff[lng]);
                         lng += cnt;
                         if  (cp->bjc_value.const_type == CON_STRING)
@@ -46,7 +46,7 @@ JFORMAT(fmt_condfull)
                         cnt = strlen(&bigbuff[lng]);
                         lng += cnt;
 #else
-			lng += sprintf(&bigbuff[lng], "%s%s", host_prefix_str(vp->var_id.hostid, vp->var_name), condname[cp->bjc_compar-1]);
+                        lng += sprintf(&bigbuff[lng], "%s%s", VAR_NAME(vp), condname[cp->bjc_compar-1]);
                         if  (cp->bjc_value.const_type == CON_STRING)
                                 lng += sprintf(&bigbuff[lng],
                                                strchr(cp->bjc_value.con_un.con_string, ' ') ||

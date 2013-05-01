@@ -142,16 +142,31 @@ static  struct  formatdef
         {       0,      0,              NULLCP, NULLCP, 0               }       /* Z */
 };
 
+static  void    get_vartitle_fmt(char **fmtp, const char *kw, const char *dflt, const int fcode)
+{
+        char    *fmt = *fmtp, *nfmt;
+        if  (fmt)
+                return;
+        fmt = helpprmpt(fcode);
+        nfmt = optkeyword(kw);
+        if  (nfmt)  {
+                if (fmt)
+                        free(fmt);
+                fmt = nfmt;
+        }
+        if  (!fmt)
+                fmt = stracpy(dflt);
+        *fmtp = fmt;
+}
+
 char *get_vartitle()
 {
         int     nn, obufl1, obufl2;
         struct  formatdef       *fp;
         char    *cp, *rp, *result, *mp;
 
-        if  (!var1_format  &&  !(var1_format = helpprmpt($P{Default var list fmt 1})))
-                var1_format = stracpy(DEFAULT_FORM1);
-        if  (!var2_format  &&  !(var2_format = helpprmpt($P{Default var list fmt 2})))
-                var2_format = stracpy(DEFAULT_FORM2);
+        get_vartitle_fmt(&var1_format, "BTQVAR1FLD", DEFAULT_FORM1, $P{Default var list fmt 1});
+        get_vartitle_fmt(&var2_format, "BTQVAR2FLD", DEFAULT_FORM2, $P{Default var list fmt 2});
 
         /* Initial pass to discover how much space to allocate */
 
@@ -370,9 +385,7 @@ void  vdisplay()
                 XmStringFree(str2);
         }
 
-        /* Adjust scrolling as requested, either by following var
-           (default), or by keeping the same amount scrolled as
-           we had before (scrkeep).  */
+        /* Adjust scrolling */
 
         if  (newpos >= 0)  {    /* Only gets set if we had one */
                 XmListSelectPos(vwid, newpos*VLINES+1, False);
@@ -512,7 +525,7 @@ static char **gen_vars(int isexport, unsigned mode)
                         if  ((result = (char**) realloc((char *) result, maxr * sizeof(char *))) == (char **) 0)
                                 ABORT_NOMEM;
                 }
-                result[countr++] = stracpy(host_prefix_str(vp->var_id.hostid, vp->var_name));
+                result[countr++] = stracpy(VAR_NAME(vp));
         }
 
         if  (countr == 0)  {
@@ -1010,190 +1023,35 @@ void  cb_setvdisplay(Widget parent, int data)
         CreateActionEndDlg(vd_shell, panew, (XtCallbackProc) endvdisp, $H{xmbtq vlist fmt dialog});
 }
 
-static  char    *f_name, *d_name, ishd;
-extern  char    Confvarname[];
-extern  char    *Helpfile_path;
+static  char    *outformat;
 
 static void  make_confline(FILE *fp, const char *vname)
 {
-        fprintf(fp, "%s=%s\n", vname, f_name);
-}
-
-static void  createnewhelp(FILE *ifl, FILE *ofl)
-{
-        int     ch, ch2, nn, hadj = 0, hadv1 = 0, hadv2 = 0, *wh = (int *) 0;
-        char    *oline = (char *) 0;
-
-        rewind(ifl);
-        while  ((ch = getc(ifl)) != EOF)  {
-
-                /* Ignore lines which don't start with a numeric string.  */
-
-                if  (!isdigit(ch))  {
-                        while  (ch != '\n'  &&  ch != EOF)  {
-                                putc(ch, ofl);
-                                ch = getc(ifl);
-                        }
-                        if  (ch == EOF)
-                                break;
-                        putc(ch, ofl);
-                        continue;
-                }
-
-                /* Read in number, see if interesting */
-
-                nn = 0;
-                do  {
-                        nn = nn * 10 + ch - '0';
-                        ch = getc(ifl);
-                }  while  (isdigit(ch));
-
-                /* Check it interests us */
-
-                if  (toupper(ch) != 'P'  ||  (nn != $P{Default job list format} && nn != $P{Default var list fmt 1} && nn != $P{Default var list fmt 2}))  {
-                        fprintf(ofl, "%d%c", nn, ch);
-                putrest:
-                        while  ((ch = getc(ifl)) != '\n'  &&  ch != EOF)
-                                putc(ch, ofl);
-                        if  (ch == EOF)
-                                break;
-                        putc(ch, ofl);
-                        continue;
-                }
-
-                /* Check terminated by colon */
-
-                ch2 = getc(ifl);
-                if  (ch2 != ':')  {
-                        fprintf(ofl, "%d%c%c", nn, ch, ch2);
-                        goto  putrest;
-                }
-
-                /* Discard rest of line */
-
-                while  ((ch = getc(ifl)) != '\n'  &&  ch != EOF)
-                        ;
-
-                /* Splurge out replacement string */
-
-                switch  (nn)  {
-                case  $P{Default job list format}:
-                        oline = job_format;
-                        wh = &hadj;
-                        break;
-                case  $P{Default var list fmt 1}:
-                        oline = var1_format;
-                        wh = &hadv1;
-                        break;
-                case  $P{Default var list fmt 2}:
-                        oline = var2_format;
-                        wh = &hadv2;
-                        break;
-                }
-                if  (*wh)
-                        continue;
-                fprintf(ofl, "%dP:%s\n", nn, oline);
-                *wh = 1;
-        }
-        if  (hadj + hadv1 + hadv2 != 3)  {
-                time_t  now = time((time_t *) 0);
-                struct  tm  *tp = localtime(&now);
-                fprintf(ofl, "\nNew formats %.2d/%.2d/%.2d %.2d:%.2d:%.2d\n\n",
-                               tp->tm_year % 100, tp->tm_mon+1, tp->tm_mday,
-                               tp->tm_hour, tp->tm_min, tp->tm_sec);
-                if  (!hadj)
-                        fprintf(ofl, "%dP:%s\n", $P{Default job list format}, job_format);
-                if  (!hadv1)
-                        fprintf(ofl, "%dP:%s\n", $P{Default var list fmt 1}, var1_format);
-                if  (!hadv2)
-                        fprintf(ofl, "%dP:%s\n", $P{Default var list fmt 2}, var2_format);
-        }
-}
-
-static void  endmsaved(Widget w, int data, XmFileSelectionBoxCallbackStruct *cbs)
-{
-        if  (data)  {           /* OK selected */
-                int     ret;
-                FILE    *ofp;
-                char    *resname;
-                struct  stat    sbuf1, sbuf2;
-
-                if  (!XmStringGetLtoR(cbs->value, XmSTRING_DEFAULT_CHARSET, &f_name))
-                        return;
-
-                disp_str = f_name;
-                if  (stat(f_name, &sbuf1) >= 0)  { /* File must exist */
-                        if  ((sbuf1.st_mode & S_IFMT) != S_IFREG)  {
-                                doerror(w, $EH{xmbtq help file not regular});
-                                XtFree(f_name);
-                                return;
-                        }
-
-                        /* Do not overwrite current help file */
-
-                        fstat(fileno(Cfile), &sbuf2);
-                        if  (sbuf1.st_dev == sbuf2.st_dev && sbuf1.st_ino == sbuf2.st_ino)  {
-                                doerror(w, $EH{xmbtq help file would overwrite});
-                                XtFree(f_name);
-                                return;
-                        }
-
-                        if  (!Confirm(w, $PH{xmbtq confirm overwrite}))  {
-                                XtFree(f_name);
-                                return;
-                        }
-                        SWAP_TO(Realuid);
-                        ofp = fopen(f_name, "w+");
-                        SWAP_TO(Daemuid);
-                        if  (!ofp)  {
-                                doerror(w, $EH{xmbtq cannot write help file});
-                                XtFree(f_name);
-                                return;
-                        }
-                }
-                else  {
-                        SWAP_TO(Realuid);
-                        ofp = fopen(f_name, "w+");
-                        SWAP_TO(Daemuid);
-                        if  (!ofp)  {
-                                doerror(w, $EH{xmbtq cannot create help file});
-                                XtFree(f_name);
-                                return;
-                        }
-                }
-                createnewhelp(Cfile, ofp);
-                if  ((ret = proc_save_opts(d_name, Confvarname, make_confline)))  {
-                        doerror(w, ret);
-                        XtFree(f_name);
-                        return;
-                }
-                if  (!(resname = malloc((unsigned) (strlen(d_name) + strlen(f_name) + 2))))
-                        ABORT_NOMEM;
-                sprintf(resname, "%s/%s", d_name, f_name);
-                free(Helpfile_path);
-                XtFree(f_name);
-                Helpfile_path = resname;
-                fclose(Cfile);
-                Cfile = ofp;
-                rewind(Cfile);
-        }
-        if  (ishd)
-                free(d_name);
-        XtDestroyWidget(w);
+        fprintf(fp, "%s=%s\n", vname, outformat);
 }
 
 void  cb_saveformats(Widget parent, const int ish)
 {
-        Widget  msaved;
-        if  ((ishd = (char) ish))
-                d_name = envprocess("$HOME");
-        else
-                d_name = Curr_pwd;
-        chdir(d_name);
-        msaved = XmCreateFileSelectionDialog(jwid, "msave", NULL, 0);
-        XtAddCallback(msaved, XmNcancelCallback, (XtCallbackProc) endmsaved, (XtPointer) 0);
-        XtAddCallback(msaved, XmNokCallback, (XtCallbackProc) endmsaved, (XtPointer) 1);
-        XtAddCallback(msaved, XmNhelpCallback, (XtCallbackProc) dohelp, (XtPointer) $H{xmbtq save help dialog});
-        chdir(spdir);
-        XtManageChild(msaved);
+        char    *dir = Curr_pwd;
+        int     ret;
+
+        disp_str = dir;
+        if  (ish)  {
+                dir = (char *) 0;
+                disp_str = "(Home)";
+        }
+
+        outformat = job_format;
+        if  ((ret = proc_save_opts(dir, "BTQJOBFLD", make_confline)) != 0)  {
+                doerror(parent, ret);
+                return;
+        }
+
+        outformat = var1_format;
+        if  ((ret = proc_save_opts(dir, "BTQVAR1FLD", make_confline)) != 0)
+                doerror(parent, ret);
+
+        outformat = var2_format;
+        if  ((ret = proc_save_opts(dir, "BTQVAR2FLD", make_confline)) != 0)
+                 doerror(parent, ret);
 }

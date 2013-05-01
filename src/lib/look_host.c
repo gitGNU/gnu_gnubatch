@@ -23,7 +23,6 @@ static  char    Filename[] = __FILE__;
 
 netid_t myhostid;               /* Define this here even for non-network version */
 
-#ifdef  NETWORK_VERSION
 #include <ctype.h>
 #include <sys/types.h>
 #include "incl_unix.h"
@@ -599,11 +598,14 @@ char *look_hostid(const netid_t netid)
         return  (char *) 0;
 }
 
-char *look_host(const netid_t netid)
+char    *look_host(const netid_t netid)
 {
         char    *res = look_hostid(netid);
-
-        return  res? res: "Unknown";
+        struct  in_addr  addr;
+        if  (res)
+                return  res;
+        addr.s_addr = netid;
+        return  inet_ntoa(addr);
 }
 
 /* Variation to take account of internal convention where we use zero for "me" */
@@ -738,27 +740,3 @@ netid_t int2ext_netid_t(const netid_t res)
         return  res;
 }
 
-#else
-
-/* Dummy version to keep linker happy */
-
-void  end_hostfile()
-{
-        return;
-}
-
-void  hash_hostfile()
-{
-        return;
-}
-
-char *look_host(const netid_t netid)
-{
-        return  "Unknown";
-}
-
-netid_t  look_hostname(const char *name)
-{
-        return  0L;
-}
-#endif

@@ -49,7 +49,7 @@ JFORMAT(fmt_assfull)
                         };
                         vp = &Var_seg.vlist[ap->bja_varind].Vent;
 #ifdef  CHARSPRINTF
-			sprintf(&bigbuff[lng], "%s%s", host_prefix_str(vp->var_id.hostid, vp->var_name), assname[ap->bja_op-1]);
+                        sprintf(&bigbuff[lng], "%s%s", VAR_NAME(vp), assname[ap->bja_op-1]);
                         cnt = strlen(&bigbuff[lng]);
                         lng += cnt;
                         if  (ap->bja_op >= BJA_SEXIT)
@@ -64,7 +64,7 @@ JFORMAT(fmt_assfull)
                         cnt = strlen(&bigbuff[lng]);
                         lng += cnt;
 #else
-			lng += sprintf(&bigbuff[lng], "%s%s", host_prefix_str(vp->var_id.hostid, vp->var_name), assname[ap->bja_op-1]);
+                        lng += sprintf(&bigbuff[lng], "%s%s", VAR_NAME(vp), assname[ap->bja_op-1]);
                         if  (ap->bja_op >= BJA_SEXIT)
                                 lng += strlen(strcpy(&bigbuff[lng], ap->bja_op == BJA_SEXIT? exitcodename: signalname));
                         else  if  (ap->bja_con.const_type == CON_STRING)

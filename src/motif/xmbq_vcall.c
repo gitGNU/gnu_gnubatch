@@ -111,7 +111,7 @@ static Widget  CreateVtitle(Widget formw, BtvarRef vp)
 {
         Widget          titw1, titw2;
         int             lng;
-        const   char    *nbuf = host_prefix_str(vp->var_id.hostid, vp->var_name);
+        const   char    *nbuf = VAR_NAME(vp);
 
         titw1 = XtVaCreateManagedWidget("varnotitle",
                                         xmLabelWidgetClass,     formw,
@@ -981,7 +981,7 @@ static void  vmacroexec(char *str, BtvarRef vp)
                 const  char     *argbuf[3];
                 argbuf[0] = str;
                 if  (vp)  {
-                        argbuf[1] = host_prefix_str(vp->var_id.hostid, vp->var_name);
+                        argbuf[1] = VAR_NAME(vp);
                         argbuf[2] = (const char *) 0;
                 }
                 else

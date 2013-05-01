@@ -27,6 +27,7 @@
 #include "files.h"
 #include "cfile.h"
 #include "ecodes.h"
+#include "stringvec.h"
 
 static  char    Filename[] = __FILE__;
 
@@ -47,17 +48,9 @@ FILE  *getcfilefrom(char *filename, const char *keyword, const char *deft_file, 
         char    *resf;
         FILE    *res;
 
-        if  (strchr(filename, '$'))  {
-                int     count_recurse = RECURSE_MAX;
-                resf = envprocess(filename);
-                while  (strchr(resf, '$')  &&  --count_recurse > 0)  {
-                        char    *tmp = envprocess(resf);
-                        free(resf);
-                        resf = tmp;
-                }
-        }
-        else
-                resf = stracpy(filename);               /* Must be malloced */
+        /* Expand out $ and ~ constructs in filename */
+
+        resf = recursive_unameproc(filename, ".", Realuid);
 
         if  (resf[0] != '/')  {
                 char  *fullp = malloc((unsigned) (strlen(defdir) + strlen(resf) + 2));
@@ -100,72 +93,99 @@ FILE  *getcfilefrom(char *filename, const char *keyword, const char *deft_file, 
 
 static  FILE    *open_cfile_int(const char *keyword, const char *deft_file)
 {
-        const   char    *cfname = USER_CONFIG;
-        char    *loclist = envprocess(HELPPATH), *nxt, *filename;
-        FILE    *res;
+        char    *loclist, *dirname, *cfilename, *filename;
+        int     part;
+        FILE    *result;
+        struct  stringvec  hpath;
 
-        nxt = loclist;
-        for  (;;)  {
-                char    *colp, *dirname;
+        /* Split path up into bits */
 
-                if  ((colp = strchr(nxt, ':')))
-                        *colp = '\0';
+        loclist = envprocess(HELPPATH);
+        stringvec_split(&hpath, loclist, ':');
+        free(loclist);
 
-                if  (nxt[0] == '-'  &&  nxt[1] == '\0')         /* Ignore - used for config files */
-                        goto  donxt;
+        for  (part = 0;  part < stringvec_count(hpath);  part++)  {
+                const  char  *pathseg = stringvec_nth(hpath, part);
+                unsigned  lng  = strlen(pathseg);
 
-                if  (*nxt == '\0'  ||  (nxt[0] == '!' && nxt[1] == '\0'))  {
-                        if  ((filename = getenv(keyword)))  {
-                                free(loclist);
+                /* Treat null segments as reference to environment */
+
+                if  (lng == 0)  {
+                        filename = getenv(keyword);
+                        if  (!filename)
+                                continue;
+                        stringvec_free(&hpath);
+                        return  getcfilefrom(filename, keyword, deft_file, ".");
+                }
+
+                /* Treat '@' as new home directory config files, '!' as reference to environment */
+
+                if  (lng == 1)  {
+
+                        /* Environment */
+
+                        if  (pathseg[0] == '!')  {
+                                filename = getenv(keyword);             /* This hasn't been malloced */
+                                if  (!filename)
+                                        continue;
+                                stringvec_free(&hpath);
                                 return  getcfilefrom(filename, keyword, deft_file, ".");
                         }
-                }
-                else  {
-                        char    cfilename[PATH_MAX];
-                        if  (strchr(nxt, '~'))  {
-                                if  (!(dirname = unameproc(nxt, ".", Realuid)))
-                                        goto  donxt;
-                                if  (strchr(dirname, '$'))  {
-                                        char    *tmp = envprocess(dirname);
-                                        free(dirname);
-                                        dirname = tmp;
-                                }
-                        }
-                        else  if  (strchr(nxt, '$'))
-                                dirname = envprocess(nxt);
-                        else
-                                dirname = stracpy(nxt);
-                        sprintf(cfilename, "%s/%s", dirname, cfname);
-                        if  ((filename = rdoptfile(cfilename, keyword)))  {
-                                res = getcfilefrom(filename, keyword, deft_file, dirname);
-                                free(dirname);
+
+                        /* New style config file */
+
+                        if  (pathseg[0] == '@')  {
+                                cfilename = recursive_unameproc(HOME_CONFIG, ".", Realuid);
+                                filename = rdoptfile(cfilename, keyword);
+                                free(cfilename);
+                                if  (!filename)
+                                        continue;
+                                result = getcfilefrom(filename, keyword, deft_file, ".");
                                 free(filename);
-                                free(loclist);
-                                return  res;
+                                stringvec_free(&hpath);
+                                return  result;
                         }
-                        free(dirname);
                 }
-        donxt:
-                if  (!colp)
-                        break;
-                *colp++ = ':';
-                nxt = colp;
+
+                /* Something else, treat as name of directory which we add the .file to */
+
+                dirname = recursive_unameproc(pathseg, ".", Realuid);
+                cfilename = malloc((unsigned) (strlen(dirname) + sizeof(USER_CONFIG) + 1));
+                if  (!cfilename)
+                        ABORT_NOMEM;
+                strcpy(cfilename, dirname);
+                strcat(cfilename, "/" USER_CONFIG);
+                free(dirname);
+
+                /* Now read the config file */
+
+                filename = rdoptfile(cfilename, keyword);
+                free(cfilename);
+                if  (!filename)
+                        continue;
+
+                /* Got file it's an error if it's not there */
+
+                result = getcfilefrom(filename, keyword, deft_file, ".");
+                free(filename);
+                stringvec_free(&hpath);
+                return  result;
         }
 
         /* All that failed, so try the standard place.  */
 
-        free(loclist);
-        loclist = envprocess(CFILEDIR);                 /* Has a / on the end of it */
-        filename = malloc((unsigned) (strlen(loclist) + strlen(deft_file) + 1));
+        stringvec_free(&hpath);
+        dirname = envprocess(CFILEDIR);                 /* Has a / on the end of it */
+        filename = malloc((unsigned) (strlen(dirname) + strlen(deft_file) + 1));
         if  (!filename)
                 ABORT_NOMEM;
-        strcpy(filename, loclist);
+        strcpy(filename, dirname);
         strcat(filename, deft_file);
-        free(loclist);
-        if  ((res = fopen(filename, "r")))
-                fcntl(fileno(res), F_SETFD, 1);
+        free(dirname);
+        if  ((result = fopen(filename, "r")))
+                fcntl(fileno(result), F_SETFD, 1);
         Helpfile_path = filename;
-        return  res;
+        return  result;
 }
 
 FILE    *open_cfile(const char *keyword, const char *deft_file)

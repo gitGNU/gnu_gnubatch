@@ -303,7 +303,7 @@ void  perform_update(char **args)
         if  ((cp = strchr(*args, ':')))  {
                 netid_t hostid;
                 *cp = '\0';
-		if  ((hostid = look_int_hostname(*args)) == -1)  {
+                if  ((hostid = look_int_hostname(*args)) == -1)  {
                         disp_str = *args;
                         html_disperror($E{Btvar unknown host name});
                         exit(E_USAGE);

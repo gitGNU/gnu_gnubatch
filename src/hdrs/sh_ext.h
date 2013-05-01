@@ -15,9 +15,7 @@
    You should have received a copy of the GNU General Public License
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
-#ifdef  NETWORK_VERSION
 extern  int     Network_ok;     /* 0=Networking turned off even though code there */
-#endif
 
 extern  PIDTYPE child_pid;      /* Slave process pid */
 
@@ -40,7 +38,6 @@ extern  int     Sem_chan;       /* Semid for semaphore list */
 extern  int             nosetpgrp;
 extern  float           pri_decrement;
 
-#ifdef  NETWORK_VERSION
 extern  SHORT   viewsock;
 
 extern  USHORT          lportnum,               /* These are all htons-ified */
@@ -52,7 +49,6 @@ extern  PIDTYPE         Netm_pid;
 extern  slotno_t        machname_slot;/* Slot number of "machine name" variable */
 
 extern  unsigned        lumpsize, lumpwait;
-#endif
 
 extern void  lockjobs();
 extern void  lockvars();
@@ -132,7 +128,6 @@ extern PIDTYPE  forksafe();
 extern vhash_t  findvar(const vident *);
 extern vhash_t  lookvar(Vref *);
 extern BtvarRef  locvarind(ShreqRef, const vhash_t);
-#ifdef  NETWORK_VERSION
 extern void  attach_hosts();
 extern void  ci_broadcast();
 extern void  ci_delhost(const unsigned);
@@ -214,5 +209,3 @@ extern struct remote *find_sync(const netid_t, const int);
 extern struct remote *alloc_roam(struct remote *);
 extern struct remote *conn_attach(struct remote *);
 extern struct remote *rattach(struct remote *);
-#endif
-

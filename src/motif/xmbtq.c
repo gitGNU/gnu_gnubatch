@@ -69,6 +69,7 @@ static  char    rcsid2[] = "@(#) $Revision: 1,8 $";
 #include "shreq.h"
 #include "ecodes.h"
 #include "errnums.h"
+#include "helpargs.h"
 #include "statenums.h"
 #include "ipcstuff.h"
 #include "cfile.h"
@@ -122,13 +123,6 @@ typedef struct  {
         Boolean jobtit_pres;
         Boolean vartit_pres;
         Boolean footer_pres;
-        Boolean keep_jscroll;
-        Boolean localonly;
-        Boolean confirmabort;
-        Boolean incnull;
-        String  onlyuser;
-        String  onlygroup;
-        String  queue;
         int     pollfreq;
         int     rtime, rint;
 }  vrec_t;
@@ -148,22 +142,6 @@ static  XtResource      resources[] = {
                   XtOffsetOf(vrec_t, vartit_pres), XtRImmediate, False },
         { "footerPresent", "FooterPresent", XtRBoolean, sizeof(Boolean),
                   XtOffsetOf(vrec_t, footer_pres), XtRImmediate, False },
-        { "keepJobScroll", "KeepJobScroll", XtRBoolean, sizeof(Boolean),
-                  XtOffsetOf(vrec_t, keep_jscroll), XtRImmediate, False },
-        { "localOnly", "LocalOnly", XtRBoolean, sizeof(Boolean),
-                  XtOffsetOf(vrec_t, localonly), XtRImmediate, False },
-
-        { "confirmAbort", "ConfirmAbort", XtRBoolean, sizeof(Boolean),
-                  XtOffsetOf(vrec_t, confirmabort), XtRImmediate, (XtPointer) True },
-        { "incNull", "IncNull", XtRBoolean, sizeof(Boolean),
-                  XtOffsetOf(vrec_t, incnull), XtRImmediate, (XtPointer) True },
-        { "onlyUser", "OnlyUser", XtRString, sizeof(String),
-                  XtOffsetOf(vrec_t, onlyuser), XtRString, "" },
-        { "onlyGroup", "OnlyGroup", XtRString, sizeof(String),
-                  XtOffsetOf(vrec_t, onlygroup), XtRString, "" },
-        { "queue", "Queue", XtRString, sizeof(String),
-                  XtOffsetOf(vrec_t, queue), XtRString, "" },
-
         { "pollFreq", "PollFreq", XtRInt, sizeof(int),
                   XtOffsetOf(vrec_t, pollfreq), XtRImmediate, (XtPointer) 10 },
         { "repeatTime", "RepeatTime", XtRInt, sizeof(int),
@@ -400,68 +378,51 @@ static void  dumpbool(FILE *tf, char *name, const int value)
         fprintf(tf, "%s.%s:\t%s\n", progname, name, value? "True": "False");
 }
 
+static  char  *confline_arg;
+
+static  void  save_confline_opt(FILE *fp, const char *vname)
+{
+        fprintf(fp, "%s=%s\n", vname, confline_arg);
+}
+
 static void  cb_saveopts(Widget w)
 {
-        char    *srfile, *hf;
-        FILE    *inf, *tf;
-        int     ch;
-        unsigned        oldumask;
-        Dimension       wid;
-        SHORT   items;
-        time_t  now;
-        struct  tm      *tp;
+        int     ret, items;
+        Dimension  wid;
+        char    digbuf[20];
 
         if  (!Confirm(w, $PH{Confirm write options}))
                 return;
 
-        hf = envprocess("$HOME/XI");
-        if  (!(inf = fopen(hf, "r")))  {
-                srfile = XtResolvePathname(dpy, "app-defaults", NULL, NULL, NULL, NULL, 0, NULL);
-                if  (!(inf = fopen(srfile, "r")))  {
-                        doerror(w, $EH{xmbtq cannot open appdefaults});
-                        XtFree(srfile);
-                        return;
-                }
-                XtFree(srfile);
-        }
-        tf = tmpfile();
-        while  ((ch = getc(inf)) != EOF)
-                putc(ch, tf);
-        fclose(inf);
-        time(&now);
-        tp = localtime(&now);
-        fprintf(tf, "\n!! %s User-defined options %.2d:%.2d:%.2d %.2d/%.2d/%.2d\n\n",
-                       progname,
-                       tp->tm_hour, tp->tm_min, tp->tm_sec,
-                       tp->tm_year % 100, tp->tm_mon+1, tp->tm_mday);
-        dumpbool(tf, "keepJobScroll", Dispflags & DF_SCRKEEP);
-        dumpbool(tf, "localOnly", Dispflags & DF_LOCALONLY);
-        dumpbool(tf, "confirmAbort", Dispflags & DF_CONFABORT);
-        dumpbool(tf, "incNull", !(Dispflags & DF_SUPPNULL));
-        fprintf(tf, "%s.onlyUser:\t%s\n", progname, Restru? Restru: "");
-        fprintf(tf, "%s.onlyGroup:\t%s\n", progname, Restrg? Restrg: "");
-        fprintf(tf, "%s.queue:\t%s\n", progname, jobqueue? jobqueue: "");
-        XtVaGetValues(jwid, XmNwidth, &wid, XmNvisibleItemCount, &items, NULL);
-        fprintf(tf, "%s*jlist.width: %ld\n", progname, (long) wid);
-        fprintf(tf, "%s*jlist.visibleItemCount: %ld\n", progname, (long) items);
-        XtVaGetValues(vwid, XmNvisibleItemCount, &items, NULL);
-        fprintf(tf, "%s*vlist.visibleItemCount: %ld\n", progname, (long) items);
-        SWAP_TO(Realuid);
-        oldumask = umask(0);
-        umask(oldumask & ~0444);
-        if  (!(inf = fopen(hf, "w")))  {
-                SWAP_TO(Daemuid);
-                doerror(w, $EH{xmbtq cannot create app resource});
+        disp_str = "(Home)";
+
+        digbuf[0] = Dispflags & DF_SUPPNULL? '0': '1';
+        digbuf[1] = Dispflags & DF_LOCALONLY? '0': '1';
+        digbuf[2] = Dispflags & DF_CONFABORT? '1': '0';
+        digbuf[3] = '\0';
+
+        confline_arg = digbuf;
+        if  ((ret = proc_save_opts((const char *) 0, "XMBTQDISPOPT", save_confline_opt)) != 0)  {
+                doerror(w, ret);
                 return;
         }
-        umask(oldumask);
-        SWAP_TO(Daemuid);
-        free(hf);
-        rewind(tf);
-        while  ((ch = getc(tf)) != EOF)
-                putc(ch, inf);
-        fclose(tf);
-        fclose(inf);
+
+        confline_arg = Restru && Restru[0]? Restru: "-";
+        proc_save_opts((const char *) 0, "XMBTQDISPUSER", save_confline_opt);
+        confline_arg = Restrg && Restrg[0]? Restrg: "-";
+        proc_save_opts((const char *) 0, "XMBTQDISPGROUP", save_confline_opt);
+        confline_arg = jobqueue && jobqueue[0]? jobqueue: "-";
+        proc_save_opts((const char *) 0, "XMBTQDISPQUEUE", save_confline_opt);
+
+        XtVaGetValues(jwid, XmNwidth, &wid, XmNvisibleItemCount, &items, NULL);
+        sprintf(digbuf, "%d", wid);
+        confline_arg = digbuf;
+        proc_save_opts((const char *) 0, "XMBTQJWIDTH", save_confline_opt);
+        sprintf(digbuf, "%d", items);
+        proc_save_opts((const char *) 0, "XMBTQJITEMS", save_confline_opt);
+        XtVaGetValues(vwid, XmNvisibleItemCount, &items, NULL);
+        sprintf(digbuf, "%d", items);
+        proc_save_opts((const char *) 0, "XMBTQVITEMS", save_confline_opt);
 }
 
 static void  cb_about()
@@ -889,9 +850,10 @@ static  XtActionsRec    arecs[] = {
 
 static void  wstart(int argc, char **argv)
 {
+        int     jwidth = -1, jitems = -1, vitems = -1;
         vrec_t  vrec;
         Pixmap  bitmap;
-        char    *jtit;
+        char    *jtit, *arg;
 
         toplevel = XtVaAppInitialize(&app, "GBATCH", NULL, 0, &argc, argv, NULL, NULL);
         XtAppAddActions(app, arecs, XtNumber(arecs));
@@ -903,21 +865,71 @@ static void  wstart(int argc, char **argv)
 
         /* Set up parameters from resources */
 
-        if  (vrec.keep_jscroll)
-                Dispflags |= DF_SCRKEEP;
-        if  (vrec.localonly)
-                Dispflags |= DF_LOCALONLY;
-        if  (vrec.confirmabort)
-                Dispflags |= DF_CONFABORT;
-        if  (!vrec.incnull)
-                Dispflags |= DF_SUPPNULL;
         poll_time = vrec.pollfreq;
         arr_rtime = vrec.rtime;
         arr_rint = vrec.rint;
 
-        Restru = vrec.onlyuser[0]? stracpy(vrec.onlyuser): (char *) 0;
-        Restrg = vrec.onlygroup[0]? stracpy(vrec.onlygroup): (char *) 0;
-        jobqueue = vrec.queue[0]? stracpy(vrec.queue): (char *) 0;
+        /* Now do stuff from the saved options. */
+
+        if  ((arg = optkeyword("XMSPQDISPOPT")))  {
+                if  (arg[0])  {
+                        if  (arg[0] == '0')
+                                Dispflags |= DF_SUPPNULL;
+                        else
+                                Dispflags &= ~DF_SUPPNULL;
+                        if  (arg[1])  {
+                                if  (arg[1] == '0')
+                                        Dispflags |= DF_LOCALONLY;
+                                else
+                                        Dispflags &= ~DF_LOCALONLY;
+                                if  (arg[2])  {
+                                        if  (arg[2] != '0')
+                                                Dispflags |= DF_CONFABORT;
+                                        else
+                                                Dispflags &= ~DF_CONFABORT;
+                                }
+                        }
+                }
+                free(arg);
+        }
+
+        if  ((arg = optkeyword("XMBTQDISPUSER")))  {
+                if  (strcmp(arg, "-") == 0)  {
+                        Restru = (char *) 0;
+                        free(arg);
+                }
+                else
+                        Restru = arg;
+        }
+        if  ((arg = optkeyword("XMBTQDISPGROUP")))  {
+                if  (strcmp(arg, "-") == 0)  {
+                        Restrg = (char *) 0;
+                        free(arg);
+                }
+                else
+                        Restrg = arg;
+        }
+        if  ((arg = optkeyword("XMBTQDISPQUEUE")))  {
+                if  (strcmp(arg, "-") == 0)  {
+                        jobqueue = (char *) 0;
+                        free(arg);
+                }
+                else
+                        jobqueue = arg;
+        }
+
+        if  ((arg = optkeyword("XMBTQJWIDTH")))  {
+                jwidth = atoi(arg);
+                free(arg);
+        }
+        if  ((arg = optkeyword("XMBTQJITEMS")))  {
+                jitems = atoi(arg);
+                free(arg);
+        }
+        if  ((arg = optkeyword("XMBTQVITEMS")))  {
+                vitems = atoi(arg);
+                free(arg);
+        }
 
         /* Now to create all the bits of the application */
 
@@ -937,6 +949,10 @@ static void  wstart(int argc, char **argv)
 
         jwid = XmCreateScrolledList(panedw, "jlist", NULL, 0);
         XtAddCallback(jwid, XmNhelpCallback, (XtCallbackProc) dohelp, (XtPointer) $H{xmbtq jlist help});
+        if  (jwidth > 0)
+                XtVaSetValues(jwid, XmNwidth, jwidth, NULL);
+        if  (jitems > 0)
+                XtVaSetValues(jwid, XmNvisibleItemCount, jitems, NULL);
         XtManageChild(jwid);
 #if defined(HAVE_XMRENDITION) && !defined(BROKEN_RENDITION)
         allocate_colours();
@@ -949,12 +965,12 @@ static void  wstart(int argc, char **argv)
         free(jtit);
 
         vwid = XmCreateScrolledList(panedw, "vlist", NULL, 0);
-        XtVaSetValues(vwid,
-                      XmNselectionPolicy,       XmMULTIPLE_SELECT,
-                      NULL);
+        XtVaSetValues(vwid, XmNselectionPolicy, XmMULTIPLE_SELECT, NULL);
         XtAddCallback(vwid, XmNmultipleSelectionCallback, (XtCallbackProc) vselect, NULL);
         XtAddCallback(vwid, XmNdefaultActionCallback, (XtCallbackProc) vselect, NULL);
         XtAddCallback(vwid, XmNhelpCallback, (XtCallbackProc) dohelp, (XtPointer) $H{xmbtq vlist help});
+        if  (vitems > 0)
+                XtVaSetValues(vwid, XmNvisibleItemCount, vitems, NULL);
         XtManageChild(vwid);
 
         if  (vrec.footer_pres)

@@ -1,6 +1,6 @@
-/* optprocess.c -- process options to shell commands
+/* optkeyword.c -- fetch value of named keyword from config files
 
-   Copyright 2009 Free Software Foundation, Inc.
+   Copyright 2013 Free Software Foundation, Inc.
 
    This program is free software: you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by
@@ -16,55 +16,27 @@
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
 #include "config.h"
-#include <stdio.h>
 #include <sys/types.h>
+#include <stdio.h>
+#include <limits.h>
 #include <ctype.h>
 #include "defaults.h"
-#include "incl_unix.h"
-#include "incl_ugid.h"
 #include "helpargs.h"
-#include "cfile.h"
-#include "files.h"
-#include "optflags.h"
 #include "errnums.h"
 #include "stringvec.h"
-
-#ifndef PATH_MAX
-#define PATH_MAX        1024
-#endif
+#include "incl_unix.h"
+#include "incl_ugid.h"
+#include "cfile.h"
+#include "files.h"
 
 static  char    Filename[] = __FILE__;
 
-/* Construct environment variable name from program name */
+/* Look in config files for the given keyword and return the last one found */
 
-char    *make_varname()
+char *optkeyword(const char *Varname)
 {
-        char  *varname = malloc((unsigned) strlen(progname) + 1), *vp;
-        const  char  *pp;
-
-        if  (!varname)
-                ABORT_NOMEM;
-
-        pp = progname;
-        vp = varname;
-
-        while  (*pp)  {
-                int  ch = *pp++;
-                if  (!isalpha(ch))
-                        *vp++ = '_';
-                else
-                        *vp++ = toupper(ch);
-        }
-        *vp = '\0';
-        return  varname;
-}
-
-char   **optprocess(char **argv, const Argdefault *defaultopts, optparam * const optlist, const int minstate, const int maxstate, const int keepargs)
-{
-	char    *Varname = make_varname();
-        HelpargRef      avec = helpargs(defaultopts, minstate, maxstate);
-        char    *loclist, *cfilename, *dirname, *name;
-        int     hadargv = 0, part;
+        char    *loclist, *cfilename, *dirname, *result, *newres;
+        int     part;
         struct  stringvec  cpath;
 
         /* Break the path into components */
@@ -73,6 +45,10 @@ char   **optprocess(char **argv, const Argdefault *defaultopts, optparam * const
         stringvec_split(&cpath, loclist, ':');
         free(loclist);
 
+        /* Kick off with nothing */
+
+        result = (char *) 0;
+
         for  (part = 0;  part < stringvec_count(cpath);  part++)  {
                 const  char  *pathseg = stringvec_nth(cpath, part);
                 unsigned  lng  = strlen(pathseg);
@@ -80,28 +56,32 @@ char   **optprocess(char **argv, const Argdefault *defaultopts, optparam * const
                 /* Treat null segments as reference to environment */
 
                 if  (lng == 0)  {
-                        doenv(getenv(Varname), avec, optlist, minstate);
+                        if  ((newres = getenv(Varname)))  {
+                                if  (result)
+                                        free(result);
+                                result = stracpy(newres);
+                        }
                         continue;
                 }
 
-                /* Treat '-' as reference to command args, '@' as new home directory config files,
+                /* Treat '-' as reference to command args but ignore it, '@' as new home directory config files,
                    '!' as reference to environment */
 
                 if  (lng == 1)  {
 
                         /* Arg list */
 
-                        if  (pathseg[0] == '-')  {
-                                if  (!hadargv)          /* Only once */
-                                        argv = doopts(&argv[0], avec, optlist, minstate);
-                                hadargv++;
+                        if  (pathseg[0] == '-')
                                 continue;
-                        }
 
                         /* Environment */
 
                         if  (pathseg[0] == '!')  {
-                                doenv(getenv(Varname), avec, optlist, minstate);
+                                if  ((newres = getenv(Varname)))  {
+                                        if  (result)
+                                                free(result);
+                                        result = stracpy(newres);
+                                }
                                 continue;
                         }
 
@@ -109,11 +89,12 @@ char   **optprocess(char **argv, const Argdefault *defaultopts, optparam * const
 
                         if  (pathseg[0] == '@')  {
                                 cfilename = recursive_unameproc(HOME_CONFIG, ".", Realuid);
-                                name = rdoptfile(cfilename, Varname);
+                                newres = rdoptfile(cfilename, Varname);
                                 free(cfilename);
-                                if  (name)  {
-                                        doenv(name, avec, optlist, minstate);
-                                        free(name);
+                                if  (newres)  {
+                                        if  (result)
+                                                free(result);
+                                        result = newres;
                                 }
                                 continue;
                         }
@@ -128,20 +109,15 @@ char   **optprocess(char **argv, const Argdefault *defaultopts, optparam * const
                 strcpy(cfilename, dirname);
                 strcat(cfilename, "/" USER_CONFIG);
                 free(dirname);
-                if  ((name = rdoptfile(cfilename, Varname)))  {
-                        doenv(name, avec, optlist, minstate);
-                        free(name);
+                if  ((newres = rdoptfile(cfilename, Varname)))  {
+                        if  (result)
+                                free(result);
+                        result = newres;
                 }
                 free(cfilename);
         }
 
         close_optfile();
         stringvec_free(&cpath);
-
-        if  (keepargs || Anychanges & OF_ANY_FREEZE_WANTED)
-                makeoptvec(avec, minstate, maxstate);
-        freehelpargs(avec);
-        if  (!hadargv)
-                argv++;
-        return  argv;
+        return  result;                 /* Might be null of course */
 }

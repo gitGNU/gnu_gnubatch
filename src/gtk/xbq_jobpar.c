@@ -101,11 +101,6 @@ struct  conddata  {
 
 #define LAB_PADDING     5
 
-static const char *disp_varname(BtvarRef vp, char *buf)
-{
-        return  host_prefix_str(vp->var_id.hostid, vp->var_name);
-}
-
 static vhash_t  lookup_varind(const char *vname, const unsigned perm)
 {
         ULONG  sp;
@@ -131,7 +126,6 @@ static vhash_t  lookup_varind(const char *vname, const unsigned perm)
 char *encode_defcond(const int condnum)
 {
         JcondRef  jc = &default_conds[condnum];
-        char    resbuf[BTV_NAME+HOSTNSIZE+2];
         GString *rb;
         char    *res;
 
@@ -139,7 +133,7 @@ char *encode_defcond(const int condnum)
                 return  (char *) 0;
 
         rb = g_string_new(NULL);
-        g_string_printf(rb, "%s/%d/%d", disp_varname(&Var_seg.vlist[jc->bjc_varind].Vent, resbuf), jc->bjc_compar, jc->bjc_iscrit & CCRIT_NORUN? 1: 0);
+        g_string_printf(rb, "%s/%d/%d", VAR_NAME(&Var_seg.vlist[jc->bjc_varind].Vent), jc->bjc_compar, jc->bjc_iscrit & CCRIT_NORUN? 1: 0);
         if  (jc->bjc_value.const_type == CON_STRING)
                 g_string_append_printf(rb, "/T:%s", jc->bjc_value.con_un.con_string);
         else
@@ -189,7 +183,6 @@ void  decode_defcond(char *coded)
 char *encode_defass(const int assnum)
 {
         JassRef  ja = &default_asses[assnum];
-        char    resbuf[BTV_NAME+HOSTNSIZE+2];
         GString *rb;
         char    *res;
 
@@ -197,7 +190,7 @@ char *encode_defass(const int assnum)
                 return  (char *) 0;
 
         rb = g_string_new(NULL);
-        g_string_printf(rb, "%s/%d/%d/%d", disp_varname(&Var_seg.vlist[ja->bja_varind].Vent, resbuf),
+        g_string_printf(rb, "%s/%d/%d/%d", VAR_NAME(&Var_seg.vlist[ja->bja_varind].Vent),
                         ja->bja_op, ja->bja_iscrit & ACRIT_NORUN? 1: 0, ja->bja_flags);
         if  (ja->bja_con.const_type == CON_STRING)
                 g_string_append_printf(rb, "/T:%s", ja->bja_con.con_un.con_string);
@@ -274,7 +267,6 @@ static  void  setup_varlist(struct conddata *adata, GCallback vlchanged, unsigne
 
         for  (vcnt = 0;  vcnt < Var_seg.nvars;  vcnt++)  {
                 BtvarRef        vp = &vv_ptrs[vcnt].vep->Vent;
-                char    nbuf[BTV_NAME+HOSTNSIZE+2];
 
                 /* Skip ones which are not allowed.  */
 
@@ -291,7 +283,7 @@ static  void  setup_varlist(struct conddata *adata, GCallback vlchanged, unsigne
                                         continue;
                 }
                 gtk_list_store_append(varlist_store, &iter);
-                gtk_list_store_set(varlist_store, &iter, 0, disp_varname(vp, nbuf), -1);
+                gtk_list_store_set(varlist_store, &iter, 0, VAR_NAME(vp), -1);
         }
 
         col = gtk_tree_view_column_new();
@@ -434,10 +426,9 @@ static int  condedit(GtkWidget *dlg, JcondRef condlist, const unsigned perm, con
                 }
                 else  {
                         BtvarRef  vp = &Var_seg.vlist[jc->bjc_varind].Vent;
-                        char    nbuf[BTV_NAME+HOSTNSIZE+2];
 
                         cname = condname[jc->bjc_compar-C_EQ];
-                        vname = disp_varname(vp, nbuf);
+                        vname = VAR_NAME(vp);
                         crit = jc->bjc_iscrit & CCRIT_NORUN;
                         crit_sens = TRUE;
 
@@ -958,10 +949,9 @@ static int  assedit(GtkWidget *dlg, JassRef asslist, const unsigned perm, const 
                 }
                 else  {
                         BtvarRef  vp = &Var_seg.vlist[ja->bja_varind].Vent;
-                        char    nbuf[BTV_NAME+HOSTNSIZE+2];
 
                         aname = disp_alt(ja->bja_op, assnames);
-                        vname = disp_varname(vp, nbuf);
+                        vname = VAR_NAME(vp);
                         crit = ja->bja_iscrit & ACRIT_NORUN;
                         crit_sens = TRUE;
 
@@ -2234,7 +2224,7 @@ void  cb_unqueue()
 
         pr = gprompt($P{xbtq unqueuing job});
         labp = g_string_new(NULL);
-        g_string_printf(labp, "%s %s", pr, host_prefix_long(cj->h.bj_hostid, cj->h.bj_job));
+        g_string_printf(labp, "%s %s", pr, JOB_NUMBER(cj));
         free(pr);
         lab = gtk_label_new(labp->str);
         g_string_free(labp, TRUE);
@@ -2418,7 +2408,7 @@ void  cb_unqueue()
                 *ap++ = udprog;
                 if  (copyonly)
                         *ap++ = "-n";
-                *ap++ = host_prefix_long(cj->h.bj_hostid, cj->h.bj_job);
+                *ap++ = JOB_NUMBER(cj);
                 *ap++ = Last_unqueue_dir;
                 *ap++ = (char *) newcf;
                 *ap++ = (char *) newjf;
@@ -2496,11 +2486,8 @@ void  cb_freeze(GtkAction *action)
                         ap = argv;
                         *ap++ = udprog;
                         *ap++ = abuf;
-                        if  (ishomed)
-                                *ap++ = envprocess("$HOME");
-                        else
-                                *ap++ = Curr_pwd;
-                        *ap++ = host_prefix_long(jp->h.bj_hostid, jp->h.bj_job);
+                        *ap++ = ishomed? "~": Curr_pwd;
+                        *ap++ = JOB_NUMBER(jp);
                         *ap = (char *) 0;
                         execv(execprog, (char **) argv);
                         exit(E_SETUP);

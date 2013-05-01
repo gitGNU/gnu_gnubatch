@@ -138,3 +138,6 @@ extern  const char *title_of(CBtjobRef);
 #define pid_jhash(pid)  (((unsigned) (pid)) % JOBHASHMOD)
 #define jno_jhash(jno)  (((unsigned) (jno)) % JOBHASHMOD)
 #define jid_jhash(jidp) (((((unsigned) (jidp)->hostid) >> 16) ^ ((unsigned) (jidp)->hostid) ^ (((unsigned) ((jidp)->slotno)) >> 4) ^ ((unsigned) ((jidp)->slotno))) % JOBHASHMOD)
+
+#define  JOBH_NUMBER(JHP)         host_prefix_long((JHP)->bj_hostid, (LONG) (JHP)->bj_job)
+#define  JOB_NUMBER(JP)         JOBH_NUMBER(&((JP)->h))

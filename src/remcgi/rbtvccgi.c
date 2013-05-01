@@ -293,8 +293,7 @@ void  perform_update(char **args)
                         html_disperror($E{Btvar unknown host name});
                         exit(E_USAGE);
                 }
-                if  (hostid == myhostid)
-                        hostid = 0;
+                hostid = ext2int_netid_t(hostid);
                 if  (hostid  &&  aop->locovar)  {
                         disp_str = arg;
                         html_disperror($E{btvcgi op local host only});

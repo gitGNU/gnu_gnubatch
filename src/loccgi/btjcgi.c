@@ -728,7 +728,7 @@ char **gen_vlist(const USHORT permflags, const int expr)
                                 ABORT_HTML_NOMEM;
                 }
 
-		result[countr++] = stracpy(host_prefix_str(vp->var_id.hostid, vp->var_name));
+                result[countr++] = stracpy(VAR_NAME(vp));
         }
 
         result[countr] = (char *) 0;
@@ -763,7 +763,7 @@ char **gen_jobasses(CBtjobRef jp)
                         rp += sprintf(rp, "%u", ja->bja_flags);
 #endif
                 vp = &Var_seg.vlist[ja->bja_varind].Vent;
-		rp += strlen(strcpy(rp, host_prefix_str(vp->var_id.hostid, vp->var_name)));
+                rp += strlen(strcpy(rp, VAR_NAME(vp)));
                 if  (ja->bja_op >= BJA_SEXIT)  {
                         *rp++ = '=';
                         strcpy(rp, ja->bja_op == BJA_SEXIT? exitcodename: signalname);
@@ -893,7 +893,7 @@ int  perf_listconds(char *arg)
                 vp = &Var_seg.vlist[jc->bjc_varind].Vent;
 
                 printf("[%d,\"", jc->bjc_iscrit & CCRIT_NORUN? 1: 0);
-		printf("%s\",%d,", host_prefix_str(vp->var_id.hostid, vp->var_name), jc->bjc_compar);
+                printf("%s\",%d,", VAR_NAME(vp), jc->bjc_compar);
                 if  (jc->bjc_value.const_type == CON_LONG)
                         printf("%ld]", (long) jc->bjc_value.con_un.con_long);
                 else
@@ -931,7 +931,7 @@ int  perf_listasses(char *arg)
                 vp = &Var_seg.vlist[ja->bja_varind].Vent;
 
                 printf("[%d,%u,\"", ja->bja_iscrit & ACRIT_NORUN? 1: 0, ja->bja_flags);
-		printf("%s\",%d,", host_prefix_str(vp->var_id.hostid, vp->var_name), ja->bja_op);
+                printf("%s\",%d,", VAR_NAME(vp), ja->bja_op);
                 if  (ja->bja_op >= BJA_SEXIT)
                         fputs("0]", stdout);
                 else  if  (ja->bja_con.const_type == CON_LONG)

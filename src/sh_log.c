@@ -185,12 +185,10 @@ void  logjob(BtjobRef jp, unsigned event, netid_t hostid, int_ugid_t uid, int_ug
                        "%.2d/%.2d/%.4d|%.2d:%.2d:%.2d|%s|%s|",
                        mday, mon, tp->tm_year + 1900,
                        tp->tm_hour, tp->tm_min, tp->tm_sec,
-                       host_prefix_long(jp->h.bj_hostid, jp->h.bj_job),
+                       JOB_NUMBER(jp),
                        title[0]? title: unnamedj);
-#ifdef  NETWORK_VERSION
         if  (hostid)
                 fprintf(jlfile, "%s:", look_host(hostid));
-#endif
         fprintf(jlfile,
                        "%s|%s|%s|%d|%d",
                        disp_alt((int) event, eventnames),
@@ -232,10 +230,8 @@ void  logvar(BtvarRef vp, unsigned event, unsigned source, netid_t hostid, int_u
                        tp->tm_hour, tp->tm_min, tp->tm_sec,
                        vp->var_name);
 
-#ifdef  NETWORK_VERSION
         if  (hostid)
                 fprintf(vlfile, "%s:", look_host(hostid));
-#endif
 
         fprintf(vlfile,
                        "%s|%s|%s|%s|",
@@ -263,7 +259,7 @@ void  logvar(BtvarRef vp, unsigned event, unsigned source, netid_t hostid, int_u
                 break;
         }
         if  (jp)
-                fprintf(vlfile, "|%s|%s", host_prefix_long(jp->h.bj_hostid, jp->h.bj_job), title_of(jp));
+                fprintf(vlfile, "|%s|%s", JOB_NUMBER(jp), title_of(jp));
         putc('\n', vlfile);
         fflush(vlfile);
 }

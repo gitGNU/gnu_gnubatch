@@ -15,7 +15,6 @@
    You should have received a copy of the GNU General Public License
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
-#ifdef  NETWORK_VERSION
 #include <netdb.h>
 #include <sys/socket.h>
 #ifdef  HAVE_SYS_SELECT_H
@@ -28,7 +27,6 @@
 #include <arpa/inet.h>
 #ifndef AF_INET
 #define AF_INET 2
-#endif
 #endif
 #ifndef INADDR_LOOPBACK
 #define INADDR_LOOPBACK ((in_addr_t) 0x7f000001) /* Inet 127.0.0.1.  */

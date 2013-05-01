@@ -348,7 +348,7 @@ void  cb_view()
 
         pr = gprompt($P{xbtq view job});
         labp = g_string_new(NULL);
-        g_string_printf(labp, "%s %s ", pr, host_prefix_long(cj->h.bj_hostid, cj->h.bj_job));
+        g_string_printf(labp, "%s %s ", pr, JOB_NUMBER(cj));
         free(pr);
 
         if  (strlen(qtitle_of(cj)) == 0)  {

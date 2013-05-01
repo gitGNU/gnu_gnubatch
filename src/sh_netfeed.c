@@ -17,7 +17,6 @@
 
 #include "config.h"
 #include <stdio.h>
-#ifdef  NETWORK_VERSION
 #include "incl_sig.h"
 #include <sys/types.h>
 #include <sys/ipc.h>
@@ -98,16 +97,3 @@ void  feed_req()
                 exit(0);
         }
 }
-
-#else   /* !NETWORK_VERSION */
-
-/* This "routine" isn't strictly necessary but some C compilers winge
-   if they are given a .c file with no code so here is some....  */
-
-
-void    feed_req()
-{
-        return;
-}
-
-#endif  /* !NETWORK_VERSION */

@@ -47,6 +47,8 @@ typedef LONG    int_pid_t;
 
 #define NETTICKLE       1000                    /* Keep networks alive */
 
+#define RECURSE_MAX     10              /* Maximum level of recursive expansion of $-style constructs */
+
 /*      Timezone - change this as needed (mostly needed for DOS version). */
 
 #define DEFAULT_TZ      "TZ=GMT0BST"

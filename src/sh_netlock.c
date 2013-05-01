@@ -21,7 +21,6 @@
  */
 
 #include "config.h"
-#ifdef  NETWORK_VERSION
 #include <stdio.h>
 #include <sys/types.h>
 #include <sys/ipc.h>
@@ -355,9 +354,3 @@ void  netlock_hostdied(struct remote *rp)
                 return;
         }
 }
-#else                           /* Dummy for non-network */
-void  end_remotelock()
-{
-        return;
-}
-#endif

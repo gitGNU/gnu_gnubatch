@@ -440,11 +440,7 @@ void  creatjfile(LONG jsize)
            which is called first see main().  Put in both places so
            that we can shuffle the call order to get the best effect.  */
 
-#ifdef  NETWORK_VERSION
         Job_seg.dptr->js_viewport = vportnum;
-#else
-        Job_seg.dptr->js_viewport = 0;
-#endif
         Job_seg.dptr->js_serial = 1;
         unlockjobs();
 }
@@ -675,10 +671,8 @@ int  growjseg()
         msync(newseg, Job_seg.inf.segsize, MS_ASYNC|MS_INVALIDATE);
 #endif
         tellchild(O_JREMAP, 0L);
-#ifdef  NETWORK_VERSION
         if  (Netm_pid)
                 kill(Netm_pid, NETSHUTSIG);
-#endif
         jqpend++;
         qchanges++;
         return  1;
@@ -772,8 +766,6 @@ static void  dequeue_nolock(const unsigned jind)
         qchanges++;
 }
 
-#ifdef  NETWORK_VERSION
-
 void  notify_stat_change(BtjobhRef jp)
 {
         if  (jp->bj_jflags & BJ_EXPORT)  {
@@ -858,7 +850,6 @@ static int  listrems(BtjobhRef jp, const int caswell)
 
         return  hadh;
 }
-#endif
 
 /* Find given job in queue or return -1.  */
 
@@ -954,7 +945,6 @@ int  checkvarsok(ShreqRef sr, BtjobhRef jp)
         return  0;
 }
 
-#ifdef  NETWORK_VERSION
 /* When a remote host comes up, check any other jobs on other
    machines which may contain conditions and assignments for
    that host and fix. */
@@ -1057,7 +1047,6 @@ void  deskeletonise(const vhash_t vind)
         }
         unlockjobs();
 }
-#endif
 
 /* Before a variable is deleted ensure that a job doesn't refer to it.
    Remotes only applies when we are only interested in remote jobs */
@@ -1092,8 +1081,6 @@ int  reqdforjobs(const vhash_t vind, const int remotesonly)
 
         return  0;
 }
-
-#ifdef  NETWORK_VERSION
 
 /* Tell existing machines about all our luvly jobs after initial startup.  */
 
@@ -1157,7 +1144,6 @@ void  net_jclear(const netid_t hostid)
         }
         unlockjobs();
 }
-#endif
 
 /* Enqueue request on spool queue.  */
 
@@ -1201,12 +1187,8 @@ int  enqueue(ShreqRef sr, BtjobRef jp)
         Job_seg.dptr->js_freech = jhp->q_nxt;
         *dest = *jp;
 
-#ifdef  NETWORK_VERSION
         if  (!Network_ok)
                 dest->h.bj_jflags &= (BJ_WRT|BJ_MAIL|BJ_NOADVIFERR);
-#else
-        dest->h.bj_jflags &= (BJ_WRT|BJ_MAIL|BJ_NOADVIFERR);
-#endif
 
         /* For remote jobs ownership gets transmogrified in sh_pack */
 
@@ -1257,7 +1239,6 @@ int  enqueue(ShreqRef sr, BtjobRef jp)
         fwpri = (float) dest->h.bj_pri;
         lastind = Job_seg.dptr->js_q_tail;
 
-#ifdef  NETWORK_VERSION
         if  (dest->h.bj_hostid)  {
 
                 /* For non-local jobs take job submission time into
@@ -1273,7 +1254,6 @@ int  enqueue(ShreqRef sr, BtjobRef jp)
                 }
         }
         else  {
-#endif
                 while  (lastind != JOBHASHEND)  {
                         HashBtjob       *lhp = &Job_seg.jlist[lastind];
                         if  ((float) lhp->j.h.bj_pri >= fwpri)
@@ -1281,9 +1261,7 @@ int  enqueue(ShreqRef sr, BtjobRef jp)
                         fwpri -= pri_decrement;
                         lastind = lhp->q_prv;
                 }
-#ifdef  NETWORK_VERSION
         }
-#endif
 
         dest->h.bj_wpri = round_short(fwpri);
         puton_q(jind, lastind);
@@ -1292,12 +1270,10 @@ int  enqueue(ShreqRef sr, BtjobRef jp)
         jqpend++;
         qchanges++;
 
-#ifdef  NETWORK_VERSION
         /* Tell the glad tidings to the rest of the world */
 
         if  (dest->h.bj_hostid == 0  &&  dest->h.bj_jflags & BJ_EXPORT)
                 job_broadcast(dest, J_CREATE);
-#endif
         unlockjobs();
         if  (dest->h.bj_hostid == 0)
                 logjob(dest, $S{log code create}, dest->h.bj_orighostid, sr->uuid, sr->ugid);
@@ -1358,9 +1334,8 @@ int  chjob(ShreqRef sr, BtjobRef jb)
 {
         BtjobRef        ojb;
         int     jind, ret, sch;
-#ifdef  NETWORK_VERSION
         ULONG   remreq;
-#endif
+
         if  ((jind = findj(jb)) < 0)
                 return  J_NEXIST;
 
@@ -1372,7 +1347,6 @@ int  chjob(ShreqRef sr, BtjobRef jb)
         if  ((ret = checkvarsok(sr, &jb->h)))
                 return  ret;
 
-#ifdef  NETWORK_VERSION
         /* Remote job - that's its problem Compare strings and send
            shorter message if none changed */
 
@@ -1381,7 +1355,6 @@ int  chjob(ShreqRef sr, BtjobRef jb)
                         return  J_ISSKEL;
                 return  job_sendupdate(ojb, jb, sr, stringsch(ojb, jb)? J_CHANGED: J_HCHANGED);
         }
-#endif
 
         /* If the job is being executed, we only allow changes to the
            mail/write bits and the time control Don't lock yet as
@@ -1402,33 +1375,25 @@ int  chjob(ShreqRef sr, BtjobRef jb)
         /* If starting up or shutting down, ignore all other changes */
 
         if  (ojb->h.bj_progress >= BJP_STARTUP1  &&  ojb->h.bj_progress != BJP_RUNNING)  {
-#ifdef  NETWORK_VERSION
                 if  (ojb->h.bj_jflags & BJ_EXPORT)
                         job_hbroadcast(&ojb->h, J_BHCHANGED);
-#endif
                 logjob(ojb, $S{log code chdetails}, sr->hostid, sr->uuid, sr->ugid);
                 return  J_OK;
         }
 
         lockjobs();
 
-#ifdef  NETWORK_VERSION
         /* Worst case is where we send the whole shooting match */
 
         remreq = (sch = stringsch(ojb, jb))? J_BCHANGED: J_BHCHANGED;
 
         if  (!Network_ok)
                 jb->h.bj_jflags &= ~(BJ_EXPORT|BJ_REMRUNNABLE);
-#else
-        jb->h.bj_jflags &= ~(BJ_EXPORT|BJ_REMRUNNABLE);
-#endif
 
         /* We only allow changes on jobs actually running which can't
            affect the status of the network connections.  */
 
         if  (ojb->h.bj_progress < BJP_STARTUP1)  {
-
-#ifdef  NETWORK_VERSION
 
                 /* If job wasn't previously exported and now is or
                    vice versa change the request into a "new job"
@@ -1441,8 +1406,6 @@ int  chjob(ShreqRef sr, BtjobRef jb)
 
                 ojb->h.bj_jflags &= ~(BJ_EXPORT|BJ_REMRUNNABLE);
                 ojb->h.bj_jflags |= jb->h.bj_jflags & (BJ_EXPORT|BJ_REMRUNNABLE);
-
-#endif /* NETWORK_VERSION */
 
                 /* Turn off SKELHOLD flag because we are about to
                    reassign the conditions.  */
@@ -1481,9 +1444,7 @@ int  chjob(ShreqRef sr, BtjobRef jb)
                 BLOCK_COPY(ojb->bj_space, jb->bj_space, JOBSPACE);
         }
 
-#ifdef  NETWORK_VERSION
-
-        /* Avoid sending the whole caboodle if we can.  */
+       /* Avoid sending the whole caboodle if we can.  */
 
         switch  (remreq)  {
         case  J_BCHANGED:
@@ -1498,13 +1459,12 @@ int  chjob(ShreqRef sr, BtjobRef jb)
                 job_imessbcast(&ojb->h, J_DELETED, 0L);
                 break;
         }
-#endif
+
         unlockjobs();
         logjob(ojb, $S{log code chdetails}, sr->hostid, sr->uuid, sr->ugid);
         return  J_OK;
 }
 
-#ifdef  NETWORK_VERSION
 /* Note changes of details of remote job.  In cases where no job
    strings have changed we only get sent a valid jb->h and the
    bj_space will be garbage. This is denoted by the code being
@@ -1604,9 +1564,7 @@ int  dstadj(ShreqRef sr, struct adjstr *adj)
                 if  (jp->bj_times.tc_repeat == TC_MINUTES || jp->bj_times.tc_repeat == TC_HOURS)
                         continue;
                 jp->bj_times.tc_nexttime += adj->sh_adjust;
-#ifdef  NETWORK_VERSION
                 notify_stat_change(jp);
-#endif
                 jqpend++;
                 qchanges++;
                 Job_seg.dptr->js_serial++;
@@ -1628,7 +1586,6 @@ int  remjchmog(BtjobRef jb)
         Job_seg.jlist[jind].j.h.bj_mode = jb->h.bj_mode;
         return  J_OK;
 }
-#endif
 
 /* Change modes of job in queue.  */
 
@@ -1643,10 +1600,8 @@ int  job_chmod(ShreqRef sr, BtjobRef jb)
 
         /* Remote jobs - send on request and return whatever it returns.  */
 
-#ifdef  NETWORK_VERSION
         if  (ojb->h.bj_hostid)
                 return  job_sendmdupdate(ojb, jb, sr);
-#endif
 
         if  (!shmpermitted(sr, &ojb->h.bj_mode, BTM_WRMODE))
                 return  J_NOPERM;
@@ -1659,10 +1614,8 @@ int  job_chmod(ShreqRef sr, BtjobRef jb)
         ojb->h.bj_mode.g_flags = jb->h.bj_mode.g_flags;
         ojb->h.bj_mode.o_flags = jb->h.bj_mode.o_flags;
         logjob(ojb, $S{log code chmod}, sr->hostid, sr->uuid, sr->ugid);
-#ifdef  NETWORK_VERSION
         if  (ojb->h.bj_jflags & BJ_EXPORT)
                 job_hbroadcast(&ojb->h, J_CHMOGED);
-#endif
         return  J_OK;
 }
 
@@ -1678,10 +1631,8 @@ int  job_chown(ShreqRef sr, jident *jid)
 
         /* Remote jobs - send on request and return whatever it returns.  */
 
-#ifdef  NETWORK_VERSION
         if  (targ->h.bj_hostid)
                 return  job_sendugupdate(targ, sr);
-#endif
 
         if  (ppermitted(sr->uuid, BTM_WADMIN))  {
                 if  (!(shmpermitted(sr, &targ->h.bj_mode, BTM_UGIVE) || shmpermitted(sr, &targ->h.bj_mode, BTM_UTAKE)))
@@ -1713,10 +1664,8 @@ int  job_chown(ShreqRef sr, jident *jid)
         qchanges++;
         jqpend++;
         logjob(targ, $S{log code chown}, sr->hostid, sr->uuid, sr->ugid);
-#ifdef  NETWORK_VERSION
         if  (targ->h.bj_jflags & BJ_EXPORT)
                 job_hbroadcast(&targ->h, J_CHMOGED);
-#endif
         return  J_OK;
 }
 
@@ -1732,10 +1681,8 @@ int  job_chgrp(ShreqRef sr, jident *jid)
 
         /* Remote jobs - send on request and return whatever it returns.  */
 
-#ifdef  NETWORK_VERSION
         if  (targ->h.bj_hostid)
                 return  job_sendugupdate(targ, sr);
-#endif
 
         if  (ppermitted(sr->uuid, BTM_WADMIN))  {
                 if  (!(shmpermitted(sr, &targ->h.bj_mode, BTM_GGIVE) || shmpermitted(sr, &targ->h.bj_mode, BTM_GTAKE)))
@@ -1767,10 +1714,8 @@ int  job_chgrp(ShreqRef sr, jident *jid)
         qchanges++;
         jqpend++;
         logjob(targ, $S{log code chgrp}, sr->hostid, sr->uuid, sr->ugid);
-#ifdef  NETWORK_VERSION
         if  (targ->h.bj_jflags & BJ_EXPORT)
                 job_hbroadcast(&targ->h, J_CHMOGED);
-#endif
         return  J_OK;
 }
 
@@ -1781,15 +1726,11 @@ void  dequeue(unsigned jn)
         BtjobhRef       jp = &Job_seg.jlist[jn].j.h;
 
         lockjobs();
-#ifdef  NETWORK_VERSION
         if  (jp->bj_hostid == 0)  {
                 if  (jp->bj_jflags & BJ_EXPORT)
                         job_imessbcast(jp, J_DELETED, 0L);
-#endif
                 unlink(mkspid(SPNAM, jp->bj_job));
-#ifdef  NETWORK_VERSION
         }
-#endif
         dequeue_nolock(jn);
         unlockjobs();
 }
@@ -1817,10 +1758,8 @@ void  back_of_queue(const unsigned jind)
         puton_q(jind, lastind);
         Job_seg.dptr->js_serial++;
         unlockjobs();
-#ifdef  NETWORK_VERSION
         if  (jp->bj_hostid == 0  &&  jp->bj_jflags & BJ_EXPORT)
                 job_imessbcast(jp, J_BOQ, 0L);
-#endif
         jqpend++;
         qchanges++;
 }
@@ -1834,10 +1773,8 @@ int  deljob(ShreqRef sr, jident *jid)
                 return  J_NEXIST;
 
         targ = &Job_seg.jlist[jn].j;
-#ifdef  NETWORK_VERSION
         if  (targ->h.bj_hostid)
                 return  job_message(targ->h.bj_hostid, &targ->h, sr);
-#endif
         if  (!shmpermitted(sr, &targ->h.bj_mode, BTM_DELETE))
                 return  J_NOPERM;
         if  (targ->h.bj_progress >= BJP_STARTUP1)
@@ -1847,7 +1784,6 @@ int  deljob(ShreqRef sr, jident *jid)
         return  J_OK;
 }
 
-#ifdef  NETWORK_VERSION
 /* Process remote job deleted notification */
 
 void  job_deleted(jident *jid)
@@ -1869,7 +1805,6 @@ void  job_deleted(jident *jid)
         }
         dequeue(jn);
 }
-#endif
 
 /* Check job conditions and return 1 if held off 0 if ready to run Use
    quick lookup for value of varcomp.  Fourth column for undefined values.  */
@@ -1893,13 +1828,11 @@ static int  condcheck(BtjobhRef jp)
         for  (k = MAXCVARS-1;  k >= 0;  cr++, k--)  {
                 if  (cr->bjc_compar == C_UNUSED)
                         return  0;
-#ifdef  NETWORK_VERSION
                 if  (is_skeleton(cr->bjc_varind))  {
                         if  (cr->bjc_iscrit & CCRIT_NORUN)
                                 return  1;
                         continue;
                 }
-#endif
                 if  (clook[cr->bjc_compar-1][varcomp(cr, jp)])
                         return  1;
         }
@@ -1969,7 +1902,6 @@ void  setasses(BtjobRef jp, unsigned flag, unsigned source, unsigned status, con
                 }
                 varind = ja->bja_varind;
                 vp = &Var_seg.vlist[varind].Vent;
-#ifdef  NETWORK_VERSION
                 if  (vp->var_flags & VF_CLUSTER)  {
 
                         /* For cluster vars we don't try to do anything other than on
@@ -1988,7 +1920,6 @@ void  setasses(BtjobRef jp, unsigned flag, unsigned source, unsigned status, con
                                 goto  contupd;
                 }
                 vp = (BtvarRef) 0;      /* Don't need broadcast */
-#endif
         contupd:
                 switch  (op)  {
                 case  BJA_SSIG:
@@ -2018,10 +1949,8 @@ void  setasses(BtjobRef jp, unsigned flag, unsigned source, unsigned status, con
                         jopvar(varind, conp, '%', source, jp);
                         break;
                 }
-#ifdef  NETWORK_VERSION
                 if  (vp)        /* Cluster var remembered */
                         var_broadcast(vp, V_ASSIGNED);
-#endif
         }
 }
 
@@ -2030,9 +1959,7 @@ void  setasses(BtjobRef jp, unsigned flag, unsigned source, unsigned status, con
 int  doabort(ShreqRef sr, jident *jid)
 {
         int     jn = findj_by_jid(jid);
-#ifdef  NETWORK_VERSION
         int     nrems = 0;
-#endif
         BtjobRef        targ;
         BtjobhRef       targh;
 
@@ -2042,14 +1969,12 @@ int  doabort(ShreqRef sr, jident *jid)
         targ = &Job_seg.jlist[jn].j;
         targh = &targ->h;
 
-#ifdef  NETWORK_VERSION
         if  (targh->bj_progress >= BJP_STARTUP1)  {
                 if  (targh->bj_runhostid)
                         return  job_message(targh->bj_runhostid, targh, sr);
         }
         else  if  (targh->bj_hostid)
                 return  job_message(targh->bj_hostid, targh, sr);
-#endif
 
         if  (!shmpermitted(sr, &targh->bj_mode, BTM_KILL))
                 return  J_NOPERM;
@@ -2074,7 +1999,6 @@ int  doabort(ShreqRef sr, jident *jid)
                 jqpend++;
                 qchanges++;
                 if  (oldp != BJP_ERROR  &&  oldp != BJP_ABORTED)  {
-#ifdef  NETWORK_VERSION
                         if  (targh->bj_jrunflags & BJ_PROPOSED)  {
                                 targh->bj_jrunflags &= ~BJ_PROPOSED;
                                 adjust_ll(-(LONG) targh->bj_ll);
@@ -2097,24 +2021,17 @@ int  doabort(ShreqRef sr, jident *jid)
                                         tellsched(J_RESCHED, 0L);
                                 }
                                 else
-#endif
                                         setasses(targ, BJA_CANCEL, $S{log source jcancel}, 0, 0L);
-#ifdef  NETWORK_VERSION
                         }
                 skipit:
-#endif
                         logjob(targ, $S{log code cancel}, sr->hostid, sr->uuid, sr->ugid);
                         notify(targ, $PE{Job cancelled msg}, 0);
                 }
-#ifdef  NETWORK_VERSION
                 notify_stat_change(targh);
-#endif
         }
 
-#ifdef  NETWORK_VERSION
         if  (nrems > 0)
                 exit(0);
-#endif
         return  J_OK;
 }
 
@@ -2131,10 +2048,8 @@ int  doforce(ShreqRef sr, jident *jid, const int noadv)
 
         targ = &Job_seg.jlist[jn].j;
         targh = &targ->h;
-#ifdef  NETWORK_VERSION
         if  (targh->bj_hostid)
                 return  job_message(targh->bj_hostid, targh, sr);
-#endif
 
         if  (!shmpermitted(sr, &targh->bj_mode, BTM_KILL))
                 return  J_NOPERM;
@@ -2150,24 +2065,18 @@ int  doforce(ShreqRef sr, jident *jid, const int noadv)
         if  (noadv)  {
                 logjob(targ, $S{log code forcena}, sr->hostid, sr->uuid, sr->ugid);
                 targh->bj_jrunflags |= BJ_FORCE | BJ_FORCENA;
-#ifdef  NETWORK_VERSION
                 if  (targh->bj_hostid == 0  &&  targh->bj_jflags & BJ_EXPORT)
                         job_imessbcast(targh, J_BFORCEDNA, 0L);
-#endif
         }
         else  {
                 logjob(targ, $S{log code force}, sr->hostid, sr->uuid, sr->ugid);
                 targh->bj_jrunflags |= BJ_FORCE;
                 targh->bj_jrunflags &= ~BJ_FORCENA;
-#ifdef  NETWORK_VERSION
                 if  (targh->bj_hostid == 0  &&  targh->bj_jflags & BJ_EXPORT)
                         job_imessbcast(targh, J_BFORCED, 0L);
-#endif
         }
         return  J_OK;
 }
-
-#ifdef  NETWORK_VERSION
 
 /* Note above applied to remote job.  */
 
@@ -2262,7 +2171,6 @@ void  rrstatchange(const netid_t run_hostid, struct jstatusmsg *jm)
         }
         job_statbroadcast(targh);
 }
-#endif
 
 /* We think that we can start a job.  */
 
@@ -2270,7 +2178,6 @@ void  startup_job(const unsigned jind)
 {
         BtjobRef        jp = &Job_seg.jlist[jind].j;
         BtjobhRef       jh = &jp->h;
-#ifdef  NETWORK_VERSION
         PIDTYPE         ret;
         int             nrems = 0;
 
@@ -2290,28 +2197,23 @@ void  startup_job(const unsigned jind)
                         }
                         return;
                 }
-#endif
 
                 /* Enter initial startup state Adjust load level to
                    reflect job being started.  Assign variables.  */
 
                 jh->bj_progress = BJP_STARTUP1;
-#ifdef  NETWORK_VERSION
                 jh->bj_runhostid = 0;
                 notify_stat_change(jh);
                 if  (jh->bj_jrunflags & BJ_PROPOSED)
                         jh->bj_jrunflags &= ~BJ_PROPOSED;
                 else
-#endif
                         adjust_ll((LONG) jh->bj_ll);
 
                 switch  (clockvars())  {
                 default:        /* Error case */
                         adjust_ll(-(LONG) jh->bj_ll);
                         jh->bj_progress = BJP_ERROR;
-#ifdef  NETWORK_VERSION
                         notify_stat_change(jh);
-#endif
                         jh->bj_jrunflags = 0;
                         Job_seg.dptr->js_serial++;
                         qchanges++;
@@ -2327,9 +2229,7 @@ void  startup_job(const unsigned jind)
                         unlockvars();
                         Job_seg.dptr->js_serial++;
                         jh->bj_progress = BJP_STARTUP2;
-#ifdef  NETWORK_VERSION
                         notify_stat_change(jh);
-#endif
                         tellchild(J_START, jind);
                         qchanges++;
                         return;
@@ -2353,9 +2253,7 @@ void  startup_job(const unsigned jind)
                                 /* Condition no longer holds */
                                 unlockvars();
                                 jh->bj_progress = BJP_NONE;
-#ifdef  NETWORK_VERSION
                                 notify_stat_change(jh);
-#endif
                                 jh->bj_jrunflags = 0;
                                 Job_seg.dptr->js_serial++;
                                 tellsched(J_RESCHED_NS, jind);
@@ -2364,15 +2262,12 @@ void  startup_job(const unsigned jind)
                                 setasses(jp, BJA_START, $S{log source jstart}, 0, 0L);
                                 unlockvars();
                                 jh->bj_progress = BJP_STARTUP2;
-#ifdef  NETWORK_VERSION
                                 notify_stat_change(jh);
-#endif
                                 Job_seg.dptr->js_serial++;
                                 tellchild(J_START, jind);
                         }
                         exit(0);
                 }
-#ifdef  NETWORK_VERSION
         }
 
         /* Our job does include references to jobs on other machines.
@@ -2428,10 +2323,7 @@ void  startup_job(const unsigned jind)
                 notify_stat_change(jh);
         }
         exit(0);
-#endif
 }
-
-#ifdef  NETWORK_VERSION
 
 /* Propose to a remote machine that we'll run one of its jobs Thinks:
    maybe sometime we'll do some sort of fancy load-balancing.  */
@@ -2481,7 +2373,6 @@ void  propok(jident *jid)
         if  ((jn = findj_by_jid(jid)) >= 0)
                 startup_job(jn);
 }
-#endif
 
 /* Reschedule all jobs and return the time to the next one due.  */
 
@@ -2582,7 +2473,6 @@ unsigned  resched()
                 if  ((LONG) jp->bj_ll + Current_ll > Max_ll)
                         continue;
 
-#ifdef  NETWORK_VERSION
                 /* If remote and not remote runnable, or proposed by
                    this or another machine, or waiting on
                    inaccessible vars, forget it */
@@ -2596,7 +2486,7 @@ unsigned  resched()
                         if  (validate_ci(jp->bj_cmdinterp) < 0)
                                 continue;
                 }
-#endif
+
                 if  (jp->bj_times.tc_istime  &&  !(jp->bj_jrunflags & BJ_FORCE))  {
                         if  (now > jp->bj_times.tc_nexttime)  {
                                 LONG    slack = jp->bj_times.tc_rate;
@@ -2644,9 +2534,7 @@ unsigned  resched()
                                 back_of_queue(cind);
                                 do      jp->bj_times.tc_nexttime = advtime(&jp->bj_times);
                                 while  (jp->bj_times.tc_nexttime < now);
-#ifdef  NETWORK_VERSION
                                 notify_stat_change(jp);
-#endif
                                 continue;
                         }
                         else  if  (now + MIGHTASWELL >= jp->bj_times.tc_nexttime)
@@ -2683,7 +2571,6 @@ unsigned  resched()
 
                 being_started++;
 
-#ifdef  NETWORK_VERSION
                 /* If it's a remote job, propose to remote machine that we run it.  */
 
                 if  (jp->bj_hostid)  {
@@ -2691,7 +2578,6 @@ unsigned  resched()
                         propose(cind);
                         continue;
                 }
-#endif
 
                 /* Well I think that we are ready to roll */
 
@@ -2720,9 +2606,7 @@ void  started_job(const unsigned slotno)
         Job_seg.dptr->js_serial++;
         being_started--;
         logjob(jp, $S{log code started}, 0L, jh->bj_mode.o_uid, jh->bj_mode.o_gid);
-#ifdef  NETWORK_VERSION
         notify_stat_change(jh);
-#endif
 
         /* If it got forced through, unset flag and exit Maybe the
            BJ_FORCENA flag will still be set */
@@ -2738,9 +2622,7 @@ void  started_job(const unsigned slotno)
         /* Reset standard time rounding off seconds */
 
         jh->bj_times.tc_nexttime = (jh->bj_stime / 60) * 60;
-#ifdef  NETWORK_VERSION
         notify_stat_change(jh);
-#endif
 }
 
 #define SHM_TRY_MAX     10
@@ -2748,9 +2630,7 @@ void  started_job(const unsigned slotno)
 void  completed_job(const unsigned slotno)
 {
         int             msg, shmtries = 0;
-#ifdef  NETWORK_VERSION
         int             nrems;
-#endif
         unsigned        flag, lcode, lvcode, savflags;
         volatile  HashBtjob     *jhp = &Job_seg.jlist[slotno];
         volatile  Btjob         *jp = &jhp->j;
@@ -2797,7 +2677,6 @@ void  completed_job(const unsigned slotno)
 
         logjob((Btjob *) jp, lcode, 0L, jh->bj_mode.o_uid, jh->bj_mode.o_gid);
 
-#ifdef  NETWORK_VERSION
         nrems = listrems((Btjobh *) jh, 0);
         if  (nrems >= 0)  {
                 if  (nrems > 0)  {
@@ -2817,24 +2696,19 @@ void  completed_job(const unsigned slotno)
                         tellsched(J_RESCHED, 0L);
                 }
                 else
-#endif
                         setasses((Btjob *) jp, flag, lvcode, jh->bj_lastexit, 0L);
-#ifdef  NETWORK_VERSION
         }
 skipit:
-#endif
         notify((Btjob *) jp, msg, 1);
 
         /* Case where host who we are running remote job for kicks bucket */
 
         if  (savflags & BJ_HOSTDIED)  {
                 dequeue(slotno);
-#ifdef  NETWORK_VERSION
                 if  (nrems > 0)  {
                         tellsched(J_RESCHED, 0L);
                         exit(0);
                 }
-#endif
                 return;
         }
 
@@ -2848,12 +2722,10 @@ skipit:
                         job_rrchstat((BtjobhRef) jh);
                 else
                         dequeue(slotno);
-#ifdef  NETWORK_VERSION
                 if  (nrems > 0)  {
                         tellsched(J_RESCHED, 0L);
                         exit(0);
                 }
-#endif
                 return;
         }
 
@@ -2861,13 +2733,11 @@ skipit:
                 back_of_queue(slotno);
                 if  (jh->bj_progress == BJP_FINISHED)
                         jh->bj_progress = BJP_DONE;
-#ifdef  NETWORK_VERSION
                 notify_stat_change((BtjobhRef) jh);
                 if  (nrems > 0)  {
                         tellsched(J_RESCHED, 0L);
                         exit(0);
                 }
-#endif
                 return;
         }
 
@@ -2882,27 +2752,22 @@ skipit:
         else  if  (!(jh->bj_jflags & BJ_NOADVIFERR)) /* Flags for ITSA */
                 jh->bj_times.tc_nexttime = advtime((Timecon *) &jh->bj_times);
 
-#ifdef  NETWORK_VERSION
         notify_stat_change((BtjobhRef) jh);
         if  (nrems > 0)  {
                 tellsched(J_RESCHED, 0L);
                 exit(0);
         }
-#endif
 }
 
 void  cannot_start(const unsigned slotno)
 {
-#ifdef  NETWORK_VERSION
         int             nrems;
-#endif
         BtjobRef        jp = &Job_seg.jlist[slotno].j;
         BtjobhRef       jh = &jp->h;
 
         adjust_ll(- (LONG)jh->bj_ll);
         being_started--;
         logjob(jp, $S{log code error}, 0L, jh->bj_mode.o_uid, jh->bj_mode.o_gid);
-#ifdef  NETWORK_VERSION
         nrems = listrems(jh, 0);
         if  (nrems >= 0)  {
                 if  (nrems > 0)  {
@@ -2917,15 +2782,12 @@ void  cannot_start(const unsigned slotno)
                         tellsched(J_RESCHED, 0L);
                 }
                 else
-#endif
                         setasses(jp, BJA_ERROR, $S{log source jerror}, 0, 0L);
-#ifdef  NETWORK_VERSION
         }
         jh->bj_runhostid = jh->bj_hostid;
         notify_stat_change(jh);
         if  (nrems > 0)
                 exit(0);
-#endif
 }
 
 void  haltall()

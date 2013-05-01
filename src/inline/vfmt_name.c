@@ -17,6 +17,6 @@
 
 VFORMAT(fmt_name)
 {
-	return  (fmt_t) strlen(strcpy(bigbuff, host_prefix_str(vp->var_id.hostid, vp->var_name)));
+        return  (fmt_t) strlen(strcpy(bigbuff, VAR_NAME(vp)));
 }
 

@@ -60,6 +60,7 @@
 #include "jvuprocs.h"
 #include "formats.h"
 #include "optflags.h"
+#include "cfile.h"
 
 /* Maximum size of single variable name before we plug a general bit
    of waffle in the hole.  */
@@ -136,7 +137,7 @@ void    qwjimsg(const unsigned, CBtjobRef);
 void    wjmsg(const unsigned, const ULONG);
 void    wn_fill(WINDOW *, const int, const struct sctrl *, const LONG);
 void    ws_fill(WINDOW *, const int, const struct sctrl *, const char *);
-void    offersave(char *, const int);
+void    offersave(char *, const char *);
 int     ciprocess();
 int     deljob(BtjobRef);
 int     modjob(BtjobRef);
@@ -434,8 +435,23 @@ char    *get_jobtitle()
         struct  formatdef       *fp;
         char    *cp, *rp, *result, *mp;
 
-        if  (!job_format  &&  !(job_format = helpprmpt($P{Default job list format})))
-                job_format = stracpy(DEFAULT_FORMAT);
+        if  (!job_format)  {
+                /* Need to get job format,
+                   First get version out of message file.
+                   Then possibly replace it with a version saved in a config file.
+                   If we don't find it anywhere, use the default. */
+
+                char    *njf;
+                job_format = helpprmpt($P{Default job list format});
+                njf = optkeyword("BTQJOBFLD");
+                if  (njf)  {
+                        if  (job_format)
+                                free(job_format);
+                        job_format = njf;
+                }
+                if  (!job_format)
+                        job_format = stracpy(DEFAULT_FORMAT);
+        }
 
         /* Set columns for these things so we know to generate a
            prompt for editing them.  */
@@ -855,7 +871,7 @@ static void  job_macro(BtjobRef jp, const int num)
                 const   char    *argbuf[3];
                 argbuf[0] = str;
                 if  (jp)  {
-                        argbuf[1] = host_prefix_long(jp->h.bj_hostid, jp->h.bj_job);
+                        argbuf[1] = JOB_NUMBER(jp);
                         argbuf[2] = (const char *) 0;
                 }
                 else
@@ -1623,7 +1639,7 @@ bj:                     err_no = $E{btq jlist off beginning};
                 }
                 free(str);
                 if  (ret)
-                        offersave(job_format, $P{Default job list format});
+                        offersave(job_format, "BTQJOBFLD");
                 goto  restartj;
 
         case  $K{key exec}:  case  $K{key exec}+1:case  $K{key exec}+2:

@@ -31,6 +31,9 @@
 #else
 #include <time.h>
 #endif
+#ifdef  HAVE_GETGROUPS
+#include <grp.h>
+#endif
 #include "defaults.h"
 #include "errnums.h"
 #include "files.h"
@@ -42,15 +45,12 @@
 
 static  char    Filename[] = __FILE__;
 
-char    configname[] = USER_CONFIG;
 char    shellname[] = DEF_CI_PATH;
 
-char    *writer, *doswriter, *mailer;
-char    *jobtitle, *exec_host;
-char    *batch_uname, *homedir;
+char    *writer, *doswriter, *mailer, *homedir, *sysmsgfile, *jobtitle, *exec_host, *batch_uname;
 jobno_t jobnum;
 
-int_ugid_t      spuid, batch_uid;
+int_ugid_t      spuid, spgid, batch_uid, batch_gid;
 
 int     has_sofile = 0, has_sefile = 0, pass_thru = 0;
 int     repl_mail = 0, repl_write = 0, repl_doswrite = 0;
@@ -161,11 +161,30 @@ void  rmsg(char *cmd)
         exit(0);
 }
 
+static  void    getsymbols(const char *fname)
+{
+        char    *repl;
+
+        if  ((repl = rdoptfile(fname, "MAILER")))  {
+                mailer = repl;
+                repl_mail++;
+        }
+        if  ((repl = rdoptfile(fname, "WRITER")))  {
+                writer = repl;
+                repl_write++;
+        }
+        if  ((repl = rdoptfile(fname, "DOSWRITER")))  {
+                doswriter = repl;
+                repl_doswrite++;
+        }
+        if  ((repl = rdoptfile(fname, "SYSMESG")))
+                sysmsgfile = repl;
+}
+
 FILE *getmsgfile()
 {
         FILE            *res;
-        char            *homedf, *sysf, *repl;
-        unsigned        hdlng, lng;
+        char            *repl;
 
         /* If I don't know the user, just return the standard file.  */
 
@@ -173,65 +192,88 @@ FILE *getmsgfile()
                 homedir = "/";
                 return  open_icfile();
         }
+        spgid = lastgid;
 
         /* Get user's home directory */
 
         homedir = unameproc("~", "/", (uid_t) spuid);
-        hdlng = strlen(homedir) + 1;
-        lng = hdlng + sizeof(configname);
-
-        /* Get hold of .xibatch file in home directory for user.  */
-
-        if  (!(homedf = malloc(lng)))
-                ABORT_NOMEM;
-        strcpy(homedf, homedir);
-        strcat(homedf, "/");
-        strcat(homedf, configname);
-
-        /* Whilst we're there, grab alternate programs if
-           specified. Also reset uid to the relevant user.  */
-
-        if  ((repl = rdoptfile(homedf, "MAILER")))  {
-                mailer = repl;
-                repl_mail++;
-        }
-        if  ((repl = rdoptfile(homedf, "WRITER")))  {
-                writer = repl;
-                repl_write++;
-        }
-        if  ((repl = rdoptfile(homedf, "DOSWRITER")))  {
-                doswriter = repl;
-                repl_doswrite++;
-        }
-        if  (!(sysf = rdoptfile(homedf, "SYSMESG")))  {
-                free(homedf);
+        if  (chdir(homedir) < 0)  {
+                homedir = "/";
                 return  open_icfile();
         }
 
-        /* If not absolute, bring it down from the home directory.  */
+        /* Get symbols, if defined, from there */
 
-        if  (sysf[0] != '/')  {
-                char    *abssysf;
-                lng = hdlng + strlen(sysf) + 1;
-                if  (!(abssysf = malloc(lng)))
+        getsymbols(USER_CONFIG);
+        if  (chdir(HOME_CONFIG_DIR) >= 0)
+                getsymbols(HOME_CONFIG_FILE);
+
+        /* If that didn't define a new message file, return the standard one */
+
+        if  (!sysmsgfile)
+                return  open_icfile();
+
+        /* Expand out any ~ or environment vars in message file name */
+
+        repl = recursive_unameproc(sysmsgfile, homedir, (uid_t) spuid);
+        free(sysmsgfile);
+        sysmsgfile = repl;
+
+        /* If that wasn't an absolute name, make one */
+
+        if  (sysmsgfile[0] != '/')  {
+                char    *abssysf = malloc((unsigned) (strlen(homedir) + strlen(sysmsgfile) + 2));
+                if  (!abssysf)
                         ABORT_NOMEM;
                 strcpy(abssysf, homedir);
                 strcat(abssysf, "/");
-                strcat(abssysf, sysf);
-                free(sysf);     /* Not needed any more */
-                sysf = abssysf;
+                strcat(abssysf, sysmsgfile);
+                free(sysmsgfile);
+                sysmsgfile = abssysf;
         }
 
-        free(homedf);
-
-        if  (!(res = fopen(sysf, "r")))  {
-                free(sysf);
+        if  (!(res = fopen(sysmsgfile, "r")))  {
+                free(sysmsgfile);
+                sysmsgfile = (char *) 0;
                 return  open_icfile();
         }
 
-        Helpfile_path = sysf;
+        Helpfile_path = sysmsgfile;
         fcntl(fileno(res), F_SETFD, 1);
         return  res;
+}
+
+/* If a user has his/her own replacement mail program/script, set user and group ids
+   appropriately. Otherwise use the batch user/group. */
+
+static  void    fixids(const int repl)
+{
+        if  (repl)  {
+#ifdef  HAVE_GETGROUPS
+                int             ngroups;
+                gid_t           *glist;
+                Requires_suppgrps = 1;
+                rgrpfile();
+#ifdef  GETGROUPS_SAME_SIZE
+                if  ((ngroups = get_suppgrps(spuid, &glist)) > 0)
+                        setgroups(ngroups, glist);
+#else
+                if  ((ngroups = get_suppgrps(spuid, &glist)) > 0)  {
+                        int     cnt;
+                        GETGROUPS_T     iglist[NGROUPS];
+                        for  (cnt = 0;  cnt < ngroups && cnt < NGROUPS;  cnt++)
+                                iglist[cnt] = glist[cnt];
+                        setgroups(ngroups, iglist);
+                }
+#endif
+#endif
+                setgid((gid_t) spgid);
+                setuid((uid_t) spuid);
+        }
+        else  {
+                setgid((gid_t) batch_gid);
+                setuid((uid_t) batch_uid);
+        }
 }
 
 MAINFN_TYPE  main(int argc, char **argv)
@@ -256,8 +298,12 @@ MAINFN_TYPE  main(int argc, char **argv)
         doswriter = envprocess(DOSWRITER);
         mailer = envprocess(MAILER);
 
-        if  ((batch_uid = lookup_uname(BATCHUNAME)) == UNKNOWN_UID)
+        if  ((batch_uid = lookup_uname(BATCHUNAME)) != UNKNOWN_UID)
+                batch_gid = lastgid;
+        else  {
                 batch_uid = ROOTID;
+                batch_gid = getgid();
+        }
 
         /* Now decode arguments.
            -m   Mail style
@@ -345,15 +391,15 @@ MAINFN_TYPE  main(int argc, char **argv)
 
         switch  (cmd)  {
         case  NOTIFY_MAIL:
-                setuid((uid_t) repl_mail? spuid: batch_uid);
+                fixids(repl_mail);
                 rmsg(mailer);
                 break;
         case  NOTIFY_WRITE:
-                setuid((uid_t) repl_write? spuid: batch_uid);
+                fixids(repl_write);
                 rmsg(writer);
                 break;
         case  NOTIFY_DOSWRITE:
-                setuid((uid_t) repl_doswrite? spuid: batch_uid);
+                fixids(repl_doswrite);
                 rmsg(doswriter);
                 break;
         }

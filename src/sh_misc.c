@@ -147,7 +147,6 @@ static void  spewdel(FILE *ofl, char *prefix, const jobno_t stuff)
         fclose(ofl);
 }
 
-#ifdef  NETWORK_VERSION
 static void  spewfile(FILE *ofl, const netid_t host, const int feedtype, const jobno_t stuff)
 {
         FILE    *fl;
@@ -161,7 +160,6 @@ static void  spewfile(FILE *ofl, const netid_t host, const int feedtype, const j
         }
         fclose(ofl);
 }
-#endif
 
 /* Invoke spmdisp command.  */
 
@@ -310,7 +308,6 @@ static void  rmsg(cmd_type cmd, CBtjobRef jp, const netid_t host, const int msg,
                 }
         }
 
-#ifdef  NETWORK_VERSION
         if  (host)  {
                 if  (sostuff)
                         spewfile(po, host, FEED_SO, sostuff);
@@ -318,14 +315,11 @@ static void  rmsg(cmd_type cmd, CBtjobRef jp, const netid_t host, const int msg,
                         spewfile(pe, host, FEED_SE, sestuff);
         }
         else  {
-#endif
                 if  (sostuff)
                         spewdel(po, SONAM, sostuff);
                 if  (sestuff)
                         spewdel(pe, SENAM, sestuff);
-#ifdef  NETWORK_VERSION
         }
-#endif
 }
 
 /* See if the said file of the said job has anything in it to bother
@@ -410,7 +404,6 @@ void  notify(BtjobRef jp, const int msg, const int sendout)
                 errstuff = stuffthere(jp->h.bj_senum, SENAM);
         }
 
-#ifdef  NETWORK_VERSION
         /* Route stuff for outside jobs to relevant host */
 
         if  (jp->h.bj_hostid)  {
@@ -418,7 +411,6 @@ void  notify(BtjobRef jp, const int msg, const int sendout)
                         job_sendnote(jp, msg, outstuff, errstuff);
                 return;
         }
-#endif
 
         /* If user is using btq, turn off write type messages.  */
 
@@ -458,7 +450,6 @@ void  notify(BtjobRef jp, const int msg, const int sendout)
         exit(0);
 }
 
-#ifdef  NETWORK_VERSION
 /* Thing wot gets called from above routine on the host from which the
    job originated.  */
 
@@ -504,4 +495,3 @@ void  rem_notify(BtjobRef jp, const netid_t host, const struct jremnotemsg *msg)
                 rmsg(copyj.h.bj_orighostid & BJ_CLIENTJOB? NOTIFY_DOSWRITE: NOTIFY_WRITE, &copyj, host, msg->msg, msg->sout, msg->serr, envlist);
         exit(0);
 }
-#endif

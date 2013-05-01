@@ -86,3 +86,5 @@ struct  Ventry  {
 
 #define vid_hash(vidp) (((((unsigned) (vidp)->hostid) >> 16) ^ ((unsigned) (vidp)->hostid) ^ (((unsigned) ((vidp)->slotno)) >> 4) ^ ((unsigned) ((vidp)->slotno))) % VAR_HASHMOD)
 unsigned  calchash(const char *);
+
+#define  VAR_NAME(VP)           host_prefix_str((VP)->var_id.hostid, (VP)->var_name)

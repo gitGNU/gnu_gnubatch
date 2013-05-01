@@ -352,7 +352,7 @@ static Widget  CreateVselDlg(Widget formw, const vhash_t existind, int writevars
 
         if  (existind >= 0)  {
                 BtvarRef        vp = &Var_seg.vlist[existind].Vent;
-                XmTextSetString(workw[WORKW_JVARNAME], (char *) host_prefix_str(vp->var_id.hostid, vp->var_name));
+                XmTextSetString(workw[WORKW_JVARNAME], (char *) VAR_NAME(vp));
         }
         return  workw[WORKW_JVARNAME];
 }
@@ -388,7 +388,7 @@ static void  filljclist()
                         break;
                 BLOCK_SET(obuf, sizeof(obuf), ' ');
                 vp = &Var_seg.vlist[jcp->bjc_varind].Vent;
-                movein(&obuf[JCVAR_P], host_prefix_str(vp->var_id.hostid, vp->var_name));
+                movein(&obuf[JCVAR_P], VAR_NAME(vp));
                 if  (jcp->bjc_iscrit & CCRIT_NORUN)
                         movein(&obuf[JCCRIT_P], ccritmark);
                 movein(&obuf[JCOP_P], condname[jcp->bjc_compar - C_EQ]);
@@ -429,7 +429,7 @@ static void  filljalist()
                         break;
                 BLOCK_SET(obuf, sizeof(obuf), ' ');
                 vp = &Var_seg.vlist[jap->bja_varind].Vent;
-                movein(&obuf[JAVAR_P], host_prefix_str(vp->var_id.hostid, vp->var_name));
+                movein(&obuf[JAVAR_P], VAR_NAME(vp));
                 if  (jap->bja_iscrit & ACRIT_NORUN)
                         movein(&obuf[JACRIT_P], scritmark);
                 movein(&obuf[JAOP_P], disp_alt((int) jap->bja_op, assnames));

@@ -55,8 +55,6 @@
 #include "xbr_ext.h"
 #include "gtk_lib.h"
 
-static  char    Filename[] = __FILE__;
-
 void  initcifile()
 {
         int     ret;
@@ -138,43 +136,22 @@ void  cb_viewopt()
 
 void  loadopts()
 {
-        char    *homed = getenv("HOME");
-        char    *fn, *arg;
-
-        if  (!homed)  {
-                struct  passwd  *pw = getpwuid(Realuid);
-                if  (!pw)
-                        return;
-                homed = pw->pw_dir;
-                endpwent();
-        }
-
-        fn = malloc(strlen(homed) + sizeof(USER_CONFIG) + 2);
-        if  (!fn)
-                ABORT_NOMEM;
-        strcpy(fn, homed);
-        strcat(fn, "/");
-        strcat(fn, USER_CONFIG);
+        char    *arg;
 
         /* Display options */
 
-        if  ((arg = rdoptfile(fn, "XBTRXTERMEDIT")))  {
-                if  (arg[0])  {
-                        if  (arg[0] == '1')
-                                xterm_edit = 1;
-                        else
-                                xterm_edit = 0;
-                }
+        if  ((arg = optkeyword("XBTRXTERMEDIT")))  {
+                if  (arg[0])
+                        xterm_edit = arg[0] != '0';
                 free(arg);
         }
 
-        if  ((arg = rdoptfile((char *) 0, "XBTREDITOR")))
+        if  ((arg = optkeyword("XBTREDITOR")))
                 editor_name = arg;
         else
                 editor_name = stracpy(DEFAULT_EDITOR_NAME); /* Something VIle I suspect */
         close_optfile();
 }
-
 
 void  cb_saveopts()
 {

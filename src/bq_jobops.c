@@ -554,7 +554,7 @@ int  editjcvars(BtjobRef jp)
                         for  (cnt = 0; cnt < unreadlen;  cnt++)
                                 waddch(cw, ' ');
                 }
-                mvwaddstr(cw, srow+ch, BOXWID+totlen, (char *) host_prefix_str(vp->var_id.hostid, vp->var_name));
+                mvwaddstr(cw, srow+ch, BOXWID+totlen, (char *) VAR_NAME(vp));
                 mvwaddstr(cw, srow+ch, BOXWID+totlen+BTV_NAME+1, disp_alt((int) bcr->bjc_compar, compnames));
                 con_refill(cw, srow+ch, BOXWID+totlen+BTV_NAME+1+compnwid+1, &bcr->bjc_value);
         }
@@ -954,7 +954,7 @@ int  editjsvars(BtjobRef jp)
                         mvaddstr(srow+ch*2, VSNOEQUIV_P, noequiv);
                 if  (sp->bja_iscrit & ACRIT_NOPERM)
                         mvaddstr(srow+ch*2, VSNOWRITE_P, unwrite);
-                mvaddstr(srow+ch*2, VSNAME_P, (char *) host_prefix_str(vp->var_id.hostid, vp->var_name));
+                mvaddstr(srow+ch*2, VSNAME_P, (char *) VAR_NAME(vp));
                 mvaddstr(srow+ch*2+1, VSOPER_P, disp_alt((int) sp->bja_op, assnames));
                 if  (sp->bja_op >= BJA_SEXIT)
                         fval = BJA_OK|BJA_ERROR|BJA_ABORT;

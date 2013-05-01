@@ -385,7 +385,7 @@ $P{Kill mode name}      $N{Kill mode name}
 
         if  ((cp = strchr(arg, ':')))  {
                 *cp = '\0';
-		if  ((hostid = look_int_hostname(arg)) == -1)  {
+                if  ((hostid = look_int_hostname(arg)) == -1)  {
                         disp_str = arg;
                         html_disperror($E{Btvar unknown host name});
                         exit(E_USAGE);

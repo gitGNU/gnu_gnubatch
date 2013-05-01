@@ -48,6 +48,7 @@
 #include "jvuprocs.h"
 #include "formats.h"
 #include "optflags.h"
+#include "cfile.h"
 
 #define DEFAULT_FORM1   " %22N %41V %13E"
 #define DEFAULT_FORM2   "     %44C %7U %7G %7K"
@@ -100,7 +101,7 @@ void  notebgwin(WINDOW *, WINDOW *, WINDOW *);
 void  viewhols(WINDOW *);
 void  ws_fill(WINDOW *, const int, const struct sctrl *, const char *);
 void  qwvmsg(unsigned, BtvarRef, ULONG);
-void  offersave(char *, const int);
+void  offersave(char *, const char *);
 int  createvar();
 int  delvar(BtvarRef);
 int  assvar(BtvarRef, int, int, int);
@@ -200,7 +201,7 @@ static char **gen_vars(char *prefix, unsigned mode)
                         if  ((result = (char**) realloc((char *) result, maxr * sizeof(char *))) == (char **) 0)
                                 ABORT_NOMEM;
                 }
-                result[countr++] = stracpy(host_prefix_str(vp->var_id.hostid, vp->var_name));
+                result[countr++] = stracpy(VAR_NAME(vp));
         }
 
         if  (countr == 0)  {
@@ -433,14 +434,29 @@ static char *vtitalloc(const char *fmt, const int len, const int vrow)
         return  result;
 }
 
+static  void    get_vartitle_fmt(char **fmtp, const char *kw, const char *dflt, const int fcode)
+{
+        char    *fmt = *fmtp, *nfmt;
+        if  (fmt)
+                return;
+        fmt = helpprmpt(fcode);
+        nfmt = optkeyword(kw);
+        if  (nfmt)  {
+                if (fmt)
+                        free(fmt);
+                fmt = nfmt;
+        }
+        if  (!fmt)
+                fmt = stracpy(dflt);
+        *fmtp = fmt;
+}
+
 void  get_vartitle(char **t1, char **t2)
 {
         int     obufl1, obufl2;
 
-        if  (!var1_format  &&  !(var1_format = helpprmpt($P{Default var list fmt 1})))
-                var1_format = stracpy(DEFAULT_FORM1);
-        if  (!var2_format  &&  !(var2_format = helpprmpt($P{Default var list fmt 2})))
-                var2_format = stracpy(DEFAULT_FORM2);
+        get_vartitle_fmt(&var1_format, "BTQVAR1FLD", DEFAULT_FORM1, $P{Default var list fmt 1});
+        get_vartitle_fmt(&var2_format, "BTQVAR2FLD", DEFAULT_FORM2, $P{Default var list fmt 2});
 
         /* Initial pass to discover how much space to allocate */
 
@@ -749,7 +765,7 @@ static void  var_macro(BtvarRef vp, const int num)
                 const  char    *argbuf[3];
                 argbuf[0] = str;
                 if  (vp)  {
-                        argbuf[1] = host_prefix_str(vp->var_id.hostid, vp->var_name);
+                        argbuf[1] = VAR_NAME(vp);
                         argbuf[2] = (const char *) 0;
                 }
                 else
@@ -1264,7 +1280,7 @@ nov:                    err_no = $E{btq vlist no vars};
                         free(t1);
                         free(t2);
                         if  (ret)
-                                offersave(var1_format, $P{Default var list fmt 1});
+                                offersave(var1_format, "BTQVAR1FLD");
                         goto  refillall;
                 }
 
@@ -1281,7 +1297,7 @@ nov:                    err_no = $E{btq vlist no vars};
                         free(t1);
                         free(t2);
                         if  (ret)
-                                offersave(var2_format, $P{Default var list fmt 2});
+                                offersave(var2_format, "BTQVAR2FLD");
                         goto  refillall;
                 }
 

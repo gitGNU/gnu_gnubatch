@@ -236,9 +236,7 @@ typedef struct  {
                         time_t  sh_endtime;
                         LONG    sh_adjust;
                 }  sh_adj;
-#ifdef  NETWORK_VERSION
                 struct  remote          sh_n;
-#endif
                 struct  jstatusmsg      remstat;
                 struct  jremassmsg      remas;
                 Cmdint                  cilist[1]; /* List of command interps */

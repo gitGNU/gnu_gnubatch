@@ -629,8 +629,6 @@ static void  connect_jobfile(BtjobRef jp)
 {
         char  *dummstr;
 
-#ifdef  NETWORK_VERSION
-
         /* If the job belongs to some other machine, copy it into a
            temporary file on this machine. */
 
@@ -676,9 +674,7 @@ static void  connect_jobfile(BtjobRef jp)
 
                 unlink(tnam);
         }
-        else
-#endif
-        if  (freopen(dummstr = mkspid(SPNAM, jp->h.bj_job), "r", stdin) == (FILE *) 0)  {
+        else  if  (freopen(dummstr = mkspid(SPNAM, jp->h.bj_job), "r", stdin) == (FILE *) 0)  {
                 perror(dummstr);
                 exit(E_EXENOJOB);
         }

@@ -394,6 +394,30 @@ char  *unameproc(char *str, const char *currdir, const uid_t realuid)
         return  alloc? str: stracpy(str);
 }
 
+/* Recursive version of above which also does envprocess-ing as well */
+
+char  *recursive_unameproc(const char *str, const char *currdir, const uid_t realuid)
+{
+        char    *newstr = unameproc((char *) str, currdir, realuid);
+        int     number = RECURSE_MAX;
+
+        while  (--number > 0)  {
+                char    *redone;
+                if  (strchr(newstr, '~'))  {
+                        redone = unameproc(newstr, currdir, realuid);
+                        free(newstr);
+                        newstr = redone;
+                        continue;
+                }
+                if  (!strchr(newstr, '$'))
+                        return  newstr;
+                redone = envprocess(newstr);
+                free(newstr);
+                newstr = redone;
+        }
+        return  newstr;
+}
+
 #ifdef  HAVE_GETGROUPS
 void  add_suppgrp(const char *unam, const gid_t gid)
 {

@@ -149,10 +149,8 @@ void  do_exit(const int n)
 #ifndef DEBUG
         kill(-(PIDTYPE) getpid(), SIGTERM);     /* Any pending child processes in group */
 #endif
-#ifdef  NETWORK_VERSION
         if  (Network_ok)
                 end_remotelock();
-#endif
 #ifdef  USING_MMAP
         munmap(Job_seg.inf.seg, Job_seg.inf.segsize);
         munmap(Var_seg.inf.seg, Var_seg.inf.segsize);
@@ -228,12 +226,10 @@ void  niceend(int signum)
         }
         nfreport(signum);
         haltall();
-#ifdef  NETWORK_VERSION
         if  (Network_ok)
                 netshut();
         if  (Xbns_pid)
                 kill(-Xbns_pid, SIGTERM);
-#endif
         syncfls();
         flushlogs(1);
         killops();
@@ -569,12 +565,10 @@ static void  o_reqs(ShipcRef rq, int bytes)
                 rgrpfile();
 #endif
                 tellchild(O_PWCHANGED, 0L);
-#ifdef  NETWORK_VERSION
                 if  (Netm_pid)
                         kill(Netm_pid, NETSHUTSIG);
                 if  (Xbns_pid)
                         kill(-Xbns_pid, SIGHUP);
-#endif
                 return;
         }
 
@@ -607,13 +601,11 @@ static void  j_reqs(ShipcRef rq, int bytes)
                 ret = deljob(&rq->sh_params, &rq->sh_un.jobref);
                 break;
 
-#ifdef  NETWORK_VERSION
         case  J_DELETED:
                 if  (bytes != sizeof(Shreq) + sizeof(jident))
                         goto  badlen;
                 job_deleted(&rq->sh_un.jobref);
                 return;
-#endif
 
         case  J_CHANGE:
                 if  (bytes != sizeof(Shreq) + sizeof(ULONG))
@@ -681,7 +673,6 @@ static void  j_reqs(ShipcRef rq, int bytes)
                 ret = dstadj(&rq->sh_params, &rq->sh_un.sh_adj);
                 break;
 
-#ifdef  NETWORK_VERSION
         case  J_CHANGED:        /* User request case */
         case  J_HCHANGED:
         case  J_BCHANGED:       /* Internal broadcast case*/
@@ -760,7 +751,6 @@ static void  j_reqs(ShipcRef rq, int bytes)
         case  J_RESCHED:
                 qchanges++;
                 return;
-#endif
         }
 
         sendreply(rq->sh_params.upid, ret);
@@ -836,8 +826,6 @@ static void  v_reqs(ShipcRef rq, int bytes)
                 ret = var_rename(&rq->sh_params, &rq->sh_un.sh_rn.sh_ovar, rq->sh_un.sh_rn.sh_rnewname);
                 break;
 
-#ifdef  NETWORK_VERSION
-
                 /* Exclusively network...  */
 
         case  V_DELETED:
@@ -863,13 +851,10 @@ static void  v_reqs(ShipcRef rq, int bytes)
                         goto  badlen;
                 var_remchname(&rq->sh_un.sh_var);
                 return;
-#endif
         }
 
         sendreply(rq->sh_params.upid, ret);
 }
-
-#ifdef  NETWORK_VERSION
 
 /* Network-type messages */
 
@@ -1016,17 +1001,13 @@ static void  n_reqs(ShipcRef rq, int bytes)
         }
         sendreply(rq->sh_params.upid, ret);
 }
-#endif
 
 /* This routine is the main process.  */
 
 void  process()
 {
         int     bytes;
-        unsigned        nextalarm, which;
-#ifdef  NETWORK_VERSION
-        unsigned        nextt;
-#endif
+        unsigned        nextalarm, which, nextt;
         union   {
                 Shipc   inreq;
                 char    inbuffer[MSGBUFFSIZE];
@@ -1034,17 +1015,13 @@ void  process()
 
         /* In case there is anything to do */
 
-#ifdef  NETWORK_VERSION
         if  (Netsync_req > 0)
                 netsync();
-#endif
 
         which = nextalarm = resched();
-#ifdef  NETWORK_VERSION
         nextt = nettickle();
         if  (nextt != 0  &&  which > nextt)
                 which = nextt;
-#endif
         alarm(which);
 
         for  (;;)  {
@@ -1066,22 +1043,16 @@ void  process()
                         case  VAR_REQ:
                                 v_reqs(&mun.inreq, bytes);
                                 break;
-#ifdef  NETWORK_VERSION
+
                         case  NET_REQ:
                                 n_reqs(&mun.inreq, bytes);
                                 break;
-#endif
                         }
 
                         /* If that hasn't affected anything which might control the job status, read the next one.  */
 
-#ifdef  NETWORK_VERSION
                         if  (!qchanges && Netsync_req == 0)
                              continue;
-#else
-                        if  (!qchanges)
-                             continue;
-#endif
                 }
                 else    if  (errno != EINTR)
                         panic($E{Error on IPC});
@@ -1113,16 +1084,12 @@ void  process()
                                         nextalarm = wa;
                         }
                 }
-#ifdef  NETWORK_VERSION
                 if  (Netsync_req > 0)
                         netsync();
-#endif
                 which = nextalarm;
-#ifdef  NETWORK_VERSION
                 nextt = nettickle();
                 if  (nextt != 0  &&  which > nextt)
                         which = nextt;
-#endif
                 alarm(which);
         }
 }
@@ -1445,8 +1412,6 @@ MAINFN_TYPE  main(int argc, char **argv)
 
         childproc();
 
-#ifdef  NETWORK_VERSION
-
         if  (Network_ok)  {
                 /* Set up remote lock semaphore.
                    Attach to other people
@@ -1459,7 +1424,6 @@ MAINFN_TYPE  main(int argc, char **argv)
                 net_initjsync();        /* Also splats ci file across */
                 netmonitor();
         }
-#endif
         nfreport($E{Scheduler started});
         process();
         return  0;              /* process never returns, but the compiler doesn't know it */

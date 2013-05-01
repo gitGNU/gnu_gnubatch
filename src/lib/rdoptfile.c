@@ -16,6 +16,9 @@
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
 #include "config.h"
+#ifdef  HAVE_FCNTL_H
+#include <fcntl.h>
+#endif
 #include <stdio.h>
 #include <errno.h>
 #include <sys/types.h>
@@ -31,6 +34,7 @@ static  char    Filename[] = __FILE__;
 #endif
 
 static  FILE    *fid;
+static  char    *last_file;             /* Remember last file name */
 
 void  close_optfile()
 {
@@ -38,36 +42,33 @@ void  close_optfile()
                 fclose(fid);
                 fid = (FILE *) 0;
         }
+        if  (last_file)  {
+                free(last_file);
+                last_file = (char *) 0;
+        }
 }
 
 /* Read option file looking for a line beginning with <keyword>=
    Allocate memory for and return the result.  This memory SHOULD
    BE FREED IN THE CALLING ROUTINE when the result is no longer
-   needed If the file name is NULL, use the last one.  */
+   needed.  */
 
 char *rdoptfile(const char *file, const char *keyword)
 {
-        const  char     *inp;
-        char            *outp, *result = (char *) 0;
-        int             ch, outlen;
+        const   char    *inp;
+        char    *outp, *result;
+        int     ch, outlen;
 
-        if  (file != (char *) 0)  {
-                close_optfile();        /*  Close previous one  */
+        /* If it was the last file we read, just rewind it */
 
-                result = envprocess(file);
-
-                if  ((fid = fopen(result, "r")) == (FILE *) 0)  {
-                        if  (errno == EACCES)
-                                fprintf(stderr, "%s: Warning! %s exists but is not readable!\n", progname, result);
-                        free(result);
-                        return  (char *) 0;
-                }
-                free(result);
-        }
-        else  {
-                if  (fid == (FILE *) 0)
-                        return  (char *) 0;
+        if  (fid  &&  last_file  &&  strcmp(file, last_file) == 0)
                 rewind(fid);
+        else  {
+                close_optfile();
+                if  (!(fid = fopen(file, "r")))
+                        return  (char *)  0;
+                fcntl(fileno(fid), F_SETFD, 1);         /* Close on exec */
+                last_file = stracpy(file);
         }
 
         /* Now look for keyword */
@@ -110,13 +111,10 @@ char *rdoptfile(const char *file, const char *keyword)
                         if  (ch != '=')
                                 goto  skipl;
 
-                        /* Accumulate chars of keyword, skipping
-                           leading white space */
+                        /* Accumulate chars of keyword, NOT skipping leading white space */
 
                         outp = result;
-
-                        do  ch = getc(fid);
-                        while  (ch == ' ' || ch == '\t');
+                        ch = getc(fid);         /* First char following = */
 
                         do  {
                                 if  (outp - result >= outlen - 1) {

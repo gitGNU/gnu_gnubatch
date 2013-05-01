@@ -205,7 +205,7 @@ GtkWidget *start_jobdlg(CBtjobRef jp, const int dlgcode, const int labelcode)
                         g_string_append(labp, no_title);
         }
 #else /* IN_XBTR */
-        g_string_append(labp, host_prefix_long(jp->h.bj_hostid, jp->h.bj_job));
+        g_string_append(labp, JOB_NUMBER(jp));
         tit = qtitle_of(jp);
         if  (strlen(tit) != 0)
                 g_string_append_printf(labp, " (%s)", tit);
@@ -2060,7 +2060,7 @@ static int  jmacroexec(const char *str, BtjobRef jp)
                 const  char     *argbuf[3];
                 argbuf[0] = (const char *) str;
                 if  (jp)  {
-                        argbuf[1] = host_prefix_long(jp->h.bj_hostid, jp->h.bj_job);
+                        argbuf[1] = JOB_NUMBER(jp);
                         argbuf[2] = (const char *) 0;
                 }
                 else
@@ -2111,7 +2111,7 @@ void  cb_jmac()
         if  (jp)  {
                 GString *labp = g_string_new(NULL);
                 pr = gprompt($P{xbtq jmac named});
-                g_string_printf(labp, "%s %s", pr, host_prefix_long(jp->h.bj_hostid, jp->h.bj_job));
+                g_string_printf(labp, "%s %s", pr, JOB_NUMBER(jp));
                 free(pr);
                 lab = gtk_label_new(labp->str);
                 g_string_free(labp, TRUE);

@@ -329,9 +329,9 @@ void  loadmac(struct macromenitem *mlist, const int cnt, const char *jorv)
 {
         char    nbuf[16], *cmd, *descr;
         sprintf(nbuf, "XBTQ%sMAC%d", jorv, cnt);
-        cmd = rdoptfile((char *) 0, nbuf);
+        cmd = optkeyword(nbuf);
         sprintf(nbuf, "XBTQ%sMACD%d", jorv, cnt);
-        descr = rdoptfile((char *) 0, nbuf);
+        descr = optkeyword(nbuf);
         if  (cmd  &&  descr)  {
                 mlist[cnt-1].cmd = cmd;
                 mlist[cnt-1].descr = descr;
@@ -348,74 +348,58 @@ void  loadmac(struct macromenitem *mlist, const int cnt, const char *jorv)
 
 void  load_optfile()
 {
-        char    *homed = getenv("HOME");
-        char    *fn, *arg;
+        char    *arg;
         int     cnt;
-
-        if  (!homed)  {
-                struct  passwd  *pw = getpwuid(Realuid);
-                if  (!pw)
-                        return;
-                homed = pw->pw_dir;
-                endpwent();
-        }
-
-        fn = malloc(strlen(homed) + sizeof(USER_CONFIG) + 2);
-        if  (!fn)
-                ABORT_NOMEM;
-        strcpy(fn, homed);
-        strcat(fn, "/");
-        strcat(fn, USER_CONFIG);
 
         /* Display options */
 
-        if  ((arg = rdoptfile(fn, "XBTQDISPOPT")))  {
+        if  ((arg = optkeyword("XBTQDISPOPT")))  {
                 if  (arg[0])  {
                         if  (arg[0] == '0')
                                 Dispflags |= DF_SUPPNULL;
                         else
                                 Dispflags &= ~DF_SUPPNULL;
-                }
-                if  (arg[1])  {
-                        if  (arg[1] == '0')
-                                Dispflags |= DF_LOCALONLY;
-                        else
-                                Dispflags &= ~DF_LOCALONLY;
-                }
-                if  (arg[2])  {
-                        if  (arg[2] == '0')
-                                Dispflags &= ~DF_CONFABORT;
-                        else
-                                Dispflags |= DF_CONFABORT;
+                        if  (arg[1])  {
+                                if  (arg[1] == '0')
+                                        Dispflags |= DF_LOCALONLY;
+                                else
+                                        Dispflags &= ~DF_LOCALONLY;
+                                if  (arg[2])  {
+                                        if  (arg[2] == '0')
+                                                Dispflags &= ~DF_CONFABORT;
+                                        else
+                                                Dispflags |= DF_CONFABORT;
+                                }
+                        }
                 }
                 free(arg);
         }
 
-        if  ((arg = rdoptfile((char *) 0, "XBTQDISPUSER")))  {
+        if  ((arg = optkeyword("XBTQDISPUSER")))  {
                 if  (strcmp(arg, "-") != 0)
                         Restru = arg;
                 else
                         free(arg);
         }
 
-        if  ((arg = rdoptfile((char *) 0, "XBTQDISPGROUP")))  {
+        if  ((arg = optkeyword("XBTQDISPGROUP")))  {
                 if  (strcmp(arg, "-") != 0)
                         Restrg = arg;
                 else
                         free(arg);
         }
 
-        if  ((arg = rdoptfile((char *) 0, "XBTQDISPQ")))  {
+        if  ((arg = optkeyword("XBTQDISPQ")))  {
                 if  (strcmp(arg, "-") != 0)
                         jobqueue = arg;
                 else
                         free(arg);
         }
 
-        if  ((arg = rdoptfile((char *) 0, "XBTQJOBFLD")))
+        if  ((arg = optkeyword("XBTQJOBFLD")))
                 ndef_jobflds = parse_fldarg(arg, &def_jobflds);
 
-        if  ((arg = rdoptfile((char *) 0, "XBTQVARFLD")))
+        if  ((arg = optkeyword("XBTQVARFLD")))
                 ndef_varflds = parse_fldarg(arg, &def_varflds);
 
         for  (cnt = 1;  cnt <= MAXMACS;  cnt++)  {
@@ -426,7 +410,7 @@ void  load_optfile()
         for  (cnt = 0;  cnt < MAXCVARS;  cnt++)  {
                 char    *arg, nbuf[20];
                 sprintf(nbuf, "XBTQDEFC%d", cnt);
-                if  ((arg = rdoptfile((char *) 0, nbuf)))  {
+                if  ((arg = optkeyword(nbuf)))  {
                         decode_defcond(arg);
                         free(arg);
                 }
@@ -434,7 +418,7 @@ void  load_optfile()
         for  (cnt = 0;  cnt < MAXSEVARS;  cnt++)  {
                 char    *arg, nbuf[20];
                 sprintf(nbuf, "XBTQDEFA%d", cnt);
-                if  ((arg = rdoptfile((char *) 0, nbuf)))  {
+                if  ((arg = optkeyword(nbuf)))  {
                         decode_defass(arg);
                         free(arg);
                 }

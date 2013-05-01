@@ -98,10 +98,10 @@ void  dumpasses(FILE *ofl, JassRef jap)
                 spitbtrstr($A{btr arg set}, ofl, 0);
                 if  (jap->bja_op >= BJA_SEXIT)  {
                         char    *msg = jap->bja_op == BJA_SEXIT? exitcodename: signalname;
-                        fprintf(ofl, "\'%s=%s\' \\\n", host_prefix_str(vp->var_id.hostid, vp->var_name), msg);
+                        fprintf(ofl, "\'%s=%s\' \\\n", VAR_NAME(vp), msg);
                 }
                 else  {
-                        fprintf(ofl, "\'%s%s", host_prefix_str(vp->var_id.hostid, vp->var_name), assname[jap->bja_op-BJA_ASSIGN]);
+                        fprintf(ofl, "\'%s%s", VAR_NAME(vp), assname[jap->bja_op-BJA_ASSIGN]);
                         if  (jap->bja_con.const_type == CON_LONG)
                                 fprintf(ofl, "%ld\' \\\n", (long) jap->bja_con.con_un.con_long);
                         else  {

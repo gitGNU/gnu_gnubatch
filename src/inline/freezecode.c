@@ -21,15 +21,17 @@ if  (Anychanges & OF_ANY_FREEZE_WANTED)  {
                 char    *varname = make_varname();
                 if  (!Curr_pwd  &&  !(Curr_pwd = getenv("PWD")))
                         Curr_pwd = runpwd();
-                if  ((ret1 = proc_save_opts(Curr_pwd, varname, spit_options)) != 0)
+                if  ((ret1 = proc_save_opts(Curr_pwd, varname, spit_options)) != 0)  {
+                        disp_str = Curr_pwd;
                         print_error(ret1);
+                }
         }
         if  (Anychanges & OF_ANY_FREEZE_HOME)  {
-                char  *hd = envprocess("${HOME-/}");
                 char    *varname = make_varname();
-                if  ((ret2 = proc_save_opts(hd, varname, spit_options)) != 0)
+                if  ((ret2 = proc_save_opts((const char *) 0, varname, spit_options)) != 0)  {
+                        disp_str = "(Home)";
                         print_error(ret2);
-                free(hd);
+                }
         }
 #ifdef  FREEZE_EXIT
         if  (argv[0] == (char *) 0)

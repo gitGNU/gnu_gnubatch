@@ -74,8 +74,6 @@ SHORT   qportnum,               /* Port number for TCP */
         apirport,               /* Port number for API requests */
         apipport;               /* UDP port number for prompt messages to API */
 
-netid_t localhostid;            /* IP of "localhost" sometimes different */
-
 const   char    Sname[] = GBNETSERV_PORT,
                 ASrname[] = DEFAULT_SERVICE,
                 ASmname[] = MON_SERVICE;

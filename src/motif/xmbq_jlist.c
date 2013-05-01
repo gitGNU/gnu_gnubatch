@@ -76,6 +76,7 @@
 #include "xmbq_ext.h"
 #include "formats.h"
 #include "optflags.h"
+#include "cfile.h"
 
 static  char    Filename[] = __FILE__;
 
@@ -421,8 +422,23 @@ char *get_jobtitle()
         struct  formatdef       *fp;
         char    *cp, *rp, *result, *mp;
 
-        if  (!job_format  &&  !(job_format = helpprmpt($P{Default job list format})))
-                job_format = stracpy(DEFAULT_FORMAT);
+        if  (!job_format)  {
+                /* Need to get job format,
+                   First get version out of message file.
+                   Then possibly replace it with a version saved in a config file.
+                   If we don't find it anywhere, use the default. */
+
+                char    *njf;
+                job_format = helpprmpt($P{Default job list format});
+                njf = optkeyword("BTQJOBFLD");
+                if  (njf)  {
+                        if  (job_format)
+                                free(job_format);
+                        job_format = njf;
+                }
+                if  (!job_format)
+                        job_format = stracpy(DEFAULT_FORMAT);
+        }
 
         /* Initial pass to discover how much space to allocate */
 
@@ -623,9 +639,7 @@ void  jdisplay()
                 XmStringFree(str);
         }
 
-        /* Adjust scrolling as requested, either by following job
-           (default), or by keeping the same amount scrolled as
-           we had before (scrkeep).  */
+        /* Adjust scrolling */
 
         if  (!(Dispflags & DF_SCRKEEP))  {
                 if  (newpos >= 0)  {

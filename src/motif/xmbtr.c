@@ -66,6 +66,7 @@ static  char    rcsid2[] = "@(#) $Revision: 1,8 $";
 #include "shreq.h"
 #include "ecodes.h"
 #include "errnums.h"
+#include "helpargs.h"
 #include "ipcstuff.h"
 #include "cfile.h"
 #include "q_shm.h"
@@ -113,8 +114,6 @@ typedef struct  {
         Boolean toolbar_pres;
         Boolean jobtit_pres;
         Boolean footer_pres;
-        Boolean xterm_edit;
-        String  editor_name;
         int     rtime, rint;
 }  vrec_t;
 
@@ -130,10 +129,6 @@ static  XtResource      resources[] = {
                   XtOffsetOf(vrec_t, jobtit_pres), XtRImmediate, False },
         { "footerPresent", "FooterPresent", XtRBoolean, sizeof(Boolean),
                   XtOffsetOf(vrec_t, footer_pres), XtRImmediate, False },
-        { "xtermEdit", "XtermEdit", XtRBoolean, sizeof(Boolean),
-                  XtOffsetOf(vrec_t, xterm_edit), XtRImmediate, (XtPointer) True },
-        { "editorName", "EditorName", XtRString, sizeof(String),
-                  XtOffsetOf(vrec_t, editor_name), XtRString, "vi" },
         { "repeatTime", "RepeatTime", XtRInt, sizeof(int),
                   XtOffsetOf(vrec_t, rtime), XtRImmediate, (XtPointer) 500 },
         { "repeatInt", "RepeatInt", XtRInt, sizeof(int),
@@ -154,9 +149,7 @@ opt_casc[] = {
         {       DSEP    },
         {       ITEM,   "Quit", cb_quit,        0       }},
 defs_casc[] = {
-#ifdef  NETWORK_VERSION
         {       ITEM,   "Defhost",      cb_defhost,     0       },
-#endif
         {       ITEM,   "Queued",       cb_jqueue,      0       },
         {       ITEM,   "Setrund",      cb_djstate,     BJP_NONE        },
         {       ITEM,   "Setcancd",     cb_djstate,     BJP_CANCELLED   },
@@ -185,9 +178,7 @@ file_casc[] = {
         {       ITEM,   "Delete",       cb_jclosedel,   1       },
         {       SEP     },
         {       ITEM,   "Submit",       cb_submit,      0       }
-#ifdef  NETWORK_VERSION
         ,{      ITEM,   "Rsubmit",      cb_remsubmit,   0       }
-#endif
 },
 job_casc[] = {
         {       ITEM,   "Queue",        cb_jqueue,      1       },
@@ -246,9 +237,7 @@ static  tool_button
         {       "Cond",         cb_jconds,      1,              $H{xmbtr set conds button help} },
         {       "Ass",          cb_jass,        1,              $H{xmbtr set asses button help} },
         {       "Submit",       cb_submit,      0,              $H{xmbtr submit button help}    }
-#ifdef  NETWORK_VERSION
         ,{      "Rsubmit",      cb_remsubmit,   0,              $H{xmbtr remote submit button help}     }
-#endif
         };
 
 #if     defined(HAVE_MEMCPY) && !defined(HAVE_BCOPY)
@@ -282,65 +271,43 @@ static void  cb_quit(Widget w, int n)
         exit(n);
 }
 
-static void  dumpbool(FILE *tf, char *name, const int value)
+static  char  *confline_arg;
+
+static  void  save_confline_opt(FILE *fp, const char *vname)
 {
-        fprintf(tf, "%s.%s:\t%s\n", progname, name, value? "True": "False");
+        fprintf(fp, "%s=%s\n", vname, confline_arg);
 }
 
 static void  cb_saveopts(Widget w)
 {
-        char    *srfile, *hf;
-        FILE    *inf, *tf;
-        int     ch;
-        unsigned        oldumask;
-        Dimension       wid;
-        SHORT   items;
-        time_t  now;
-        struct  tm      *tp;
+        int     ret, items;
+        Dimension  wid;
+        char    digbuf[20];
 
         if  (!Confirm(w, $PH{Confirm write options}))
                 return;
 
-        hf = envprocess("$HOME/XI");
-        if  (!(inf = fopen(hf, "r")))  {
-                srfile = XtResolvePathname(dpy, "app-defaults", NULL, NULL, NULL, NULL, 0, NULL);
-                if  (!(inf = fopen(srfile, "r")))  {
-                        doerror(w, $EH{xmbtq cannot open appdefaults});
-                        XtFree(srfile);
-                        return;
-                }
-                XtFree(srfile);
+        disp_str = "(Home)";
+        digbuf[0] = xterm_edit + '0';
+        digbuf[1] = '\0';
+        confline_arg = digbuf;
+        if  ((ret = proc_save_opts((const char *) 0, "XMBTRXTERMEDIT", save_confline_opt)) != 0)  {
+               doerror(w, ret);
+               return;
         }
-        tf = tmpfile();
-        while  ((ch = getc(inf)) != EOF)
-                putc(ch, tf);
-        fclose(inf);
-        time(&now);
-        tp = localtime(&now);
-        fprintf(tf, "\n!! %s User-defined options %.2d:%.2d:%.2d %.2d/%.2d/%.2d\n\n",
-                progname,
-                tp->tm_hour, tp->tm_min, tp->tm_sec,
-                tp->tm_year % 100, tp->tm_mon+1, tp->tm_mday);
-        dumpbool(tf, "xtermEdit", xterm_edit);
-        fprintf(tf, "%s.editorName: %s\n", progname, editor_name);
+
+        /* Note that this will always save something, possibly the default editor name.
+           NB No error check second and subsequent as we assume that they will work if the
+           first one does. */
+
+        confline_arg = editor_name;
+        proc_save_opts((const char *) 0, "XMBTREDITOR", save_confline_opt);
         XtVaGetValues(jwid, XmNwidth, &wid, XmNvisibleItemCount, &items, NULL);
-        fprintf(tf, "%s*jlist.width: %ld\n", progname, (long) wid);
-        fprintf(tf, "%s*jlist.visibleItemCount: %ld\n", progname, (long) items);
-        SWAP_TO(Realuid);
-        oldumask = umask((int) Save_umask);
-        if  (!(inf = fopen(hf, "w")))  {
-                SWAP_TO(Daemuid);
-                doerror(w, $EH{xmbtq cannot create app resource});
-                return;
-        }
-        umask((int) oldumask);
-        SWAP_TO(Daemuid);
-        free(hf);
-        rewind(tf);
-        while  ((ch = getc(tf)) != EOF)
-                putc(ch, inf);
-        fclose(tf);
-        fclose(inf);
+        sprintf(digbuf, "%d", wid);
+        confline_arg = digbuf;
+        proc_save_opts((const char *) 0, "XMBTRJWIDTH", save_confline_opt);
+        sprintf(digbuf, "%d", items);
+        proc_save_opts((const char *) 0, "XMBTRJITEMS", save_confline_opt);
 }
 
 static void  cb_about()
@@ -472,6 +439,8 @@ static Widget  maketitle(char *tname)
 
 static void  wstart(int argc, char **argv)
 {
+        char    *arg;
+        int     jwidth = -1, jitems = -1;
         vrec_t  vrec;
         Pixmap  bitmap;
 
@@ -484,16 +453,32 @@ static void  wstart(int argc, char **argv)
 
         /* Set up parameters from resources */
 
-        if  (vrec.editor_name[0])  {
-                editor_name = stracpy(vrec.editor_name);
-                xterm_edit = vrec.xterm_edit? 1: 0;
-        }
-        else  {
-                editor_name = stracpy("vi");
-                xterm_edit = 1;
-        }
         arr_rtime = vrec.rtime;
         arr_rint = vrec.rint;
+
+        /* Now get default editor stuff from parameters */
+
+        if  ((arg = optkeyword("XMBTRXTERMEDIT")))  {
+                 if  (arg[0])
+                        xterm_edit = arg[0] != '0';
+                 free(arg);
+        }
+
+        if  ((arg = optkeyword("XMBTREDITOR")))
+                editor_name = arg;
+        else
+                editor_name = stracpy(DEFAULT_EDITOR_NAME); /* Something VIle I suspect */
+
+        if  ((arg = optkeyword("XMBTRJWIDTH")))  {
+                jwidth = atoi(arg);
+                free(arg);
+        }
+        if  ((arg = optkeyword("XMBTRJITEMS")))  {
+                jitems = atoi(arg);
+                free(arg);
+        }
+
+        close_optfile();
 
         /* Now to create all the bits of the application */
 
@@ -509,6 +494,10 @@ static void  wstart(int argc, char **argv)
 
         jwid = XmCreateScrolledList(panedw, "jlist", NULL, 0);
         XtAddCallback(jwid, XmNhelpCallback, (XtCallbackProc) dohelp, (XtPointer) $H{xmbtr jlist help});
+        if  (jwidth > 0)
+                XtVaSetValues(jwid, XmNwidth, jwidth, NULL);
+        if  (jitems > 0)
+                XtVaSetValues(jwid, XmNvisibleItemCount, jitems, NULL);
         XtManageChild(jwid);
 
         if  (vrec.footer_pres)

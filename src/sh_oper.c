@@ -56,9 +56,7 @@ static  struct  opstr   {
                         gid;
 }  *oplist;
 
-#ifdef  NETWORK_VERSION
 extern  PIDTYPE Xbns_pid;
-#endif
 
 /* Allocate a structure for an operator.  */
 

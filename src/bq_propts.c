@@ -517,45 +517,25 @@ void  spit_options(FILE *dest, const char *name)
 
 static void  ask_build()
 {
-        char    *hd;
         int     ret, i;
         static  char    btq[] = "BTQ";
 
         if  (!askyorn($PH{Save parameters}))
                 return;
 
-        hd = envprocess("${HOME-/}");
-        if  (strcmp(Curr_pwd, hd) == 0)  {
-                disp_str = hd;
-                if  (!askyorn($PH{Save in current home directory}))  {
-                        free(hd);
+        disp_str = Curr_pwd;
+        if  (askyorn($PH{Save in current directory}))  {
+                if  ((ret = proc_save_opts(Curr_pwd, btq, spit_options)) == 0)
                         return;
-                }
         }
         else  {
-                disp_str = Curr_pwd;
-                if  (askyorn($PH{Save in current directory}))  {
-                        if  ((ret = proc_save_opts(Curr_pwd, btq, spit_options)) == 0)  {
-                                free(hd);
-                                return;
-                        }
-                        disp_str = Curr_pwd;
-                        doerror(stdscr, ret);
-                }
-                disp_str = hd;
-                if  (!askyorn($PH{Save in home directory}))  {
-                        free(hd);
+                disp_str = "(Home)";
+                if  (!askyorn($PH{Save in home directory}))
                         return;
-                }
+                if  ((ret = proc_save_opts((const char *) 0, btq, spit_options)) == 0)
+                        return;
         }
-
-        if  ((ret = proc_save_opts(hd, btq, spit_options)) == 0)  {
-                free(hd);
-                return;
-        }
-        disp_str = hd;
         doerror(stdscr, ret);
-        free(hd);
         do  i = getkey(MAG_A|MAG_P);
         while   (i == EOF);
 }
@@ -688,8 +668,7 @@ static char **codeshelp(char *prefixnotused)
 
 static  struct  sctrl   wns_wid = { $H{btq fmt field width}, ((char **(*)()) 0), 3, 0, FMTWID_P, MAG_P, 1L, 100L, (char *) 0 },
                         wss_code = { $H{btq fmt fmt code}, codeshelp, 1, 0, CODE_P, MAG_P, 0L, 0L, (char *) 0 },
-                        wss_sep = { $H{btq fmt sep val}, ((char **(*)()) 0), 40, 0, 1, MAG_OK, 0L, 0L, (char *) 0 },
-                        wst_fname = { $H{btq fmt what file}, ((char **(*)()) 0), 40, 0, 1, MAG_OK, 0L, 0L, (char *) 0 };
+                        wss_sep = { $H{btq fmt sep val}, ((char **(*)()) 0), 40, 0, 1, MAG_OK, 0L, 0L, (char *) 0 };
 
 struct  formatrow       {
         char    *f_field;               /* field explain or sep */
@@ -1248,190 +1227,23 @@ none2:                  err_no = $E{btq format no formats};
         }
 }
 
-static  void  createnewhelp(FILE *ifl, FILE *ofl, const int statecode, char *fmt)
-{
-        int     ch, ch2, nn, hadit = 0;
-
-        rewind(ifl);
-        while  ((ch = getc(ifl)) != EOF)  {
-
-                /* Ignore lines which don't start with a numeric string.  */
-
-                if  (!isdigit(ch))  {
-                        while  (ch != '\n'  &&  ch != EOF)  {
-                                putc(ch, ofl);
-                                ch = getc(ifl);
-                        }
-                        if  (ch == EOF)
-                                break;
-                        putc(ch, ofl);
-                        continue;
-                }
-
-                /* Read in number, see if interesting */
-
-                nn = 0;
-                do  {
-                        nn = nn * 10 + ch - '0';
-                        ch = getc(ifl);
-                }  while  (isdigit(ch));
-
-                /* Check it interests us */
-
-                if  (toupper(ch) != 'P'  ||  nn != statecode)  {
-                        fprintf(ofl, "%d%c", nn, ch);
-                putrest:
-                        while  ((ch = getc(ifl)) != '\n'  &&  ch != EOF)
-                                putc(ch, ofl);
-                        if  (ch == EOF)
-                                break;
-                        putc(ch, ofl);
-                        continue;
-                }
-
-                /* Check terminated by colon */
-
-                ch2 = getc(ifl);
-                if  (ch2 != ':')  {
-                        fprintf(ofl, "%d%c%c", nn, ch, ch2);
-                        goto  putrest;
-                }
-
-                /* Discard rest of line */
-
-                while  ((ch = getc(ifl)) != '\n'  &&  ch != EOF)
-                        ;
-
-                /* Splurge out replacement string */
-
-                if  (hadit)
-                        continue;
-                fprintf(ofl, "%dP:%s\n", nn, fmt);
-                hadit = 1;
-        }
-        if  (!hadit)  {
-                time_t  now = time((time_t *) 0);
-                struct  tm  *tp = localtime(&now);
-                fprintf(ofl, "\nNew formats %.2d/%.2d/%.2d %.2d:%.2d:%.2d\n\n",
-                               tp->tm_year % 100, tp->tm_mon+1, tp->tm_mday,
-                               tp->tm_hour, tp->tm_min, tp->tm_sec);
-                fprintf(ofl, "%dP:%s\n", statecode, fmt);
-        }
-}
-
-static  char    *wfile;
-extern  char    Cvarname[];
-extern  char    *Helpfile_path;
+static  char    *wfmt;
 
 static void  make_confline(FILE *fp, const char *vname)
 {
-        fprintf(fp, "%s=%s\n", vname, wfile);
+        fprintf(fp, "%s=%s\n", vname, wfmt);
 }
 
-void  offersave(char *fmt, const int statecode)
+void  offersave(char *fmt, const char *varname)
 {
-        char    *hd, *wd, *str;
-        int     prow, pcol, ret;
-        FILE    *ofp;
-        static  char    *fnprompt;
-
         if  (!askyorn($PH{Save format codes}))
                 return;
 
-        hd = envprocess("${HOME-/}");
-        if  (strcmp(Curr_pwd, hd) == 0)  {
-                disp_str = hd;
-                if  (!askyorn($PH{Save in current home directory}))  {
-                        free(hd);
-                        return;
-                }
-                wd = stracpy(hd);
-        }
-        else  {
-                disp_str = Curr_pwd;
-                if  (askyorn($PH{Save in current directory}))
-                        wd = stracpy(Curr_pwd);
-                else  {
-                        disp_str = hd;
-                        if  (!askyorn($PH{Save in home directory}))  {
-                                free(hd);
-                                return;
-                        }
-                        wd = stracpy(hd);
-                }
-        }
-        free(hd);
-
-        if  (chdir(wd) < 0)  {
-                free(wd);
-                return;
-        }
-        if  (!fnprompt)
-                fnprompt = gprompt($P{btq fmt what file});
-        reset_state();
-        clear();
-        mvaddstr(LINES/2, 0, fnprompt);
-        addch(' ');
-        getyx(stdscr, prow, pcol);
-        wst_fname.col = (SHORT) pcol;
-        for  (;;)  {
-                struct  stat    sbuf1, sbuf2;
-                if  (!(str = wgets(stdscr, prow, &wst_fname, "")))  {
-                        Ignored_error = chdir(spdir);
-                        free(wd);
-                        return;
-                }
-                if  (stat(str, &sbuf1) >= 0)  {
-                        if  ((sbuf1.st_mode & S_IFMT) != S_IFREG)  {
-                                doerror(stdscr, $E{xmbtq help file not regular});
-                                continue;
-                        }
-                        fstat(fileno(Cfile), &sbuf2);
-                        if  (sbuf1.st_dev == sbuf2.st_dev && sbuf1.st_ino == sbuf2.st_ino)  {
-                                doerror(stdscr, $E{xmbtq help file would overwrite});
-                                continue;
-                        }
-                        disp_str = str;
-                        if  (!askyorn($PH{Sure you want to overwrite}))
-                                continue;
-                        SWAP_TO(Realuid);
-                        ofp = fopen(str, "w+");
-                        SWAP_TO(Daemuid);
-                        if  (!ofp)  {
-                                doerror(stdscr, $E{xmbtq cannot write help file});
-                                continue;
-                        }
-                }
-                else  {
-                        SWAP_TO(Realuid);
-                        ofp = fopen(str, "w+");
-                        SWAP_TO(Daemuid);
-                        if  (!ofp)  {
-                                doerror(stdscr, $E{xmbtq cannot create help file});
-                                continue;
-                        }
-                }
-                createnewhelp(Cfile, ofp, statecode, fmt);
-                break;
-        }
-
-        wfile = stracpy(str);
-        if  ((ret = proc_save_opts(wd, Cvarname, make_confline)))  {
-                disp_str = wd;
-                disp_str2 = wfile;
-                doerror(stdscr, ret);
-                do  ret = getkey(MAG_A|MAG_P);
-                while   (ret == EOF);
-        }
-        Ignored_error = chdir(spdir);
-        free(wfile);
-        if  (!(wfile = malloc((unsigned) (strlen(wd) + strlen(str) + 2))))
-                ABORT_NOMEM;
-        sprintf(wfile, "%s/%s", wd, str);
-        free(wd);
-        free(Helpfile_path);
-        Helpfile_path = wfile;
-        fclose(Cfile);
-        Cfile = ofp;
-        rewind(Cfile);
-}
+        /* Save this in static location for proc_save_opts/make_confline to use */
+         wfmt = fmt;
+         disp_str = Curr_pwd;
+         if  (askyorn($P{Save in current directory}))
+                 proc_save_opts(Curr_pwd, varname, make_confline);
+         else  if  (askyorn($P{Save in home directory}))
+                 proc_save_opts((const char *) 0, varname, make_confline);
+ }

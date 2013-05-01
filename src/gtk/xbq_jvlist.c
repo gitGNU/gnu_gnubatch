@@ -506,7 +506,7 @@ static void  set_jlist_common(GtkTreeIter *iter, const int jnum)
 
         gtk_list_store_set(jlist_store, iter,
                            SEQ_COL,             (guint) jnum,
-                           JNUM_COL,            host_prefix_long(jh->bj_hostid, jh->bj_job),
+                           JNUM_COL,            JOBH_NUMBER(jh),
                            JUSER_COL,           jh->bj_mode.o_user,
                            JGROUP_COL,          jh->bj_mode.o_group,
                            JORIGHOST_COL,       look_int_host(jh->bj_orighostid),
@@ -1120,7 +1120,7 @@ void  set_vlist_store(const int vnum, GtkTreeIter *iter)
                            VGROUP_COL,          vp->var_mode.o_group,
                            -1);
 
-        gtk_list_store_set(vlist_store, iter, VNAME_COL, host_prefix_str(vp->var_id.hostid, vp->var_name), -1);
+        gtk_list_store_set(vlist_store, iter, VNAME_COL, VAR_NAME(vp), -1);
 
         if  (mpermitted(&vp->var_mode, BTM_READ, mypriv->btu_priv))  {
                 CBtconRef       cp = &vp->var_value;

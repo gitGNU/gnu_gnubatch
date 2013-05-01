@@ -26,6 +26,7 @@ struct  stringvec  {
 extern void  stringvec_init(struct stringvec *);
 extern void  stringvec_insert_unique(struct stringvec *, const char *);
 extern void  stringvec_append(struct stringvec *, const char *);
+extern void  stringvec_split(struct stringvec *, const char *, const char);
 extern void  stringvec_insert(struct stringvec *, const int, const char *);
 extern void  stringvec_delete(struct stringvec *, const unsigned);
 extern void  stringvec_replace(struct stringvec *, const unsigned, const char *);

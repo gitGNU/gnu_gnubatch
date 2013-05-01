@@ -16,7 +16,6 @@
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
 #include "config.h"
-#ifdef  NETWORK_VERSION
 #include <sys/types.h>
 #include <sys/ipc.h>
 #include "incl_unix.h"
@@ -453,12 +452,3 @@ void  var_unpack(BtvarRef dest, const struct varnetmsg *src)
         else
                 dest->var_value.con_un.con_long = ntohl(src->nm_un.nm_long);
 }
-
-#else           /***************************************************
-                    Non-network version - dummy routine
-                 ***************************************************/
-void  jid_pack()
-{
-        return;
-}
-#endif

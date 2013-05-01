@@ -26,6 +26,7 @@ extern  char    *homedof(const int_ugid_t);
 extern  char    *prin_uname(const uid_t);
 extern  char    *prin_gname(const gid_t);
 extern  char    *unameproc(char *, const char *, const uid_t);
+extern  char    *recursive_unameproc(const char *, const char *, const uid_t);
 extern  char    **gen_glist(const char *);
 extern  char    **gen_ulist(const char *);
 #ifdef  HAVE_GETGROUPS

@@ -1224,8 +1224,8 @@ int  varshminit(struct shmid_ds *sp, struct stat *fsb)
                 Var_seg.inf.seg = buffer;
                 Var_seg.dptr = (struct vshm_hdr *) buffer;
                 Var_seg.vhash = (vhash_t *) (buffer + sizeof(struct vshm_hdr));
-		Var_seg.vidhash = (vhash_t *) ((char *) Var_seg.vhash + VAR_HASHMOD * sizeof(vhash_t));
-		Var_seg.vlist = (struct Ventry *) ((char *) Var_seg.vidhash + VAR_HASHMOD * sizeof(vhash_t));
+                Var_seg.vidhash = (vhash_t *) ((char *) Var_seg.vhash + VAR_HASHMOD * sizeof(vhash_t));
+                Var_seg.vlist = (struct Ventry *) ((char *) Var_seg.vidhash + VAR_HASHMOD * sizeof(vhash_t));
                 Var_seg.Nvars = Var_seg.dptr->vs_maxvars;
                 return  -1;
         }
@@ -1253,8 +1253,8 @@ int  varshminit(struct shmid_ds *sp, struct stat *fsb)
                         goto  here;
                 }
                 Var_seg.vhash = (vhash_t *) (Var_seg.inf.seg + sizeof(struct vshm_hdr));
-		Var_seg.vidhash = (vhash_t *) ((char *) Var_seg.vhash + VAR_HASHMOD * sizeof(vhash_t));
-		Var_seg.vlist = (struct Ventry *) ((char *) Var_seg.vidhash + VAR_HASHMOD * sizeof(vhash_t));
+                Var_seg.vidhash = (vhash_t *) ((char *) Var_seg.vhash + VAR_HASHMOD * sizeof(vhash_t));
+                Var_seg.vlist = (struct Ventry *) ((char *) Var_seg.vidhash + VAR_HASHMOD * sizeof(vhash_t));
                 Var_seg.Nvars = Var_seg.dptr->vs_maxvars;
 
                 /* If we didn't have a semaphore, see if we have a lock file */

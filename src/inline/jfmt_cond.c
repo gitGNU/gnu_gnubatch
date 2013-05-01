@@ -33,7 +33,7 @@ JFORMAT(fmt_cond)
                         if  (uc != 0)
                                 bigbuff[lng++] = ',';
                         vp = &Var_seg.vlist[cp->bjc_varind].Vent;
-			lng += strlen(strcpy(&bigbuff[lng], host_prefix_str(vp->var_id.hostid, vp->var_name)));
+                        lng += strlen(strcpy(&bigbuff[lng], VAR_NAME(vp)));
                 }
         }
 #ifndef BTJLIST_INLINE

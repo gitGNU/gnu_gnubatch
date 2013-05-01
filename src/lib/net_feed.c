@@ -24,7 +24,6 @@
 #include <fcntl.h>
 #endif
 #include "defaults.h"
-#ifdef  NETWORK_VERSION
 #include "incl_net.h"
 #include "incl_unix.h"
 #include "files.h"
@@ -86,13 +85,3 @@ FILE *net_feed(const int type, const netid_t netid, const jobno_t jobno, const i
 #endif
         return  result;
 }
-
-#else
-
-/* Dummy version to keep linker happy */
-
-FILE *net_feed(const int type, const netid_t netid, const jobno_t jobno, const int port)
-{
-        return  (FILE *) 0;
-}
-#endif

@@ -917,49 +917,34 @@ int  job_save(struct pend_job *pj)
 
 void  cb_loaddefsb(const int ishomed)
 {
-        const   char    *configname = USER_CONFIG;
-        char            *name;
-        char            **ret = (char **) 0;
+        char    *filename, *name, **ret = (char **) 0;
         int             had = 0;
 
-        if  (ishomed)  {
-                char    hdname[16+14];
-                strcpy(hdname, "$HOME/");
-                strcat(hdname, configname);
-                if  ((name = rdoptfile(hdname, Varname)))  {
-                        char    **evec = makevec(name);
-                        init_defaults();
-                        cjob = &default_pend;
-                        JREQ = default_pend.job;
-                        Mode_arg = &default_pend.job->h.bj_mode;
-                        ret = my_doopts(evec);
-                        free(evec[0]);
-                        free((char *) evec);
-                        free(name);
-                        had++;
-                }
-        }
+        if  (ishomed)
+                filename = recursive_unameproc(HOME_CONFIG, Curr_pwd, Realuid);
         else  {
-                char    *path;
-                if  (!(path = malloc((unsigned) (strlen(Curr_pwd) + strlen(configname) + 2))))
+                if  (!(filename = malloc((unsigned) (strlen(Curr_pwd) + sizeof(USER_CONFIG) + 1))))
                         ABORT_NOMEM;
-                sprintf(path, "%s/%s", Curr_pwd, configname);
-                if  ((name = rdoptfile(path, Varname)))  {
-                        char    **evec = makevec(name);
-                        init_defaults();
-                        cjob = &default_pend;
-                        JREQ = default_pend.job;
-                        Mode_arg = &default_pend.job->h.bj_mode;
-                        ret = my_doopts(evec);
-                        free(evec[0]);
-                        free((char *) evec);
-                        free(name);
-                        had++;
-                }
-                free(path);
+                strcpy(filename, Curr_pwd);
+                strcat(filename, "/" USER_CONFIG);
         }
 
-        if  (!had)
+        if  ((name = rdoptfile(filename, Varname)))  {
+                char    **evec = makevec(name);
+                init_defaults();
+                cjob = &default_pend;
+                JREQ = default_pend.job;
+                Mode_arg = &default_pend.job->h.bj_mode;
+                ret = my_doopts(evec);
+                free(evec[0]);
+                free((char *) evec);
+                free(name);
+                had++;
+        }
+
+        free(filename);
+
+        if  (!had)                      /* Nothing found */
                 return;
 
         checksetmode(0, (const USHORT *) 0, mypriv->btu_jflags[0], &default_job.h.bj_mode.u_flags);
@@ -1052,12 +1037,13 @@ void  cb_savedefs(GtkAction *act)
         int     ret;
 
         if  (strcmp(gtk_action_get_name(act), "Savedefsh") == 0)  {
-                char  *hd = envprocess("${HOME-/}");
-                ret = proc_save_opts(hd, Varname, spit_options);
-                free(hd);
+                ret = proc_save_opts((const char *) 0, Varname, spit_options);
+                disp_str = "(Home)";
         }
-        else
+        else  {
+                disp_str = Curr_pwd;
                 ret = proc_save_opts(Curr_pwd, Varname, spit_options);
+        }
 
         if  (ret)
                 doerror(ret);

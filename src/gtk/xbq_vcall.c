@@ -114,7 +114,7 @@ GtkWidget *start_vardlg(BtvarRef vp, const int dlgcode, const int labelcode)
         labp = g_string_new(pr);
         free(pr);
         g_string_append_c(labp, ' ');
-        g_string_append(labp, host_prefix_str(vp->var_id.hostid, vp->var_name));
+        g_string_append(labp, VAR_NAME(vp));
         lab = gtk_label_new(labp->str);
         g_string_free(labp, TRUE);
         gtk_box_pack_start(GTK_BOX(GTK_DIALOG(dlg)->vbox), lab, FALSE, FALSE, DEF_DLG_VPAD);
@@ -714,7 +714,7 @@ static int  vmacroexec(const char *str, BtvarRef vp)
                 const  char     *argbuf[3];
                 argbuf[0] = str;
                 if  (vp)  {
-                        argbuf[1] = host_prefix_str(vp->var_id.hostid, vp->var_name);
+                        argbuf[1] = VAR_NAME(vp);
                         argbuf[2] = (const char *) 0;
                 }
                 else
@@ -765,7 +765,7 @@ void  cb_vmac()
         if  (vp)  {
                 GString *labp = g_string_new(NULL);
                 pr = gprompt($P{xbtq vmac named});
-                g_string_printf(labp, "%s %s", pr, host_prefix_str(vp->var_id.hostid, vp->var_name));
+                g_string_printf(labp, "%s %s", pr, VAR_NAME(vp));
                 free(pr);
                 lab = gtk_label_new(labp->str);
                 g_string_free(labp, TRUE);

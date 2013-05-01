@@ -17,7 +17,6 @@
 
 #include "config.h"
 #include <stdio.h>
-#ifdef  NETWORK_VERSION
 #include "incl_sig.h"
 #include <sys/types.h>
 #ifdef  HAVE_FCNTL_H
@@ -2159,12 +2158,12 @@ int  sendsync(struct remote *rp)
 
 void  send_endsync(struct remote *rp)
 {
-                struct  netmsg  rq;
-                BLOCK_ZERO(&rq, sizeof(rq));
-                rq.hdr.code = htons(N_ENDSYNC);
-                rq.hdr.length = htons(sizeof(struct netmsg));
-                rq.hdr.hostid = myhostid;
-                chk_write(rp, (char *) &rq, sizeof(rq));
+        struct  netmsg  rq;
+        BLOCK_ZERO(&rq, sizeof(rq));
+        rq.hdr.code = htons(N_ENDSYNC);
+        rq.hdr.length = htons(sizeof(struct netmsg));
+        rq.hdr.hostid = myhostid;
+        chk_write(rp, (char *) &rq, sizeof(rq));
 }
 
 /* Note we had a successful end sync from the other end */
@@ -2534,15 +2533,3 @@ void  netmonitor()
                 }
         }
 }
-
-#else   /* !NETWORK_VERSION */
-
-/* This "routine" isn't strictly necessary but some C compilers winge
-   if they are given a .c file with no code so here is some....  */
-
-void    netmonitor()
-{
-        return;
-}
-
-#endif  /* !NETWORK_VERSION */

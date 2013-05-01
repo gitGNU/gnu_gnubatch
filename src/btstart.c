@@ -67,8 +67,6 @@ void  nomem(const char *fl, const int ln)
         exit(E_NOMEM);
 }
 
-#ifdef  NETWORK_VERSION
-
 /* Find host name in host file or look it up and construct structure */
 
 static  int  get_conn_host(const char *hostn, struct remote *drp)
@@ -160,7 +158,6 @@ static int  doconnop(const unsigned cmd, const char *hostn)
         print_error($E{Btconn connection fail});
         return  E_FALSE;
 }
-#endif
 
 /* See what time the guy wants */
 
@@ -448,7 +445,6 @@ MAINFN_TYPE  main(int argc, char **argv)
         SCRAMBLID_CHECK
         SWAP_TO(Daemuid);
 
-#ifdef  NETWORK_VERSION
         if  (strcmp(progname, "gbch-conn") == 0 || strcmp(progname, "gbch-disconn") == 0)  {
                 if  (!argv[1])  {
                         print_error($E{Btconn no machine arg});
@@ -464,7 +460,7 @@ MAINFN_TYPE  main(int argc, char **argv)
                 }
                 return  doconnop(strcmp(progname, "btconn") == 0? N_CONNECT: N_DISCONNECT, argv[1]);
         }
-#endif
+
         if  (strcmp(progname, "gbch-dst") == 0)  {
                 if  ((Ctrl_chan = msgget(MSGID+envselect_value, 0)) < 0)  {
                         print_error($E{Scheduler not running});
@@ -556,12 +552,10 @@ MAINFN_TYPE  main(int argc, char **argv)
                         exit(E_SETUP);
                 }
         }
-#ifdef  NETWORK_VERSION
         if  (fork() == 0)  {
                 char    *xbn = envprocess(XBNETSERV);
                 execl(xbn, xbn, (const char *) 0);
                 exit(255);
         }
-#endif
         return  0;
 }

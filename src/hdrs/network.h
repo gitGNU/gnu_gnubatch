@@ -22,7 +22,6 @@
 #define CLOCK_AMCHILD   1
 #define CLOCK_OK        2
 
-#ifdef  NETWORK_VERSION
 struct  remote  {
         char    hostname[HOSTNSIZE];    /* Actual host name (alternatively user name) */
         char    alias[HOSTNSIZE];       /* Alias for it (alternatively group name) */
@@ -88,5 +87,3 @@ extern   netid_t         look_int_hostname(const char *);       /* Look up host 
 extern   netid_t  sockaddr2int_netid_t(struct sockaddr_in *);
 extern   netid_t  ext2int_netid_t(const netid_t);
 extern   netid_t  int2ext_netid_t(const netid_t);
-
-#endif

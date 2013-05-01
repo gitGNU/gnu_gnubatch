@@ -355,6 +355,8 @@ MAINFN_TYPE  main(int argc, char **argv)
 
         /* This is only called internally, so don't bother with messages.  */
 
+        Dirname = argv[2];              /* Check validity and replace ~ in 6-arg case */
+
         if  (argc == 4)  {
                 char    *arg = argv[1];
                 if  (arg[0] != '-'  ||  arg[2] != '\0')
@@ -391,6 +393,12 @@ MAINFN_TYPE  main(int argc, char **argv)
                 }
                 else
                         Jobnum = atol(argv[3]);
+
+                /* In this case only, replace ~ directory name with null to
+                   select the home directory version */
+
+                if  (strcmp(Dirname, "~") == 0)
+                        Dirname = (char *) 0;
         }
         else  {
                 if  (argc == 6)  {
@@ -412,7 +420,6 @@ MAINFN_TYPE  main(int argc, char **argv)
                 Xfile = argv[3];
                 Jfile = argv[4];
         }
-        Dirname = argv[2];
 
         spdir = envprocess(SPDIR);
         if  (chdir(spdir) < 0)
@@ -457,13 +464,17 @@ MAINFN_TYPE  main(int argc, char **argv)
         mypriv = getbtuentry(Realuid);
         if  (!mpermitted(&jp->h.bj_mode, nodelete? BTM_READ: BTM_READ|BTM_DELETE, mypriv->btu_priv)  &&  !(mypriv->btu_priv & BTM_WADMIN))
                 return  E_CANTDEL;
+
         switch  (pardump)  {
         default:
+                /* Dump out job case, Dirname should be something sensible */
                 dumpjob(jp);
                 deljob(jp);
                 break;
+
         case  ASCANC:
         case  ASRUNN:
+                /* Dirname may be null if home directory is intended */
                 Wj = jp;
                 /* FIXME sometime we don't want to be called BTR */
                 if  (proc_save_opts(Dirname, "BTR", spit_options) != 0)

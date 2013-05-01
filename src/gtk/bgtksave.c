@@ -49,13 +49,13 @@ int  isfld(char *buff, char **argv)
 }
 
 /*  Arguments are:
-    1. Encoded options XSPQDISPOPT
-    2. Encoded class code XSPQDISPCC
-    3. Users to limit display to XSPQDISPUSER
-    4. Printers to limit display to XSPQDISPPTR
-    5. Job titles to limit display to XSPQDISPTIT
-    6. Fields for job view XSPQJOBFLD
-    7. Fields for job view XSPQPTRFLD */
+    1. Encoded options XBTQDISPOPT
+    2. Encoded class code XBTQDISPCC
+    3. Users to limit display to XBTQDISPUSER
+    4. Printers to limit display to XBTQDISPPTR
+    5. Job titles to limit display to XBTQDISPTIT
+    6. Fields for job view XBTQJOBFLD
+    7. Fields for job view XBTQPTRFLD */
 
 MAINFN_TYPE  main(int argc, char **argv)
 {
@@ -79,15 +79,15 @@ MAINFN_TYPE  main(int argc, char **argv)
                 homed = pw->pw_dir;
         }
 
-        if  (chdir(homed) < 0)
-                return  E_SETUP;
-
         /* Set umask so anyone can read the file (home dir mush be at least 0111). */
 
         oldumask = umask(0);
         umask(oldumask & ~0444);
 
-        if  ((xtfile = fopen(USER_CONFIG, "r")))  {
+        if  (chdir(homed) < 0  ||  (chdir(HOME_CONFIG_DIR) < 0  &&  (mkdir(HOME_CONFIG_DIR, 0777) < 0 || chdir(HOME_CONFIG_DIR) < 0)))
+                return  E_SETUP;
+
+         if  ((xtfile = fopen(HOME_CONFIG_FILE, "r")))  {
                 FILE  *tmpf = tmpfile();
                 char    buffer[BUFFSIZE];
 
@@ -97,12 +97,12 @@ MAINFN_TYPE  main(int argc, char **argv)
                 }
                 rewind(tmpf);
                 fclose(xtfile);
-                if  (!(xtfile = fopen(USER_CONFIG, "w")))
+                if  (!(xtfile = fopen(HOME_CONFIG_FILE, "w")))
                         return  E_NOPRIV;
                 while  (fgets(buffer, BUFFSIZE, tmpf))
                         fputs(buffer, xtfile);
         }
-        else  if  (!(xtfile = fopen(USER_CONFIG, "w")))
+        else  if  (!(xtfile = fopen(HOME_CONFIG_FILE, "w")))
                 return  E_NOPRIV;
 
         /* Now stick the new stuff on the end of the file */

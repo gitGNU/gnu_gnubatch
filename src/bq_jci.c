@@ -653,74 +653,52 @@ char    **listcis(char *prefix)
         return  result;
 }
 
-/* Stuff to implement the unqueue command */
+/* Stuff to implement the unqueue command
+   First parameter stuff from message file */
 
-int  dounqueue(BtjobRef jp)
+static  char    *udprog, *udprompt, *copyprompt, *dirprompt, *xfilep, *jfilep, *udcverb, *udccanc;
+static  HelpaltRef      udopts, verbopts, cancopts;
+static  int     maxp;
+
+static  void    loadunqparams()
 {
-        static  char    *udprog, *udprompt, *copyprompt, *dirprompt, *xfilep, *jfilep;
-        static  char    *udcverb, *udccanc;
-        static  HelpaltRef      udopts, verbopts, cancopts;
-        static  int     maxp;
-        int     jsy, jmsy, dummy, whichopt;
-        PIDTYPE pid;
+        if  (udprompt)                          /* Done this once */
+                return;
+
+        udprog = envprocess(DUMPJOB);
+        dirprompt = gprompt($P{btq unqueue dir});
+        xfilep = gprompt($P{btq unqueue command file});
+        jfilep = gprompt($P{btq unqueue job file});
+        udprompt = gprompt($P{btq unqueue hdr prompt});
+        udopts = galts(jscr, $Q{btq unqueue options}, 4);
+        copyprompt = gprompt($P{btq copy options prompt});
+        verbopts = galts(jscr, $Q{btq unq verbose}, 2);
+        udcverb = gprompt($P{btq unq verbose});
+        cancopts = galts(jscr, $Q{btq unq jobstate}, 2);
+        udccanc = gprompt($P{btq unq jobstate});
+        maxp = r_max(strlen(dirprompt), r_max(strlen(xfilep), r_max(strlen(jfilep), r_max(strlen(udcverb), strlen(udccanc)))));
+        ud_xf.col = ud_jf.col = ud_dir.col = maxp + BOXWID + 1;
+        ud_dir.size = COLS - maxp - BOXWID - 2;
+}
+
+/* Create a sub-window with a box round it for unqueue prompts */
+
+static  WINDOW  *make_unq_prompt_win(BtjobRef jp, char *prompt, const int size)
+{
+        int     jsy, jmsy, dummy;
         WINDOW  *cw;
-        char    *hd;
-        char    *Exist, *Direc, *Expdir;
-        const   char    *title;
-
-        /* Can the geyser do it?  */
-
-        disp_str = title = qtitle_of(jp);
-        disp_arg[0] = jp->h.bj_job;
-
-        if  (!mpermitted(&jp->h.bj_mode, BTM_READ|BTM_WRITE|BTM_DELETE, mypriv->btu_priv))  {
-                doerror(jscr, $E{btq unq no permission});
-                return  0;
-        }
-        if  (jp->h.bj_progress >= BJP_STARTUP1)  {
-                doerror(jscr, $E{btq unq runnable job});
-                return  0;
-        }
-
-        /* First time round, read prompts */
-
-        if  (!udprompt)  {
-                udprog = envprocess(DUMPJOB);
-                dirprompt = gprompt($P{btq unqueue dir});
-                xfilep = gprompt($P{btq unqueue command file});
-                jfilep = gprompt($P{btq unqueue job file});
-                udprompt = gprompt($P{btq unqueue hdr prompt});
-                udopts = galts(jscr, $Q{btq unqueue options}, 4);
-                copyprompt = gprompt($P{btq copy options prompt});
-                verbopts = galts(jscr, $Q{btq unq verbose}, 2);
-                udcverb = gprompt($P{btq unq verbose});
-                cancopts = galts(jscr, $Q{btq unq jobstate}, 2);
-                udccanc = gprompt($P{btq unq jobstate});
-                maxp = r_max(strlen(dirprompt), r_max(strlen(xfilep), r_max(strlen(jfilep), r_max(strlen(udcverb), strlen(udccanc)))));
-                ud_xf.col = ud_jf.col = ud_dir.col = maxp + BOXWID + 1;
-                ud_dir.size = COLS - maxp - BOXWID - 2;
-        }
-
-        if  (!(udopts && verbopts && cancopts))
-                return  -1;
-
-        getyx(jscr, jsy, dummy);
-        whichopt = rdalts(jscr, jsy, 0, udopts, -1, $H{btq unqueue options});
-        if  (whichopt < 0)
-                return  -1;
-
-        /* Create sub-window to input variable creation details */
+        const   char    *title = qtitle_of(jp);
 
         getbegyx(jscr, jsy, dummy);
         getmaxyx(jscr, jmsy, dummy);
-        if  (jmsy < 4+2*BOXWID)  {
+        if  (jmsy < size+2*BOXWID)  {
                 doerror(jscr, $E{btq jlist no space unq win});
-                return  0;
+                return  (WINDOW *) 0;
         }
 
-        if  ((cw = newwin(5+2*BOXWID, 0, jsy + (jmsy - 5-2*BOXWID) / 2, 0)) == (WINDOW *) 0)  {
+        if  ((cw = newwin(size+2*BOXWID, 0, jsy + (jmsy - 5-2*BOXWID) / 2, 0)) == (WINDOW *) 0)  {
                 doerror(jscr, $E{btq jlist cannot create unq win});
-                return  0;
+                return  (WINDOW *) 0;
         }
 
 #ifdef  HAVE_TERMINFO
@@ -728,44 +706,46 @@ int  dounqueue(BtjobRef jp)
 #else
         box(cw, '|', '-');
 #endif
-        mvwprintw(cw, BOXWID, BOXWID, whichopt > 1? copyprompt: udprompt, title, jp->h.bj_job);
+        mvwprintw(cw, BOXWID, BOXWID, prompt, title, jp->h.bj_job);
+        return  cw;
+}
+
+static  char    *get_unqueue_dir(WINDOW *cw)
+{
+        char    *Exist;
+
         mvwaddstr(cw, 2+BOXWID, BOXWID, dirprompt);
-        hd = Curr_pwd;
-        if  (whichopt == 2)
-                hd = envprocess("$HOME");
-        ws_fill(cw, 2+BOXWID, &ud_dir, hd);
-        if  (whichopt < 2)  {
-                mvwaddstr(cw, 3+BOXWID, BOXWID, xfilep);
-                mvwaddstr(cw, 4+BOXWID, BOXWID, jfilep);
-        }
-
-        /* Read directory field */
-
+        ws_fill(cw, 2+BOXWID, &ud_dir, Curr_pwd);
+        mvwaddstr(cw, 3+BOXWID, BOXWID, xfilep);
+        mvwaddstr(cw, 4+BOXWID, BOXWID, jfilep);
         reset_state();
         Ew = cw;
+        Exist = Curr_pwd;
 
-        Exist = hd;
         for  (;;)  {
+                char    *Direc, *Expdir;
+
                 if  (!(Direc = wgets(cw, 2+BOXWID, &ud_dir, Exist)))  {
+                        /* Aborted case */
 #ifdef  CURSES_MEGA_BUG
                         refresh();
 #endif
-                        delwin(cw);
-                        return  -1;
+                        return  (char *) 0;
                 }
-                if  (Direc[0] == '\0')
+
+                if  (Direc[0] == '\0')          /* Empty string */
                         Expdir = stracpy(Exist);
                 else  {
                         Expdir = envprocess(Direc);
                         if  (strchr(Expdir, '~'))  {
-                                char    *nd = unameproc(Expdir, hd, Realuid);
+                                char    *nd = unameproc(Expdir, Curr_pwd, Realuid);
                                 free(Expdir);
                                 Expdir = nd;
                         }
                 }
 
                 disp_str = Expdir;
-                Exist = Direc[0]? Direc: hd;
+                Exist = Direc[0]? Direc: Curr_pwd;
 
                 if  (Expdir[0] != '/')  {
                         doerror(cw, $E{btq unq not absolute path});
@@ -773,107 +753,128 @@ int  dounqueue(BtjobRef jp)
                         continue;
                 }
                 if  (chdir(Expdir) >= 0)
-                        break;
+                        return  Expdir;
                 doerror(cw, $E{btq unq not a directory});
                 free(Expdir);
+         }
+}
+
+static  char    *get_unqueue_file(WINDOW *cw, const int row)
+{
+        char    *resf, *Exist = "";
+
+        for  (;;)  {
+                struct  stat    sbuf;
+
+                if  (!(resf = wgets(cw, row, &ud_xf, Exist)))
+                        return  (char *) 0;
+
+                disp_str = resf;
+                if  (strchr(resf, '/'))  {
+                        doerror(cw, $E{btq unq not a file name});
+                        continue;
+                }
+
+                if  (stat(resf, &sbuf) < 0  || (sbuf.st_mode & S_IFMT) == S_IFREG)
+                        return  stracpy(resf);
+
+                doerror(cw, $E{btq unq not a regular file});
+                Exist = resf;
+        }
+}
+
+static  int     do_unqueue_int(BtjobRef jp, const int whichopt)
+{
+        PIDTYPE pid;
+        WINDOW  *cw;
+        char   *Direc, *Xfname, *Jfname;
+
+        if  (!(cw = make_unq_prompt_win(jp, udprompt, 5)))
+                return  0;
+
+        Direc = get_unqueue_dir(cw);
+        Ignored_error = chdir(spdir);
+
+        if  (!Direc)  {
+                delwin(cw);
+                return  -1;
         }
 
-        if  (whichopt < 2)  {
-                char    *Xfname, *Jfname, *arg0;
-                struct  stat    sbuf;
-                const   char    **ap, *arglist[7];
-
-                Exist = "";
-                for  (;;)  {
-                        if  (!(Xfname = wgets(cw, 3+BOXWID, &ud_xf, Exist)))
-                                goto  aborted;
-                        disp_str = Xfname;
-                        if  (strchr(Xfname, '/'))  {
-                                doerror(cw, $E{btq unq not a file name});
-                                continue;
-                        }
-
-                        if  (stat(Xfname, &sbuf) < 0  || (sbuf.st_mode & S_IFMT) == S_IFREG)
-                                break;
-                        doerror(cw, $E{btq unq not a regular file});
-                        Exist = Xfname;
-                }
-
-                Xfname = stracpy(Xfname);
-                Exist = "";
-                for  (;;)  {
-                        if  (!(Jfname = wgets(cw, 4+BOXWID, &ud_jf, Exist)))  {
-                                free(Xfname);
-                                goto  aborted;
-                        }
-                        disp_str = Jfname;
-                        if  (strchr(Jfname, '/'))  {
-                                doerror(cw, $E{btq unq not a file name});
-                                continue;
-                        }
-
-                        if  (stat(Jfname, &sbuf) < 0  || (sbuf.st_mode & S_IFMT) == S_IFREG)
-                                break;
-                        doerror(cw, $E{btq unq not a regular file});
-                        Exist = Jfname;
-                }
-
-                /* Ok now do the business */
-
-#ifdef  CURSES_MEGA_BUG
-                refresh();
-#endif
+        if  (!(Xfname = get_unqueue_file(cw, 3 + BOXWID)))  {
+                free(Direc);
                 delwin(cw);
-                Ignored_error = chdir(spdir);
+                return  -1;
+        }
 
-                if  ((pid = fork()))  {
-                        int     status;
+        if  (!(Jfname = get_unqueue_file(cw, 4 + BOXWID)))  {
+                free(Xfname);
+                free(Direc);
+                delwin(cw);
+                return  -1;
+        }
 
-                        free(Expdir);
-                        free(Xfname);
+        /* Ok now do the business */
 
-                        if  (pid < 0)  {
-                                doerror(jscr, $E{btq unq cannot fork});
-                                return  -1;
-                        }
-#ifdef  HAVE_WAITPID
-                        while  (waitpid(pid, &status, 0) < 0)
-                                ;
-#else
-                        while  (wait(&status) != pid)
-                                ;
-#endif
-                        if  (status == 0)       /* All ok */
-                                return  1;
-                        if  (status & 0xff)  {
-                                doerror(jscr, $E{btq unq program fault});
-                                return  -1;
-                        }
-                        status = (status >> 8) & 0xff;
-                        disp_arg[0] = jp->h.bj_job;
-                        disp_str = title;
-                        switch  (status)  {
-                        default:
-                                disp_arg[1] = status;
-                                doerror(jscr, $E{btq unq misc error});
-                                return  -1;
-                        case  E_JDFNFND:
-                                doerror(jscr, $E{btq unq file not found});
-                                return  -1;
-                        case  E_JDNOCHDIR:
-                                doerror(jscr, $E{btq unq dir not found});
-                                return  -1;
-                        case  E_JDFNOCR:
-                                doerror(jscr, $E{btq unq cannot create directory});
-                                return  -1;
-                        case  E_JDJNFND:
-                                doerror(jscr, $E{btq unq unknown job});
-                                return  -1;
-                        case  E_CANTDEL:
-                                doerror(jscr, $E{btq unq cannot delete});
-                                return  -1;
-                        }
+        delwin(cw);
+        Ignored_error = chdir(spdir);
+
+        if  ((pid = fork()))  {
+                int     status;
+
+                free(Direc);
+                free(Xfname);
+                free(Jfname);
+
+                if  (pid < 0)  {
+                        doerror(jscr, $E{btq unq cannot fork});
+                        return  -1;
                 }
+
+#ifdef  HAVE_WAITPID
+                 while  (waitpid(pid, &status, 0) < 0)
+                         ;
+#else
+                 while  (wait(&status) != pid)
+                         ;
+#endif
+
+                 if  (status == 0)       /* All ok */
+                         return  1;
+
+                 if  (status & 0xff)  {
+                         doerror(jscr, $E{btq unq program fault});
+                         return  -1;
+                 }
+
+                 status = (status >> 8) & 0xff;
+                 disp_arg[0] = jp->h.bj_job;
+                 disp_str = qtitle_of(jp);;
+
+                 switch  (status)  {
+                 default:
+                         disp_arg[1] = status;
+                         doerror(jscr, $E{btq unq misc error});
+                         return  -1;
+                 case  E_JDFNFND:
+                         doerror(jscr, $E{btq unq file not found});
+                         return  -1;
+                 case  E_JDNOCHDIR:
+                         doerror(jscr, $E{btq unq dir not found});
+                         return  -1;
+                 case  E_JDFNOCR:
+                         doerror(jscr, $E{btq unq cannot create directory});
+                         return  -1;
+                 case  E_JDJNFND:
+                         doerror(jscr, $E{btq unq unknown job});
+                         return  -1;
+                 case  E_CANTDEL:
+                         doerror(jscr, $E{btq unq cannot delete});
+                         return  -1;
+                 }
+        }
+        else  {         /* Child process */
+                char    *arg0;
+                const   char    **ap, *arglist[7];
 
                 setuid(Realuid);
                 Ignored_error = chdir(Curr_pwd);        /* So that it picks up config file correctly */
@@ -881,87 +882,89 @@ int  dounqueue(BtjobRef jp)
                         arg0 = udprog;
                 else
                         arg0++;
+
                 ap = arglist;
                 *ap++ = arg0;
                 if  (whichopt > 0)              /* No delete */
                         *ap++ = "-n";
-                *ap++ = host_prefix_long(jp->h.bj_hostid, jp->h.bj_job);
-                *ap++ = Expdir;
+                *ap++ = JOB_NUMBER(jp);
+                *ap++ = Direc;
                 *ap++ = Xfname;
                 *ap++ = Jfname;
                 *ap = (char *) 0;
                 execv(udprog, (char **) arglist);
-                exit(E_SETUP);
+                _exit(E_SETUP);
+        }
+}
+
+static  int     do_copyoptsinjob(BtjobRef jp, const int whichopt)
+{
+        int     isverb, iscanc;
+        WINDOW  *cw;
+        PIDTYPE pid;
+
+        if  (!(cw = make_unq_prompt_win(jp, copyprompt, 4)))
+                return  0;
+
+        mvwaddstr(cw, 2+BOXWID, BOXWID, udcverb);
+        wrefresh(cw);
+        isverb = rdalts(cw, 2+BOXWID, maxp+BOXWID+1, verbopts, -1, $H{btq unq verbose});
+        if  (isverb < 0)  {
+                delwin(cw);
+                return  -1;
+        }
+        mvwaddstr(cw, 2+BOXWID, maxp+BOXWID+1, disp_alt(isverb, verbopts));
+        mvwaddstr(cw, 3+BOXWID, BOXWID, udccanc);
+        wrefresh(cw);
+        iscanc = rdalts(cw, 3+BOXWID, maxp+BOXWID+1, cancopts, jp->h.bj_progress != BJP_NONE? 1: 0, $H{btq unq jobstate});
+        delwin(cw);
+        if  (iscanc < 0)
+                return  -1;
+
+        /* Do the business */
+
+        if  ((pid = fork()))  {
+                int     status;
+
+                if  (pid < 0)  {
+                        doerror(jscr, $E{btq unq cannot fork});
+                        return  -1;
+                }
+#ifdef  HAVE_WAITPID
+                while  (waitpid(pid, &status, 0) < 0)
+                        ;
+#else
+                while  (wait(&status) != pid)
+                        ;
+#endif
+                if  (status == 0)       /* All ok */
+                        return  1;
+                if  (status & 0xff)  {
+                        doerror(jscr, $E{btq unq program fault});
+                        return  -1;
+                }
+                status = (status >> 8) & 0xff;
+                disp_arg[0] = jp->h.bj_job;
+                disp_str = qtitle_of(jp);;
+                switch  (status)  {
+                default:
+                        disp_arg[1] = status;
+                        doerror(jscr, $E{btq unq misc error});
+                        return  -1;
+                case  E_JDNOCHDIR:
+                        doerror(jscr, $E{btq unq dir not found});
+                        return  -1;
+                case  E_JDJNFND:
+                        doerror(jscr, $E{btq unq unknown job});
+                        return  -1;
+                case  E_CANTSAVEO:
+                        doerror(jscr, $E{btq unq cannot save options file});
+                        return  -1;
+                }
         }
         else  {
-                int     isverb, iscanc;
                 const   char    *arg0, **ap, *arglist[5];
                 char    abuf[3];
-
-                if  (whichopt == 2)             /* Don't need home directory any more */
-                        free(hd);
-                mvwaddstr(cw, 3+BOXWID, BOXWID, udcverb);
-                wrefresh(cw);
-                isverb = rdalts(cw, 3+BOXWID, maxp+BOXWID+1, verbopts, -1, $H{btq unq verbose});
-                if  (isverb < 0)
-                        goto  aborted;
-                mvwaddstr(cw, 3+BOXWID, maxp+BOXWID+1, disp_alt(isverb, verbopts));
-                mvwaddstr(cw, 4+BOXWID, BOXWID, udccanc);
-                wrefresh(cw);
-                iscanc = rdalts(cw, 4+BOXWID, maxp+BOXWID+1, cancopts, jp->h.bj_progress != BJP_NONE? 1: 0, $H{btq unq jobstate});
-                if  (iscanc < 0)
-                        goto  aborted;
-                mvwaddstr(cw, 4+BOXWID, maxp+BOXWID+1, disp_alt(iscanc, cancopts));
-
-                /* Ok now do the business */
-
-#ifdef  CURSES_MEGA_BUG
-                refresh();
-#endif
-                delwin(cw);
-                Ignored_error = chdir(spdir);
-
-                if  ((pid = fork()))  {
-                        int     status;
-
-                        free(Expdir);
-
-                        if  (pid < 0)  {
-                                doerror(jscr, $E{btq unq cannot fork});
-                                return  -1;
-                        }
-#ifdef  HAVE_WAITPID
-                        while  (waitpid(pid, &status, 0) < 0)
-                                ;
-#else
-                        while  (wait(&status) != pid)
-                                ;
-#endif
-                        if  (status == 0)       /* All ok */
-                                return  1;
-                        if  (status & 0xff)  {
-                                doerror(jscr, $E{btq unq program fault});
-                                return  -1;
-                        }
-                        status = (status >> 8) & 0xff;
-                        disp_arg[0] = jp->h.bj_job;
-                        disp_str = title;
-                        switch  (status)  {
-                        default:
-                                disp_arg[1] = status;
-                                doerror(jscr, $E{btq unq misc error});
-                                return  -1;
-                        case  E_JDNOCHDIR:
-                                doerror(jscr, $E{btq unq dir not found});
-                                return  -1;
-                        case  E_JDJNFND:
-                                doerror(jscr, $E{btq unq unknown job});
-                                return  -1;
-                        case  E_CANTSAVEO:
-                                doerror(jscr, $E{btq unq cannot save options file});
-                                return  -1;
-                        }
-                }
 
                 setuid(Realuid);
                 Ignored_error = chdir(Curr_pwd);        /* So that it picks up config file correctly */
@@ -977,19 +980,51 @@ int  dounqueue(BtjobRef jp)
                 abuf[2] = '\0';
                 *ap++ = arg0;
                 *ap++ = abuf;
-                *ap++ = Expdir;
-                *ap++ = host_prefix_long(jp->h.bj_hostid, jp->h.bj_job);
+                *ap++ = whichopt == 2? "-": Curr_pwd;
+                *ap++ = JOB_NUMBER(jp);
                 *ap = (char *) 0;
                 execv(udprog, (char **) arglist);
-                exit(E_SETUP);
+                _exit(E_SETUP);
+        }
+}
+
+int  dounqueue(BtjobRef jp)
+{
+        int     jsy, ret, whichopt;
+
+        /* Can the geyser do it?  */
+
+        disp_str = qtitle_of(jp);
+        disp_arg[0] = jp->h.bj_job;
+
+        if  (!mpermitted(&jp->h.bj_mode, BTM_READ|BTM_WRITE|BTM_DELETE, mypriv->btu_priv))  {
+                doerror(jscr, $E{btq unq no permission});
+                return  0;
+        }
+        if  (jp->h.bj_progress >= BJP_STARTUP1)  {
+                doerror(jscr, $E{btq unq runnable job});
+                return  0;
         }
 
- aborted:
-        free(Expdir);
-#ifdef  CURSES_MEGA_BUG
+        loadunqparams();
+
+        /* Check we've got everything */
+
+        if  (!(udopts && verbopts && cancopts))
+                return  -1;
+
+        getyx(jscr, jsy, ret);
+
+        if  ((whichopt = rdalts(jscr, jsy, 0, udopts, -1, $H{btq unqueue options})) < 0)
+                return  -1;
+
+        if  (whichopt < 2)
+                ret = do_unqueue_int(jp, whichopt);
+
+        ret = do_copyoptsinjob(jp, whichopt);
+
+ #ifdef  CURSES_MEGA_BUG
         refresh();
-#endif
-        delwin(cw);
-        Ignored_error = chdir(spdir);
-        return  -1;
+ #endif
+        return  ret;
 }

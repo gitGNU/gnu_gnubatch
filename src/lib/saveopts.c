@@ -19,13 +19,13 @@
 #include <stdio.h>
 #include <sys/types.h>
 #include <sys/stat.h>
-#include "incl_unix.h"
 #include "defaults.h"
+#include "incl_unix.h"
+#include "incl_ugid.h"
 #include "files.h"
 #include "helpargs.h"
 #include "errnums.h"
 
-extern  uid_t   Realuid;
 USHORT  Save_umask = 0xFFFF;            /* Invalid value indicating not set */
 
 int  spitoption(const int arg, const int firstarg, FILE *xfl, const int pch, const int cc)
@@ -53,8 +53,7 @@ static void  copyout(FILE *src, FILE *dest, const char *name)
 
         while  ((ch = getc(src)) != EOF)  {
 
-                /* Trim off leading spaces rdoptfile ignores them but
-                   they shouldn't be there.  */
+                /* Trim off leading spaces rdoptfile ignores them but they shouldn't be there.  */
 
                 if  (ch == ' ' || ch == '\t')
                         continue;
@@ -103,7 +102,6 @@ static void  copyin(FILE *src, FILE *dest)
 
 int     proc_save_opts(const char *direc, const char *varname, void (*fn)(FILE *, const char *))
 {
-        const   char    *cfname = USER_CONFIG;
         char    *fname;
         FILE    *ifl, *ofl;
         PIDTYPE pid;
@@ -136,9 +134,29 @@ int     proc_save_opts(const char *direc, const char *varname, void (*fn)(FILE *
 
         setuid(Realuid);
 
-        if  (!(fname = malloc((unsigned) (strlen(direc) + strlen(cfname) + 2))))
-                _exit($S{saveopts nomem});
-        sprintf(fname, "%s/%s", direc, cfname);
+        /* If we set the umask before, set it back */
+
+        if  (Save_umask != 0xFFFF)
+                umask(Save_umask);
+
+        /* We now set direc to null to use the home directory version, which is moved
+           to a .subdirectory so we aren't confused if we run from the home directory
+           and end up reading the same file twice.
+           Note that this code cheats by only allowing for one level of subdirectory */
+
+        if  (direc)  {
+                if  (!(fname = malloc((unsigned) (strlen(direc) + sizeof(USER_CONFIG) + 1))))
+                        _exit($S{saveopts nomem});
+                strcpy(fname, direc);
+                strcat(fname, "/" USER_CONFIG);
+        }
+        else  {
+                char    *dir = unameproc("~", ".", Realuid);
+                if  (chdir(dir) < 0  ||  /* Change to home directory */
+                     (chdir(HOME_CONFIG_DIR) < 0  &&  (mkdir(HOME_CONFIG_DIR, 0777) < 0 || chdir(HOME_CONFIG_DIR) < 0)))
+                        _exit($S{saveopts cannot create});
+                fname = HOME_CONFIG_FILE;
+        }
 
         if  ((ifl = fopen(fname, "r")))  {
                 struct  stat    sbuf;
@@ -158,13 +176,11 @@ int     proc_save_opts(const char *direc, const char *varname, void (*fn)(FILE *
 #endif
         }
         else  {
-                if  (Save_umask != 0xFFFF)
-                        umask(Save_umask);
+
                 if  (!(ifl = fopen(fname, "w")))
                         _exit($S{saveopts cannot create});
         }
         (*fn)(ifl, varname);
         fclose(ifl);
         _exit(0);
-        return  0;              /* To shut up fussy compilers */
 }

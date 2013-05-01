@@ -80,6 +80,35 @@ void  stringvec_append(struct stringvec *sv, const char *newitem)
         sv->memb_cnt++;
 }
 
+/* Split string with separator sep into a stringvec. */
+
+void    stringvec_split(struct stringvec *sv, const char *str, const char sep)
+{
+        const   char    *start = str, *nxt = strchr(str, sep);
+
+        stringvec_init(sv);
+
+        while  (start)  {
+                test_realloc(sv);
+                if  (nxt)  {
+                        unsigned  lng = nxt - start;
+                        char    *piece = malloc(lng+1);
+                        if  (!piece)
+                                ABORT_NOMEM;
+                        strncpy(piece, start, lng);
+                        piece[lng] = '\0';
+                        sv->memb_list[sv->memb_cnt] = piece;
+                        sv->memb_cnt++;
+                        start = nxt + 1;
+                        nxt = strchr(start, sep);
+                }
+                else  {
+                        stringvec_append(sv, start);
+                        start = nxt;
+                }
+        }
+}
+
 void  stringvec_insert(struct stringvec *sv, const int which, const char *newitem)
 {
         int     lim = which, cnt;

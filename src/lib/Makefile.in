@@ -57,12 +57,12 @@ CLIENTOBJS=\
 	dumpnstr.o	dumpredirs.o	dumpstr.o	dumptime.o \
 	getxbuf.o	gprompt.o	helpnstate.o	helpargs.o \
 	htmllib.o	lookup_alt.o	makeovec.o	makevec.o \
-	open_cfile.o	optdisp.o	optpparm.o	optprocess.o \
-	opttime.o	optvars.o	produser.o	rdoptfile.o \
-	readreply.o	repmnthfix.o	rjfile.o	rvfile.o \
-	saveopts.o	shutilmsg.o	spitbtrstr.o	spit_cond.o \
-	spit_msg.o	spit_pparm.o	spit_redir.o	spit_time.o \
-	stringvec.o
+	open_cfile.o	optdisp.o	optkeyword.o    optpparm.o \
+	optprocess.o    opttime.o	optvars.o	produser.o \
+	rdoptfile.o     readreply.o	repmnthfix.o	rjfile.o \
+	rvfile.o        saveopts.o	shutilmsg.o	spitbtrstr.o \
+	spit_cond.o     spit_msg.o	spit_pparm.o	spit_redir.o \
+	spit_time.o     stringvec.o
 
 # libgnubatch_curs is for clients which	use curses routines
 

@@ -359,45 +359,26 @@ void  spit_options(FILE *dest, const char *name)
 
 static void  ask_build()
 {
-        char    *hd;
         int     ret, i;
         static  char    btuser[] = "BTUSER";
 
         if  (!askyorn($PH{Save parameters}))
                 return;
 
-        hd = envprocess("${HOME-/}");
-        if  (strcmp(Curr_pwd, hd) == 0)  {
-                disp_str = hd;
-                if  (!askyorn($PH{Save in current home directory}))  {
-                        free(hd);
+        disp_str = Curr_pwd;
+        if  (askyorn($PH{Save in current directory}))  {
+                if  ((ret = proc_save_opts(Curr_pwd, btuser, spit_options)) == 0)
                         return;
-                }
+                doerror(stdscr, ret);
         }
         else  {
-                disp_str = Curr_pwd;
-                if  (askyorn($PH{Save in current directory}))  {
-                        if  ((ret = proc_save_opts(Curr_pwd, btuser, spit_options)) == 0)  {
-                                free(hd);
-                                return;
-                        }
-                        disp_str = Curr_pwd;
-                        doerror(stdscr, ret);
-                }
-                disp_str = hd;
-                if  (!askyorn($PH{Save in home directory}))  {
-                        free(hd);
+                if  (!askyorn($PH{Save in home directory}))
                         return;
-                }
+                if  ((ret = proc_save_opts((char *) 0, btuser, spit_options)) == 0)
+                        return;
+                disp_str = "(Home)";
+                doerror(stdscr, ret);
         }
-
-        if  ((ret = proc_save_opts(hd, btuser, spit_options)) == 0)  {
-                free(hd);
-                return;
-        }
-        disp_str = hd;
-        doerror(stdscr, ret);
-        free(hd);
         do  i = getkey(MAG_A|MAG_P);
         while   (i == EOF);
 }

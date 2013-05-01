@@ -52,6 +52,7 @@ static  char    rcsid2[] = "@(#) $Revision: 1,8 $";
 #include "ecodes.h"
 #include "errnums.h"
 #include "statenums.h"
+#include "helpargs.h"
 #include "incl_unix.h"
 #include "incl_ugid.h"
 #include "cfile.h"
@@ -113,7 +114,6 @@ static  Widget  panedw,         /* Paned window to stick rest in */
 typedef struct  {
         Boolean tit_pres;
         Boolean footer_pres;
-        String  sort_type;
         String  onlyuser;
         String  onlygroup;
         int     loadstep;
@@ -131,8 +131,6 @@ static  XtResource      resources[] = {
                   XtOffsetOf(vrec_t, footer_pres), XtRImmediate, False },
         { "loadStep", "LoadStep", XtRInt, sizeof(int),
                   XtOffsetOf(vrec_t, loadstep),  XtRImmediate, (XtPointer) 100 },
-        { "sortType", "SortType", XtRString, sizeof(String),
-                  XtOffsetOf(vrec_t, sort_type), XtRString, "" },
         { "onlyUser", "OnlyUser", XtRString, sizeof(String),
                   XtOffsetOf(vrec_t, onlyuser), XtRString, "" },
         { "onlyGroup", "OnlyGroup", XtRString, sizeof(String),
@@ -245,64 +243,33 @@ static void  cb_quit(Widget w, int n)
         exit(n);
 }
 
+static  char  *confline_arg;
+
+static  void  save_confline_opt(FILE *fp, const char *vname)
+{
+        fprintf(fp, "%s=%s\n", vname, confline_arg);
+}
+
 static void  cb_saveopts(Widget w)
 {
-        char    *srfile, *hf;
-        FILE    *inf, *tf;
-        int     ch;
-        unsigned        oldumask;
-        Dimension       wid;
-        SHORT   items;
-        time_t  now;
-        struct  tm      *tp;
+        int     items;
+        Dimension  wid;
+        char    digbuf[20];
 
         if  (!Confirm(w, $PH{Confirm write options}))
                 return;
-        hf = envprocess("$HOME/XI");
-        if  (!(inf = fopen(hf, "r")))  {
-                srfile = XtResolvePathname(dpy, "app-defaults", NULL, NULL, NULL, NULL, 0, NULL);
-                if  (!(inf = fopen(srfile, "r")))  {
-                        doerror(w, $EH{xmbtq cannot open appdefaults});
-                        XtFree(srfile);
-                        return;
-                }
-                XtFree(srfile);
-        }
-        tf = tmpfile();
-        while  ((ch = getc(inf)) != EOF)
-                putc(ch, tf);
-        fclose(inf);
-        time(&now);
-        tp = localtime(&now);
-        fprintf(tf, "\n!! %s User-defined options %.2d:%.2d:%.2d %.2d/%.2d/%.2d\n\n",
-                       progname,
-                       tp->tm_hour, tp->tm_min, tp->tm_sec,
-                       tp->tm_year % 100, tp->tm_mon+1, tp->tm_mday);
-        fprintf(tf, "%s.sortType:\t%s\n", progname,
-                       alphsort == SORT_USER? "Username": alphsort == SORT_GROUP? "Groupname" : "Numeric");
-        if  (urestrict)
-                fprintf(tf, "%s.onlyUser:\t%s\n", progname, urestrict);
-        if  (grestrict)
-                fprintf(tf, "%s.onlyGroup:\t%s\n", progname, grestrict);
+
+        disp_str = "(Home)";
+        confline_arg = digbuf;
+        digbuf[0] = alphsort == SORT_USER? 'U': alphsort == SORT_GROUP? 'G' : 'N';
+        digbuf[1] = '\0';
+        proc_save_opts((const char *) 0, "XMBTUSORT", save_confline_opt);
         XtVaGetValues(uwid, XmNwidth, &wid, XmNvisibleItemCount, &items, NULL);
-        fprintf(tf, "%s*ulist.width: %ld\n", progname, (long) wid);
-        fprintf(tf, "%s*ulist.visibleItemCount: %ld\n", progname, (long) items);
-        SWAP_TO(Realuid);
-        oldumask = umask(0);
-        umask(oldumask & ~0444);
-        if  (!(inf = fopen(hf, "w")))  {
-                SWAP_TO(Daemuid);
-                doerror(w, $EH{xmbtq cannot create app resource});
-                return;
-        }
-        umask(oldumask);
-        SWAP_TO(Daemuid);
-        free(hf);
-        rewind(tf);
-        while  ((ch = getc(tf)) != EOF)
-                putc(ch, inf);
-        fclose(tf);
-        fclose(inf);
+        sprintf(digbuf, "%d", wid);
+        confline_arg = digbuf;
+        proc_save_opts((const char *) 0, "XMBTUWIDTH", save_confline_opt);
+        sprintf(digbuf, "%d", items);
+        proc_save_opts((const char *) 0, "XMBTUITEMS", save_confline_opt);
 }
 
 /* For when we run out of memory.....  */
@@ -434,7 +401,8 @@ static void  maketitle(char *tname)
 
 static void  wstart(int argc, char **argv)
 {
-        int     cnt;
+        int     cnt, uwidth = -1, uitems = -1;
+        char    *arg;
         vrec_t  vrec;
         Pixmap  bitmap;
         XtWidgetGeometry        size;
@@ -454,15 +422,26 @@ static void  wstart(int argc, char **argv)
 
         /* Set up parameters from resources */
 
-        switch  (vrec.sort_type[0])  {
-        default:case  'n':case  'N':    alphsort = SORT_NONE;   break;
-        case  'u':case  'U':            alphsort = SORT_USER;   break;
-        case  'g':case  'G':            alphsort = SORT_GROUP;  break;
+        if  ((arg = optkeyword("XMBTUSORT")))  {
+                switch  (arg[0])  {
+                default:
+                        alphsort = SORT_NONE;   break;
+                case  'u':case 'U':
+                        alphsort = SORT_USER;   break;
+                case  'g':case 'G':
+                        alphsort = SORT_GROUP;  break;
+                }
+                free(arg);
         }
-        if  (vrec.onlyuser[0]  &&  !urestrict)
-                urestrict = stracpy(vrec.onlyuser);
-        if  (vrec.onlygroup[0]  &&  !grestrict)
-                grestrict = stracpy(vrec.onlygroup);
+        if  ((arg = optkeyword("XMBTUWIDTH")))  {
+                uwidth = atoi(arg);
+                free(arg);
+        }
+        if  ((arg = optkeyword("XMBTUITEMS")))  {
+                uitems = atoi(arg);
+                free(arg);
+        }
+
         arr_rtime = vrec.rtime;
         arr_rint = vrec.rint;
         loadstep = vrec.loadstep;
@@ -489,9 +468,11 @@ static void  wstart(int argc, char **argv)
                 maketitle("utitle");
 
         uwid = XmCreateScrolledList(panedw, "ulist", NULL, 0);
-        XtVaSetValues(uwid,
-                      XmNselectionPolicy,       XmEXTENDED_SELECT,
-                      NULL);
+        XtVaSetValues(uwid, XmNselectionPolicy, XmEXTENDED_SELECT, NULL);
+        if  (uwidth > 0)
+                XtVaSetValues(uwid, XmNwidth, uwidth, NULL);
+        if  (uitems > 0)
+                XtVaSetValues(uwid, XmNvisibleItemCount, uitems, NULL);
         XtAddCallback(uwid, XmNhelpCallback, (XtCallbackProc) dohelp, (XtPointer) $H{xmbtuser ulist help});
         XtManageChild(uwid);
 
@@ -643,6 +624,7 @@ MAINFN_TYPE  main(int argc, char **argv)
 #if     defined(NHONSUID) || defined(DEBUG)
         int_ugid_t      chk_uid;
 #endif
+        BtuserRef       mypriv;
 
         versionprint(argv, "$Revision: 1,8 $", 0);
 
