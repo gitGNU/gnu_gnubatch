@@ -399,7 +399,8 @@ static void  cb_saveopts(Widget w)
         digbuf[0] = Dispflags & DF_SUPPNULL? '0': '1';
         digbuf[1] = Dispflags & DF_LOCALONLY? '0': '1';
         digbuf[2] = Dispflags & DF_CONFABORT? '1': '0';
-        digbuf[3] = '\0';
+        digbuf[3] = Dispflags & DF_SCRKEEP? '1': '0';
+        digbuf[4] = '\0';
 
         confline_arg = digbuf;
         if  ((ret = proc_save_opts((const char *) 0, "XMBTQDISPOPT", save_confline_opt)) != 0)  {
@@ -887,6 +888,12 @@ static void  wstart(int argc, char **argv)
                                                 Dispflags |= DF_CONFABORT;
                                         else
                                                 Dispflags &= ~DF_CONFABORT;
+                                        if  (arg[3])  {
+                                                if  (arg[3] != '0')
+                                                        Dispflags |= DF_SCRKEEP;
+                                                else
+                                                        Dispflags &= ~DF_SCRKEEP;
+                                        }
                                 }
                         }
                 }
