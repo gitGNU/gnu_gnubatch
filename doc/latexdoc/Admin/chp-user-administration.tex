@@ -1,0 +1,136 @@
+\chapter{User administration}
+\label{chp:user-administration}
+\ProductName{} maintains a list of users which is generated from the password system (whether using the passwd file or NIS). Hence, each
+user must normally have a Unix account in order to have a \ProductName{} account. However a default set of permissions is
+provided for users who do not have a Unix account.
+
+There are 4 (formerly 5) aspects to the \ProductName{} user account:
+
+\begin{tabular}{l p{14cm}}
+{\bfseries
+Privileges} &
+Control access to usage and administration functions of the system. For
+example, the privilege to submit jobs to the queue. \\
+
+{\bfseries
+Load levels} &
+Provide a limit on the size of any one job and the total load that that
+user can place on the system. \\
+
+{\bfseries
+Priorities} &
+When there are more jobs ready to run than are allowed these position the ``ready'' jobs with respect to each
+other. Facilities exist to specify what priorities each \ProductName{} user may specify for their batch jobs. \\
+{\bfseries
+Modes} &
+Specify the default modes that are placed on jobs and variables for the
+user who creates them. Modes are described in detail in the Variables
+chapter and the Jobs chapter. \\
+{\bfseries
+Charges} &
+These are now deprecated. \\
+\end{tabular}
+
+In addition to these features the user interface can be configured
+differently for different users and activities.
+
+There are 5 programs for administering user accounts which are:
+
+\begin{tabular}{l p{13cm}}
+\PrBtcharge & A command line utility for querying and adjusting user charges (this is now deprecated) \\
+\PrBtuchange & a command line utility for modifying user accounts \\
+\PrBtulist & A command line utility for listing user accounts \\
+\PrBtuser & An interactive tool for viewing and changing user accounts on character terminals \\
+\PrXbtuser & A GTK+ alternative to \PrBtuser \\
+\PrXmbtuser & A Motif GUI alternative to \PrBtuser \\
+\end{tabular}
+
+The programs are described in detail in the System Reference Manual.
+
+\section{Adding New Users}
+No special action is required to add new users to \ProductName{} unless the users have to have different permissions from the defaults.
+
+\section{Removing Users}
+No special action needs to be taken when users are deleted.
+
+\section{Setting Privileges}
+The available privileges are:
+
+\begin{tabular}{|l | p{10cm}|}
+\hline
+\bfseries Privilege &
+\bfseries Description\\\hline
+Read admin file &
+May display contents of administration file showing users,
+charges and privileges.\\\hline
+Write admin file &
+May edit the administration file. This makes a user a full
+\ProductName{} Administrator since they can grant themselves any other
+privilege.\\\hline
+Create entry &
+User may create jobs and variables. This permission is granted
+by default in the initial configuration when \ProductName{} is
+installed.\\\hline
+Special Create &
+ May create jobs (and variables) with different load levels,
+owners and groups. Can also add, delete and modify command
+interpreters.\\\hline
+Stop scheduler &
+May stop \ProductName{} using the \PrBtquit{}
+program.\\\hline
+Change default modes &
+User may change their own default modes. This permission is
+granted by default in the initial configuration when \ProductName{} is
+installed.\\\hline
+Combine user and group permissions &
+If the user has the same primary group as the job or variable
+in question, then the permissions are the combination of user and group
+permissions.\newline
+This could make a user a super user for managing jobs in their group,
+without having to grant Write admin file privilege.\\\hline
+Combine user and other permissions &
+If the user has a different primary group from the job or
+variable in question, then the permissions are the combination of user
+and ``other'' permissions.\\\hline
+Combine group and other permissions &
+Combine group and ``other'' permissions. This effectively turns off group handling.\\\hline
+\end{tabular}
+
+Unless otherwise stated in the table, when \ProductName{} is installed these
+privileges are turned off. The currently specified default privileges
+are applied to all new users.
+
+When \ProductName{} is installed only the super-user, \filename{root}, and user \batchuser{} are set up
+as system administrators. These two users are granted all of the privileges (and cannot be deprived of them, attempts to do
+so will be silently ignored).
+
+Changing users privileges and the default settings can be performed with \PrBtuser, \PrBtuchange, \PrXbtuser{} or
+\PrXmbtuser.
+
+When setting up \ProductName{} on a machine one of the first Administration tasks should be deciding which extra Unix users to make administrators.
+
+\section{Setting Default \& User Priorities}
+When several jobs are ready and waiting to run, those with the highest value get started first. There can be constraints which limit the
+number of jobs that can be running. In this case the higher priority jobs get started, working down the priority until the limit is reached. The remaining jobs have to wait until a running job finished or the limit is raised, when the next highest gets started.
+
+A batch job may have a priority in the range of 1 to 255. Users will usually be restricted to a smaller range between their individual
+minimum and maximum priorities. When it is installed \ProductName{} sets the
+default values to be:
+
+\begin{center}
+\begin{tabular}{l l}
+minimum & 100\\
+maximum & 200\\
+default & 150\\
+\end{tabular}
+\end{center}
+
+There is no particular reason for these values. They allow for non-standard users to set up jobs which have higher or lower priority
+than the normal user population.
+
+When a new policy is decided the default values should be adjusted, then existing user accounts modified as required.
+
+When a job is submitted, it is given the user's default priority unless overridden. It is possible to set a user's minimum,
+maximum and default priorities to apparently useless values, for example if the default priority is outside the range of the maximum and
+minimum priorities, the user will always have to specify a priority.
+

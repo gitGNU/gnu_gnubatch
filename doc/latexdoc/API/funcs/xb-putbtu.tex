@@ -1,0 +1,26 @@
+\subsection{\funcnameXBputbtu{}}
+
+\begin{expara}
+
+int \funcnameXBputbtu{}(const int fd,
+
+\ \ \ \ \ \ \ \ \ \ \ \ \ \ const char *username,
+
+\ \ \ \ \ \ \ \ \ \ \ \ \ \ const apiBtuser *ustr)
+
+\end{expara}
+
+The function \funcXBputbtu{} is used to update a user's profile parameters for the given host. It may
+only be invoked by a user with \textit{write admin file} privilege, unless the user just wants to change his or her default modes and has
+change default modes privilege. (The privileges are those applying prior to the operation).
+
+\exampletext{fd} is a file descriptor which was previously returned by a successful call to \funcXBopen{} or equivalent.
+
+\exampletext{username} is the name of the user, whose details are being updated.
+
+\exampletext{ustr} is a pointer to a structure which contains the new user profile. The definition of the user profile structure is
+given on page \pageref{bkm:Userstructure}.
+
+\subsubsection{Return values}
+The function returns 0 if successful otherwise one of the error codes listed on page \pageref{errorcodes} onwards.
+

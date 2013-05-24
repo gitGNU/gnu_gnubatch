@@ -1,0 +1,25 @@
+\subsection{\funcnameXBgetenvlist{}}
+
+\begin{expara}
+
+const char **\funcnameXBgetenvlist{}(const apiBtjob *jobp), const char *name)
+
+\end{expara}
+
+The function \funcXBgetenvlist{} is used to extract
+the list of environment variables from a job string table.
+
+\exampletext{jobp} is a pointer to a structure containing the
+details of the job. \ The definition of the job structure is given on
+page \pageref{bkm:Jobstructure} onwards.
+
+\subsubsection{Return values}
+The result is a null-terminated vector of environment variables in the
+form \exampletext{NAME=VALUE}, or NULL if memory could not be
+allocated for it.
+
+The space is allocated within the API. The user should not attempt to
+free it after use. Also note that the space is re-used if
+\funcXBgetenv{} is invoked on a different job, the
+result should be copied if needed.
+

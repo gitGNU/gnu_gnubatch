@@ -1,0 +1,130 @@
+\subsection{\BtcichangeName}
+
+\begin{expara}
+
+\BtcichangeName{} [-options] name
+
+\end{expara}
+
+\PrBtcichange{} is a shell-level command to create, delete or change details of a command interpreter according to the
+options specified. Only one command interpreter may be operated upon at a time.
+
+The command interpreter in question is that given by the final argument name to the command.
+
+The user must have \textit{special create} permission to operate this command - see \PrBtuser{} on page \pageref{btuser:permsreq}.
+
+\subsubsection{Options}
+The environment variable on which options are supplied is \filename{\BtcichangeVarname} and the environment variable to specify
+the help file is \filename{BTRESTCONF}.
+
+\setbkmkprefix{btcichange}
+\explainopt
+
+\cmdoption{A}{add}{}{add}
+
+The command interpreter whose name and details are given with the other options is to be added.
+
+\cmdoption{a}{args}{args}{args}
+
+Set the ``predefined argument list'' to be that given by \genericargs{args}.
+
+This replaces any existing predefined arguments.
+
+Supply an empty string with {\textquotedbl}{\textquotedbl} to delete all arguments.
+
+Almost invariably with shells, the \exampletext{{}-s} option should be supplied as a predefined argument. This will cause the
+``real'' arguments supplied by the job, e.g. with the \exampletext{{}-a} option to \PrBtr{}, which follow the predefined arguments, to
+be treated as strings and not the names of files.
+
+\cmdoption{D}{delete}{}{delete}
+
+The specified command interpreter is to be deleted. Note that the first entry on the list, which is initialised on installation to be
+the Bourne shell \exampletext{sh}, cannot be deleted.
+
+\warnings{N.B. This is not subject to extensive checking to ensure that no job currently uses the specified command interpreter, so please check
+first.}
+
+\cmdoption{e}{expand-args}{}{expandargs}
+
+Expand \$-prefixed environment variables, \genericargs{\~{}user} and backquote constructs in job scripts before invoking the command interpreter, rather than relying upon the command interpreter to do it.
+
+\cmdoption{i}{set-arg0-name}{}{arg0name}
+
+Argument 0 of the job, when running, often displayed as the process name in ps(1) output, is the name of the command interpreter.
+
+This is the default.
+
+\cmdoption{L}{load-level}{number}{loadlev}
+
+Set the load level to \genericargs{number} to be the default for new jobs created with this command interpreter.
+
+The default for new command interpreters if this option is not given is the special create load level given in the user's profile as displayed by
+\PrBtuser{}.
+
+Remember that this load level must be less than or equal to a user's maximum load level per job for him/her to make use of this.
+
+\cmdoption{N}{nice}{number}{nice}
+
+Set the \progname{nice} value to number for jobs run under this command interpreter.
+This is an ``absolute'' nice number. Most OSes have a standard nice of 20, so set this to 20 to get that,
+to higher numbers to get lower priority and to lower numbers to get higher priority.
+
+\cmdoption{n}{new-name}{name}{newname}
+
+Supply a new name name for an existing command interpreter.
+
+\warnings{N.B. Beware that existing jobs referring to the old name will not be checked for or changed.}
+
+\cmdoption{p}{path}{pathname}{path}
+
+Set the path \genericargs{pathname} to be the process invoked as the command interpreter.
+
+Note that \PrBtcichange{} does not attempt to verify the accuracy of this path name.
+
+Environment variables etc are not expanded here and the full path name (starting from \filename{/}) should be given.
+
+\cmdoption{t}{set-arg0-title}{}{settitle}
+
+Arrange that argument 0 for the command interpreter, when the job is started, is set to the job
+title. On many systems this will make the output of ps display the job title in the output instead of the command interpreter name.
+
+\cmdoption{U}{update}{}{update}
+
+The specified command interpreter is to have details changed as specified.
+
+This is the default in the absence of other options.
+
+\cmdoption{u}{no-expand-args}{}{noexpandargs}
+
+Turn off expansion of environment variables etc in the scripts passed to the command interpreter, allowing that to do it.
+
+\freezeopts{\filename{\BtcichangeVarname}}{STOP}
+
+\subsubsection{Examples}
+To change the nice value, load level and to specify that the job title will become the process name for jobs running under the \filename{sh} command
+interpreter:
+
+\begin{expara}
+
+\BtcichangeName{} -N 22 -L 500 -t sh
+
+\end{expara}
+
+To add a new command interpreter using the Korn shell with the \exampletext{{}-s} option:
+
+\begin{expara}
+
+\BtcichangeName{} -A -N 25 -L 1500 -p /bin/ksh -a {\textquotesingle}-s{\textquotesingle} ksh
+
+\end{expara}
+
+The quotes around \exampletext{{}-s} are not necessary in this case, only if spaces are included.
+
+To change the name to \exampletext{korn}
+
+\begin{expara}
+
+\BtcichangeName{} -n korn ksh
+
+\end{expara}
+

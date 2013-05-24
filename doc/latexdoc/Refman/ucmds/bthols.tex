@@ -1,0 +1,63 @@
+\subsection{Bthols}
+
+\begin{expara}
+
+\BtholsName{} [-C] [-d] [-r] [-s] year [file]
+
+\end{expara}
+
+\PrBthols{} is a shell-level program to display or set the holidays file for the given year.
+
+The holidays are displayed or interpreted in the following format (as for UK in 2004)
+
+\begin{expara}
+
+January: 1
+
+April: 9 12
+
+May; 3 31
+
+August: 30
+
+December: 27 28
+
+\end{expara}
+
+The year is given as 4 digits, thus \exampletext{2014}. Output when displaying, the
+default, is to standard output.
+
+If setting (with the \exampletext{{}-s} option) the input is from standard input or the specified file name. Holidays are added to
+the existing list for the year unless the \exampletext{{}-C} option is also given.
+
+Month names may be given in abbreviated or full format, case-insensitive, but are displayed in full. The full and abbreviated
+names are extracted from the help file, by default \filename{\helpdirname/btrest.help}.
+
+\subsubsection{Options}
+The environment variable on which options are supplied is \filename{\BtholsVarname} and the environment variable to specify the
+help file is \filename{BTRESTCONF}.
+
+\setbkmkprefix{bthols}
+\explainopt
+
+\cmdoption{C}{clear}{}{clear}
+
+Relevant only when the \exampletext{{}-s} option is specified, clear the existing holidays for the given year before
+applying the new ones.
+
+\cmdoption{d}{display}{}{display}
+
+Display the existing holidays.
+
+This is the default if no options are given.
+
+\cmdoption{s}{set}{}{set}
+
+Set holidays from standard input.
+
+\cmdoption{r}{no-clear}{}{noclear}
+
+Cancel any previously-set \exampletext{{}-C} option.
+
+\freezeopts{\filename{\BtholsVarname}}{STOP}
+

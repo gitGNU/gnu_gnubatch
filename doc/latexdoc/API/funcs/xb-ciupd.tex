@@ -1,0 +1,38 @@
+\subsection{\funcnameXBciupd{}}
+
+\begin{expara}
+
+int \funcnameXBciupd{}(const int fd,
+
+\ \ \ \ \ \ \ \ \ \ \ \ \ const unsigned flags,
+
+\ \ \ \ \ \ \ \ \ \ \ \ \ const int indx,
+
+\ \ \ \ \ \ \ \ \ \ \ \ \ const Cmdint *newci)
+
+\end{expara}
+
+The function \funcXBciupd{} is used to update the
+details of a command interpreter on a
+\ProductName{} server. The invoking user must have
+\textit{special create} permission or the call will be rejected.
+
+\exampletext{fd} is a file descriptor which was previously
+returned by a successful call to \funcXBopen{} or equivalent.
+
+\exampletext{flags} is currently unused, but is reserved for
+future extensions. Set it to zero.
+
+\exampletext{indx} is the number of the command interpreter to
+be updated (see \funcXBciread{}).
+
+\exampletext{newci} is a pointer to a structure containing the
+new command interpreter details.
+
+The definition of the command interpreter structure is given on page
+\pageref{bkm:Cmdinterp} onwards.
+
+\subsubsection{Return values}
+The function returns 0 if successful otherwise one of the error codes
+listed on page \pageref{errorcodes} onwards.
+

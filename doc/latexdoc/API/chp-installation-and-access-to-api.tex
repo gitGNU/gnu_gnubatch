@@ -1,0 +1,13 @@
+\chapter{Installation and access to API}
+\label{chp:installation-and-access-to-api}
+The API is provided as two files, a \textit{header} file \filename{\includefile} and a library file.
+
+The header file should be copied to a suitable location for ready access.
+On Unix systems we suggest that the header file is copied to the directory \filename{\includeloc} so that
+it may be included in C programs via the directive \exampletext{\includedirective}
+
+The library file is set up so it can be invoked with the \progname{ld} directive \exampletext{\libname}.
+On some UNIX systems you may have to include a socket handling library as well when linking.
+
+On Windows systems the library is supplied as a DLL. Again we suggest that it be placed in the default search path.
+

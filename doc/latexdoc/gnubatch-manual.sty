@@ -1,0 +1,300 @@
+% GNUBatch Manual Stylesheet
+%
+%   Copyright 2013 Free Software Foundation, Inc.
+%
+%  This program is free software: you can redistribute it and/or modify
+%  it under the terms of the GNU General Public License as published by
+%  the Free Software Foundation, either version 3 of the License, or
+%  (at your option) any later version.
+%
+%  This program is distributed in the hope that it will be useful,
+%  but WITHOUT ANY WARRANTY; without even the implied warranty of
+%  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+%  GNU General Public License for more details.
+%
+%   You should have received a copy of the GNU General Public License
+%  along with this program.  If not, see <http://www.gnu.org/licenses/>.
+%
+
+%
+% Usage example:
+%  \usepackage[product=GNUBatch,release=1,mantitle={Installation and Administration Manual}]{gnubatch-manual}
+% Note the manual title uses ~ instead of space.
+%
+% You can also define \manualProduct, \manualTitle and \manualProductRelease manually
+% before \usepackage{gnubatch-manual} if you so wish.
+% Don't mix arguments with prior definition though.
+%
+% Commands defined:
+%  \manualProduct{}   -->  The name of the product we're documenting (e.g. GNUbatch)
+%  \manualTitle{}  -->  The name of the manual defined in the mantitle option.
+%  \manualProductRelease{}   -->  The release number defined in the release option.
+%  \manualFrontMatter{} -->  Place in your 'document' environment to print a default title page and table of contents
+%                      based on the variables defined above.
+
+\NeedsTeXFormat{LaTeX2e}
+\ProvidesPackage{gnubatch-manual}[2013/05/09 GNUBatch Manual Page Style]
+
+\RequirePackage{xkeyval}
+
+\DeclareOptionX{mantitle}{\newcommand\manualTitle{#1}}
+\DeclareOptionX{product}{\newcommand\manualProduct{#1}}
+\DeclareOptionX{release}{\def\manualProductRelease{#1}}
+\ProcessOptionsX
+
+\usepackage[latin1]{inputenc}
+\usepackage[english]{babel}
+\usepackage{amsmath}
+\usepackage{amssymb,amsfonts,textcomp}
+\usepackage{xifthen}
+
+% Declare default fonts
+\usepackage{times}
+\usepackage[T1]{fontenc}
+\usepackage[scaled]{helvet}
+\renewcommand*\familydefault{\sfdefault}
+
+\usepackage{hhline}
+
+% Use spacing rather than indentation to separate paragraphs
+\usepackage{parskip}
+\setlength{\parindent}{0em}
+
+% We use colour in here
+\usepackage{color}
+
+% And fancy box styles
+\usepackage{fancybox}
+
+% Hyperlink references
+\usepackage{hyperref}
+\hypersetup{pdftex, colorlinks=true, linkcolor=blue, citecolor=blue, filecolor=blue, urlcolor=blue, pdftitle=, pdfauthor=John Collins, pdfsubject=, pdfkeywords=}
+
+% Text styles
+\newcommand\filename[1]{\texttt{\textcolor[rgb]{0.20784314,0.36862746,0.0}{#1}}}
+\newcommand\exampletext[1]{\texttt{\textmd{\textcolor[rgb]{0.36078432,0.52156866,0.14901961}{#1}}}}
+\newcommand\genericargs[1]{\texttt{\textmd{\textit{\textcolor[rgb]{0.36078432,0.52156866,0.14901961}{#1}}}}}
+\newcommand\progname[1]{\textrm{\textcolor[rgb]{0.15686275,0.0,0.6}{#1}}}
+\newcommand\warnings[1]{\textbf{\textcolor[rgb]{0.72156864,0.2784314,0.0}{#1}}}
+\newcommand\username[1]{\texttt{\textmd{\textcolor[rgb]{0.36078432,0.52156866,0.14901961}{#1}}}}
+\newcommand\userentry[1]{\texttt{\textmd{\textit{\textcolor[rgb]{0.5,0.5,0}{#1}}}}}
+\newcommand\strongemphasis[1]{\textbf{#1}}
+\newcommand\emphasis[1]{\textit{#1}}
+\newcommand\footnotesymbol[1]{#1}
+
+% Environment for displaying blocks of examples
+
+\newenvironment{expara}%
+{\addtolength{\leftskip}{1cm}%
+\setlength{\parskip}{0pt}%
+\ttfamily\mdseries\color[rgb]{0.2,0.4,0.1}%
+\bigskip}{}
+
+% Ditto but smaller
+
+\newenvironment{exparasmall}%
+{\addtolength{\leftskip}{1cm}%
+\setlength{\parskip}{0pt}%
+\ttfamily\mdseries\color[rgb]{0.2,0.4,0.1}%
+\small
+\bigskip}{}
+
+% Prefix for bookmarks, what we are documenting
+\newcommand\bkmkprefix{undef}
+\newcommand\setbkmkprefix[1]{\renewcommand\bkmkprefix{#1}}
+\newcommand\bookmark[1]{\label{\bkmkprefix:#1}}
+% Provide a standardised heading describing a command option
+% Arg 1 is the single letter version (stick a minus in front)
+% Arg 2 is the keyword version (stick a plus in front)
+% Arg 3 is the optional parameter name
+\newcommand\cmdoptarg{undef}
+\newcommand\cmdoption[4]{
+\ifthenelse{\isempty{#3}}{\renewcommand\cmdoptarg{}}{\renewcommand\cmdoptarg{\ \ \genericargs{#3}}}
+\ifthenelse{\isempty{#1}}{\paragraph{+#2 option}\exampletext{-{}-{}#2}\cmdoptarg\newline\exampletext{+#2}\cmdoptarg\newline}
+{\ifthenelse{\isempty{#2}}{\paragraph{{}-#1 option}\exampletext{-{}#1}\cmdoptarg\newline}{\paragraph{{}-#1 or +#2 option}
+\exampletext{-{}#1}\cmdoptarg\newline\exampletext{-{}-{}#2}\cmdoptarg\newline\exampletext{+#2}\cmdoptarg\newline}}
+\bookmark{#4}}
+%Same but as a subsubsection not a paragraph
+\newcommand\cmdoptionsssect[4]{
+\ifthenelse{\isempty{#3}}{\renewcommand\cmdoptarg{}}{\renewcommand\cmdoptarg{\ \ \genericargs{#3}}}
+\ifthenelse{\isempty{#1}}{\subsubsection{+#2 option}\exampletext{-{}-{}#2}\cmdoptarg\newline\exampletext{+#2}\cmdoptarg\newline}
+{\ifthenelse{\isempty{#2}}{\subsubsection{{}-#1 option}\exampletext{-{}#1}\cmdoptarg\newline}{\subsubsection{{}-#1 or +#2 option}
+\exampletext{-{}#1}\cmdoptarg\newline\exampletext{-{}-{}#2}\cmdoptarg\newline\exampletext{+#2}\cmdoptarg\newline}}
+\bookmark{#4}}
+%Same but as a section not a paragraph
+\newcommand\cmdoptionsect[4]{
+\ifthenelse{\isempty{#3}}{\renewcommand\cmdoptarg{}}{\renewcommand\cmdoptarg{\ \ \genericargs{#3}}}
+\ifthenelse{\isempty{#1}}{\section{+#2 option}\exampletext{-{}-{}#2}\cmdoptarg\newline\exampletext{+#2}\cmdoptarg\newline}
+{\ifthenelse{\isempty{#2}}{\section{{}-#1 option}\exampletext{-{}#1}\cmdoptarg\newline}{\section{{}-#1 or +#2 option}
+\exampletext{-{}#1}\cmdoptarg\newline\exampletext{-{}-{}#2}\cmdoptarg\newline\exampletext{+#2}\cmdoptarg\newline}}
+\bookmark{#4}}
+
+
+%Standard blah about explain and freeze
+
+\newcommand\explainopt{\cmdoption{?}{explain}{~}{explain}
+
+This option causes a summary of the other options to be displayed without
+taking further action.}
+
+\newcommand\freezeopts[2]{\cmdoption{}{freeze-current}{}{freezecurr}
+
+Save all the current options in a \filename{.gnubatch}
+file in the current directory with keyword #1.
+\ifthenelse{\isempty{#2}}{
+
+Processing of the remaining command options will proceed even if this is specified.}{
+
+No further action will be taken if this option is specified.}
+
+\cmdoption{}{freeze-home}{}{freezehome}
+
+Save all the current options in a \filename{\~.gbch/gnubatch1}
+file in the user{\textquotesingle}s home directory with keyword #1.\ifthenelse{\isempty{#2}}{
+
+Processing of the remaining command options will proceed even if this is specified.}{
+
+No further action will be taken if this option is specified.}}
+
+% Text styles for referring to GUI elements
+%\newcommand\button[1]{\emph{\textbf{#1}}}
+\newcommand\key[1]{\ovalbox{\texttt{#1}}}
+\newcommand\button[1]{\fbox{#1}}
+\newcommand\checkbox[1]{\fbox{#1}}
+\newcommand\menu[1]{\fbox{#1}}
+
+% Define \arraybslash
+\makeatletter
+\newcommand\arraybslash{\let\\\@arraycr}
+\makeatother
+
+% Page layout (geometry)
+\setlength\voffset{-1in}
+\setlength\hoffset{-1in}
+\setlength\topmargin{2cm}
+\setlength\oddsidemargin{2cm}
+\setlength\textheight{22.679cm}
+\setlength\textwidth{17.001cm}
+\setlength\footskip{1.497cm}
+\setlength\headheight{1.016cm}
+\setlength\headsep{0.508cm}
+
+% Footnote rule
+\setlength{\skip\footins}{0.119cm}
+\renewcommand\footnoterule{\vspace*{-0.018cm}\setlength\leftskip{0pt}\setlength\rightskip{0pt plus 1fil}\noindent\textcolor{black}{\rule{0.25\columnwidth}{0.018cm}}\vspace*{0.101cm}}
+
+% footnotes configuration
+\makeatletter
+\renewcommand\thefootnote{\arabic{footnote}}
+\makeatother
+
+% Pages styles
+\makeatletter
+\newcommand\ps@Standard{
+  \pagestyle{myheadings}
+  \markright{\hfill \manualProduct{} \manualTitle{} \hfill}
+}
+\newcommand\ps@CoverPage{
+  \renewcommand\@oddhead{}
+  \renewcommand\@evenhead{}
+  \renewcommand\@oddfoot{}
+  \renewcommand\@evenfoot{}
+  \renewcommand\thepage{\arabic{page}}
+}
+\newcommand\ps@FirstPage{
+  \renewcommand\@oddhead{\mdseries\upshape \manualProduct{} \manualTitle{}}
+  \renewcommand\@evenhead{\@oddhead}
+  \renewcommand\@oddfoot{Page \thepage{}}
+  \renewcommand\@evenfoot{\@oddfoot}
+  \renewcommand\thepage{\arabic{page}}
+}
+\makeatother
+\pagestyle{Standard}
+
+% Put a linebreak after \paragraph title.
+\makeatletter
+\renewcommand\paragraph{\@startsection{paragraph}{4}{\z@}%
+  {-3.25ex\@plus -1ex \@minus -.2ex}%
+  {1.5ex \@plus .2ex}%
+  {\normalfont\normalsize\bfseries}}
+\makeatother
+
+% Set padding / separation in arrays and tables.
+\setlength\tabcolsep{1mm}
+\renewcommand\arraystretch{1.3}
+
+% Listings
+\usepackage{listings}
+
+\lstdefinestyle{prototype}
+{
+	numbers=none,
+	basicstyle=\ttfamily\color[rgb]{0.36078432,0.52156866,0.14901961},
+	columns=fixed,
+	% The following lines are good for if you want to put the code in
+	% a box.  Comment them out if you don't want to.
+	frame=lrtb,
+	framerule=0.1pt,
+	linewidth=\textwidth,
+	%backgroundcolor=\color[gray]{.92}
+}
+
+\lstdefinestyle{cexample}
+{
+	numbers=none,
+	basicstyle=\small\ttfamily\color[rgb]{0.36078432,0.52156866,0.14901961},
+	columns=fixed,
+	% The following lines are good for if you want to put the code in
+	% a box.  Comment them out if you don't want to.
+	frame=lrtb,
+	framerule=0.5pt,
+	linewidth=\textwidth,
+	%backgroundcolor=\color[gray]{.92}
+}
+
+% I frequently use this format for referencing sections and pages.
+\newcommand{\secpageref}[1]{section~\ref{#1} (p.~\pageref{#1})}
+
+% Increase section numbering depth
+
+\setcounter{secnumdepth}{6}
+
+% Make it hard for LaTeX to get away with widows at end of paragraph.
+% Based on advice from:
+% * http://tex.stackexchange.com/questions/21983/how-to-avoid-page-breaks-inside-paragraphs
+% * http://www.ichimusai.org/latex/
+\widowpenalties 1 9999
+\raggedbottom
+
+% In some cases where a very short paragraph spills onto a new page on its
+% own, typically at the end of a chapter, you might want to put \nopagebreak
+% on the line directly above that paragraph.
+
+% Define the title page
+\newcommand\manualFrontMatter{
+  \thispagestyle{CoverPage}
+  
+
+  {\Huge\centering
+  \begin{minipage}{17.261cm}
+  {\centering\bfseries\color[rgb]{0.29803923,0.29803923,0.29803923}
+  \manualProduct{} Release \manualProductRelease{}
+  \par}
+
+  {\Huge\centering\color[rgb]{0.29803923,0.29803923,0.29803923}
+  \manualTitle{}
+  \par}
+
+  \centering\includegraphics[width=\textwidth]{../gnu-head.png}\par
+  \end{minipage}
+  }
+  \setcounter{tocdepth}{10}
+  \renewcommand\contentsname{Table of Contents}
+  \tableofcontents
+  \clearpage\pagestyle{Standard}
+}
+
+% Define title, author and date here
+\title{\manualProduct{} Release \manualProductRelease{}\\\manualTitle{}}
+\author{John Collins}
+\date{\today}

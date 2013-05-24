@@ -1,0 +1,12 @@
+\chapter{Introduction to \ProductName{} API}
+\label{chp:introduction-to-xi-batch-api}
+The \ProductName{} API enables a C or C++ programmer to access \ProductName{} facilities directly from within an application. The
+application may be on a Unix host or on a Windows workstation.
+
+Communication takes place using a TCP connection between the API running on a Windows or Unix machine and the server process
+\progname{xbnetserv} running on the Unix host in question. The same application may safely make several simultaneous conversations
+with the same or different host.
+
+The user may submit, change, delete and alter the state of jobs or variables to which he or she has access, and may receive notification
+about changes which may require attention. In addition, the user access control parameters may be viewed and if permitted, changed.
+

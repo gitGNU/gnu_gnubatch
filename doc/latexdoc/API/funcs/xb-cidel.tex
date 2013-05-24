@@ -1,0 +1,36 @@
+\subsection{\funcnameXBcidel{}}
+
+\begin{expara}
+
+int \funcnameXBcidel{}(const int fd, const unsigned flags, const unsigned indx)
+
+\end{expara}
+
+The function \funcXBcidel{} is used to delete a
+command interpreter from a \ProductName{} server.
+The invoking user must have \textit{special create} permission or the
+call will be rejected.
+
+\exampletext{fd} is a file descriptor which was previously
+returned by a successful call to \funcXBopen{} or equivalent.
+
+\exampletext{flags} is currently unused, but is reserved for
+future extensions. Set it to zero.
+
+\exampletext{indx} is the number of the command interpreter to
+be deleted.
+
+\subsubsection{Return values}
+The function returns 0 if successful otherwise one of the error codes
+listed on page \pageref{errorcodes} onwards.
+
+\subsubsection{Notes}
+The standard shell entry, entry zero, cannot be deleted and attempts to
+do so will always return an error code
+(\filename{\constprefix{}BAD\_CI}).
+
+There are few checks and interlocks on command interpreter lists, which
+are assumed to be likely to be changed sparingly. The user should
+satisfy him or herself that there are no jobs likely to use the command
+interpreter about to be deleted before invoking this operation.
+

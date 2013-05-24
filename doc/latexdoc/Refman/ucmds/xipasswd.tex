@@ -1,0 +1,50 @@
+\subsection{\XipasswdName}
+
+\begin{expara}
+
+\XipasswdName{} [-u user] [-p password] [-f] [-d] [-F file]
+
+\end{expara}
+
+\PrXipasswd{} sets a password for the current user or a specified user if \exampletext{{}-u} is given. This is
+separate and distinct from the user's login password.
+This password is used by the web interfaces, the Windows interfaces and
+the APIs\IfXi{ for both \ProductName{} and \OtherProductName}.
+
+The reason for doing this is because it is considered insecure to possibly repeatedly try login passwords from user programs.
+
+If any users have a password set in this way, then all users will have to to have a password in the file to use any of the interfaces
+requiring a password.
+
+Unlike the Unix \progname{passwd(1)} routine, the old password is not prompted for and there is no confirmation.
+
+\subsubsection{Options}
+
+Note that this program does not provide for saving options in \configurationfile{} or \homeconfigpath{} files.
+
+\setbkmkprefix{xipasswd}
+
+\cmdoption{u}{}{user}{user}
+
+Set password for given user. This may only be for other than the current user if \PrXipasswd{} is invoked by
+\filename{root}.
+
+\cmdoption{p}{}{passwd}{passwd}
+
+Specify the password to be set other than prompting for it.
+
+\cmdoption{f}{}{}{insist}
+
+It is normally considered an error to include a password for \filename{root} for the same reasons that the password file is
+separate. However this option may be set to insist upon it.
+
+\cmdoption{d}{}{}{deluser}
+
+Delete the user's password from the file.
+
+\cmdoption{F}{}{file}{file}
+
+Use \genericargs{file} to hold the password. The default if no file is given
+is \filename{\IfXi{/usr/spool/progs/xipwfile}\IfGNU{/usr/local/share/gbpwfile}}. Any number of
+\exampletext{{}-F} options may be given to set up several password files at once.
+

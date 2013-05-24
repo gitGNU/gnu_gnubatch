@@ -1,0 +1,31 @@
+\subsection{\funcnameXBgethenv{}}
+
+\begin{expara}
+
+char **\funcnameXBgethenv{}(const int fd)
+
+\end{expara}
+
+The function \funcXBgethenv{} is used to obtain a copy
+of the static environment file for the server. This will provide the
+environment variables which a job running on that server would have
+unless overridden by separate environment variables in the job.
+
+\exampletext{fd} is a file descriptor which was previously
+returned by a successful call to \funcXBopen{} or equivalent.
+
+The result is a vector of character pointers containing environment
+variable assignments of the form \exampletext{NAME=VALUE}.
+This list is terminated by a null pointer. If there is no static
+environment file, an empty list is returned, i.e. it will be a pointer
+to a \exampletext{char *} location containing NULL.
+
+Unlike other routines, the user has the responsibility to deallocate the
+space allocated, each string and the overall vector, when not required.
+
+\subsubsection{Return values}
+The function returns a null-terminated vector of character vectors if
+successful, otherwise it returns NULL and one of the error codes listed
+on page \pageref{errorcodes} onwards is assigned to the external
+variable \filename{\errorloc}.
+

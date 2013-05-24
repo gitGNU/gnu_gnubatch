@@ -1,0 +1,23 @@
+\subsection{\funcnameXBgetbtd{}}
+
+\begin{expara}
+
+int \funcnameXBgetbtd{}(const int fd, apiBtdef *defs)
+
+\end{expara}
+
+The function \funcXBgetbtd{} is used to read the
+default user profile parameters for the given host.
+
+\exampletext{fd} is a file descriptor which was previously
+returned by a successful call to \funcXBopen{} or equivalent.
+
+\exampletext{defs} is a pointer to a structure which will on
+successful return, contain the default user details. The definition of
+the default user profile structure is given on page
+\pageref{bkm:Defaultuser}.
+
+\subsubsection{Return values}
+The function returns 0 if successful otherwise one of the error codes
+listed on page \pageref{errorcodes} onwards.
+

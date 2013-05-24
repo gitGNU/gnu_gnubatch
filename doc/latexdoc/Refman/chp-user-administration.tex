@@ -1,0 +1,124 @@
+\chapter{User Administration}
+\label{chp:user-administration}
+\ProductName{} maintains a list of users which is generated from the password system (whether using the \filename{/etc/passwd} file or NIS).
+Hence, each user must first have a Unix account in order to have a \ProductName{} account.
+
+User permissions are now held as a default set together with differences for specific users, so no special action need be taken when users are
+added or deleted, unless they are distinguished in some way.
+
+There are 4 (formerly 5) aspects to the \ProductName{} user account:
+
+\begin{tabular}{l p{14cm}}
+{\bfseries
+Privileges} &
+Control access to usage and administration functions of the system. For
+example, the privilege to submit jobs to the queue. \\
+
+{\bfseries
+Load levels} &
+Provide a limit on the size of any one job and the total load that that
+user can place on the system. \\
+
+{\bfseries
+Priorities} &
+When there are more jobs ready to run than are allowed these position
+the ``ready'' jobs with respect to each
+other. Facilities exist to specify what priorities each \ProductName{} user
+may specify for their batch jobs. \\
+{\bfseries
+Modes} &
+Specify the default modes that are placed on jobs and variables for the
+user who creates them. Modes are described in detail in the Variables
+chapter and the Jobs chapter. \\
+{\bfseries
+Charges} &
+These are now deprecated. \\
+\end{tabular}
+\section{Privileges}
+In addition to the ability to access jobs and variables in the manners
+described by the \textit{modes}, each user has a number of
+\textit{privileges}, as follows. The privileges may be individually set
+for each user using \PrBtuser, and a default
+established for new users. The privileges are:
+
+\begin{tabular}{|p{3cm}|l|p{12cm}|}
+\hline
+\bfseries Privilege &
+\bfseries Abbr &
+\bfseries Description\\\hline
+Read admin file & \exampletext{RA} &
+User may display contents of administration file showing
+users, charges and privileges.\\\hline
+Write admin file & \exampletext{WA} &
+User has full write access to administration file.\\\hline
+Create entry & \exampletext{CR} &
+User may create jobs and variables. This permission is granted
+by default.\\\hline
+Special Create & \exampletext{SPC} &
+User may update command interpreter file or adjust load
+levels.\\\hline
+Stop scheduler & \exampletext{ST} &
+User may stop \ProductName{} (i.e. run \PrBtquit)\\\hline
+Change default modes & \exampletext{Cdft} &
+User may change his/her default modes. This permission is granted by default.\\\hline
+Combine user and group permissions & \exampletext{UG} &
+If the user has this privilege, then any job or variable in
+the user's primary group will have the permissions of ``owner'' and ``group'' combined.\\\hline
+Combine user and other permissions & \exampletext{UO} &
+If the user has this privilege, then any job or variable in not in the user's primary group will have the
+permissions of ``owner'' and ``others'' combined.\\\hline
+Combine group and other permissions & \exampletext{GO} &
+If the user has this privilege, then any job or variable will have the permissions of ``group'' and
+``others'' combined, effectively ``turning off'' any difference between ``group'' and ``other'' permissions.\\\hline
+\end{tabular}
+
+Unless otherwise stated in the above table the privileges are turned off
+by default. The default privileges are those which by default are
+applied to new users. They may be changed by a system administrator
+using \PrBtuser.
+
+A \textit{system administrator} is any user with all privileges enabled, especially the \textit{write administration file} privilege. Initially
+the super-user, \filename{root}, and \batchuser{} are designated as system administrators
+(and it is not possible to turn this off). A particular feature of this privilege is that changes to owner or group of jobs or variables are
+immediate and complete.
+
+To save screen space the abbreviations given in the above table are often used in \ProductName{} to
+represent these permissions. An example of these may be seen on the main screen of the user administration tools,
+\progname{btuser}, \PrXbtuser{} and \PrXmbtuser{}.
+
+\section{Load Levels}
+\label{useradm:loadlevels}
+
+Each user has a \emphasis{maximum load level}. This is a number given to each job which relates to the load it has on the system. A user can be limited to the maximum size of a job with this parameter.
+
+Each user also has a \emphasis{total load level}. This limits the sum of the load levels for each job which the user may have running.
+
+Each user also has a \emphasis{special create load level}, but this just serves to initialise the load level for new command
+interpreters if the user is allowed to create them (i.e. he/she also has \textit{special create} privilege).
+
+\section{Priorities}
+A batch job may have a priority in the range of 1 to 255. Users will usually be restricted to a smaller range between their individual
+minimum and maximum priorities, but which are normally the system defaults, initially 100 to 200. A default priority for each user may be
+set; again there is a system default, initially 150.
+
+When a job is queued using \PrBtr{}, it is given the user's default priority unless overridden with the
+\exampletext{{}-p} option. It is possible to set a user's minimum, maximum and default priorities to apparently useless values, such as
+setting the default priority outside the range of the maximum and minimum priorities to force the user always to set a priority.
+
+Jobs belonging to remote machines may appear in different places on the queue than on their machines when they initially come on line, but this
+situation, which is harmless, should in any case rapidly adjust itself.
+
+\section{Charging}
+Charging is deprecated and has been removed from \ProductName{}.
+
+\section{Modes}
+The modes of jobs and variables are set when they are created. Unless otherwise specified, they are set to the default modes in force for the
+user who created the job or variable.
+
+See Job and Variable Modes for an introduction to Modes. Additional information follows about jobs and variables in the relevant sections.
+
+A user may be permitted to reset his/her own default modes with the \textit{change default modes} privilege, using
+\progname{btuser}. A system-wide `default default mode' is given to each new user, along with a default set of privileges.
+
+As distributed, \ProductName{} will assign default modes to users for the jobs and variables they create as described previously on page \pageref{overview:defmodes}.
+

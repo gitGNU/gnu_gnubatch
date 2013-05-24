@@ -1,0 +1,347 @@
+\chapter{System Administration}
+\label{chp:system-administration}
+As opposed to managing users this section is about managing the scheduler. this chapter includes topics like controlling the workload, setting up global entities like command interpreters and keeping audit trails.
+
+\section{Managing Workload and Auditing}
+There are seven pre-defined ``System'' variables known to \ProductName{}. They are initially set to be owned by
+\batchuser{} (or \filename{root} if \batchuser{} does not exist) with the default modes which
+may be reset if desired. These variables may not be deleted or set to an invalid value (e.g. string for numeric variable etc.). They may be
+included in job conditions or assignments provided that these do not attempt to perform an invalid operation on them.
+
+The variables are:
+
+\begin{tabular}{|l|p{14cm}|}
+\hline
+\filename{CLOAD} &
+\ProductName{} updates \filename{CLOAD} in real time to show the total load level of all currently-running jobs. This is a
+read-only variable.\\\hline
+\filename{LOADLEVEL} &
+Controls the maximum load of batch jobs that may be running on the system. Jobs can only be started when \filename{CLOAD} is
+less than \filename{LOADLEVEL}. A job can only start if it will not put \filename{CLOAD} over the limit set by
+\filename{LOADLEVEL}.\newline
+\filename{LOADLEVEL} may only be set to a numeric
+value.
+\newline
+If the value is increased, then new jobs may start immediately. If the
+value is reduced, then it is possible that the total load level of
+running jobs may temporarily exceed it until some of them terminate,
+however no new jobs will start until the level is no longer
+exceeded.\\\hline
+\filename{LOGJOBS} &
+Specifies where to send output from the Job Audit Trail
+logging. If the variable holds null (an empty data field) then logging
+is turned off.\\\hline
+\filename{LOGVARS} &
+Specifies where to send log output for the Variable Audit
+Trail. If the variable holds null (an empty data field) then logging is
+turned off.\\\hline
+\filename{MACHINE} &
+This is a read-only variable containing the current machine
+name, that can only be referenced as a local variable.\\\hline
+\filename{STARTLIM} &
+This variable contains the maximum number of jobs that
+\ProductName{} can start at once. The initial value, upon installation of
+\ProductName{}, is 5.\\\hline
+\filename{STARTWAIT} &
+This variable contains the waiting time in seconds for the
+next available batch to start if the previous batch set by
+\filename{STARTLIM} has not been started for some reason. The
+initial value upon installation of \ProductName{} is set to be 30
+seconds.\\\hline
+\end{tabular}
+
+The values of the variables can be read and, except for \filename{MACHINE} and \filename{CLOAD}, adjusted
+using programs \PrBtq, \PrBtvar, \PrXbtq{} and \PrXmbtq. These and other variables can also be queried using \PrBtvlist.
+
+\subsection{Managing Total Workload}
+\filename{LOADLEVEL} and \filename{CLOAD} may be used to control the batch workload and avoid conflicts with other activities
+in a variety of ways. To make the best use of these facilities the load specified for jobs should also be used to reflect their use of
+resources. Resource hungry jobs should have higher load values then smaller jobs.
+
+\subsubsection{Running fewer batch jobs in office hours}
+A batch job can be set up to reduce the value of \filename{LOADLEVEL} at the start of office hours, to prevent
+batch jobs slowing down interactive users. Another job can run at the close of office hours to put \filename{LOADLEVEL} back up to
+the overnight level.
+
+If jobs have loads in the range 500 to 10000 lowering the value of \filename{LOADLEVEL} can also be used to prevent some jobs
+running. For example setting it to 5000 from 20000 will reduce the number of jobs running concurrently but also prevent any jobs over 5000
+units from being started.
+
+\subsubsection{Stopping \manualProduct{} gracefully}
+To stop \ProductName{}, yet allow jobs to complete, perform the following
+steps:
+
+\begin{enumerate}
+\item Set \filename{LOADLEVEL}=0
+\item Wait until \filename{CLOAD}=0
+\item Stop \ProductName{}
+\end{enumerate}
+
+This can be done manually, incorporated in a shell script or even set up as a batch job. Batch jobs which stop the scheduler must launch their script asynchronously to avoid killing themselves with the \PrBtquit{} command.
+
+\subsubsection{Starting activities when Production Work Completes}
+Set the administration activities up as a batch job to start towards the end of the expected batch work schedule. Specify
+\filename{CLOAD}=0 as a pre-condition for the administration job. If there are more than one administration jobs to be run, set them
+up as a chain of jobs, with only the first one dependent on \filename{CLOAD}.
+
+The sort of administrative activities that might be performed include back ups, optimising databases, cleaning temporary directories and so
+on.
+
+This approach is compatible with the idea promoted in the next section. Instead of testing for \filename{CLOAD}=0 the test might be
+\filename{CLOAD}{\textless}= 10 for the quoted example.
+
+\subsubsection{Mixing Administration and Production Jobs}
+A policy can also be used which will allow small administration jobs to
+run without being blocked by big production jobs. For example:
+
+\begin{itemize}
+\item Make the load values for all production jobs go up in increments of 100 units, with the smallest being 100 units.
+\item Give admin. jobs a load value of 1 unit.
+\item Setting the value of \filename{LOADLEVEL} to 20010 will allow a maximum of 20000 units of production jobs. It also lets up to
+10 admin. jobs run at any time.
+\item To stop \ProductName{} gracefully \filename{LOADLEVEL} could first be set to 10 to allow admin. jobs to continue running whilst
+production work finishes. Then when \filename{CLOAD} drops below 100 set \filename{LOADLEVEL} to 0 and proceed as above.
+\end{itemize}
+
+\subsection{Controlling Peak Activity with STARTLIM \& STARTWAIT}
+These variables prevent a large number of jobs swamping a machine or network by starting at the same instant. Any process tends to use a
+large amount of system resources when starting up. For example: if a user scheduled 400 network I/O intensive jobs to start at Midnight, it
+is likely that network problems would ensue.
+
+If you observe any resource being swamped then lower the value of \filename{STARTLIM} and/or increase the number of seconds
+delay specified by \filename{STARTWAIT}. On more powerful machines \filename{STARTLIM} may be increased and/or
+\filename{STARTWAIT} reduced.
+
+External packages, like alert or performance managers, can query and modify these values using \PrBtvar. The package
+must execute the commands as a suitably authorised user.
+
+\subsection{Keeping an Audit Trail}
+\ProductName{} produces separate output of events suffered by variables and jobs. The output for the Job log is specified by the variable
+\filename{LOGJOBS} and for variables by \filename{LOGVARS}.
+
+\subsubsection{Job Logging via LOGJOBS}
+This variable may only be set to a string value. It should contain a file name, or a program or shell script name starting with a
+\filename{{\textbar}}. However, it is vitally important to use \filename{{\textbar}} with great care so as to ensure the
+scheduler process cannot be held up by the receiving process.
+
+If a file name is given, it will be taken relative to the spool directory, by default \spooldir. Thus a file
+name of \exampletext{joblog} will be interpreted as \exampletext{\spooldirname/joblog}.
+
+The file access modes on the file will correspond to the \textit{read/write} permissions on the variable, and the owner and
+group will correspond to that of the variable.
+
+If a program or shell script is given, then the \filename{PATH} variable which applied when the scheduler was started will be used to
+find the program.
+
+Lines written to the file or sent to the program will take the form
+
+\begin{expara}
+
+05/01/99{\textbar}10:22:43{\textbar}13741{\textbar}date{\textbar}completed{\textbar}jmc{\textbar}users{\textbar}150{\textbar}1000
+
+\end{expara}
+
+Each field is separated from the previous one by a \filename{{\textbar}}, for ease of processing by \progname{awk} etc. The fields are in the following order(new versions will add fields on the right):
+
+\begin{tabular}{l l}
+Date & in the form \textit{dd/mm/yy} or \textit{mm/dd/yy} depending
+on the time zone.\\
+Time & ~ \\
+Job Number &
+or for external jobs Machine:jobnumber\\
+Job Title & or if not title {\textless}unnamed job{\textgreater}\\
+Status code & (listed below) Prefixed by machine: if from remote host\\
+User & ~ \\
+Group & ~ \\
+Priority & ~ \\
+Load Level & ~ \\
+\end{tabular}
+
+The status codes may be one of the following:
+
+\begin{tabular}{l l}
+\exampletext{Abort} &
+Job aborted\\
+\exampletext{Cancel} &
+Job cancelled\\
+\exampletext{Chgrp} &
+Group changed\\
+\exampletext{Chmod} &
+Mode changed\\
+\exampletext{Chown} &
+Owner changed\\
+\exampletext{Completed} &
+Job completed satisfactorily\\
+\exampletext{Create} &
+Job created (i.e. submitted to queue)\\
+\exampletext{Delete} &
+Job deleted\\
+\exampletext{Error} &
+Job completed with error exit\\
+\exampletext{force-run} &
+Job forced to start, without time advance\\
+\exampletext{force-start} &
+Job forced to start\\
+\exampletext{Jdetails} &
+Other details of job changed\\
+\exampletext{Started} &
+Job started\\
+\end{tabular}
+
+\subsubsection{Variable Logging via LOGVARS}
+This variable may only be set to a string value. It should contain a file name, or a program or shell script name starting with a
+``\filename{{\textbar}}''.
+
+If a file name is given, it will be taken relative to the spool directory, by default \spooldir. Thus a file
+name of \exampletext{varlog} will be interpreted as the file name \exampletext{\spooldirname/varlog}.
+
+The file access modes on the file will correspond to the \textit{read/write} permissions on the variable, and the owner and
+group will correspond to that of the variable.
+
+If a program or shell script is given, then the \filename{PATH} variable which applied when the scheduler was started will be used to
+find the program. Lines written to the file or sent to the program will take the form:
+
+\begin{expara}
+
+05/01/99{\textbar}09:52:43{\textbar}cnt{\textbar}assign{\textbar}Job
+start{\textbar}jmc{\textbar}users{\textbar}2011{\textbar}86742{\textbar}myjob
+
+\end{expara}
+
+Each field is separated from the previous one by a \filename{{\textbar}}, for ease of processing by
+\progname{awk} etc.
+
+The fields are in the order (new versions will add fields on the right):
+
+\begin{tabular}{l l}
+Date &
+in the form \textit{dd/mm/yy} or \textit{mm/dd/yy}, depending
+on time zone.\\
+Time & ~ \\
+Variable Name & ~ \\
+Status code & (listed below) Prefixed by machine: if from remote host\\
+Event code & see below.\\
+User & ~ \\
+Group & ~ \\
+Value & numeric or string\\
+Job number & if done from job\\
+Job title & if done from job\\
+\end{tabular}
+
+The status codes indicate what happened, and may be one of the
+following:
+
+\begin{tabular}{l l}
+\exampletext{assign} & Value assigned to variable\\
+\exampletext{chcomment} & Comment changed\\
+\exampletext{chgrp} & Group changed\\
+\exampletext{chown} & Owner changed\\
+\exampletext{create} & Variable created\\
+\exampletext{delete} & Variable deleted\\
+\exampletext{rename} & Variable renamed\\
+\end{tabular}
+
+The event code indicates the circumstance in which the variable was
+changed, as follows:
+
+\begin{tabular}{l l}
+\exampletext{manual} & Set via user command\\
+\exampletext{Job start} & Executed at job start\\
+\exampletext{Job completed} & Executed at job completion\\
+\exampletext{Job error} & Executed at job error exit\\
+\exampletext{Job abort} & Executed at job abort\\
+\exampletext{Job cancel} & Executed at job cancellation\\
+\end{tabular}
+\section{Setting Up Command Interpreters}
+The command interpreters are separate entities which are referred to in
+the job specifications. Every job specifies which command interpreter
+it will run under. When \ProductName{} is installed there is normally only
+one command interpreter set up. It is usually called
+\exampletext{sh} and runs the Bourne shell.
+
+Additional command interpreters can be set up to run jobs under the
+Korn, C, Perl or other shell programs. Any program that reads all of
+its commands from standard input can be used by a \ProductName{} Command
+Interpreter.
+
+Each command interpreter specifies the following set of parameters:
+
+\begin{description}
+\item{\bfseries{Name}}
+A unique identifier which is used, both internally and by user programs,
+to refer to the command interpreter.
+\item{\bfseries{Program}}
+Holds the full path and name of the command interpreter program. This
+can be any program, such as the Bourne shell,
+\filename{/bin/sh}, or the Korn shell,
+\filename{/bin/ksh}, that will read commands from standard
+input.
+\item{\bfseries{Arguments}}
+Specifies any arguments that are to be passed to the command interpreter
+when it is invoked. The standard option for Bourne Shell type
+interpreters is \exampletext{{}-s}, which prevents the first
+``actual'' argument from being treated as a
+file name.
+\item{\bfseries{Load Level}}
+Sets the default Load level to be given to all jobs running under the
+command interpreter. Only users with the \textit{special create
+privilege} may override this default.
+\item{\bfseries{Nice}}
+Sets the Unix nice value for processing batch jobs under this command
+interpreter. The default is 24, giving a slightly lower priority from
+the normal of 20.
+\item{\bfseries{Argument 0}}
+When getting a list of processes using a command like
+\progname{ps} the batch jobs will normally have the name of
+the command interpreter program they are running under. Setting the
+Argument 0 option causes the job title to be used as the process name.
+\item{\bfseries{Expand \$ constructs}}
+Causes the scheduler to expand \$-type constructs rather than the
+command interpreter.
+\end{description}
+
+The standard default Bourne shell has the following set up:
+
+\hspace{1cm}
+\begin{tabular}{l l}
+Name & \exampletext{sh}\\
+Program & \filename{/bin/sh}\\
+Arguments & \exampletext{{}-s}\\
+Load Level & 1000\\
+Nice & 24\\
+Argument 0 & false (i.e. not set)\\
+Expand \$ constructs & false (i.e. not set)\\
+\end{tabular}
+
+The same program can be used by more than one command interpreter. For
+example, two command interpreters could be set up using the Bourne
+shell, but using different options. One could be called sh with the
+normal arguments. The other could be named
+\exampletext{sh\_high} with a higher load level and lower
+nice.
+
+Standard users are not normally allowed to specify different load levels
+for jobs. They automatically inherit the load from the command
+interpreter. The mechanism for supporting different types of jobs is to
+set up a command interpreter for each type. Give each command
+interpreter a meaning full name.
+
+Here are some examples showing different Programs, Arguments and Load
+Levels:
+
+\hspace{1cm}
+\begin{tabular}{l l l l}
+Name & reports &  updates & admin\\
+Program & \filename{/bin/sh} & \filename{/bin/sh} & \filename{/bin/perl}\\
+Arguments & \exampletext{{}-s} & \exampletext{{}-s} & \exampletext{{}-}\\
+Load Level & 1000 & 3000 & 1500\\
+\end{tabular}
+
+Programs \PrBtq, \PrBtcichange, \PrXbtq{} and \PrXmbtq{} can be used for adding, changing and
+deleting Command Interpreters. Program \PrBtcilist{}
+is a command line utility for listing the command interpreters.
+
+To specify the command interpreter when submitting jobs with \PrBtr{} use the \exampletext{{}-i} option.
+Programs \\PrBtq, \PrBtjchange, \PrXbtq{} and \PrXmbtq{} provide facilities for re-specifying a
+job's command interpreter.
+

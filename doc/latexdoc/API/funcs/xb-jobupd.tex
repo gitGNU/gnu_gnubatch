@@ -1,0 +1,34 @@
+\subsection{\funcnameXBjobupd{}}
+
+\begin{expara}
+
+int \funcnameXBjobupd{}(const int fd,
+
+\ \ \ \ \ \ \ \ \ \ \ \ \ \ const unsigned flags,
+
+\ \ \ \ \ \ \ \ \ \ \ \ \ \ const slotno\_t slot,
+
+\ \ \ \ \ \ \ \ \ \ \ \ \ \ apiBtjob * jobd)
+
+\end{expara}
+
+The function \funcXBjobupd{} is used to update the
+details of a job.
+
+\exampletext{fd} is a file descriptor which was previously
+returned by a successful call to \funcXBopen{} or equivalent.
+
+\exampletext{flags} is zero or
+\filename{\constprefix{}FLAG\_IGNORESEQ} to ignore recent changes to
+the job list.
+
+\exampletext{jobp} is a pointer to a structure containing the
+details of the job.
+
+The definition of the job structure is given on page
+\pageref{bkm:Jobstructure} onwards.
+
+\subsubsection{Return values}
+The function returns 0 if successful otherwise one of the error codes
+listed on page \pageref{errorcodes} onwards.
+

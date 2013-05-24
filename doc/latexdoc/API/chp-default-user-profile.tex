@@ -1,0 +1,35 @@
+\chapter{Default user profile}
+\label{chp:default-user-profile}
+\label{bkm:Defaultuser}The default user profile is applied to all new users on the system and consists of the following fields.
+
+\begin{expara}
+
+typedef \ \ struct \ \ \ \{
+
+\ \ \ \ \ \ \ \ unsigned \ char \ btd\_minp,
+
+\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ btd\_maxp,
+
+\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ btd\_defp,
+
+\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ btd\_version;
+
+\ \ \ \ \ \ \ \ unsigned \ short btd\_maxll;
+
+\ \ \ \ \ \ \ \ unsigned \ short btd\_totll;
+
+\ \ \ \ \ \ \ \ unsigned \ short btd\_spec\_ll;
+
+\ \ \ \ \ \ \ \ unsigned \ short btd\_priv;
+
+\ \ \ \ \ \ \ \ unsigned \ short btd\_jflags[3];
+
+\ \ \ \ \ \ \ \ unsigned \ short btd\_vflags[3];
+
+\} \ apiBtdef;
+
+\end{expara}
+
+The meanings of the various fields are the same as the corresponding elements of the \filename{apiBtuser} structure, defined above
+apart from \filename{btd\_version}, which contains the current release number of \ProductName{}, currently \IfXi{6}\IfGNU{1}.
+

@@ -43,7 +43,7 @@ INSTALL		=	@INSTALL@
 INSTALL_DATA	=	@INSTALL_DATA@
 STAGED_INSTALL	=	false
 
-all:	buildd build-src
+all:	buildd build-src docdir
 
 buildd:	utild
 	$(HELPPARSE) $(MSGFILE) $(SRCDIR) $(BUILDDIR)
@@ -51,6 +51,10 @@ buildd:	utild
 
 build-src:
 	cd $(BUILDDIR);$(MAKE) all
+	touch $@
+
+docdir:
+	cd doc;$(MAKE) all
 	touch $@
 
 utild:
@@ -91,7 +95,7 @@ install-net:
 
 clean:
 	cd $(UTILDIR);$(MAKE) clean
-	rm -fr $(BUILDDIR) buildd utild build-src
+	rm -fr $(BUILDDIR) buildd utild build-src docdir
 	cd doc;$(MAKE) clean
 
 distclean:	clean
@@ -101,3 +105,4 @@ distclean:	clean
 	$(RM) config.cache config.h config.status config.log Makefile
 	$(RM) Checkuserinst Userinst Netinst gnubatch.conf ingnubatch.conf gnubatch.hosts
 	cd doc;$(MAKE) distclean
+

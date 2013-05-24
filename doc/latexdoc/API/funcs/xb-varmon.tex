@@ -1,0 +1,69 @@
+\subsection{\funcnameXBvarmon{}}
+
+\begin{expara}
+
+int \funcnameXBvarmon{}(const int fd, void (*fn)(const int))
+
+\end{expara}
+
+Note that this routine is not available in the Windows version, please
+see the section on \funcXBsetmon{} on page
+\pageref{bkm:xbsetmon} which covers both jobs and variables.
+
+The function \funcXBvarmon{} is used to set a function
+to monitor changes to the variables list.
+
+\exampletext{fd} is a file descriptor which was previously
+returned by a successful call to \funcXBopen{} or equivalent.
+
+\exampletext{fn} is a pointer to a function which will handle
+the changes to the list or NULL, which cancels any previous call. This
+function will be called with fd as an argument when any change is
+noted. The API does not note which variables the user is interested in,
+so any changes to variables may provoke a call to this function.
+
+\subsubsection{Return values}
+The function returns 0 if successful otherwise one of the error codes
+listed on page \pageref{errorcodes} onwards.
+
+\subsubsection{Example}
+
+\begin{expara}
+
+void note\_mod(const int fd)
+
+\{
+
+\ \ \ \ var\_changes++;
+
+\}
+
+\bigskip
+
+
+...
+
+\bigskip
+
+
+\funcnameXBvarmon{}(fd, note\_mod);
+
+if (var\_changes) \ \{
+
+\ \ \ \ var\_changes = 0;
+
+\ \ \ \ \ ...
+
+/* Re-read list etc */
+
+\ \ \ \ \ ...
+
+\}
+
+\bigskip
+
+
+\funcnameXBvarmon{}(fd, NULL);
+
+\end{expara}
+

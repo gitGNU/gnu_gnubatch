@@ -1,0 +1,44 @@
+\chapter{Command Interpreters}
+\label{chp:command-interpreters}
+\label{bkm:Cmdinterp}
+The following structure is used to describe command interpreters.
+
+\begin{expara}
+
+typedef \ \ struct \ \ \ \{
+
+\ \ \ \ \ \ \ \ unsigned \ short \ \ ci\_ll;
+
+\ \ \ \ \ \ \ \ unsigned \ char \ \ \ ci\_nice;
+
+\ \ \ \ \ \ \ \ unsigned \ char \ \ \ ci\_flags;
+
+\ \ \ \ \ \ \ \ char \ \ \ \ \ \ \ \ \ \ \ \ \ ci\_name[CI\_MAXNAME+1];
+
+\ \ \ \ \ \ \ \ char
+\ \ \ \ \ \ \ \ \ \ \ \ \ ci\_path[CI\_MAXFPATH+1];
+
+\ \ \ \ \ \ \ \ char \ \ \ \ \ \ \ \ \ \ \ \ \ ci\_args[CI\_MAXARGS+1];
+
+\} \ Cmdint;
+
+\end{expara}
+
+The field \filename{ci\_ll} gives the default load level for the command interpreter. If this is given as zero in an
+\funcXBciadd{} or \funcXBciupd{} function call, then the user's special create load level is substituted.
+
+The field \filename{ci\_nice} gives the nice value at which jobs will run.
+
+The field \filename{ci\_flags} contains a combination of:
+
+\begin{tabular}{ll}
+\filename{CIF\_SETARG0} & Insert job title as argument 0 of job\\
+\filename{CIF\_INTERPARGS} & Expand environment variables and \exampletext{{\textasciigrave}{\textasciigrave}} constructs in
+arguments.\\
+\end{tabular}
+
+The fields \filename{ci\_name}, \filename{ci\_path} and \filename{ci\_args} give the name, the path name and the
+prefix to the arguments for the command interpreter. Neither the path nor the arguments are checked for validity. \ProductName{} assumes
+virtually everywhere that few changes will ever be made to command interpreters and that they are more or less the same on each connected
+host. Accordingly changes to the command interpreter list should be sparing.
+

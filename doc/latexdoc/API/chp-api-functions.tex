@@ -1,0 +1,141 @@
+\chapter{API Functions}
+\label{chp:api-functions}
+The following sub-sections describe the \ProductName{} API C routines including each function's purpose, syntax, parameters
+and possible return values.
+
+The function descriptions also contain additional information that illustrate how the function can be used to carry out tasks.
+
+Apart from the string manipulation functions and Unix versions of the two functions \funcXBjobadd{} and
+\funcXBjobdata{} which return a standard I/O file descriptor, all functions return an integer value. This is negative to
+indicate an error, or zero if all is well, apart from \funcXBopen{}, which may return a positive value.
+
+In some cases there are differences between the Unix and Windows variants, these are noted where appropriate.
+
+The negative values have the following meanings.
+
+\bigskip
+
+\label{errorcodes}
+\begin{tabular}{|l|l|}
+\hline
+\bfseries Error code & \bfseries Meaning\\\hline
+\filename{\constprefix{}INVALID\_FD} & Invalid file descriptor\\\hline
+\filename{\constprefix{}NOMEM} & API unable to allocate memory\\\hline
+\filename{\constprefix{}INVALID\_HOSTNAME} & Invalid host name\\\hline
+\filename{\constprefix{}INVALID\_SERVICE} & Invalid service name\\\hline
+\filename{\constprefix{}NODEFAULT\_SERVICE} & Default service not found\\\hline
+\filename{\constprefix{}NOSOCKET} & Unable to create socket\\\hline
+\filename{\constprefix{}NOBIND} & Unable to bind socket\\\hline
+\filename{\constprefix{}NOCONNECT} & Unable to make connection\\\hline
+\filename{\constprefix{}BADREAD} & Failure reading from socket\\\hline
+\filename{\constprefix{}BADWRITE} & Failure writing to socket\\\hline
+\filename{\constprefix{}CHILDPROC} & Unable to create child process\\\hline
+\filename{\constprefix{}NOT\_USER} & Not relevant user\\\hline
+\filename{\constprefix{}BAD\_CI} & Invalid command interpreter\\\hline
+\filename{\constprefix{}BAD\_CVAR} & Bad variable in condition\\\hline
+\filename{\constprefix{}BAD\_AVAR} & Bad variable in assignment\\\hline
+\filename{\constprefix{}NOMEM\_QF} & No memory or disk space for queue file\\\hline
+\filename{\constprefix{}NOCRPERM} & No create permission\\\hline
+\filename{\constprefix{}BAD\_PRIORITY} & Invalid priority\\\hline
+\filename{\constprefix{}BAD\_LL} & Invalid load level\\\hline
+\filename{\constprefix{}BAD\_USER} & Invalid user\\\hline
+\filename{\constprefix{}FILE\_FULL} & File system full creating job\\\hline
+\filename{\constprefix{}QFULL} & IPC Message system full\\\hline
+\filename{\constprefix{}BAD\_JOBDATA} & Invalid job data\\\hline
+\filename{\constprefix{}UNKNOWN\_USER} & Unknown user specified\\\hline
+\filename{\constprefix{}UNKNOWN\_GROUP} & Unknown group specified\\\hline
+\filename{\constprefix{}ERR} & Undefined error\\\hline
+\filename{\constprefix{}NORADMIN} & No read admin file permission\\\hline
+\filename{\constprefix{}NOCMODE} & No change permissions permission\\\hline
+\filename{\constprefix{}UNKNOWN\_COMMAND} & Unknown command in \funcXBjobop\\\hline
+\filename{\constprefix{}SEQUENCE} & Sequence error\\\hline
+\filename{\constprefix{}UNKNOWN\_JOB} & Unknown job\\\hline
+\filename{\constprefix{}UNKNOWN\_VAR} & Unknown variable\\\hline
+\filename{\constprefix{}NOPERM} & No permission for operation\\\hline
+\end{tabular}
+
+\begin{tabular}{|l|l|}
+\hline
+\bfseries Error code & \bfseries Meaning\\\hline
+\filename{\constprefix{}INVALID\_YEAR} & Invalid year in holiday file operations\\\hline
+\filename{\constprefix{}ISRUNNING} & Job is running\\\hline
+\filename{\constprefix{}NOTIMETOA} & Job has no time to advance\\\hline
+\filename{\constprefix{}VAR\_NULL} & Null variable name\\\hline
+\filename{\constprefix{}INVALIDSLOT} & Invalid slot number\\\hline
+\filename{\constprefix{}ISNOTRUNNING} & Job is not running\\\hline
+\filename{\constprefix{}NOMEMQ} & No memory for queue name\\\hline
+\filename{\constprefix{}NOPERM\_VAR} & No permission on variable(s) referenced in job\\\hline
+\filename{\constprefix{}RVAR\_LJOB} & Remote variable in local job\\\hline
+\filename{\constprefix{}LVAR\_RJOB} & Local variable in remote job\\\hline
+\filename{\constprefix{}MINPRIV} & Too few permissions given\\\hline
+\filename{\constprefix{}SYSVAR} & Invalid operation on system variable\\\hline
+\filename{\constprefix{}SYSVTYPE} & Invalid type assignment attempted to system variable\\\hline
+\filename{\constprefix{}VEXISTS} & Variable exits\\\hline
+\filename{\constprefix{}DSYSVAR} & Attempt to delete system variable\\\hline
+\filename{\constprefix{}DINUSE} & Attempt to delete variable in use\\\hline
+\filename{\constprefix{}DELREMOTE} & Attempt to delete remote variable.\\\hline
+\filename{\constprefix{}NO\_PASSWD} & A password is required for the user\\\hline
+\filename{\constprefix{}PASSWD\_INVALID} & The supplied password is invalid.\\\hline
+\filename{\constprefix{}BAD\_GROUP} & Invalid group name (inaccessible to user).\\\hline
+\filename{\constprefix{}NOTEXPORT} & ``Cluster'' set on variable but not
+``Export''\\\hline
+\filename{\constprefix{}RENAMECLUST} & Attempt to rename clustered variable\\\hline
+\end{tabular}
+\section[Sign{}-on and off]{Sign-on and off}
+\input{funcs/xb-open.tex}
+\input{funcs/xb-close.tex}
+\input{funcs/xb-newgrp.tex}
+\input{funcs/xb-gethenv.tex}
+\input{funcs/xb-holread.tex}
+\input{funcs/xb-holupd.tex}
+\section{Job access}
+\input{funcs/xb-joblist.tex}
+\input{funcs/xb-jobfind.tex}
+\input{funcs/xb-jobread.tex}
+\input{funcs/xb-jobdata.tex}
+\input{funcs/xb-jobadd.tex}
+\input{funcs/xb-jobdel.tex}
+\input{funcs/xb-jobupd.tex}
+\input{funcs/xb-jobchown.tex}
+\input{funcs/xb-jobchgrp.tex}
+\input{funcs/xb-jobchmod.tex}
+\input{funcs/xb-jobop.tex}
+\input{funcs/xb-jobmon.tex}
+\section{Job fields}
+\input{funcs/xb-getarg.tex}
+\input{funcs/xb-getdirect.tex}
+\input{funcs/xb-getenv.tex}
+\input{funcs/xb-getenvlist.tex}
+\input{funcs/xb-getredir.tex}
+\input{funcs/xb-delarg.tex}
+\input{funcs/xb-delenv.tex}
+\input{funcs/xb-delredir.tex}
+\input{funcs/xb-putarg.tex}
+\input{funcs/xb-putargglist.tex}
+\input{funcs/xb-putenv.tex}
+\input{funcs/xb-putenvlist.tex}
+\input{funcs/xb-putredir.tex}
+\input{funcs/xb-putredirlist.tex}
+\input{funcs/xb-puttitle.tex}
+\section{Variable access}
+\input{funcs/xb-varlist.tex}
+\input{funcs/xb-varfind.tex}
+\input{funcs/xb-varadd.tex}
+\input{funcs/xb-vardel.tex}
+\input{funcs/xb-varupd.tex}
+\input{funcs/xb-varchcomm.tex}
+\input{funcs/xb-varchown.tex}
+\input{funcs/xb-varchgrp.tex}
+\input{funcs/xb-varchmod.tex}
+\input{funcs/xb-varrename.tex}
+\input{funcs/xb-varmon.tex}
+\section{Command Interpreters}
+\input{funcs/xb-ciread.tex}
+\input{funcs/xb-ciadd.tex}
+\input{funcs/xb-cidel.tex}
+\input{funcs/xb-ciupd.tex}
+\section{User permissions}
+\input{funcs/xb-getbtd.tex}
+\input{funcs/xb-getbtu.tex}
+\input{funcs/xb-putbtd.tex}
+\input{funcs/xb-putbtu.tex}

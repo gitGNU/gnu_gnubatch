@@ -1,0 +1,84 @@
+\subsection{\XbCjlistName}
+
+\begin{expara}
+
+\XbCjlistName{} [-D dir] [-v n] [-e n] [-u] [-s] [-f] jobfile outfile workdir
+
+\end{expara}
+
+\PrXbCjlist{} converts \ProductName{} job files held in the batch spool
+directory to an executable shell script which may be used to recreate
+them. This may be useful for backup purposes or for one stage in upgrading from one release of \ProductName{} to
+another.
+
+The jobs are copied into the backup directory \exampletext{workdir}, and the generated shell script file
+\exampletext{outfile} refers to files in that directory.
+
+\IfXi{\PrXbCjlist{} understands the format of the saved job file for versions of \ProductName{} going back to
+release 5, and when presented with a saved file, will attempt to work out from the format which release it relates to. If required, it will
+skip apparent errors in the job file.}
+
+In addition to options, three arguments are always supplied to \PrXbCjlist{}.
+
+\begin{tabular}{l p{14cm}}
+Job list file &
+This is the file containing the attributes of the jobs,
+\filename{btsched\_jfile} in the spool directory, by default \spooldir, or as relocated by re-specifying
+\filename{SPOOLDIR}.\\
+& \\
+Output file & This file is created by \PrXbCjlist{} to
+contain the executable shell script which may be used to create the
+jobs.\\
+& \\
+Backup directory & This directory is used to hold the job data.\\
+\end{tabular}
+
+Note that saved jobs make use of the \exampletext{{}-U} option to \PrBtr{} to set the ownership correctly.
+
+\subsubsection{Options}
+
+Note that this program does not provide for saving options in \configurationfile{} or \homeconfigpath{} files.
+
+\setbkmkprefix{xb-cjlist}
+
+\cmdoption{D}{}{directory}{directory}
+
+This option specifies the source directory for the jobs and job file
+rather than the current directory. It can be specified as \exampletext{\$SPOOLDIR} or
+\exampletext{\$\{SPOOLDIR-\spooldirname\}} etc and the environment and/or \linebreak[3]\masterconfig{} will be
+interrogated to interpolate the value of the environment variable given.
+
+If you use this, don't forget to put single quotes around it thus:
+
+\begin{expara}
+
+\XbCjlistName{} -D
+{\textquotesingle}\$\{SPOOLDIR-\spooldirname\}{\textquotesingle}
+...
+
+\end{expara}
+
+otherwise the shell will try to interpret the \exampletext{\$} construct and not \PrXbCjlist{}.
+
+\cmdoption{e}{}{n}{errorlim}
+
+Tolerate \genericargs{n} errors of the kinds denoted by the other options before giving up trying to convert the file.
+
+\cmdoption{f}{}{}{ignfmt}
+
+Ignore format errors in the saved jobs file, up to the limit of errors given by the \exampletext{{}-e} option.
+
+\cmdoption{s}{}{}{ignsize}
+
+Ignore file size errors in the saved jobs file (up to the number of total errors given by the \exampletext{{}-e}
+option.
+
+\cmdoption{u}{}{}{noucheck}
+
+Do not check user names in the saved job file.
+
+\IfXi{\cmdoption{v}{}{number}{version}
+
+Tell \PrXbCjlist{} that the jobs file is for release number of \ProductName{}, where number
+is 4 to 6. This may be necessary where the user file is corrupted and \PrXbCjlist{} cannot guess what is meant.}
+

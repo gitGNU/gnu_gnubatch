@@ -1,0 +1,990 @@
+\chapter{Configuration and customisation}
+\label{chp:configurability}
+\ProductName{} can be highly configured to restrict or enhance the scope and
+function of user activities. The System Reference Manual
+gives the basic information for configuring the user interfaces. This
+chapter describes some of the applications of this configurabillity and
+their implementation.
+
+Here is the same example that is used in the System Reference Manual. It
+shows how program \PrBtq{} might look when configured
+to take advantage of function keys and show a different set of
+information in a simplified format.
+
+\begin{expara}
+Seq \ \ Job Name \ \ \ \ \ \ \ \ \ \ \ \ Args \ \ \ \ \ \ Date/Time
+\ \ \ \ \ \ \ \ Prog
+
+{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-
+
+\bigskip
+
+\ \ 1 \ \ start
+\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ 08/02/99 10:54
+\ \ \ \ Canc
+
+\ \ 2 \ \ Process directory \ \ \ /home \ \ \ \ \ 08/02/99 10:54
+
+\ \ 3 \ \ Process directory \ \ \ /usr \ \ \ \ \ \ 08/02/99 10:54
+
+\ \ 4 \ \ Process directory \ \ \ /tmp \ \ \ \ \ \ 08/02/99 10:54
+
+\ \ 5 \ \ Collect data \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ 08/02/99
+10:54
+
+\ \ 6 \ \ Error Handler \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ 08/02/99
+10:54
+
+\ \ 7 \ \ cleanup
+\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ 08/02/99 10:54
+
+\ \ 8 \ \ setup
+\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ 29/01/99 23:01
+\ \ \ \ Done
+
+\bigskip
+
+{}-{}-{}-{}-F1-{}-{}-{}-{}-{}-F2-{}-{}-{}-{}-{}-F3-{}-{}-{}-{}-{}-F4-{}-{}-{}-{}-{}-F5-{}-{}-{}-{}-F6-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-
+
+\ \ \ help \ \ enable disable \ \ set \ \ \ view \ view
+
+\ \ \ \ \ \ \ \ \ \ run \ \ \ \ run \ \ \ \ \ time \ \ job \ \ \ vars
+
+{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-
+
+\end{expara}
+
+This configuration could be specific to a particular user or activity.
+In this case it is taken from a real configuration belonging to user
+\exampletext{wally} when using jobs in a queue named
+\exampletext{par}. The screen display has been changed as
+follows:
+
+\begin{itemize}
+\item The fields \exampletext{jobno}, \exampletext{Shell}, \exampletext{Pri}, \exampletext{Load}, and \exampletext{Cond} have been
+removed. (The queue name is omitted when the view is restricted, it can be explicitly specified).
+\item The \exampletext{Time} field is changed from the abbreviated form to show time in full,
+\exampletext{Date/Time}. The \exampletext{Title} field is widened to display more text.
+\item Argument field added. This shows the differences between jobs which are identical except that they use different data as specified in
+the arguments.
+\item Column headings underlined and footer expanded to include function
+key reminders.
+\end{itemize}
+
+The set of jobs displayed has also been restricted to show just those in the queue named \exampletext{par}, that belong to user \exampletext{wally}.
+
+This is what the standard configuration of \PrBtq{} looked like when invoked by user \exampletext{wally}, on
+another terminal, at the same time:
+
+\begin{expara}
+
+Seq Jobno \ \ User \ \ \ Title \ \ \ \ \ \ \ \ Shell \ \ Pri Load Time
+\ Cond \ \ \ \ \ Prog
+
+\ \ 0 340 \ \ \ \ wally \ \ e-mail:dial u sh \ \ \ \ \ 150 1000 16:33
+
+\ \ 1 734 \ \ \ \ tony \ \ \ prog\_a \ \ \ \ \ \ \ sh \ \ \ \ \ 150 1000
+06/02 \ \ \ \ \ \ \ \ \ \ Run
+
+\ \ 2 1420 \ \ \ wally \ \ Output Exampl sh \ \ \ \ \ 150 1000 29/01
+\ \ \ \ \ \ \ \ \ \ Err
+
+\ \ 3 735 \ \ \ \ tony \ \ \ prog\_b \ \ \ \ \ \ \ sh \ \ \ \ \ 150 1000
+08/02 A\_STATUS
+
+\ \ 4 736 \ \ \ \ tony \ \ \ prog\_c \ \ \ \ \ \ \ sh \ \ \ \ \ 150 1000
+08/02 A\_STATUS
+
+\ \ 5 439 \ \ \ \ wally \ \ wally \ \ \ \ \ \ \ \ sh \ \ \ \ \ 150 1000
+\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ Canc
+
+\ \ 6 588 \ \ \ \ wally \ \ Also Sprach Z sh \ \ \ \ \ 150 1000 04/02
+\ \ \ \ \ \ \ \ \ \ Done
+
+\ \ 7 564 \ \ \ \ wally \ \ Daily Update \ sh \ \ \ \ \ 150 1000
+\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ Run
+
+\ \ 8 455 \ \ \ \ pior \ \ \ Simple Job \ \ \ sh \ \ \ \ \ 150 1000
+11/03 \ \ \ \ \ \ \ \ \ \ Abrt
+
+\ \ 9 309 \ \ \ \ wally \ \ par:start \ \ \ \ sh \ \ \ \ \ 150 1000
+08/03 \ \ \ \ \ \ \ \ \ \ Canc
+
+\ 10 310 \ \ \ \ wally \ \ par:Process d sh \ \ \ \ \ 150 1000 08/03
+**Cond**
+
+\ 11 312 \ \ \ \ wally \ \ par:Process d sh \ \ \ \ \ 150 1000 08/03
+**Cond**
+
+\ 12 313 \ \ \ \ wally \ \ par:Process d sh \ \ \ \ \ 150 1000 08/03
+**Cond**
+
+\ 13 314 \ \ \ \ wally \ \ par:Collect d sh \ \ \ \ \ 150 1000 08/03
+**Cond**
+
+\ 14 315 \ \ \ \ wally \ \ par:Error han sh \ \ \ \ \ 150 1000 08/03
+**Cond**
+
+\ 15 316 \ \ \ \ wally \ \ par:cleanup \ \ sh \ \ \ \ \ 150 1000 08/03
+**Cond**
+
+\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ {}-{}- 9 more
+jobs below -{}-
+
+=======================================================================
+
+
+\end{expara}
+
+On the standard configuration jobs owned by users \exampletext{tony} and \exampletext{pior} can be seen
+along with other jobs owned by \exampletext{wally} which were not relevant to the
+task in hand.
+
+The following sub-sections describe various ways in which the interface can be configured.
+
+\section{Default Options}
+All of the programs in the Base Product can be given or require options
+on the command line. Default options and values can be specified to
+save typing or to enforce their use. The defaults can be set up
+globally, per user, by current working directory or by activity.
+
+\subsection{Setting Up Defaults}
+Default options for each command line utility, like \PrBtr{} and \PrBtvar{}, is
+specified using an environment variable of the same name. This holds a string of one or more options and any associated arguments. The
+interactive programs, \PrBtq{} and \PrBtuser{}, each require two environment variables.
+One holds program options like the command line utilities and the other can point to an alternative help file.
+
+These can be set up as environment variables in the user/process environment. Alternatively an equivalent entries can be set up in the
+relevant configuration files. The names of the environment variables are generally called keywords. they are always in upper case, whereas
+the program names are in lower case. \IfGNU{Minus signs are converted to underscore.}
+
+The program descriptions in the System Reference Manual list the keywords. For example \PrBtq{} is listed as having
+the keyword \exampletext{\BtqVarname} for options and \exampletext{BTQCONF} for the help file.
+
+The chapter on Configurabillity in the System Reference Manual explains the theory. Here are some examples of how defaults can be used for
+\PrBtq{}:
+
+\begin{expara}
+
+BTQCONF=\helpdirname/\BtqName{}/prod.help
+
+\end{expara}
+
+This tells \PrBtq{} to load the file \exampletext{prod.help} in the specified directory instead of
+\filename{btq.help} from the \exampletext{progs} directory. It is a good idea to use meaningful file names, in this case
+\exampletext{prod.help} could be the configuration for ``Production Jobs''.
+
+If all of these ``production jobs'' are in specific queues the \exampletext{{}-q} option can be used to restrict the view
+accordingly. For example:
+
+\begin{expara}
+
+\BtqVarname=-Z -q live*,prod*
+
+\end{expara}
+
+This just selects jobs whose queue name starts with \exampletext{live} or \exampletext{prod}. The \exampletext{{}-Z} option excludes jobs in the null queue from the job list.
+
+\subsection{Enforcing Defaults}
+To enforce a default setting users must not be able to invoke the relevant program directly from the command line. There are two ways of
+achieving this for most programs:
+
+\begin{enumerate}
+\item Providing a user interface, like a menu system, that does not expose users to the command line.
+\item Concealing the program from the user and providing a wrapper program which the user runs instead. This wrapper program can check the
+options against the defaults and invoke the intended program accordingly.
+\end{enumerate}
+
+\section{Setting Views of the Job and Variable Lists}
+There are facilities for selecting which jobs and variables to display. These are completely separate to the modes which dictate who can
+do what to each job or variable. Whilst these can be used for security purposes they are also just as useful for selecting logical views of the scheduling system.
+
+Users can have logical views imposed upon them or be allowed to select their own. A user can only affect a job or variable if they can see it.
+
+\subsection{Selecting Jobs by Queue}
+Programs \PrBtq{}, \PrBtjlist, \PrXbtq{} and \PrXmbtq{} have options for queue name selection. The first two use Keywords for setting default values. For example to select only jobs in queue test:
+
+\hspace{2cm}
+\begin{tabular}{ll}
+\bfseries Program &
+\bfseries Keyword / Resources\\
+\PrBtq & \exampletext{\BtqVarname=-Z -q test}\\
+\PrBtjlist & \exampletext{\BtjlistVarname=-Z -q test}\\
+\end{tabular}
+
+\subsection{Selecting Jobs and Variables by Owner and Group}
+Programs \PrBtq{}, \PrBtjlist, \PrBtvlist, \PrXbtq{} and \PrXmbtq{} have
+options for selection by owner and group name. The first three use
+Keywords for setting default values, the others save a set as requested within the program.
+For example to select only jobs owned by user \exampletext{fred}:
+
+\hspace{2cm}
+\begin{tabular}{ll}
+\bfseries Program & \bfseries Keyword / Resources\\
+\PrBtq & \exampletext{\BtqVarname=-u fred}\\
+\PrBtjlist & \exampletext{\BtjlistVarname=-u fred}\\
+\PrBtvlist & \exampletext{\BtvlistVarname=-u fred}\\
+\end{tabular}
+
+Similarly for selecting jobs in group \exampletext{staff}:
+
+\hspace{2cm}
+\begin{tabular}{ll}
+\bfseries Program & \bfseries Keyword / Resources\\
+\PrBtq & \exampletext{\BtqVarname=-g staff}\\
+\PrBtjlist & \exampletext{\BtjlistVarname=-g staff}\\
+\PrBtvlist & \exampletext{\BtvlistVarname=-g staff}\\
+\end{tabular}
+
+\subsection{A real example}
+The Jobs in the example screen for \PrBtq{} at the
+beginning of this Chapter were selected by invoking
+\PrBtq{} with the command:
+
+\begin{expara}
+
+\BtqName{} -Z -q {\textquotesingle}par*{\textquotesingle} -u wally
+
+\end{expara}
+
+This could have been set up as the default in a
+\configurationfile{} file or off the user's home directory \homeconfigpath{} using a line like this:
+
+\begin{expara}
+
+\BtqVarname=-Z -q par* -u wally
+
+\end{expara}
+
+Alternatively it could have been set up in an environment variable using
+the commands (assuming the Bourne or Korn shell are in use):
+
+\begin{expara}
+
+\BtqVarname={\textquotedbl}-Z -q par* -u wally{\textquotedbl}
+
+export \BtqVarname
+
+\end{expara}
+
+If these commands are being executed in a general shell script, the
+current user could be specified by replacing \exampletext{wally} with
+\exampletext{\$LOGNAME}. For example:
+
+\begin{expara}
+
+BTQ={\textquotedbl}-Z -q par* -u \$LOGNAME{\textquotedbl}
+
+export BTQ
+
+\end{expara}
+
+The \exampletext{\$LOGNAME} is evaluated by the shell not the
+\ProductName{} programs. The only place where environment variables like
+\exampletext{\$LOGNAME} can be used is in the global
+configuration file \masterconfig.
+
+\section{Job and Variable List Formats}
+The job and variable list formats are described in the System Reference
+Manual. To quickly create a new layout the format can be re-specified
+and tested from within \PrBtq{}, \PrXbtq{} or \PrXmbtq.
+New formats can be saved at any time, for
+use or further development later.
+
+The job list for the example at the beginning of this chapter was
+produced like this:
+
+\begin{enumerate}
+\item Create a working directory and change directory to it.
+\item Run \PrBtq{} and go into the job list. It will
+look something like this:
+
+\begin{exparasmall}
+
+Seq Jobno \ \ User \ \ \ Title \ \ \ \ \ \ \ \ Shell \ \ Pri Load Time
+\ Cond \ \ \ \ \ Prog
+
+\ \ 0 340 \ \ \ \ wally \ \ e-mail:dial u sh \ \ \ \ \ 150 1000 16:33
+
+\ \ 1 734 \ \ \ \ tony \ \ \ prog\_a \ \ \ \ \ \ \ sh \ \ \ \ \ 150 1000
+06/02 \ \ \ \ \ \ \ \ \ \ Run
+
+\ \ 2 1420 \ \ \ wally \ \ Output Exampl sh \ \ \ \ \ 150 1000 29/01
+\ \ \ \ \ \ \ \ \ \ Err
+
+\ \ 3 735 \ \ \ \ tony \ \ \ prog\_b \ \ \ \ \ \ \ sh \ \ \ \ \ 150 1000
+08/02 A\_STATUS
+
+\ \ 4 736 \ \ \ \ tony \ \ \ prog\_c \ \ \ \ \ \ \ sh \ \ \ \ \ 150 1000
+08/02 A\_STATUS
+
+\ \ 5 439 \ \ \ \ wally \ \ wally \ \ \ \ \ \ \ \ sh \ \ \ \ \ 150 1000
+\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ Canc
+
+\ \ 6 588 \ \ \ \ wally \ \ Also Sprach Z sh \ \ \ \ \ 150 1000 04/02
+\ \ \ \ \ \ \ \ \ \ Done
+
+\ \ 7 564 \ \ \ \ wally \ \ Daily Update \ sh \ \ \ \ \ 150 1000
+\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ Run
+
+\ \ 8 455 \ \ \ \ pior \ \ \ Simple Job \ \ \ sh \ \ \ \ \ 150 1000
+11/03 \ \ \ \ \ \ \ \ \ \ Abrt
+
+\ \ 9 309 \ \ \ \ wally \ \ par:start \ \ \ \ sh \ \ \ \ \ 150 1000
+08/03 \ \ \ \ \ \ \ \ \ \ Canc
+
+\ 10 310 \ \ \ \ wally \ \ par:Process d sh \ \ \ \ \ 150 1000 08/03
+**Cond**
+
+\ 11 312 \ \ \ \ wally \ \ par:Process d sh \ \ \ \ \ 150 1000 08/03
+**Cond**
+
+\ 12 313 \ \ \ \ wally \ \ par:Process d sh \ \ \ \ \ 150 1000 08/03
+**Cond**
+
+\ 13 314 \ \ \ \ wally \ \ par:Collect d sh \ \ \ \ \ 150 1000 08/03
+**Cond**
+
+\ 14 315 \ \ \ \ wally \ \ par:Error han sh \ \ \ \ \ 150 1000 08/03
+**Cond**
+
+\ 15 316 \ \ \ \ wally \ \ par:cleanup \ \ sh \ \ \ \ \ 150 1000 08/03
+**Cond**
+
+\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ {}-{}- 9 more
+jobs below -{}-
+
+=======================================================================
+
+\end{exparasmall}
+
+\item From the job list enter the ``\userentry{,}'' command. This
+opens the Job list formats screen, showing the current specification:
+
+\begin{expara}
+
+Job list formats
+
+\ \ \ \ Width \ Code
+
+\ \ \ \ \ \ \ \ 3 \ n \ Sequence
+
+{\textquotedbl} {\textquotedbl}
+
+\ {\textless} \ \ \ \ \ 7 \ N Job number
+
+{\textquotedbl} {\textquotedbl}
+
+\ \ \ \ \ \ \ \ 7 \ U \ User
+
+{\textquotedbl} {\textquotedbl}
+
+\ \ \ \ \ \ \ 13 \ H \ Title (in full)
+
+{\textquotedbl} {\textquotedbl}
+
+\ \ \ \ \ \ \ 14 \ I \ Command Interpreter
+
+{\textquotedbl} {\textquotedbl}
+
+\ \ \ \ \ \ \ \ 3 \ p \ Priority
+
+\ \ \ \ \ \ \ \ 5 \ L \ Load Level
+
+{\textquotedbl} {\textquotedbl}
+
+\ \ \ \ \ \ \ \ 5 \ t \ Time or date
+
+{\textquotedbl} {\textquotedbl}
+
+\ \ \ \ \ \ \ \ 9 \ c \ Conditions (abbreviated)
+
+{\textquotedbl} {\textquotedbl}
+
+\ {\textless} \ \ \ \ \ 4 \ P \ Progress
+
+\end{expara}
+
+\item The entries can be changed in any order, but it is often easiest to delete unwanted fields first. Move the cursor to the Job number
+line:
+
+\begin{expara}
+
+Job list formats
+
+\ \ \ \ Width \ Code
+
+\ \ \ \ \ \ \ \ 3 \ n \ Sequence
+
+{\textquotedbl} {\textquotedbl}
+
+\_{\textless} \ \ \ \ \ \ 7 N \ Job number
+
+{\textquotedbl} {\textquotedbl}
+
+\ \ \ \ \ \ \ \ 7 \ U \ User
+
+\end{expara}
+
+Press \userentry{D} to delete this entry. The result will look like:
+
+\begin{expara}
+Job list formats
+
+\ \ \ \ Width Code
+
+\ \ \ \ \ \ \ \ 3 n \ Sequence
+
+{\textquotedbl} {\textquotedbl}
+
+{\textquotedbl} {\textquotedbl}
+
+\ \ \ \ \ \ \ \ 7 U \ User
+
+{\textquotedbl} {\textquotedbl}
+
+\end{expara}
+
+\item Repeat the operation for all the lines to be deleted.
+\item Now is a good time to add the \exampletext{Args} column.
+Move the cursor to the delimiter line above \exampletext{Time
+or date}, it is shown here as an underline.
+
+\begin{expara}
+
+{\textquotedbl} {\textquotedbl}
+
+\ \ \ \ \ \ \ 13 \ H Title (in full)
+
+{\textquotedbl} {\textquotedbl}
+
+{\textquotedbl} {\textquotedbl}
+
+\ \ \ \ \ \ \ \ 5 \ t Time or date
+
+{\textquotedbl} {\textquotedbl}
+
+\end{expara}
+
+\item Enter the \userentry{i} command to insert a new entry above
+the current line, which is to the left of the delimiter in the job
+list.
+
+\begin{expara}
+
+\ 13 H Title (in full)
+
+\ {\textquotedbl} {\textquotedbl}
+
+\ \_ 5 t Time or date
+
+\ {\textquotedbl} {\textquotedbl}
+
+\end{expara}
+
+The line is blanked and the cursor moves to the field code
+column. Enter the code letter for the required data field. In this case
+type an upper case \userentry{A} and press return.
+
+\begin{expara}
+
+\ \ \ \ \ \ \ 13 \ H \ Title (in full)
+
+{\textquotedbl} {\textquotedbl}
+
+\ \ \ \ \ \ \ 10 \ A
+
+\ \ \ \ \ \ \ \ 5 \ t \ Time or date
+
+{\textquotedbl} {\textquotedbl}
+
+\end{expara}
+
+Asking for help displays a list of available fields. On a standard
+terminal there is not enough space to show them all, but they are
+listed in the section on \PrBtq{} in the System
+Reference Manual.
+
+A field width is suggested by \PrBtq, in this case
+10. Type 20 and press return to specify a wider column.
+\PrBtq{} fills in the remaining field. The result
+should be:
+
+\begin{expara}
+
+\ \ \ \ \ \ \ 13 \ H \ Title (in full)
+
+{\textquotedbl} {\textquotedbl}
+
+\ \ \ \ \ \ \ 20 \ A \ Arguments
+
+{\textquotedbl} {\textquotedbl}
+
+\ \ \ \ \ \ \ \ 5 \ t \ Time or date
+
+{\textquotedbl} {\textquotedbl}
+
+\end{expara}
+
+Edit the \exampletext{Time or Date} field to be
+\exampletext{Date and Time} instead. To do this move to the
+current entry and add a new field. Specify upper case
+\userentry{T} for the field code and accept the suggested
+width of 18 by just pressing ENTER. Now delete the original entry.
+\item Increase the width of the Title field from 13 to 20 characters.
+Move to the required line and enter the lower case
+\userentry{w} command. Type in the new width, \userentry{20}, and press
+RETURN.
+
+The final result should look like this:
+
+\begin{expara}
+
+Job list formats
+
+\ \ \ \ Width \ Code
+
+\ \ \ \ \ \ \ \ 3 \ n \ Sequence
+
+{\textquotedbl} {\textquotedbl}
+
+\ \ \ \ \ \ \ 20 \ H \ Title (in full)
+
+{\textquotedbl} {\textquotedbl}
+
+\ \ \ \ \ \ \ 20 \ A \ Arguments
+
+{\textquotedbl} {\textquotedbl}
+
+\ \ \ \ \ \ \ \ 5 \ t \ Date and Time
+
+{\textquotedbl} {\textquotedbl} {\textless} \ \ 4 \ P \ Progress
+
+\end{expara}
+
+\item Type \exampletext{q} to return to the job list. The
+program will ask if you want to save the new format. If you say yes it
+will ask where to save it. If you say no but want to save the changes
+later you will have to come back into this or one of the other
+formatting screens.
+\end{enumerate}
+
+Back in the main screen the new layout will look like this:
+
+\begin{exparasmall}
+
+Seq \ \ Title \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ Args \ \ \ \ \ \ Date/Time
+\ \ \ \ \ \ \ \ \ Prog
+
+\ \ 1 \ \ start
+\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ 08/02/99 10:54
+\ \ \ \ Canc
+
+\ \ 2 \ \ Process directory \ \ \ /home \ \ \ \ \ 08/02/99 10:54
+
+\ \ 3 \ \ Process directory \ \ \ /usr \ \ \ \ \ \ 08/02/99 10:54
+
+\ \ 4 \ \ Process directory \ \ \ /tmp \ \ \ \ \ \ 08/02/99 10:54
+
+\ \ 5 \ \ Collect data \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ 08/02/99
+10:54
+
+\ \ 6 \ \ Error Handler \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ 08/02/99
+10:54
+
+\ \ 7 \ \ cleanup
+\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ 08/02/99 10:54
+
+\ \ 8 \ \ setup
+\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ 29/01/99 23:01
+\ \ \ \ Done
+
+\bigskip
+
+======================================================================
+
+\end{exparasmall}
+
+This is not yet the same as the original example. The configuration was
+saved in a new help file, which was then edited to give the finished
+result.
+
+The top line has the word \exampletext{Title} instead of the
+string \exampletext{Job Name}. A simple text editor was used
+to find and edit instances of the word \exampletext{Title} in
+the help file.
+
+The lines at the top and bottom of the screen were also edited using a
+text editor. By default the specification for the lines at the top of
+the screen is just this:
+
+\begin{expara}
+
+J1:j
+
+\end{expara}
+
+and the specification for the footer lines at the bottom is
+
+\begin{exparasmall}
+
+F1:================================================================
+
+
+\end{exparasmall}
+
+To add an extra line to ``underline'' the
+column headings a second line was added to the \exampletext{J}
+specifications like this:
+
+\begin{exparasmall}
+
+J1:j
+
+J2:-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-
+
+\end{exparasmall}
+
+To put the Function key reminders at the bottom of the screen replace
+the two original lines with four that look like this.
+
+\begin{exparasmall}
+
+F1:-{}-{}-{}-F1-{}-{}-{}-{}-{}-F2-{}-{}-{}-{}-{}-F3-{}-{}-{}-{}-{}-F4-{}-{}-{}-{}-{}-F5-{}-{}-{}-{}-F6-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-
+
+F2: help enable disable set view view
+
+F3: run run time job vars
+
+F4:-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-
+
+\end{exparasmall}
+
+Setting up the function keys to actually do something is a separate
+exercise described later in this chapter.
+
+\section{Help \& Error Messages}
+Almost all of the help and error messages output by \ProductName{} programs
+are held in the help files. These messages can be edited with any
+ordinary text editor.
+
+Each message can be made more informative or shorter. The terminology
+can be changed to reflect local standards or the whole file can be
+re-written in a different language. Here is a trivial example of
+enhancing an error message:
+
+Pressing a key which has no command associated with it in the job list
+produces this error message:
+
+\begin{expara}
+
+Unknown command - expecting job op
+
+\end{expara}
+
+The message is defined in the help file, in an error line which looks
+like this:
+
+\begin{expara}
+
+E200:Unknown command - expecting job op
+
+\end{expara}
+
+When one of the programs needs a message it looks down the help file for
+all lines beginning with a particular code. In this case
+\exampletext{E200} is the relevant error message.
+
+To enhance the message it could be edited and or have additional lines
+appended. This version offers some constructive advice:
+
+\begin{expara}
+
+E200:Unknown Key - Expecting a job related command
+
+E200:You probably pressed the wrong key by mistake
+
+E200:Enter a ? or press F1 to list commands \& keys.
+
+\end{expara}
+
+\section{Names of Alternatives}
+Names like those of the different job progress states are referred to as
+alternatives. There are sets of alternatives for all sorts of
+parameters like comparison operators, types of I/O redirection and
+units of time for repeating jobs. Only one alternative can be selected
+for each parameter.
+
+One of the alternatives is normally specified as the default. When an
+interactive program, like \PrBtq, prompts for
+selection from a list of alternatives this one will be the default
+unless a different alternative is selected.
+
+The names of alternatives can be edited. A different default alternative
+can also be specified. If an alternative like the job progress is used
+by more than one program then it is important to change the names in
+all of the relevant help files.
+
+\subsection{Editing Names}
+Other batch schedulers use different names for the \exampletext{Canc} or \exampletext{Cancelled} state
+of a batch job. In some cases the name \exampletext{Canc} has a very different meaning.
+The name used by \ProductName{} can be edited to be in line with other packages. For example to change
+\exampletext{Canc} to \exampletext{Held}:
+
+Search the files \filename{btq.help} and \filename{btrest.help} for the strings
+\exampletext{Canc} and any variations due to upper case letters. The \exampletext{Canc} alternative will be specified
+in lists of alternatives like this one from \filename{btrest.help} for program \PrBtjlist:
+
+\begin{expara}
+
+\# Progress codes for \BtjlistName{}
+
+202AD0:
+
+202A1:Done
+
+202A2:Err
+
+202A3:Abrt
+
+202A4:Canc
+
+202A5:Init
+
+202A6:Strt
+
+202A7:Run
+
+202A8:Fin
+
+\end{expara}
+
+The entry for \exampletext{Canc} can be edited to
+
+\begin{expara}
+
+202A4:Held
+
+\end{expara}
+
+The first entry is the default, and has an empty string. This is the
+alternative for the empty progress state for a job that is waiting to
+run. Some users do not like a blank field and change it to something
+like:
+
+\begin{expara}
+
+202AD0:*rdy
+
+\end{expara}
+
+In this case the completed list would look like:
+
+\begin{expara}
+
+202AD0:*rdy
+
+202A1:Done
+
+202A2:Err
+
+202A3:Abrt
+
+202A4:Held
+
+202A5:Init
+
+202A6:Strt
+
+202A7:Run
+
+202A8:Fin
+
+\end{expara}
+
+\subsection{Specifying a Different Default}
+In program \PrBtq, when specifying conditions the not equals, \exampletext{!=}, comparison is offered as the
+default. This is specified by the \exampletext{D} in the alternative code in the help file:
+
+\begin{expara}
+
+\# Comparison operations.
+
+\# Insert `D' after the `A' to denote default.
+
+230A1:=
+
+230AD2:!=
+
+230A3:{\textless}
+
+230A4:{\textless}=
+
+230A5:{\textgreater}
+
+230A6:{\textgreater}=
+
+\end{expara}
+
+If the equals comparison is used much more often than not equals the
+default can be changed by changing the codes for both alternatives.
+Move the \exampletext{D} from the code of the
+\exampletext{!=} alternative and to the code for the =
+comparison, like this:
+
+\begin{expara}
+
+230A\textbf{D}1:=
+
+230A2:!=
+
+230A3:{\textless}
+
+230A4:{\textless}=
+
+230A5:{\textgreater}
+
+230A6:{\textgreater}=
+
+\end{expara}
+
+\section{Keys \& Commands}
+The keys and commands of the interactive tools \PrBtq{} and \PrBtuser{} can be
+re-configured. One or more keys is mapped to each command by an entry
+in the relevant help file which looks like this:
+
+\begin{expara}
+
+K400:?
+
+K401:\^{}
+
+K402:{\textbackslash}e
+
+K403:{\textbackslash}s
+
+K404:{\textbackslash}r
+
+K405:Q,q,.,{\textbackslash}kQUIT
+
+K406:k,{\textbackslash}kUP
+
+K407:j,{\textbackslash}kDOWN
+
+\end{expara}
+
+or this:
+
+\begin{expara}
+
+1K501:D
+
+1K503:M
+
+1K504:O
+
+1K505:G
+
+1K507:{\textquotedbl}
+
+1K510:p
+
+1K511:l
+
+\end{expara}
+
+The entries which start with a letter \exampletext{K} are
+global and those that start with a number apply to a specific
+sub-screen or option. The component before the \exampletext{:}
+specifies the command. The component after the \exampletext{:}
+is a comma separated list of key definitions.
+
+\subsection{Specifying Different Keys}
+An entry for a command may have one or more keys defined. The default
+key for requesting help is a question mark. In the
+\filename{btq.help} file it is specified like this.
+
+\begin{expara}
+
+K400:?
+
+\end{expara}
+
+If the key definition for the function key F1 is
+\exampletext{{\textbackslash}kF1} then the F1 key could be set
+up for getting help instead of the question mark. Change the entry to
+look like this:
+
+\begin{expara}
+
+K400:{\textbackslash}kF1
+
+\end{expara}
+
+It is likely that not all of your terminals will support function keys
+properly. In this case both keys can be specified, like this:
+
+\begin{expara}
+
+K400:?,{\textbackslash}kF1
+
+\end{expara}
+
+\subsection{Disabling Commands}
+If there is no key defined for a command that command cannot be invoked.
+Deleting, or preferably converting to comment, the entry in a help file
+for a key effectively disables that command.
+
+For example the delete job command for \PrBtq{} is
+specified by the help file entry:
+
+\begin{expara}
+
+1K501:D
+
+\end{expara}
+
+To disable this command comment the entry out by prefixing it with a
+\exampletext{\#} like this:
+
+\begin{expara}
+
+\# 1K501:D
+
+\end{expara}
+
+Having disabled a command it is important to edit the help messages to
+reflect the change. The help associated with delete command for the job
+list will be adjacent to the key definitions in the help file.
+
+In the case of the delete command the only line that needs changing is
+from top level help that displays the available commands. This is the
+line
+
+\begin{expara}
+
+H1:D Delete job
+
+\end{expara}
+
+If this line contained information about other commands it would need
+editing. Since it only relates to the delete command it can be
+commented out:
+
+\begin{expara}
+
+\# H1:D Delete job
+
+\end{expara}
+
+\subsection{Customising Commands}
+The function of a particular command can be changed by substituting a
+macro. Macros are described in the following chapter. First
+the existing command must be disabled as described above. Then a macro
+is set up which is invoked by the same key or keys as the original
+command.
+
+For example the \exampletext{Delete} command could be replaced
+by a macro which silently unqueues the job to an archive directory.
+This could be useful for accident prone users.
+

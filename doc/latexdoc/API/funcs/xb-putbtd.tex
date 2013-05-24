@@ -1,0 +1,23 @@
+\subsection{\funcnameXBputbtd{}}
+
+\begin{expara}
+
+int \funcnameXBputbtd{}(const int fd, const apiBtdef *defs)
+
+\end{expara}
+
+The function \funcXBputbtd{} is used to update the
+default user profile parameters for the given host. It may only be
+invoked by a user with write admin file privilege.
+
+\exampletext{fd} is a file descriptor which was previously
+returned by a successful call to \funcXBopen{} or equivalent.
+
+\exampletext{defs} is a pointer to a structure containing the
+new default user profile. The definition of the default user profile
+structure is given on page \pageref{bkm:Defaultuser}.
+
+\subsubsection{Return values}
+The function returns 0 if successful otherwise one of the error codes
+listed on page \pageref{errorcodes} onwards.
+

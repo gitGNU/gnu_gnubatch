@@ -1,0 +1,69 @@
+\subsection{\XbBtuconvName}
+
+\begin{expara}
+
+\XbBtuconvName{} [-D dir] [-v n] [-e n] [-s] [-f] user file outfile
+
+\end{expara}
+
+\PrXbBtuconv{} converts the \ProductName{} user file, which is usually
+\filename{btufile}, possibly with a numeric suffix, held in the batch spool directory to an executable shell script file
+\genericargs{outfile}, which if executed, would recreate the \ProductName{}
+users' permissions with the same options and privileges.
+
+\IfXi{\PrXbBtuconv{} understands the format of the saved user file for versions of \ProductName{} going back
+to release 4, and when presented with a saved file, will attempt to work out from the format which release it relates to.}
+
+In addition to options, two arguments are always supplied to \PrXbBtuconv{}.
+
+\begin{tabular}{l p{14cm}}
+User file & This is the file containing the attributes of the user permissions,
+\filename{btufile\textit{n}} in the batch spool directory, by default \spooldir, or as relocated by re-specifying
+\filename{SPOOLDIR}.\\
+& \\
+Output file & This file is created by \PrXbBtuconv{} to contain the executable shell script, containing
+\PrBtuchange{} commands, which may be used to recreate the user file.
+This file should be run before restarting the scheduler.\\
+\end{tabular}
+
+\subsubsection{Options}
+
+Note that this program does not provide for saving options in \configurationfile{} or \homeconfigpath{} files.
+
+\setbkmkprefix{xb-btuconv}
+
+\cmdoption{D}{}{directory}{directory}
+
+This option specifies the source directory for the users and user file. It can be specified as \exampletext{\$SPOOLDIR} or
+\exampletext{\$\{SPOOLDIR-/var/spool/batch\}} etc and the environment and/or \linebreak[3]\masterconfig{} will be
+interrogated to interpolate the value of the environment variable given.
+
+If you use this, don't forget to put single quotes around it thus:
+
+\begin{expara}
+
+\XbBtuconvName{} -D {\textquotesingle}\$\{SPOOLDIR-\spooldirname\}{\textquotesingle} ...
+
+\end{expara}
+
+otherwise the shell will try to interpret the \exampletext{\$} construct and not \PrXbBtuconv.
+
+\cmdoption{e}{}{n}{errorlim}
+
+Tolerate \genericargs{n} errors of the kinds denoted by the other options before giving up trying to convert the file.
+
+\cmdoption{f}{}{}{ignfmt}
+
+Ignore format errors in the saved user file, up to the limit of errors given by the \exampletext{{}-e} option.
+
+\cmdoption{s}{}{}{ignsize}
+
+Ignore file size errors in the saved user file (up to the number of total errors given by the \exampletext{{}-e}
+option.
+
+\IfXi{\cmdoption{v}{}{number}{version}
+
+Tell \PrXbBtuconv{} that the user file is for release number of \ProductName{}, where number
+is 4 to 6. This may be necessary where the user file is corrupted and
+\PrXbBtuconv{} cannot guess what is meant.}
+

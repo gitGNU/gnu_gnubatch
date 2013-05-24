@@ -1,0 +1,20 @@
+\subsection{\funcnameXBdelredir{}}
+
+\begin{expara}
+
+int \funcnameXBdelredir{}(apiBtjob *jobp, const unsigned indx)
+
+\end{expara}
+
+The function \funcXBdelredir{} is used to delete a redirection from a job structure string table.
+
+The definition of the job structure is given on page \pageref{bkm:Jobstructure} onwards.
+
+\progname{jobp} is a pointer to a structure containing the details of the job.
+
+\progname{indx} is the number of the redirection. Note that any subsequent redirections are ``moved up''
+one place as a result of this function and their index numbers reduced by one.
+
+\subsubsection{Return values}
+The result is non-zero if successful, or zero if the string table overflowed, an likely event in the case of \funcXBdelredir{}.
+

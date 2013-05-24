@@ -1,0 +1,36 @@
+\subsection{\funcnameXBputredirlist{}}
+
+\begin{expara}
+
+int \funcnameXBputredirlist{}(apiBtjob *jobp,
+
+\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ const apiMredir *rdlist,
+
+\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ const unsigned num)
+
+\end{expara}
+
+The function \funcXBputredirlist{} is used to replace
+the entire redirection list for a job in one operation.
+
+\exampletext{jobp} is a pointer to a structure which contains
+the job details. The definition of the job structure is given on page
+\pageref{bkm:Jobstructure} onwards.
+
+\exampletext{rdlist} is a vector of redirections.
+
+Details of the redirection structure and fields therein are documented
+under \funcXBgetredir{} on page
+\pageref{bkm:redirstruct}.
+
+\exampletext{num} is the number of elements in
+\exampletext{rdlist}.
+
+The new redirection list completely replaces the old.
+
+\subsubsection{Return values}
+The function will return non-zero if successful otherwise zero if the
+string table overflowed. In the latter case the contents of the job
+should no be relied upon, the job structure should be saved first if in
+doubt.
+

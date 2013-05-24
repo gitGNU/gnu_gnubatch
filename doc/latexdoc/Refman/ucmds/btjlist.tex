@@ -1,0 +1,296 @@
+\subsection{\BtjlistName}
+
+\begin{expara}
+
+\BtjlistName{} [-options] [job numbers]
+
+\end{expara}
+
+\PrBtjlist{} is a program to display a summary of the jobs (or to be precise the jobs visible to the user) on the standard output.
+
+Each line of the output corresponds to a single job, and by default the output is generally similar to the default format of the jobs screen of
+the \PrBtq{} command. The first field on each line (unless varied as below) is the numeric job number of the job, prefixed
+by a machine name and colon if the job is on a machine other than the one \BtjlistName{} is run on, job thus:
+
+\begin{expara}
+
+3493
+
+macha:9239
+
+machb:19387
+
+\end{expara}
+
+This is the required format of the job number which should be passed to \PrBtjdel{} and \PrBtjchange{}.
+
+Various options allow the user to control the output in various ways as described below. The user can limit the output to specific jobs by
+giving the job numbers as additional arguments.
+
+\subsubsection{Options}
+The environment variable on which options are supplied is \filename{\BtjlistVarname} and the environment variable to specify the
+help file is \filename{BTRESTCONF}.
+
+\setbkmkprefix{btjlist}
+\explainopt
+
+\cmdoption{B}{bypass-modes}{}{bypassmodes}
+
+Disregard all modes etc and print full details. This is provided for dump/restore scripts. It is only available to users with
+\textit{Write Admin File} permission, otherwise it is silently ignored.
+
+This option is now deprecated as \PrXbCjlist{} is now provided for the purpose for which this option was implemented.
+
+\cmdoption{D}{default-format}{}{deffmt}
+
+Revert the output format to the default format.
+
+\cmdoption{F}{format}{string}{format}
+
+Changes the output format to conform to the pattern given by the format \genericargs{string}. This is further described below.
+
+\cmdoption{g}{just-group}{group}{group}
+
+Restrict the output to jobs owned by the specified \exampletext{group}.
+
+To cancel this argument, give a single \exampletext{{}-} sign as a group name.
+
+The group name may be a shell-style wild card as described below.
+
+\cmdoption{H}{header}{}{header}
+
+Generate a header for each column in the output.
+
+\cmdoption{L}{local-only}{}{localonly}
+
+Display only jobs local to the current host.
+
+\cmdoption{l}{no-view-jobs}{}{noview}
+
+Cancel the \exampletext{{}-V} option and view job parameters rather than job scripts.
+
+\cmdoption{N}{no-header}{}{noheader}
+
+Cancel the \exampletext{{}-H} option. Do not print a header.
+
+\cmdoption{n}{no-sort}{}{nosort}
+
+Cancel the \exampletext{{}-s} option. Do not sort the jobs into the order in which they will run.
+
+\cmdoption{q}{job-queue}{name}{queue}
+
+Restricts attention to jobs with the queue prefix name. The queue may be specified as a pattern with shell-like wild cards as
+described below.
+
+To cancel this argument, give a single \exampletext{{}-} sign as a queue name.
+
+The queue prefix is deleted from the titles of jobs which are displayed.
+
+\cmdoption{R}{include-all-remotes}{}{remotes}
+
+Displays jobs local to the current host and exported jobs on remote machines.
+
+\cmdoption{r}{include-exec-remotes}{}{execremotes}
+
+Displays jobs local to the current host and jobs on remote machines which are remote-executable, i.e. which might possibly be
+executed by the current machine.
+
+\cmdoption{S}{short-times}{}{shorttimes}
+
+Displays times and dates in abbreviated form, i.e. times within the next 24 hours as times, otherwise dates. This option is
+ignored if the \exampletext{{}-F} option is specified.
+
+\cmdoption{s}{sort}{}{sort}
+
+Causes the output to be sorted so that the jobs whose next execution time is soonest comes at the top of the list.
+
+\cmdoption{T}{full-times}{}{fulltimes}
+
+Displays times and dates in full. This option is ignored if the \exampletext{{}-F} option is specified.
+
+\cmdoption{u}{just-user}{user}{user}
+
+Restrict the output to jobs owned by the specified \exampletext{user}.
+
+To cancel this argument, give a single \exampletext{{}-} sign as a user name.
+
+The user name may be a shell-style wild card as described below.
+
+\cmdoption{V}{view-jobs}{}{view}
+
+Do not display job details at all, output the scripts (input to the command interpreter) on standard output for each of the jobs specified, or all jobs
+if none are specified.
+
+\cmdoption{Z}{no-null-queues}{}{nonull}
+
+In conjunction with the \exampletext{{}-q} parameter, do not include jobs with no queue prefix in the list.
+
+\cmdoption{Z}{null-queues}{}{null}
+
+In conjunction with the \exampletext{{}-q} parameter, include jobs with no queue prefix in the list.
+
+\freezeopts{\filename{\BtjlistVarname}}{}
+
+\subsubsection{Wild cards}
+Wild cards in queue, user and group name arguments take a format similar to the shell.
+
+\begin{center}
+\begin{tabular}{l p{12.133cm}}
+\exampletext{*} & matches anything\\
+\exampletext{?} & matches a single character\\
+\exampletext{[a-mp-ru]} & matches any one character in the range of characters given\\
+\end{tabular}
+\end{center}
+
+Alternatives may be included, separated by commas. For example
+
+\begin{expara}
+
+{}-q {\textquotesingle}a*{\textquotesingle}
+
+\end{expara}
+
+displays jobs with queue prefixes starting with \exampletext{a}
+
+\begin{expara}
+
+{}-q {\textquotesingle}[p-t]*,*[!h-m]{\textquotesingle}
+
+\end{expara}
+
+displays jobs with queue prefixes starting with \exampletext{p} to \exampletext{t} or ending with anything other than
+\exampletext{h} to \exampletext{m}.
+
+\begin{expara}
+
+{}-u jmc,tony
+
+\end{expara}
+
+displays jobs owned by \exampletext{jmc} or \exampletext{tony}
+
+\begin{expara}
+
+{}-g {\textquotesingle}s*{\textquotesingle}
+
+\end{expara}
+
+displays jobs owned by groups with names starting \exampletext{s}.
+
+You should always put quotes around arguments containing the wildcard characters, to avoid misinterpretation by the shell.
+
+\subsubsection{Format codes}
+
+The format string consists of a string containing the following character sequences, which are replaced by the corresponding job
+parameters. The string may contain various other printing characters or spaces as required.
+
+Each column is padded on the right to the length of the longest entry. If a header is requested, the appropriate abbreviation is obtained from
+the message file and inserted.
+
+\begin{tabular}{l p{14cm}}
+\exampletext{\%\%} & Insert a single \exampletext{\%} character.\\
+\exampletext{\%A} & Insert the argument list for job separated by commas.\\
+\exampletext{\%a} & Insert the ``days to avoid'' separated by commas.\\
+\exampletext{\%b} & Display job start time or time job last started.\\
+\exampletext{\%C} & Display conditions for job in full, showing operations and constants.\\
+\exampletext{\%c} & Display conditions for job with variable names only.\\
+\exampletext{\%D} & Working directory for job.\\
+\exampletext{\%d} & Delete time for job (in hours).\\
+\exampletext{\%E} & Environment variables for job. Note that this may make the output lines extremely long.\\
+\exampletext{\%e} & \exampletext{Export} or \exampletext{Rem-runnable} for exported jobs.\\
+\exampletext{\%f} & Last time job finished, or blank if it has not run yet.\\
+\exampletext{\%G} & Group owner of job.\\
+\exampletext{\%g} & Grace time for job (time after maximum run time to allow job to finish before final kill) in minutes and seconds.\\
+\exampletext{\%H} & Title of job including queue name (unless queue name restricted with \exampletext{{}-q} option).\\
+\exampletext{\%h} & Title of job excluding queue name.\\
+\exampletext{\%I} & Command interpreter.\\
+\exampletext{\%i} & Process identifier if job running, otherwise blank. This is the process identifier on whichever processor is running the job.\\
+\exampletext{\%k} & Kill signal number at end of maximum run time.\\
+\exampletext{\%L} & Load level\\
+\exampletext{\%l} & Maximum run time for job, blank if not set.\\
+\end{tabular}
+
+\begin{tabular}{l p{14cm}}
+\exampletext{\%M} & Mode as a string of letters with \exampletext{U:}, \exampletext{G:} or \exampletext{O:} prefixes as in
+\exampletext{U:RWSMPUVGHDK,G:RSMG,O:SM}.\\
+\exampletext{\%m} & Umask as 3 octal digits.\\
+\exampletext{\%N} & Job number, prefixed by host name if remote.\\
+\exampletext{\%O} & Originating host name, possibly different if submitted via \PrRbtr{} or the API.\\
+\exampletext{\%o} & Original date or time job submitted.\\
+\exampletext{\%P} & Job progress code, \exampletext{Run}, \exampletext{Done} etc.\\
+\exampletext{\%p} & Priority\\
+\exampletext{\%q} & Job queue name\\
+\exampletext{\%R} & Redirections\\
+\exampletext{\%r} & Repeat specification\\
+\exampletext{\%S} & Assignments in full with operator and constant\\
+\exampletext{\%s} & Assignments (variable names only)\\
+\exampletext{\%T} & Date and time of next execution\\
+\exampletext{\%t} & Abbreviated date or time if in next 24 hours\\
+\exampletext{\%U} & User name of owner\\
+\exampletext{\%u} & Ulimit (hexadecimal)\\
+\exampletext{\%W} & Start time if running, end time if just finished, otherwise next time to run\\
+\exampletext{\%X} & Exit code ranges\\
+\exampletext{\%x} & Last exit code for job\\
+\exampletext{\%Y} & If ``avoiding holidays'' is set, display holiday dates for the next year\\
+\exampletext{\%y} & Last signal number for job\\
+\end{tabular}
+
+Note that the various strings such as \exampletext{export} etc are read from the message file also, so it is possible to modify them
+as required by the user.
+
+Only the job number, user, group, originating host and progress fields will be non-blank if the user may not read the relevant job. The mode
+field will be blank if the user cannot read the modes.
+
+The default format is
+
+\begin{expara}
+
+\%N \%U \%H \%I \%p \%L \%t \%c \%P
+
+\end{expara}
+
+with the (default) \exampletext{{}-S} option and
+
+\begin{expara}
+
+\%N \%U \%H \%I \%p \%L \%T \%c \%P
+
+\end{expara}
+
+with the \exampletext{{}-T} option.
+
+\subsubsection{Examples}
+The default output might look like this:
+
+\begin{expara}
+
+15367 jmc \ Go-to-optician \ memo 150 100 \ 10/08
+
+25874 uucp dba:Admin \ \ \ \ \ \ sh \ \ 150 1000 11:48 \ \ \ \ \ Done
+
+25890 uucp dba:Uuclean \ \ \ \ sh \ \ 150 1000 23:45
+
+25884 uucp dba:Half-hourly sh \ \ 150 1000 10:26 Lock
+
+26874 adm
+
+\end{expara}
+
+If the user does not have read permission on a job, then only limited information is displayed.
+
+This might be limited to a different format with only jobs in queue dba as follows:
+
+\begin{expara}
+
+\$ \BtjlistName{} -q dba -Z -H -F {\textquotedbl}\%N \%H \%P{\textquotedbl}
+
+Jobno Title \ \ \ \ \ \ Progress
+
+25874 Admin \ \ \ \ \ \ Done
+
+25890 Uuclean
+
+25884 Half-hourly
+
+\end{expara}
+

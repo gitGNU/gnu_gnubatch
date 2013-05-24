@@ -1,0 +1,49 @@
+\subsection{\funcnameXBjobop{}}
+
+\begin{expara}
+
+int \funcnameXBjobop{}(const int fd,
+
+\ \ \ \ \ \ \ \ \ \ \ \ \ const unsigned flags,
+
+\ \ \ \ \ \ \ \ \ \ \ \ \ const slotno\_t slot,
+
+\ \ \ \ \ \ \ \ \ \ \ \ \ const unsigned op,
+
+\ \ \ \ \ \ \ \ \ \ \ \ \ const unsigned param)
+
+\end{expara}
+
+The function \funcXBjobop{} is used to perform an
+operation on a job.
+
+\exampletext{fd} is a file descriptor which was previously
+returned by a successful call to \funcXBopen{} or equivalent.
+
+\exampletext{flags} is zero or
+\filename{\constprefix{}FLAG\_IGNORESEQ} to ignore recent changes to
+the job list.
+
+\exampletext{slot} is the slot number corresponding to the job
+as returned by \funcXBjoblist{} or
+\funcXBjobfindslot{}.
+
+\exampletext{op} is one of the following:
+
+\begin{tabular}{ll}
+\filename{\constprefix{}JOP\_SETRUN} & Set job running\\
+\filename{\constprefix{}JOP\_SETCANC} & Cancel a job\\
+\filename{\constprefix{}JOP\_FORCE} & Force a job to start\\
+\filename{\constprefix{}JOP\_FORCEADV} & Force to start and advance time\\
+\filename{\constprefix{}JOP\_ADVTIME} & Advance to next repeat\\
+\filename{\constprefix{}JOP\_KILL} & Kill job\\
+\end{tabular}
+
+\exampletext{param} is only relevant to
+\filename{\constprefix{}JOP\_KILL}, in which case it gives the signal
+number to kill the job.
+
+\subsubsection{Return values}
+The function returns 0 if successful otherwise one of the error codes
+listed on page \pageref{errorcodes} onwards.
+

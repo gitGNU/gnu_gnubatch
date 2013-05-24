@@ -1,0 +1,21 @@
+\subsection{\funcnameXBclose{}}
+
+\begin{expara}
+
+int \funcnameXBclose{}(const int fd)
+
+\end{expara}
+
+The function \funcXBclose{} is used to terminate a
+connection with the API.
+
+\exampletext{fd} is a file descriptor which was previously
+returned by a successful call to \funcXBopen{} or equivalent.
+
+\subsubsection{Return values}
+The function returns 0 if successful otherwise one of the error codes
+listed on page \pageref{errorcodes} onwards.
+
+In most API programs the return value is ignored as it is only likely to
+report an error if an invalid API descriptor is passed.
+

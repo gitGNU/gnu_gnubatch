@@ -1,0 +1,73 @@
+\subsection{\funcnameXBjobfind{}}
+
+\begin{expara}
+
+int \funcnameXBjobfind{}(const int fd,
+
+\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ const unsigned flags,
+
+\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ const jobno\_t jobnum,
+
+\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ const netid\_t nid,
+
+\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ slotno\_t *slot,
+
+\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ apiBtjob *jobd)
+
+\bigskip
+
+
+int \funcnameXBjobfindslot{}(const int fd,
+
+\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ const unsigned flags,
+
+\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ const jobno\_t jobnum,
+
+\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ const netid\_t nid,
+
+\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ slotno\_t *slot)
+
+\end{expara}
+
+The function \funcXBjobfind{} is used to retrieve the
+details of a job, starting from the job number, in one operation.
+
+The function \funcXBjobfindslot{} is used to retrieve
+just the slot number of a job, starting from the job number.
+
+\exampletext{fd} is a file descriptor which was previously
+returned by a successful call to \funcXBopen{} or equivalent.
+
+\exampletext{flags} is zero or the logical OR of one or more of
+the following bits:
+
+\begin{tabular}{ll}
+\filename{\constprefix{}FLAG\_LOCALONLY} & Search for jobs local to the server only.\\
+\filename{\constprefix{}FLAG\_USERONLY} & Search for jobs owned by the user only.\\
+\filename{\constprefix{}FLAG\_GROUPONLY} & Search for jobs owned by the group only.\\
+\filename{\constprefix{}FLAG\_QUEUEONLY} & Search for jobs with the queue name specified by
+\funcXBsetqueue{} only.\\
+\end{tabular}
+
+\progname{jobnum} is the job number to be searched for.
+
+\exampletext{nid} is the IP address (in network byte order) of
+the host on which the searched-for job is to be located. It should be
+correct even if \filename{\constprefix{}FLAG\_LOCALONLY} is
+specified.
+
+\exampletext{slot} is assigned the slot number corresponding to
+the job. It may be null is not required, but this would be nearly
+pointless with \funcXBjobfindslot{} (other than
+reporting that the job was unknown).
+
+\exampletext{jobp} is a pointer to a structure to contain the
+details of the job for \funcXBjobfind{}.
+
+The definition of the job structure is given on page
+\pageref{bkm:Jobstructure} onwards.
+
+\subsubsection{Return values}
+The function returns 0 if successful otherwise one of the error codes
+listed on page \pageref{errorcodes} onwards.
+

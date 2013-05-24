@@ -1,0 +1,499 @@
+\chapter{The Job Structure}
+\label{chp:the-job-structure}
+The following structures are used to describe jobs within the API. All
+the structures and definitions are contained within the include file
+\filename{\includefile}.
+
+\section{Overall Structure}
+\label{bkm:Jobstructure}A job structure consists of two parts, a \textit{header part} and a \textit{string table}. The header part
+contains all the run flags and parameters such as load level and priority, whilst the string table contains all the variable-length
+fields, namely the job title, directory, environment variables, arguments and redirections.
+
+Whilst the C programmer may directly manipulate the string table if he or she wishes, this is strongly discouraged in favour of the use of the
+utility functions \funcXBgettitle{}, \funcXBputtitle{} etc. Future extensions to \ProductName{} and the API will attempt wherever possible to
+preserve the interfaces to these functions.
+
+\begin{expara}
+
+typedef \ \ struct \ \ \ \{
+
+\ \ \ \ \ \ \ \ apiBtjobh \ h;
+
+\ \ \ \ \ \ \ \ char \ \ \ \ \ \ bj\_space[JOBSPACE];
+
+\} \ apiBtjob;
+
+\end{expara}
+
+The size of the \filename{bj\_space} vector is given by the constant \filename{JOBSPACE} which is determined when
+\textbf{\ProductName{}} is compiled\IfXi{ on the relevant platform}. It may possibly vary from machine to machine, but the string manipulation functions
+pack the data at the start of the space and always pass the minimum length, so enabling copies of \textbf{\ProductName{}} with different values
+of \filename{JOBSPACE} to be able to talk to one another.
+
+When creating new jobs, we suggest that you start by clearing the entire structure to zero and then insert the various fields. This way your
+code should work across various releases as we shall endeavour to keep the existing behaviour where the new fields are zero.
+
+\section{The job header}
+The header structure for the job is defined as follows:
+
+\begin{expara}
+
+typedef \ \ struct \ \ \ \{
+
+\ \ \ \ \ \ \ \ jobno\_t \ \ \ \ \ \ \ bj\_job;
+
+\ \ \ \ \ \ \ \ long \ \ \ \ \ \ \ \ \ \ bj\_time;
+
+\ \ \ \ \ \ \ \ long \ \ \ \ \ \ \ \ \ \ bj\_stime;
+
+\ \ \ \ \ \ \ \ long \ \ \ \ \ \ \ \ \ \ bj\_etime;
+
+\ \ \ \ \ \ \ \ int\_pid\_t \ \ \ \ \ bj\_pid;
+
+\ \ \ \ \ \ \ \ netid\_t \ \ \ \ \ \ \ bj\_orighostid;
+
+\ \ \ \ \ \ \ \ netid\_t \ \ \ \ \ \ \ bj\_hostid;
+
+\ \ \ \ \ \ \ \ netid\_t \ \ \ \ \ \ \ bj\_runhostid;
+
+\ \ \ \ \ \ \ \ slotno\_t \ \ \ \ \ \ bj\_slotno;
+
+\ \ \ \ \ \ \ \ unsigned char \ bj\_progress;
+
+\ \ \ \ \ \ \ \ unsigned char \ bj\_pri;
+
+\ \ \ \ \ \ \ \ unsigned short bj\_ll;
+
+\ \ \ \ \ \ \ \ unsigned short bj\_umask;
+
+\ \ \ \ \ \ \ \ unsigned short bj\_nredirs,
+
+\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ bj\_nargs,
+
+\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ bj\_nenv;
+
+\ \ \ \ \ \ \ \ unsigned char \ bj\_jflags;
+
+\ \ \ \ \ \ \ \ unsigned char \ bj\_jrunflags;
+
+\ \ \ \ \ \ \ \ short \ \ \ \ \ \ \ \ \ bj\_title;
+
+\ \ \ \ \ \ \ \ short \ \ \ \ \ \ \ \ \ bj\_direct;
+
+\ \ \ \ \ \ \ \ unsigned long \ bj\_runtime;
+
+\ \ \ \ \ \ \ \ unsigned short bj\_autoksig;
+
+\ \ \ \ \ \ \ \ unsigned short bj\_runon;
+
+\ \ \ \ \ \ \ \ unsigned short bj\_deltime;
+
+\ \ \ \ \ \ \ \ char \ \ \ \ \ \ \ \ \ \ bj\_cmdinterp[CI\_MAXNAME+1];
+
+\ \ \ \ \ \ \ \ Btmode \ \ \ \ \ \ \ \ bj\_mode;
+
+\ \ \ \ \ \ \ \ apiJcond \ \ \ \ \ \ bj\_conds[MAXCVARS];
+
+\ \ \ \ \ \ \ \ apiJass \ \ \ \ \ \ \ bj\_asses[MAXSEVARS];
+
+\ \ \ \ \ \ \ \ Timecon \ \ \ \ \ \ \ bj\_times;
+
+\ \ \ \ \ \ \ \ long \ \ \ \ \ \ \ \ \ \ bj\_ulimit;
+
+\ \ \ \ \ \ \ \ short \ \ \ \ \ \ \ \ \ bj\_redirs;
+
+\ \ \ \ \ \ \ \ short \ \ \ \ \ \ \ \ \ bj\_env;
+
+\ \ \ \ \ \ \ \ short \ \ \ \ \ \ \ \ \ bj\_arg;
+
+\ \ \ \ \ \ \ \ unsigned short bj\_lastexit;
+
+\ \ \ \ \ \ \ \ Exits \ \ \ \ \ \ \ \ \ bj\_exits;
+
+\} \ apiBtjobh;
+
+\end{expara}
+
+The various constants \filename{MAXCVARS}, \filename{MAXSEVARS} etc are defined elsewhere in
+\filename{\includefile}, and the sub-structures for times, modes, conditions, assignments and exit codes are described below.
+
+The functions of the various fields are as follows:
+
+\begin{tabular}{l l}
+\filename{bj\_job} & Job number\\
+\filename{bj\_time} & Time job was submitted\\
+\filename{bj\_stime} & Time job was (last) started\\
+\filename{bj\_etime} & Time job last finished\\
+\filename{bj\_pid} & Process id of running job\\
+\filename{bj\_orighostid} & Originating host id, network byte order.\\
+\filename{bj\_hostid} & Host id of job owner\\
+\filename{bj\_runhostid} & Host id running job, if applicable\\
+\filename{bj\_slotno} & Slot number on owning machine of non-local job\\
+\filename{bj\_progress} & Progress code, see below\\
+\filename{bj\_pri} & Priority\\
+\filename{bj\_ll} & Load level\\
+\filename{bj\_umask} & Umask value\\
+\filename{bj\_nredirs} & Number of redirections\\
+\filename{bj\_nargs} & Number of arguments\\
+\filename{bj\_nenv} & Number of environment variables\\
+\filename{bj\_jflags} & Job flags see below\\
+\filename{bj\_jrunflags} & Job flags whilst running\\
+\filename{bj\_title} & Offset of title field in job string area\\
+\filename{bj\_direct} & Offset of directory field in job string area\\
+\filename{bj\_runtime} & Maximum run time (seconds)\\
+\filename{bj\_autoksig} & Signal number to kill with after run time\\
+\filename{bj\_runon} & Grace time (seconds)\\
+\filename{bj\_deltime} & Delete time automatically (hours)\\
+\filename{bj\_cmdinterp} & Command interpreter name (NB string in R5 up)\\
+\filename{bj\_mode} & Job permissions, see below\\
+\filename{bj\_conds} & Job conditions, see below\\
+\filename{bj\_asses} & Job assignments, see below\\
+\filename{bj\_times} & Job time constraints, see below\\
+\filename{bj\_ulimit} & Job maximum file size\\
+\filename{bj\_redirs} & Offset of redirection table in job string area\\
+\filename{bj\_env} & Offset of environment variables in job string area\\
+\filename{bj\_arg} & Offset of arguments in job string area.\\
+\filename{bj\_lastexit} & Saved exit code from last time job was run\\
+\filename{bj\_exits} & Exit code constraints, see below\\
+\end{tabular}
+
+If the user only has ``reveal'' access when a job is read using \funcXBjobread{}, then all fields
+will be zeroed apart from \filename{bj\_job}, \filename{bj\_jflags}, \filename{bj\_progress},
+\filename{bj\_hostid}, \filename{bj\_orighostid} and \filename{bj\_runhostid}. The completion of the
+\filename{bj\_mode} field depends upon whether the user has ``display mode'' access.
+
+\subsection{Progress codes}
+The progress code field of a job consists of one of the following
+values.
+
+\begin{tabular}{l l}
+\filename{BJP\_NONE} & Job is ready to run\\
+\filename{BJP\_DONE} & Job has completed\\
+\filename{BJP\_ERROR} & Job terminated with error\\
+\filename{BJP\_ABORTED} & Job aborted\\
+\filename{BJP\_CANCELLED} & Job cancelled\\
+\filename{BJP\_STARTUP1} & Startup - phase 1\\
+\filename{BJP\_STARTUP2} & Startup - phase 2\\
+\filename{BJP\_RUNNING} & Job is running\\
+\filename{BJP\_FINISHED} & Job has finished - phase 1\\
+\end{tabular}
+
+The values \filename{BJP\_STARTUP1} and \filename{BJP\_STARTUP2}, and \filename{BJP\_FINISHED} are transient states.
+
+Note that jobs should be created and updated with the values \filename{BJP\_NONE} (this is zero, so if the job structure is
+cleared initially it will be set to this) and \filename{BJP\_CANCELLED} only.
+
+\subsection{Job Flags}
+The field \filename{bj\_jflags} consists of some or all of the following values.
+
+\begin{tabular}{ll}
+\filename{BJ\_WRT} & Send message to users terminal on completion\\
+\filename{BJ\_MAIL} & Mail message to user on completion\\
+\filename{BJ\_NOADVIFERR} & Do not advance time on error\\
+\filename{BJ\_EXPORT} & Job is visible from outside world\\
+\filename{BJ\_REMRUNNABLE} & Job is runnable from outside world\\
+\filename{BJ\_CLIENTHOST} & Job was submitted from Windows client\\
+\filename{BJ\_ROAMUSER} & Job was submitted from ``dynamic IP'' client\\
+\end{tabular}
+
+The flags \filename{BJ\_CLIENTHOST} and \filename{BJ\_ROAMUSER} are set as appropriate by the
+interface and will be ignored if a job is created or updated with these set.
+
+\subsection{Run Flags}
+The field \filename{bj\_jrunflags} in the job header contains some or all of the following bits:
+
+\begin{tabular}{ll}
+\filename{BJ\_PROPOSED} & Remote job proposed. This is an intermediate step in a remote execution protocol.\\
+\filename{BJ\_SKELHOLD} & Job held dependent on inaccessible remote variables\\
+\filename{BJ\_AUTOKILLED} & Job has exceeded run time, initial signal applied.\\
+\filename{BJ\_AUTOMURDER} & Job has exceeded ``grace period'', final kill applied.\\
+\filename{BJ\_HOSTDIED} & Job killed because owning host died.\\
+\filename{BJ\_FORCE} & Force job to run\\
+\filename{BJ\_FORCENA} & Do not advance time on Force job to run\\
+\end{tabular}
+
+These are provided for reference only when a job is read and will be ignored if a job is created or updated with any of these set.
+
+\subsection{Mode Structures}
+These are applicable to both jobs and variables, and contain the permission structures in each case. Note that user profiles are held in
+a separate structure defined later.
+
+\begin{expara}
+
+typedef \ \ struct \ \ \ \{
+
+\ \ \ \ \ \ \ \ int\_ugid\_t \ \ o\_uid, o\_gid, c\_uid, c\_gid;
+
+\ \ \ \ \ \ \ \ char \ \ \ \ \ \ \ \ o\_user[UIDSIZE+1],
+
+\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ o\_group[UIDSIZE+1],
+
+\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ c\_user[UIDSIZE+1],
+
+\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ c\_group[UIDSIZE+1];
+
+\ \ \ \ \ \ \ \ unsigned \ short \ u\_flags,
+
+\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ g\_flags,
+
+\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ o\_flags;
+
+\} \ Btmode;
+
+\end{expara}
+
+The two sets of users and groups correspond to those of the current owner, and the creator. When ownership is changed, which is a two stage
+process in \ProductName{}, the creator field is changed first when the owner is ``given away'' and then the
+owner field when the owner is ``assumed''.
+
+The numeric user ids are unlikely to be very useful unless they are identical on the host machine to the calling machine (possibly if it is
+the same machine), but are included for completeness.
+
+The flags fields consist of the following bitmaps.
+
+\begin{tabular}{ll}
+\filename{BTM\_READ} & Item may be read\\
+\filename{BTM\_WRITE} & Item may be written\\
+\filename{BTM\_SHOW} & Item is visible at all\\
+\filename{BTM\_RDMODE} & Mode may be displayed\\
+\filename{BTM\_WRMODE} & Mode may be updated\\
+\filename{BTM\_UTAKE} & User may be assumed\\
+\filename{BTM\_GTAKE} & Group may be assumed\\
+\filename{BTM\_UGIVE} & User may be given away\\
+\filename{BTM\_GGIVE} & Group may be given away\\
+\filename{BTM\_DELETE} & Item may be deleted\\
+\filename{BTM\_KILL} & Job may be killed, not meaningful for variables.\\
+\end{tabular}
+
+The \filename{\#define} constants \filename{JALLMODES} and \filename{VALLMODES} combine all valid flags at once for
+jobs and variables respectively for where the user wants to ``allow everything''.
+
+If a job or variable is read, and the BTM\_\filename{RDMODE} permission is not available to the user, then the whole of the mode
+field is set to zero apart from \filename{o\_user} and \filename{o\_group}. Jobs and variables may not be created
+without certain minimal modes enabling someone to delete them or change the modes.
+
+\subsection{Condition Structures}
+The job condition structures consist of the following fields:
+
+\begin{expara}
+
+typedef \ \ struct \ \ \ \{
+
+\ \ \ \ \ \ \ \ unsigned char \ \ bjc\_compar;
+
+\ \ \ \ \ \ \ \ unsigned char \ \ bjc\_iscrit;
+
+\ \ \ \ \ \ \ \ apiVid \ \ \ \ \ \ \ \ \ bjc\_var;
+
+\ \ \ \ \ \ \ \ Btcon \ \ \ \ \ \ \ \ \ \ bjc\_value;
+
+\} \ apiJcond;
+
+\end{expara}
+
+The field \filename{bjc\_compar} has one of the following values:
+
+\begin{tabular}{lp{10cm}}
+\filename{C\_UNUSED} & Not used. This marks the end of a list of conditions if there are less than \filename{MAXCVARS}. This is zero.\\
+\filename{C\_EQ} & Compare equal to value\\
+\filename{C\_NE} & Compare not equal to value\\
+\filename{C\_LT} & Compare less than value\\
+\filename{C\_LE} & Compare less than or equal to value\\
+\filename{C\_GT} & Compare greater than value\\
+\filename{C\_GE} & Compare greater than or equal to value\\
+\end{tabular}
+
+The field \filename{bjc\_iscrit} is set with some or all of the following bit flags:
+
+\begin{tabular}{l p{10cm}}
+\filename{CCRIT\_NORUN} & Set to indicate job should not run if remote variable in this condition unavailable.\\
+\filename{CCRIT\_NONAVAIL} & Set internally to denote that condition is relying on unavailable variable.\\
+\filename{CCRIT\_NOPERM} & Set internally to denote that condition is relying on remote
+variable which proves to be unreadable when machine has restarted.\\
+\end{tabular}
+
+The field \filename{bjc\_var} is an instance of the following structure:
+
+\begin{expara}
+
+typedef \ \ struct \ \{
+
+\ \ \ \ \ \ \ \ slotno\_t \ \ \ \ \ slotno;
+
+\} \ apiVid;
+
+\end{expara}
+
+The slot number referred to is that on the host machine which the API is talking to, as returned by \funcXBvarlist{}, and not
+the slot number on the owning machine.
+
+The field \filename{bjc\_value} is an instance of the following structure.
+
+\begin{expara}
+
+typedef \ \ struct \ \ \ \{
+
+\ \ \ \ \ \ \ \ short \ \ \ const\_type;
+
+\ \ \ \ \ \ \ \ union \ \ \{
+
+\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ char \ \ con\_string[BTC\_VALUE+1];
+
+\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ long \ \ con\_long;
+
+\ \ \ \ \ \ \ \ \} \ con\_un;
+
+\} \ Btcon;
+
+\end{expara}
+
+The field \filename{const\_type} may be either \filename{CON\_LONG} to denote a numeric (long) value, or
+\filename{CON\_STRING} to denote a string value.
+
+\subsection{Assignment structures}
+A job assignment structure consists of the following fields:
+
+\begin{expara}
+
+typedef \ \ struct \ \ \ \{
+
+\ \ \ \ \ \ \ \ unsigned short bja\_flags;
+
+\ \ \ \ \ \ \ \ unsigned char \ bja\_op;
+
+\ \ \ \ \ \ \ \ unsigned char \ bja\_iscrit;
+
+\ \ \ \ \ \ \ \ apiVid \ \ \ \ \ \ \ \ bja\_var;
+
+\ \ \ \ \ \ \ \ Btcon \ \ \ \ \ \ \ \ \ bja\_con;
+
+\} \ apiJass;
+
+\end{expara}
+
+The field \filename{bja\_flags} consists of one or more of the following bits
+
+\begin{tabular}{l l}
+\filename{BJA\_START} & Apply at start of job\\
+\filename{BJA\_OK} & Apply on normal exit\\
+\filename{BJA\_ERROR} & Apply on error exit\\
+\filename{BJA\_ABORT} & Apply on abort\\
+\filename{BJA\_CANCEL} & Apply on cancel\\
+\filename{BJA\_REVERSE} & Reverse assignment on exit\\
+\end{tabular}
+
+The field \filename{bja\_op} consists of one of the following values.
+
+\begin{tabular}{l p{10cm}}
+\filename{BJA\_NONE} &
+No operation. This is used to signify the end of a list of
+assignments if there are less than \filename{MAXSEVARS}. This
+is zero.\\
+\filename{BJA\_ASSIGN} & Assign value given\\
+\filename{BJA\_INCR} & Increment by value given\\
+\filename{BJA\_DECR} & Decrement by value given\\
+\filename{BJA\_MULT} & Multiply by value given\\
+\filename{BJA\_DIV} & Divide by value given\\
+\filename{BJA\_MOD} & Modulus by value given\\
+\filename{BJA\_SEXIT} & Assign job exit code\\
+\filename{BJA\_SSIG} & Assign job signal number\\
+\end{tabular}
+
+The field \filename{bja\_iscrit} is set with some or all of the following bit flags:
+
+\begin{tabular}{l p{10cm}}
+\filename{ACRIT\_NORUN} & Set to indicate job should not run if remote variable in this
+assignment unavailable.\\
+\filename{ACRIT\_NONAVAIL} & Set internally to denote that assignment is relying on
+unavailable variable.\\
+\filename{ACRIT\_NOPERM} & Set internally to denote that assignment is relying on remote
+variable which proves to be unwritable when machine has restarted.\\
+\end{tabular}
+
+The fields \filename{bja\_var} and \filename{bja\_con} are similar to those in the condition fields above for variable and
+constant value.
+
+\subsection{Time Constraints}
+The time constraint field \filename{bj\_times} in a job header consists of the following structure.
+
+\begin{expara}
+
+typedef \ \ struct \ \ \ \{
+
+\ \ \ \ \ \ \ \ long \ \ \ \ \ \ \ \ \ \ \ tc\_nexttime;
+
+\ \ \ \ \ \ \ \ unsigned \ char \ tc\_istime;
+
+\ \ \ \ \ \ \ \ unsigned \ char \ tc\_mday;
+
+\ \ \ \ \ \ \ \ unsigned \ short tc\_nvaldays;
+
+\ \ \ \ \ \ \ \ unsigned \ char \ tc\_repeat;
+
+\ \ \ \ \ \ \ \ unsigned \ char \ tc\_nposs;
+
+\ \ \ \ \ \ \ \ unsigned \ long \ tc\_rate;
+
+\} \ Timecon;
+
+\end{expara}
+
+The field \filename{tc\_nexttime} gives the next time at which the job is to be executed.
+
+The field \filename{tc\_istime} is non-zero to indicate that the time constraint is valid, otherwise the job is a ``do when you can'' job.
+
+The field \filename{tc\_mday} is the target day of the month for ``months relative to the beginning of the month'' repeats,
+or the number of days back from the end of the month (possibly zero) for ``months relative to the end of the month'' repeats.
+
+The field \filename{tc\_nvaldays} is the ``days to avoid'' field with Sunday being bit (1 {\textless}{\textless} 0),
+Monday being bit (1 {\textless}{\textless} 1), through to Saturday being bit (1 {\textless}{\textless} 6).
+Holidays are represented by bit (1 {\textless}{\textless} 7), also given by the \filename{\#define} constant \filename{TC\_HOLIDAYBIT}.
+
+The field \filename{tc\_repeat} is set to one of the following values.
+
+\begin{tabular}{l l}
+\filename{TC\_DELETE} & Run and delete\\
+\filename{TC\_RETAIN} & Run and retain\\
+\filename{TC\_MINUTES} & Repeat in minutes\\
+\filename{TC\_HOURS} & Repeat in hours\\
+\filename{TC\_DAYS} & Repeat in days\\
+\filename{TC\_WEEKS} & Repeat in weeks\\
+\filename{TC\_MONTHSB} & Repeat in months relative to the beginning\\
+\filename{TC\_MONTHSE} & Repeat in months relative to the end\\
+\filename{TC\_YEARS} & Repeat in years\\
+\end{tabular}
+
+The field \filename{tc\_nposs} is set to one of the following values
+
+\begin{tabular}{l l}
+\filename{TC\_SKIP} & Skip if not possible\\
+\filename{TC\_WAIT1} & Delay current if not possible\\
+\filename{TC\_WAITALL} & Delay all if not possible\\
+\filename{TC\_CATCHUP} & Run one and catch up\\
+\end{tabular}
+
+The field \filename{tc\_rate} gives the repetition rate (number of units).
+
+\subsection{Exit code structure}
+The job header field \filename{bj\_exits} consists of an instance of the following structure.
+
+\begin{expara}
+
+typedef \ \ struct \ \ \ \{
+
+\ \ \ \ \ \ \ \ unsigned \ char \ nlower;
+
+\ \ \ \ \ \ \ \ unsigned \ char \ nupper;
+
+\ \ \ \ \ \ \ \ unsigned \ char \ elower;
+
+\ \ \ \ \ \ \ \ unsigned \ char \ eupper;
+
+\} \ Exits;
+
+\end{expara}
+
+The 4 values give the ranges of exit codes to be considered ``normal'' or ``error'' respectively. If the ranges
+overlap, then an exit code falling inside both ranges will be considered to fall in the smaller of the two ranges.
+An exit code not ``covered'' will be treated as ``abort''.
+

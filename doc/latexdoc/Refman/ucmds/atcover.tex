@@ -1,0 +1,18 @@
+\subsection{atcover}
+
+\begin{expara}
+
+atcover options
+
+\end{expara}
+
+\progname{atcover} may be used instead of the standard \progname{at(1)} command. It converts the options that most versions of the
+\progname{at(1)} commands take to the equivalent \PrBtr{} commands and then invokes \PrBtr{} to submit the batch jobs.
+
+The \PrBtr{} program provides a much greater set of facilities than \progname{at}(1). Although it is strongly
+recommended to switch to the \PrBtr{} command to take advantage of these, they can be made available to users of our
+\progname{atcover} command. This is done by setting up \filename{BTR} in the application or user environment.
+
+\progname{atcover} is usually installed in place of \progname{at} in \filename{/usr/bin}, with the
+original binary moved to something like \filename{old.at} in the same directory.
+

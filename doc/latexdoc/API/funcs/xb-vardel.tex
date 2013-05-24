@@ -1,0 +1,67 @@
+\subsection{\funcnameXBvardel{}}
+
+\begin{expara}
+
+int \funcnameXBvardel{}(const int fd, const unsigned flags, const slotno\_t
+slot)
+
+\end{expara}
+
+The function \funcXBvardel{} is used to delete a
+variable from the variable list.
+
+\exampletext{fd} is a file descriptor which was previously
+returned by a successful call to \funcXBopen{} or equivalent.
+
+\exampletext{flags} is 0 or
+\filename{\constprefix{}FLAG\_IGNORESEQ} to attempt to ignore recent
+changes to the variable list.
+
+\exampletext{slot} is the slot number corresponding to the
+variable as returned by \funcXBvarlist{} or
+\funcXBvarfindslot{}.
+
+\subsubsection{Return values}
+The function returns 0 if successful otherwise one of the error codes
+listed on page \pageref{errorcodes} onwards.
+
+\subsubsection{Example}
+This example deletes all the variables owned by the user.
+
+\begin{expara}
+
+int fd, ret, cnt;
+
+int numvars;
+
+slotno\_t *list;
+
+\bigskip
+
+
+fd = \funcnameXBopen{}({\textquotedbl}myhost{\textquotedbl}, (char *)0);
+
+ret = \funcnameXBvarlist{}(fd, \constprefix{}FLAG\_USERONLY, \&numvars, \&list);
+
+if (fd {\textless} 0) \ \{ /* process error */
+
+\ \ \ \ \ . . .
+
+\}
+
+\bigskip
+
+
+for (cnt = 0; cnt {\textless} numvars, cnt++) \{
+
+\ \ \ \ if \ ((ret = \funcnameXBvardel{}(fd, 0, list[cnt])) {\textless} 0)
+\ \ \{
+
+\ \ \ \ \ \ \ \ \ /* process error */
+
+\ \ \ \ \ \ \ \ \ . . .
+
+\ \ \ \ \
+
+\end{expara}
+

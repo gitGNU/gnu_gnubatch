@@ -1,0 +1,37 @@
+\subsection{\funcnameXBciread{}}
+
+\begin{expara}
+
+int ciread(const int fd,
+
+\ \ \ \ \ \ \ \ \ \ \ const unsigned flags,
+
+\ \ \ \ \ \ \ \ \ \ \ int *numcis,
+
+\ \ \ \ \ \ \ \ \ \ \ Cmdint **cilist)
+
+\end{expara}
+
+The function \funcXBciread{} is used to read the list of command interpreters from the given server. This may be invoked by
+any user, no special permission is required.
+
+\exampletext{fd} is a file descriptor which was previously returned by a successful call to \funcXBopen{} or equivalent.
+
+\exampletext{flags} is currently unsused, but is reserved for future use. Set it to zero.
+
+\exampletext{numcis} is a pointer to an integer which upon return will contain the number of command interpreter structures
+returned in cilist. (This might exceed the number of actual command interpeters if some have been deleted).
+
+\exampletext{cilist} is a pointer to which a vector of command interpreter structures will be assigned by this routine. The user
+should not attempt to free the memory used by this structure as it is owned by the API. The list returned may possibly have
+``holes'' in it where previously-created command interpreters have been deleted. These holes can be identified
+by having a null \filename{ci\_name} field.
+
+The definition of the command interpreter structure is given on page \pageref{bkm:Cmdinterp} onwards.
+
+The index number of each element in the vector is the number which should be used as the third argument in
+\funcXBcidel{} and \funcXBciupd{} calls.
+
+\subsubsection{Return values}
+The function returns 0 if successful otherwise one of the error codes listed on page \pageref{errorcodes} onwards.
+

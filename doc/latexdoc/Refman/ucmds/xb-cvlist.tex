@@ -1,0 +1,72 @@
+\subsection{\XbCvlistName}
+
+\begin{expara}
+
+\XbCvlistName{} [ -D dir ] [ -v n ] [ -e n ] [ -s ] [ -f ] var file outfile
+
+\end{expara}
+
+\PrXbCvlist{} converts \ProductName{} variables held in the batch spool
+directory to an executable shell script which may be used to re-install
+them. This may be useful for backup purposes or for one stage in
+upgrade from one release of \ProductName{} to another.
+
+\IfXi{\PrXbCvlist{} understands the format of the saved
+variable file for versions of \ProductName{} going
+back to release 4, and when presented with a saved file, will attempt
+to work out from the format which release it relates to.}
+
+In addition to options, two arguments are always supplied to \PrXbCvlist{}.
+
+\begin{tabular}{l p{14cm}}
+Variable list file &
+This is the file containing the attributes of the variables, \filename{btsched\_vfile} in the batch spool directory, by
+default \spooldir, or as relocated by re-specifying \filename{SPOOLDIR}.\\
+& \\
+Output file &
+This file is created by \PrXbCvlist{} to contain the executable shell script, containing
+\PrBtvar{} commands, which may be used to recreate the variables.\\
+\end{tabular}
+
+\subsubsection{Options}
+
+Note that this program does not provide for saving options in \configurationfile{} or \homeconfigpath{} files.
+
+\setbkmkprefix{xb-cvlist}
+
+\cmdoption{D}{}{directory}{directory}
+
+This option specifies the source directory for the variables
+rather than the current directory. It can be specified as \exampletext{\$SPOOLDIR} or
+\exampletext{\$\{SPOOLDIR-\spooldirname\}} etc and the environment and/or \linebreak[3]\masterconfig{} will be
+interrogated to interpolate the value of the environment variable given.
+
+If you use this, don't forget to put single quotes around it thus:
+
+\begin{expara}
+
+\XbCvlistName{} -D
+{\textquotesingle}\$\{SPOOLDIR-/usr/spool/batch\}{\textquotesingle}
+...
+
+\end{expara}
+
+otherwise the shell will try to interpret the \exampletext{\$} construct and not \PrXbCvlist{}.
+
+\cmdoption{e}{}{n}{errorlim}
+
+Tolerate \genericargs{n} errors of the kinds denoted by the other options before giving up trying to convert the file.
+
+\cmdoption{f}{}{}{ignfmt}
+
+Ignore format errors in the saved variables file, up to the limit of errors given by the \exampletext{{}-e} option.
+
+\cmdoption{s}{}{}{ignsize}
+
+Ignore file size errors in the saved variables file (up to the number of total errors given by the \exampletext{{}-e} option.
+
+\IfXi{\cmdoption{v}{}{number}{version}
+
+Tell \PrXbCvlist{} that the variables file is for release number of \ProductName{}, where number
+is 4 to 6. This may be necessary where the user file is corrupted and \PrXbCvlist{} cannot guess what is meant.}
+

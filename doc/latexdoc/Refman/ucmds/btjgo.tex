@@ -1,0 +1,38 @@
+\subsection{\BtjgoName, \BtjgoadvName, \BtjadvName}
+
+\begin{expara}
+
+\BtjgoName{} job number ...
+
+\BtjgoadvName{} job number ...
+
+\BtjadvName{} job number ...
+
+\end{expara}
+
+\PrBtjgo{} forces a job or jobs to run, ignoring the ``next run time''. Conditions and load level
+constraints are however still enforced. The ``next run time'' will not be affected when the job completes. This
+inserts an extra run of the job.
+
+\PrBtjgoadv{} forces a job or jobs to run, ignoring the ``next run time''. Conditions and load
+level constraints are however still enforced. The ``next run time'' is advanced to the next time. This brings
+forward the next run, thereafter resuming the sequence.
+
+\PrBtjadv{} advances the run time on each job specified to the next run time according to its repeat time without
+running the job or looking at conditions.
+
+These programs are all links to the \PrBtjdel{} binary. They all parse the same options as \PrBtjdel, but do not do anything with them.
+
+Jobs are specified by using the job number, as displayed by \PrBtr{} with the \exampletext{{}-v}
+(verbose) option, or as in the output of the first column of the \PrBtjlist{} command with default format.
+
+Remote jobs should be specified by prefixing the job numbers with the host name thus:
+
+\begin{expara}
+
+host:1234
+
+\end{expara}
+
+It is not necessary to specify any leading zeroes.
+

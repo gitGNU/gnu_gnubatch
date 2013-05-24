@@ -1,0 +1,278 @@
+\subsection{\BtfilemonName}
+\setbkmkprefix{btfilemon}
+\bookmark{startdoc}
+\begin{expara}
+
+\BtfilemonName{} [-options]
+
+\end{expara}
+
+\PrBtfilemon{} executes a given program or script when specified files change in specified ways in a specified directory.
+
+It is intentionally not integrated with the \ProductName{} core product, as there is no
+automatic mechanism within Unix for signalling changes to files, and it is therefore necessary to ``poll'' or monitor
+the files at a given interval. \PrBtfilemon{} is made as small as possible so that the ``polling'' does not have a large impact
+on the system.
+
+The rest of \ProductName{} is made to be ``event-driven'', as this has minimal impact on the system when the product is inactive.
+
+The ``action'' of \PrBtfilemon{} may be to run a \ProductName{} job, set a variable, or perform some
+completely unrelated task.
+
+\PrBtfilemon{} may optionally be used to list or terminate running copies of itself.
+
+\subsubsection{Options}
+The GTK+ program \PrXfilemon{} and the X/Motif program \PrXmfilemon{} may be used to set
+up the options to and run \PrBtfilemon{} rather than remembering them here.
+
+The environment variable on which options are supplied is \filename{\BtfilemonVarname} and the environment variable to specify
+the help file is \filename{FILEMONCONF}.
+
+\explainopt
+
+\cmdoption{A}{file-arrives}{}{arrives}
+
+Perform the required action when a new file is detected in the directory.
+
+\cmdoption{a}{any-file}{}{anyfile}
+
+Perform the required action for any file name.
+
+\cmdoption{C}{continue-running}{}{continue}
+
+Continue \PrBtfilemon{} after a matching file and condition has been found, looking for further files.
+
+\cmdoption{c}{script-command}{}{scriptcmd}
+
+Specify command as a string to execute when one of the monitored events occurs. This is an alternative to \exampletext{{}-X}, which
+runs a named shell script.
+
+In the command the sequence \exampletext{\%f} is replaced by the name of the file whose activity has provoked the action, and
+\exampletext{\%d} by the directory.
+
+To use this option, be sure to enclose the whole shell command in quotes so that it is passed as one argument, thus:
+
+\begin{expara}
+
+xmessage -bg red {\textquotesingle}Found \%f{\textquotesingle}
+
+\end{expara}
+
+\cmdoption{D}{directory}{dir}{directory}
+
+Specify the given \textit{dir} as the directory to monitor rather than the current directory.
+
+\cmdoption{d}{daemon-process}{}{daemon}
+
+Detach a further \PrBtfilemon{} as a daemon process to do the work, and return to the user.
+
+\cmdoption{e}{include-existing}{}{inclexisting}
+
+Include existing files in the scan, and report changes etc to those.
+
+If the \exampletext{{}-A} option (watch for file arriving) is specified, this will have no effect unless an existing file is deleted
+and is recreated.
+
+\cmdoption{G}{file-stops-growing}{secs}{nogrow}
+
+Activate command when a file has appeared, and has not grown further for at least \genericargs{secs}.
+
+Distinguish this from the \exampletext{{}-M} option, which will check for any change, possibly in the middle of a file.
+
+\cmdoption{I}{file-stops-changing}{secs}{nochange}
+
+Activate command when a file has appeared, and has not been changed for at least \genericargs{secs}.
+
+This is more inclusive than \exampletext{{}-M}, as it includes activities such as changing the ownership or mode of the file, or making hard links.
+
+\cmdoption{i}{ignore-existing}{}{ignoreexisting}
+
+Ignore existing files (default). However if an existing file is noted to have been deleted, and then re-created, the new version
+will be treated as a new file.
+
+\cmdoption{K}{kill-all}{}{killall}
+
+Kill all \PrBtfilemon{} daemon processes belonging to the user, or all such processes if invoked by \filename{root}.
+
+\cmdoption{k}{kill-processes}{dir}{killproc}
+
+Kill any \PrBtfilemon{} daemon processes left running which are scanning the given directory. Processes must
+belong to the invoking user, or \PrBtfilemon{} be invoked by \filename{root}.
+
+\cmdoption{L}{follow-links}{}{follow}
+
+Follow symbolic links to files (and subdirectories with th exampletext{{}-R} option).
+
+\cmdoption{l}{list-processes}{}{list}
+
+List running \PrBtfilemon{} processes and which directories they are accessing.
+
+\cmdoption{M}{file-stops-writing}{secs}{nowrite}
+
+Activate command when a file has appeared, and has not been written to, for at least \genericargs{secs}.
+
+This is more inclusive than \exampletext{{}-G} as it includes writes other than to the end of the file.
+
+It is less inclusive than \exampletext{{}-I} which also monitors for linking and permission-changing.
+
+\cmdoption{m}{run-monitor}{}{runmonitor}
+
+Run as a file monitor program (default) rather than listing processes as with \exampletext{{}-l} or killing monitor processes
+as with \exampletext{{}-k} or \exampletext{{}-K}.
+
+\cmdoption{n}{not-daemon}{}{notdaemon}
+
+Do not detach \PrBtfilemon{} as a daemon process (default), wait and only return to the user when a file event has been detected.
+
+\cmdoption{P}{poll-time}{secs}{polltime}
+
+Poll directory every \genericargs{secs} seconds. This should be sufficiently small not to ``miss'' events for
+a long time, but large enough to not load the system. The default if this is not specified is 20 seconds.
+
+\cmdoption{p}{pattern-file}{pattern}{pattern}
+
+Perform action on a file name matching \genericargs{pattern}.
+
+The pattern may take the form of wild-card matching given by the shell, with \exampletext{*} \exampletext{?}
+\exampletext{[a-z]} \exampletext{[!a-z]} having the same meanings as with the shell, and possible alternative patterns
+separated by commas, for example:
+
+\begin{expara}
+
+{}-p {\textquotesingle}*.[chyl],*.obj{\textquotesingle}
+
+\end{expara}
+
+Remember to enclose the argument in quotes so that it is interpreted by \PrBtfilemon{} and not the shell.
+
+\cmdoption{R}{recursive}{}{recursive}
+
+Recursively follow subdirectories of the starting directory.
+
+\cmdoption{r}{file-deleted}{}{deleted}
+
+Perform action when a file matching the criteria has been deleted.
+
+\cmdoption{S}{halt-when-found}{}{haltfound}
+
+Halt \PrBtfilemon{} when the first matching file and condition has been found.
+
+\cmdoption{s}{specific-file}{file}{specific}
+
+Perform action only with a specific named file, not a pattern.
+
+\cmdoption{u}{file-stops-use}{secs}{stopsuse}
+
+Perform action when a file has appeared, and has not been read for at least \genericargs{secs}.
+
+(Remember that many systems suppress or reduce the frequency with which this is updated).
+
+\cmdoption{X}{script-file}{file}{script}
+
+Specify the given script as a shell script to execute when one of the monitored events occurs.
+
+This is an alternative to \exampletext{{}-c} where the whole command is spelled out.
+
+The existence of the shell script is checked, and \PrBtfilemon{} will fail with an error message if it does not exist.
+
+The shell script is passed the following arguments:
+
+\begin{enumerate}
+\item File name\item Directory path\item File size (or last file size if
+file deleted).\item Date of file modification, change or access as
+YYYY/MM/DD, but only for those type of changes.\item Time of file
+modification, change or access as HH:MM:SS, but only for those type of
+changes.\end{enumerate}
+
+\freezeopts{\filename{\BtfilemonVarname}}{stop}
+
+\subsubsection{File matching}
+
+What to look for may be made to depend upon something happening to
+
+\begin{tabular}{l l}
+Any file & With the \exampletext{{}-a} option. Any file that meets the other criteria will trigger the event.\\
+Specific file & With the \exampletext{{}-s} option, \PrBtfilemon{} will watch for the specific file named.\\
+Pattern & With the \exampletext{{}-p} option, a file which matches the pattern and the other criteria will trigger the action.\\
+\end{tabular}
+
+\subsubsection{Criteria}
+There are 6 criteria to watch for.
+
+\begin{tabular}{l p{14cm}}
+File arriving &
+This is probably the most common case. If you want to wait for a file appearing and trigger an event, the -A option will look for this.\\
+& \\
+File removal &
+This will watch for files being deleted, for example some applications use a ``lock file'' to denote
+that they are being run, and you might wish to start something else when it has gone.
+Remember that you might want to include existing files in the scan with \exampletext{{}-e} if the file in question existed when you
+started \PrBtfilemon{}.\\
+& \\
+File stopped growing &
+What this watches for is for a file being having been created,
+or with the \exampletext{{}-e} option starting to ``grow'', and then apparently no longer grown
+for the given time.
+If files are arriving from FTP, for example, then when they are complete, they will cease to ``grow'' in
+size.\\
+& \\
+File no longer written &
+A file not used sequentially may be written to internally
+rather than have additional data appended. This often occurs with
+database files, where records are updated somewhere in the middle of
+the file. If a series of database transactions is made and then
+completed, the file will no longer be written to for some time, and
+\BtfilemonName{} can be made to trigger an action after that time.
+You will often want to include the \exampletext{{}-e} option if the file existed already on entry.\\
+& \\
+File no longer changed & This goes a stage further than ``no longer written'' as it includes any kind of change to the file,
+such as permissions, owner, hard links or change of access and write times.\\
+& \\
+File no longer used & This monitors the access time of the file, updated whenever
+the file is read, and proceeds when this has gone unchanged for the
+specified time.
+You will often want to include the \exampletext{{}-e} option with this if the file existed already on entry.\\
+\end{tabular}
+
+\subsubsection{Pre-existing files}
+If the \exampletext{{}-i} (ignore existing) option is specified, which is the default, then no changes to existing files
+which would otherwise match the criteria will be considered, except where an existing file is deleted and then recreated and
+\PrBtfilemon{} ``notices'' this happen, in that the file is deleted before one ``poll'' of the directory and recreated
+before another.
+
+In other words, if the poll time is 20 seconds, then the deletion and recreation will have to be 20 seconds apart.
+
+If the -e option to include existing files is specified, the \exampletext{{}-G} \exampletext{{}-u}
+\exampletext{{}-M} \exampletext{{}-I} and \exampletext{{}-r} options will work as for new files but not
+\exampletext{{}-A} as the file has already ``arrived''. However, if it is deleted, this
+is ``noticed'' and then recreated, it will be treated as a ``new'' file.
+
+\subsubsection{Recursive searches}
+If recursive searches are specified using the \exampletext{{}-R} option, a separate
+\PrBtfilemon{} process will be invoked for each subdirectory, for each further subdirectory within each of those
+subdirectories, and for each new subdirectory created within one of those whilst each process is running, unless the
+\exampletext{{}-r} option is being used to watch for file removal, whereupon only those subdirectories which existed to begin
+with will be considered.
+
+If the \exampletext{{}-S} option is specified to stop once a file has been found, each process will continue until a file is found
+in its particular subdirectory.
+
+\subsubsection{Examples}
+Monitor the FTP directories for new files which have finished arriving, sending a message to the user:
+
+\begin{expara}
+
+\BtfilemonName{} -aRC -D /var/spool/ftp -G 30 -c {\textquotedbl}xmessage
+{\textquotesingle}\%f in \%d{\textquotesingle}{\textquotedbl}
+
+\end{expara}
+
+Set a \ProductName{} variable to an appropriate
+value when a file arrives in the current directory
+
+\begin{expara}
+
+\BtfilemonName{} -aAC -c {\textquotedbl}\BtvarName{} -s {\textquotesingle}\%f arrived{\textquotesingle} file\_var{\textquotedbl}
+
+\end{expara}
+

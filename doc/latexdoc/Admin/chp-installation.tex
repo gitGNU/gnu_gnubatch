@@ -1,0 +1,572 @@
+\chapter{Installation}
+\label{chp:installation}
+\IfGNU{
+\ProductName{} is built directly from the sources and installed by ``make install'' so there is no special installation
+routine.
+
+Note, however, that the first time it is installed, the network parameters and the system user will need to be installed,
+for which the \progname{make} targets \filename{install-user} and \filename{install-net} are provided.
+
+\section{Installation directories}
+The following directories are used to hold component parts of \ProductName{}. Note that
+there is a method for relocating parts of them after the product has been built, to use
+different directories. In conformity with GNU standards, the directories are by default
+based on \filename{/usr/local}, but you may well want to relocate the spool directory, which
+can be large.
+
+You can relocate the spool directory and other directories either using symbolic links, or by specifying an alternative location
+in the ``master configuration file'' \masterconfig.
+
+\begin{center}
+\begin{tabular}{l l}
+\textbf{Directory} & \textbf{Function} \\
+\filename{bin} & User-level programs \\
+\filename{libexec/gnubatch} & Internal programs \\
+\filename{sbin} & Administration programs \\
+\filename{share/gnubatch} & Data and control files \\
+\filename{share/gnubatch/help} & Help files for programs \\
+\filename{var/gnubatch} & Spool directory for pending jobs \\
+\end{tabular}
+\end{center}
+
+\section{Installing the system user}
+
+Most internal files, and IPC facilities such as shared memory segments and
+semaphores, are owned by a user \batchuser. This user name is like a ``sub-super-user''
+for \ProductName{} facilities. It is not intended that the \batchuser{} user name should be used
+extensively, however it (hopefully) serves to distinguish \ProductName{} files from other
+files.
+
+The only files which are not owned by \batchuser{} are the scheduler process \progname{btsched}
+and the network server process \progname{xbnetserv}, together with some auxiliary programs
+from the GTK clients, which have to be owned by \filename{root}, as they have to be able to
+transform to other users.
+
+During the installation, it will be necessary to create user \batchuser{}, If it does not
+exist. We normally recommend a user id of 51 (i.e. in the "system users" below 100),
+and your ``create new user'' routine may need a special option to install this. It is not
+entirely necessary, however, but we do not suggest that all the standard user-level
+login directory and contents be included, as the user name is not intended for general
+use.
+
+When setting up the default group for user \batchuser{}, we suggest that a group such as
+\filename{daemon}, or \filename{sys} is selected. If you are running \OtherProductName{} as well, which shares some
+facilities, you may want to make it the same group as \spooluser.
+
+}
+\IfXi{A simple installation procedure is adopted for \ProductName{} using the Perl
+scripting language which is now distributed as standard on most UNIX
+systems and all Linux systems.
+
+Some of the installation binaries which are generally useful, such as
+the \PrXbCjlist{} and \PrXbCvlist{}
+utilities, are now installed together with the user-level binaries,
+prefixed by
+{\textquotedblleft}\progname{xb-}{\textquotedblright}.
+(The prefix is to avoid any confusion with similarly-named utilities
+for other Xi Software products).
+
+The product uses some configuration files in the
+\filename{/etc} directory, together with 4 other directories:
+
+\begin{enumerate}
+\item The batch spool directory, in which jobs and their attributes are
+saved, together with pending output. This can in principle get large.
+\item The internal programs directory.
+\item Help files directory for files with help and error messages, menus
+etc.
+\item User binaries directory, where the programs used directly by users
+are located.
+\end{enumerate}
+In most installations the internal programs and help messages directory
+are the same, but they don{\textquotesingle}t have to be. However the
+other directories should all be distinct.
+
+If all the default options are selected, then the locations of the
+directories are as follows:
+
+\begin{center}
+\begin{tabular}{l l}
+Batch spool directory &
+\filename{/usr/spool/batch}\\
+Internal programs directory &
+\filename{/usr/spool/progs}\\
+Help files directory &
+\filename{/usr/spool/progs}\\
+User binaries &
+\filename{/usr/local/bin} if it exists otherwise
+\filename{/usr/bin}\\
+\end{tabular}
+\end{center}
+It is common to make the first three directories subdirectories of a
+base directory, in the default case \filename{/usr/spool}, but
+this is by no means compulsory.
+
+The user binaries should be put in a directory accessed by the
+\filename{PATH} environment variable of all users of the
+product. On many systems \filename{/usr/local/bin} is suitable
+for putting binaries local to the system not installed with the system,
+hence this is the default.
+
+To install \ProductName{}, we suggest you copy and extract the media to a
+suitable directory. The product binaries are located in a subdirectory
+given by the name of the platform you are using, for example
+\filename{Linux-mint13\_64}.
+
+\section{Starting installation}
+Within the product directory will be a file called
+\filename{INSTALL}, which you can run (as
+\filename{root}) by just typing:
+
+\begin{expara}
+./INSTALL
+
+\end{expara}
+
+(You probably need the
+{\textquotedblleft}\filename{./}{\textquotedblright} in front
+as the \filename{root} user will probably have the current directory excluded from
+the search path).
+
+The following style of output should appear:
+
+\begin{expara}
+Welcome, Acme Systems, to Xi Software{\textquotesingle}s distribution.
+
+
+\bigskip
+
+We intend to install the following products intended for the
+
+platform Linux (Intel Architecture) running Mint Rel 13 (64 bit).
+
+
+\bigskip
+
+Xi-Batch\ \ Release: 6.424\ \ Serial: 123456
+
+Xi-Util utilities\ \ Release: 1.62\ \ Serial: N/A
+
+\bigskip
+
+Before we go any further, please check that the above is correct.
+
+OK to Continue?
+
+\end{expara}
+
+Please check this carefully to ensure that the platform and versions are
+what you expect before proceeding. If you have any doubts, please reply
+N and contact us.
+
+\section{Choosing the user program directory}
+If you do reply Y, you should get the following:
+
+\begin{expara}
+I need to ask you which directory you want to put user-level
+
+binaries for Xi Software products in.
+
+\bigskip
+
+This should normally be the PATH for each user.
+
+\bigskip
+
+Here are the directories on your PATH (but note
+
+
+this is the root path and may have unusual directories in).
+
+\bigskip
+
+/bin
+
+/sbin
+
+/usr/bin
+
+/usr/local/bin
+
+/usr/local/sbin
+
+/usr/sbin
+
+\bigskip
+
+Directory to use:
+
+\end{expara}
+
+At this point you should type in the directory to use. If this does not
+exist or is not on the \filename{PATH}, this will be queried.
+If you do choose a directory which Is not on the
+\filename{PATH}, then you will be reminded in various places.
+Versions of operating systems differ as to the appropriate place to set
+this up, so this must be left to the user.
+
+\section{Installing the system user}
+After selecting the user program directory, you should receive the
+following message.
+
+\begin{expara}
+
+Xi-Batch installation
+
+=====================
+
+\bigskip
+
+Welcome to Xi-Batch installation.
+
+\bigskip
+
+Note that in most places you can press F1 or ? to get help,
+
+F2 or ENTER to continue (and accept default answer)
+
+F8 or Q (capital) to abort.
+
+\bigskip
+
+[Please press ENTER to continue]
+
+\end{expara}
+
+We now move on to installation of the system user, \batchuser{},
+unless this has already been done, with the message
+
+\begin{expara}
+
+Installation of user batch
+
+{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-
+
+\bigskip
+
+I need to install user {\textquotedbl}batch{\textquotedbl}.
+
+\bigskip
+
+This will own the files and directories used by Xi-Batch Scheduler.
+
+\bigskip
+
+OK to continue?
+
+\end{expara}
+
+Most internal files, and IPC facilities such as shared memory segments
+and semaphores, are owned by a user \batchuser{}. This
+user name is like a {\textquotedbl}sub-super-user{\textquotedbl} for
+\ProductName{} facilities. It is not intended that the
+\batchuser{} user name should be used extensively, however
+it (hopefully) serves to distinguish \ProductName{} files from other files.
+
+The only files which are not owned by \batchuser{} are the
+scheduler process \progname{btsched} and the network server
+process \progname{xbnetserv}, which have to be owned by
+\filename{root}, as they have to be able to transform to other
+users.
+
+Before proceeding with the installation, it will be necessary to create
+user \batchuser{}, If it does not exist.
+
+\subsection{Creating user name manually}
+If there is a {\textquotedblleft}create user{\textquotedblright} program
+on your system which the installation routine understands, it will be
+used, otherwise the installation will abort so you can do this
+yourself.
+
+If you do have to create it manually, we normally recommend a user id of
+51 (i.e. in the {\textquotedbl}system users{\textquotedbl} below 100),
+and your {\textquotedbl}create new
+\filename{user}{\textquotedbl} routine may need a special
+option to install this. It is not entirely necessary, however, but we
+do not suggest that all the standard user-level login directory and
+contents be included, as the user name is not intended for general use.
+
+When setting up the default group for user \batchuser{}, we
+suggest that a group such as \filename{daemon}, or
+\filename{sys} is selected. This only matters, however, if the
+web browser interfaces to \ProductName{} and \OtherProductName{} are to be used on the
+same machine, when the user names \batchuser{} and
+\spooluser{} should have the same default group.
+
+\section{Selecting installation options}
+After checking and if necessary creating the \batchuser{}
+user, the next message you should receive is:
+
+\begin{expara}
+
+Installation Requirements
+
+=========================
+
+\bigskip
+
+Do you want a full licence?
+
+\end{expara}
+
+If you are just making a 30-day trial, then reply \userentry{n}
+to this. Otherwise, if this is to be a production copy, reply
+\userentry{y}.
+
+If you say that you want a full licence, you should then get the
+question
+
+\begin{expara}
+
+Do you want to try to download the codes?
+
+\end{expara}
+
+It is possible to connect directly to the Xi Software website and
+download a licence key without typing codes in. However it may not be
+allowed in your installation if it is not connected to the Internet or
+some firewall is in place. Say \userentry{y} if you want to
+try to do this (it won{\textquotesingle}t be catastrophic if it fails,
+you{\textquotesingle}ll just have to get the codes and type them in).
+
+\subsection[Network licence]{Network licence}
+\ProductName{} can run {\textquotedblleft}standalone{\textquotedblright}, or
+it can share jobs and variables with another Unix or Linux computer. If
+you are doing this, you need a {\textquotedblleft}network
+licence{\textquotedblright} to enable this facility. It also requires
+certain service names to be added to the system and a list of host
+names to be set up.
+
+You also need a network licence if you are planning to use the MS
+Windows interface, the API (Unix or Windows) or to use the remote
+version of the browser (which uses the API). You do not need it to run
+the {\textquotedblleft}Windows Agent{\textquotedblright}.
+
+You will be asked the question:
+
+\begin{expara}
+
+Do you need a network licence?
+
+\end{expara}
+
+Reply either \userentry{y} or \userentry{n} as
+required. Do not specify this if you don{\textquotesingle}t need it. I
+leaves TCP ports open which if not used are a potential security risk
+in addition to consuming resources.
+
+\subsection{Selecting the directories to be used}
+The next question concerns the directories to be used:
+
+\begin{expara}
+
+Installation directories
+
+========================
+
+\bigskip
+
+The installation directories are currently set up as follows.
+
+\bigskip
+
+SHLIBDIR \ Location for shared libraries \ \ \ \ \ \ \ \ \ /usr/lib/xi
+
+USERPATH \ Location for user programs
+\ \ \ \ \ \ \ \ \ \ \ \ /usr/local/bin
+
+SPROGDIR \ Location of internal programs, data \ \ \ /usr/spool/progs
+
+SPHELPDIR Location of help files
+\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ /usr/spool/progs
+
+SPOOLDIR \ Spool directory for pending batch jobs /usr/spool/batch
+
+\bigskip
+
+(Please note that Include and Shared Library directories are only
+
+important if you are using the API).
+
+\bigskip
+
+Do you need to change any of those?
+
+\end{expara}
+
+If you opt to change any of the directories, you will be taken through a
+menu of options to do this, with short cuts for where you want all the
+parts placed in a common directory.
+
+\subsection{Final check prior to installation}
+After you have finished selecting the directories, you will get the
+message
+
+\begin{expara}
+
+Summary
+
+=======
+
+\bigskip
+
+Just to summarise the options:
+
+\bigskip
+
+You are installing a full licence
+
+You are enabling full networking.
+
+\bigskip
+
+Installation directories are as follows
+
+\bigskip
+
+INCPATH \ \ Include directory for API header
+\ \ \ \ \ \ /usr/include/xi
+
+SHLIBDIR \ Location for shared libraries \ \ \ \ \ \ \ \ \ /usr/lib/xi
+
+USERPATH \ Location for user programs
+\ \ \ \ \ \ \ \ \ \ \ \ /usr/local/bin
+
+SPROGDIR \ Location of internal programs, data \ \ \ /usr/spool/progs
+
+SPHELPDIR Location of help files
+\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ /usr/spool/progs
+
+SPOOLDIR \ Spool directory for pending batch jobs /usr/spool/batch
+
+\bigskip
+
+(Please note that Include and Shared Library directories are only
+
+important if you are using the API).
+
+\bigskip
+
+Are you happy with those options?
+
+\end{expara}
+
+If you agree to these, it will ask again if you are sure, and then
+install the software.
+
+Finally, if you have not agreed to download the codes (or if it tried
+and could not), it will ask
+
+\begin{expara}
+
+In a moment you will be asked for some codes.
+
+\bigskip
+
+You may have been given them, or you may want to
+
+fetch them from the Xi Software Website at
+
+http://www.xisl.com/onlinlic.php
+
+\bigskip
+
+The time and date on your machine is set to 15:04 on 10/08/2012
+
+If this is correct, please press RETURN, otherwise interrupt and reset:
+
+\end{expara}
+
+You should check the time and date are correct, abort and restart if
+necessary, and then press ENTER to be asked for your name.
+
+\begin{expara}
+
+Please type your Organisation name.
+
+This should be exactly as you would like it to appear on
+
+your output. (1 line, Max 80 chars)
+
+\end{expara}
+
+You should key in your organisation name as you want it to appear later.
+You should then be asked for your serial number (it will suggest the
+one it thinks is correct) thus
+
+\begin{expara}
+
+Organisation: Acme Systems
+
+Serial number: 12346
+
+\bigskip
+
+Is that ok?
+
+\end{expara}
+
+If that is OK, then you will be prompted for the codes if it not
+downloaded.
+
+If the codes are successfully entered or downloaded, then it should say
+
+\begin{expara}
+
+Your copy is licensed from 10/08/2012 without limit
+
+Network version \textit{(if applicable)}
+
+Licence OK
+
+btstart - restarting Xi-Batch scheduler process
+
+\end{expara}
+
+Before finishing, it will attempt to install startup files in the
+appropriate places before asking
+
+\begin{expara}
+
+Do you want to be a Xi-Batch super-user?
+
+\end{expara}
+
+This is whether you want the the user you logged in as (if you did not
+log in as \filename{root} and did \progname{su} or
+\progname{sudo}) to be given all possible permissions.
+
+At the conclusion it should say
+
+\begin{expara}
+
+Xi-Batch is now running!
+
+========================
+
+\bigskip
+
+Xi-Batch is now available for use.
+
+\bigskip
+
+Looking at system startup files.....
+
+System startup file exists - replace it? Yes
+
+\bigskip
+
+It looks like everything was installed correctly.
+
+We wish you the greatest of success with our products.
+
+\bigskip
+
+Yours sincerely
+
+\bigskip
+
+Xi Software Ltd.
+
+\end{expara}
+}

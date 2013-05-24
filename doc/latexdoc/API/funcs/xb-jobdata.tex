@@ -1,0 +1,115 @@
+\subsection{\funcnameXBjobdata{}}
+
+\begin{expara}
+
+FILE *\funcnameXBjobdata{}(const int fd,
+
+\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ const int flags,
+
+\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ const slotno\_t slot)
+
+\bigskip
+
+
+int \funcnameXBjobdata{}(const int fd,
+
+\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ const int outfile,
+
+\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ int (*fn)(int,void*,unsigned),
+
+\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ const unsigned, flags,
+
+\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ const slotno\_t slotno)
+
+\end{expara}
+
+The function \funcXBjobdata{} is used to retrieve the
+job script of a job. There are two versions, one for the Unix and Linux
+API and one for the Windows API. The second form is used under Windows
+as there is no acceptable substitute for the pipe(2) system call.
+
+In both forms of the call, \exampletext{fd} is a file
+descriptor which was previously returned by a successful call to
+\funcXBopen{} or equivalent.
+
+\exampletext{flags} is zero or
+\filename{\constprefix{}FLAG\_IGNORESEQ} to ignore recent changes to
+the job list.
+
+\exampletext{slot} is the slot number corresponding to the job as returned by \funcXBjoblist{} or \funcXBjobfindslot{}.
+
+The difference between the two versions of \funcXBjobadd{} is in the method of passing the job script.
+
+\subsubsection{Unix and Linux}
+The Unix and Linux API version returns a stdio file descriptor which may be used with the standard I/O functions \progname{getc(3)},
+\progname{fread(3)} etc to read the job script. The job script should always be read to the end and then using
+\progname{fclose(3)} to ensure that all incoming data on the socket is collected.
+
+If there is any kind of error, then \funcXBjobdata{} will return NULL, leaving the error code in the external variable
+\filename{\errorloc}.
+
+\subsubsection{Windows}
+In the case of the Windows version, the specified function fn is invoked with parameters similar to \progname{write} to read data to
+pass across as the job script, the argument \exampletext{outfile} being passed as a file handle as the
+first argument to \exampletext{fn}.
+
+\exampletext{fn} may very well be \progname{write}. The reason for the routine not invoking \progname{write}
+itself is partly flexibility but mostly because some versions of Windows DLLs do not allow \progname{write} to be invoked
+directly from within them.
+
+N.B. This routine is particularly susceptible to peculiar effects due to assignment of insufficient stack space.
+
+The return value is zero for success, or an error code. The error code is also assigned to the external variable
+\filename{\errorloc} for consistency with the Unix version.
+
+\subsubsection{Return values}
+The Unix version of \funcXBjobdata{} returns NULL if unsuccessful, placing the error code in the external variable
+\filename{\errorloc}.
+
+The Windows version of \funcXBjobdata{} returns zero if successful, otherwise an error code.
+
+The error codes which may be returned are listed on page \pageref{errorcodes} onwards.
+
+\subsubsection{Example}
+
+\begin{expara}
+
+int fd, ret, ch;
+
+FILE *inf;
+
+slotno\_t slot;
+
+\bigskip
+
+
+/* \ select a job assign it to slot */
+
+\bigskip
+
+
+inf = \funcnameXBjobdata{}(fd, XBABI\_IGNORESEQ, slot);
+
+\bigskip
+
+
+if (!inf) \{ /* error in \errorloc */
+
+\ \ \ \ . . .
+
+\}
+
+\bigskip
+
+
+while ((ch = getc(inf)) != EOF)
+
+\ \ \ \ putchar(ch);
+
+\bigskip
+
+
+fclose(inf);
+
+\end{expara}
+

@@ -1,0 +1,13 @@
+\chapter{The API file descriptor}
+\label{chp:the-api-file-descriptor}
+Each routine in the API uses a \textit{file descriptor} to identify the
+instance in progress. This is an integer value, and is returned by a
+successful call to one of the open or login routines such as \funcXBopen{} routine or \funcXBlogin{}.
+All other routines take this value as a first parameter. As mentioned before, more than one
+session may be in progress at once with different parameters.
+
+Each session with the API should be commenced with a call to one of the open or login routines and terminated with a call to \funcXBclose{}.
+
+Note that each API session will cause a separate instance of \progname{xbnetserv} to be spawned on the server to service it.
+
+

@@ -1,0 +1,38 @@
+\subsection{\funcnameXBciadd{}}
+
+\begin{expara}
+
+int \funcnameXBciadd{}(const int fd,
+
+\ \ \ \ \ \ \ \ \ \ \ \ \ const unsigned flags,
+
+\ \ \ \ \ \ \ \ \ \ \ \ \ const Cmdint *newci,
+
+\ \ \ \ \ \ \ \ \ \ \ \ \ unsigned *indx)
+
+\end{expara}
+
+The function \funcXBciadd{} is used to create a new
+command interpreter on a \ProductName{} server. The
+invoking user must have special create permission or the call will be
+rejected.
+
+\exampletext{fd} is a file descriptor which was previously
+returned by a successful call to \funcXBopen{} or equivalent.
+
+\exampletext{flags} is currently unused, but reserved for
+future use. Set it to zero.
+
+\exampletext{newci} is a pointer to a structure containing the
+new command interpreter details.
+
+\exampletext{indx} is a pointer to an unsigned location into
+which the index number of the new command interpreter is placed.
+
+The definition of the command interpreter structure is given on page
+\pageref{bkm:Cmdinterp} onwards.
+
+\subsubsection{Return values}
+The function returns 0 if successful otherwise one of the error codes
+listed on page \pageref{errorcodes} onwards.
+

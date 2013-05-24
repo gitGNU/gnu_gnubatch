@@ -1,0 +1,104 @@
+\subsection{\funcnameXBopen{}}
+
+\begin{exparasmall}
+
+int \funcnameXBopen{}(const char *hostname, const char *servname)
+
+int \funcnameXBopen{}(const char *hostname, const char *servname, const char *username) \textit{/* Windows */}
+
+int \funcnameXBlogin{}(const char *hostname, const char *servname, const char *username, char *passwd)
+
+int \funcnameXBwlogin{}(const char *hostname, const char *servname, const char *username, char *passwd)
+
+int \funcnameXBlocallogin(const char *servname, const char *username)
+
+int \funcnameXBlocalloginbyid(const char *servname, const int ugid\_t uid)
+
+\end{exparasmall}
+
+The function \funcXBopen{} is used to open a connection to the \ProductName{} API.
+There are some variations in the semantics depending upon whether the caller is known to be a Unix host or
+a Windows or other client. This can be controlled by settings in the servers host file, typically
+\hostsfile{} and the user map file \usermap.
+
+The server will know that the caller is a Unix host if it appears in the hosts file as a potential server,
+maybe with a \exampletext{manual} keyword to denote that it shouldn't be connected unless requested
+(with \PrBtconn). In such cases user names will be taken as Unix user names.
+
+In other cases the user names will be taken as Windows Client user names to be mapped appropriately.
+
+Windows user names are mapped on the server to Unix user names using the user map file and constructs in the host file, with the latter taking priority.
+
+Note that it is possible to use a different set of passwords on the server from the users' login passwords, setting them up with \PrXipasswd. This is desirable in preference to people's login passwords appearing in various interface programs.
+
+All of these functions return non-negative (possibly zero) on success, this should be quoted in all other calls.
+
+In the event of an error, then a negative error code is returned as described on page \pageref{errorcodes}.
+
+\funcXBopen{} may be used to open a connection with the current effective user id on Unix systems,
+or (using the extra \exampletext{username} parameter a predefined connection for the given user on Windows systems.
+
+No check takes place of passwords for Unix connections, but the call will only succeed on Windows systems if the client has a fixed user name assigned to it.
+
+This happens if the client matches entries in \hostsfile{} of the forms:
+
+\begin{expara}
+
+mypc  {}-  client(unixuser)
+unixuser winuser clienthost(mypc)
+
+\end{expara}
+
+The call will succeed in the first instance if the user is mapped to \exampletext{unixuser} and running on \exampletext{mypc}.
+
+In the second case it will succeed if it is running on \exampletext{mypc} and \exampletext{winuser} is given in the call,
+whereupon it will be mapped to \exampletext{unixuser}.
+
+This is over-complicated, potentially insecure, and preserved for compatibility only, and \funcXBopen{} should only really be used on Unix hosts to log in with the effective user id.
+
+
+\funcXBlogin{} should normally be used to open a connection to the API with a username and password.
+If the client is not registered as a Unix client, then the user name is mapped to a user name
+on the server as specified in the user map file or the hosts file.
+The password should be that for the user mapped to (possibly as set by \PrXipasswd{} rather than the login password).
+
+\funcXBwlogin{} is similar to \funcXBlogin{}, but guarantees that the user name will be looked up as if the caller were not registered as Unix client
+so that there are no surprises if this is changed.
+
+\funcXBlocallogin{} and \funcXBlocalloginbyid{} may be used to set up an API connection on the same machine as the server without a password.
+The \exampletext{username}, if not null, may be used to specify a user other than that of the effective user id.
+To use a user other than the effective user id, \textit{Write Admin}
+permission is required.
+
+In all cases, \exampletext{hostname} is the name of the host being connected to or null to use the loopback interface.
+\exampletext{servname} may be NULL to use a standard service name, otherwise an alternative service may be specified.
+Note that more than one connection can be open at any time with various combinations of user names and hosts.
+
+When finished, close the conection with a call to \funcXBclose.
+
+\subsubsection{Return values}
+The function returns a positive value if successful, which is the file
+descriptor used in various other calls, otherwise one of the error
+codes listed on page \pageref{errorcodes} onwards, all of which are
+negative.
+
+\subsubsection{Example}
+
+\begin{expara}
+
+int fd;
+
+fd = \funcnameXBopen{}({\textquotedbl}myhost{\textquotedbl}, (char *) 0);
+
+if (fd {\textless} 0) \ \{ /* handle error */
+
+\ \ \ \ ...
+
+\}
+
+\ \ \ \ \ \ \ \ ...
+
+\funcnameXBclose{}(fd)
+
+\end{expara}
+

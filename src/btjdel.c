@@ -472,6 +472,7 @@ void  spit_options(FILE *dest, const char *name)
 
 MAINFN_TYPE  main(int argc, char **argv)
 {
+	int	clng;
 #if     defined(NHONSUID) || defined(DEBUG)
         int_ugid_t      chk_uid;
 #endif
@@ -484,12 +485,15 @@ MAINFN_TYPE  main(int argc, char **argv)
         else
                 progname = argv[0];
 
-        if  (ncstrcmp(progname, "btjgo") == 0)
-                which = CMD_GO;
-        else  if  (ncstrcmp(progname, "btjgoadv") == 0)
-                which = CMD_GOADV;
-        else  if  (ncstrcmp(progname, "btjadv") == 0)
-                which = CMD_ADV;
+        /* Select action according to program name */
+
+        clng = strlen(progname);
+        if  (ncstrcmp(progname+clng-2, "go") == 0)
+        	which = CMD_GO;
+        else  if  (ncstrcmp(progname+clng-5, "goadv") == 0)
+        	which = CMD_GOADV;
+        else  if  (ncstrcmp(progname+clng-3, "adv") == 0)
+        	which = CMD_ADV;
 
         init_mcfile();
 

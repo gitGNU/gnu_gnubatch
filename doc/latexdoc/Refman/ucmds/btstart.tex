@@ -1,0 +1,47 @@
+\subsection{\BtstartName}
+
+\begin{expara}
+
+\BtstartName{} [-options]
+
+\end{expara}
+
+\PrBtstart{} initiates the \ProductName{} batch scheduler system, by starting the processes \progname{btsched} and
+\progname{xbnetserv}.
+
+\subsubsection[Options]{Options}
+The environment variable on which options are supplied is \filename{\BtstartVarname} and the environment variable to specify the
+help file is \filename{BTRESTCONF}.
+
+\PrBtstart{} does not do anything, and most of the options are obviously ignored, if the scheduler is already running.
+
+\setbkmkprefix{btstart}
+\explainopt
+
+\cmdoption{l}{initial-load-level}{number}{initll}
+
+This option arranges for the \filename{LOADLEVEL} variable, which controls the total load level of running jobs to the
+specified number (usually zero).
+
+This is useful for starting up in a controlled fashion, checking the status of jobs and then resetting \filename{LOADLEVEL} appropriately allowing jobs to run.
+
+If this option is not specified, then the value is unchanged from its initial value saved by the scheduler when it was last shut down.
+
+\cmdoption{j}{initial-job-size}{number}{initjobs}
+
+Allocate space for the the specified maximum number of jobs on startup.
+
+This is very often necessary as it may not be possible to reallocate additional shared memory after processing has got under way.
+
+If this option is not specified, then the initial allocation will be based on the original number of saved jobs, which is often far from enough.
+
+\cmdoption{v}{initial-var-size}{number}{initvars}
+
+Allocate space for the specified maximum number of variables on startup.
+
+This is very often necessary as it may not be possible to reallocate additional shared memory after processing has got under way.
+
+If this option is not specified, then the initial allocation will be based on the original number of saved variables, which is often far from enough.
+
+\freezeopts{\filename{\BtstartVarname}}{Stop}
+

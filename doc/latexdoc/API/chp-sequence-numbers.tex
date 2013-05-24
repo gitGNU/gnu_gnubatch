@@ -1,0 +1,15 @@
+\chapter{Sequence numbers}
+\label{chp:sequence-numbers}
+These quantities are not available directly, but are held to determine how out-of-date the user's record of jobs or variables
+may be.
+
+Every time you read a job or variable record, the sequence number of the job or variable list is checked, and if out-of-date, you will receive
+the error \filename{\constprefix{}SEQUENCE}. This is not so much of an error as a warning. If you re-read the job or variable required,
+then you will not receive this error, except where you and one or more other users have ``raced'' to update a
+variable and you have ``lost the race''.
+
+If you want to bypass this, you can access the job or variable without worrying about the sequence using the \textit{flag
+}\filename{\constprefix{}IGNORESEQ}, however you might receive an error about unknown job or variable if the job or variable has
+disappeared. In the case of variables you may still receive the \filename{\constprefix{}SEQUENCE} error if another user
+``wins a race'' as described above.
+

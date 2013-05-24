@@ -1,0 +1,36 @@
+\subsection{\funcnameXBgetbtu{}}
+
+\begin{expara}
+
+int \funcnameXBgetbtu{}(const int fd,
+
+\ \ \ \ \ \ \ \ \ \ \ \ \ \ char *username,
+
+\ \ \ \ \ \ \ \ \ \ \ \ \ \ char *groupname,
+
+\ \ \ \ \ \ \ \ \ \ \ \ \ \ apiBtuser *ustr)
+
+\end{expara}
+
+The function \funcXBgetbtu{} is used to read the user
+profile of a specific user. Only a user with \textit{read admin file
+privilege} will be able to read the profiles of other users.
+
+\exampletext{fd} is a file descriptor which was previously
+returned by a successful call to \funcXBopen{} or equivalent.
+
+\exampletext{username} is the name of a valid user on the
+server.
+
+\exampletext{groupname} will be assigned with the default group
+name on the server.
+
+\exampletext{ustr} is a pointer to a structure which will on
+successful return, contain the profile of the specific user. The
+definition of the user profile structure is given on page
+\pageref{bkm:Userstructure}.
+
+\subsubsection{Return values}
+The function returns 0 if successful otherwise one of the error codes
+listed on page \pageref{errorcodes} onwards.
+

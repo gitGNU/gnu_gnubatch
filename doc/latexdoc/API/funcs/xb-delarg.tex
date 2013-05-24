@@ -1,0 +1,18 @@
+\subsection{\funcnameXBdelarg{}}
+
+\begin{expara}
+
+int \funcnameXBdelarg{}(apiBtjob *jobp, const unsigned indx)
+
+\end{expara}
+
+The function \funcXBdelarg{} is used to delete an argument from a job structure string table.
+
+\exampletext{jobp} is a pointer to a structure containing the details of the job. The definition of the job structure is given on
+page \pageref{bkm:Jobstructure} onwards.
+
+\exampletext{indx} is the number of the argument being deleted. Note that all the following arguments are ``moved up'' the list and their index numbers will be reduced by one.
+
+\subsubsection{Return values}
+The result is non-zero if successful, or zero if the string table overflowed, an likely event in the case of \funcXBdelarg{}.
+

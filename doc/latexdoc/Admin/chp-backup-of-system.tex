@@ -1,0 +1,171 @@
+\chapter{Backup of \manualProduct{} System}
+\label{chp:backup-of-system}
+Certain utilities are provided to back up the \ProductName{} system, by saving
+the current jobs, variables, user accounts and command interpreter
+list. You may want to do this when you have set up a complicated
+schedule of jobs. \IfXi{Alternatively you may want to do this if you are
+upgrading to a new major release of \ProductName{}.}
+
+All the backup options create a single shell script which, if run, would
+recreate the relevant items. This may be edited if required.
+
+Jobs, variables, command interpreters and user profiles should be saved
+in any order, but it is probably best to restore them in the following order to avoid trying to restore items which
+depend on other items before they are restored.
+
+\begin{enumerate}
+\item User profiles
+\item Command interpreters
+\item Variables
+\item Jobs
+\end{enumerate}
+
+\section{Jobs}
+To convert the job list, the utility \PrXbCjlist{} is used. This may be run at any time, even when \ProductName{} is running, but
+we would suggest that not too much activity is in progress at the time.
+
+\IfXi{\PrXbCjlist{} may be found in the user-level programs directory (we used to keep it in the distribution directory but too many people
+wanted it quickly found).}
+\IfGNU{\PrXbCjlist{} is installed in the system binaries directory, by default \filename{/usr/local/sbin}.}
+
+You will need to create a directory into which the job scripts are saved.
+
+Here is a suggested routine for saving the jobs:
+
+\begin{enumerate}
+\item Create a backup directory, for example \exampletext{/usr/batchsave/May13}.
+\item Create a subdirectory within that directory for the scripts, for example you might choose something like
+\exampletext{/usr/batchsave/May13/Scripts}.
+\item Run \PrXbCjlist{} on the existing job files.
+\end{enumerate}
+
+Thus:
+
+\begin{expara}
+
+mkdir -p /usr/batchsave/May13/Scripts
+
+cd /usr/batchsave/May13
+
+\XbCjlistName{} -D \spooldirname{} btsched\_jfile Jcmd Scripts
+
+\end{expara}
+
+The shell command to recreate the jobs will be put in \exampletext{Jcmd}, and the job script files in \exampletext{Scripts}.
+
+For more details, and especially the handling of errors, please see the documentation of \PrXbCjlist.
+
+\PrXbCjlist{} only considers and saves jobs on the machine on which it is run.
+
+To restore the jobs, just run the shell script \exampletext{Jcmd} (you may want to edit out some jobs or change parameters
+on others).
+
+\section{Variables}
+Variables are saved in a similar manner to jobs, except no additional directory is required, using the program
+\PrXbCvlist. Only one file is generated, a single shell script of \PrBtvar{} commands to recreate the variables.
+
+Assuming that the \exampletext{/usr/batchsave/May13} directory described above has already been created and selected to save jobs, the
+following command will save the variables:
+
+\begin{expara}
+
+\XbCvlistName{} -D \spooldirname{} btsched\_vfile Vcmd
+
+\end{expara}
+
+When restoring jobs and variables, you will almost certainly need to restore variables first, otherwise the conditions and assignments in
+the saved jobs will be rejected.
+
+Please see the documentation of \PrXbCvlist{} for more information, particularly regarding error handling.
+
+\section{Command Interpreters}
+Command interpreters are saved in a similar manner to jobs and variables, using the utility program \PrXbCiconv{}.
+
+As with \PrXbCvlist, a single shell command file is generated containing commands to recreate the command interpreter file.
+
+To continue the examples above for jobs and variables, the following will create a command file capable of recreating command interpreters:
+
+\begin{expara}
+
+\XbCiconvName{} -D \spooldirname{} cifile Cicmd
+
+\end{expara}
+
+When restoring the whole system, be sure to restore the command interpreter list and variables before restoring jobs, otherwise the
+jobs which refer to command interpreters other than the default will be rejected.
+
+Please see the documentation of \PrXbCiconv{} for more information, particularly regarding error handling.
+
+\section{User permissions}
+User permissions may be saved in a similar manner to jobs, variables and command interpreters, using the command
+\PrXbBtuconv.
+
+As with \PrXbCvlist{} and \PrXbCiconv{}, a shell command is saved which when run will reset the user permissions and defaults for all
+users.
+
+To continue the examples above for jobs, variables, and command interpreters, the following will create a command file capable of
+recreating the user permissions.
+
+\begin{expara}
+
+\XbBtuconvName{} -D /usr/spool/batch btufile6 Ucmd
+
+\end{expara}
+
+When restoring the whole system, it is not necessary, but probably desirable, to restore the user permissions prior to restoring jobs,
+variables, and command interpreters.
+
+Please see the documentation of \PrXbBtuconv{} for more information, particularly regarding error handling.
+
+\IfXi{\section{Upgrading from Earlier Releases of \manualProduct}
+This section describes the preparations to be made before and actions to
+take when using the installation kit to upgrade from an earlier version
+of \ProductName{}. The main topic is include how to bring forward the
+relevant information.
+
+Release or version numbers consist of two parts:
+
+\begin{enumerate}
+\item The \textit{major release Number}, which precedes the decimal
+point.
+\item The \textit{minor version Number}, which follows the decimal
+point.
+\end{enumerate}
+
+Thus if the full release number is 6.170, then it has a major release
+number of 6 and a version number of 170.
+
+The saved file structures only change between Major Release Numbers, so
+if you are, for example, upgrading from version 6.43 to 6.170, you
+should not have to save and restore any data files. You should be able
+to stop the old version, copy across the new binaries, and restart the
+new version.
+
+On the other hand, internal interfaces may change slightly, so you
+should install all the binaries of the new release.
+
+It is only when you move between major releases, such as from Release
+5.x to Release 6.y, that you need to take additional action to preserve
+the status of jobs, variables etc.
+
+\subsection{Help and resource files}
+
+Help files in the help file directory \helpdir{} by default) will be replaced when the software is upgraded. We suggest that you make a copy of the existing versions before you begin and if necessary consult us regarding integrating your customisations into the new release. In most cases the changes will be correction of spelling mistakes and clarifications of existing error messages.
+
+Changing screen formats no longer entails the creation of local copies of the help files, this is done a different way.
+
+\subsection{Carrying Information Forward to the New Installation}
+If you are upgrading a major release, e.g. from Release 5.x to Release
+6.y, you may want to carry information such as jobs, variables, command
+interpreters and user permissions forward into the upgraded version. It
+should not be necessary at all if you are upgrading from the same major
+release, i.e. from 6.aaa to 6.bbb.
+
+You may however want to use these procedures to take a ``snapshot'' of a configuration of jobs and
+variables, perhaps for backup purposes.
+
+Strenuous efforts are made to cater for data files from historical
+versions of \ProductName{} and to appropriately convert them. To a limited
+degree, errors in data files are also catered for.}
+
+

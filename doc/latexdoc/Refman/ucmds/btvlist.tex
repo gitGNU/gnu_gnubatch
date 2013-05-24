@@ -1,0 +1,154 @@
+\subsection{\BtvlistName}
+
+\begin{expara}
+
+\BtvlistName{} [ -options ] [ variable names ]
+
+\end{expara}
+
+\PrBtvlist{} is a program to display \ProductName{} variables on the standard output. It can be used in both shell scripts and other programs.
+Each line of the output corresponds to a single variable, and by default the output is generally similar to the default format of the
+variables screen of the \PrBtq{} command. The first field on each line is the variable name prefixed by a machine name and colon thus:
+
+\begin{expara}
+
+macha:v1
+
+machb:xyz
+
+\end{expara}
+
+if the variable is on a remote machine. This is the required format of the variable name which should be passed to \PrBtvar{} and other shell interface commands.
+
+An example of the output of \PrBtvlist{} is as follows:
+
+\begin{exparasmall}
+
+CLOAD \ \ \ \ \ \ \ \ 0 \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \# Current value
+of load level
+
+Dell:CLOAD \ \ \ 0 \ \ \ \ \ \ \ \ Export \# Current value of load
+level
+
+arnie:CLOAD \ \ 1000 \ \ \ \ \ Export \# Current value of load level
+
+LOADLEVEL \ \ \ \ 20000 \ \ \ \ \ \ \ \ \ \ \ \# Maximum value of load
+level
+
+LOGJOBS \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \# File to save
+job record in
+
+LOGVARS \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \# File to save
+variable record in
+
+MACHINE \ \ \ \ \ \ sisko \ \ \ \ \ \ \ \ \ \ \ \# Name of current host
+
+Dell:Neterr \ \ 0 \ \ \ \ \ \ \ \ Export \# Exit code from polling
+
+STARTLIM \ \ \ \ \ 5 \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \# Number of jobs to
+start at once
+
+STARTWAIT \ \ \ \ 30 \ \ \ \ \ \ \ \ \ \ \ \ \ \ \# Wait time in seconds
+for job start
+
+Dell:Two \ \ \ \ \ 2 \ \ \ \ \ \ \ \ Export \#
+
+bar \ \ \ \ \ \ \ \ \ \ 1 \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \#
+
+foo \ \ \ \ \ \ \ \ \ \ 123 \ \ \ \ \ \ Export \# Testing
+
+\end{exparasmall}
+
+If the user has `reveal' but not `read' permission on a variable, the name only is displayed.
+
+Various options allow the user to control the output in various ways as described below. The user can limit the output to specific variables by
+giving the variable names as arguments following the options.
+
+\subsubsection{Options}
+The environment variable on which options are supplied is \filename{\BtvlistVarname} and the environment variable to specify the
+help file is \filename{BTRESTCONF}.
+
+\setbkmkprefix{btvlist}
+\explainopt
+
+\cmdoption{B}{bypass-modes}{}{bypass}
+
+Disregard all modes etc and print full details. This is provided for dump/restore scripts.
+
+It is only available to users with \textit{Write Admin File} permission such as \batchuser{} or \filename{root}, otherwise it is silently ignored.
+This option is now deprecated as \PrXbCvlist{} is now provided for the purpose for which this option was implemented.
+
+\cmdoption{D}{default-format}{}{deffmt}
+
+Revert to the default display format, cancelling the \exampletext{{}-F} option.
+
+\cmdoption{F}{format}{string}{format}
+
+Changes the output format to conform to the pattern given by the format \genericargs{string}. This is further described below.
+
+\cmdoption{g}{just-group}{group}{group}
+
+Restrict the output to variables owned by the specified \genericargs{group}.
+
+To cancel this argument, give a single \exampletext{{}-} sign as a group name.
+
+The group name may be a shell-style wild card as described below.
+
+\cmdoption{H}{header}{}{header}
+
+Generate a header for each column in the output.
+
+\cmdoption{L}{local-only}{}{localonly}
+
+Display only variables local to the current host.
+
+\cmdoption{R}{include-remotes}{}{remotes}
+
+Displays variables local to the current host and exported variables on remote machines.
+
+\cmdoption{u}{just-user}{user}{user}
+
+Restrict the output to variables owned by the specified \genericargs{user}.
+
+To cancel this argument, give a single \exampletext{{}-} sign as a user name.
+
+The user name may be a shell-style wild card as described below.
+
+\freezeopts{\filename{\BtvlistVarname}}{}
+
+\subsubsection{Format codes}
+The format string consists of a string containing the following character sequences, which are replaced by the following variable
+parameters. The string may contain various other printing characters or spaces as required.
+
+Each column is padded on the right to the length of the longest entry.
+
+If a header is requested, the appropriate abbreviation is obtained from the message file and inserted.
+
+\begin{tabular}{l l}
+\exampletext{\%\%} & Insert a single \exampletext{\%}.\\
+\exampletext{\%C} & Comment field.\\
+\exampletext{\%E} & Export if variable is exported\\
+\exampletext{\%G} & Group owner of variable.\\
+\exampletext{\%K} & Cluster if the variable is marked clustered\\
+\exampletext{\%M} & Mode as a string of letters with \exampletext{U:},
+\exampletext{G:} or \exampletext{O:} prefixes as in \exampletext{U:RWSMPUVGHD,G:RSMG,O:SM}.\\
+\exampletext{\%N} & Name\\
+\exampletext{\%U} & User name of owner.\\
+\exampletext{\%V} & Value\\
+\end{tabular}
+
+Note that the various strings such as \exampletext{export} etc are read from the message file also, so it is possible to modify them
+as required by the user.
+
+Only the \exampletext{name}, \exampletext{user}, \exampletext{group}, \exampletext{export} and
+\exampletext{cluster} fields will be non-blank if the user may not read the relevant variable. The mode field will be blank if the
+user cannot read the modes.
+
+The default format is
+
+\begin{expara}
+
+\%N \%V \%E \# \%C
+
+\end{expara}
+

@@ -1,0 +1,115 @@
+\chapter{Introduction}
+\label{chp:introduction}
+\ProductName{} is a fully functioned, high performance Job Scheduler and
+Management System which is available for a wide range of machines
+running a Unix-style Operating System.
+
+\IfGNU{The original version was written by John Collins at Xi Software Ltd and marketed as
+\strongemphasis{Xi-Batch} (this name may still appear in some diagrams). The names, including many
+of the program and interface names, have been changed to \ProductName{} or derivatives
+and the default installation directories have been changed to GNU standards.}
+
+The product consists of a ``core product'' or ``basic product'' which contains the
+scheduling software, command-line and character-based interfaces.
+Additional options provide for:
+
+\begin{itemize}
+\item An X-Windows GTK+ or Motif Toolkit Interface. \IfGNU{This is not really supported under GNU but the programs do build and run.}
+\item An API for use with C and C++ \IfGNU{This has been adapted to work under Java.}
+\IfXi{\item An Interface for MS-Windows using Visual C++}
+\item An Interface for MS-Windows using Python and PyQt (this can also be used on other platforms supporting PyQt\IfGNU{, including GNU/Linux,} as an alternative interface).
+\item A C and C++ API for use with MS-Windows
+\item Browser Interfaces
+\end{itemize}
+The basic manuals cover the ``basic product'' and the X-Windows interfaces. Additional supplements cover the other
+interfaces.
+
+The basic manuals are:
+
+\begin{itemize}
+\item User Guide - a quick introduction and ``cookbook'' for use of \ProductName{}
+\item Reference manual - a complete description of all components of the basic product.
+\item Administrator Guide - this manual. Information about installation and customisation of the software.
+\end{itemize}
+Also available are:
+
+\begin{itemize}
+\item API reference manual for Unix and MS-Windows API
+\IfXi{\item MS Windows Interface Manual}
+\item MS Windows PyQt Interface Manual
+\item Browser Interface Manual
+\end{itemize}
+\section{Documentation Standards}
+\IfXi{Xi Software}\IfGNU{These} manuals use various character fonts to indicate different types of information as follows:
+
+\begin{center}
+\filename{File names and quotations within the text}
+
+\exampletext{Examples and user script}
+
+\genericargs{Generic data (where you should put a value appropriate to your own environment)}
+
+\userentry{Something you should type}
+
+\progname{Program names, whether for \ProductName{} or standard Unix facilities}
+
+\warnings{Warnings and important advice}
+\end{center}
+
+\section{Command Line Program Options}
+Almost all of the programs that make up \ProductName{} can take (or require)
+options and arguments supplied on the command line. As much flexibility
+as possible is allowed in the specification of these options and
+arguments. The examples in the manual use which ever notation is
+clearest.
+
+White space may be inserted into flag arguments as in
+
+\begin{expara}
+
+\BtrName{} -c COUNT=0 -T 10:16
+
+\end{expara}
+
+or it may be left out as in
+
+\begin{expara}
+
+\BtrName{} -cCOUNT=0 -T10:16
+
+\end{expara}
+
+Single character options may be strung together with one minus sign:
+
+\begin{expara}
+
+\BtrName{} -mwC
+
+\end{expara}
+
+or separated, as in
+
+\begin{expara}
+
+\BtrName{} -m -w -C
+
+\end{expara}
+
+If mutually contradictory arguments are permitted, the rightmost (or
+rather the most recently specified) applies.
+
+The ability to redefine option letters has been provided, together with
+the \exampletext{+keyword} or \exampletext{{}-{}-keyword} style of option. Such options
+should be given completely surrounded by spaces or tabs to separate
+them from each other and their arguments, for example
+
+\begin{expara}
+
+\BtrName{} +condition COUNT=0 -{}-time 10:16
+
+\end{expara}
+
+In addition, all the commands have an option \exampletext{{}-?}
+or \exampletext{+explain} (or \exampletext{{}-{}-explain}) whose function is to list all the
+other options and exit.
+

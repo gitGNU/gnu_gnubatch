@@ -1,0 +1,111 @@
+\subsection{\BtqName}
+
+\begin{expara}
+
+\BtqName{} [ -options ]
+
+\end{expara}
+
+\PrBtq{} is an interactive program that allows the user to display in real-time state and details of
+\ProductName{} jobs and variables on local or remote machines, refreshing the screen automatically as the queue
+changes or variables are updated, and allowing the status of jobs and variables on the queue to be altered according to each
+user's permissions and privileges.
+
+Please see page \pageref{bkm:Btqdescr} for more details of the interactive commands.
+This section focuses on the command-line options which may be used to control the initial display.
+
+\subsubsection{Options}
+The environment variable on which options are supplied is \filename{\BtqVarname} and the environment variable to specify the
+help file is \filename{BTQCONF}.
+
+Certain commands available on-screen enable many of these options to be changed and saved in configuration files.
+
+\setbkmkprefix{btq}
+\explainopt
+
+\cmdoption{A}{no-confirm-delete}{}{noconfdel}
+
+Suppress confirmation request for delete operations.
+
+\cmdoption{a}{confirm-delete}{}{confdel}
+
+Ask confirmation of delete operations (this is the default).
+
+\cmdoption{B}{no-help-box}{}{nohelpbox}
+
+Put help messages in inverse video rather than in a box (this is the default).
+
+\cmdoption{b}{help-box}{}{helpbox}
+
+Put help messages in a box rather than displaying inverse video.
+
+\cmdoption{E}{no-error-box}{}{noerrorbox}
+
+Put error messages in inverse video rather than in a box.
+
+\cmdoption{e}{error-box}{}{errorbox}
+
+Put error messages in a box rather than displaying inverse video.
+
+\cmdoption{g}{just-group}{group}{group}
+
+Restrict the output to jobs owned by the group specified.
+Cancel this argument by giving a single \exampletext{{}-} sign
+as an argument. The group name may be a pattern with shell-like wild cards.
+
+\cmdoption{H}{keep-char-help}{}{keepchhelp}
+
+When displaying a help screen, interpret the next key press as a command as well as clearing the help screen. This is the
+default.
+
+\cmdoption{h}{lose-char-help}{}{losechhelp}
+
+Discard whatever key press is made to clear a help screen.
+
+\cmdoption{j}{jobs-screen}{}{jobscreen}
+
+Commence display in jobs screen. This is the default unless there are no jobs to be viewed.
+
+\cmdoption{l}{local-only}{}{localonly}
+
+Only display jobs or variables local to the machine.
+
+\cmdoption{N}{follow-job}{}{followjob}
+
+If the currently selected job or variable moves on the screen, try to follow it and do not try to retain relative screen positions.
+
+\cmdoption{q}{job-queue}{name}{queue}
+
+Restricts attention to jobs with the queue prefix \genericargs{name}.
+
+Cancel this argument by giving a single \exampletext{{}-} sign as an argument. The queue name may be a pattern with shell-like wild
+cards.
+
+\cmdoption{r}{network-wide}{}{networkwide}
+
+Display jobs on all connected hosts.
+
+\cmdoption{s}{keep-cursor}{}{keepcursor}
+
+If the currently-selected job or variable moves on the screen, try to preserve the
+relative position of the cursor on the screen rather than following the
+job or variable.
+
+\cmdoption{u}{just-user}{user}{user}
+
+Restrict the output to jobs owned by the user specified. Cancel this argument by giving a \exampletext{{}-} parameter.
+
+The user name may be a pattern with shell-like wild cards.
+
+\cmdoption{v}{vars-screen}{}{varsscreen}
+
+Commence display in variables screen.
+
+\cmdoption{Z}{no-null-queues}{}{nonull}
+
+In conjunction with the \exampletext{{}-q} parameter, do not include jobs with no queue prefix in the list.
+
+\cmdoption{z}{null-queues}{}{null}
+
+In conjunction with the \exampletext{{}-q} parameter, include jobs with no queue prefix in the list.
+

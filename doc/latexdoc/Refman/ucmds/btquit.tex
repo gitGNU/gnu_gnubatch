@@ -1,0 +1,19 @@
+\subsection{\BtquitName}
+
+\begin{expara}
+
+\BtquitName{} [-y]
+
+\end{expara}
+
+\PrBtquit{} is a program which should be invoked to bring the \ProductName{}
+batch system to an orderly halt prior to system shutdown. Any jobs and variables will be saved.
+
+Only a user with the stop scheduler privilege may successfully invoke it, and confirmation is requested unless the
+\exampletext{{}-y} option is given.
+
+\subsubsection{Diagnostics}
+Various diagnostics may be issued, read as required from the message file, which by default is in\linebreak[30] \filename{\helpdirname/btrest.help}.
+
+The most important ones are that it is not running and that the user is not permitted to invoke the command.
+

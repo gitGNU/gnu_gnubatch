@@ -1,0 +1,89 @@
+\subsection{\BtuserName}
+\setbkmkprefix{btuser}
+
+\begin{expara}
+
+\BtuserName{} [ -options ]
+
+\end{expara}
+
+\PrBtuser{} provides 4 functions:
+
+With no arguments it lists the permissions for the invoking user and exits.
+
+\bookmark{permsreq}
+With the \exampletext{{}-m} option it enables the invoking user to edit his own default job and variable permissions. The user must
+have change default modes permission to do this.
+
+With the \exampletext{{}-v} option it enables the invoking user to interactively review the list of permissions for all users. The user
+must have read admin file permission to do this.
+
+With the \exampletext{{}-i} option it enables the invoking user to interactively review and update the list of permissions for all
+users. The user must have write admin file permission to do this.
+
+Please see page \pageref{bkm:Btuserdescr} for more details of the interactive commands.
+This section focuses on the command-line options which may be used to control the initial display.
+
+\subsubsection{Options}
+The environment variable on which options are supplied is \filename{\BtuserVarname} and the environment variable to specify the
+help file is \filename{BTUSERCONF}.
+
+Certain commands available on-screen enable many of these options to be changed and saved in configuration files.
+
+\explainopt
+
+\cmdoption{B}{no-help-box}{}{nohelpbox}
+
+Put help messages in inverse video rather than in a box (this is the default).
+
+\cmdoption{b}{help-box}{}{helpbox}
+
+Put help messages in a box rather than displaying inverse video.
+
+\cmdoption{d}{display-only}{}{disponly}
+
+This is the default. A list of permissions is output to the standard output.
+
+\cmdoption{E}{no-error-box}{}{noerrorbox}
+
+Put error messages in inverse video rather than in a box.
+
+\cmdoption{e}{error-box}{}{errorbox}
+
+Put error messages in a box rather than displaying inverse video.
+
+\cmdoption{g}{group-name-sort}{}{grpsort}
+
+Sort the list of users by the group name in ascending order, then by users within that group as primary group.
+
+This is only relevant to \exampletext{{}-v} or \exampletext{{}-i} options.
+
+\cmdoption{H}{keep-char-help}{}{keepchhelp}
+
+When displaying a help screen, interpret the next key press as a command as well as clearing the help screen. This is the
+default.
+
+\cmdoption{h}{lose-char-help}{}{losechhelp}
+
+Discard whatever key press is made to clear a help screen.
+
+\cmdoption{i}{update-users}{}{updusers}
+
+View and update the list of users. This option requires \textit{write admin file} privilege.
+
+\cmdoption{m}{set-default-modes}{}{setdef}
+
+Interactively set the default modes for the invoking user. This option requires \textit{change default modes} privilege.
+
+\cmdoption{n}{numeric-user-sort}{}{numusort}
+
+Sort the list of users by the numeric user id (default).
+
+\cmdoption{u}{user-name-sort}{}{usort}
+
+Sort the list of users by the user name.
+
+\cmdoption{v}{view-users}{}{viewusers}
+
+View in read-only mode the list of users and permissions. This requires \textit{read admin file} privilege.
+

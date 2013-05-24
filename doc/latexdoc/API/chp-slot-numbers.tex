@@ -1,0 +1,30 @@
+\chapter{Slot numbers}
+\label{chp:slot-numbers}
+Each job or variable is identified to \textbf{\ProductName{}} by means of two
+numbers:
+
+\begin{enumerate}
+\item The host or network identifier. This is a long corresponding to
+the Interment address in network byte order. The host identifier is
+given the type \filename{netid\_t}.
+\item The shared memory offset, or \textit{slot number}. This is the
+offset in shared memory on the relevant host of the job or variable and
+stays constant during the lifetime of the job or variable. The type for
+this is \filename{slotno\_t}.
+\end{enumerate}
+These two quantities uniquely identify any job or variable.
+
+It might be worth noting that there are two slot numbers relating to a
+remote job or variable.
+
+\begin{enumerate}
+\item The slot number of the record of the job or variable held in local
+shared memory. This is the slot number which will in all cases be
+manipulated directly by the API.
+\item The slot number of the job or variable on the owning host. This is
+in fact available in the job structures as the field
+\filename{bj\_slotno} and in the variable structure as the
+field \filename{var\_id.slotno}. For local jobs or variables,
+these fields usually have the same value, but this should not be relied
+upon.
+\end{enumerate}

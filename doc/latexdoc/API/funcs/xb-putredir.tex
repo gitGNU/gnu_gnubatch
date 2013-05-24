@@ -1,0 +1,36 @@
+\subsection{\funcnameXBputredir{}}
+
+\begin{expara}
+
+int \funcnameXBputredir{}(apiBtjob *jobp,
+
+\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ const unsigned indx,
+
+\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ const apiMredir *newredir)
+
+\end{expara}
+
+The function \funcXBputredir{} is used to insert a new
+or replacement redirection into a job structure.
+
+\exampletext{jobp} is a pointer to a structure containing the
+job details. The definition of the job structure is given on page
+\pageref{bkm:Jobstructure} onwards.
+
+\exampletext{indx} is the number of the redirection to be
+inserted or replaced (starting at zero). This should be equal to the
+number of existing redirections to create a new one.
+
+\exampletext{newredir} is the redirection structure
+representing the redirection to be inserted or replaced.
+
+Details of the redirection structure and fields therein are documented
+under \progname{\funcnameXBgetredir{} }on page
+\pageref{bkm:redirstruct}.
+
+\subsubsection{Return values}
+The result will be no-zero if successful or zero if the string table
+overflowed. In the latter case the string table contents of the job
+should not be relied upon. The job structure should be saved first if
+in doubt.
+

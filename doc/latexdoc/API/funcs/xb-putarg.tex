@@ -1,0 +1,29 @@
+\subsection{\funcnameXBputarg{}}
+
+\begin{expara}
+
+int \funcnameXBputarg{}(apiBtjob *jobp, const unsigned indx, const char *newarg)
+
+\end{expara}
+
+The function \funcXBputarg{} is used to replace or add
+a new argument to the argument list of a job.
+
+\exampletext{jobp} is a pointer to a structure containing the
+details of the job. The definition of the job structure is given on
+page \pageref{bkm:Jobstructure} onwards.
+
+\exampletext{indx} is the number of the argument to be replaced
+or added. This may be greater than any number of existing arguments if
+required, in which case any intervening arguments are created as empty
+strings.
+
+\exampletext{newarg} is the character string containing the new
+argument.
+
+\subsubsection{Return values}
+The result is non-zero if successful or zero if the string table
+overflowed. In the latter case the contents of the string table should
+not be relied upon. The job structure should be saved first if in
+doubt.
+

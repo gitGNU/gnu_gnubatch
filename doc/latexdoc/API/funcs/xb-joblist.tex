@@ -1,0 +1,73 @@
+\subsection{\funcnameXBjoblist{}}
+
+\begin{expara}
+
+int \funcnameXBjoblist{}(const int fd,
+
+\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ const unsigned flags,
+
+\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ int *numjobs,
+
+\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ slotno\_t **slots)
+
+\end{expara}
+
+The function \funcXBjoblist{} is used to get a list of
+jobs from the API.
+
+\exampletext{fd} is a file descriptor which was previously
+returned by a successful call to \funcXBopen{} or equivalent.
+
+\exampletext{flags} is zero, or a logical OR of one or more of
+the following values
+
+\begin{tabular}{ll}
+\filename{\constprefix{}FLAG\_LOCALONLY} & Ignore remote jobs/hosts, i.e. not local to the server, not the client.\\
+\filename{\constprefix{}FLAG\_QUEUEONLY} & Restrict to the selected queue (with \funcXBsetqueue{}) only.\\
+\filename{\constprefix{}FLAG\_USERONLY} & Restrict to the user only.\\
+\filename{\constprefix{}FLAG\_GROUPONLY} & Restrict to the current group (possibly as selected by \funcXBnewgrp{}) only.\\
+\end{tabular}
+
+\exampletext{numjobs} is a pointer to an integer which upon return will contain the number of jobs in the list.
+
+\exampletext{slots} will upon return contain a list of slot numbers, each of which can be used to access an individual job. The
+memory used by this array is owned by the API and therefore the user should not attempt to deallocate it.
+
+\subsubsection{Return values}
+The function returns 0 if successful otherwise one of the error codes listed on page \pageref{errorcodes} onwards.
+
+\subsubsection{Example}
+
+\begin{expara}
+
+int fd, ret, cnt, numjobs;
+
+\bigskip
+
+
+ret = \funcnameXBjoblist{}(fd, 0, \&numjobs, \&list);
+
+if (ret {\textless} 0) \{ \ /* handle error */
+
+\ \ \ \ . . .
+
+\}
+
+\bigskip
+
+
+for (cnt = 0; cnt {\textless} numjobs; cnt++) \ \{
+
+\ \ \ \ slotno\_t this\_slot = list[cnt];
+
+\ \ \ \ /* process this\_slot */
+
+\}
+
+\bigskip
+
+
+/* do not try to deallocate the list
+
+\end{expara}
+

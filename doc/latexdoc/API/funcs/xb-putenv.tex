@@ -1,0 +1,24 @@
+\subsection{\funcnameXBputenv{}}
+
+\begin{expara}
+
+const char *\funcnameXBputenv{}(const apiBtjob *jobp, const char *name)
+
+\end{expara}
+
+The function \funcXBputenv{} is used to insert an
+environment variable into a job string table.
+
+\exampletext{jobp} is a pointer to a structure containing the
+details of the job. The definition of the job structure is given on
+page \pageref{bkm:Jobstructure} onwards.
+
+\exampletext{name} is the environment varible required, in the
+form NAME=VALUE.
+
+\subsubsection{Return values}
+This function will return non-zero if successful otherwise zero if the
+string table overflowed. In the latter case the contents of the job
+structure should not be relied upon. If in doubt copy the job structure
+first.
+

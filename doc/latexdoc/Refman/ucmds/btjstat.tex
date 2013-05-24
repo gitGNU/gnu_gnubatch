@@ -1,0 +1,109 @@
+\subsection{\BtjstatName}
+
+\begin{expara}
+
+\BtjstatName{} [-options] jobnumber
+
+\end{expara}
+
+\PrBtjstat{} is provided to enable shell scripts to determine the status of a single job.
+
+The jobs is specified by using the job number, as displayed by \PrBtr{} with the \exampletext{{}-v}
+(verbose) option, or as in the output of the first column of the \PrBtjlist{} command with default format.
+
+A remote job should be specified by prefixing the job number with the host name thus:
+
+\begin{expara}
+
+host:1234
+
+\end{expara}
+
+It is not necessary to include any leading zeroes.
+
+By default, the job is checked to see if it is running, just starting or just finishing, but by means of the \exampletext{{}-s} option,
+the user can specify which states to test for.
+
+\PrBtjstat{} returns an exit code of 0 (true to shells) if the job is in the given state, 1 if it is not, and some
+other exit code (and a diagnostic) if some other error occurs, e.g. the job does not exist.
+
+\subsubsection{Options}
+The environment variable on which options are supplied is \filename{\BtjstatVarname} and the environment variable to specify the
+help file is \filename{BTRESTCONF}.
+
+\setbkmkprefix{btjstat}
+\explainopt
+
+\cmdoption{d}{default-states}{}{defstates}
+
+Cancel a \exampletext{{}-s} option and revert to checking whether the job is running, just starting or just finishing.
+
+\cmdoption{s}{state}{statcodes}{state}
+
+Specify \genericargs{statecodes} as the states to be tested for. \genericargs{Statecodes}
+is a comma-separated list of states exactly as reported by \PrBtjlist{}.
+
+The strings are read from the message file, and can be altered if required.
+
+As distributed, they are
+
+\begin{center}
+\begin{tabular}{l l}
+\textit{(empty)} & Ready to run \\
+\exampletext{Done} & Normal exit \\
+\exampletext{Err} & Error exit \\
+\exampletext{Abrt} & Aborted \\
+\exampletext{Canc} & Cancelled \\
+\exampletext{Init} & Startup stage 1 (included in the default case) \\
+\exampletext{Strt} & Startup stage 2 (included in the default case) \\
+\exampletext{Run} & Running (included in the default case) \\
+\exampletext{Fin} & Terminating (included in the default case) \\
+\end{tabular}
+\end{center}
+
+\freezeopts{\filename{\BtjstatVarname}}{STOP}
+
+\subsubsection{State names}
+
+The state names are case insensitive. If one (typically the ``ready to run'' state) is a null string,
+then this can be tested for by using a null string or two consecutive commas, thus:
+
+\begin{expara}
+
+\BtjstatName{} -s {\textquotesingle}{\textquotesingle} ...
+
+\BtjstatName{} -s ,Done,Err ...
+
+\BtjstatName{} -s Done,,Err ...
+
+\end{expara}
+
+\subsubsection{Example}
+The following shell script displays a list of the titles of jobs ready to run or running
+
+\pagebreak[11]
+\begin{expara}
+
+\BtjlistName{} -F {\textquotesingle}\%N \%H{\textquotesingle}{\textbar}while
+read num title
+
+do
+
+\ \ \ \ if \BtjstatName{} -s {\textquotesingle}{\textquotesingle} \$num
+
+\ \ \ \ then
+
+\ \ \ \ \ \ \ \ echo \$title is ready to run
+
+\ \ \ \ elif \BtjstatName{} \$num
+
+\ \ \ \ then
+
+\ \ \ \ \ \ \ \ echo \$title is running
+
+\ \ \ \ fi
+
+done
+
+\end{expara}
+

@@ -1,0 +1,26 @@
+\subsection{\funcnameXBgetarg{}}
+
+\begin{expara}
+
+const char *\funcnameXBgetarg{}(const apiBtjob *jobp, const unsigned indx)
+
+\end{expara}
+
+The function \funcXBgetarg{} is used to extract an
+argument string from a job string table.
+
+\exampletext{jobp} is a pointer to a structure containing the
+details of the job.
+
+The definition of the job structure is given on page
+\pageref{bkm:Jobstructure} onwards.
+
+\exampletext{indx} is the argument number required. This should
+be between 0 and 1 less than the total number of arguments (given by
+the field \filename{jobp-{\textgreater}h.bj\_args}).
+
+\subsubsection{Return values}
+If successful the function will return the required argument as a
+\filename{const} character string otherwise NULL if the
+argument number is invalid.
+

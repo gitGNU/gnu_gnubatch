@@ -1,0 +1,205 @@
+\subsection{\funcnameXBjobadd{}}
+
+\begin{expara}
+
+FILE *\funcnameXBjobadd{}(const int fd,
+
+\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ apiBtjob *jobd)
+
+\bigskip
+
+
+int \funcnameXBjobres{}(const int fd,
+
+\ \ \ \ \ \ \ \ \ \ \ \ \ \ jobno\_t *jobno)
+
+\bigskip
+
+
+int \funcnameXBjobadd{}(const int fd,
+
+\ \ \ \ \ \ \ \ \ \ \ \ \ \ const int infile,
+
+\ \ \ \ \ \ \ \ \ \ \ \ \ \ int(*fn)(int,void*,unsigned),
+
+\ \ \ \ \ \ \ \ \ \ \ \ \ \ apiBtjob *jobd)
+
+\end{expara}
+
+The function \funcXBjobadd{}, is used to create a new \ProductName{} job.
+
+There are two forms of \funcXBjobadd{}. The first form, together with \funcXBjobres{}, is used to
+create jobs using the Unix or Linux version of the API.
+
+The second form is used under Windows as there is no acceptable substitute for the pipe(2) system call.
+
+In both forms of the call, \exampletext{fd} is a file descriptor which was previously returned by a successful call to
+\funcXBopen{} or equivalent.
+
+\exampletext{jobd} is a pointer to a structure containing the attributes of the job to be created apart from the job script.
+
+The definition of the job structure is given on page \pageref{bkm:Jobstructure} onwards.
+
+The difference between the two versions of \funcXBjobadd{} is in the method of passing the job script.
+
+\subsubsection{Unix and Linux}
+The Unix and Linux API version returns a stdio file descriptor which may be used with the standard I/O functions
+\exampletext{fputs(3)}, \exampletext{fprintf(3)} etc
+to write the job script. When complete, the job script should be closed using \progname{fclose(3)}. The result of the job
+submission is then collected using the \funcXBjobres{} routine, which assigns the job number to the contents of the \exampletext{jobno} parameter and
+returns zero as its result. The job number is also placed into the \filename{bj\_job} field in the job structure.
+
+For reasons of correctly synchronising socket messages, be sure to call \funcXBjobres{} immediately after the call to
+\progname{fclose(3)}, even if you do not require the answer.
+
+If there is any kind of error, then depending upon at what point the error is detected, either \funcXBjobadd{} will return
+NULL, leaving the error code in the external variable \filename{\errorloc}, or \funcXBjobres{} will return the error as its result
+rather than zero.
+
+\subsubsection{Windows}
+In the case of the Windows version, the specified function \exampletext{fn} is invoked with parameters similar to
+\progname{read} to read data to pass across as the job script, the argument infile being passed as a file handle as the first
+argument to fn.
+
+\exampletext{fn} may very well be \progname{read}. The reason for the routine not invoking \progname{read}
+itself is partly flexibility but mostly because some versions of Windows DLLs do not allow \progname{read} to be invoked
+directly from within them.
+
+N.B. This routine is particularly susceptible to peculiar effects due to assignment of insufficient stack space.
+
+The return value is zero for success, in which case the job number will be assigned to the \filename{bj\_job} field of
+\exampletext{jobd}, or an error code. The error code is also assigned to the external variable \filename{\errorloc}
+for consistency with the Unix version.
+
+\subsubsection{Return values}
+The Unix version of \funcXBjobadd{} returns NULL if unsuccessful, placing the error code in the external variable
+\filename{\errorloc}.
+
+The Windows version of \funcXBjobadd{} and the \funcXBjobres{} under Unix return zero if successful, otherwise an error code.
+
+The error codes which may be returned are listed on page \pageref{errorcodes} onwards.
+
+\subsubsection{Example}
+This example creates a job from standard input:
+
+\begin{expara}
+
+int fd, ret, ch;
+
+FILE *outf;
+
+jobno\_t jn;
+
+apiBtjob outj;
+
+\bigskip
+
+
+fd = \funcnameXBopen{}({\textquotedbl}myhost{\textquotedbl}, (char *) 0);
+
+if (fd {\textless} 0) \{ /* error handling */
+
+\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ . . .
+
+\}
+
+\bigskip
+
+
+/* always clear the structure first */
+
+memset((void *)\&outj,
+{\textquotesingle}{\textbackslash}0{\textquotesingle}, sizeof(outj));
+
+\bigskip
+
+
+/* only the following parameters are compulsory */
+
+\bigskip
+
+
+outj.h.bj\_pri = 150;
+
+outj.h.bj\_ll = 1000;
+
+outj.h.bj\_mode.u\_flags = JALLMODES;
+
+outj.h.bj\_exits.elower = 1;
+
+outj.h.bj\_eupper = 255;
+
+outj.h.bj\_ulimit = 0x10000;
+
+strcpy(outj.h.bj\_cmdinterp, {\textquotedbl}sh{\textquotedbl}); /* NB
+assumes sh defined */
+
+\funcnameXBputdirec{}(\&outj, {\textquotedbl}\~{}/work{\textquotedbl});
+
+\bigskip
+
+
+/* set progress code to zero */
+
+outj.h.bj\_progress = BJP\_CANCELLED;
+
+\bigskip
+
+
+/* set up a time constraint */
+
+outj.h.bj\_times.tc\_istime = 1;
+
+outj.h.bj\_times.tc\_nexttime = time(long *)0) + 300;
+
+outj.h.bj\_times.tc\_repeat = TC\_MINUTES;
+
+outj.h.bj\_times.tc\_rate = 10;
+
+outj.h.bj\_times.tc\_nposs = TC\_SKIP;
+
+\bigskip
+
+
+\funcnameXBputtitle{}(\&outj, {\textquotedbl}MyTitle{\textquotedbl});
+
+\bigskip
+
+
+outf = \funcnameXBjobadd{}(fd, \&outj);
+
+if \ (!outf) \ \{ \ /* error in \errorloc */
+
+\ \ \ \ \ . . .
+
+\}
+
+\bigskip
+
+
+while ((ch = getchar()) != EOF)
+
+\ \ \ \ putc(ch, outf);
+
+fclose(outf);
+
+ret = \funcnameXBjobres{}(fd, \&jn);
+
+if (ret {\textless} 0) \{ \ /* error in ret */
+
+\ \ \ \ . . .
+
+\}
+
+else
+
+\ \ \ \ printf({\textquotedbl}job number is
+\%ld{\textbackslash}n{\textquotedbl}, jn);
+
+\bigskip
+
+
+\funcnameXBclose{}(fd);
+
+\end{expara}
+

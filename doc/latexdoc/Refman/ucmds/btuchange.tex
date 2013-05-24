@@ -1,0 +1,221 @@
+\subsection{\BtuchangeName}
+
+\begin{expara}
+
+\BtuchangeName{} [-options] [users]
+
+\end{expara}
+
+\PrBtuchange{} is a shell tool that may be used to update the user permissions file giving the user profiles of various
+users and the operations which they may be permitted to perform within the \ProductName{} system. Alternatively the
+{\textquotedbl}default permissions{\textquotedbl} may be updated. These are the permissions which are assigned by default to new
+\ProductName{} users.
+
+The invoking user must have \textit{write admin file} permission.
+
+\subsubsection{Options}
+The environment variable on which options are supplied is \filename{\BtuchangeVarname} and the environment variable to specify
+the help file is \filename{BTRESTCONF}.
+
+\setbkmkprefix{btuchange}
+\explainopt
+
+\cmdoption{A}{copy-defaults}{}{copydefall}
+
+Copy the default profile to all users before setting other permissions on the named users (with the \exampletext{{}-u}
+option) or after setting the defaults (with the \exampletext{{}-D} option).
+
+The privileges of the invoking user are not changed by this operation.
+
+\cmdoption{D}{set-defaults}{}{setdef}
+
+Indicate that the other options are to apply to the default profile for new users.
+
+\cmdoption{d}{default-priority}{num}{defpri}
+
+Set the default job priority to \genericargs{num}, which must be between 1 and 255.
+
+\cmdoption{J}{job-mode}{modes}{jobmode}
+
+Set the default permissions on jobs according to the format of the \genericargs{modes} argument.
+
+\cmdoption{l}{min-priority}{num}{minpri}
+
+Set the minimum job priority to \genericargs{num}, which must be between 1 and 255.
+
+\cmdoption{M}{max-load-level}{num}{maxload}
+
+Set the maximum load level for any one job to \genericargs{num}, which must be between 1 and 32767.
+
+\cmdoption{m}{max-priority}{num}{maxpri}
+
+Set the maximum job priority to \genericargs{num}, which must be between 1 and 255.
+
+\cmdoption{N}{no-rebuild}{}{norebuild}
+
+Cancel the \exampletext{{}-R} option to rebuild the user permissions file.
+
+This option is now deprecated.
+
+\cmdoption{p}{privileges}{privileges}{privileges}
+
+Set the privileges of the user(s) as specified by the argument.
+
+\cmdoption{R}{rebuild-file}{}{rebuild}
+
+Rebuild the user permissions file \filename{\spooldirname/btufile\IfXi{6}\IfGNU{1}} incorporating any changes in the password list.
+
+This option is now deprecated and is ignored.
+
+\cmdoption{S}{special-load-level}{num}{specll}
+
+Set the special load level for the user(s) to num, which must be between 1 and 32767.
+
+Note that this is irrelevant for users who do not have \textit{special create} privilege.
+
+\cmdoption{s}{no-copy-defaults}{}{nocopy}
+
+Cancel the effect of the \exampletext{{}-A}.
+
+\cmdoption{T}{total-load-level}{num}{totll}
+
+Set the total load level for the user(s) to \genericargs{num}, which must be between 1 and 32767.
+
+\cmdoption{u}{set-users}{}{setu}
+
+Indicate that the other options are to apply to the users specified on the rest of the command line, resetting any previous
+\exampletext{{}-D} option.
+
+\cmdoption{V}{var-mode}{mode}{varmode}
+
+Set the default permissions on variables according to the format of the \genericargs{modes} argument.
+
+\cmdoption{X}{dump-passwd}{}{dumppasswd}
+
+Dump out the hash table of the password file to avoid re-reading the password file within the other programs.
+
+This option is now deprecated and is ignored.
+
+\cmdoption{Y}{default-passwd}{}{defpasswd}
+
+Default handling of password hash file dump - rebuild if it is already present and \exampletext{{}-R} specified, otherwise not.
+
+This option is now deprecated and is ignored.
+
+\cmdoption{Z}{kill-dump-passwd}{}{killdump}
+
+Delete any existing dumped password hash file.
+
+This option is now deprecated and is ignored.
+
+\freezeopts{\filename{\BtuchangeVarname}}{stop}
+
+\subsubsection{Users or default}
+In one operation \PrBtuchange{} either adjusts the default permissions, to be applied to new users, if
+\exampletext{{}-D} is specified, or specified users, if nothing or \exampletext{{}-u} is specified. So first set the
+required defaults:
+
+\begin{expara}
+
+\BtuchangeName{} -D -n 20 -p CR,SPC,ST,Cdft -A
+
+\end{expara}
+
+Then set named users (in fact changes to \filename{root} and \batchuser{} users are silently ignored).
+
+\begin{expara}
+
+\BtuchangeName{} -p ALL jmc root batch
+
+\end{expara}
+
+\subsubsection{Rebuilding the user control file}
+
+The user control file is now held as ``default'' plus a list of ``differences'' so the options to do this are now deprecated and the
+relevant options ignored.
+
+\subsubsection{Dumping the password file}
+This has now been deprecated and the options are ignored.
+
+\subsubsection{Privileges}
+The following may be specified as the argument to \exampletext{{}-p}, as one or more (comma-separated) of
+argument may be one or more of the following codes, optionally preceded by a minus to turn off the corresponding privilege.
+
+\begin{center}
+\begin{tabular}{|l|l|}
+\hline
+\exampletext{RA} & read admin file\\\hline
+\exampletext{WA} & write admin file\\\hline
+\exampletext{CR} & create\\\hline
+\exampletext{SPC} & special create\\\hline
+\exampletext{ST} & stop scheduler\\\hline
+\exampletext{Cdft} & change default\\\hline
+\exampletext{UG} & or user and group modes\\\hline
+\exampletext{UO} & or user and other modes\\\hline
+\exampletext{GO} & or group and other modes.\\\hline
+\end{tabular}
+\end{center}
+
+\exampletext{ALL} may be used to denote all of the permissions, and then perhaps to cancel some. For example:
+
+\begin{expara}
+{}-p CR,ST,Cdft
+
+{}-p ALL,-WA
+
+\end{expara}
+
+A hexadecimal value is also accepted, but this is intended only for the benefit of the installation routines.
+
+\subsubsection{Mode arguments}
+The argument to the \exampletext{{}-J} and \exampletext{{}-V} options provides for a wide variety of operations.
+
+Each permission is represented by a letter, as follows:
+
+\begin{center}
+\begin{tabular}{|l|l|}
+\hline
+\exampletext{R} & read permission\\\hline
+\exampletext{W} & write permission\\\hline
+\exampletext{S} & reveal permission\\\hline
+\exampletext{M} & read mode\\\hline
+\exampletext{P} & set mode\\\hline
+\exampletext{U} & give away owner\\\hline
+\exampletext{V} & assume owner\\\hline
+\exampletext{G} & give away group\\\hline
+\exampletext{H} & assume group\\\hline
+\exampletext{D} & delete\\\hline
+\exampletext{K} & kill (only valid for jobs)\\\hline
+\end{tabular}
+\end{center}
+
+Each section of the mode (job, group, others) is represented by the prefixes \exampletext{U:}, \exampletext{G:} and
+\exampletext{O:} and separated by commas.
+
+For example:
+
+\begin{expara}
+
+{}-J U:RWSMPDK,G:RWSDK,O:RS
+
+\end{expara}
+
+would set the permissions for the user, group and others for jobs as given. If the prefixes are omitted, as in
+
+\begin{expara}
+
+{}-J RWSDK
+
+\end{expara}
+
+then all of the user, group and other permissions are set to the same value. Alternatively two of the \exampletext{J},
+\exampletext{G} or \exampletext{O} may be run together as in
+
+\begin{expara}
+
+{}-J U:RWSKD,GO:RWS
+
+\end{expara}
+
+if ``group'' or ``other'' (in this case) are to have the same permissions.
+

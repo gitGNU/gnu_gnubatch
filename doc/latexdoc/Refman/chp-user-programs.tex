@@ -1,0 +1,372 @@
+\chapter{User Programs}
+\label{chp:user-programs}
+\label{bkm:Userprograms}Users have a wide variety of Unix programs which may be used to submit batch jobs, and manage scheduling. This includes
+a set of standard command line and interactive programs, plus optional Motif GUI applications.
+
+The following are the user programs available, listed by function, including some intended only for set-up and installation. Some of the
+descriptions which follow are merged together to save repetition.
+
+More detailed descriptions of the interactive interfaces to \PrBtq{}, \PrBtuser, \PrXbtq{}, \PrXbtr{}, \PrXbtuser{}, \PrXmbtq{},
+\PrXmbtr{} and \PrXmbtuser{} follow in the next two chapters, the descriptions here concentrating on the
+command line options to these programs.
+
+\section{Syntax of batch commands}
+All of the options referred to in the descriptions of the shell-level programs for \ProductName{} below may be supplied
+in a \emphasis{configuration file} (q.v.), or in an environment variable whose name is the same as the calling program,
+except that it is in upper case\IfGNU{, with hyphens converted to underscores, thus for example the environment variable name for
+passing options to \PrBtq{} is \filename{\BtqVarname}.
+
+Note that the environment variable name is constructed each time from the program name, so if \PrBtq{} is renamed \progname{view-queued-jobs}
+then the corresponding environment variable looked for will be \linebreak[20]\exampletext{VIEW\_QUEUED\_JOBS}.}
+
+\IfXi{Note that the environment variable name stays the same even if the program is renamed,
+so for example if \PrBtr{} is renamed to be \progname{Queue-a-job}, the environment variable name does not change from being \filename{BTR}.}
+
+This may enable defaults to be supplied according to the application from which the program is invoked. However any options and arguments
+supplied on the command line usually take priority.
+
+Additionally by editing the appropriate \emphasis{message file} (q.v.) it is possible to change the option letters and keywords from
+those described.
+
+\subsection{Option types}
+In nearly all cases there are two alternative ways of supplying options:
+
+\begin{itemize}
+\item Via a traditional Unix-style \genericargs{-letter} option, for example as \exampletext{-z}. In some cases, such as in \PrBtr{} and
+\PrBtjchange{} we ran out of letters and had to use other a few other characters, such as digits.
+\item Via a keyword-style option, such as \exampletext{+zero-charge}. Keywords are case-insensitive.
+\end{itemize}
+\subsection{Option syntax}
+The syntax of options is intended to be as flexible as possible. Options which do not take arguments may be grouped together as in
+
+\begin{expara}
+
+{}-Nwm
+
+\end{expara}
+
+or they may be given separately as in
+
+\begin{expara}
+
+{}-N -w -m
+
+\end{expara}
+
+White space is optional in the case of options which do take arguments, thus both
+
+\begin{expara}
+
+{}-p150
+
+\end{expara}
+
+and
+
+\begin{expara}
+
+{}-p 150
+
+\end{expara}
+
+are acceptable and have the same effect.
+
+If the keyword version of an option is given, then it must be separated from its argument by white space thus
+
+\begin{expara}
+
++priority 150
+
+\end{expara}
+
+\subsection{Configuration files}
+To save the user from having to specify commonly-used combinations of options, there are mechanisms enabling these to be supplied to each
+program automatically.
+
+One mechanism is the use of a \emphasis{configuration file}, \configurationfile{},
+in the current or a similar file \linebreak[20]\homeconfigpath{} off the user's home directory. The other is the use of an environment variable.
+
+These files may also be used to specify alternative \emphasis{message files}.
+
+The format of configuration files is akin to a set of environment variable assignments, with empty lines and lines beginning with
+\exampletext{\#} being ignored.
+
+The name assigned either in the configuration file or that of the environment variable,
+to is the same as that of the calling program but in upper case\IfGNU{ and with hyphens replaced by underscores},
+for example that corresponding to \PrBtr{} is \filename{\BtrVarname} etc. This is the same as for the corresponding environment variable.
+
+Note that if the program is renamed, for example \PrBtr{} is renamed as \progname{my-queue-program}, then the name of the variable \IfXi{does not
+change with it. It still remains as \filename{\BtrVarname}}\IfGNU{changes with it, in that instance to \filename{MY\_QUEUE\_PROGRAM}}.
+
+Usually options are taken from the following places in order, so that later-processed ones override earlier ones:
+
+\begin{tabular}{l p{12cm}}
+Standard defaults &
+Each program has a set of standard defaults which are used to
+initialise the parmaters when the program is invoked.\\
+User profile & In some cases, for example default priority, the user's profile as displayed by \PrBtuser{} is used to initialise the defaults.\\
+Home options directory & The file \homeconfigpath{} is read, and any options specified therein (i.e. with an assignment to the appropriate
+name) are interpreted.\\
+Home directory & The file \configurationfile{} in the user's home directory is read, and any options
+specified therein (i.e. with an assignment to the appropriate name) are interpreted. This is for compatibility with previous versions of
+\ProductName{} and the version using \homeconfigpath{} should be used in new applications to avoid \configurationfile{} being read twice when
+commands are run from the user's home directory. \\
+Environment &
+Any options specified in the appropriate environment variable
+(you will almost certainly have to use quotes when setting it via the
+shell in order to preserve the white space) are read and interpreted.\\
+Current Directory &
+The file \configurationfile{} is read, and any options
+specified therein (i.e. with an assignment to the appropriate name) are
+interpreted.\footnotemark{}. \\
+Command line &
+Any options specified on the command line are interpreted last.\\
+\end{tabular}
+
+\footnotetext{Note that the problem of reading configuration files twice
+if programs are run from the home directory has been overcome by moving
+the ``home directory'' version from \configurationfile{} to \homeconfigpath{} off the user's home directory.}
+
+Most options have inverses so that it is possible to reset anything which may have been set by previously-read options. Extra care should
+be taken with cumulative options, notably arguments and redirections, so that these are not doubled, especially in the case where the home
+directory is also the current directory.
+
+\subsection{Option path}
+The above description of the order of selection of configuration files, environment and command-line options is the default.
+
+It may be desirable to change the order of selection of options, in to eliminate some alternative locations or to include others.
+
+The environment variable \configpathvar{} may be set to a colon-separated list of directories (environment variables and
+\exampletext{\~{}user} constructs are appropriately interpreted).
+
+The symbol \exampletext{!} is used to represent the relevant environment variable, and \exampletext{{}-} is used to
+represent option arguments.
+
+The symbole \exampletext{@} is used to represent the ``home directory'' configuration file \homeconfigpath{} for the current user.
+
+The default value of \configpathvar{} is
+
+\begin{expara}
+
+@:\~:!:.:-
+
+\end{expara}
+
+This provides the interpretation of options in various configuration
+files and the environment which is documented above.
+
+Note that it is possible to eliminate or override the interpretation of options on the command line by removing or relocating the
+\exampletext{{}-}. This may have very surprising effects especially where configuration files wipe out the effects of options
+which may have been set on the command line. Where the interpretation of options has been removed altogether, then any options supplied will
+probably be objected to or misinterpreted as file names or similar.
+
+The options to most programs of
+
+\begin{expara}
+
++freeze-home
+
+\end{expara}
+
+and
+
+\begin{expara}
+
++freeze-current
+
+\end{expara}
+
+and equivalents do not take into account the value of \configpathvar{} in any way.
+
+Please note that \configpathvar{}, with its default and interpretation is the same in \IfXi{other Xi Software products, such as}
+\OtherProductName.
+
+Finally please note that any non-existent or inaccessible directories and files will (usually) be silently ignored. If a configuration file
+appears to exist but is inaccessible, a diagnostic may be given; however in some cases this may be misleading due to the fact that
+various versions of Unix are misleading or inconsistent with regard to the error codes reported from an attempt to open a non-existent or
+inaccessible file in a non-existent or inaccessible directory.
+\subsection{Message files}
+As well as providing help and error messages, screen key assignments etc, message files also provide the option letters and keyword names
+used to specify the options.
+
+For each command, there is a default message file. For most of the shell-based commands, this is \filename{btrest.help} in \helpdir.
+Alternative message files may be specified using an environment variable or configuration file assigning values to a name. For most of the shell-based commands, this is \filename{BTRESTCONF}.
+
+Within the message file itself, the option letters and keywords are set up using sequences of the form
+
+\begin{expara}
+
+A300:?,explain
+
+\end{expara}
+
+Comments and the context should make clear which commands these options relate to.
+
+These sequences define
+
+\begin{tabular}{lp{12cm}}
+A state number & The state number, in the above example \exampletext{300}, which is used internally to denote the argument.\\
+& \\
+option letters & A single character, often a letter, but in the above example \exampletext{?}, which is the single-character variant of the
+option, thus \exampletext{{}-?}.\newline
+Several option letters, each separated by commas may be defined. To define ``\exampletext{,}'' itself as
+an option ``letter'', use \exampletext{{\textbackslash},}.\footnotemark{}\\
+& \\
+option keywords & A string of alphanumerics, possibly including hyphens and underscores, is used to denote an option keyword, in the above example
+\exampletext{+explain}. Several such keywords may be defined, each separated by commas. Note that the case of letters in the keywords
+is discarded.\\
+\end{tabular}
+
+\footnotetext{We intend removing this facility to respecify option letters (as opposed to keywords) in future versions of \ProductName{} as it
+over-complicates this and gives rise to too many potential conflicts. Please advise us if you think this is a mistake.}
+\subsection{Location of message files} 
+It is possible to specify alternative locations for message files so that alternatives are selected according to the application being run etc.
+
+The location may be specified using configuration files in a similar fashion to the search for options, except that the search runs the other way.
+
+The search is in the following order:
+
+\begin{tabular}{lp{12cm}}
+Current Directory &
+If a configuration file \configurationfile{} in the current directory specifies a
+location for the message file, by means of an assignment to the
+relevant variable (for most shell-based commands this is
+\filename{BTRESTCONF}), then this file is taken.
+
+\bigskip
+
+Environment variables in the form \exampletext{\$ABC} and users{\textquotesingle} home directories in the form \exampletext{\~{}user} are
+appropriately expanded. The sequence \exampletext{\$0} is replaced by the name of the program being invoked. (This process may
+run recursively up to a level of 10).\\
+& \\
+Environment &
+If the relevant environment variable (for most shell-based commands this is \filename{BTRESTCONF}) specifies a location,
+then this is taken.\\
+& \\
+Home Directory config file &
+A configuration file \configurationfile{} in the home directory may specify a location for the message file. (Note that this is deprecated in favour
+of using \homeconfigpath{} instead but is still supported for compatibility).\\
+& \\
+Home Directory &
+A configuration file \homeconfigpath{} off the user's home directory may specify a location for the message file.\\
+& \\
+Default Location & If none of the above specify a replacement message file then the default location is taken.\\
+\end{tabular}
+
+If a file is specified but does not exist, then this is a fatal error.
+
+However there is an additional step to assist the user to set up some alternative files with a default name.
+
+Should the file not exist, then the search falls back to a name generated by taking the last part of the default file name (for example
+\exampletext{btrest.conf}) and substituting this for the last part of the file name specified.
+
+For example if the normal message file for the command were
+
+\begin{expara}
+
+\helpdirname/btrest.help
+
+\end{expara}
+
+and the user had specified in a configuration file
+
+\begin{expara}
+
+BTRESTCONF=\~{}/\$0.help
+
+\end{expara}
+
+then if he or she were to run, say, \PrBtr{}, then the file
+
+\begin{expara}
+
+\~{}/\BtrName.help
+
+\end{expara}
+
+would be searched for. If this did not exist, then a search would be made for
+
+\begin{expara}
+
+\~{}/btrest.help
+
+\end{expara}
+
+\subsection{Path to locate message files}
+The above search path may be modified using the environment variable \helppathvar. The interpretation is very similar to
+the description above for \configpathvar, except that \exampletext{{}-} fields are ignored.
+
+The default value of \helppathvar{} is \filename{.:!:\~:@} giving the interpretation described above. Note that this is in the opposite order to
+\configpathvar.
+
+\section{Submitting Batch Jobs}
+\input{ucmds/btr.tex}
+\input{ucmds/atcover.tex}
+\input{ucmds/xmbtr.tex}
+\section{Managing the batch scheduler}
+\input{ucmds/btstart.tex}
+\input{ucmds/btquit.tex}
+\input{ucmds/btconn.tex}
+\input{ucmds/btdisconn.tex}
+\input{ucmds/btcichange.tex}
+\input{ucmds/btcilist.tex}
+\input{ucmds/bthols.tex}
+\input{ucmds/hostedit.tex}
+\section{Querying/managing batch jobs from the command line}
+\input{ucmds/btjchange.tex}
+\input{ucmds/btjdel.tex}
+\input{ucmds/btjlist.tex}
+\input{ucmds/btjstat.tex}
+\input{ucmds/btjgo.tex}
+\input{ucmds/btdst.tex}
+\section{Querying/managing variables from the command line}
+\input{ucmds/btvlist.tex}
+\input{ucmds/btvar.tex}
+\section{Interactive job and variable administration}
+\input{ucmds/btq.tex}
+\input{ucmds/xmbtq.tex}
+\section{File Monitoring}
+\input{ucmds/btfilemon.tex}
+\input{ucmds/xmfilemon.tex}
+\section{User administration}
+\input{ucmds/btcharge.tex}
+\input{ucmds/btuchange.tex}
+\input{ucmds/btulist.tex}
+\input{ucmds/btuser.tex}
+\input{ucmds/xmbtuser.tex}
+\section{Web browser interface support}
+The following commands are provided for the web browser interface support and are not documented further here.
+\begin{center}
+\begin{tabular}{|l|l|}
+\hline
+\progname{btjccgi} & Operations on jobs CGI program\\\hline
+\progname{btjcgi} & List jobs CGI program\\\hline
+\progname{btjcrcgi} & Create jobs CGI program\\\hline
+\progname{btjdcgi} & Delete jobs CGI program\\\hline
+\progname{btjvcgi} & View jobs CGI program\\\hline
+\progname{btvccgi} & Operations on variables CGI program\\\hline
+\progname{btvcgi} & List variables CGI program\\\hline
+\progname{rbtjccgi} & Operations on jobs CGI program\\\hline
+\progname{rbtjcgi} & List jobs CGI program\\\hline
+\progname{rbtjcrcgi} & Create jobs CGI program\\\hline
+\progname{rbtjdcgi} & Delete jobs CGI program\\\hline
+\progname{rbtjvcgi} & View jobs CGI program\\\hline
+\progname{rbtvccgi} & Operations on variables CGI program\\\hline
+\progname{rbtvcgi} & List variables CGI program\\\hline
+\end{tabular}
+\end{center}
+\section{System file management}
+\input{ucmds/xb-btuconv.tex}
+\input{ucmds/xb-cjlist.tex}
+\input{ucmds/xb-cvlist.tex}
+\input{ucmds/xb-ciconv.tex}
+\input{ucmds/xb-ripc.tex}
+\input{ucmds/xipasswd.tex}
+\IfXi{\section{Licence manipulation and installation programs}
+\input{ucmds/xb-checklic.tex}
+\input{ucmds/xb-emerglic.tex}
+\input{ucmds/xb-triallic.tex}
+\input{ucmds/xb-vwrite.tex}
+\input{ucmds/whatvn.tex}
+\input{ucmds/zinstall.tex}}
+

@@ -1,0 +1,47 @@
+\chapter{Other administration matters}
+\label{chp:other-administration-matters}
+\section{Startup and shutdown of \ProductName{}}
+The user-level programs \PrBtstart{} and \PrBtquit{} are provided for the startup and shutdown
+of \ProductName{} and \PrBtconn{} and \PrBtdisconn{} are provided for attaching and
+detaching Unix hosts.
+
+Please try to use these utilities wherever possible rather than starting or halting internal processes yourself.
+
+\section{\BtstartName}
+\ProductName{} can be started by just running the program \PrBtstart{}. However there are three options to
+\PrBtstart{} which should be worth noting:
+
+The \exampletext{{}-j n} and \exampletext{{}-v n}
+options reserve shared memory (or memory-mapped file) space for the given number of jobs and variables respectively. This is often
+necessary on installations where it is not possible to reallocate shared memory after \ProductName{} has been started, perhaps because other applications have taken all the available shared memory.
+
+To start \ProductName{} reserving space for 5,000 jobs and 6,000 variables, use the command:
+
+\begin{expara}
+
+\BtstartName{} -j 5000 -v 6000
+
+\end{expara}
+
+Another option worth noting here is the \exampletext{{}-l n} option, which sets the \filename{LOADLEVEL} system variable to
+an initial value on startup, commonly zero, which will prevent any jobs from starting until you are ready and all the jobs are in a suitable starting state.
+
+Any user may run \PrBtstart{}. If \ProductName{} is already running, there may be harmless error messages, but otherwise nothing
+will happen.
+
+\section{\BtquitName}
+\PrBtquit{} should be used to halt \ProductName{}. Any jobs running will be aborted. This may only be run by a suitably-privileged
+user.
+
+If there are problems with it and some of the processes continue to run and you need to kill \progname{btsched} and other
+processes, try first with just ``\exampletext{kill}'' and not ``\exampletext{kill -9}'' as this
+will cause the IPC facilities to be deleted.
+
+\section{\BtconnName{} and \BtdisconnName}
+\PrBtconn{} is used to connect to Unix hosts set up as for ``manual connection'' in the hosts file (although more recent versions
+of \ProductName{} will accept a simple name of an identifiable host on the network) or disconnected using \PrBtdisconn{}.
+
+\PrBtdisconn{} disconnects from other Unix hosts previously connected from ``either end''.
+
+Either are invoked with the host name or alias required. They should return immediately, although the network shutdown may take longer.
+

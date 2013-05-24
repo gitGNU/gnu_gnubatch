@@ -36,7 +36,8 @@ manpages:
 	# Currently don't do anything
 
 pdfdocs:
-	# Currently don't do anything
+	# If we have pdflatex run the sub makefile
+	type pdflatex >/dev/null 2>&1 && (cd latexdoc;$(MAKE))
 
 install install-strip: all
 	$(INSTALL) -d $(MANDIR)/man1
@@ -56,7 +57,8 @@ install install-strip: all
 	$(INSTALL_DATA) pdf/*.pdf $(PDFDIR)
 
 clean:
-	# Currently don't do anything
+	cd latexdoc;$(MAKE) clean
 
-distclean:	clean
+distclean:
+	cd latexdoc;$(MAKE) distclean
 	$(RM) Makefile

@@ -1,0 +1,23 @@
+\subsection{\funcnameXBgetenv{}}
+
+\begin{expara}
+
+const char *\funcnameXBgetenv{}(const apiBtjob *jobp, const char *name)
+
+\end{expara}
+
+The function \funcXBgetenv{} is used to extract an
+environment variable from a job string table.
+
+\exampletext{jobp} is a pointer to a structure containing the
+details of the job. The definition of the job structure is given on
+page \pageref{bkm:Jobstructure} onwards.
+
+\exampletext{name} is the environment varible required.
+
+\subsubsection{Return values}
+The result is the environment variable value as a
+\filename{const} character string or NULL if the variable does
+not exist in the job (perhaps because it is in the static environment
+file).
+

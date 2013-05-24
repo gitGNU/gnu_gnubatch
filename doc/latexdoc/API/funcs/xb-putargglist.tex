@@ -1,0 +1,50 @@
+\subsection{\funcnameXBputargglist{}}
+
+\begin{expara}
+
+int \funcnameXBputarglist{}(apiBtjob *jobp, const char **alist)
+
+\end{expara}
+
+The function \funcXBputarglist{} is used to replace
+the entire argument list within a string table of a job.
+
+\exampletext{jobp} is a pointer to a structure containing the
+details of the job. The definition of the job structure is given on
+page \pageref{bkm:Jobstructure} onwards.
+
+\exampletext{alist} is a vector of strings containing the new
+arguments.
+
+The new argument list completely replaces the old
+
+\subsubsection{Return values}
+The result is non-zero if successful or zero if the string table
+overflowed. In the latter case the contents of the string table should
+not be relied upon. The job structure should be saved first if in
+doubt.
+
+\subsection{\funcnameXBputdirect{}}
+
+\begin{expara}
+
+int \funcnameXBputdirect{}(apiBtjob *jobp, const char *direct)
+
+\end{expara}
+
+The function \funcXBputdirect{} is used to insert a
+new working directory name into a job structure.
+
+\exampletext{jobp} is a pointer to a structure containing the
+job details. The definition of the job structure is given on page
+\pageref{bkm:Jobstructure} onwards.
+
+\exampletext{direct} is the name of the directory to be
+inserted.
+
+\subsubsection{Return values}
+The result will be non-zero if successful or zero if the string table
+overflowed. In the latter case the string table contents of the job
+should not be relied upon. The job structure should be saved first if
+in doubt.
+

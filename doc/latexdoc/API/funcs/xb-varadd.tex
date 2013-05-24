@@ -1,0 +1,66 @@
+\subsection{\funcnameXBvaradd{}}
+
+\begin{expara}
+
+int \funcnameXBvaradd{}(const int fd, apiBtvar *vard)
+
+\end{expara}
+
+The function \funcXBvaradd{} is used to create a new
+variable.
+
+\exampletext{fd} is a file descriptor which was previously
+returned by a successful call to \funcXBopen{} or equivalent.
+
+\exampletext{vard} is a pointer to a structure which contains
+the details of the new variable. The definition of the variable
+structure is given on page \pageref{bkm:Varstructure} onwards.
+
+\subsubsection{Return values}
+The function returns 0 if successful otherwise one of the error codes
+listed on page \pageref{errorcodes} onwards.
+
+\subsubsection{Example}
+
+\begin{expara}
+
+int fd, ret
+
+int apiBtvar outv;
+
+\bigskip
+
+
+fd = \funcnameXBopen{}({\textquotedbl}myhost{\textquotedbl}, (char *) 0);
+
+if (fd {\textless} 0) \ \{ /* error handling */
+
+\ \ \ \ ...
+
+\}
+
+memset((void *)\&outv,
+{\textquotesingle}{\textbackslash}0{\textquotesingle}, sizeof(outv));
+
+strcpy(outv.var\_name, {\textquotedbl}var1{\textquotedbl});
+
+strcpy(outv.var\_comment, {\textquotedbl}A comment{\textquotedbl});
+
+outv.var\_value.const\_type = CON\_LONG;
+
+outv.var\_value.con\_un.con\_long = 1;
+
+outv.var\_mode.u\_flags = VALLMODES;
+
+ret = \funcnameXBvaradd{}(fd, \&outv);
+
+if (ret {\textless} 0) \{ /* error handling */
+
+\ \ \ \ ...
+
+\}
+
+\funcnameXBclose{}(fd);
+
+\end{expara}
+

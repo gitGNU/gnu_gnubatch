@@ -1,0 +1,2826 @@
+\chapter{Text screen-based programs}
+\label{chp:text-screen-based-programs}
+The following sections provide more information on the text screen-based
+programs \PrBtq{} and \PrBtuser{}, with attention to the screen commands. See the previous chapter
+regarding command-line options to \PrBtq{} and \PrBtuser{}.
+
+\section{\BtqName{} - interactive batch queue manager}
+\label{bkm:Btqdescr}The following screens and screen-based commands
+apply to \PrBtq{}. Remember, however that all of the
+screen formats and the key bindings may be adjusted to suit your
+requirements, so the default commands listed here may have been changed
+on your system.
+
+\subsection{User Interface Settings on Entry}
+If \PrBtq{} is given no arguments, then the jobs list is displayed, unless there are no jobs visible to the user, in which
+case the variables list is displayed. The jobs or variables display can be pre-selected by the \exampletext{{}-j} and
+\exampletext{{}-v} options respectively.
+
+The \exampletext{{}-A} option turns off the prompt for confirmation of deletions and \exampletext{{}-a} turns it on.
+
+The \exampletext{{}-s} and \exampletext{{}-N} options change the handling of the job queue display when the current job moves
+within the queue. The \exampletext{{}-s} option tries to keep the job under the cursor at the same screen position whatever happens.
+The \exampletext{{}-N} option tries to ensure that the job list appearance changes as little as possible.
+
+The \exampletext{{}-h} option causes the next keystroke after displaying a help message to just clear the message. The
+\exampletext{{}-H} option causes the next keystroke to be taken as a command as well as clearing the message.
+
+When no queue name is specified, all queues (including the un-named one) will be displayed by default. In this case, the corresponding queue
+name of each job can be seen as a prefix to its job \textit{title} separated by a colon ``\exampletext{:}''. The
+\exampletext{{}-q} option allows the user to specify which job queues to display. Only jobs belonging to the specified queues will be
+displayed. No prefixes will be shown on the job title. The \exampletext{{}-z} and \exampletext{{}-Z} options
+allow the user to control whether or not jobs without a queue prefix are also displayed.
+
+If the title is changed within \PrBtq{} then the job queue name will be prefixed to it.
+
+\subsection{General \BtqName{} screen commands}
+A different set of interactive commands, and related on-line help messages, is available for each context or screen within
+\PrBtq{}. For consistency there is a common set of commands to perform standard operations, such as forward and reverse
+scroll, cursor up and down, help and quit. These are then added to by the relevant commands for each context.
+
+Not all of the common set of commands are available in some contexts. For example search commands are only available in the job and variable
+lists.
+
+It is possible to re-assign any or all of the keystrokes corresponding to the commands, using the mechanisms described in the configuration
+chapter. The remainder of this section will describe the functionality of \PrBtq{} using the default configuration.
+
+The set of common keys for commands are:
+
+\begin{center}
+\begin{tabular}{|l|p{10cm}|}\hline
+\bfseries Keys &
+\bfseries Operation performed\\\hline
+\userentry{?} & Help (this screen)\\\hline
+\itshape ctrl-L & Refresh screen\\\hline
+\userentry{q Q} & Quit\\\hline
+\userentry{k} & Move cursor up one line or entry\\\hline
+\userentry{j} & Move cursor down one line or entry\\\hline
+\userentry{b} & Keyed once moves cursor to top of the screen.\newline
+Keyed a second time, or if the cursor is already at the top of screen,
+moves to the beginning of the list.\\\hline
+\userentry{e} & Keyed once moves cursor to bottom of the screen.\newline
+Keyed a second time, or if the cursor is already at the bottom of
+screen, moves to the end of the list.\\\hline
+\itshape Ctrl-B & Moves up list by one screen\\\hline
+\itshape Ctrl-F & Moves down list by one screen\\\hline
+\itshape Ctrl-U & Moves up list by half a screen\\\hline
+\itshape Ctrl-D & Moves down list by half a screen\\\hline
+\userentry{\^{}} & Search forward for string\\\hline
+\userentry{{\textbackslash}} & Search backward for string\\\hline
+\end{tabular}
+\end{center}
+
+The use of the arrow keys for cursor up and down, or Home or function keys are most helpful. The \ProductName{} installation will attempt to set
+cursor movement keys up for terminals that support them. If cursor keys are available but not configured during installation they can be set up
+as described in the chapter on user interface configuration starting on page \pageref{bkm:Configurability}.
+
+The search commands discard the case of letters, and take ``\exampletext{.}'' as a wild-card character.
+
+\subsubsection{Context Sensitive Help}
+Pressing the ``\userentry{?}'' key will bring up help relevant to the current context. This ranges from a
+list of the commands available for a whole screen to simple prompts for entering data in a parameter field.
+
+The help messages may be in inverse video or inside a box, according to user preference.
+
+\subsubsection{Macro Commands}
+Additional operations, known as macro commands, can be defined for use within \PrBtq{}. These are not described in this
+manual because they are custom built as required. How to create and set
+up Macro commands is described in the Extensibility chapter on page \pageref{bkm:Extensibility} and
+especially the section on macro definitions starting on page \pageref{bkm:Macrodefs}.
+
+Up to nine macros can be set up for jobs, and another nine for
+variables, to be invoked by a single key press. Other macros can be
+used by pressing the general macro key and typing in the name of the
+command to be run.
+
+The choice of keys to assign to each macro, including the general macro
+key, is left to the person who installs the macro(s). How to invoke
+each macro should be documented, in the on-line help, by the person who
+installed it.
+
+\subsection{The Job Screen and Commands}
+Assuming that there are plenty of jobs in the queue which are visible to
+the user; a typical screen for the, default configuration, job list
+might look like this:
+
+\begin{exparasmall}
+
+Seq Jobno \ \ User \ \ \ Title \ \ \ \ \ \ \ \ Shell \ \ Pri Load Time
+\ Cond \ \ \ \ \ Prog
+
+\ \ 0 340 \ \ \ \ wally \ \ e-mail:dial u sh \ \ \ \ \ 150 1000 16:33
+
+\ \ 1 734 \ \ \ \ tony \ \ \ prog\_a \ \ \ \ \ \ \ sh \ \ \ \ \ 150 1000
+06/02 \ \ \ \ \ \ \ \ \ \ Run
+
+\ \ 2 1420 \ \ \ wally \ \ Output Exampl sh \ \ \ \ \ 150 1000 29/01
+\ \ \ \ \ \ \ \ \ \ Err
+
+\ \ 3 735 \ \ \ \ tony \ \ \ prog\_b \ \ \ \ \ \ \ sh \ \ \ \ \ 150 1000
+08/02 A\_STATUS
+
+\ \ 4 736 \ \ \ \ tony \ \ \ prog\_c \ \ \ \ \ \ \ sh \ \ \ \ \ 150 1000
+08/02 A\_STATUS
+
+\ \ 5 439 \ \ \ \ wally \ \ wally \ \ \ \ \ \ \ \ sh \ \ \ \ \ 150 1000
+\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ Canc
+
+\ \ 6 588 \ \ \ \ wally \ \ Also Sprach Z sh \ \ \ \ \ 150 1000 04/02
+\ \ \ \ \ \ \ \ \ \ Done
+
+\ \ 7 564 \ \ \ \ wally \ \ Daily Update \ sh \ \ \ \ \ 150 1000
+\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ Run
+
+\ \ 8 455 \ \ \ \ pior \ \ \ Simple Job \ \ \ sh \ \ \ \ \ 150 1000
+11/03 \ \ \ \ \ \ \ \ \ \ Abrt
+
+\ \ 9 309 \ \ \ \ wally \ \ par:start \ \ \ \ sh \ \ \ \ \ 150 1000
+08/03 \ \ \ \ \ \ \ \ \ \ Canc
+
+\ 10 310 \ \ \ \ wally \ \ par:Process d sh \ \ \ \ \ 150 1000 08/03
+**Cond**
+
+\ 11 312 \ \ \ \ wally \ \ par:Process d sh \ \ \ \ \ 150 1000 08/03
+**Cond**
+
+\ 12 313 \ \ \ \ wally \ \ par:Process d sh \ \ \ \ \ 150 1000 08/03
+**Cond**
+
+\ 13 314 \ \ \ \ wally \ \ par:Collect d sh \ \ \ \ \ 150 1000 08/03
+**Cond**
+
+\ 14 315 \ \ \ \ wally \ \ par:Error han sh \ \ \ \ \ 150 1000 08/03
+**Cond**
+
+\ 15 316 \ \ \ \ wally \ \ par:cleanup \ \ sh \ \ \ \ \ 150 1000 08/03
+**Cond**
+
+\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ {}-{}- 9 more
+jobs below -{}-
+
+=======================================================================
+
+\end{exparasmall}
+
+The job most likely to run next is the job at the top of the queue. As a
+job is completed, it will either be deleted altogether, or else it will
+be repositioned at the end of the queue.
+
+Only jobs for which the user has at least ``reveal'' permission are displayed. If the
+user has reveal but not read permission only the first two columns of
+information are shown. All of the information is visible if the user
+has read permission for the job.
+
+The time field is only displayed if a time constraint exists. It is
+displayed in 24-hour clock form if the job is scheduled to start within
+24 hours. Otherwise the start day is displayed in \genericargs{dd/mm} or \genericargs{mm/dd}
+form, depending on the time zone being used. (\genericargs{mm/dd} is displayed if the time zone is
+more than 4 hours West, otherwise \genericargs{dd/mm} is used).
+
+If the variable name or names will fit, then the names of the variables
+are displayed, otherwise \exampletext{**Cond**} is shown.
+
+Finally, the job's \textit{Progress} is displayed. This may be one of
+
+\begin{tabular}{l p{12cm}}
+\exampletext{Run} & when the job is running.\\
+\exampletext{Strt} or \exampletext{Init} & if the job is being started. \\
+\exampletext{Fin} & if the job has just completed and \ProductName{} is still performing
+assignments and updating related information. \\
+\exampletext{Done} & When the job has completed successfully and is being held on
+the queue, without a specified repetition. \\
+\exampletext{Err} & if the job terminated with an exit status indicating an error. \\
+\exampletext{Abrt} & if the job was terminated with a signal (either killed, or due
+to a program fault outside of \ProductName{} control). \\
+\exampletext{Canc} & if the job was terminated before it started. \\
+\end{tabular}
+
+If the job is yet to run, or has been run and reset to run again, the
+progress field is blank. All commands available from within the job
+list are as follows. Where a specific job is involved, the cursor
+should be moved to the job to select that job first.
+
+\begin{center}
+\begin{tabular}{|l p{12cm}|}\hline
+\bfseries Key &
+\bfseries Function\\\hline
+\userentry{D} & Delete the job. Confirmation may be requested (\userentry{y} or \userentry{n}).\\
+\userentry{M} & Open window to View / Edit the job modes (access permissions)\\
+\userentry{O} & Change the owner of the job\\
+\userentry{G} & Change the group of the job\\
+\userentry{{\textquotedbl}} & Change the title of the job\\
+\userentry{p} & Change the priority of the job\\
+\userentry{l} & Change the load level of the job (only with \textit{special create} privilege).\\
+\userentry{I} & View the script of the job on the screen\\
+\userentry{t} & Edit the start time, retention and repeat specification for the job\\
+\userentry{a} & Advance scheduled time to next repeat time without running job\\
+\userentry{C} & Open window to Add, Delete and Edit job conditions\\
+\userentry{S} & Open window to Add, Delete and Edit job assignments\\
+\userentry{x} & Change the command interpreter for the job\\
+\userentry{P} & Change the progress setting for the job\\
+\userentry{r} & Set job runnable\\
+\userentry{z} & Set job cancelled or held (does not invoke the cancel assignments)\\
+\userentry{f} & Force job to run but do not advance time\\
+\userentry{g} & Force job to run if possible, advancing to the next repeat if applicable\\
+\userentry{K} & Kill or cancel the job\\
+\userentry{F} & Open window to set the mail and write job completion flags.\\
+\userentry{u} & Edit process parameters, i.e. directory, umask, ulimit and exit code conditions.\\
+\userentry{A} & Open window to view / edit argument list for the job.\\
+\userentry{E} & Open window to view / edit environment variables for the job.\\
+\userentry{R} & Open window to add, delete and modify redirections for the job.\\
+\userentry{U} & Unqueue the job\\
+\userentry{X} & Open window to add, delete and edit command interpreters for the scheduler\\
+\userentry{\^{}} & Search forwards for job title\\
+\userentry{{\textbackslash}} & Search backwards for job title\\
+\userentry{V} & Switch to variable list screen\\
+\userentry{H} & Open window to set up holidays for the scheduler\\
+\userentry{\$} & Open window to change program options\\
+\userentry{,} & Modify format and content of job list\\\hline
+\end{tabular}
+\end{center}
+
+If the user is not permitted to perform the requested operation an Error message appears and nothing further happens.
+
+\subsubsection{View job script}
+The \userentry{I} command causes the current job to be displayed on the screen. The commands to the job are assumed to be
+text. Any non-printing characters will appear in inverse-video representations, i.e. binary 1 will appear as an inverse-video
+\exampletext{A}.
+
+To page through the display, use the following commands:
+
+\begin{center}
+\begin{tabular}{|l p{6cm}|}\hline
+\bfseries Command &
+\bfseries Function\\\hline
+\userentry{q} & Quit back to jobs screen.\\
+SPACE j \textit{down cursor} & Page down\\
+\userentry{k} \textit{up cursor} & Page up\\
+\userentry{B b} & Top of document\\
+\userentry{E e} & Bottom of document\\
+\userentry{h} or \textit{left cursor} & Shift window left\\
+\userentry{l} or \textit{right cursor} & Shift window right\\
+\userentry{{\textless}} & Left margin\\
+\userentry{{\textgreater}} & Right margin\\\hline
+\end{tabular}
+\end{center}
+\subsubsection{Change title}
+To change the title for a job, type \userentry{{\textquotedbl}} and key in any string of
+characters directly into the field, terminated by pressing the RETURN or ENTER key.
+
+It is possible to display a help message in free text fields like this one, but the help command
+will have to be bound to a key like a function key. The key chosen must be other than
+``\userentry{?}'' or a printing character, because these are permitted as part of the title.
+
+\subsubsection{Time Specification}
+To edit the time and repetition controls press \userentry{t}, which opens this sub-window:
+
+\begin{exparasmall}
+
+Seq Jobno \ \ User \ \ \ Title \ \ \ \ \ \ \ \ Shell \ \ Pri Load Time
+\ Cond \ \ \ \ \ Prog
+
++-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-+
+
+{\textbar} \ \ \ Set time for: e-mail:dial up Yes
+\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ {\textbar}
+
+{\textbar}
+\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ {\textbar}
+
+{\textbar} \ \ \ 23:11 Mon 22 Jan 2001
+\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ {\textbar}
+
+{\textbar}
+\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ {\textbar}
+
+{\textbar} \ \ Repeat: Once (\& delete)
+\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ {\textbar}
+
+{\textbar} \ \ \ \ \ \ \ \ \ \ \ Once (\& retain)
+\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ {\textbar}
+
+{\textbar} \ \ \ \ \ \ \ \ \ \ \ Minutes
+\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ {\textbar}
+
+{\textbar} \ \ \ \ \ \ \ \ \ \ \ Repeat every \ \ 2 Hours 01:11 Tue 23
+Jan 2001 \ \ \ \ \ \ \ \ \ \ \ \ {\textbar}
+
+{\textbar} \ \ \ \ \ \ \ \ \ \ \ Days
+\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ {\textbar}
+
+{\textbar} \ \ \ \ \ \ \ \ \ \ \ Weeks
+\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ {\textbar}
+
+{\textbar} \ \ \ \ \ \ \ \ \ \ \ Months (rel beg)
+\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ {\textbar}
+
+{\textbar} \ \ \ \ \ \ \ \ \ \ \ Months (rel end)
+\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ {\textbar}
+
+{\textbar} \ \ \ \ \ \ \ \ \ \ \ Years
+\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ {\textbar}
+
+{\textbar}
+\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ {\textbar}
+
+{\textbar} \ \ \ Avoiding Sun \ {}-{}-{}- \ {}-{}-{}- \ {}-{}-{}-
+\ {}-{}-{}- -{}-{}- \ Sat \ {}-{}-{}-
+\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ {\textbar}
+
+{\textbar}
+\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ {\textbar}
+
+{\textbar} \ \ \ If not possible: Skip
+\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ {\textbar}
+
+{\textbar} \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ Delay current
+\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ {\textbar}
+
+{\textbar} \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ Delay all
+\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ {\textbar}
+
+{\textbar} \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ Catch up
+\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ {\textbar}
+
+{\textbar}
+\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ {\textbar}
+
++-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-+
+
+=======================================================================
+
+\end{exparasmall}
+
+This screen displays all the start and repeat time parameters. If there are none, only the first line appears with \exampletext{No} at
+the end. The Avoiding ... and If not possible ... parameters are only displayed if a repeat specification is set.
+
+The second time and date displayed corresponds to the next time which would apply with the parameters given, and will be updated as the other
+parameters are changed.
+
+The following key commands are available as appropriate:
+
+\begin{center}
+\begin{tabular}{|l p{12.093cm}|}\hline
+\bfseries Command &
+\bfseries Function\\\hline
+\userentry{?} & Displays context sensitive help for the current field.\\\hline
+\userentry{Q} & Save changes and quit back to jobs screen\\\hline
+\itshape ESC & Leave unchanged and quit back to jobs screen.\\\hline
+\textit{TAB} or \textit{ENTER} & Move to the next field, or back to main screen as appropriate.\\\hline
+Back tab & Move to the previous field\\\hline
+\userentry{Y y T t S s} & Set field. i.e. Yes for time or Sun for first day field\\\hline
+\userentry{N n F f U u} & Un-set field. i.e. No for time or -{}-{}- for first day field\\\hline
+\userentry{! \~{}} & Toggle setting.\\\hline
+\userentry{+} & Increment the value of the current field\\\hline
+\userentry{{}-} & Decrement the value of the current field\\\hline
+\userentry{h} & Move left a day in Avoiding days fields\\\hline
+\userentry{l} & Move right a day in Avoiding days fields\\\hline
+\userentry{0} to \userentry{9} & Type digits into a part of the time or date fields\\\hline
+\end{tabular}
+\end{center}
+\paragraph{Turn on or off time constraint}
+The first line of the time constraint display gives users the option to
+turn one on if it is off, or off if it is on.
+
+\paragraph{Editing the time}
+If the job has not had any time constraint, then default parameters will
+be inserted. The defaults may be changed, by editing the
+\PrBtq{} message file, see thechapter on user interface configuration
+starting on page \pageref{bkm:Configurability} for more information. As each part of the time is
+changed, the date and day of the week are altered also in step with the
+changes. Each part of the time may be edited separately.
+
+\paragraph{Editing the repetition factor}
+The method of changing the repetition factor is to
+
+\begin{enumerate}
+\item Move the cursor to the required repetition factor (using \userentry{j} or
+\textit{cursor down} and \userentry{k} or \textit{cursor up}) and press ENTER. The
+selected repetition factor is underlined.
+\item Type in the number of the selected units to be repeated by, and
+press ENTER, or just press ENTER accept the default.
+\end{enumerate}
+To change only the number of an existing repetition, move the cursor to
+it and press the \userentry{+} or \userentry{{}-}
+key. The value may now be typed in, incremented or decremented.
+
+The \textit{next time} field will be updated automatically.
+
+The cases of \textit{months (rel beg)} and \textit{months (rel end)} are
+handled slightly differently. The day of the month is also required for
+months relative to the beginning, for example run every 2 months on the
+5th. For months relative to the end the day back from the end of the
+month is required. In combination with \textit{days to avoid} this
+allows for specifications like: the third working day from month end.
+
+\paragraph{Days to avoid}
+The days displayed are those when repetition will not occur. It is
+treated as an error to avoid every day.
+
+\paragraph{Reschedule options}
+To set the reschedule options, you move the cursor to the required
+option (using \userentry{j} or \textit{cursor up} and
+\userentry{k} or \textit{cursor down}) and press ENTER. The
+selected field will be highlighted. Press ENTER again or
+\userentry{q} to complete editing, or \textit{BACKTAB} to
+return to the days to avoid.
+
+To abort without saving changes, press ESC.
+
+\subsubsection{Change priority}
+To change the priority for the job, type \userentry{p} and
+key in a new priority for the job into the field, terminated by RETURN
+or ENTER.
+
+Users are only able to change the priority within the range specified in
+the administration file. The default range, on installation of
+\ProductName{}, is 100 to 200.
+
+\subsubsection{Change load level}
+Only users with \textit{special create} privilege are allowed to alter
+load levels. Otherwise the load level is set to that of the command
+interpreter. The load level may be set to any value between 1 and
+32767. To change the load level, press \userentry{l} and key
+in the new load level, terminated by RETURN or ENTER.
+
+\subsubsection{Progress Code}
+Providing a job is not running the \textit{progress code} or state of
+the job can be changed. This can be done if the job halted with an
+error or abort and, after rectifying the problem, it needs to be reset
+so that it can run again.
+
+The code may not be changed to \exampletext{Run}. Changing it
+to \exampletext{Cancelled} will not in this case invoke the
+assignments for job cancellation.
+
+Press \userentry{P} which will give a prompt of the form
+
+\begin{expara}
+
+[Nil Done Error Abrt]? Nil
+
+\end{expara}
+
+This shows the possible alternatives, and the default alternative.
+\exampletext{Nil} is the ready to run or runnable state.
+
+The following key commands are available:
+
+\begin{center}
+\begin{tabular}{|l p{10cm}|}\hline
+\bfseries Command &
+\bfseries Function\\\hline
+ENTER & Accept current alternative.\\\hline
+TAB & Skip forward to next alternative.\\\hline
+BACKTAB & Skip back to previous alternative.\\\hline
+ERASE and explicit characters & Type in alternative directly.\\\hline
+ESC & Abort function.\\\hline
+\end{tabular}
+\end{center}
+An alternative may also be selected by typing in the first letter of the
+name, providing that it is unique in the list of alternatives.
+
+The single-keystroke commands \userentry{r} and
+\userentry{z} are provided to enable the user to quickly set
+the job into the most-commonly required states of runnable or
+cancelled.
+
+\subsubsection{Force to run}
+The \userentry{g} command may be used to not only force a job
+into runnable state, but to bypass the time constraint for the current
+run and perform it immediately if possible
+
+Conditions and load level limits are not bypassed and may still restrict
+the job from running. The job will not run until these pre-conditions
+are satisfied.
+
+The \userentry{f} command is similar to the
+\userentry{g} command but does not advance the time after
+the job has run. The a command advances the time without running the
+job.
+
+\subsubsection{Kill or cancel job}
+To kill or cancel a job, move the cursor to it and type K, which gives
+the prompt:
+
+\begin{expara}
+
+[Int Quit Term Kill]? Term
+
+\end{expara}
+
+Select the required alternative in the same way as for Progress Codes.
+
+If the job is actually running, it will be killed with the selected
+signal, otherwise it will be set to cancelled state and any assignments
+flagged for \textit{cancel} will be invoked.
+
+If the process aborts with a signal, then it will be flagged as aborted.
+Note that if the process catches the signal and exits, then it will be
+considered to have terminated with an error, or if the exit code was
+zero, then it will be considered to have exited normally.
+
+\subsubsection{Process Parameters}
+Press the lower case u to open the window to view and edit the various
+process parameters: The screen displayed will look something like this:
+
+\begin{exparasmall}
+
+Process environment for Job {\textasciigrave}Output
+Example{\textquotesingle} (1420)
+
+{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-
+
+\bigskip
+
+
+Directory: \ \ \ \ \ /users/wally/bin
+
+\bigskip
+
+
+Umask: \ \ \ \ \ \ \ \ \ 022
+
+\bigskip
+
+
+Ulimit: \ \ \ \ \ \ \ \ 3FFFFF
+
+\bigskip
+
+
+Normal exit: \ \ \ \ \ 0 \ \ \ 0
+
+\bigskip
+
+
+Error exit: \ \ \ \ \ \ 1 \ 255
+
+\bigskip
+
+
+Advance time
+
+\bigskip
+
+
+Export: Local only
+
+\bigskip
+
+
+Delete time \ \ \ \ \ \ \ \ 0
+
+Maximum run time 0 \ 0 \ 0
+
+Signal number \ \ \ 0 \ Run on time \ \ \ \ \ 0 \ 0
+
+\end{exparasmall}
+
+The various components of this screen are:
+
+Directory
+
+specifies the directory which is set as the current working directory
+when the job is started. This can include environment variables, such
+as \userentry{\$HOME} or refer to a user's
+home directory using expressions like \userentry{\~{}/bin}
+to denote the directory \exampletext{bin} from the home
+directory, or \genericargs{\~{}tony} to denote the given
+user's home directory.
+
+Umask:
+
+The Unix \progname{umask} to be applied to the job
+
+Ulimit:
+
+Maximum size for files written by the job. Set to zero to avoid applying a limit (recommended).
+
+Normal exit
+
+Specifies the range of exit codes which the scheduler should interpret as indicating normal completion of the job.
+
+Error exit
+
+Specifies the range of exit codes which the scheduler should interpret as indicating the job terminated with some kind of error.
+
+Advance time
+
+Indicates that a repeating job should be advanced to the next scheduled
+run time even if it gave an error. If this is not set then instead of
+Advance time the string would appear as Do not advance time.
+
+Export
+
+Specifies the scope of the job across co-operating \ProductName{} hosts. The
+options are:
+
+Local only
+
+Only visible and runnable on local machine
+
+Export
+
+Accessible on any machine but only runnable on the local machine.
+
+Remote runnable
+
+Can be accessed from and run on any machine.
+
+Delete time
+
+Specifies the time in hours from the last run of a job after which it
+will be automatically deleted. Zero means there is no delete time and
+the job will stay on the queue indefinitely.
+
+Maximum ...
+
+The Maximum elapsed run time (in hours minutes and seconds), before the
+job will be killed for over running. All zeroes indicates no time
+limit, hence the job may run unrestricted.
+
+Signal number
+
+Sets the signal which should be sent to an over running job to terminate
+it gracefully.
+
+Run on time
+
+Specifies how long, in minutes and seconds, that a job may run for after
+receiving the above signal before it is sent a
+\filename{SIGKILL}.
+
+Note that if the ranges for normal and error exits overlap, then the
+\textit{smaller} range will be applied to any exit code which falls
+within both ranges.
+
+If an exit code does not fall within either of the ranges, then it is
+treated as an abort case.
+
+The following key commands are available:
+
+\begin{center}
+\begin{tabular}{|l p{12cm}|}\hline
+\bfseries Key & \bfseries Function\\\hline
+\userentry{d} & Change working directory\\\hline
+\userentry{m} & Edit umask in octal\\\hline
+\userentry{l} & Edit ulimit in hexadecimal\\\hline
+\userentry{A} & Set or reset advance time on error\\\hline
+\userentry{N} & Set normal exit code range\\\hline
+\userentry{E} & Set error exit code range\\\hline
+\userentry{q} & Quit back to jobs screen\\\hline
+\userentry{X} & Set job export flags\\\hline
+\userentry{D} & Set delete time in hours. Zero lets the job stay on the queue indefinitely.\\\hline
+\userentry{R} & Specify maximum permitted elapsed run time.\\\hline
+\userentry{K} & Specify signal for killing job if it over runs\\\hline
+\userentry{g} & Set grace time from above signal until job sent a \filename{SIGKILL}\\\hline
+\end{tabular}
+\end{center}
+Commands which prompt with a list of alternatives are handled in the
+same way as the Progress code described earlier.
+
+The directory may contain environment variable names prefixed by
+\exampletext{\$} or constructs of the form
+\genericargs{\~{}user} to denote the home directory of
+the given user\footnote{This is probably most important for possibly
+remotely run commands as the directory structures may vary between
+machines.}.
+
+\subsubsection{Change command interpreter}
+To change the command interpreter, press the lower case
+\userentry{x} which moves the cursor to that field for entry
+of the new command interpreter name.
+
+Type in the new command interpreter as a string, e.g.
+\exampletext{ksh}. Pressing the help key will prompt with a
+list of possible command interpreter names. If part of a name has
+already been given, the list is restricted to those starting with that
+string.
+
+Pressing the space bar will cycle through possible command interpreter
+names. Likewise if part of a name has been given, the list of names
+cycled through is restricted to those starting with the character or
+characters already specified.
+
+Type RETURN or ENTER to accept the name offered. To abort the process,
+press ESC.
+
+On successful completion, the command interpreter's load level will also replace the load level of the job.
+
+\subsubsection{Unqueue Job}
+Type an upper case \userentry{U} to unqueue a job, or just its specification, which prompts with:
+
+\begin{expara}
+
+[Unqueue Copy Save-home Options-current]? Unqueue
+
+\end{expara}
+
+The four alternatives are:
+
+\exampletext{Unqueue}
+
+Remove the job from the queue and save it.
+
+\exampletext{Copy}
+
+Just make a copy of the job, do not delete it.
+
+\exampletext{Save-home}
+
+Create or edit a \homeconfigpath{} file off the home
+directory, using the options used for this job as default options for
+\PrBtr{} commands.
+
+\exampletext{Options-current}
+
+As above but use the current directory.
+
+For the first two alternatives, a sub-window is generated of the form
+
+\begin{exparasmall}
+
++-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-+
+
+{\textbar}Unqueuing job {\textasciigrave}Output
+Example{\textquotesingle} (1420)
+\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ {\textbar}
+
+{\textbar}
+\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ {\textbar}
+
+{\textbar}Directory to write in /users/wally
+\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ {\textbar}
+
+{\textbar}Command file
+\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ {\textbar}
+
+{\textbar}Job file
+\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ {\textbar}
+
++-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-+
+
+\end{exparasmall}
+
+The default directory is the current directory when \PrBtq{} was started, but this may be over-typed with
+any other directory name.
+
+The two file names prompted for are a \textit{command file}, into which
+a \PrBtr{} command will be placed suitable for
+re-submitting the job with the same parameters, and a \textit{job
+file}, containing the shell script or standard input for the job. The
+command file will be made executable (i.e. it will become a shell
+script), and it will name the job file as the source of the standard
+input.
+
+For the \textit{Save-home} and \textit{Options-current} alternatives,
+the sub-window does not have fields for the Command and Job files, only
+the directory is prompted for, with the initial directory the home or
+the current directory respectively.
+
+The files may be edited and the job re-submitted by executing the
+command file. On machines with some \textit{read-only} environment
+variables this may fail. In this case invoke the program
+\progname{btresub} with the name of the command file to
+re-submit the job.
+
+Note that to unqueue the job, a user must have read, read-mode and
+delete permission.
+
+\subsubsection{Set mail/write message on job completion flags}
+Press \userentry{F} to view and change the mail and write
+flags, which opens this sub-window:
+
+\begin{exparasmall}
+
++-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-+
+
+{\textbar}Mail/Write Flags for job {\textquotesingle}Output
+Example{\textquotesingle} (1420){\textbar}
+
+{\textbar}
+\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ {\textbar}
+
+{\textbar}Mail user at end of job \ \ \ \ \ \ \ \ \ No
+\ \ \ \ \ \ \ \ \ \ \ \ {\textbar}
+
+{\textbar}Write message to user{\textquotesingle}s terminal No
+\ \ \ \ \ \ \ \ \ \ \ \ {\textbar}
+
++-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-+
+
+\end{exparasmall}
+
+These options do not affect the output from the job. The output is
+always e-mailed back to the user unless it has been redirected. Only
+the job completion messages are affected.
+
+\pagebreak[20]
+The available commands for this sub-window are:
+
+\begin{center}
+\begin{tabular}{|l p{12cm}|}\hline
+\bfseries Command &
+\bfseries Function\\\hline
+\userentry{Y T S} & Set current flag\\\hline
+\userentry{N F U} & Un-set current flag\\\hline
+\userentry{! \~{}} & Reverse current flag\\\hline
+\userentry{q} & Quit back to job screen\\\hline
+\itshape ESC & Abort edit and leave unchanged\\\hline
+\end{tabular}
+\end{center}
+\subsubsection{Setting job arguments}
+Press \userentry{A} to open the job arguments screen, which will look like this:
+
+\begin{exparasmall}
+
+Command arguments for Job {\textasciigrave}Accounts{\textquotesingle} (9309)
+
+Numb Value
+
+\bigskip
+
+
+\ \ \ 1 {\textquotesingle}statements{\textquotesingle}
+
+\ \ \ 2 {\textquotesingle}june{\textquotesingle}
+
+\end{exparasmall}
+
+Arguments can include job parameters, by using the \exampletext{\%} symbols in the same way as environment
+variables and I/O redirections, see page \pageref{bkm:Metadata}.
+
+The following, context specific, key commands are available:
+
+\begin{center}
+\begin{tabular}{|l p{12cm}|}\hline
+\bfseries Key &
+\bfseries Function\\\hline
+\userentry{i} & Insert new, copied or moved argument before the current one.\\\hline
+\userentry{a} & Insert new, copied or moved argument after the current one.\\\hline
+\userentry{d} & Delete current argument\\\hline
+\userentry{m} & Mark argument for moving. Pressing m again cancels.\\\hline
+\userentry{c} & Mark argument for copying. Pressing c again cancels.\\\hline
+\userentry{E} & Edit the text of the current argument.\\\hline
+\userentry{q} & Quit back to jobs screen\\\hline
+\end{tabular}
+\end{center}
+
+To move an argument, first place the cursor on the argument to be moved
+and press \userentry{m}. The (Moving) flag appears at the
+top right corner of the screen. Next move the cursor to the destination
+position, and type \userentry{i} or \userentry{a}
+to insert the argument before or after the line.
+
+To copy an argument follow the same procedure, but press \userentry{c} to copy, instead of \userentry{m}.
+
+\subsubsection{Editing the environment}
+The procedure for setting the environment of a job is similar to that
+for the arguments, except that there is no copy facility. Press
+\userentry{E} to open the Environment list for the job,
+which will look something like this:
+
+\pagebreak[20]
+\begin{exparasmall}
+
+Environment variables for job
+{\textasciigrave}Audio:playback{\textquotesingle} (1082)
+
+Numb \ \ \ \ Name
+
+\ \ \ \ Value
+
+{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-
+
+1 \ \ \ \ \ \ \ MANPATH
+
+\ \ \ \ :/usr/share/man:/usr/motif/man:/usr/local/man
+
+2 \ \ \ \ \ \ \ HZ
+
+\ \ \ \ 100
+
+3 \ \ \ \ \ \ PATH
+
+\ \ \ \ :/usr/bin:/usr/ccs/bin:/usr/local/bin:/usr/ucb:/usr/X386/bin:/usr/
+
+motif/bin:/home/int/jmc/bin
+
+4 \ \ \ \ \ \ CDPATH
+
+\ \ \ \ :..:/home/int/jmc:/home/int/work:/home/products
+
+\end{exparasmall}
+
+The following, context specific, key commands are available
+
+\begin{center}
+\begin{tabular}{|l p{12cm}|}\hline
+\bfseries Key &
+\bfseries Function\\\hline
+\userentry{i} & Insert new or moved environment variable before the current one.\\\hline
+\userentry{a} & Insert new or moved environment variable after the current one.\\\hline
+\userentry{d} & Delete current environment variable\\\hline
+\userentry{m} & Mark environment variable for moving. Pressing m again cancels.\\\hline
+\userentry{N} & Rename the current environment variable.\\\hline
+\userentry{V} & Edit the value (i.e. contents) of the current environment variable.\\\hline
+\userentry{q} & Quit back to jobs screen\\\hline
+\end{tabular}
+\end{center}
+To change the name of an environment variable press \userentry{N}. To change the value, press
+\userentry{V}. Note that the value (or contents) of an environment variable may extend over several lines.
+
+To move an environment variable, first place the cursor on the variable
+to be moved and press \userentry{m}. The (Moving) flag
+appears at the top right corner of the screen. Next move the cursor to
+the destination position, and type \userentry{i} or
+\userentry{a} to insert it before or after the line. The
+order of environment variables is not known to have an effect with any
+existing software.
+
+Note that the \filename{PWD} environment variable is not copied out when the job is unqueued. This is because many shells object to
+assignments to this variable.
+
+\exampletext{\%} sequences are expanded in environment
+variables, in the same way as in arguments and I/O redirections.
+
+\subsubsection[Editing redirections]{Editing redirections}
+First move to the relevant job and press \exampletext{R}. This
+opens a screen looking like:
+
+\pagebreak[20]
+\begin{exparasmall}
+
+I/O Redirections for job {\textasciigrave}Output
+Example{\textquotesingle} (1420)
+
+Numb File \ Type
+
+\ \ \ \ File/Process
+
+1 \ \ \ 1 (stdout) \ \ \ Write
+
+\ \ \ \ /tmp/results\_j\%d1
+
+2 \ \ 2 (stderr) \ \ \ \ Append
+
+\ \ \ \ /tmp/logfile\_j\$d1
+
+\end{exparasmall}
+
+The following, context specific, key commands are available:
+
+\begin{center}
+\begin{tabular}{|l p{12cm}|}\hline
+\bfseries Key &
+\bfseries Function\\\hline
+\userentry{i} & Insert new or moved redirection before the current one.\\\hline
+\userentry{a} & Insert new or moved redirection after the current one.\\\hline
+\userentry{d} & Delete current redirection.\\\hline
+\userentry{m} & Mark redirection for moving. Pressing m again cancels.\\\hline
+\userentry{N} & Change the file number.\\\hline
+\userentry{A} & Change the Action ( i.e. read, write, append, ...)\\\hline
+\userentry{F} & Edit the file / process.\\\hline
+\end{tabular}
+\end{center}
+The commands \userentry{N}, \userentry{A} and
+\userentry{F} respectively enable editing of the file
+descriptor number, \textit{action} and file name (or number in the case
+of \textit{dup descriptor} actions).
+
+\userentry{\%} sequences can be used to insert job
+parameters, as described under Meta-Data on page \pageref{bkm:Metadata}.
+
+\subsubsection{Job Assignment Editing}
+Up to 8 assignments are allowed per job. Select the required job and
+press \userentry{S}, to open a window like this:
+
+\begin{exparasmall}
+
+Assignments for job {\textasciigrave}prog\_a{\textquotesingle} (451)
+
+\bigskip
+
+
+\ \ Variable \ \ \ \ \ \ \ \ \ \ Start \ Reverse Normal \ Error
+\ \ Abort \ Cancel
+
+Oper \ \ \ \ Value to set
+
+\bigskip
+
+
+\ \ A\_COUNT \ \ \ \ \ \ \ \ \ \ \ {}-{}- \ \ \ \ {}-{}- \ \ \ \ \ Set
+\ \ \ \ Set \ \ \ \ Set \ \ \ Set
+
+Add \ \ \ \ \ 1
+
+\ \ A\_STATUS \ \ \ \ \ \ \ \ \ \ {}-{}- \ \ \ \ {}-{}- \ \ \ \ \ Set
+\ \ \ \ {}-{}- \ \ \ \ \ {}-{}- \ \ \ \ {}-{}-
+
+Set \ \ \ \ \ 1
+
+\ \ A\_STATUS \ \ \ \ \ \ \ \ \ \ {}-{}- \ \ \ \ {}-{}- \ \ \ \ \ {}-{}-
+\ \ \ \ \ Set \ \ \ \ Set \ \ \ {}-{}-
+
+Set \ \ \ \ \ 999
+
+\end{exparasmall}
+
+The available key commands are:
+
+\begin{center}
+\begin{tabular}{|l p{12cm}|}\hline
+\bfseries Key &
+\bfseries Function\\\hline
+\userentry{D} & Delete this assignment\\\hline
+\userentry{I} & Insert new assignment before current line.\\\hline
+\userentry{a} & Insert new assignment after current line\\\hline
+\userentry{V} & Select a different variable for assignment\\\hline
+\userentry{=} & Change assignment operation\\\hline
+\userentry{N} & Change value assigned\\\hline
+\userentry{S} & Edit \textbf{start} flag\\\hline
+\userentry{R} & Edit \textbf{reverse} flag\\\hline
+\userentry{O} & Edit \textbf{normal exit} (OK) flag\\\hline
+\userentry{E} & Edit \textbf{error exit} flag\\\hline
+\userentry{A} & Edit \textbf{abort exit} flag\\\hline
+\userentry{C} & Edit \textbf{cancel} flag\\\hline
+\userentry{T Y S} & Set flag\\\hline
+\userentry{F N U} & Clear flag\\\hline
+\userentry{\~{} !} & Toggle flag\\\hline
+\userentry{c} & Toggle \textit{critical} mark for remote variables\\\hline
+\end{tabular}
+\end{center}
+When a new assignment is created, the fields for variable name,
+operation and value are prompted for. The flags are set from
+configurable defaults. As distributed these are: set \textit{start},
+\textit{reverse}, \textit{normal exit}, \textit{error exit} and
+\textit{abort}.
+
+\paragraph{Choosing the Variable}
+Requesting help whilst entering or changing the variable name gives a
+list of available variables. If one or more characters of a variable
+name have already been entered the list will be restricted to just
+those variables starting with the character(s) typed.
+
+Pressing the space bar whilst entering or changing the variable name
+will cycle the field through the list of possibilities. If part of the
+name has already been entered, the list of variables cycled through
+will be restricted to variables starting with those characters.
+
+\paragraph{Specifying the Value to be Assigned}
+The value may be an integer number or a string. Numeric values are
+recognised by a leading digit or a
+``\userentry{{}-}'' sign. Strings
+are recognised by the leading character not being numeric or a
+``\userentry{{}-}'' sign. The
+first string character will be prefixed automatically by a
+{\textquotedbl} character, but this should not be typed at the end.
+
+To enter a string which starts with a digit or
+``\userentry{{}-}'', precede it by
+a double quote, \userentry{''}. This will be
+echoed, but will not form part of the string.
+
+\paragraph{Specifying the Assignment Operation}
+Editing the assignment operation prompts with the set of alternatives,
+like this:
+
+\begin{expara}
+
+Set Add Subtract Multiply Divide Modulus Exit Signal]? Set
+
+\end{expara}
+
+These are handled in the same way as described for the Progress Codes.
+
+Only Set is permitted with string values.
+
+\paragraph{Setting the flags}
+Press the appropriate key for the assignment flag that needs changing.
+Then press the key to set, clear or toggle the flag as required. Note
+that if the reverse flag is set, the effected exit conditions are
+highlighted.
+
+To mark a variable assignment as critical press
+\userentry{c}. Press \userentry{c} again to clear
+the assignment critical flag.
+
+\subsubsection{Set job conditions}
+Type \userentry{C} to open the job pre-conditions sub-window,
+which
+
+\begin{exparasmall}
+
+\ +-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-+
+
+\ {\textbar} Conditions for job
+{\textasciigrave}Audio:playback{\textquotesingle} (1080)
+\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ {\textbar}
+
+\ {\textbar}
+\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ {\textbar}
+
+\ {\textbar} Variable \ \ \ \ \ \ \ \ \ Cond Value
+\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ {\textbar}
+
+\ {\textbar}
+\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ {\textbar}
+
+\ {\textbar} Audio\_Lock \ \ \ \ \ \ \ \ \ {\textgreater} \ 0
+\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ {\textbar}
+
+\ {\textbar} Audio\_Status \ \ \ \ \ \ \ =
+\ {\textquotedbl}three{\textquotedbl}
+\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ {\textbar}
+
+\ {\textbar}
+\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ {\textbar}
+
+\ {\textbar}
+\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ {\textbar}
+
+\ {\textbar}
+\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ {\textbar}
+
+\ {\textbar}
+\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ {\textbar}
+
+\ {\textbar}
+\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ {\textbar}
+
+\ {\textbar}
+\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ {\textbar}
+
+\ +-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-+
+
+\end{exparasmall}
+
+New conditions are added to the end of the list. Up to a maximum of 10
+conditions may be specified for each job.
+
+The available key commands are:
+
+\begin{center}
+\begin{tabular}{|l p{12cm}|}\hline
+\bfseries Command &
+\bfseries Function\\\hline
+\userentry{D} & Delete the selected condition\\
+\userentry{a} & Add new condition\\
+\userentry{V} & Change variable used in condition\\
+\userentry{C = ! {\textless} {\textgreater}} & Change comparison operator\\
+TAB & Cycles alternatives when changing comparison operator\\
+\userentry{N} & Change value compared against\\
+\userentry{c} & Toggle \textit{critical} mark for remotes\\\hline
+\end{tabular}
+\end{center}
+\paragraph{Choosing the Variable}
+Asking for help whilst entering or changing the variable name, will give
+a list of available variables. If one or more characters of a variable
+name have already been entered, the list is restricted to names
+starting with those characters.
+
+Pressing the space bar whilst entering or changing the variable name
+will cycle the field through the list of possibilities. If part of the
+name has already been entered, the list of variables cycled through
+will be restricted to variables starting with those characters.
+
+\paragraph{Specifying the Comparison Operator}
+Editing the comparison operator prompts with the set of alternatives,
+like this:
+
+\begin{expara}
+
+[= != {\textless} {\textless}= {\textgreater} {\textgreater}=] !=
+
+\end{expara}
+
+These are handled in the same way as described for the Progress Codes,
+plus the operator may be erased and typed in directly.
+
+Only ``\exampletext{=}'' and ``\exampletext{!=}'' are guaranteed to work consistently with strings.
+
+\paragraph{Specifying the Value to Compare Against}
+The value may be an integer number or a string. Numeric values are recognised by a leading digit or a
+``\exampletext{{}-}'' sign. Strings are recognised by the leading character not being numeric or a
+``\exampletext{{}-}'' sign. The first string character will be prefixed automatically by a
+\exampletext{{\textquotedbl}} character, but this should not be typed at the end.
+
+To enter a string which starts with a digit or ``\exampletext{{}-}'', precede it by
+a double quote, \exampletext{{\textquotedbl}}. This will be echoed, but will not form part of the string.
+
+\subsubsection{Change Owner}
+To change the ownership of a job, a suitable user must nominate the new
+owner, for which \textit{give away} permission applies. Then the new
+owner must accept the transfer, for which \textit{assume ownership}
+applies. Nothing effectively happens until these two stages have been
+completed, and the job list display will not change after the first
+step.
+
+If the user has \textit{write administration file} privilege, then these
+checks are bypassed and the change of owner is immediately effective.
+
+Type \userentry{O} to change the owner, which will prompt with
+
+\begin{expara}
+
+New owner for job {\textquotesingle}memo{\textquotesingle} currently jmc:
+
+\end{expara}
+
+Enter the new owner as a string, e.g. \filename{root}, or as a
+numeric user id\footnote{Although we suggest you avoid this.}. Asking
+for help prompts with a list of possible user names. If the first one
+or more characters of the user name has been typed in, only names
+starting with those characters are listed.
+
+To cycle through possible user names, press the space bar. The list of
+names cycled through can be restricted by entering the one or more
+characters.
+
+To abort the process, press \textit{ESC}.
+
+\subsubsection{Change Group}
+To change the group of a job it has to be nominated to the new group by
+a suitable user, for which \textit{give away group }permission applies.
+It then has to be accepted by someone in the new group, for which
+\textit{assume group ownership }applies. Nothing effectively happens
+until these two stages have been completed.
+
+If the user has \textit{write administration file} privilege, then these
+checks are bypassed and the change of group is immediately effective.
+
+Pressing \userentry{G} to change group causes \PrBtq{} to prompt
+with:
+
+\begin{expara}
+
+New group for job {\textquotesingle}memo{\textquotesingle} currently
+users:
+
+\end{expara}
+
+Type in the new group as a string, e.g. \filename{other}, or as
+a numeric group id\footnote{Although we suggest you avoid this.}.
+Pressing the help key will prompt with a list of possible group names.
+If part of a group name has already been given, the list is restricted
+to those starting with that string.
+
+Pressing the space bar will cycle through possible group names. Likewise
+if part of a group name has been given, the list of groups cycled
+through is restricted to those starting with the character or
+characters already specified.
+
+To abort the process, press \textit{ESC}
+
+\subsubsection{Mode Editing}
+Press \userentry{M} to edit the job modes (or access
+permissions). This opens a sub-window that looks something like this:
+
+\begin{exparasmall}
+
++-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-+
+
+{\textbar}Modes for Job {\textquotesingle}update{\textquotesingle}
+(6943) \ \ \ \ \ \ \ \ \ \ \ \ \ \ {\textbar}
+
+{\textbar}Job owner jmc group users
+\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ {\textbar}
+
+{\textbar}
+\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ {\textbar}
+
+{\textbar} \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ User \ \ Group
+\ Others {\textbar}
+
+{\textbar}Read \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ Yes \ \ \ Yes
+\ \ \ No \ \ \ \ {\textbar}
+
+{\textbar}Write \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ Yes \ \ \ No
+\ \ \ \ No \ \ \ \ {\textbar}
+
+{\textbar}Reveal \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ Yes \ \ \ Yes \ \ \ Yes
+\ \ \ {\textbar}
+
+{\textbar}Display mode \ \ \ \ \ \ \ \ \ \ Yes \ \ \ Yes \ \ \ Yes
+\ \ \ {\textbar}
+
+{\textbar}Set mode \ \ \ \ \ \ \ \ \ \ \ \ \ \ Yes \ \ \ No \ \ \ \ No
+\ \ \ \ {\textbar}
+
+{\textbar}Assume ownership \ \ \ \ \ \ No \ \ \ \ No \ \ \ \ No
+\ \ \ \ {\textbar}
+
+{\textbar}Assume group ownership No \ \ \ \ No \ \ \ \ No
+\ \ \ \ {\textbar}
+
+{\textbar}Give away owner \ \ \ \ \ \ \ Yes \ \ \ No \ \ \ \ No
+\ \ \ \ {\textbar}
+
+{\textbar}Give away group \ \ \ \ \ \ \ Yes \ \ \ Yes \ \ \ No
+\ \ \ \ {\textbar}
+
+{\textbar}Delete \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ Yes \ \ \ No \ \ \ \ No
+\ \ \ \ {\textbar}
+
+{\textbar}Kill (jobs only) \ \ \ \ \ \ Yes \ \ \ No \ \ \ \ No
+\ \ \ \ {\textbar}
+
++-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-+
+
+\end{exparasmall}
+
+If the user has \textit{Set mode} access, the following key commands are
+available:
+
+\begin{center}
+\begin{tabular}{|l|p{12cm}|} \hline
+\bfseries Command &
+\bfseries Meaning\\\hline
+\userentry{Y T} & Set corresponding permission, move right\\
+\userentry{N F} & Unset corresponding permission, move right\\
+\userentry{! \~{}} & Invert permission and move right\\\hline
+\end{tabular}
+\end{center}
+Note that some permissions, where it does not make sense to have one without the other, are coupled together. For example if turning on
+\textit{read} permission, the \textit{reveal} permission will be turned on at the same time.
+
+Type \userentry{q} to quit back to the main job screen.
+
+\subsection{The Variables Screen and Commands}
+The variables screen may be displayed automatically on entry, if there
+are no jobs visible to the user or it has been set as the default. To
+switch to the variables screen from the job list type an upper case
+\userentry{V}.
+
+A typical screen for the, default configuration, variable list might look like this:
+
+\begin{exparasmall}
+
+\ Name \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ Value
+\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ Exp/Loc
+
+\ \ \ \ \ Comment
+\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ User
+\ \ \ Group
+
+{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-
+
+\bigskip
+
+
+\ CLOAD \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ 0
+
+\ \ \ \ \ Current value of load level
+\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ batch \ \ bin
+
+\bigskip
+
+
+\ LOADLEVEL \ \ \ \ \ \ \ \ \ \ \ \ \ 20000
+
+\ \ \ \ \ Maximum value of load level
+\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ batch \ \ bin
+
+\bigskip
+
+
+\ LOGJOBS
+
+\ \ \ \ \ File to save job record in
+\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ batch \ \ bin
+
+\bigskip
+
+
+\ LOGVARS
+
+\ \ \ \ \ File to save variable record in \ \ \ \ \ \ \ \ \ \ \ batch
+\ \ bin
+
+\bigskip
+
+
+\ MACHINE \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ voyager
+
+\ \ \ \ \ Name of current host
+\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ batch \ \ bin
+
+\bigskip
+
+
+\ STARTLIM \ \ \ \ \ \ \ \ \ \ \ \ \ \ 5
+
+\ \ \ \ \ Number of jobs to start at once \ \ \ \ \ \ \ \ \ \ \ batch
+\ \ bin
+
+\bigskip
+
+
+\ STARTWAIT \ \ \ \ \ \ \ \ \ \ \ \ \ 30
+
+\ \ \ \ \ Wait time in seconds for job start \ \ \ \ \ \ \ \ batch
+\ \ bin
+
+\bigskip
+
+
+=======================================================================
+
+\end{exparasmall}
+
+In this example, only the system variables have been set up and the user
+has sufficient permissions to see all of the information for all of
+them. The variables \filename{LOGVARS} and
+\filename{LOGJOBS} contain the empty or null string.
+
+The following key commands are available:
+
+\begin{center}
+\begin{tabular}{|l p{12cm}|}\hline
+\bfseries Command &
+\bfseries Function\\\hline
+\userentry{D} & Delete the variable. Confirmation is requested - reply Y or N.\\
+\userentry{M} & Change the variable modes (access permissions)\\
+\userentry{O} & Change the owner of the variable\\
+\userentry{G} & Change the group of the variable\\
+\userentry{{\textquotedbl}} & Change the comment for the variable\\
+\userentry{R} & Rename the variable\\
+\userentry{C} & Create a new variable\\
+\userentry{A} & Assign a new value to the variable\\
+\userentry{=} & Reset constant for arithmetic\\
+\userentry{+ - * / \%} & Apply arithmetic operation (constant on \textit{rhs}) to variable\\
+\userentry{\$} & Set program options\\
+\userentry{J} & Switch to job list screen\\
+\userentry{L} & Set variable as local\\
+\userentry{E} & Set variable as export\\
+\userentry{\~{}} & Toggle export state of variable\\
+\userentry{U} & Set variable clustered\\
+\userentry{K} & Set variable not clustered\\
+\userentry{\&} & Toggle clustered setting\\
+\userentry{\^{}} & Search forwards for variable name or title\\
+\userentry{{\textbackslash}} & Search backwards for variable name or title\\
+\userentry{,} & Set format and content of top line for each variable\\
+\userentry{;} & Set format and content of bottom line for each variable\\\hline
+\end{tabular}
+\end{center}
+\subsubsection{Assign new value}
+To assign a new value to the variable, press \userentry{A}.
+The cursor will move to the value field for entry of the new data, may
+be either an integer or a string. Numeric values are recognised by a
+leading digit or minus sign and strings are recognised by any other
+initial character. The first string character will automatically be
+prefixed by a \exampletext{{\textquotedbl}} character.
+
+To enter a string which happens to start with a digit or
+``\exampletext{{}-}'', precede it with a double quote \exampletext{{\textquotedbl}} character.
+This will force the value to string and be echoed, but will not be
+taken as part of the string.
+
+Type \textit{ESC} to abort and leave the value unchanged.
+
+\subsubsection{Arithmetic operations}
+Arithmetic operations, like increment and decrement use a constant which
+is initially set to one. The constant maybe changed by pressing the
+``\userentry{=}'' key. You will be
+prompted for a new value on the current screen line, and the header
+will be updated.
+
+The constant may be applied to any variable by moving the cursor to it
+and typing \userentry{+ - * /} or \userentry{\%}
+(the last gives modulus, i.e. remainder when divided by the constant).
+The variable must be numeric to start with.
+
+\subsubsection{Change comment}
+The comment field is a free text string, which \ProductName{} maintains for
+documenting the purpose of variables. The comment field has no effect
+on the behaviour of variables or the scheduling of jobs.
+
+To change the comment for a variable, type
+\userentry{{\textquotedbl}} and key in any string of
+characters, pressing ENTER or RETURN to complete the operation.
+
+It is possible to display a help message whilst this is happening, but
+the help command will have to be bound to a non-printing character, as
+\exampletext{?} is permitted as part of the comment.
+
+\subsubsection{Create new variable}
+Press \userentry{C} to create a new variable, which opens
+this sub-window:
+
+\begin{exparasmall}
+
++-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-+
+
+{\textbar} \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ Create new variable
+\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ {\textbar}
+
+{\textbar}
+\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ {\textbar}
+
+{\textbar}Name:
+\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ {\textbar}
+
+{\textbar}
+\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ {\textbar}
+
+{\textbar}Value:
+\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ {\textbar}
+
+{\textbar}
+\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ {\textbar}
+
+{\textbar}Comment:
+\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ {\textbar}
+
++-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-+
+
+\end{exparasmall}
+
+\PrBtq{} prompts through each field in turn. Press
+\textit{ESC} at any stage to abort.
+
+Variable names are restricted to alphanumeric characters and underscore
+starting with an upper or lower case letter.
+
+The value may contain either an integer or a string. Numeric values are
+recognised as by a leading digit or
+``\exampletext{{}-}'' sign. Strings
+are recognised as by the entry of any printing character other than a
+digit or ``\exampletext{{}-}'' sign.
+The first string character will be prefixed automatically by a
+\exampletext{{\textquotedbl}} character (which will not form
+part of the string), but this should not be typed at the end.
+
+To enter a string which happens to start with a digit or
+``\exampletext{{}-}'', type a double
+quote first. This will be echoed, but will not form part of the string.
+
+The comment is free text string made up of spaces and any printable
+characters.
+
+For example, creating a variable to control and show the progress of a
+chain of jobs relating to the pay roll might look like this:
+
+\pagebreak[20]
+\begin{exparasmall}
+
++-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-+
+
+{\textbar} \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ Create new variable
+\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ {\textbar}
+
+{\textbar}
+\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ {\textbar}
+
+{\textbar}Name: \ \ \ \ \ \ \ PayRoll\_Progress
+\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ {\textbar}
+
+{\textbar}
+\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ {\textbar}
+
+{\textbar}Value: \ \ \ \ \ \ {\textquotedbl}Start\_Wait
+\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ {\textbar}
+
+{\textbar}
+\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ {\textbar}
+
+{\textbar}Comment: \ \ \ \ Progress through queue of pay roll jobs
+\ \ {\textbar}
+
++-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-+
+
+\end{exparasmall}
+
+\subsubsection{Rename variable}
+A variable may be renamed using the \userentry{R} command, which prompts with:
+
+\begin{expara}
+
+New name for variable cant:
+
+\end{expara}
+
+The name must begin with an upper or lower case alphabetic character. The rest of the name may be any combination of alphanumeric and
+underscore characters.
+
+Only users with \textit{delete} permission on the variable may rename it.
+
+The variable references in job assignments and conditions will be updated, including those on remote machines. Users cannot rename a
+remote variable.
+
+\subsubsection{Mode Editing}
+Move the cursor to the required variable and press M to open the Modes sub-window, which will look something like this:
+
+\begin{exparasmall}
+
+\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ +-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-+
+
+\ LOADLEVEL \ \ \ \ \ \ {\textbar}Modes for Variable
+{\textasciigrave}LOADLEVEL{\textquotesingle}
+\ \ \ \ \ \ \ \ \ \ \ \ \ {\textbar}
+
+\ \ \ \ \ Maximum val {\textbar}Variable owner batch group bin
+\ \ \ \ \ \ \ \ \ \ \ \ \ {\textbar}
+
+\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ {\textbar}
+\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ {\textbar}
+
+\ LOGJOBS \ \ \ \ \ \ \ \ {\textbar}
+\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ User \ \ Group \ Others
+{\textbar}
+
+\ \ \ \ \ File to sav {\textbar}Read
+\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ Yes \ \ \ Yes \ \ \ No
+\ \ \ \ {\textbar}
+
+\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ {\textbar}Write
+\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ Yes \ \ \ No \ \ \ \ No
+\ \ \ \ {\textbar}
+
+\ LOGVARS \ \ \ \ \ \ \ \ {\textbar}Reveal
+\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ Yes \ \ \ Yes \ \ \ Yes
+\ \ \ {\textbar}
+
+\ \ \ \ \ File to sav {\textbar}Display mode \ \ \ \ \ \ \ \ \ \ Yes
+\ \ \ Yes \ \ \ Yes \ \ \ {\textbar}
+
+\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ {\textbar}Set mode
+\ \ \ \ \ \ \ \ \ \ \ \ \ \ Yes \ \ \ No \ \ \ \ No \ \ \ \ {\textbar}
+
+\ MACHINE \ \ \ \ \ \ \ \ {\textbar}Assume ownership \ \ \ \ \ \ No
+\ \ \ \ No \ \ \ \ No \ \ \ \ {\textbar}
+
+\ \ \ \ \ Name of cur {\textbar}Assume group ownership No \ \ \ \ No
+\ \ \ \ No \ \ \ \ {\textbar}
+
+\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ {\textbar}Give away owner
+\ \ \ \ \ \ \ Yes \ \ \ No \ \ \ \ No \ \ \ \ {\textbar}
+
+\ STARTLIM \ \ \ \ \ \ \ {\textbar}Give away group \ \ \ \ \ \ \ Yes
+\ \ \ Yes \ \ \ No \ \ \ \ {\textbar}
+
+\ \ \ \ \ Number of j {\textbar}Delete
+\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ Yes \ \ \ No \ \ \ \ No
+\ \ \ \ {\textbar}
+
+\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ +-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-+
+
+\end{exparasmall}
+
+The sub-window is brought up over the top of the variable screen, in the same way as sub-windows for jobs.
+
+The context specific key commands available in the modes sub-window are:
+
+\begin{center}
+\begin{tabular}{|l p{12cm}|}\hline
+\bfseries Command &
+\bfseries Meaning\\\hline
+\userentry{Y T} & Set corresponding permission\\\hline
+\userentry{N F} & Unset corresponding permission\\\hline
+\userentry{! \~{}} & Toggle permission\\\hline
+\end{tabular}
+\end{center}
+The cursor moves on to the next column or row after each command. The
+usual movement commands allow navigation forwards and backwards through
+the modes sub-window.
+
+Note that some permissions, where it does not make sense to have one
+without the other, are coupled together. For example, turning on
+\textit{read} permission also turns on the \textit{reveal} permission
+at the same time.
+
+Type \userentry{q} to quit back to the main variables screen
+saving the changes.
+
+\subsubsection{Change Owner}
+To change the ownership of a variable a user, with \textit{give away}
+permission, must nominate the new owner. The nominated owner must then
+accept the transfer, for which \textit{assume ownership} applies.
+Nothing effectively happens until these two stages have been completed.
+The job list display will not change after the first step.
+
+If the user has \textit{write administration file} privilege, then the
+checks are bypassed and the change of owner is effective immediately.
+
+Pressing \userentry{O} to change the owner prompts with:
+
+\begin{expara}
+
+New owner for variable {\textquotesingle}count{\textquotesingle}
+currently jmc:
+
+\end{expara}
+
+Type in the new owner as a string, e.g. \exampletext{tony}, or
+as a numeric user id\footnote{Although we suggest you avoid this.}.
+Asking for help will be give a list of possible user names. If part of
+a user name has already been given, the help message will be restricted
+to user names beginning with those characters.
+
+To cycle through possible user names press the space bar. If part of a
+user name has already been entered, the list of users cycled through is
+restricted to those starting with the characters already given.
+
+To abort the process, press \textit{ESC}.
+
+\subsubsection{Change of group}
+This is almost identical to change of owner. To change the group of a
+variable a user with \textit{give away group} permission must nominate
+the new group. Then a user with \textit{assume group ownership} must
+accept the transfer. Nothing effectively happens until these two stages
+have been completed.
+
+If the user has \textit{write administration file} privilege, then these
+checks are bypassed and the change of group is immediately effective.
+
+Enter \userentry{G} to change the group, which prompts with:
+
+\begin{expara}
+
+New group for variable {\textquotesingle}memo{\textquotesingle}
+currently users:
+
+\end{expara}
+
+Type in the new group as a string, e.g. \filename{other}, or as
+a numeric group id\footnote{Although we suggest you avoid this as
+well.}. Asking for help will give a list of possible group names. If
+part of a group name has already been entered, the help message will be
+restricted to groups beginning with those characters.
+
+To cycle through possible groups press the space bar. If part of a group
+name has already been entered, the list of names cycled through is
+restricted to those starting with the characters already given.
+
+To abort the process, press \textit{ESC}.
+
+\subsection{Command interpreter list}
+This facility is only available to users with \textit{special create}
+privilege. From the Job screen, press \userentry{X} to
+review and edit the command interpreter list, which will look like
+this:
+
+\begin{exparasmall}
+
+\ \ \ Command Inter \ \ Predef args \ \ \ \ \ \ \ Load Level \ \ Nice
+
+\ \ \ \ \ \ \ Path name
+
+{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-
+
+\bigskip
+
+
+\ \ \ sh \ \ \ \ \ \ \ \ \ \ \ \ \ {}-s
+\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ 1000 \ \ \ \ 24
+
+\ \ \ \ \ \ \ /bin/sh
+
+\bigskip
+
+
+\ \ \ ksh \ \ \ \ \ \ \ \ \ \ \ \ {}-s
+\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ 1000 \ \ \ \ 24 \ \ \ \ Set
+A0
+
+\ \ \ \ \ \ \ /bin/ksh
+
+\end{exparasmall}
+
+On a new installation of \ProductName{} there will only be one Command
+Interpreter specified. This will probably be the Bourne shell,
+\exampletext{sh}, and it will not have the
+``\exampletext{Set A0}'' flag set.
+
+The following key commands are available:
+
+\begin{center}
+\begin{tabular}{|lp{12cm}|}\hline
+\bfseries Command &
+\bfseries Function\\\hline
+\userentry{q} & Quit back to jobs screen\\\hline
+\userentry{A} & Add new entry\\\hline
+\userentry{D} & Delete current entry\\\hline
+\userentry{L} & Reset load level\\\hline
+\userentry{a} & Set pre-defined args\\\hline
+\userentry{n} & Reset nice value\\\hline
+\userentry{N} & Set name\\\hline
+\userentry{P} & Set path\\\hline
+\userentry{0} (zero) & Toggle the ``arg 0'' flag\\\hline
+\userentry{e} & Toggle the ``expand args'' flag.\\\hline
+\end{tabular}
+\end{center}
+\subsubsection{Setting Up A Command Interpreter}
+To add a command interpreter press \userentry{A}, which moves the cursor to the ``Command Inter'' field.
+Enter a name by which the command interpreter will be known and press
+RETURN or ENTER. Next the ``Path name'' field
+is selected for entry of the full path and name of the command
+interpreter program. All the remaining fields are initialised to
+default values which should be edited as required.
+
+The load level will be initialised to the user's special create load level.
+
+The pre-defined arguments, if any, are prepended to any arguments
+supplied to the command interpreter by the job. This is particularly
+important with shells, and the default setting for the Bourne shell is
+to include the \exampletext{{}-s} argument, which prevents it
+trying to interpret the first argument to the job as a shell script
+name. The \userentry{a} command causes these arguments to be
+reset.
+
+These pre-defined arguments may include the \exampletext{{}-{}-} option. This causes subsequent \exampletext{-} options
+to be passed to the job script and not the shell.
+
+The nice value is an \textit{absolute} nice value. The scheduler process
+runs at the highest priority and jobs are run with nice set to the
+given value. User processes from a login prompt usually run with a nice
+value of 20. Hence, values less than 20 represents a higher priority
+and values greater than 20 represents lower priorities than a login
+process. Command interpreters are created with an initial nice value of
+24.
+
+\subsection{Edit holiday list}
+To edit the table of holidays used by the \textit{days to avoid}
+setting, users must have \textit{write administration file} privilege.
+Other users may view but not edit the list. The years up to 2099 are
+supported.
+
+Press \userentry{H} to display a calendar for the current
+year with holidays highlighted. The calendar looks like this before any
+holidays have been specified:
+
+\begin{exparasmall}
+
+\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ 2001
+
+\bigskip
+
+
+Jan \ \ \ \ 1 \ 2 \ 3 \ 4 \ 5 \ 6 \ Feb \ \ \ \ \ \ \ \ \ \ \ \ \ 1 \ 2
+\ 3 \ Mar \ \ \ \ \ \ \ \ \ \ \ \ \ 1 \ 2 \ 3
+
+\ \ \ \ \ 7 \ 8 \ 9 10 11 12 13 \ \ \ \ \ \ 4 \ 5 \ 6 \ 7 \ 8 \ 9 10
+\ \ \ \ \ \ 4 \ 5 \ 6 \ 7 \ 8 \ 9 10
+
+\ \ \ \ 14 15 16 17 18 19 20 \ \ \ \ \ 11 12 13 14 15 16 17 \ \ \ \ \ 11
+12 13 14 15 16 17
+
+\ \ \ \ 21 22 23 24 25 26 27 \ \ \ \ \ 18 19 20 21 22 23 24 \ \ \ \ \ 18
+19 20 21 22 23 24
+
+\ \ \ \ 28 29 30 31 \ \ \ \ \ \ \ \ \ \ \ \ \ \ 25 26 27 28
+\ \ \ \ \ \ \ \ \ \ \ \ \ \ 25 26 27 28 29 30 31
+
+Apr \ 1 \ 2 \ 3 \ 4 \ 5 \ 6 \ 7 \ May \ \ \ \ \ \ \ 1 \ 2 \ 3 \ 4 \ 5
+\ Jun \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ 1 \ 2
+
+\ \ \ \ \ 8 \ 9 10 11 12 13 14 \ \ \ \ \ \ 6 \ 7 \ 8 \ 9 10 11 12
+\ \ \ \ \ \ 3 \ 4 \ 5 \ 6 \ 7 \ 8 \ 9
+
+\ \ \ \ 15 16 17 18 19 20 21 \ \ \ \ \ 13 14 15 16 17 18 19 \ \ \ \ \ 10
+11 12 13 14 15 16
+
+\ \ \ \ 22 23 24 25 26 27 28 \ \ \ \ \ 20 21 22 23 24 25 26 \ \ \ \ \ 17
+18 19 20 21 22 23
+
+\ \ \ \ 29 30 \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ 27 28 29 30 31
+\ \ \ \ \ \ \ \ \ \ \ 24 25 26 27 28 29 30
+
+Jul \ 1 \ 2 \ 3 \ 4 \ 5 \ 6 \ 7 \ Aug \ \ \ \ \ \ \ \ \ \ 1 \ 2 \ 3 \ 4
+\ Sep 30 \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ 1
+
+\ \ \ \ \ 8 \ 9 10 11 12 13 14 \ \ \ \ \ \ 5 \ 6 \ 7 \ 8 \ 9 10 11
+\ \ \ \ \ \ 2 \ 3 \ 4 \ 5 \ 6 \ 7 \ 8
+
+\ \ \ \ 15 16 17 18 19 20 21 \ \ \ \ \ 12 13 14 15 16 17 18
+\ \ \ \ \ \ 9 10 11 12 13 14 15
+
+\ \ \ \ 22 23 24 25 26 27 28 \ \ \ \ \ 19 20 21 22 23 24 25 \ \ \ \ \ 16
+17 18 19 20 21 22
+
+\ \ \ \ 29 30 31 \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ 26 27 28 29 30 31
+\ \ \ \ \ \ \ \ 23 24 25 26 27 28 29
+
+Oct \ \ \ \ 1 \ 2 \ 3 \ 4 \ 5 \ 6 \ Nov \ \ \ \ \ \ \ \ \ \ \ \ \ 1 \ 2
+\ 3 \ Dec 30 31 \ \ \ \ \ \ \ \ \ \ \ \ \ 1
+
+\ \ \ \ \ 7 \ 8 \ 9 10 11 12 13 \ \ \ \ \ \ 4 \ 5 \ 6 \ 7 \ 8 \ 9 10
+\ \ \ \ \ \ 2 \ 3 \ 4 \ 5 \ 6 \ 7 \ 8
+
+\ \ \ \ 14 15 16 17 18 19 20 \ \ \ \ \ 11 12 13 14 15 16 17
+\ \ \ \ \ \ 9 10 11 12 13 14 15
+
+\ \ \ \ 21 22 23 24 25 26 27 \ \ \ \ \ 18 19 20 21 22 23 24 \ \ \ \ \ 16
+17 18 19 20 21 22
+
+\ \ \ \ 28 29 30 31 \ \ \ \ \ \ \ \ \ \ \ \ \ \ 25 26 27 28 29 30
+\ \ \ \ \ \ \ \ 23 24 25 26 27 28 29
+
+\end{exparasmall}
+
+Sundays and Saturdays may be rendered ``dim'' if the screen enhancements permit this.
+
+The following key commands are available:
+
+\begin{center}
+\begin{tabular}{|lp{12cm}|}
+\hline
+\bfseries Key &
+\bfseries Function\\\hline
+TAB & Move to next month\\\hline
+N P & Go to Next / Previous year\\\hline
+\userentry{y t s} & Set current day as holiday\\\hline
+\userentry{f u n} & Clear current day, i.e. set as NOT a holiday\\\hline
+\userentry{! \~{}} & Toggle holiday state of current day\\\hline
+\end{tabular}
+\end{center}
+\subsection{Setting program options}
+To select a new set of program options and optionally to save them type
+\userentry{\$}. A screen is displayed as follows:
+
+\begin{exparasmall}
+
+Setting Program options for \BtqName{}
+
+\bigskip
+
+
+Job queues (pattern) \ \ \ \ \ \ \ :
+
+Include null queue names \ \ \ : Yes
+
+Display only user :
+
+Display only group:
+
+Confirm abort/delete jobs \ \ : Always
+
+If job moves \ \ \ \ \ : Follow job
+
+Local jobs/vars \ \ : All jobs/vars
+
+Clear help message: Use next command
+
+Help messages \ \ \ \ : Inverse video
+
+Error messages \ \ \ : Inverse video
+
+Screen on entry \ \ : Don{\textquotesingle}t care
+
+\end{exparasmall}
+
+To cycle through the options for each parameter press the space bar.
+Parameters like the queue, user and group names allow the specification
+to be typed in.
+
+Type \userentry{q} to exit from any parameter which does not
+accept free text. Alternatively just press return for each parameter
+until the cursor moves off the last parameter. On exiting from this
+screen, the option to save the parameters settings is prompted for:
+
+\begin{expara}
+
+Save parameters?
+
+\end{expara}
+
+Opt to do so by typing \userentry{y}, which asks whether to save the settings in the current directory or the
+user's home directory. Type \userentry{n} to avoid saving the changes.
+
+Options take effect immediately, apart from the \textit{screen or entry} setting.
+
+\subsection{Setting Display Contents}
+Within \PrBtq{} it is possible to alter the appearance of the screens. A user can change the size and ordering of the fields
+to suit their specific tastes. The user can also customise the heading title strings, perhaps to support a language other than English.
+
+\subsubsection{Display Format for the Jobs Screen}
+To bring up the display settings screen for the job screen, go in to the job list and press
+``\userentry{,}'' the comma key. The default job list format will look like:
+
+\begin{exparasmall}
+
+Job list formats
+
+\ \ \ \ Width \ Code
+
+\ \ \ \ \ \ \ \ 3 \ n \ Sequence
+
+{\textquotedbl} {\textquotedbl}
+
+\ {\textless} \ \ \ \ \ 7 \ N \ Job number
+
+{\textquotedbl} {\textquotedbl}
+
+\ \ \ \ \ \ \ \ 7 \ U \ User
+
+{\textquotedbl} {\textquotedbl}
+
+\ \ \ \ \ \ \ 13 \ H \ Title (in full)
+
+{\textquotedbl} {\textquotedbl}
+
+\ \ \ \ \ \ \ 14 \ I \ Command Interpreter
+
+{\textquotedbl} {\textquotedbl}
+
+\ \ \ \ \ \ \ \ 3 \ p \ Priority
+
+\ \ \ \ \ \ \ \ 5 \ L \ Load Level
+
+{\textquotedbl} {\textquotedbl}
+
+\ \ \ \ \ \ \ \ 5 \ t \ Time or date
+
+{\textquotedbl} {\textquotedbl}
+
+\ \ \ \ \ \ \ \ 9 \ c \ Conditions (abbreviated)
+
+{\textquotedbl} {\textquotedbl}
+
+\ {\textless} \ \ \ \ \ 4 \ P \ Progress
+
+\end{exparasmall}
+
+Each line represents either a field on the main screen or a separator.
+The \exampletext{{\textless}} specifies that field may
+overflow onto its left hand neighbour if necessary. The number is the
+field width. The letter represents the key that is used to access the
+field and the last entry is the column heading. The adjacent fields
+will be separated by, the character or characters, in between the
+double quotes.
+
+The job list can only ever show a sub-set of the job fields. The
+complete set of fields available for inclusion in the job list are:
+
+\begin{tabular}{llll}
+\userentry{A} & Arguments & \userentry{a} & Avoiding\\
+~ & ~ & \userentry{b} & Start time\\
+\userentry{C} & Conditions (in full) & \userentry{c} & Conditions (abbreviated)\\
+\userentry{D} & Directory & \userentry{d} & Delete time\\
+\userentry{E} & Environment & \userentry{e} & Export / Remote runnable\\
+~ &~ & \userentry{f} & End time\\
+\userentry{G} & Group & \userentry{g} & Grace period\\
+\userentry{H} & Job Name (in full) & \userentry{h} & Title (no queue name)\\
+\userentry{I} & Command Interpreter & \userentry{i} & Process id\\
+~ & ~ & \userentry{k} & Signal to kill over running job with\\
+\userentry{L} & Load Level & \userentry{l} & Maximum elapsed run time\\
+\userentry{M} & Mode & \userentry{m} & Umask\\
+\userentry{N} & Job id number & \userentry{n} & Sequence\\
+\userentry{O} & Originating host & \userentry{o} & Time submitted\\
+\userentry{P} & Progress & \userentry{p} & Priority\\
+~ & ~ & \userentry{q} & Queue name\\
+\userentry{R} & I/O Redirections & \userentry{r} & Repeat specification\\
+\userentry{S} & Assignments (in full) & \userentry{s} & Assignments (abbreviated)\\
+\userentry{T} & Date and time (in full) & \userentry{t} & Time or date\\
+\userentry{U} & User & \userentry{u} & Ulimit\\
+\userentry{W} & Last / Next time & ~ & ~ \\
+\userentry{X} & Exit code ranges & \userentry{x} & Exit code returned by last run\\
+\userentry{Y} & Holiday dates being avoided & \userentry{y} & Signal num last run terminated by\\
+\end{tabular}
+
+\subsubsection{Display Format for the Variables Screen}
+This differs from the job screen because two lines of information are
+used to represent each variable. These lines are specified
+independently of each other.
+
+To bring up the display specification screen for the top line of all the
+variables, go to the variable screen and press
+``\userentry{,}'' the comma key.
+The default format will look like:
+
+\begin{exparasmall}
+
+Variable list format 1
+
+\ \ \ \ Width \ Code
+
+{\textquotedbl} {\textquotedbl}
+
+\ \ \ \ \ \ \ 22 \ N \ Name of variable
+
+{\textquotedbl} {\textquotedbl}
+
+\ \ \ \ \ \ \ 41 \ V \ Value of variable
+
+{\textquotedbl} {\textquotedbl}
+
+\ \ \ \ \ \ \ 13 \ E \ Export or Local
+
+\end{exparasmall}
+
+To bring up the display specification screen for the bottom line of all
+the variables, go to the variable screen and press
+``\userentry{;}'' the semi-colon
+key. The default format will look like:
+
+\begin{exparasmall}
+
+Variable list format 2
+
+\ \ \ \ Width \ Code
+
+{\textquotedbl} \ \ \ {\textquotedbl}
+
+\ \ \ \ \ \ \ 44 \ C \ Comment
+
+{\textquotedbl} {\textquotedbl}
+
+\ \ \ \ \ \ \ \ 7 \ U \ User Owner
+
+{\textquotedbl} {\textquotedbl}
+
+\ \ \ \ \ \ \ \ 7 \ G \ Group Owner
+
+\end{exparasmall}
+
+The set of fields available for inclusion in the variable list are:
+
+\pagebreak[15]
+\begin{tabular}{llll}
+\userentry{C} & Comment & \userentry{N} & Name of variable\\
+\userentry{E} & Export or Local State & \userentry{U} & User who owns variable\\
+\userentry{G} & Group variable belongs to & \userentry{V} & Value\\
+\userentry{M} & Modes & \userentry{K} & Clustered marker\\
+\end{tabular}
+
+\subsubsection{Editing the Display Formats}
+The following key commands are available from within any of the display
+options screens:
+
+\begin{center}
+\begin{tabular}{|lp{12cm}|}
+\hline
+\bfseries Key &
+\bfseries Function\\\hline
+\userentry{i} & Insert a new field before the current field\\\hline
+\userentry{a} & Insert a new field after the current field\\\hline
+\userentry{{\textquotesingle}} & Insert a new separator before the current field\\\hline
+\userentry{{\textquotedbl}} & Insert a new separator after the current field\\\hline
+\userentry{w} & Set the width of the current field\\\hline
+\userentry{c} & Set the shortcut key code for this field\\\hline
+\userentry{{\textless}} & Toggle the left flag (see below)\\\hline
+\userentry{D} & Delete the current field\\\hline
+\userentry{S} & Set the current separator string\\\hline
+\end{tabular}
+\end{center}
+The \userentry{i} and \userentry{a} commands
+insert a new field either before or after the field marked by the
+cursor. When inserting a new field, \PrBtq{} prompts
+the user for the code of the new field. The user should enter the
+required code, as shown in the previous sub-section, then hit return.
+To move a field use the delete command to remove the original and the
+insert commands to position a new copy.
+
+The \userentry{{\textquotesingle}} and
+\userentry{{\textquotedbl}} commands insert a new separator
+field either before or after the current field.
+
+The \userentry{w} command alters the width of the current
+field. Pressing \userentry{w} moves the cursor across to the
+width field of the current selection, for entry of the new value.
+
+The \userentry{c} command alters the character used to access
+the current field, from the main job window. Take care to avoid
+clashes.
+
+The \userentry{{\textless}} toggle enables or disables field
+overflow into the left hand neighbouring field. When enabled, if the
+contents of a particular field are wider than the field itself
+\PrBtq{} overwrites the field to the left. If the
+toggle is off, \PrBtq{} truncates oversized field
+contents.
+
+The \userentry{D} command deletes the current field.
+
+Use the \userentry{S} command to change the separator from
+the default space between each field.
+
+Press the \textit{ESC} key, at any time, to abort the current operation.
+
+When leaving the display option screen \BtqName{} asks if it should save the
+changes, as the default. Press \userentry{y} to save the
+changes as the new settings, otherwise press \userentry{n}.
+When saving the changes, \BtqName{} prompts for the location, in which to
+save, and then the name of, the configuration file.
+
+Saving the changes results in an entry in the relevant \configurationfile{} file, of the form:
+
+\begin{expara}
+
+BTQCONF=\textit{filename}
+
+\end{expara}
+
+\textit{Filename} is the name entered when saving. To undo any changes remove or comment out the \filename{BTQCONF} line.
+
+See the chapters on configurability (see page
+\pageref{bkm:Configurability}) and extensibility (see page
+\pageref{bkm:Extensibility}) for details of more ways to customise the
+operation and displays of \PrBtq{}. Here is an
+example showing a job screen with function keys specified, different
+header, footer, format and content:
+
+\begin{exparasmall}
+
+Seq \ \ Job Name \ \ \ \ \ \ \ \ \ \ \ \ Args \ \ \ \ \ \ Date/Time
+\ \ \ \ \ \ \ \ \ Prog
+
+{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-
+
+\ \ 1 \ \ start
+\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ 08/02/01 10:54
+\ \ \ \ Canc
+
+\ \ 2 \ \ Process directory \ \ \ /home \ \ \ \ \ 08/02/01 10:54
+
+\ \ 3 \ \ Process directory \ \ \ /usr \ \ \ \ \ \ 08/02/01 10:54
+
+\ \ 4 \ \ Process directory \ \ \ /tmp \ \ \ \ \ \ 08/02/01 10:54
+
+\ \ 5 \ \ Collect data \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ 08/02/01
+10:54
+
+\ \ 6 \ \ Error Handler \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ 08/02/01
+10:54
+
+\ \ 7 \ \ cleanup
+\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ 08/02/01 10:54
+
+\ \ 8 \ \ setup
+\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ 29/01/01 23:01
+\ \ \ \ Done
+
+\bigskip
+
+
+\bigskip
+
+
+\bigskip
+
+
+{}-{}-{}-{}-F1-{}-{}-{}-{}-{}-F2-{}-{}-{}-{}-{}-F3-{}-{}-{}-{}-{}-F4-{}-{}-{}-{}-{}-F5-{}-{}-{}-{}-F6-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-
+
+\ \ \ help \ \ enable \ disable \ \ set \ \ \ view \ \ view
+
+\ \ \ \ \ \ \ \ \ \ run \ \ \ \ run \ \ \ \ \ \ time \ \ job \ \ \ vars
+
+{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-
+
+\end{exparasmall}
+
+\section{\BtuserName{} - Interactive user administration tool}
+\label{bkm:Btuserdescr}\PrBtuser{} is both a simple
+report generator and an interactive tool for administering user
+privileges and settings. It has four modes of operation, which are:
+
+Listing
+
+Produces a simple report for the current user showing their modes and
+permissions.
+
+Mode edit
+
+Enables the current user (if permitted, with change default modes
+privilege) to interactively display and adjust their default modes for
+creation of jobs and variables.
+
+View mode
+
+Allows users with \textit{read administration file} privilege to
+interactively view the entire list of permissions for all users, but
+not to make any changes.
+
+Update mode
+
+Gives full interactive access to \ProductName{} administrators to view and
+edit the entire list of permissions for all users. For this purpose the
+user must have \textit{write administration file} privilege.
+
+The mode can be specified as an option on the command line. Like the
+other interactive programs there are no
+\exampletext{+freeze-current} or
+\exampletext{+freeze-home} keywords, as these facilities are
+provided by an interactive screen within the program.
+
+\subsection{Display current permissions}
+With no options, or the option -d, a report is output for the settings
+of the current user. For an ordinary user, with the default
+installation settings, the report will look like:
+
+\begin{exparasmall}
+
+The \manualProduct{} account for user tony group staff.
+
+Minimum priority 100 maximum 200 default 150
+
+Maximum load level 1000 total load 10000
+
+Special jobs are allocated a load of 1000
+
+Current charge is 0 units.
+
+Privileges are: Create entry, Change default modes
+
+Job \ {}- Read by: User, Group
+
+Job \ {}- Write by: User
+
+Job \ {}- Reveal by: User, Group, Others
+
+Job \ {}- Display mode by: User, Group, Others
+
+Job \ {}- Set mode by: User
+
+Job \ {}- Give away owner by: User
+
+Job \ {}- Give away group by: User, Group
+
+Job \ {}- Delete by: User
+
+Job \ {}- Kill (jobs only) by: User
+
+Var \ {}- Read by: User, Group
+
+Var \ {}- Write by: User
+
+Var \ {}- Reveal by: User, Group, Others
+
+Var \ {}- Display mode by: User, Group, Others
+
+Var \ {}- Set mode by: User
+
+Var \ {}- Give away owner by: User
+
+Var \ {}- Give away group by: User, Group
+
+Var \ {}- Delete by: User
+
+\end{exparasmall}
+
+This display also gives the user's current charge (although this is deprecated now and is always zero).
+
+\subsection{Mode Edit}
+Users who have \textit{change default modes} privilege, may change their default modes by using the -m option. The \PrBtuser{}
+\exampletext{{}-m} display will look like:
+
+\pagebreak[18]
+\begin{exparasmall}
+
+Modes for user tony
+
+\bigskip
+
+
+\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ Jobs
+\ \ \ \ \ \ \ \ \ \ Vars
+
+\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ U \ \ G \ \ O \ \ \ U
+\ \ G \ \ O
+
+Read \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ Yes Yes No \ \ Yes Yes No
+
+Write \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ Yes No \ No \ \ Yes No \ No
+
+Reveal \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ Yes Yes Yes \ Yes Yes Yes
+
+Display mode \ \ \ \ \ \ \ \ \ \ Yes Yes Yes \ Yes Yes Yes
+
+Set mode \ \ \ \ \ \ \ \ \ \ \ \ \ \ Yes No \ No \ \ Yes No \ No
+
+Assume ownership \ \ \ \ \ \ No \ No \ No \ \ No \ No \ No
+
+Assume group ownership No \ No \ No \ \ No \ No \ No
+
+Give away owner \ \ \ \ \ \ \ Yes No \ No \ \ Yes No \ No
+
+Give away group \ \ \ \ \ \ \ Yes Yes No \ \ Yes Yes No
+
+Delete \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ Yes No \ No \ \ Yes No \ No
+
+Kill (jobs only) \ \ \ \ \ \ Yes No \ No
+
+\end{exparasmall}
+
+The standard screen command keys, as described in the section on program
+\PrBtq{}, plus the following context specific key
+commands are available:
+
+\begin{center}
+\begin{tabular}{|lp{12cm}|}
+\hline
+\bfseries Key &
+\bfseries Function\\\hline
+\userentry{?} & Display help message\\\hline
+\userentry{B} & Beginning row\\\hline
+\userentry{E} & End row\\\hline
+\userentry{J} & Jobs column\\\hline
+\userentry{V} & Variables column\\\hline
+\userentry{Y T} & Set corresponding permission, move right\\\hline
+\userentry{N F} & Unset corresponding permission, move right\\\hline
+\userentry{! \~{}} & Invert permission and move right\\\hline
+\userentry{\$} & Save program options\\\hline
+\end{tabular}
+\end{center}
+Note that some permissions, where it does not make sense to have one without the other, are coupled together. For example if the
+\textit{read} permission is turned on, the \textit{reveal} permission will be turned on at the same time if it is unset.
+
+\subsection{View and edit permissions}
+The display for the View, \exampletext{{}-v}, and Edit, \exampletext{{}-i} options is similar, so they are treated
+together. \PrBtuser{} goes into the main screen, which looks something like this:
+
+\pagebreak[18]
+\begin{exparasmall}
+
+User \ \ \ Group \ \ Def Min Max Maxll Totll Spcll \ Privs
+
+DEFAULT \ \ \ \ \ \ \ \ 150 100 200 \ 1000 10000 \ 1000
+\ CR{\textbar}Cdft
+
+\bigskip
+
+
+root \ \ \ other \ \ 150 100 200 \ 1000 10000 \ 1000
+\ RA{\textbar}WA{\textbar}CR{\textbar}SPC{\textbar}ST{\textbar}Cdft{\textbar}UG{\textbar}UO{\textbar}GO
+
+daemon \ other \ \ 150 100 200 \ 1000 10000 \ 1000 \ CR{\textbar}Cdft
+
+bin \ \ \ \ bin \ \ \ \ 150 100 200 \ 1000 10000 \ 1000
+\ CR{\textbar}Cdft
+
+sys \ \ \ \ sys \ \ \ \ 150 100 200 \ 1000 10000 \ 1000
+\ CR{\textbar}Cdft
+
+adm \ \ \ \ adm \ \ \ \ 150 100 200 \ 1000 10000 \ 1000
+\ CR{\textbar}Cdft
+
+uucp \ \ \ uucp \ \ \ 150 100 200 \ 1000 10000 \ 1000
+\ CR{\textbar}Cdft
+
+nuucp \ \ nuucp \ \ 150 100 200 \ 1000 10000 \ 1000 \ CR{\textbar}Cdft
+
+listen \ adm \ \ \ \ 150 100 200 \ 1000 10000 \ 1000 \ CR{\textbar}Cdft
+
+spooler bin \ \ \ \ 150 100 200 \ 1000 10000 \ 1000 \ CR{\textbar}Cdft
+
+batch \ \ bin \ \ \ \ 150 100 200 \ 1000 10000 \ 1000
+\ RA{\textbar}WA{\textbar}CR{\textbar}SPC{\textbar}ST{\textbar}Cdft{\textbar}UG{\textbar}UO{\textbar}GO
+
+lp \ \ \ \ \ lp \ \ \ \ \ 150 100 200 \ 1000 10000 \ 1000
+\ CR{\textbar}Cdft
+
+wally \ \ staff \ \ 150 100 200 \ 1000 10000 \ 1000
+\ RA{\textbar}WA{\textbar}CR{\textbar}SPC{\textbar}ST{\textbar}Cdft{\textbar}UG{\textbar}UO{\textbar}GO
+
+pior \ \ \ staff \ \ 150 100 200 \ 1000 10000 \ 1000
+\ CR{\textbar}Cdft{\textbar}UO
+
+tony \ \ \ staff \ \ 150 100 200 \ 1000 10000 \ 1000 \ CR{\textbar}Cdft
+
+jmc \ \ \ \ staff \ \ 150 100 200 \ 1000 10000 \ 1000
+\ RA{\textbar}WA{\textbar}CR{\textbar}SPC{\textbar}ST{\textbar}Cdft{\textbar}UG{\textbar}UO{\textbar}GO
+
+nobody \ nobody \ 150 100 200 \ 1000 10000 \ 1000 \ CR{\textbar}Cdft
+
+noaccessnoaccess150 100 200 \ 1000 10000 \ 1000 \ CR{\textbar}Cdft
+
+\bigskip
+
+
+============================================================================
+
+\end{exparasmall}
+
+The top row of permissions, headed \filename{DEFAULT},
+represents the default values given to any new user. The table
+underneath lists all of the individual users, which can be scrolled
+through if it is longer than will fit on one screen. Use
+\userentry{\^{}} or \userentry{{\textbackslash}}
+to search forward or backwards respectively.
+
+The leftmost two columns show the individual user and group,
+respectively. This is followed by the users default, minimum and
+maximum permitted job priorities. If no priority is specified when a
+job is submitted the default is taken.
+
+Next is the maximum permitted load level, \exampletext{Maxll}
+for any one job owned by the user. This is followed by the maximum
+total load level, \exampletext{Totll}, of jobs running at one
+time for the user. The scheduler sums the Load of all the jobs
+currently running for each user and ensures that it does not exceed the
+maximum total load level.
+
+Last of the numeric fields is the default \textit{special create} load
+level, \exampletext{Spcll}, used when a suitably privileged
+user sets up a new command interpreter. This only applies if the user
+has got \textit{special create} privilege, SPC. In the above example
+only users \filename{root}, \batchuser{},
+\filename{wally} and \filename{jmc} have
+\textit{special create} privilege.
+
+This is followed by a list of the privileges granted to the user, which
+are represented using the following abbreviations:
+
+\begin{tabular}{|lp{12cm}|}
+\hline
+\bfseries Abbreviation &
+Privilege\\\hline
+\exampletext{RA} & Read admin file\\\hline
+\exampletext{WA} & Write admin file\\\hline
+\exampletext{CR} & Create entry\\\hline
+\exampletext{SPC} & Special Create\\\hline
+\exampletext{ST} & Stop scheduler\\\hline
+\exampletext{Cdft} & Change default modes\\\hline
+\exampletext{UG} & Combine user and group permissions\\\hline
+\exampletext{UO} & Combine user and other permissions\\\hline
+\exampletext{GO} & Combine group and other permissions\\\hline
+\end{tabular}
+
+The standard screen command keys, as described in the section on program
+\PrBtq{}, plus the following context specific key
+commands are available:
+
+\begin{center}
+\begin{tabular}{|lp{12cm}|}
+\hline
+\bfseries Key &
+\bfseries Function\\\hline
+\userentry{\$} & Set and save program options\\\hline
+\userentry{d} & Set default priority\\\hline
+\userentry{l} & Set lower limit of priority\\\hline
+\userentry{u} & Set upper limit of priority\\\hline
+\userentry{m} & Set maximum load level\\\hline
+\userentry{t} & Set total load level\\\hline
+\userentry{s} & Set special create load level\\\hline
+\userentry{b} & Display charge\\\hline
+\userentry{p} & Set privileges\\\hline
+\userentry{c} & Set default access modes\\\hline
+\userentry{a} & Copy defaults (priorities and load levels) to current user\\\hline
+\userentry{A} & Copy defaults to all users\\\hline
+\userentry{D} & Set system default default priority\\\hline
+\userentry{L} & Set system default lower limit of priority\\\hline
+\userentry{U} & Set system default upper limit of priority\\\hline
+\userentry{M} & Set system default maximum load level\\\hline
+\userentry{T} & Set system default total load level\\\hline
+\userentry{S} & Set system default special create load level\\\hline
+\userentry{P} & Set system default privileges\\\hline
+\userentry{C} & Set system default default access modes\\\hline
+\end{tabular}
+\end{center}
+
+\subsubsection{Setting user priorities}
+The three parameters default, min and max priority may be individually
+set for each user by typing \userentry{d},
+\userentry{l} and \userentry{u} respectively.
+
+The default priority will be assigned to each new job unless the user
+overrides it. When specifying a priority the user may not create jobs
+with, or change jobs to a lower priority than the minimum or a higher
+one than the maximum.
+
+It is normally the case that
+
+\begin{expara}
+
+\genericargs{min {\textless}= default {\textless}= max}
+
+\end{expara}
+
+for each user, but two other possibilities are useful:
+
+\begin{itemize}
+\item If \genericargs{default {\textless} min}, or
+\genericargs{default {\textgreater} max}, then the user
+must specify the priority each time a job is submitted (i.e. there is
+no default for the user).
+\item If \genericargs{min {\textgreater} max}, then the
+user is prevented from submitting jobs. This can also be achieved by
+turning off \textit{create} privilege (not to be confused with
+\textit{special create} privilege) for the user.
+\end{itemize}
+To edit these fields, move the cursor to the relevant user and type the
+appropriate key. Then just type in the new number and press ENTER. Type
+\textit{ESC} to abort.
+
+\subsubsection{Setting default priorities}
+The three system default priority parameters
+default, min and max priority may be set by typing \userentry{D}, \userentry{L} and
+\userentry{U} respectively.
+
+\subsubsection[Setting user load levels]{Setting user load levels}
+The three parameters \exampletext{maxll},
+\exampletext{totll} and \exampletext{specll} load
+levels may be individually set for each user by typing
+\userentry{m}, \userentry{t} and \userentry{s} respectively.
+
+The maximum load level, \exampletext{maxll}, restricts the load
+level of any one job submitted by that user to be less than or equal to
+the given value. The load level of the command interpreter is compared
+against this value.
+
+The total load level, \exampletext{totll}, restricts the total
+of load levels of running jobs for the given user to the specified
+value. If a job would cause this value to be exceeded it will not be
+run until some other job for the user has completed.
+
+The special create load level, \exampletext{specll}, is the
+default load level for any command interpreters created by the given
+user. This parameter is ignored for users without the \textit{special
+create} privilege.
+
+\subsubsection{Setting default load levels}
+The three system default parameters
+\exampletext{Maxll}, \exampletext{Totll} and
+\exampletext{Specll} load levels may be set by typing
+\userentry{M}, \userentry{T} and \userentry{S} respectively.
+
+\subsubsection{Applying default settings to one or all users}
+Each new user added to the password file inherits the values of the
+default settings. An individual user can be set to the default values
+by selecting their entry and entering a lower case
+\userentry{a}. To apply the defaults to all users enter an
+upper case \userentry{A}.
+
+\subsubsection{Displaying charge}
+To display a user{\textquotesingle}s charge field, press \userentry{b}. A one-line popup display shows the charge for
+the current user. This will always be zero as \PrBtuser{} no longer provides facilities to change the charge.
+
+\subsubsection{Setting user's privileges}
+To edit a user's privileges, press \userentry{p}, which will open a screen looking like this:
+
+\begin{exparasmall}
+
+Privileges for user tony group staff
+
+\bigskip
+
+
+User tony may Read admin file: No
+
+User tony may Write admin file: No
+
+User tony may Create entry: Yes
+
+User tony may Special create: No
+
+User tony may Stop scheduler: No
+
+User tony may Change default modes: Yes
+
+User tony may Combine user/group perms: No
+
+User tony may Combine user/other perms: No
+
+User tony may Combine group/other perms: No
+
+\end{exparasmall}
+
+The standard screen command keys, as described in the section on program \PrBtq{}, earlier plus the following context specific
+key commands are available:
+
+\begin{center}
+\begin{tabular}{|lp{12cm}|}
+\hline
+\bfseries Key &
+\bfseries Operation\\\hline
+ENTER & Move down, quit back to main screen if on last line\\\hline
+\userentry{Y T} & Set corresponding privilege\\\hline
+\userentry{N F} & Unset corresponding privilege\\\hline
+! \~{} & Invert privilege\\\hline
+\end{tabular}
+\end{center}
+Note that some privileges, where it does not make sense to have one without the other, are coupled together. For example if turning on
+\textit{Write Admin File} privilege, causes the \textit{Read Admin File} privilege to be turned on at the same time.
+
+Note that if a user inadvertently turns off their own \textit{Write Admin File} privilege, he/she will not get a warning, however the
+change will not take effect until he/she exits from \PrBtuser.
+
+Attempts to turn off \textit{Write Admin File} for \filename{root} and \batchuser{} will be silently ignored.
+
+\subsubsection{Setting default privileges}
+To edit the default privileges, press \userentry{P}, which opens a screen identical to the user privileges screen except for the
+title:
+
+\pagebreak[18]
+\begin{exparasmall}
+
+Default privileges
+
+\bigskip
+
+
+Default is to Read admin file: No
+
+Default is to Write admin file: No
+
+Default is to Create entry: Yes
+
+Default is to Special create: No
+
+Default is to Stop scheduler: No
+
+Default is to Change default modes: Yes
+
+Default is to Combine user/group perms: No
+
+Default is to Combine user/other perms: No
+
+Default is to Combine group/other perms: No
+
+\end{exparasmall}
+
+These may then be changed in just the same way as for a user's privileges. At the end, if there are any
+changes, \PrBtuser{} prompts with the question:
+
+\begin{expara}
+
+Copy to everyone else (but you)?
+
+\end{expara}
+
+Reply \userentry{Y} only if copying the default privileges to
+all other users is required. Otherwise the default privileges will only
+be applied to new users.
+
+\subsubsection{Setting default and user modes}
+To edit the default job and variable creation modes (access permissions) for any given user press \userentry{c}, or to edit the
+default modes press \userentry{C}.
+
+For any given user, the display and editing is identical to that for that user entering \PrBtuser{} with the \textit{mode edit} option
+\userentry{{}-m}. For the default modes, the display is identical except for the tile.
+
+For example, editing modes for user \exampletext{tony} will look like this:
+
+\begin{exparasmall}
+
+Modes for user tony
+
+\bigskip
+
+
+\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ Jobs
+\ \ \ \ \ \ \ \ \ \ Vars
+
+\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ U \ \ G \ \ O \ \ \ U
+\ \ G \ \ O
+
+Read \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ Yes Yes No \ \ Yes Yes No
+
+Write \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ Yes No \ No \ \ Yes No \ No
+
+Reveal \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ Yes Yes Yes \ Yes Yes Yes
+
+Display mode \ \ \ \ \ \ \ \ \ \ Yes Yes Yes \ Yes Yes Yes
+
+Set mode \ \ \ \ \ \ \ \ \ \ \ \ \ \ Yes No \ No \ \ Yes No \ No
+
+Assume ownership \ \ \ \ \ \ No \ No \ No \ \ No \ No \ No
+
+Assume group ownership No \ No \ No \ \ No \ No \ No
+
+Give away owner \ \ \ \ \ \ \ Yes No \ No \ \ Yes No \ No
+
+Give away group \ \ \ \ \ \ \ Yes Yes No \ \ Yes Yes No
+
+Delete \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ Yes No \ No \ \ Yes No \ No
+
+Kill (jobs only) \ \ \ \ \ \ Yes No \ No
+
+\end{exparasmall}
+
+The standard screen command keys, as described in the section on program \PrBtq{}, plus the following context specific key
+commands are available:
+
+\pagebreak[10]
+\begin{center}
+\begin{tabular}{|lp{12cm}|}
+\hline
+\bfseries Command &
+\bfseries Meaning\\\hline
+\userentry{B} & Beginning Row\\\hline
+\userentry{E} & End Row\\\hline
+\userentry{J} & Jobs column\\\hline
+\userentry{V} & Variables column\\\hline
+\userentry{Y T} & Set corresponding permission, move right\\\hline
+\userentry{N F} & Unset corresponding permission, move right\\\hline
+\userentry{! \~{}} & Invert permission and move right\\\hline
+\end{tabular}
+\end{center}
+Note that some permissions, where it does not make sense to have one without the other, are coupled together. For example if you turn on
+\textit{read} permission, the \textit{reveal} permission will be turned on at the same time.
+
+At the end of changing the default modes, but not an individual user's modes, \PrBtuser{} will prompt with the question:
+
+\begin{expara}
+
+Copy to everyone else (but you)?
+
+\end{expara}
+
+Reply \userentry{Y} only if copying the default modes to all
+other users is required. Otherwise the default modes will only be
+applied to new users. If you do want the new default modes to apply to
+you, move to your user name and type \userentry{a}.
+

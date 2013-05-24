@@ -1,0 +1,23 @@
+\subsection{\funcnameXBputenvlist{}}
+
+\begin{expara}
+
+int \funcnameXBputenvlist{}(const apiBtjob *jobp, const char **elist)
+
+\end{expara}
+
+The function \funcXBputenv{} is used to replace the entire environment variable list of a job string table.
+
+\exampletext{jobp} is a pointer to a structure containing the details of the job. The definition of the job structure is given on
+page \pageref{bkm:Jobstructure} onwards.
+
+\exampletext{elist} is a null-terminated list of environment variables. Each should be of the form
+\exampletext{NAME=VALUE}. Any entries not in this form are ignored.
+
+\subsubsection{Return values}
+The result will be no-zero if successful or zero if the string table overflowed. In the latter case the string table contents of the job
+should not be relied upon. The job structure should be saved first if in doubt.
+
+\subsubsection{Notes}
+Remember that these entries merely override settings in any ``static environment file'' on the server running the job.
+

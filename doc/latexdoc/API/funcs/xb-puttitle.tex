@@ -1,0 +1,32 @@
+\subsection{\funcnameXBputtitle{}}
+
+\begin{expara}
+
+int \funcnameXBputtitle{}(const int fd, apiBtjob *jobp, const char *title)
+
+\end{expara}
+
+The function \funcnameXBputtitle{} is used to insert a new or replacement title
+into the string table of a job structure, possibly automatically
+inserting the current queue name as set by \funcnameXBsetqueue{}.
+
+\exampletext{fd} is a file descriptor which was previously
+returned by a successful call to \funcXBopen{}, or -1
+to disregard any queue name set by \funcnameXBsetqueue{}.
+
+\exampletext{jobp} is a pointer which contains the details of
+the job.
+
+The definition of the job structure is given on page
+\pageref{bkm:Jobstructure} onwards.
+
+\exampletext{title} is the required new title or NULL if the
+title is to be deleted. If fd is a valid API descriptor, then any queue
+name set by \funcXBsetqueue{} will be added to it.
+
+\subsubsection{Return values}
+The result will be no-zero if successful or zero if the string table
+overflowed. In the latter case the string table contents of the job
+should not be relied upon. The job structure should be saved first if
+in doubt.
+

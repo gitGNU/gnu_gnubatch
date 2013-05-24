@@ -1,0 +1,408 @@
+\chapter{Common Problems}
+\label{chp:common-problems}
+This final section deals with common problems which occur from time to time running \ProductName.
+
+\IfXi{If you are going to contact us for support, please check this section first before calling us and tell us about
+anything which is unclear so we can improve this manual.}
+
+\section{The system log file}
+
+At the first sign of any major problem, please check the contents of the system log file \filename{btsched\_reps} in the spool
+directory, by default \spooldir.
+
+All system processes, such as \progname{btsched} and \progname{xbnetserv} append messages to this file before aborting and the
+messages may make clear what the problem is, so the last few lines of this file may be very informative.
+
+Also check if there are \progname{btsched} processes running, there should be 3 (with transient extras) if \ProductName{} is running networked and 2 if it is running networked. There should be 1 \progname{xbnetserv} process with transient extras to service API requests.
+
+\IfXi{\section{When you contact us}
+
+Please have ready the following information so that we can speedily diagnose the problem.
+
+\begin{enumerate}
+\item Machine Model, Operating System and Hostname.
+\item Version number for the copy of \ProductName (most important). You may find the \PrWhatvn{} utility useful to display this, or
+you can run \progname{what} or \progname{ident} on any of the binaries (if they give different answers for different binaries
+this may well be the cause of the problem!).
+\item A copy of any error messages, especially any in the system log file \filename{btsched\_reps}, by default in \spooldir.
+\item A note of changes in hardware or software.
+\item Has the system crashed recently and been brought back from backup?
+\item Are other applications running normally? If something was working and now it is not, we look for what has changed. There is always something, it just might not seem relevant.
+\end{enumerate}
+}
+
+\section{Files \& Directories}
+One of the most common causes of problems for most products and platforms is changes to files, directory structures, ownerships or
+permissions. The effects of a missing, duplicate or modified file can be instantly fatal or very subtle. Directories, files, permissions and ownerships should be as described below.
+
+This assumes you are familiar with the output of \progname{ls} with the \exampletext{-l} option (use \exampletext{-ld} if you want to
+look at the permissions of the directory rather than its contents).
+
+So for example:
+
+\begin{exparasmall}
+
+\$ ls -ld /usr/local/bin/\BtqName{} \spooldirname{}
+
+-rwsr-xr-x 1 \batchusername{} root 215424 Apr 27 17:44 /usr/local/bin/\BtqName{}
+
+drwx------ 2 \batchusername{} daemon 4096 May  2 08:11 \spooldirname{}
+
+\end{exparasmall}
+
+The initial block of characters indicates the mode or permissions. The next two fields give the user name by whom the file
+is owned, \batchuser{} in both the above cases, and the group name by whom the file is group-owned, which is unimportant in
+nearly all cases.
+
+Normally everything should be world-readable and world-executable in the case of files or in the case of directories, searchable
+by all users, with the exception of \spooldir, which is normally restricted to \batchuser{} as above.
+
+All of the user-level binaries such as \PrBtq{} and \PrBtr{} are set-user to \batchuser.
+
+Of the internal programs in \progsdir{}, the following should be set-user to \batchuser.
+
+\begin{tabular}{l l}
+\bfseries Program &
+\bfseries Function \\
+\filename{jobdump} & Copies jobs out to file \\
+\end{tabular}
+
+The following internal programs should be set-user to \filename{root}.
+
+\begin{tabular}{l l}
+\bfseries Program &
+\bfseries Function \\
+\filename{bgtkldsv} & Load and restore files for GTK+ interface \\
+\filename{btexec} & Macro execution \\
+\filename{btmdisp} & Message sending \\
+\filename{btpwchk} & Password checking \\
+\filename{btsched} & Scheduler process \\
+\filename{xbnetserv} & Network client manager \\
+\end{tabular}
+
+Also check that the versions correspond. You might have more than one set of binaries in your \filename{PATH}, so check that the binaries you are
+actually running correspond with the versions you think you have installed. Running
+
+\begin{expara}
+
+type \BtqName{}
+
+\end{expara}
+
+will display what binary is run when you type \PrBtq{}, which may possibly be different from what you think.
+
+\IfGNU{You can discover the version number for any binary by invoking it with the \exampletext{--version} option. Make sure that the version
+numbers of everything correspond.}
+
+You can \IfGNU{also} discover the version number from the \filename{ident} strings in the file, which you can discvoer from either \progname{ident}
+or \progname{what} if they are available\IfXi{ or our own in-house program \progname{whatvn}}.
+
+\section{Configuration Files}
+Errors in the information held by the configuration files can cause fatal or very subtle problems.
+\ProductName{} will produce messages about syntax errors.
+
+If a set up problem is suspected check all of the configuration files. For example a network problem may be due to an
+interaction between the files \filename{/etc/hosts} and the hosts file \hostsfile.
+
+\section{Corruption of Variables}
+It is possible to purge \ProductName{} of all the variables by shutting it down and deleting the variable database file
+\filename{btsched\_vfile}. Some users also have procedures where the files in the \filename{batch} directory are moved.
+These procedures have potentially disastrous side effects and we strongly recommend that you check with us first.
+
+If you restart the scheduler after deleting this file, saved jobs containing conditions and assignments depending on these variables will
+have the relevant conditions and assignments deleted (a suitable message will be put in the log file in each case). The jobs may
+therefore start unexpectedly.
+
+\section{IPC Facilities}
+\ProductName{} uses one message queue to communicate with the scheduler process, \progname{btsched}. Two shared memory segments are
+used to hold records of jobs and variables. These records are written out to the files \filename{btsched\_jfile} and
+\filename{btsched\_vfile} respectively, after changes occur. A further shared memory segment is used as buffer space for passing job
+details, as the size of messages which may be sent on message queues is limited on many systems. One semaphore controls access to the shared memory segments, and another is used for network locking.
+
+On some versions of \ProductName{}, use of shared memory is replaced by memory-mapped files and use of semaphores is
+replaced by file locking, except for network locking, which still uses a semaphore.
+
+\subsection{Looking at IPC Facilities}
+The IPC facilities can be recognised by running \progname{ipcs}. The items in question are owned by \batchuser{}
+with a \textit{key} of \exampletext{0x5869Bxxx}. Using the command \exampletext{ipcs -o} should produce an output listing
+resembling this:
+
+\begin{exparasmall}
+
+\# ipcs -o
+
+\bigskip
+
+IPC status from {\textless}running system{\textgreater} as of Mon Feb 8
+12:27:52 1999
+
+T \ \ \ \ ID \ \ \ \ KEY \ \ \ \ \ \ \ MODE \ \ \ \ \ \ OWNER
+\ \ \ GROUP CBYTES \ QNUM
+
+\bigskip
+
+Message Queues:
+
+q \ \ \ \ \ 0 0x5869b000 -Rrw-{}-{}-{}-{}-{}-{}- \ \ \ \batchusername{} \ \ \ \ bin
+\ \ \ \ \ 0 \ \ \ \ 0
+
+\bigskip
+
+T \ \ \ \ ID \ \ \ \ KEY \ \ \ \ \ \ \ MODE \ \ \ \ \ \ OWNER
+\ \ \ GROUP NATTCH
+
+Shared Memory:
+
+m \ \ \ \ \ 0 0x50018c83 -{}-rw-r-{}-r-{}- \ \ \ \ root \ \ \ root
+\ \ \ \ \ 1
+
+m \ \ \ \ \ 1 0x5869b003 -{}-rw-{}-{}-{}-{}-{}-{}- \ \ \ \batchusername{}
+\ \ \ \ bin \ \ \ \ \ 4
+
+m \ \ \ \ \ 2 0x5869b002 -{}-rw-{}-{}-{}-{}-{}-{}- \ \ \ \batchusername{}
+\ \ \ \ bin \ \ \ \ \ 4
+
+m \ \ \ \ \ 3 0x5869b100 -{}-rw-{}-{}-{}-{}-{}-{}- \ \ \ \batchusername{}
+\ \ \ \ bin \ \ \ \ \ 4
+
+
+\bigskip
+
+Semaphores:
+
+s \ \ \ \ \ 0 0x5869b001 -{}-ra-ra-ra- \ \ \ \batchusername{} \ \ \ \ bin
+
+s \ \ \ \ \ 1 0x5869b003 -{}-ra-{}-{}-{}-{}-{}-{}- \ \ \ \batchusername{}
+\ \ \ \ bin
+
+
+\end{exparasmall}
+
+In this example there are two third party software products using the IPC facilities, as well a shared memory area in use by the operating
+system. The lines of interest are the ones showing entries owned by user \batchuser{}.
+
+If several products are
+using IPC facilities there will be more entries displayed than will fit on a screen. The entries appear in the order they were created, as time goes by existing entries will be removed and new ones created. Hence the entries will no longer be in easy to find blocks.
+
+An easy way to see only the entries owned by \batchuser{} would be to pipe the output from the \progname{ipcs}
+command through \progname{grep}. For example:
+
+\begin{expara}
+
+\# ipcs -o {\textbar} grep \batchusername{}
+
+\bigskip
+
+q \ \ \ \ \ 0 0x5869b000 -Rrw-{}-{}-{}-{}-{}-{}- \ \ \ \batchusername{}
+\ \ \ \ \ bin \ \ \ \ 0 \ \ \ \ 0
+
+m \ \ \ \ \ 1 0x5869b003 -{}-rw-{}-{}-{}-{}-{}-{}- \ \ \ \batchusername{}
+\ \ \ \ \ bin \ \ \ \ 4
+
+m \ \ \ \ \ 2 0x5869b002 -{}-rw-{}-{}-{}-{}-{}-{}- \ \ \ \batchusername{}
+\ \ \ \ \ bin \ \ \ \ 4
+
+m \ \ \ \ \ 3 0x5869b100 -{}-rw-{}-{}-{}-{}-{}-{}- \ \ \ \batchusername{}
+\ \ \ \ \ bin \ \ \ \ 4
+
+s \ \ \ \ \ 0 0x5869b001 -{}-ra-ra-ra- \ \ \ \batchusername{} \ \ \ \ \ bin
+
+s \ \ \ \ \ 1 0x5869b003 -{}-ra-{}-{}-{}-{}-{}-{}- \ \ \ \batchusername{}
+\ \ \ \ \ bin
+
+\end{expara}
+
+The type of each entry is shown in the first column. Message Queues have a letter ``\exampletext{q}'' in the
+first column, shared memory areas have a letter ``\exampletext{m}'' and semaphores a letter ``\exampletext{s}''.
+
+More recent versions of \ProductName{} will just show one message queue and one semaphore.
+
+\subsection{Problem - Cannot Start \ProductName{}}
+When \ProductName{} is halted normally it removes all of the IPC facilities which it is using. If terminated abnormally the \progname{btsched} processes will still try to tidy up if possible.
+
+The scheduler cannot be restarted until all old \ProductName{} processes have been killed and their IPC entries removed. An IPC entry cannot be
+deleted if there is still a process using or attached to it. This can be a program, like \PrBtq{} or
+\PrBtjlist{}, not just \progname{btsched}.
+
+Possible Symptoms:
+
+\begin{itemize}
+\item Invoking \progname{btsched} to start the scheduler fails silently.
+\item Using btstart to start the scheduler fails with an error message about the IPC facilities, I/O or about files other than ones which are
+held in the batch directory.
+\end{itemize}
+Investigation:
+
+\begin{itemize}
+\item If invoking \progname{btsched}, run \PrBtstart{} instead to get an error message.
+\item Make sure that the scheduler is stopped. \item Look for \progname{btsched},
+\progname{xbnetserv} and any user programs with a command like \progname{ps}.
+\item Check the IPC facilities with the \exampletext{ipcs -o} command.
+\end{itemize}
+
+Fix:
+
+\begin{itemize}
+\item Kill any \progname{btsched}, \progname{xbnetserv} and user processes like \PrBtq{}.
+\item Check the IPC facilitates, for entries owned by \batchuser{}, with the \exampletext{ipcs -o}
+command again. Remove any that remain using the \progname{ipcrm} or \progname{ripc} commands.
+\item Run \PrBtstart{} to bring the scheduler up, if this fails call for help.
+\end{itemize}
+
+\subsection{Deleting IPC entries owned by batch}
+The \progname{ipcrm} command may be used to delete Message Queues, Shared Memory Segments and Semaphores. It uses the same letters to identify Queues, Memory Segments and Semaphores as the \progname{ipcs} command. If running \exampletext{ipcs -o} gives a listing like
+this:
+
+\begin{expara}
+
+\# ipcs -o {\textbar} grep \batchusername{}
+
+\bigskip
+
+q \ \ \ \ \ 0 0x5869b000 -Rrw-{}-{}-{}-{}-{}-{}- \ \ \ \batchusername{}
+\ \ \ \ \ bin \ \ \ \ 0 \ \ \ \ 0
+
+m \ \ \ \ \ 1 0x5869b003 -{}-rw-{}-{}-{}-{}-{}-{}- \ \ \ \batchusername{}
+\ \ \ \ \ bin \ \ \ \ 4
+
+m \ \ \ \ \ 4 0x5869b002 -{}-rw-{}-{}-{}-{}-{}-{}- \ \ \ \batchusername{}
+\ \ \ \ \ bin \ \ \ \ 4
+
+m \ \ \ \ \ 5 0x5869b100 -{}-rw-{}-{}-{}-{}-{}-{}- \ \ \ \batchusername{}
+\ \ \ \ \ bin \ \ \ \ 4
+
+s \ \ \ \ \ 0 0x5869b001 -{}-ra-ra-ra- \ \ \ \batchusername{} \ \ \ \ \ bin
+
+s \ \ \ \ \ 1 0x5869b003 -{}-ra-{}-{}-{}-{}-{}-{}- \ \ \ \batchusername{}
+\ \ \ \ \ bin
+
+\end{expara}
+
+then suitable \progname{ipcrm} commands to remove each entry would be:
+
+\begin{expara}
+
+ipcrm -q 0
+
+ipcrm -m 1
+
+ipcrm -m 4
+
+ipcrm -m 5
+
+ipcrm -s 0
+
+ipcrm -s 1
+
+\end{expara}
+
+The flag in \progname{ipcrm} indicates what type of IPC entry to delete, using the same letter as in the first column of the
+output from \exampletext{ipcs -o}. A message queue is represented with a letter ``\exampletext{q}'' and deleted with
+a \exampletext{{}-q} option and so on.
+
+The number following the flag is an ID number for the queue, memory segment or semaphore. It is unique within the type of IPC, hence there
+can only be one Message Queue 0, but there can also be one Shared Memory Segment 0 and one Semaphore 0.
+
+Most operating systems will allow more than one entry to be deleted with a single invocation of \progname{ipcrm}. To delete all 6
+entries in one go the command would be:
+
+\begin{expara}
+
+ipcrm -q 0 -m 1 -m 4 -m 5 -s 0 -s 1
+
+\end{expara}
+
+Please be careful not to delete the wrong IPC entry, possibly belonging to a third-party product!
+
+An easier alternative to \progname{ipcrm} is the utility program \PrXbRipc.
+
+To delete the entries, just type:
+
+\begin{expara}
+
+\XbRipcName -d
+
+\end{expara}
+
+Ignore any messages, as this program may also be used for debugging purposes, or discard them thus:
+
+\begin{expara}
+
+\XbRipcName -d {\textgreater}/dev/null
+
+\end{expara}
+
+When it has finished, run
+
+\begin{expara}
+
+ipcs -o
+
+\end{expara}
+
+again to verify that the IPC facilities have been deleted.
+
+\IfXi{\section{Messages about expiry / validation}
+\ProductName{} has a software protection mechanism such that the scheduler process will not run without a current license. When the software is first installed a time limited evaluation license is set up. If the evaluation license has expired or any license has been invalidated \PrBtstart{} will give an error message.
+
+Moving or copying the \filename{btsched} file or \filename{progs} directory is almost certain to invalidate the license.
+
+Call us or your distributor for help. New validation codes can be supplied over the phone, or on \href{http://www.xi-software.com}{our website} for repairing permanent licenses and purchasing new licenses. The chapter on installation contains a section describing how to apply validation codes.}
+
+\section{Messages about key clashes entering \BtqName{} or \BtuserName{}}
+If you receive a message like this:
+
+\begin{expara}
+
+State 5 setup error - clash on character \^{}H with previously-given value 420 and new value 530
+
+\end{expara}
+
+It means that your help message file contains 2 definitions for the given character, in this case backspace (\exampletext{\^{}H}).
+You should look in the help message file (in the case of \PrBtq{} this will be by default
+\filename{\progsdirname/btq.help} and \filename{btuser.help}) for lines of the form
+
+\begin{expara}
+
+K420: . . .
+
+\end{expara}
+
+and
+
+\begin{expara}
+
+5K530: . . .
+
+\end{expara}
+
+The ``420'', ``5'' and ``530'' are all parameters given in the message. You may find that the same character value is defined more
+than once; remember that (in this example) backspace could conceivably be specified from:
+
+\begin{tabular}{ll}
+\exampletext{\^{}H {\textbackslash}b} & An explicit character definition\\
+\exampletext{{\textbackslash}kERASE} & Terminal key settings for erase character etc\\
+\exampletext{{\textbackslash}kLEFT} & The \textit{left cursor} key as defined in \textit{terminfo}
+or \textit{termcap}\\
+\end{tabular}
+
+The installation procedure attempts to cover cases on the terminal on which you installed \ProductName{}, but you may run into these difficulties if you use different terminals or key settings.
+
+To overcome the difficulties you may want to rearrange the help message file, or possibly temporarily reassign your terminal keys.
+Don{\textquotesingle}t forget that you can arrange to automatically select different help message files depending upon the terminal you are
+using.
+
+\section{Warning messages about unknown key name}
+If you receive a message on entry to \PrBtq{} or \PrBtuser{} such as
+
+\begin{expara}
+
+Unknown key name {\textquotesingle}khome{\textquotesingle} - ignored
+
+\end{expara}
+
+then this means that your help message file contains a reference to a key not defined in your \textit{terminfo} or \textit{termcap} file, in this case the \exampletext{HOME} key. The effect is harmless; however to get rid of the message you should either adjust the file
+(\filename{btq.help} or \filename{btuser.help}) to remove the reference, in this case to
+\exampletext{{\textbackslash}kHOME}, or to replace it with the correct character sequence, alternatively you should include the
+definition in your \textit{terminfo} or \textit{termcap} file.
+

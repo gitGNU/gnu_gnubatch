@@ -1,0 +1,468 @@
+\subsection{\BtjchangeName}
+
+\begin{expara}
+
+\BtjchangeName{} [-options] job number ...
+
+\end{expara}
+
+\PrBtjchange{} is a program to modify details of a job or jobs from a shell script or another program. Jobs are specified by
+using the job number, as displayed by \PrBtr{} with the \exampletext{{}-v} (verbose) option, or as in the output of the first column of the \PrBtjlist{} command with default format.
+
+Remote jobs should be specified by prefixing the job numbers with the host name thus:
+
+\begin{expara}
+
+host:1234
+
+\end{expara}
+
+It is not necessary to specify any leading zeroes.
+
+Several jobs may be specified at once to apply the same set of changes to all of them at once.
+
+\subsubsection{Options}
+As supplied, the options to \BtjchangeName{} are more or less identical to those for \PrBtr{}, except that existing jobs have
+their parameters changed from whatever they are to the specified parameters, and there is no ``default'', in
+that mentioning an option means that the user requires an existing parameter for the job or jobs changed. For details of the syntax and
+much of the meaning of the options, in most cases this is the same as for \PrBtr{} at the corresponding option.
+
+It is a mistake not to specify any options at all.
+
+The environment variable on which options are supplied is \filename{\BtjchangeVarname} and the environment variable to specify
+the help file is \filename{BTRESTCONF}.
+
+\setbkmkprefix{btjchange}
+\explainopt
+
+\cmdoption{2}{grace-time}{time}{gracetime}
+
+This option sets or changes the second stage time of handling over-running jobs to time, in seconds (the argument may be any number of seconds, or given
+as \genericargs{mm:ss} for minutes and seconds).
+
+For more information, see the further documentation of this on \pageref{btr:gracetime}.
+
+\cmdoption{9}{catch-up}{~}{catchup}
+
+This option changes the ``if not possible'' action of the job or jobs to catch up - one run of a series of missed runs is
+done when it is possible without affecting future runs.
+
+\cmdoption{A}{avoiding-days}{~}{avoiding}
+
+This option sets the days to avoid when the job or jobs are to be repeated automatically. The days to avoid option supersedes whatever
+was in the job or jobs, unless a leading comma is given.
+
+Thus if the existing days to avoid in the job are \exampletext{Sat} and \exampletext{Sun},
+
+\begin{expara}
+
+\BtrName{} -A Wed ...
+
+\end{expara}
+
+will change the days to avoid to be Wednesday only, whereas
+
+\begin{expara}
+
+\BtrName{} -A ,Wed ...
+
+\end{expara}
+
+will change the days to avoid to be Saturday, Sunday and Wednesday.
+
+A single \exampletext{{}-} argument cancels the days to avoid parameter altogether, thus
+
+\begin{expara}
+
+\BtrName{} -A {}- ...
+
+\end{expara}
+
+For more information about this option, in particular about altering the names for the
+days, see the corresponding option for \PrBtr{} on page \pageref{btr:avoiding}.
+
+\cmdoption{a}{argument}{string}{arg}
+
+Provide an argument string to the command interpreter.
+
+This will be added to the end of the arguments already in the job or jobs or to arguments already provided using the \exampletext{{}-a} option already.
+
+If you want to clear the argument list and start again, use the \exampletext{{}-e} (see page \pageref{btjchange:cancarg}) option first.
+
+\cmdoption{B}{assignment-not-critical}{~}{anotcrit}
+
+This marks subsequently-specified assignments (with the \exampletext{{}-s} option) as ``not critical'', meaning that the assignment will be ignored if
+it contains a reference to a variable on a remote host which is offline or inaccessible.
+
+This must precede (not necessarily immediately) the \exampletext{{}-s} options to which it is to be applied.
+
+Note that this option on its own doesn't change anything in the job or jobs.
+
+\cmdoption{b}{assignment-critical}{~}{acrit}
+
+This marks subsequently-specified assignments (with the \exampletext{{}-s} option) as
+``critical'', meaning that the job or jobs will not start if the assignment contains a reference to a variable on
+a remote host which is offline or inaccessible.
+
+This must precede (not necessarily immediately) the \exampletext{{}-s} options to which it is to be applied.
+
+Note that this option on its own doesn't change anything in the job or jobs.
+
+\cmdoption{C}{cancelled}{~}{cancelled}
+
+Set the job or jobs to the ``cancelled'' state.
+
+\cmdoption{c}{condition}{condition}{condition}
+
+Add a condition to be satisfied before the job or jobs may run.
+
+The condition is added to the end of the list of conditions in the job or jobs and ones added by previous \exampletext{{}-c} options, up to a maximum of 10
+conditions.
+
+To delete any existing conditions and start from scratch, use the \exampletext{{}-y} option first.
+
+The format of the condition argument is decribed fully on page \pageref{btr:condfmt}.
+
+\cmdoption{D}{directory}{directory}{directory}
+
+This option resets the working directory for the job or jobs.
+
+Various constructs are recognised in the directory name, see page \pageref{btr:directory} for more details.
+
+\cmdoption{d}{delete-at-end}{~}{deleteatend}
+
+This option cancels any repeat option of the job or jobs so that they will be deleted at the end of the run rather than repeated or kept.
+
+\cmdoption{E}{reset-environment}{~}{resetenv}
+
+\warnings{Note that this option is different from the} \exampletext{{}-E} \warnings{option for} \PrBtr{}.
+
+This option causes the environment for the job or jobs to be that of the environment of the \PrBtjchange{} command.
+
+\cmdoption{e}{cancel-arguments}{~}{cancarg}
+
+This option cancels any arguments previously set up in the job or jobs.
+
+You probably want to use this if you are changing the arguments, otherwise any arguments you specify with the \exampletext{{}-a} option will go on the end of existing arguments.
+
+\cmdoption{F}{export}{~}{export}
+
+This marks the job or jobs to be visible throughout the network or ``exported''.
+
+The job won't actually run on another host unless you go further and make the job ``remote runnable'' with the
+\exampletext{{}-G} option, as described on page \pageref{btjchange:fullexport}.
+
+\cmdoption{f}{flags-for-set}{letters}{assflags}
+
+This option provides a set of ``flags'' for subsequent assignment operators specified by the \exampletext{{}-s} option, indicating when they
+should apply.
+
+The argument letters should be some or all of \exampletext{SNEACR} for respectively Start, Normal exit,
+Error exit, Abort, Cancel and Reverse.
+
+Note that this option on its own doesn't change anything in the job or jobs.
+
+\cmdoption{G}{full-export}{~}{fullexport}
+
+This option marks the job or jobs to be visible throughout the network and potentially available to run on any machine.
+
+\cmdoption{g}{set-group}{~}{group}
+
+This option sets the group owner of the job or jobs to be \genericargs{group}.
+
+Note that the setting of the group is done as a separate operation from any other changes. Depending upon whether the pre-existing and new
+modes and ownership permit the various operations, this may need to be done before, after or interleaved with other changes for it to
+succeed.
+
+\cmdoption{H}{hold-current}{~}{holdcurrent}
+
+This option selects the variant of the ``if not possible'' action for the job or jobs to ``hold current''. The next run is done
+when possible, but the usual time is not adjusted.
+
+Note that unlike with the ``catch up'' option described on page \pageref{btjchange:catchup},
+subsequent runs are not omitted, the job will repeatedly run until all missed runs are completed.
+
+\cmdoption{h}{title}{title}{title}
+
+This option supplies a title for the job or jobs, setting it to the supplied \genericargs{title}.
+
+In the absence of this argument the title will be that of the last part of the file name, if any.
+
+Note that this may be done whilst the job or jobs are running.
+
+The title may be a string of any length containing any printable characters, but colon should be avoided to avoid confusion with queue names.
+
+If the title contains spaces or characters interpreted by the shell, it should be surrounded by quotes.
+
+\cmdoption{I}{input-output}{redirection-spec}{redir}
+
+This option specifies a redirection for the job or jobs. Note that the new redirection will be appended to the list of redirections in each job or as specified by preceding \exampletext{{}-I} options.
+
+To clear any existing ones and start the list of redirections from scratch, precede them with the \exampletext{{}-Z}
+option.
+
+When the job is executed the redirections are handled in order from first to last.
+
+The format of redirection specifications are described fully on page \pageref{btr:redirfmt}.
+
+\cmdoption{i}{interpreter}{name}{interpreter}
+
+This option resets the command interpreter for the job or jobs to be that specified by the name, which should already be defined.
+
+The load level is also set to that for the specified interpreter, so if a \exampletext{{}-l} argument is to be specified,
+it should \emphasis{follow} the \exampletext{{}-i} option.
+
+\cmdoption{J}{no-advance-time-error}{~}{noadv}
+
+This specifies that if the job exits with an error, the next time to run is not advanced according to the repeat specification if applicable.
+
+\cmdoption{j}{advance-time-error}{~}{adv}
+
+This specifies that if the job exits with an error, the next time to run is still advanced if applicable according to the repeat
+specification.
+
+\cmdoption{K}{condition-not-critical}{~}{cnotcrit}
+
+This option marks subsequently specified conditions set with the \exampletext{{}-c} option as ``not critical'',
+i.e. a condition dependent on a variable on an offline or otherwise inaccessible remote host will be ignored in
+deciding whether a job may start.
+
+This must precede (not necessarily immediately) the \exampletext{{}-c} options to which it is to be applied.
+
+Note that this option on its own doesn't change anything in the job or jobs.
+
+\cmdoption{k}{condition-critical}{~}{ccrit}
+
+This option marks subsequently specified conditions set with the \exampletext{{}-c} option as ``critical'', i.e. a condition dependent on a
+variable on an offline or otherwise inaccessible remote host will cause the job to be held up.
+
+This must precede (not necessarily immediately) the \exampletext{{}-c} options to which it is to be applied.
+
+Note that this option on its own doesn't change anything in the job or jobs.
+
+\cmdoption{L}{ulimit}{value}{ulimit}
+
+This option sets the \filename{ulimit} (maximum file size) value for the job or jobs to the value given.
+
+Set a value of zero (the default) to indicate an unlimited value.
+
+We strongly recommend that this option not be used as it easily causes a lot of unexpected problems.
+
+\cmdoption{l}{loadlev}{number}{loadlev}
+
+This option sets the load level of the job or jobs to be number. The user must have ``special create permission'' for this to differ from that of the
+command interpreter.
+
+The load level is also reset by the \exampletext{{}-i} (set command interpreter) option, so this option must be used after that has been specified
+if it is to have any effect.
+
+\cmdoption{M}{mode}{modes}{modes}
+
+This option sets the permission of the job or jobs to be as specified.
+
+The format of the mode argument is described fully on page \pageref{btjchange:modefmt}.
+
+\warnings{Note that this is different from that for the \PrBtr{} command as it contains syntax to add and subtract from existing modes.}
+
+\cmdoption{m}{mail-message}{~}{mail}
+
+This option sets the flag whereby completion messages are mailed to the owner of the job. (They may anyway if the jobs output to standard
+output or standard error and these are not redirected).
+
+\cmdoption{N}{normal}{~}{normal}
+
+This option sets the job or jobs to normal ``ready to run'' state, as opposed to ``cancelled'' as set by the \exampletext{{}-C} option.
+
+\cmdoption{n}{local-only}{~}{localonly}
+
+This option marks the job or jobs to be local only to the machines which they are queued on, cancelling any \exampletext{{}-F} or \exampletext{{}-G} options. They will not be visible or runnable on remote hosts.
+
+\cmdoption{o}{no-repeat}{~}{norep}
+
+This option cancels any repeat option of the job or jobs, so that the they will be run and retained on the queue marked ``done'' at the end.
+
+\cmdoption{P}{umask}{value}{umask}
+
+This option sets the \progname{umask} value of the job or jobs to the octal value given. The value should be up to 3 octal digits as
+per the shell.
+
+\cmdoption{p}{priority}{number}{priority}
+
+This option sets the priority of the job or jobs to be \genericargs{number}, which must be in the range given by the user{\textquotesingle}s minimum
+and maximum priority.
+
+\cmdoption{q}{job-queue}{queuename}{queue}
+
+This option sets a job queue name as specified on the job or jobs. This may be any sequence of printable characters.
+
+\cmdoption{R}{reschedule-all}{~}{delayall}
+
+This option sets the ``not possible'' action of the job or jobs to reschedule all - the run is done when it is possible
+and subsequent runs are rescheduled by the amount delayed.
+
+\cmdoption{r}{repeat}{repeat\_spec}{repeat}
+
+This option sets the repeat option of the job or jobs as specified.
+
+The format of the repeat argument is the same as for \PrBtr{} and is described fully on page \pageref{btr:repeatfmt}.
+
+\cmdoption{S}{skip-if-held}{~}{skip}
+
+This option sets the ``not possible'' action of the job or jobs to skip - the run is skipped if it could not be done at the specified
+time.
+
+\cmdoption{s}{set}{assignment}{assign}
+
+This option sets an assignment on the job or jobs to be performed at the start and/or finish of the job or jobs as selected by a
+previously-specified \exampletext{{}-f} option (see page \pageref{btjchange:assflags}).
+
+This option is cumulative, and will add to the list of assignments already in the job or as specified by previous \exampletext{{}-s} options.
+
+To clear all existing assignments and start from scratch, precede the assignments with the \exampletext{{}-z} option.
+
+The format of the assignment argument as for \PrBtr{}, and is described fully on page \pageref{btr:assfmt}.
+
+\cmdoption{T}{time}{time}{time}
+
+This option sets the next run time or time and date of the job or jobs as specified.
+
+\cmdoption{t}{delete-time}{time}{deltime}
+
+This option sets a delete time for the specified job or jobs as a time in hours, after which it will be automatically deleted if this time has
+elapsed since it was queued or last ran.
+
+Set to zero (the default) to retain the job or jobs indefinitely.
+
+\cmdoption{U}{no-time}{~}{notime}
+
+This option cancels any time setting on the job or jobs.
+
+\cmdoption{u}{set-owner}{user}{owner}
+
+This option sets the owner of the job or jobs to be \genericargs{user}.
+
+Note that the setting of the user is done as a separate operation from any other changes. Depending upon whether the pre-existing and new
+modes and ownership permit the various operations, this may need to be done before, after or interleaved with other changes to
+succeed.
+
+\cmdoption{W}{which-signal}{sig}{whichsig}
+
+This option is resets which signal is used to kill the job or jobs after the maximum run time has been exceeded.
+
+\cmdoption{w}{write-message}{~}{write}
+
+This option is used to indicate that completion messages are written to the owner's terminal if available.
+
+\cmdoption{X}{exit-code}{range}{exits}
+
+This option sets the normal or error exit code ranges for the job or jobs. THe format of the \genericargs{range} argument is as given for the
+\PrBtr{} command on page \pageref{btr:exits}.
+
+\cmdoption{x}{no-message}{~}{nomess}
+
+This option resets both flags as set by the \exampletext{{}-m} and \exampletext{{}-w} options.
+
+\cmdoption{Y}{run-time}{time}{runtime}
+
+This option sets a maximum elapsed run time for the specified job or jobs.
+
+The argument time is in seconds, which may be written as \genericargs{mm:ss} or \genericargs{hh:mm:ss}.
+
+For more details, including the interaction with the other arguments \exampletext{{}-W} and \exampletext{{}-2},see the documentation of this option for
+\PrBtr{} given on page \pageref{btr:runtime}.
+
+\cmdoption{y}{cancel-condition}{~}{canccond}
+
+This option deletes any conditions set up in the job or jobs or by previous \exampletext{{}-c} options.
+
+\cmdoption{Z}{cancel-io}{~}{cancio}
+
+This option deletes any redirections set up in the job or jobs or by previous \exampletext{{}-I} options.
+
+\cmdoption{z}{cancel-set}{~}{cancass}
+
+This option deletes any assignments set up in the job or jobs or by previous \exampletext{{}-s} options.
+
+\freezeopts{\filename{\BtjchangeVarname}}{Stop}
+
+\subsubsection{Mode arguments}
+\bookmark{modefmt}
+
+The argument to the \exampletext{{}-M} option provides for a wide variety of operations. Note that this differs from the syntax for the corresponding
+option of the \PrBtr{} command on page \pageref{btr:modefmt}.
+
+Each permission is represented by a letter, as follows:
+
+\begin{center}
+\begin{tabular}{l l}
+\exampletext{R} & read permission\\
+\exampletext{W} & write permission\\
+\exampletext{S} & reveal permission\\
+\exampletext{M} & read mode\\
+\exampletext{P} & set mode\\
+\exampletext{U} & give away owner\\
+\exampletext{V} & assume owner\\
+\exampletext{G} & give away group\\
+\exampletext{H} & assume group\\
+\exampletext{D} & delete\\
+\exampletext{K} & kill\\
+\end{tabular}
+\end{center}
+Each section of the mode (user, group, others) is represented by the prefixes \exampletext{U:}, \exampletext{G:} and
+\exampletext{O:} and separated by commas.
+
+For example:
+
+\begin{expara}
+
+{}-M U:RWSMPDK,G:RWSDK,O:RS
+
+\end{expara}
+
+would set the permissions for the user, group and others as given. If the prefixes are omitted, as in
+
+\begin{expara}
+
+{}-M RWSDK
+
+\end{expara}
+
+then all of the job, group and other permissions are set to the same value.
+
+An alternative format allows permissions to be added to the existing permissions, thus
+
+\begin{expara}
+
+{}-M U:+WD,G:+D
+
+\end{expara}
+
+will add the relevant permissions to whatever is currently set.
+
+Similarly permissions may be cancelled individually by constructs of the form:
+
+\begin{expara}
+
+{}-M G:-W,O:-RS
+
+\end{expara}
+
+If the same operation is to be done with two or more of \exampletext{U}, \exampletext{G} or
+\exampletext{O}, the letters may be run together, for example
+
+\begin{expara}
+
+{}-M GO:+W
+
+\end{expara}
+
+\subsubsection{Note on mode and owner changes}
+Changing various parameters, the mode (permissions), the owner and the group are done as separate operations.
+
+In some cases changing the mode may prevent the next operation from taking place. In other cases it may need to be done first.
+
+Similar considerations apply to changes of the owner and the group.
+
+\PrBtjchange{} does not attempt to work out the appropriate order to perform the operations, the user should execute
+separate \PrBtjchange{} commands in sequence to achieve the desired effect.
+

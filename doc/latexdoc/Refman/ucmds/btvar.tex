@@ -1,0 +1,190 @@
+\subsection{\BtvarName}
+
+\begin{expara}
+
+\BtvarName{} [-options] variable name
+
+\end{expara}
+
+\PrBtvar{} is a shell level tool to display, create, delete, modify or test the values of \ProductName{}
+variables. Testing may be ``atomic'', in the sense that if two or more users attempt to assign new values to the
+same variable conditional on a test, only one will ``win''.
+
+\subsubsection{Options}
+The environment variable on which options are supplied is \filename{\BtvarVarname} and the
+environment variable to specify the help file is \filename{BTRESTCONF}.
+
+\setbkmkprefix{btvar}
+\explainopt
+
+\cmdoption{C}{create}{}{create}
+
+Create the variable if it doesn't exist. An initial value should be supplied using the \exampletext{{}-s} option.
+
+\cmdoption{c}{comment}{string}{comment}
+
+Assign or update the given comment field of the variable to be \genericargs{string}.
+
+\cmdoption{D}{delete}{}{delete}
+
+Delete the variable.
+
+\cmdoption{E}{set-export}{}{export}
+
+Mark the variable as ``exported'', i.e. visible to other hosts.
+
+\cmdoption{G}{set-group}{group}{group}
+
+Change the group ownership of the variable to \genericargs{group}.
+
+\cmdoption{K}{cluster}{}{cluster}
+
+Set the ``clustered'' marker on the variable. When used in conditions or assignments, the local version is used. Note that this
+option is set to be deprecated in future releases in favour of modifying the condition or assignment itself to select the local version.
+
+\cmdoption{k}{no-cluster}{}{nocluster}
+
+Reset the ``clustered'' marker on the variable.
+
+\cmdoption{L}{set-local}{}{setlocal}
+
+Mark the variable as local to the host only. This is the default for new variables, for existing variables it will turn off the
+export flag if it is specified. To leave existing variables unaffected, invoke the \exampletext{{}-N} flag.
+
+\cmdoption{M}{set-mode}{mode}{mode}
+
+Set the mode (permissions) on the variable according to the \genericargs{mode} argument given.
+
+\cmdoption{N}{reset-export}{}{resetexport}
+
+Reset the \exampletext{{}-L} and \exampletext{{}-E} options. Don't change the state of the variable.
+
+This means that existing variables are left unchanged and for new variables that they will be created local-only.
+
+\cmdoption{o}{reset-cluster}{}{resetcluster}
+
+Reset the \exampletext{{}-k} and \exampletext{{}-K} options.
+
+For new variables this will restore to the default of not clustered. For existing variables this will mean that the cluster flag is left unchanged.
+
+\cmdoption{S}{force-string}{}{forcestring}
+
+Force all assigned values to string type even if they appear to be numeric.
+
+\cmdoption{s}{set-value}{value}{setvalue}
+
+Assign or initialise the variable with the given \genericargs{value}.
+
+\cmdoption{U}{set-owner}{user}{owner}
+
+Change the ownership of the variable to \genericargs{user}.
+
+\cmdoption{u}{undefined-value}{value}{undefval}
+
+In the test operations, if the variable does not exist, treat it as if it did exist and had the given \genericargs{value}.
+
+\cmdoption{X}{cancel}{}{cancel}
+
+Cancel options \exampletext{{}-S}, \exampletext{{}-C}, \exampletext{{}-D}, \exampletext{{}-s} and \exampletext{{}-u}.
+
+\freezeopts{\filename{\BtvarVarname}}{}
+
+\subsubsection{Conditions}
+The six conditions \exampletext{+eq}, \exampletext{+ne}, \exampletext{+gt}, \exampletext{+ge}, \exampletext{+lt +le} followed by
+a constant compare the variable value with the constant specified. The constant is assumed to be on the right of the comparison, for example:
+
+\begin{expara}
+
+\BtvarName{} +gt 4 myvar
+
+\end{expara}
+
+Returns an exit code of zero (``true'' to the shell) if \exampletext{myvar} is greater than 4, or 1 (``false'' to the shell) if it is less than
+or equal to 4.
+
+Some other exit code would be returned if \exampletext{myvar} did not exist or some error occurred.
+
+This may be combined with other options, for example
+
+\begin{expara}
+
+\BtvarName{} -D +gt 100 myvar
+
+\end{expara}
+
+Would delete \exampletext{myvar} only if its value was greater than 100.
+
+\begin{expara}
+
+\BtvarName{} -s 1 +le 0 myvar
+
+\end{expara}
+
+Would assign 1 to \exampletext{myvar} only if its previous value was less than or equal to 0. Exit code 0 (shell
+``true'') would be returned if the test succeeded and the other operation was completed successfully, exit code
+1 (shell ``false'') would be returned if the test failed and nothing was done, or some other error if the variable
+did not exist or the operation was not permitted.
+
+The test is ``atomic'' in the sense that a diagnostic will occur, and no assignment made, if some other process
+sets the value in between the test and the assignment (or other change).
+
+The condition must follow all other options.
+
+\exampletext{+eq}, \exampletext{+ne}, \exampletext{+lt} and \exampletext{+gt} may be represented as \exampletext{{}-e},
+\exampletext{{}-n}, \exampletext{{}-l} and \exampletext{{}-g} but this is not particularly recommended, especially for the last two.
+
+\subsubsection{Use of options}
+With no options, then the current value of the variable is printed, for example:
+
+\begin{expara}
+
+\BtvarName{} abc
+
+\end{expara}
+
+prints out the value of variable \exampletext{abc}.
+
+To assign a value, the \exampletext{{}-s} option should be used, thus
+
+\begin{expara}
+
+\BtvarName{} -s 29 abc
+
+\end{expara}
+
+assigns the numeric value 29 to \exampletext{abc}.
+
+Remote variables are referred to as follows:
+
+\begin{expara}
+
+\BtvarName{} -s 32 host2:def
+
+\end{expara}
+
+assigns 32 to variable \exampletext{def} on \exampletext{host2}.
+
+The conditional options should be the last to be specified.
+
+The \exampletext{{}-u} option may be used to specify a value to substitute for a non-existent variable in a test rather than reporting
+an error, for example:
+
+\begin{expara}
+
+\BtvarName{} -u 10 -gt 5 myvar
+
+\end{expara}
+
+will compare \exampletext{myvar} with 5 if it exists. If it does not exist, then it will compare the given value, in this case 10,
+with 5, and in this case return ``true''. There should not be a diagnostic unless there is a completely different error.
+
+\subsubsection{Note on mode and owner changes}
+Changing various parameters, the mode (permissions), the owner and the group are done as separate operations.
+
+In some cases changing the mode may prevent the next operation from taking place. In other cases it may need to be done first.
+
+Similar considerations apply to changes of the owner and the group.
+
+\PrBtvar{} does not attempt to work out the appropriate order to perform the operations, the user should execute
+separate \PrBtvar{} commands in sequence to achieve the desired effect.
+

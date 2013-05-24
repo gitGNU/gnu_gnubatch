@@ -1,0 +1,96 @@
+\chapter{The Variable Structure}
+\label{chp:the-variable-structure}
+\label{bkm:Varstructure}The following structure is used to manipulate variables.
+
+\begin{expara}
+
+typedef struct \ \{
+
+\ \ \ \ \ \ unsigned long \ var\_sequence;
+
+\ \ \ \ \ \ vident \ \ \ \ \ \ \ \ var\_id;
+
+\ \ \ \ \ \ long \ \ \ \ \ \ \ \ \ \ var\_c\_time, var\_m\_time;
+
+\ \ \ \ \ \ unsigned \ char var\_type;
+
+\ \ \ \ \ \ unsigned char \ var\_flags;
+
+\ \ \ \ \ \ char \ \ \ \ \ \ \ \ \ \ var\_name[BTV\_NAME+1];
+
+\ \ \ \ \ \ char \ \ \ \ \ \ \ \ \ \ var\_comment[BTV\_COMMENT+1];
+
+\ \ \ \ \ \ Btmode \ \ \ \ \ \ \ \ var\_mode;
+
+\ \ \ \ \ \ Btcon \ \ \ \ \ \ \ \ \ var\_value;
+
+\} \ apiBtvar;
+
+\end{expara}
+
+The field \filename{var\_sequence} is updated every time the
+variable is changed, but should not be relied upon within the API.
+
+The field \filename{var\_id} consists of an instance of the
+following structure, which denotes the location of the variable on the
+\textit{owning} host.
+
+\begin{expara}
+
+typedef \ \ struct \ \ \ \{
+
+\ \ \ \ \ \ \ \ netid\_t \ \ hostid;
+
+\ \ \ \ \ \ \ \ slotno\_t \ slotno;
+
+\} \ vident;
+
+\end{expara}
+
+The field \filename{hostid} refers to the owning host, and the \filename{slotno} field refers to the slot number on the
+owning host. \textbf{Remember that this should not be confused with the slot number used by the API to refer to variables, which refers to the
+slot number on the host with which the API is in communication}. (Actually this may be the same if the variable belongs to that machine).
+
+The field \filename{var\_c\_time} refers to the creation time of the variable, but this is not currently maintained by the API.
+
+The field \filename{var\_m\_time} gives the time at which the variable was last modified.
+
+The field \filename{var\_type} gives the type of the variable if it is a system variable, otherwise it is zero to denote that the
+variable is an ordinary variable. Values are as follows:
+
+\begin{tabular}{ll}
+\filename{VT\_LOADLEVEL} & Maximum Load Level variable\\
+\filename{VT\_CURRLOAD} & Current load level variable\\
+\filename{VT\_LOGJOBS} & Log jobs variable\\
+\filename{VT\_LOGVARS} & Log vars variable\\
+\filename{VT\_MACHNAME} & Machine name (constant) variable\\
+\filename{VT\_STARTLIM} & Max number of jobs to start at once\\
+\filename{VT\_STARTWAIT} & Wait time\\
+\end{tabular}
+
+The field \filename{var\_flags} gives certain flag bits for the variable as follows:
+
+\begin{tabular}{ll}
+\filename{VF\_READONLY} & Read-only system variable\\
+\filename{VF\_STRINGONLY} & System variable which may take strings only\\
+\filename{VF\_LONGONLY} & System variable which may take numeric only\\
+\filename{VF\_EXPORT} & Variable is exported\\
+\filename{VF\_CLUSTER} & Variable is ``clustered''\\
+\filename{VF\_SKELETON} & Variable is ``outline'' for variable on remote host.\\
+\end{tabular}
+
+Only the \filename{VF\_EXPORT} and \filename{VF\_CLUSTER} flags may be set by the user, the
+latter only if the former is set.
+
+The fields \filename{var\_name} and \filename{var\_comment} give the name and comment fields of
+the variable.
+
+The field \filename{var\_mode} gives the permissions for the variable in a similar manner to the corresponding field in the job
+header structure, as given for jobs.
+
+The field \filename{var\_value} gives the current value of the variable as described in the job condition and assignment structures.
+
+If a user has no read access to a variable, but does have ``reveal'' access, then the fields
+\filename{var\_commen}t and \filename{var\_value} are zeroed when the variable is read. The completion of the
+\filename{var\_mode} field depends upon whether the user has ``display mode'' access.
+

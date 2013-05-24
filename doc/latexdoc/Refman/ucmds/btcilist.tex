@@ -1,0 +1,25 @@
+\subsection{\BtcilistName}
+
+\begin{expara}
+
+\BtcilistName{} [-options]
+
+\end{expara}
+
+\PrBtcilist{} causes a list of command interpreters, optionally for a remote host, to be output on standard output.
+
+\subsubsection{Options}
+The environment variable on which options are supplied is \filename{\BtcilistVarname} and the environment variable to specify
+the help file is \filename{BTRESTCONF}.
+
+\setbkmkprefix{btcilist}
+\explainopt
+
+\cmdoption{Q}{host}{host}{host}
+
+Specifies the host name, defaulting to the host being run, for which the listing is required.
+
+To cancel a previously-specified host name, use a single minus sign as an argument, or the local host name.
+
+\freezeopts{\filename{\BtcilistVarname}}{}
+

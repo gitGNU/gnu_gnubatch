@@ -1,0 +1,60 @@
+\chapter{User profile structures}
+\label{chp:user-profile-structures}
+\label{bkm:Userstructure}The profile of a given user is described via a structure of the following format.
+
+\begin{expara}
+
+typedef \ \ struct \ \ \ \{
+
+\ \ \ \ \ \ \ \ unsigned \ char \ btu\_isvalid,
+
+\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ btu\_minp,
+
+\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ btu\_maxp,
+
+\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ btu\_defp;
+
+\ \ \ \ \ \ \ \ int\_ugid\_t \ \ \ \ \ btu\_user;
+
+\ \ \ \ \ \ \ \ unsigned \ short btu\_maxll;
+
+\ \ \ \ \ \ \ \ unsigned \ short btu\_totll;
+
+\ \ \ \ \ \ \ \ unsigned \ short btu\_spec\_ll;
+
+\ \ \ \ \ \ \ \ unsigned \ short btu\_priv;
+
+\ \ \ \ \ \ \ \ unsigned \ short btu\_jflags[3];
+
+\ \ \ \ \ \ \ \ unsigned \ short btu\_vflags[3];
+
+\} \ apiBtuser;
+
+\end{expara}
+
+The field \filename{btu\_isvalid} denotes that the user description is valid. This will always be non-zero.
+
+The fields \filename{btu\_minp}, \filename{btu\_maxp} and \filename{btu\_defp} give the minimum, maximum and default
+priorities respectively.
+
+The fields \filename{btu\_maxll}, \filename{btu\_totll} and \filename{btu\_spec\_ll} give the maximum per job load level, the total load level and the
+`special create'' load levels respectively.
+
+The field \filename{btu\_priv} gives the user's privileges as a combination of some of the following bits.
+
+\begin{tabular}{ll}
+\filename{BTM\_SSTOP} & Stop the scheduler\\
+\filename{BTM\_UMASK} & Change own default permissions\\
+\filename{BTM\_SPCREATE} & Special create permission\\
+\filename{BTM\_CREATE} & Create new entries\\
+\filename{BTM\_RADMIN} & Read administration file\\
+\filename{BTM\_WADMIN} & Write admin file\\
+\filename{BTM\_ORP\_UG} & Or user and group permissions\\
+\filename{BTM\_ORP\_UO} & Or user and other permissions\\
+\filename{BTM\_ORP\_GO} & Or group and other permissions\\
+\end{tabular}
+
+The fields \filename{btu\_jflags} and \filename{btu\_vflags} give the default permissions for jobs
+and variables respectively, and the owner, group and `others'' permission as three successive
+fields for each. These are bit maps with the same meanings as that given for the job and variables permissions.
+

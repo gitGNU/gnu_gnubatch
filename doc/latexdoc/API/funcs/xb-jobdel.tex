@@ -1,0 +1,71 @@
+\subsection{\funcnameXBjobdel{}}
+
+\begin{expara}
+
+int \funcnameXBjobdel{}(const int fd, const unsigned flags, const slotno\_t
+slot)
+
+\end{expara}
+
+The function \funcXBjobdel{} is used to delete a job.
+
+\exampletext{fd} is a file descriptor which was previously
+returned by a successful call to \funcXBopen{} or equivalent.
+
+\exampletext{flags} is zero or
+\filename{\constprefix{}FLAG\_IGNORESEQ} to ignore recent changes to
+the job list.
+
+\exampletext{slot} is the slot number corresponding to the job
+as returned by \funcXBjoblist{} or
+\funcXBjobfindslot{}.
+
+\subsubsection{Return values}
+The function returns 0 if successful otherwise one of the error codes
+listed on page \pageref{errorcodes} onwards.
+
+\subsubsection{Example}
+To delete all jobs for a user.
+
+\begin{expara}
+
+int fd, ret, cnt, numjobs;
+
+slotno\_t *list;
+
+\bigskip
+
+
+fd = \funcnameXBopen{}({\textquotedbl}myhost{\textquotedbl}, (char *) 0);
+
+ret = \funcnameXBjoblist{}(fd, \constprefix{}FLAG\_USERONLY, \&numjobs, \&list);
+
+if (fd {\textless} 0) \ \{ /* handle error */
+
+\ \ \ \ . . .
+
+\}
+
+\bigskip
+
+
+for (cnt = 0; cnt {\textless} numjobs; cnt++) \ \{
+
+\ \ \ \ if ((ret = \funcnameXBjobdel{}(fd, \constprefix{}FLAG\_IGNORESEQ, list[cnt])
+\ \{
+
+\ \ \ \ \ \ \ \ /* handle error */
+
+\ \ \ \ \ \ \ \ . . .
+
+\ \ \ \ \}
+
+\}
+
+\bigskip
+
+
+\funcnameXBclose{}(fd);
+
+\end{expara}
+

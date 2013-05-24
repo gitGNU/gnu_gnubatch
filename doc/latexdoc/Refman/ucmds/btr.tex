@@ -1,0 +1,895 @@
+\subsection{\BtrName{} and \RbtrName{}}
+
+\begin{expara}
+
+\BtrName{} [-options] [ files ]
+
+\RbtrName{} [-options] [ files ]
+
+\end{expara}
+
+\PrBtr{} creates a \ProductName{} batch job from each of the supplied files or the standard input if no file names are given.
+
+\PrRbtr{} operates similarly, but creates the jobs on a remote host without the necessity of having to have \ProductName{} running on the submitting host.
+
+\subsubsection{Options}
+Except for the \exampletext{{}-Q} option, which must be specified for \PrRbtr{}, and the options keyword used
+to pick up default arguments and to save with the \exampletext{+freeze-current} and \exampletext{+freeze-home} options, the options to \PrRbtr{} are identical in effect to those for \PrBtr{}\footnote{Standard - it would be possible to make them different by editing the option definitions in
+\filename{\helpdirname/btrest.help} but this would not be sensible}.
+
+The environment variable on which options are supplied is
+\filename{\BtrVarname} for \PrBtr{}, \filename{\RbtrVarname} for \PrRbtr{} and the environment variable to specify the help file is
+\filename{BTRESTCONF}.
+
+We regret having run out of single letters for options to \PrBtr{} and \PrRbtr{} and having had to resort in three cases to non-alphabetic options. The
+next release of \ProductName{} introduces the new concept of \textit{templates} carrying most of the information supplied as options to
+\PrBtr{}.
+\setbkmkprefix{btr}
+\explainopt
+
+\cmdoption{2}{grace-time}{time}{gracetime}
+
+This option sets the second stage time of handling over-running jobs to time, in seconds (the argument may be any number of seconds, or given
+as \genericargs{mm:ss} for minutes and seconds).
+
+This only applies if a maximum elapsed time for a job is set with the \exampletext{{}-Y} option. If a non-zero time is also given
+with this option, the job is first killed with the signal number given by the \exampletext{{}-W} option and then, if it continues to
+run for the time given by this argument, killed with \filename{SIGKILL} which cannot be caught or ignored.
+
+\cmdoption{9}{catch-up}{~}{catchup}
+
+This option sets the ``if not possible'' action of the job or jobs to catch up - one run of a series of missed runs is done when it is possible without affecting future runs.
+
+\cmdoption{.}{done}{~}{done}
+
+This option sets the job or jobs to ``done'' state.
+
+This is mainly intended for resubmitting jobs which have been ``unqueued'' and is not recommended for general use.
+
+\cmdoption{A}{avoiding-days}{~}{avoiding}
+
+This option specifies days to avoid when the job or jobs are to be repeated automatically. The days to avoid option supersedes any
+preceding or default option, unless a leading comma is given.
+
+Thus if the existing days to avoid are \exampletext{Sat} and \exampletext{Sun}, the default when installed,
+
+\begin{expara}
+
+\BtrName{} -A Wed ...
+
+\end{expara}
+
+will change the days to avoid to be Wednesday only, whereas
+
+\begin{expara}
+
+\BtrName{} -A ,Wed ...
+
+\end{expara}
+
+will change the days to avoid to be Saturday, Sunday and Wednesday.
+
+A single \exampletext{{}-} argument cancels the days to avoid parameter altogether, thus
+
+\begin{expara}
+
+\BtrName{} -A {}- ...
+
+\end{expara}
+
+Note that this parameter only affects automatic repetitions, so if the date given by the \exampletext{{}-T} parameter falls on a day
+excluded by this argument, it will not be affected and the first run will be on the date specified.
+
+Upon installation the default abbreviations for the days are \exampletext{Sun}, \exampletext{Mon}, \exampletext{Tue}, \exampletext{Wed},
+\exampletext{Thu}, \exampletext{Fri}, \exampletext{Sat} and \exampletext{Hday}, the last refers to holidays as specified in the holiday file.
+The days are interpreted case-insensitively, but on saving options with \exampletext{+freeze-current} or
+\exampletext{+freeze-home} will save the names as given in the message file, by default in the initial capital format.
+
+\cmdoption{a}{argument}{string}{arg}
+
+Provide an argument string to the command interpreter. Successive \exampletext{{}-a} options are cumulative and
+append additional arguments to the list of arguments for the job or jobs. To clear previously-specified options (maybe set in
+\configurationfile{} files) and start afresh, use the \exampletext{{}-e} (see page \pageref{btr:cancarg}) option first.
+
+\cmdoption{B}{assignment-not-critical}{~}{anotcrit}
+
+This marks subsequently-specified assignments (with the \exampletext{{}-s} option) as ``not critical'', meaning that the assignment will be ignored if
+it contains a reference to a variable on a remote host which is offline or inaccessible.
+
+This must precede (not necessarily immediately) the \exampletext{{}-s} options to which it is to be applied.
+
+\cmdoption{b}{assignment-critical}{~}{acrit}
+
+This marks subsequently-specified assignments (with the \exampletext{{}-s} option) as ``critical'', meaning that the job or jobs
+will not start if the assignment contains a reference to a variable on a remote host which is offline or inaccessible.
+
+This must precede (not necessarily immediately) the \exampletext{{}-s} options to which it is to be applied.
+
+\cmdoption{C}{cancelled}{~}{cancelled}
+
+This causes the job or jobs to be queued in the ``cancelled'' state.
+
+This is commonly used to initially queue a job for later editing by a GUI-style utility such as \PrBtq{}, \PrXbtq{} and \PrXmbtq{}.
+
+\cmdoption{c}{condition}{condition}{condition}
+
+This sets a condition to be satisfied before the job or jobs may run.
+
+Successive \exampletext{{}-c} options cause further conditions to be appended to the list, up to a maximum of 10 conditions.
+
+To start from scratch, deleting any previously-specified conditions (in a \configurationfile{} file perhaps), use the
+\exampletext{{}-y} option first.
+
+The format of the condition argument is decribed fully on page \pageref{btr:condfmt}.
+
+\cmdoption{D}{directory}{directory}{directory}
+
+This option sets the working directory for the job or jobs.
+
+The directory may be specified using environment variables preceded by \exampletext{\$} or constructs to denote a user's home directory
+of the form \genericargs{\~{}user} such as in
+
+\begin{expara}
+
+\$HOME/batchjobs
+
+\~jim/jobs
+
+\end{expara}
+
+Remember, if using the shell, and using these constructs, to put quotes around the directory, otherwise the shell may expand the constructs and not
+\ProductName{}). This may well have the intended effect in most cases, but for jobs to be ``portable'' across different
+hosts for remote execution, it is better for the expansions to be done as late as possible.
+
+If this option is omitted, then the current directory at the time of invoking \PrBtr{} or \PrRbtr{} is used.
+
+\cmdoption{d}{delete-at-end}{~}{deleteatend}
+
+This option cancels any repeat option of the job or jobs so that they will be deleted at the end of the run rather than repeated or kept. This is the
+default if no arguments are specified.
+
+\cmdoption{E}{local-environment}{~}{locenv}
+
+This option only applies to \PrRbtr{} and is ignored by \PrBtr{}.
+
+It instructs \PrRbtr{} to use the environment variables from the local environment (from which the job is submitted)
+rather than the remote environment (to which the job is going).
+
+\cmdoption{e}{cancel-arguments}{~}{cancarg}
+
+This option cancels any arguments previously set up with the \exampletext{{}-a} option.
+
+You might want to use it if your environment or a \configurationfile{} file specifies standard arguments and you want to clear those and start again.
+
+\cmdoption{F}{export}{~}{export}
+
+This marks the job or jobs to be visible throughout the network or ``exported''.
+
+The job won't actually run on another host unless you go further and make the job ``remote runnable'' with the
+\exampletext{{}-G} option, as described on page \pageref{btr:fullexport}.
+
+\cmdoption{f}{flags-for-set}{letters}{assflags}
+
+This option provides a set of ``flags'' for subsequent assignment operators specified by the \exampletext{{}-s} option, indicating when they
+should apply.
+
+The argument letters should be some or all of \exampletext{SNEACR} for respectively Start, Normal exit, Error exit, Abort, Cancel and Reverse.
+
+\cmdoption{G}{full-export}{~}{fullexport}
+
+This option marks the job or jobs to be visible throughout the network and potentially available to run on any machine.
+
+\cmdoption{g}{set-group}{~}{group}
+
+This option sets the group owner of the job or jobs to be \genericargs{group}. The user must have ``write admin file'' permission to invoke this option.
+
+\cmdoption{H}{hold-current}{~}{holdcurrent}
+
+This option selects the variant of the ``if not possible'' action for the job or jobs to ``hold current''. The next run is done
+when possible, but the usual time is not adjusted.
+
+Note that unlike with the ``catch up'' option described on page \pageref{btr:catchup},
+subsequent runs are not omitted, the job will repeatedly run until all missed runs are completed.
+
+\cmdoption{h}{title}{title}{title}
+
+This option supplies a title for the job or jobs, setting it to the supplied \genericargs{title}.
+
+In the absence of this argument the title will be that of the last part of the file name, if any.
+
+The title may be a string of any length containing any printable characters, but colon should be
+avoided to avoid confusion with queue names.
+
+If the title contains spaces or characters interpreted by the shell, it should be surrounded by
+quotes.
+
+\cmdoption{I}{input-output}{redirection-spec}{redir}
+
+This option specifies a redirection for the job or jobs. Successive \exampletext{{}-I} options are cumulative and will append to
+the current list of redirections. To start the list of redirections from scratch, precede them with the \exampletext{{}-Z}
+option.
+
+When the job is executed the redirections are handled in order from first to last.
+
+The format of redirection specifications are described fully on page \pageref{btr:redirfmt}.
+
+\cmdoption{i}{interpreter}{name}{interpreter}
+
+This option sets the command interpreter for the job or jobs to be that specified by the name,
+which should already be defined.
+
+The load level is also set to that for the specified interpreter, so if a
+\exampletext{{}-l} argument is to be specified, it should \emphasis{follow} the \exampletext{{}-i} option.
+
+\cmdoption{J}{no-advance-time-error}{~}{noadv}
+
+This specifies that if the job exits with an error, the next time to run is not advanced according to the repeat specification if applicable.
+
+\cmdoption{j}{advance-time-error}{~}{adv}
+
+This specifies that if the job exits with an error, the next time to run is still advanced if applicable according to the repeat specification.
+
+This is the default if no arguments are specified.
+
+\cmdoption{K}{condition-not-critical}{~}{cnotcrit}
+
+This option marks subsequently specified conditions set with the \exampletext{{}-c} option as ``not critical'', i.e. a condition dependent on a variable on an offline or otherwise inaccessible remote host will be ignored in deciding whether a job may start.
+
+This must precede (not necessarily immediately) the \exampletext{{}-c} options to which it is to be applied.
+
+This setting is the default if no arguments are specified.
+
+\cmdoption{k}{condition-critical}{~}{ccrit}
+
+This option marks subsequently specified conditions set with the \exampletext{{}-c} option as ``critical'', i.e. a condition dependent on a
+variable on an offline or otherwise inaccessible remote host will cause the job to be held up.
+
+This must precede (not necessarily immediately) the \exampletext{{}-c} options to which it is to be applied.
+
+\cmdoption{L}{ulimit}{value}{ulimit}
+
+This option sets the \filename{ulimit} (maximum file size) value for the job or jobs to the value given.
+
+Set a value of zero (the default) to indicate an unlimited value.
+
+We strongly recommend that this option not be used as it easily causes a lot of unexpected problems.
+
+\cmdoption{l}{loadlev}{number}{loadlev}
+
+This option sets the load level of the job or jobs to be number. The user must have ``special create permission'' for this to differ from that of the
+command interpreter.
+
+The load level is also reset by the \exampletext{{}-i} (set command interpreter) option, so this option must be used after that has been specified if it is to have any effect.
+
+\cmdoption{M}{mode}{modes}{modes}
+
+This option sets the permission of the job or jobs to be as specified.
+
+The format of the mode argument is described fully on page \pageref{btr:modefmt}.
+
+\cmdoption{m}{mail-message}{~}{mail}
+
+This option sets the flag whereby completion messages are mailed to the owner of the job. (They may anyway if the jobs output to standard
+output or standard error and these are not redirected).
+
+\cmdoption{N}{normal}{~}{normal}
+
+This option sets the job or jobs to normal ``ready to run'' state, as opposed to ``cancelled'' as set by the \exampletext{{}-C} option.
+
+This is the default if no arguments are specified.
+
+\cmdoption{n}{local-only}{~}{localonly}
+
+This option marks the job or jobs to be local only to the machines which they are queued on, cancelling any \exampletext{{}-F} or \exampletext{{}-G}
+options. They will not be visible or runnable on remote hosts.
+
+This is the default if no arguments are specified.
+
+\cmdoption{O}{remote-environment}{~}{remenv}
+
+This option only applies to \PrRbtr{} and is ignored by \PrBtr{}.
+
+It instructs \PrRbtr{} to use the environment variables from the remote environment (to which the job is going) rather than the local
+environment (from which the job is submitted).
+
+This is the default if no arguments are specified.
+
+\cmdoption{o}{no-repeat}{~}{norep}
+
+This option cancels any repeat option of the job or jobs, so that the they will be run and retained on the queue marked ``done'' at the end.
+
+\cmdoption{P}{umask}{value}{umask}
+
+This option sets the \progname{umask} value of the job or jobs to the octal value given. The value should be up to 3 octal digits as
+per the shell.
+
+The initial value, if no other option is given, is taken from the invoking environment.
+
+\cmdoption{p}{priority}{number}{priority}
+
+This option sets the priority of the job or jobs to be \genericargs{number}, which must be in the range given by the user{\textquotesingle}s minimum
+and maximum priority.
+
+\cmdoption{Q}{host}{hostname}{host}
+
+This option primarily applies to \PrRbtr{}, for which it is always required, and specifies that the job should
+be sent to to the given \textit{hostname}.
+
+If specified with \PrBtr{}, the effect is to invoke \PrRbtr{} with the same command-line options as were given to \PrBtr{}.
+
+Note that this does not include any options for \PrBtr{} extracted from the environment or \configurationfile{} files or the environment using the
+\filename{\BtrVarname} keyword, the automatically-invoked \PrRbtr{} will pick up its own options from those files using the \filename{\RbtrVarname} keyword.
+
+There is no loop if the options for \PrRbtr{} don't thereby specify this option, an error message is given instead.
+
+\cmdoption{q}{job-queue}{queuename}{queue}
+
+This option sets a job queue name as specified on the job or jobs. This may be any sequence of printable characters.
+
+Currently the queue name is just a prefix on the job title. In future releases of \ProductName{}, it is much more sophisticated.
+
+\cmdoption{R}{reschedule-all}{~}{delayall}
+
+This option sets the ``not possible'' action of the job or jobs to reschedule all - the run is done when it is possible
+and subsequent runs are rescheduled by the amount delayed.
+
+\cmdoption{r}{repeat}{repeat\_spec}{repeat}
+
+This option sets the repeat option of the job or jobs as specified.
+
+The format of the repeat argument is described fully on page \pageref{btr:repeatfmt}.
+
+\cmdoption{S}{skip-if-held}{~}{skip}
+
+This option sets the ``not possible'' action of the job or jobs to skip - the run is skipped if it could not be done at the specified
+time.
+
+\cmdoption{s}{set}{assignment}{assign}
+
+This option sets an assignment on the job or jobs to be performed at the start and/or finish of the job or jobs as selected by a
+previously-specified \exampletext{{}-f} option (see page \pageref{btr:assflags}).
+
+This option is cumulative, and will add to the list of assignments specified by previous \exampletext{{}-s} options.
+
+To start from scratch, precede the assignments with the \exampletext{{}-z} option.
+
+The format of the assignment argument is described fully on page \pageref{btr:assfmt}.
+
+\cmdoption{T}{time}{time}{time}
+
+This option sets the next run time or time and date of the job or jobs as specified.
+
+\cmdoption{t}{delete-time}{time}{deltime}
+
+This option sets a delete time for the specified job or jobs as a time in hours, after which it will be automatically deleted if this time has
+elapsed since it was queued or last ran.
+
+Set to zero (the default) to retain the job or jobs indefinitely.
+
+\cmdoption{U}{no-time}{~}{notime}
+
+This option cancels any time setting on the job or jobs set with \exampletext{{}-T}, \exampletext{{}-r} or \exampletext{{}-o} options.
+
+\cmdoption{u}{set-owner}{user}{owner}
+
+This option sets the owner of the job or jobs to be \genericargs{user}.
+
+The invoking user must have ``write admin file'' permission to use this option.
+
+\cmdoption{V}{no-verbose}{~}{noverbose}
+
+This option suppresses any confirmation message about the successful submission of jobs.
+
+This is the default if no options are given.
+
+\cmdoption{v}{verbose}{~}{verbose}
+
+This option causes \PrBtr{} and \PrRbtr{} to display a message on standard error with the job number of each job successfully created.
+
+\cmdoption{W}{which-signal}{sig}{whichsig}
+
+This option is used in conjunction with the \exampletext{{}-Y} and \exampletext{{}-2} options to specify the initial signal number, e.g.
+1, 2, 15 to kill the job or jobs after the maximum run time has been exceeded.
+
+\cmdoption{w}{write-message}{~}{write}
+
+This option is used to indicate that completion messages are written to the owner's terminal if available.
+
+\cmdoption{X}{exit-code}{range}{exits}
+
+This option sets the normal or error exit code ranges for the job or jobs.
+
+The format of the range argument is \exampletext{N} or \exampletext{E} followed by a range in the form \genericargs{nn:nn}, thus
+
+\begin{expara}
+
+{}-X N0:9
+
+{}-X E10:255
+
+\end{expara}
+
+Note that an exit code which falls inside both ranges will be handled by the setting of the \emphasis{smaller} range, so
+
+\begin{expara}
+
+{}-X N0:10
+
+{}-X E1:255
+
+\end{expara}
+
+will mean that exit codes 1 to 10 inclusive are treated as normal as that is the smaller range. Unhandled exit codes are treated
+as abort.
+
+The default ranges are \exampletext{N0:0} and \exampletext{E1:255}.
+
+\cmdoption{x}{no-message}{~}{nomess}
+
+This option resets both flags as set by the \exampletext{{}-m} and \exampletext{{}-w} options.
+
+\cmdoption{Y}{run-time}{time}{runtime}
+
+This option sets a maximum elapsed run time for the specified job or jobs.
+
+The argument time is in seconds, which may be written as \genericargs{mm:ss} or \genericargs{hh:mm:ss}.
+
+The job will be killed with \filename{SIGKILL} unless a different signal is specified with the \exampletext{{}-W} option and a further ``grace time'' specified with the \exampletext{{}-2} option.
+
+\cmdoption{y}{cancel-condition}{~}{canccond}
+
+This option deletes any conditions set up by previous \exampletext{{}-c} options.
+
+This may be necessary if the environment or a \configurationfile{} file contain \exampletext{{}-c} options for defaults and it is required to remove those and specify other ones.
+
+\cmdoption{Z}{cancel-io}{~}{cancio}
+
+This option deletes any redirections set up by previous \exampletext{{}-I} options.
+
+This may be necessary if the environment or a \configurationfile{} file contain \exampletext{{}-I}
+options for defaults and it is required to remove those and specify other ones.
+
+\cmdoption{z}{cancel-set}{~}{cancass}
+
+This option deletes any assignments set up by previous \exampletext{{}-s} options.
+
+This may be necessary if the environment or a \configurationfile{} file contain
+\exampletext{{}-s} options for defaults and it is required to remove those and specify other ones.
+
+\freezeopts{\filename{\BtrVarname} for \PrBtr{} or \filename{\RbtrVarname} for \PrRbtr{}}{Stop}
+
+\subsubsection{Redirection format}
+\bookmark{redirfmt}
+The format of the argument to the \exampletext{{}-I} option is similar to that for the shell with some extensions. The argument should
+always be enclosed in quotes to avoid the shell interpreting it rather than \PrBtr{} or \PrRbtr{}.
+
+Environment variables and \genericargs{\~{}user} constructs are expanded at run time in the strings.
+
+Parameter substitutions, or ``meta data'' may be included in the argument strings for redirections, see meta data on page \pageref{bkm:Metadata}.
+
+\paragraph{Input from file}
+
+The redirection style:
+
+\begin{expara}
+
+\textit{n}{\textless}file
+
+\end{expara}
+
+For example
+
+\begin{expara}
+
+3{\textless}myfile
+
+7{\textless}/tmp/data
+
+{\textless}input\_file
+
+\end{expara}
+
+Opens the specified file descriptor for input connected to the specified file. The file descriptor may be omitted in the common case
+of file descriptor 0 (standard input).
+
+\paragraph{Output to file}
+
+The redirection style:
+
+\begin{expara}
+
+\textit{n}{\textgreater}file
+
+\end{expara}
+
+For example
+
+\begin{expara}
+
+4{\textgreater}outfile
+
+2{\textgreater}errors.\%t
+
+12{\textgreater}/tmp/out
+
+{\textgreater}output\_file
+
+\end{expara}
+
+Opens the specified file descriptor for output, possibly creating the file, or truncating it to zero length first if it exists.
+The file descriptor may be be omitted in the common case of file descriptor 1 (standard output).
+
+\paragraph{Append to file}
+
+The redirection style:
+
+\begin{expara}
+
+\textit{n}{\textgreater}{\textgreater}file
+
+\end{expara}
+
+For example
+
+\begin{expara}
+
+5{\textgreater}{\textgreater}Log
+
+7{\textgreater}{\textgreater}Log.\%t
+
+{\textgreater}{\textgreater}output.\%t
+
+\end{expara}
+
+As with the shell, this likewise creates the output file if it does not exist but appends new data to any previous data if it exists,
+rather than truncating it.
+
+\paragraph{Open for read and write}
+
+The redirection style:
+
+\begin{expara}
+
+\textit{n}{\textless}{\textgreater}file
+
+\end{expara}
+
+For example
+
+\begin{expara}
+
+8{\textless}{\textgreater}Data
+
+{\textless}{\textgreater}Myfile
+
+\end{expara}
+
+Connect the file descriptor (or file descriptor 0 if not specified) for input and output, read-write mode. The file is created if it
+does not exist and is truncated if it does exist.
+
+\paragraph{Open for read and append}
+
+The redirection style:
+
+\begin{expara}
+
+\textit{n}{\textless}{\textgreater}{\textgreater}file
+
+\end{expara}
+
+For example
+
+\begin{expara}
+
+8{\textless}{\textgreater}{\textgreater}Data
+
+{\textless}{\textgreater}{\textgreater}Myfile
+
+\end{expara}
+
+Connect the file descriptor (or file descriptor 0 if not specified) for input and output, read-write mode. The file is created if it
+does not exist and data is appended to the end of the file if it does exist.
+
+\paragraph{Input from program}
+
+The redirection style:
+
+\begin{expara}
+
+\textit{n}{\textless}{\textbar}program
+
+\end{expara}
+
+For example
+
+\begin{expara}
+
+7{\textless}{\textbar}uname
+
+\end{expara}
+
+Run the specified program and take input from it on the given file descriptor (defaulting to standard input, file descriptor 0, if not specified).
+
+\paragraph{Output to program}
+
+The redirection style:
+
+\begin{expara}
+
+\textit{n}{\textbar}program
+
+\end{expara}
+
+For example
+
+\begin{expara}
+
+2{\textbar}log\_errors
+
+{\textbar}log\_output7{\textless}{\textbar}uname
+
+\end{expara}
+
+Run the specified program and send output to it on the given file descriptor (defaulting to standard output, file descriptor 1, if not specified).
+
+\paragraph{Duplicate descriptor}
+
+The redirection style:
+
+\begin{expara}
+
+\textit{n\&k}
+
+\end{expara}
+
+For example
+
+\begin{expara}
+
+2\&1
+
+\end{expara}
+
+Duplicates the second file descriptor as the first file descriptor with the same attributes.
+
+\paragraph{Close descriptor}
+
+The redirection style:
+
+\begin{expara}
+
+\textit{n\&-}
+
+\end{expara}
+
+Closes the given file descriptor. (Note that redirections are always treated first to last).
+
+\bookmark{repeatfmt}
+\subsubsection{Repeat periods}
+The repeat period names for the \filename{-r} option are as follows:
+
+\begin{center}
+\begin{tabular}{l l}
+\exampletext{Minutes} & Period in minutes\\
+\exampletext{Hours} & Period in hours\\
+\exampletext{Days} & Period in days\\
+\exampletext{Weeks} & Period in weeks\\
+\exampletext{Monthsb} & Months relative to the beginning\\
+\exampletext{Monthse} & Months relative to the end of the month\\
+\exampletext{Years} & Period in years\\
+\end{tabular}
+\end{center}
+Each is followed by the number of the relevant periods after a colon. In the case of the month parameters, then this should be followed by a
+``target day'' after a colon.
+
+Examples:
+
+\begin{expara}
+
+{}-r Days:4
+
+{}-r Monthsb:1:4
+
+{}-r Monthse:1:31
+
+{}-r Years:2
+
+\end{expara}
+
+For \exampletext{Monthsb} the ``target day'' is the day of the month to aim for, in this case the 4th of the month.
+If this would be a ``day to avoid'', then the following day is tried and so on.
+
+For \exampletext{Monthse} the ``target day'' is selected from the day of the month given in the \exampletext{{}-T} option. So if the month in the
+\exampletext{{}-T} option has 31 days, then \exampletext{{}-r Monthse:1:31}
+
+will select the last day of each month and
+
+\begin{expara}
+
+{}-r Monthse:1;30
+
+\end{expara}
+
+will select the second last, but if the month in the \exampletext{{}-T} option has 30 days, the first will be invalid and the second will select the last day of the month.
+
+If the selected day cannot be met for any reason, typically because it does not meet the ``days to avoid'' criteria,
+then the previous day is tried until an acceptable day is found. In this way you can select the ``last working day of the
+month'' or ``next to last working day'' etc.
+
+\subsubsection{Conditions}
+\bookmark{condfmt}
+A condition must be of the form
+
+\begin{expara}
+
+[machine:]{\textless}varname{\textgreater}{\textless}condop{\textgreater}{\textless}constant{\textgreater}.
+
+\end{expara}
+
+where \exampletext{varname} is the name of an existing variable for which the user has read permission.
+
+\exampletext{condop} is one of the following:
+
+\begin{center}
+\begin{tabular}{l l}
+\exampletext{=} & equal to\\
+\exampletext{!=} & not equal\\
+\exampletext{{\textless}} & less than\\
+\exampletext{{\textless}=} & less than or equal\\
+\exampletext{{\textgreater}} & greater than\\
+\exampletext{{\textgreater}=} & greater than or equal\\
+\end{tabular}
+\end{center}
+constant is either a string or a numeric value. If the string starts with a number then it should be preceded with a colon.
+
+N.B. When invoked from a shell, quotation marks should surround the entire argument as shown above, otherwise the shell may attach its own
+interpretation on the various characters.
+
+Examples of conditions:
+
+\begin{expara}
+
+{}-c {\textquotesingle}Count{\textgreater}3{\textquotesingle}
+
+{}-c {\textquotesingle}Lock=0{\textquotesingle}
+
+{}-c {\textquotesingle}Remote:Lock!=0{\textquotesingle}
+
+{}-c {\textquotesingle}Val=:3rd{\textquotesingle}
+
+\end{expara}
+
+\subsubsection{Assignments}
+\bookmark{assfmt}
+Each assignment should normally be preceded by a \exampletext{{}-f} option to denote when the assignment is applied, apart from exit code and signal assignments.
+
+The argument to the \exampletext{{}-f} option is one or more of the following:
+
+\begin{center}
+\begin{tabular}{l l}
+\exampletext{S} & Perform assignment on startup\\
+\exampletext{N} & Perform assignment on normal exit\\
+\exampletext{E} & Perform assignment on error exit\\
+\exampletext{A} & Perform assignment on abort\\
+\exampletext{C} & Perform assignment on cancellation\\
+\exampletext{R} & Reverse assignment for \exampletext{N}, \exampletext{E}, \exampletext{A}, and \exampletext{C}.\\
+\end{tabular}
+\end{center}
+The default if no \exampletext{{}-f} options are specified is
+
+\begin{expara}
+
+-f SNEAR
+
+\end{expara}
+
+but the default for this may be changed by editing the message file.
+
+The format of the argument to the \exampletext{{}-s} option is in the format
+
+\begin{expara}
+
+[machine:]{\textless}varname{\textgreater}{\textless}operator{\textgreater}{\textless}constant{\textgreater}
+
+\end{expara}
+
+\exampletext{varname} is the name of a variable to which the user has read and write permission.
+
+\exampletext{operator} is one of the following:
+
+\begin{tabular}{lp{12cm}}
+\exampletext{=} &
+Assign value which may be a string or numeric constant. To indicate that a string starting with a digit is intended to be a
+string, prefix it with a colon. Exceptionally, the variable assigned to may have write permission and not read permission for the user.
+The effect of the ``reverse'' flag is to assign zero or the null string. Previous values are not recalled.\\
+& \\
+\exampletext{+=} &
+Increment variable by numeric constant. The effect of the ``reverse'' flag is to decrement the variable
+by that constant. Arithmetic is as 32-bit signed integer.\\
+& \\
+\exampletext{{}-=} &
+Decrement variable by numeric constant. The effect of the ``reverse'' flag is to increment the variable
+by that constant.
+Arithmetic is as 32-bit signed integer.\\
+& \\
+\exampletext{*=} &
+Multiply variable by numeric constant. The effect of the ``reverse'' flag is to divide the variable by that constant.
+Arithmetic is as 32-bit signed integer and overflow is ignored.\\
+& \\
+\exampletext{/=} &
+Divide variable by numeric constant. The effect of the ``reverse'' flag is to multiply the variable by that constant.
+Arithmetic is as 32-bit signed integer. Note that the remainder from division is ignored.
+The handling of negative numbers may be dependent on the hardware and
+should probably not be relied upon.\\
+& \\
+\exampletext{\%=} &
+Take the remainder (modulus) from division by the numeric constant. There is no ``reverse'' of the operation.
+Arithmetic is as 32-bit signed integer. The handling of negative numbers may be dependent on the hardware and should probably not be relied
+upon.\\
+& \\
+\exampletext{=exitcode} &
+Assign the exit code of the job to the given variable. Flags are ignored and the operation only occurs when the job exits.\\
+& \\
+\exampletext{=signal} &
+Assign the signal number with which the job terminated to the given variable, or zero if the job did not exit with a signal. Flags
+are ignored and the operation only occurs when the job exits.\\
+\end{tabular}
+
+The following are examples of assignments:
+
+\begin{expara}
+
+{}-s {\textquotesingle}myvar=7{\textquotesingle}
+
+{}-s {\textquotesingle}host2:hisvar+=1{\textquotesingle}
+
+{}-s {\textquotesingle}status=exitcode{\textquotesingle}
+
+{}-s {\textquotesingle}val=:3rd{\textquotesingle}
+
+\end{expara}
+
+Note the colon in the last assignment indicating that the value is a string, the colon is not included in the string.
+
+\subsubsection{Mode arguments}
+\bookmark{modefmt}
+The argument to the \exampletext{{}-M} option provides for a wide variety of operations.
+
+Each permission is represented by a letter, as follows:
+
+\begin{center}
+\begin{tabular}{l l}
+\exampletext{R} & read permission\\
+\exampletext{W} & write permission\\
+\exampletext{S} & reveal permission\\
+\exampletext{M} & read mode\\
+\exampletext{P} & set mode\\
+\exampletext{U} & give away owner\\
+\exampletext{V} & assume owner\\
+\exampletext{G} & give away group\\
+\exampletext{H} & assume group\\
+\exampletext{D} & delete\\
+\exampletext{K} & kill\\
+\end{tabular}
+\end{center}
+Each section of the mode (user, group, others) is represented by the prefixes \exampletext{U:}, \exampletext{G:} and
+\exampletext{O:} and separated by commas.
+
+For example:
+
+\begin{expara}
+
+{}-M U:RWSMPDK,G:RWSDK,O:RS
+
+\end{expara}
+
+would set the permissions for the user, group and others as given. If the prefixes are omitted, as in
+
+\begin{expara}
+
+{}-M RWSDK
+
+\end{expara}
+
+then all of the user, group and other permissions are set to the same value.
+

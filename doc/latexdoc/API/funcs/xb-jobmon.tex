@@ -1,0 +1,116 @@
+\subsection{\funcnameXBjobmon{}}
+
+\begin{expara}
+
+int \funcnameXBjobmon{}(const int fd, void (*fn)(const int))
+
+\bigskip
+
+
+int \funcnameXBsetmon{}(const int fd, HWND hWnd, UINT wMsg)
+
+\bigskip
+
+
+int \funcnameXBprocmon{}(const int fd)
+
+\bigskip
+
+
+void \funcnameXBunsetmon{}(const int fd)
+
+\end{expara}
+
+\subsubsection{Unix and Linux}
+The function \funcXBjobmon{} is used to set a function
+to monitor changes to the job queue.
+
+\exampletext{fd} is a file descriptor which was previously
+returned by a successful call to \funcXBopen{} or equivalent.
+
+\exampletext{fn} is a pointer to a function which must be
+declared as returning \filename{void} and taking one
+\filename{const int} argument. Alternatively, this may be NULL
+to cancel monitoring.
+
+The function \exampletext{fn} will be called upon each change
+to the job list. The argument passed will be \exampletext{fd}.
+Note that any changes to the job queue are reported (including changes
+on other hosts whose details are passed through) as the API does not
+record which jobs the user is interested in.
+
+\subsubsection{Windows}
+\label{bkm:xbsetmon}The \funcXBsetmon{} routine may be
+used to monitor changes to the job queue or variable list. Its
+parameters are as follows.
+
+\exampletext{fd} is a file descriptor which was previously
+returned by a successful call to \funcXBopen{} or equivalent.
+
+\exampletext{hWnd} is a windows handle to which messages should
+be sent.
+
+\exampletext{wMsg} is the message id to be passed to the window
+(\exampletext{WM\_USER} or a constant based on this is
+suggested).
+
+To decode the message, the \funcXBprocmon{} is
+provided. This returns \filename{XBWINAPI\_JOBPROD} to
+indicate a change or changes to the job queue and
+\filename{XBWINAPI\_VARPROD} to indicate a change or changes
+to the variable list. If there are changes to both, two or more
+messages will be sent, each of which should be decoded via separate
+\funcXBprocmon{} calls.
+
+To cancel monitoring, invoke the routine
+
+\begin{expara}
+
+\funcnameXBunsetmon{}(fd)
+
+\end{expara}
+
+If no monitoring is in progress, or the descriptor is invalid, this call
+is just ignored.
+
+\subsubsection{Return values}
+The function \funcXBjobmon{} returns 0 if successful
+otherwise the error code \filename{\constprefix{}INVALID\_FD} if the
+file descriptor is invalid. Invalid fn parameters will not be detected
+and the application program will probably crash.
+
+\subsubsection{Example}
+
+\begin{expara}
+
+void note\_mod(const int fd)
+
+\{
+
+\ \ \ \ job\_changes++;
+
+\}
+
+\bigskip
+
+
+. . .
+
+\bigskip
+
+
+\funcnameXBjobmon{}(fd, note\_mod);
+
+\ \ \ \ . . .
+
+\bigskip
+
+
+if (job\_changes) \{ /* handle changes */
+
+\ \ \ \ . . .
+
+\
+
+\end{expara}
+

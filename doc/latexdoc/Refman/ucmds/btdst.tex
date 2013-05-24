@@ -1,0 +1,37 @@
+\subsection{\BtdstName}
+
+\begin{expara}
+
+\BtdstName{} [ -R ] startdate enddate adjustment
+
+\end{expara}
+
+\PrBtdst{} adjusts all jobs between the specified start and end dates and times by adding the specified (possibly signed)
+adjustment in seconds to it.
+
+The dates and times may be specified in the forms
+
+\begin{expara}
+
+dd/mm
+
+mm/dd
+
+yy/mm/dd
+
+\end{expara}
+
+Which of the first two forms is chosen is taken from the existing time zone. For time zones greater or equal to 4 West from GMT, the
+\genericargs{mm/dd} form is chosen, otherwise \genericargs{dd/mm}.
+
+The dates may be followed by a comma and a time in the form \genericargs{hh:mm}, otherwise midnight is assumed.
+
+When working out what to do, remember that Unix internal time is based upon Greenwich Mean Time (GMT), it is the display which changes, so
+that the effect of moving the clocks forward is to make the times (held as GMT) appear later than they did before.
+
+A negative adjustment is subtracted from the time, making jobs run sooner. This is therefore appropriate when the clocks go forward at the
+start of the summer time. Likewise a positive adjustment should be used at the end of summer time.
+
+The optional argument \exampletext{{}-R} tries to apply the option to all exported remote jobs, but this really is not recommended
+as the local jobs on those hosts will be unaffected probably leaving the users on those machines confused.
+

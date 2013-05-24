@@ -1,0 +1,78 @@
+\subsection{\HosteditName}
+
+\begin{expara}
+
+\HosteditName{} [-o file] [-s arg] [-I] [ file ]
+
+\XhosteditName{} [-o file] [-s arg] [-I] [ file ]
+
+\end{expara}
+
+\PrHostedit{} is a simple curses-based program to edit host tables for \hostsfile, the host table for \ProductName{}.
+
+\PrXhostedit{} is a GTK+ alternative which may be available to you.
+
+It knows about local addresses, using web servers to get the local address, Windows clients,
+DHCP, trusted hosts (although this is now deprecated), manual connections, probes and timeouts.
+
+That said, you make not need to use it for a straightforward network connection to another host as
+it is no longer compulsory to have details in the hosts file.
+
+Input is taken from standard input unless a file name is given, and output is to standard output unless the \exampletext{{}-o}
+option is given.
+
+Alternatively use the \exampletext{{}-I} option to edit a file in place.
+
+Normally this would be run as follows:
+
+\begin{expara}
+
+\HosteditName{} -I \hostsfilename
+
+\end{expara}
+
+You will usually have to stop and restart \ProductName{} after you have done this so that all parts of the system ``know''
+about the new hosts, however this may not be necessary in all cases, you may only have to ``\exampletext{kill -1}'' the process id of the
+\progname{xbnetserv} process.
+
+\subsubsection{Options}
+
+The options for \progname{xhostedit} are the same as for \PrHostedit{}, except that the former may take options interpreted by GTK+ as well.
+
+\setbkmkprefix{hostedit}
+
+\cmdoption{o}{}{file}{output}
+
+Output to the named file rather than Standard Output
+
+\cmdoption{s}{}{char}{sort}
+
+Where \genericargs{char} is \exampletext{h} or \exampletext{i}.
+
+Sort display by host name or by IP address.
+
+\cmdoption{I}{}{}{inplace}
+
+Edit the named file, which must always be given but need not exist, in place.
+
+\subsubsection[Commands]{Commands}
+The following command keys are used from within the screen displayed by \HosteditName{}. As with other \ProductName{} commands, any commands which operate
+upon an existing item will do so with the item to which the cursor is moved.
+
+\begin{center}
+\begin{tabular}{l l}
+\exampletext{k} or cursor up & Move cursor up.\\
+\exampletext{j} or cursor down & Move cursor down.\\
+\exampletext{N} or next page & Scroll down a screenful.\\
+\exampletext{P} or previous page & Scroll up a screenful.\\
+\exampletext{q} & Quit and write hosts file.\\
+\exampletext{a} & Create a new hosts entry.\\
+\exampletext{c} & Edit the selected hosts entry.\\
+\exampletext{d} & Delete the selected hosts entry.\\
+\exampletext{l} & Edit the local address.\\
+\exampletext{L} & Set the local address from the selected host.\\
+\exampletext{w} & Set the local address from a web server.\\
+\exampletext{u} & Set the default user name for DHCP clients.\\
+\end{tabular}
+\end{center}
+

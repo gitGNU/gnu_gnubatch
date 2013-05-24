@@ -1,0 +1,980 @@
+\chapter{Jobs and related entities}
+\label{chp:jobs-and-related-entities}
+To execute a job \ProductName{} invokes the specified command interpreter and
+``pipes'' the text of the job to the standard input of the command interpreter. The most common types of batch job
+are shell scripts. Any program which will read instructions from standard input may be set up as a command interpreter for use by
+\ProductName{}.
+
+The text of a job is often referred to as the job, job file or commands. To avoid confusion the use of the word \textit{script} is now being
+encouraged. The script for each batch job may invoke other programs, compiled or shell script, as it would if it was run from the command
+line. The term job file is still used to describe the file of an unqueued job which holds the job script.
+
+The set of parameters held by \ProductName{} governing what it should do with the job is often called the command file. This is now being referred to
+as the job specification. The term command file is used to refer to the file of an unqueued job which holds the specification.
+
+Apart from variables, which are described in their own chapter, jobs also have relationships with two other entities. These are:
+
+\begin{itemize}
+\item The command interpreter under which the job actually runs. All jobs have a specified command interpreter.
+\item A queue, which provides a grouping mechanism for jobs. All jobs belong to a queue. This is not always obvious since jobs which do not
+specify a queue are associated with the null queue, which has no name.
+\end{itemize}
+These entities are discussed at the end of this chapter, as well as in the sub-sections which describe how each job specifies relationships
+with them.
+
+\section{Time}
+Jobs can be specified without any scheduling time specifications. In this case they will run as soon as possible, just like jobs run under
+the standard Unix batch command. Once such a job has run it will be deleted from the queue.
+
+If a job has a time specification it will always have a \textit{Scheduled Run Start Time} and flags to indicate if the job is
+to be: deleted, retained or repeated after completion.
+
+Repeating jobs have additional options, such as a specification of any days to avoid, which do not have any impact on the first
+\textit{Scheduled Run Start Time}.
+
+The intricacies of the time options are explained below:
+
+\subsection{Scheduled run start time}
+The time at which a job is scheduled to start can be specified by date and time to the nearest minute. \ProductName{} starts jobs on the minute
+boundary, unless they are prevented from doing so by some condition. When a job has a time specified, it may be set up to be deleted,
+retained in a done state or repeated, automatically after the first run.
+
+The user interface programs accept and understand years specified as 4 digit numbers, hence avoiding any problems over the year 2000.
+
+If a job is due to run for the first time then it will always wait, if blocked by some condition, until that condition is satisfied. Once all
+conditions are satisfied the job will run immediately.
+
+When a job is blocked from repeating by some condition, there are a range of behaviours that it can follow. The options for these
+behaviours are described in the sub-section on Repetition.
+
+\subsection{Retention}
+Jobs may be set up to run once at a specified start time and then be retained on the queue after execution. Once the job has run its
+progress state is set to \exampletext{Done}.
+
+A job that is in the \exampletext{Done} state may be set running at any time by a suitably authorised user or program. Similarly
+the specification of the job may be changed. For example a new run could be scheduled and possibly some repetition specified.
+
+\subsubsection{Auto delete after execution}
+An automatic delete time may be specified if the job has been retained, either with the ``retain on completion'' or
+one of the repeat options. The job will be deleted automatically after the specified number of hours. The default is zero hours, which will
+retain the job indefinitely (this maintains backward compatibility with earlier versions of \ProductName{}).
+
+Each time the job runs, the timeout period will restart.
+
+\subsection{Repetition}
+Jobs can be specified to automatically repeat at regular intervals after the initial run. The interval is specified as an integer number of a
+particular unit of time. The available units are:
+
+\begin{tabular}{l p{12cm}}
+\exampletext{Minutes} & Minutes (All repeating jobs attempt to start on the minute)\\
+\exampletext{Hours} & Hours (This is the default as distributed)\\
+\exampletext{Days} & Days\\
+\exampletext{Weeks} & Weeks\\
+\exampletext{Monthsb} & Months relative to the beginning.\newline
+This specification requires two integer values: the first is the
+interval in months and the second is the day of the month on which to run.\\
+\exampletext{Monthse} &
+Months relative to the end of the month. This specification requires two integer values: the first is the interval in months and
+the other is the day on which to run.\\
+\exampletext{Years} & Years in the range 1 to 99.\\
+\end{tabular}
+
+With the exception of \exampletext{Monthsb} and \exampletext{Monthse} the first scheduled repetition is
+calculated by adding the repeat interval to the initial run time. The repeat specification is often represented in the format unit:number on
+the command line of programs like \PrBtr{}. For example:
+
+\begin{expara}
+
+Minutes:10
+
+\end{expara}
+
+run every ten minutes
+
+\begin{expara}
+
+Weeks:2
+
+\end{expara}
+
+run at the same time and day, once a fortnight
+
+\begin{expara}
+
+Days:5
+
+\end{expara}
+
+run at the same time of every fifth day
+
+Repeating jobs have additional options which can be set to indicate what to do if a job fails and to specify any days to avoid. These are
+explained in detail later.
+
+\subsubsection{Monthly Repeat Intervals}
+For \exampletext{Monthsb} and \exampletext{Monthse} the first scheduled repetition will be at the same time of day as the
+initial run. The month for the repetition is calculated from that of the initial run, but the actual day of the month is specified as a
+separate parameter. If a \textit{day of month} is not specified when the repetition is set up, \ProductName{} takes the day of the initial run as
+the \textit{day of month}.
+
+Monthly repeat specifications are often represented in the form \genericargs{unit:number:day} in the command line options
+of programs, like \PrBtr{}. For example:
+
+\begin{expara}
+
+Monthsb:1:5
+
+\end{expara}
+
+specifies that the job will be run on the 5th day of every month. The repeat specification may also include one or more days to avoid. If
+this is the case and the scheduled repeat falls on one of these, the job is put back until the same time on the first acceptable day.
+
+The repeat option for days relative to the end of the month has to take into account the number of days in each month. To specify how many days
+from the end of the month is required, the month given in the next scheduled time is taken, for example if the month in the next scheduled
+time has 31 days, then to specify the last day of each month use:
+
+\begin{expara}
+
+Monthse:1:31
+
+\end{expara}
+
+or to specify the next to last day of the month use:
+
+\begin{expara}
+
+Monthse:1:30
+
+\end{expara}
+
+If the next scheduled start time is in February and not a in leap year, then these should be:
+
+\begin{expara}
+
+Monthse:1:28
+
+\end{expara}
+
+or to specify the next to last day of the month use:
+
+\begin{expara}
+
+Monthse:1:27
+
+\end{expara}
+
+to achieve the same effect.
+
+With ``months relative to the end'', if ``days to avoid'' is set, then earlier days in each month are selected until an acceptable day is found, whereas
+with all other repetitions the next repeat is put back.
+
+Specifying ``months relative to the end'' of 5 or less, or ``months relative to the beginning'' of 27 or more is probably a mistake.
+
+Exceptionally, the web browser interface takes a number representing the day of the month in either case with 1 representing the last day of the
+month with ``months relative to the end'', 2 the next to last etc.
+
+We would appreciate feedback as to which convention is preferable.
+
+\subsubsection{Days to Avoid}
+The repeat specification has options to specify one or more days of the week and holidays to be avoided when scheduling the next run of a job.
+The holidays are marked in the holiday table, which is described later in this chapter. Up to 6 days of the week can be set to be avoided.
+
+When the next repetition of a job is calculated the scheduler will step past any days to avoid. For example a job that runs at 3 minutes past
+the hour every hour, but avoiding Saturdays and Sundays will run at 23:03 on Friday night and then next at 3 minutes past midnight on
+Monday morning.
+
+The days to avoid parameter does not affect the initial run time. Hence a job can be submitted to run the first time on a Saturday, but avoid
+Saturday and Sunday thereafter.
+
+Upon installation the default abbreviations for the days to avoid are: \exampletext{Sun}, \exampletext{Mon},
+\exampletext{Tue}, \exampletext{Wed}, \exampletext{Thu}, \exampletext{Fri}, \exampletext{Sat} and \exampletext{Hday}. The
+\exampletext{Hday} refers to days to avoid as specified in the scheduler{\textquotesingle}s Holiday file.
+
+\subsubsection{Time adjustments on error}
+The time adjustment parameter specifies whether the job{\textquotesingle}s scheduled start time should be left in the past
+or set to the next repetition in the event of the job failing.
+
+Specifying that the start time is not to be advanced to the next repetition, allows errors to be corrected and the job restarted. Select
+the advance time on error option, when a problem can or need not be rectified until the next repetition is due.
+
+\section{Job Completion Messages}
+\ProductName{} can send messages to the owner of a batch job, for example when it finishes or fails. These messages can be directed to e-mail, the
+users terminal session if logged in, or disabled as part of each jobs specification. The options are:
+
+\begin{itemize}
+\item Discard all messages.
+\item Write messages to the job owner's terminal, if they are logged in. Otherwise e-mail the messages back to them.
+\item E-mail messages to the job owner.
+\end{itemize}
+Do not confuse messages from the scheduler about a job with the output from the job. which is handled differently.
+
+The message handling can be modified on a per user or system wide basis. The same flags are used but the scheduler can be configured to behave
+differently, when writing or e-mailing messages. This is not part of the job specification and is described under the chapters on
+Configuration and Extensions.
+
+\section[Redirection of Input and Output]{Redirection of Input and Output}
+By default any standard output and standard error produced by a job is spooled to a temporary file, then e-mailed back to the job owner on
+completion. If no standard input is specified for a job it will just hang.
+
+The job specification includes redirection options to specify Unix files for input and output. These work in the same way as redirections in a
+shell, and have a similar syntax to the popular shell programs.
+
+A redirection can have:
+
+\begin{itemize}
+\item \textit{File number}, the file descriptor to be used. If omitted, standard input is assumed for input, standard output for output.
+\item \exampletext{{\textless}} indicating input, or \exampletext{{\textgreater}} indicating output or
+\exampletext{{\textgreater}{\textgreater}} append to output or \exampletext{{\textbar}} output to pipe, standard input for
+following shell command.
+\item \exampletext{{\textless}{\textgreater}} indicating that the following file would be opened in read/write mode, or
+\exampletext{{\textless}{\textgreater}{\textgreater}} for read/write/append mode.
+\item \exampletext{{\textless}{\textbar}} for input from the standard output of the following shell command.
+\item \exampletext{\&}\genericargs{File\_number} indicating dup from that file number, or
+\exampletext{\&-} meaning close the file number first specified.
+\end{itemize}
+Examples of redirections are
+
+\begin{expara}
+
+{\textless}Cfile
+
+{\textgreater}{\textgreater}Output
+
+2{\textgreater}Error
+
+2{\textgreater}\&1
+
+{\textbar}lp -d laser
+
+2{\textbar}grep error {\textgreater}Errs
+
+\end{expara}
+
+Note that in the last two cases there are further redirections involving a pipe or output file which are interpreted by the shell. The last
+example causes the standard error to be passed to the standard input of \progname{grep}.
+
+Symbols for meta-data can also be included in the path/file names used in redirections.
+See the section on Meta-Data on page \pageref{bkm:Metadata} for a list of the available data.
+
+\section{Arguments}
+Programs that are run from the command line are often given options or arguments on the command that invokes them. For example the file list
+program \progname{ls} may be given the options \exampletext{-al} to specify that all files should be included in a report of long format:
+
+\begin{expara}
+
+ls -al
+
+\end{expara}
+
+A job script may also take arguments and options. These are held in an argument list as part of the job specification. For example a script
+called \exampletext{update}, may be run from the command line with arguments like this:
+
+\begin{expara}
+
+update -C all sales
+
+\end{expara}
+
+In a batch job these would be held in the argument list as separate arguments. How the arguments are separated is up to the owner of the
+job. For example \exampletext{{}-C} and all could be treated as separate arguments or a single argument.
+
+The \PrBtr{} command
+
+\begin{expara}
+
+\BtrName{} -a {\textquotesingle}-C{\textquotesingle} -a {\textquotesingle}all{\textquotesingle} -a {\textquotesingle}sales{\textquotesingle} update
+
+\end{expara}
+
+(none of the quotes are necessary in this instance, but help the reader to follow the difference between \PrBtr{} arguments
+and arguments to the job) will produce an argument list of:
+
+\begin{expara}
+
+{}-C\newline
+all\newline
+sales
+
+\end{expara}
+
+Symbols for meta-data can also be included in arguments. See the section
+on Meta-Data on page \pageref{bkm:Metadata} for a list of the available data.
+
+\section{Environment \& process parameters}
+A copy of the environment in effect when jobs are submitted is saved as part of their specification. The job will be run using this
+environment. The various elements of this environment can be re-specified as required.
+
+Jobs submitted from an alien platform, such as a PC running Windows, will be given a default environment. This default can be configured on
+the submitting machine.
+
+\subsection{Environment Variables}
+The job specification holds a list of environment variables that are set up in the job's environment each time it is run. At
+run time the scheduler first sets up any environment variables that are specified in the \batchenv{} file. The
+variables from the job specification are then added to the environment.
+
+Symbols for meta-data can also be included in the values of environment variables. See the section on Meta-Data on page \pageref{bkm:Metadata} for a list of the available data.
+
+Note that if you have a large number of environment variables, the standard set should be placed in \batchenv{}.
+The job will contain the differences between those variables and the variables set with the job.
+
+\subsection{ulimit and umask}
+The \progname{ulimit} and \progname{umask} parameters may be applied to a batch job. By default the values are
+taken from the values in force when the job is submitted.
+
+\progname{ulimit} specifies the maximum file size, in blocks, that can be written by the job.
+
+\progname{umask} affects the default permissions of files created by the job. It is usually represented as an octal number, the
+same as file permissions. For example if \progname{umask} is \exampletext{022} the write permission will be turned off
+for \textit{Group} and \textit{Other} on any files created by the job.
+
+\subsection[Working Directory]{Working Directory}
+By default \ProductName{} assumes that a job is to be run in the same directory as it was submitted from. This is held in the job
+specification and any alternative directory may be specified, either when the job is specified or later. Take care not to specify a
+directory which does not exist or for which the owner of the job has insufficient permissions.
+
+The \exampletext{\~{}} notation for users' home directories, such as \exampletext{\~{}jmc} is expanded.
+
+\subsection{Normal and Error Exit Codes}
+Jobs like all Unix processes will return an exit code on completion. Usually an exit code of zero indicates the process performed its tasks
+successfully and exited normally. Any other exit code usually indicates an error of some kind. Exit codes are integers in the range 0 to 255.
+
+Not all programs follow this convention, however, so job specifications include two parameters to interpret exit codes.
+
+The \textit{normal exit} range parameter specifies a range of exit code values that the scheduler should interpret as a normal exit after a
+successful run. When specifying a \textit{normal exit} range on the command line of a program like \BtrName{} the parameter would look like this:
+
+\begin{expara}
+
+N0:0
+
+N0:9
+
+\end{expara}
+
+The first example indicates that only 0 represents a normal exit. The second indicates that the exit codes 0 to 9 are normal.
+
+The \textit{error exit} range may be set using the other parameter, which on the \PrBtr{} command line would look like:
+
+\begin{expara}
+
+E17:255
+
+\end{expara}
+
+If an exit code does not fall inside either the \textit{normal exit} or \textit{error exit} ranges the job is considered to have been aborted.
+
+If an exit code falls inside both ranges, then the smaller of the two ranges will apply. For example, if the ranges are:
+
+\begin{expara}
+
+N0:10
+
+\end{expara}
+
+and
+
+\begin{expara}
+
+E1:255
+
+\end{expara}
+
+an exit code of 1 to 10 will fall inside both ranges but will be treated as \textit{normal} since the \textit{normal} exit range is smaller.
+
+\subsection{Network Scope}
+When two or more machines are running \ProductName{} in co-operation with each other the scope of jobs becomes relevant. There are three alternatives,
+which are:
+
+Local
+
+Specifies that the job is visible and accessible only on the machine to which it was submitted.
+
+Export
+
+Specifies that the job must run on the local host, but allows the job to be seen and managed from any networked \ProductName{} host.
+
+Full Export
+
+Enables the job to run on any co-operating \ProductName{} host as well as being visible and manageable by the remote hosts.
+
+\subsection{Time-out parameters for stopping runaway Jobs}
+There are three parameters that specify how to identify and stop a runaway job. They are:
+
+\begin{enumerate}
+\item The maximum elapsed time since starting that a job may run for until it is terminated by the scheduler. This is specified as a number
+of seconds. The default is 0 seconds indicating that the job may run unchecked.
+\item What signal to send an over-running job in order to terminate it. The job should trap anything other than a \filename{SIGKILL}
+and respond by tidying up and exiting cleanly. The signal is specified by number rather than by name.
+\item A grace time, again in seconds, within which the job should terminate after being sent a signal. If the job does not terminate
+itself within the specified grace time the scheduler will kill it with a \filename{SIGKILL}.
+\end{enumerate}
+\section{Owners, Groups and Modes}
+Each job belongs to a user and a Unix group. Access to jobs is controlled by a set of permissions, called modes, similar to those on
+ordinary Unix files.
+
+\subsection{Owners and Groups}
+The job specification includes the \textit{user} who owns the job and the Unix \textit{group} that the job belongs to. The \textit{owner} and
+the \textit{group} are normally taken as those of the user who submitted the job. A different user and group may be specified when the
+job is submitted, but only if the submitting user has \textit{write admin file} privilege.
+
+Suitably authorised users may change the owner and group of a job when it is on the queue. An administrator may do this in one operation.
+Ordinary users, may be given sufficient privilege to change the specification. In this case the current owner has to specify who the
+job is to be given to and then the recipient must accept it.
+
+These security features prevent un-authorised transfer of jobs to and from more privileged owners and groups such as the
+\filename{root} user.
+
+Only the primary groups of users are considered for evaluating access permissions to jobs.
+
+\subsection{Modes}
+Access to jobs is controlled by the Modes which are similar to Unix file permissions, but with greater functionality. Permission to each access
+mode is granted to the owner of the variable (User), users in the same primary group (Group) or everyone (Others).
+
+Here is a screen, from the interactive batch queue management tool \PrBtq{}, showing the modes for a job called \exampletext{update}.
+
+\begin{expara}
+
+Modes for Job {\textasciigrave}update{\textquotesingle}
+
+Job owner wally group staff
+
+\bigskip
+
+\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ User \ \ Group Others
+
+Read \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ Yes \ \ \ Yes \ \ No
+
+Write \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ Yes \ \ \ No \ \ \ No
+
+Reveal \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ Yes \ \ \ Yes \ \ Yes
+
+Display mode \ \ \ \ \ \ \ \ \ \ Yes \ \ \ Yes \ \ Yes
+
+Set mode \ \ \ \ \ \ \ \ \ \ \ \ \ \ Yes \ \ \ No \ \ \ No
+
+Assume ownership \ \ \ \ \ \ No \ \ \ \ No \ \ \ No
+
+Assume group ownership No \ \ \ \ No \ \ \ No
+
+Give away owner \ \ \ \ \ \ \ Yes \ \ \ No \ \ \ No
+
+Give away group \ \ \ \ \ \ \ Yes \ \ \ Yes \ \ No
+
+Delete \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ Yes \ \ \ No \ \ \ No
+
+kill (jobs only) \ \ \ \ \ \ Yes \ \ \ No \ \ \ No
+
+\end{expara}
+
+The various modes give the following type of access when permission is granted:
+
+\begin{tabular}{l p{12cm}}
+\exampletext{Read} & The job specification and script contents can be read.\\
+\exampletext{Write} & The job specification may be modified, and read permission is conferred automatically.\\
+\exampletext{Reveal} & Jobs are completely hidden from users without reveal permission. If reveal permission is granted but not write permission
+then only the job id number, owner and group may be seen.\\
+\exampletext{Display mode} & Allows these modes to be viewed.\\
+\exampletext{Set mode} & Allows these modes to be changed.\\
+\exampletext{Assume ownership} & Dictates to whom ownership of a job may be transferred
+relative to the current owner.\\
+\exampletext{Assume group ownership} & Dictates to which group a job may be transferred relative to the current group.\\
+\exampletext{Give away owner} & Grants permission to transfer the ownership of a job to another user.\\
+\exampletext{Give away group} & Grants permission to transfer the job to another group.\\
+\exampletext{Delete} & Permission to delete job from the queue.\\
+\exampletext{Kill} & Allows jobs to be killed, or sent some other signal.\\
+\end{tabular}
+\section{Job Identifiers - Queues, Titles and Job ID numbers}
+Each job has a unique job id number, also called the job number or jobno. This is an unsigned integer, generated by the scheduler when the
+job is submitted. The job number is used whenever jobs have to be identified unambiguously.
+
+The job specification also includes a title, providing a more user friendly means of identifying jobs on the queue. This title is
+specified and editable by users and so can not be guaranteed to be unique. It should be used to help users recognise jobs.
+
+As part of the title specification, a job can be associated with a queue. Each job may only belong to one queue and a queue may hold many
+jobs. Queues and their uses are described later in this chapter.
+
+\section{Priority and Command Interpreter}
+Priority, load level and command interpreter are loosely related in that they indicate the importance and impact on the system of a job.
+
+All jobs are run under a command interpreter, which is referred to by name in the job specification. Command interpreters are separate
+entities which specify a default load level for jobs submitted to run under them. See the section on command interpreters later in this
+chapter for more information.
+
+The load level is held as an unsigned 16 bit integer. It specifies the relative impact that a job is likely to have on the loading of the host
+machine.
+
+Priority is specified as an integer in the range 1 to 255, and controls how likely a job is to be run ahead of other jobs in the queue. If
+there were no conditions on jobs then they would all run as soon as their start time arrived.
+
+In reality, due to conditions set by the variable \filename{LOADLEVEL}, there may be more jobs ready to start
+than the system will allow. In this case jobs with the higher priority get started ahead of lower priority ones. When the maximum number of
+jobs are running, those that did not get in have to wait until one or more of the higher priority jobs finish before being started.
+
+\section{Job control variables - Conditions and Assignments}
+Dependencies between jobs, and other parts of the system, can be implemented using variables. The job specification holds two lists of
+relationships between a job and the variables. One list specifies conditions which must be true before \ProductName{} will allow the job to
+start. The other list specifies assignments that \ProductName{} will perform on the data held in variables when a job starts, stops or fails.
+
+\subsection{Conditions}
+A condition is a simple expression that compares the value of a variable with a literal string or integer constant. The scheduler will not start
+a job unless all of the conditions are satisfied, i.e. the expressions return a value of true. Up to 10 Conditions may be specified for each
+job. The expression has the following four components:
+
+\begin{enumerate}
+\item A \textit{variable name}, which may be any variable readable by the user, including variables on remote machines represented as
+\exampletext{machine:variable}.
+\item A \textit{comparator}, which may be any of \exampletext{=}, \exampletext{!=}, \exampletext{{\textless}}, \exampletext{{\textless}=},
+\exampletext{{\textgreater}} or \exampletext{{\textgreater}=}.
+
+Remember to enclose these sequences in quotes when using them in a shell command.
+\item A \textit{constant}, which can be a string or an integer (negative or positive).
+\item A \textit{critical flag}, which determines whether the condition should be ignored if it involves an inaccessible remote variable.
+\end{enumerate}
+For example,
+
+\begin{expara}
+
+Update\_Count{\textless}17
+
+BackUp\_State!=Done
+
+voyager:Update\_Count{\textgreater}2
+
+\end{expara}
+
+Where a condition refers to a variable on a remote machine, there is always the possibility that the remote machine's copy of the scheduler
+is not running or disconnected. To handle this the condition has the option to specify whether the condition is critical or not.
+
+If the condition is specified as \textit{critical} the job has to wait until the machine is available, and the variable satisfies the
+expression, before running.
+
+Alternatively if the condition is specified as \textit{non-critical} and the machine is not available, the condition will be ignored.
+
+\subsection{Assignments}
+Up to 8 assignments may be specified for a job. Each assignment specifies what operation to perform on a variable and under what
+circumstances to perform the operation. The operation is specified as a simple programming language like assignment statement, hence the name
+assignment. The circumstances are defined by a set of flags; all, one or more of which may be set.
+
+There are two special cases of the assignment. One performs a straight assignment of the exit code with which the job terminated, to a
+variable. The other does the same thing with the signal number, if the job was terminated on a signal, either by a kill command, a signal from
+\BtqName{} etc, or a program fault.
+
+\subsubsection{Flag Options}
+There are six flags to specify when an assignment should be performed. At least one flag must be set. They can be used in combination or all
+set as required. The flags are usually represented by a single letter, as follows:
+
+\begin{center}
+\begin{tabular}{|l l|}
+\hline
+\bfseries Letter &
+\bfseries Operation specified\\\hline
+\exampletext{S} & Start, the scheduler performs the assignment when it starts the job\\
+\exampletext{N} & Normal exit, performs the assignment on normal exit\\
+\exampletext{E} & Error exit, performs the assignment on error exit\\
+\exampletext{A} & Aborted, performs assignment if job aborted (signal)\\
+\exampletext{C} & Cancellation, performs assignment if job cancelled\\
+\exampletext{R} & Reverse the specified assignment for everything except S.\\\hline
+\end{tabular}
+\end{center}
+
+The \exampletext{R} flag, is only relevant one or more of the exit flags is set. It undoes whatever assignment was (or would have
+been if S is not specified) performed at the start of the job, when the job finishes.
+
+If all the flags, \exampletext{SNEACR}, are set then the assignment is performed on start up, and reset when the job finishes
+however it exited. If only the flags \exampletext{SNR} are set then the assignment is only reversed when the job finishes normally.
+
+Remember that you can adjust what exit codes constitute ``normal'' and ``error'' exits, as described earlier.
+
+\subsubsection{Assignment Operation}
+Each assignment statement has five components, which are:
+
+\begin{itemize}
+\item A \textit{variable name}, which must already exist and be \textit{writeable} by the user. To access an exported variable from a
+remote machine, prefix it with the machine name and a colon.
+\item An \textit{assignment operator}, which can be as follows:
+\end{itemize}
+\begin{center}
+\begin{tabular}{l p{12cm}}
+\exampletext{=} & Assign constant to variable\\
+\exampletext{+=} & Increment value of variable by constant\\
+\exampletext{{}-=} & Decrement value of variable by constant\\
+\exampletext{*=} & Multiply value of variable by constant\\
+\exampletext{/=} & Divide value of variable by constant\\
+\exampletext{\%=} & Take modulus of variable (i.e. remainder when divided by the constant)\\
+\end{tabular}
+\end{center}
+
+\begin{itemize}
+\item A \textit{constant}, which may be a string or numeric value. Only the \exampletext{=} operator is valid for assignments with strings.
+\item A \textit{critical flag} to determine whether the assignment should be ignored if the host is offline.
+\item Assignment flags for the start and end of jobs.
+\end{itemize}
+Here are some examples of assignments:
+
+\begin{expara}
+
+count+=1
+
+status=error
+
+mach2:log+=3
+
+\end{expara}
+
+In the case of assignments from an exit code or signal number only the plan assignment is provided. The keyword exitcode or signal is used in
+the statement instead of a constant. For example:
+
+\begin{expara}
+
+status=exitcode
+
+killed\_by=signal
+
+\end{expara}
+
+If the R flag is set, to reverse a start assignment, the assignments performed are:
+
+\begin{center}
+\begin{tabular}{|l l p{10cm}|}
+\hline
+\bfseries Operator &
+\bfseries Reverse &
+\bfseries implies\\\hline
+\exampletext{=} & (n/a) & Assign zero to an integer value or an empty string to a string value.\\
+\exampletext{+=} & \exampletext{{}-=} & decrement value by same constant used for increment.\\
+\exampletext{{}-=} & \exampletext{+=} & increment value by same constant used for decrement.\\
+\exampletext{*=} & \exampletext{/=} & divide value by same constant used for multiplication (ignoring any remainder).\\
+\exampletext{/=} & \exampletext{*=} & multiply value by same constant used for division.\\
+\exampletext{\%=} & (n/a) & Unchanged, since this operation does not have a meaningful complement.\\\hline
+\end{tabular}
+\end{center}
+Note that reverse assignment may still be applied if the job has no start assignment flag to be reversed. The operation is still applied in
+the ``reversed'' state as above as if the start condition had applied. However it is recommended that you avoid
+this.
+
+Where an assignment operates upon a variable on a remote machine, there is a possibility that the remote machine's copy of the
+scheduler is not running or disconnected. To handle this the assignment has the option to specify whether the operation is critical or not.
+
+If the assignment is specified as \textit{critical} the job has to wait until the machine is available, for the operation to be performed,
+before running.
+
+Alternatively if the assignment is specified as \textit{non-critical} and the machine is not available, the job will be run without
+performing the specified operation.
+
+Once a job is running the critical specification has no effect. If a remote variable becomes unavailable during execution of a job, any
+critical job completion assignments to that variable are ignored.
+
+\section{Meta-Data}
+\label{bkm:Metadata}There are several useful parameters from the job specification that can be substituted into arguments, environment
+variables and I/O redirections. These are:
+
+\begin{center}
+\begin{tabular}{l l}
+\exampletext{\%s} & Command Interpreter name\\
+\exampletext{\%t} & Job title\\
+\exampletext{\%U} & User name\\
+\exampletext{\%G} & Group name\\
+\exampletext{\%N0} & Host name where job originated\\
+\exampletext{\%d1} & Job number, in decimal\\
+\exampletext{\%d2} & Priority, in decimal\\
+\exampletext{\%d3} & Load Level, in decimal\\
+\exampletext{\%x1} & Job number, in hexadecimal\\
+\exampletext{\%x2} & Priority, in hexadecimal\\
+\exampletext{\%x3} & Load Level, in hexadecimal\\
+\exampletext{\%\%} & To insert a single \% character.\\
+\exampletext{{\textasciigrave}cmd{\textasciigrave}} & Insert first line of output of cmd.\\
+\end{tabular}
+\end{center}
+The substitution is performed at run time, making sure that the information is up to date.
+
+For example to output a standard banner containing the Title and Job ID number, each parameter could be set up in an environment variable. If
+the environment variables are:
+
+\begin{expara}
+
+JOBNUM=\%d1
+
+JOBNAME=\%t
+
+\end{expara}
+
+then a simple piece of shell script to use them might look like this:
+
+\begin{expara}
+
+cat {\textless}{\textless}endbanner
+
+********************************************
+
+Output from Job: \$JOBNAME
+
+Job ID number: \ \ \$JOBNUM
+
+********************************************
+
+endbanner
+
+\end{expara}
+
+The output can be re-directed to a unique file by using the job number like this:
+
+\begin{expara}
+
+1{\textgreater}/joblogs/jobnum\%d1
+
+\end{expara}
+
+\section{Command Interpreters}
+The command interpreters are separate entities which are referred to in the job specifications. Each command interpreter specifies the
+following set of parameters:
+
+\begin{tabular}{l p{12cm}}
+Name & A unique identifier which is used, both internally and by user
+programs, to refer to the command interpreter.\\
+& \\
+Program &
+Holds the full path name of the command interpreter program.
+This can be any program, such as the Bourne shell, usually
+\filename{/bin/sh}, or the Korn shell, usually \filename{/bin/ksh}, that will read commands from standard input.\\
+& \\
+Arguments & Specifies any ``predefined'' arguments that are to be passed to the command interpreter when it is
+invoked, preceding any arguments which are given to the job. This is very commonly set to \exampletext{{}-s} for shells,
+which directs the shells not to interpret the first actual argument as a file name.\\
+& \\
+Load Level &
+Sets the default Load level to be given to all jobs running under the command interpreter. Only users with the \textit{special
+create} privilege may override this default for a job.\\
+& \\
+Nice & Sets the Unix nice value for processing batch jobs under this command interpreter. The default is 24. Remember that increased
+priority is denoted by a low nice value.\\
+& \\
+Argument 0 & When getting a list of processes using a command like \progname{ps}, the batch jobs will normally have the name
+of the command interpreter program they are running under. Setting the Argument 0 option causes the job title to be used as the process name
+instead. This may confuse some programs, hence it is made an option.\\
+& \\
+Expand args &
+Arguments with \$ in within the script of the job are expanded by \ProductName{}, rather than by
+the command interpreter. This may be desirable in cases where the command interpreter is not a shell, or where the semantics of \$ signs
+in arguments is different than that of the shell.\\
+\end{tabular}
+
+The same program can be used by more than one command interpreter, for example with low nice values (and hence a high priority) and a high
+load level or vice versa.
+
+Be careful about using the \textbf{Expand Args} flag with shells and in conjunction with arguments specified in the job and environment
+variables with quotes etc in. This is because most shells identify syntax before expanding variables. So for example if argument 1
+contained a single quote and argument 2 contained \exampletext{My String}, then
+
+\begin{expara}
+
+echo \$1\$2\$1
+
+\end{expara}
+
+would print
+
+\begin{expara}
+
+{\textquotesingle}My String{\textquotesingle}
+
+\end{expara}
+
+having identified the syntax first and decided that there are no quotes, but if the arguments were expanded the shell would never
+``see'' the \$1 and \$2 constructs and the output would be
+
+\begin{expara}
+
+\$2
+
+\end{expara}
+
+As the quotes would ``protect'' the \$ from expansion.
+
+\section{Queues}
+All of the jobs on a \ProductName{} host run in the same physical queue. There is however a mechanism of virtual queues, referred to simply as queues,
+that can be used for grouping jobs together. \ProductName{} does not impose any structure or operations on these queues. It provides mechanisms to
+restrict the view of and selectively query the physical queue by virtual queue names.
+
+This is enough, combined with the configuration and extension options of \ProductName{} to provide sophisticated management of queues of
+jobs.
+
+Each job is associated with just one queue. If no queue is specified then the job is said to be in the null queue. A view or query can be
+restricted to a set which contains one or more queues, and which may include or exclude the null queue.
+
+The set of queues may be one name, a list of names or a list of patterns for matching queues. It may be advisable to use quotation marks around
+the queue specification when invoked from a shell command. They may be given as a comma-separated list of alternatives, including the use of
+shell-style wild-cards. For example
+
+\begin{expara}
+
+test
+
+\end{expara}
+
+would restrict the view to just the queue test.
+
+\begin{expara}
+
+dev\_a,test1,test2
+
+\end{expara}
+
+would select the three separately named queues: dev\_a, test1 and test2.
+
+\begin{expara}
+
+dev*,test[3-7]
+
+\end{expara}
+
+select jobs in any queue whose name starts with the string ``\exampletext{dev}'' and jobs in
+queues \exampletext{test3}, \exampletext{test4}, \exampletext{test5}, \exampletext{test6} and \exampletext{test7}.
+
+The wild-card options are:
+
+\begin{center}
+\begin{tabular}{l l}
+\exampletext{*} & Matches anything\\
+\exampletext{?} & Matches one character\\
+\exampletext{[a-mp]} & Matches one character in list or range\\
+\exampletext{[!n-zq]} & Matches one character not in list or range\\
+\end{tabular}
+\end{center}
+\subsection{Examples}
+It is important to devise a naming convention for queues that reflects the structure of the batch processing. It is also a good idea to use
+the same naming conventions for job control variables related to particular queues. The queue name could be incorporated into the
+variable name.
+
+For example variables associated with jobs in queue \exampletext{abc} could be named as follows:
+
+\begin{expara}
+
+abc\_progress
+
+\end{expara}
+
+could be used to control the progress of a chain of jobs in queue \exampletext{abc}.
+
+\begin{expara}
+
+abc\_count
+
+\end{expara}
+
+to indicate how many times the chain has run.
+
+The queue name \exampletext{abc} is not very meaningful. It is best to choose names which describe the family of jobs in each queue. A
+queue of jobs that handle wages could be called \exampletext{Payroll}. Since the word \exampletext{Payroll} has been used for the queue name it can
+be left out of individual job titles. A job originally called
+
+\begin{expara}
+
+Check run for Payroll
+
+\end{expara}
+
+could be put in queue \exampletext{Payroll} and titled
+
+\begin{expara}
+
+Payroll:Check run
+
+\end{expara}
+
+Queue names can indicate more than just a simple functional grouping. By taking into account how queues can be selected using wild card
+characters, much more complex groupings can be implemented.
+
+\subsubsection{Naming Conventions for Overlapping Sets}
+Queue names can reflect the business area which jobs relate to with names like: \exampletext{sales}, \exampletext{lease},
+and \exampletext{returns}. Alternatively they can indicate the developmental state of jobs with names like:
+\exampletext{dev}, \exampletext{test}, and \exampletext{live}.
+
+The selection mechanisms enable queues to represent jobs as belonging to overlapping groups of activity. For example: a suite of jobs currently
+being developed might be in the queue \exampletext{dev\_sales}. When ready to hand over to operations the queue name would be changed to
+\exampletext{test\_sales}. Once the jobs are ready for production work they would be moved again to
+\exampletext{live\_sales}.
+
+Typical selections would be:
+
+\begin{expara}
+
+*sales
+
+\end{expara}
+
+for all jobs in a queue relating to \exampletext{sales},
+
+\begin{expara}
+
+live*
+
+\end{expara}
+
+forall jobs in queues for production jobs,
+
+\begin{expara}
+
+dev*,test*
+
+\end{expara}
+
+for jobs in the development and test queues,
+
+\begin{expara}
+
+*sales,*lease
+
+\end{expara}
+
+for all job relating to sales and leasing.
+
+\subsubsection{Naming Conventions for Sub-Queues or Hierarchies}
+Jobs may be related in a structure that resembles a family tree. This structure can be reflected in the queue naming conventions adopted for
+these jobs.
+
+For example all jobs related to customer accounts might be in a queue called \exampletext{cust}. Within that queue the jobs could be
+broken down into smaller units indicating what type of task each does, by a suffix. Jobs that update customer records may have a suffix of
+\exampletext{\_ch} and those that generate reports could have \exampletext{\_rep}.
+
+Even finer resolution could be obtained by an additional suffix, perhaps indicating what customer information is being used: Addresses could be
+indicated by \exampletext{\_addr} and credit limits by \exampletext{\_cred}.
+
+Used with meaningful job titles a list of jobs in the queue \exampletext{cust*} might look like this:
+
+\begin{expara}
+
+cust\_ch\_addr:Fred Smith
+
+cust\_rep\_mktg:MailshotList
+
+cust\_new:Bloggs Builders
+
+cust\_rm:Inactive Accounts
+
+cust\_ch\_cred:Xi Software Ltd
+
+cust\_rep\_addr:Scotland
+
+cust\_rep\_bal:OverCreditLimit
+
+\end{expara}
+
+Restricting the selection to \exampletext{cust\_rep*} would give only:
+
+\begin{expara}
+
+cust\_rep\_mktg:MailshotList
+
+cust\_rep\_addr:Scotland
+
+cust\_rep\_bal:OverCreditLimit
+
+\end{expara}
+
+\section{Holidays}
+Holidays are an 8th type of \textit{day to avoid} for repetitions. It relates to a single table of holidays for the current, past and present
+years. A system administrator can set up, and any user can view, the table of holidays for the year using the programs
+\PrBtq{}, \PrXbtq{} and \PrXmbtq{}.
+
+The repeat time for a job is calculated at the previous run time. Any changes made to the table of holidays are not automatically taken into
+consideration by pending jobs. The changes only take effect after the job is next run.
+

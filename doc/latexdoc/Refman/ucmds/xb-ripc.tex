@@ -1,0 +1,119 @@
+\subsection{\XbRipcName}
+
+\begin{expara}
+
+\XbRipcName{} [-d] [-r] [-F] [-A] [-D secs] [-P psarg] [-G] [-n] [-o file]
+
+\ \ \ \ \ [-S dir] [-x] \ [-B n] [-N char]
+
+\end{expara}
+
+\PrXbRipc{} traces, and/or optionally monitors or deletes IPC facilities for \ProductName{}. Many of
+the facilities are used for debugging, but it also serves as a quick method of deleting the IPC facilities, being easier to use than
+\progname{ipcs} and \progname{ipcrm}, in the event that the scheduler has crashed or been killed without deleting
+the IPC facilities.
+
+To use this facility, just run \PrXbRipc{} thus:
+
+\begin{expara}
+
+\XbRipcName{} -d {\textgreater}/dev/null
+
+\end{expara}
+
+The diagnostic output may be useful as it reports any inconsistencies.
+
+The monitoring option can be used to diagnose processes, possibly not \ProductName{} ones, which are interfering with
+\ProductName{} shared memory segments, in cases where a third-party application is suspected of damaging the shared
+memory.
+
+\PrXbRipc{} also checks for errors in memory-mapped files where the version of \ProductName{} is using those rather than shared
+memory.
+
+\subsubsection{Options}
+
+Note that this program does not provide for saving options in \configurationfile{} or \homeconfigpath{} files.
+
+\setbkmkprefix{xb-ripc}
+
+\cmdoption{A}{}{}{jvdets}
+
+Display details of jobs and variables. This often generates a lot of output and is not really necessary.
+
+\cmdoption{D}{}{secs}{pollshm}
+
+Monitor which process has last attached to the job shared memory segment and report apparent corruption, polling every \genericargs{secs} seconds.
+
+\cmdoption{d}{}{}{delete}
+
+Delete the IPC facilities after printing out contents. This saves messing with arguments to \progname{ipcrm(1)}.
+
+\cmdoption{f}{}{}{dispfree}
+
+Display the free chains for jobs and variables. This generates a lot of output and isn't usually necessary.
+
+\cmdoption{n}{}{}{nodispok}
+
+Suppress display from \exampletext{{}-D} option if everything is OK.
+
+\cmdoption{o}{}{outfile}{outfile}
+
+Output to \textit{outfile} rather than standard output. Set it to \filename{/dev/null} if you don't want to see any
+output.
+
+\cmdoption{P}{}{psarg}{psarg}
+
+Specify argument to \progname{ps(1)} to invoke if corruption detected when monitoring with \exampletext{{}-D}
+option. The output is passed through \progname{fgrep(1)} to find the line (if any) with the process id of the process which last
+attached to the shared memory.
+
+\cmdoption{G}{}{}{argfull}
+
+Used in conjunction with the \exampletext{{}-P} option, the output from \progname{ps(1)} is displayed in
+full, without passing it through \progname{fgrep(1)}.
+
+\cmdoption{r}{}{}{readq}
+
+Read and display the entries on the message queue. This is normally suppressed because they can't be
+``peeked at'' or ``unread''.
+
+\cmdoption{S}{}{dir}{dir}
+
+This is only relevant for versions of \ProductName{} which use memory-mapped files rather
+than shared memory. It specifies the location of the spool directory.
+If this is not specified, then the master configuration file \linebreak[3]\masterconfig is consulted to find the spool
+directory location, or failing that, the directory \spooldir{} is used.
+
+\cmdoption{x}{}{}{hexdump}
+
+Dump the contents of shared memory or memory-mapped files in hexadecimal and ASCII characters.
+
+\cmdoption{B}{}{n}{dumpwidth}
+
+Where \genericargs{n} may be 1 to 8, specify the width of the hexadecimal dump output as a number of 32-bit words.
+
+\cmdoption{N}{}{char}{replchar}
+
+Replace the character in the ASCII part of the hexadecimal dump to represent non-ASCII characters with the specified character
+(the first character of the argument). The default is \exampletext{.} To specify a space, you may need to use quotes
+thus: \exampletext{{}-N {\textquotesingle} {\textquotesingle}}
+
+\subsubsection{Example}
+To delete all IPC facilities after \ProductName{} has crashed.
+
+\begin{expara}
+
+\XbRipcName{} -d -o /dev/null
+
+\end{expara}
+
+To monitor the job shared memory segment for errors, printing out the \progname{ps(1)} output (where the full listing is obtained
+with \exampletext{{}-ef}) search for the process id of the last process to attach to the segment. Print out the contents of the
+segment including in hexadecimal after corruption is detected.
+
+\begin{expara}
+
+\XbRipcName{} -D 30 -P -ef -o joblog -A -x
+
+\end{expara}
+

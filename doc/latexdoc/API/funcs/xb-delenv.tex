@@ -1,0 +1,24 @@
+\subsection{\funcnameXBdelenv{}}
+
+\begin{expara}
+
+int \funcnameXBdelenv{}(const apiBtjob *jobp, const char *name)
+
+\end{expara}
+
+The function \funcXBgetenv{} is used to delete an environment variable from a job string table.
+
+\exampletext{jobp} is a pointer to a structure containing the details of the job. The definition of the job structure is given on
+page \pageref{bkm:Jobstructure} onwards.
+
+\exampletext{name} is the environment variable to be deleted.
+
+\subsubsection{Return values}
+The result is non-zero if successful, or zero if the string table overflowed, an unlikely event in the case of a deletion.
+
+No error is reported if the specified variable does not exist.
+
+\subsubsection{Notes}
+Environment variables common to all jobs may be held in a ``static environment file'' to which the job
+structure environment variables represent differences only. This routine will not affect entries in the static environment file.
+

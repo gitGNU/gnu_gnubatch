@@ -1,0 +1,369 @@
+\chapter{Internal Programs and file formats}
+\label{chp:internal-programs-and-file-formats}
+The following lists the internal programs and file formats used by \ProductName{}. With a few exceptions these programs should not be invoked or
+accessed by a user including an administrator.
+
+The internal programs are all held in the same directory, \progsdir{} by default. If the default directory is not used it will be pointed to by the
+\filename{SPROGDIR} environment variable set up in the \masterconfig{} file.
+
+\section{Core Programs}
+\subsection{btsched}
+
+\begin{expara}
+
+\progsdirname/btsched [-options]
+
+\end{expara}
+
+\progname{btsched} is the scheduler process for the \ProductName{} batch processing system.
+
+It is normally invoked by the system startup routines, or otherwise by \PrBtstart{}.
+
+It may take certain options from the command line, but these are normally passed to it by \PrBtstart{} and are not
+documented here as they are part of the internal interfaces of \ProductName{} and are subject to change.
+
+Information, either in respect of other machines to connect to, or pre-existing jobs and variables on the current machine, are read
+respectively from the files \hostsfile{} and the directory \spooldir{} (unless changed via the \textit{master configuration file} \masterconfig).
+
+A ``slave'' \progname{btsched} process is spawned to control running jobs, and if a networked version of \ProductName{} is being run,
+then an additional ``slave'' btsched process is spawned to monitor and process incoming network messages.
+
+Incoming remotely-submitted jobs and API interfaces are handled via a separate process (also invoked by \PrBtstart{}), \progname{xbnetserv}.
+
+\subsubsection{Files used}
+\begin{center}
+\begin{tabular}{l l}
+\hostsfile &
+Host names and descriptions\\
+\masterconfig & Master configuration file\\
+\filename{\helpdirname/btint-config} & Message file\\
+\spooldir & Spool directory\\
+\filename{\spooldirname/btsched\_jfile} & Job file\\
+\filename{\spooldirname/btsched\_vfile} & Variables file\\
+\filename{\spooldirname/btsched\_reps} & Error log file\\
+\filename{\spooldirname/btufile} & User data\\
+\filename{\spooldirname/btmm\_jobs} & Job memory-mapped file\\
+\filename{\spooldirname/btmm\_vars} & Variables memory-mapped file\\
+\filename{\spooldirname/btmm\_xfer} & Communication buffer memory-mapped file\\
+\end{tabular}
+\end{center}
+\subsubsection[IPC Facilities used]{IPC Facilities used}
+An IPC message queue, with key \exampletext{0x5869b000} and owned by user \batchuser{} is created by
+\progname{btsched} and used to receive messages from user processes and pass instructions to and internal messages from the slave
+\progname{btsched} processes to the master.
+
+Two shared memory segments are created to hold details of jobs and variables. As the shared memory facility provides no facilities for
+growth, then additional shared memory segments may be created if the job and variable lists expand sufficiently and the original ones
+deallocated.
+
+A further shared memory segment, with key \exampletext{0x5869b100} is created to hold details of pending
+jobs before transfer to the main shared memory segment.
+
+The keys given to the shared memory segments start at \exampletext{0x5869b002} and ascend upwards to
+\exampletext{0x5869b064} before wrapping around.
+
+Some versions of \progname{btsched} may use memory-mapped files rather than shared memory.
+The files are held in the spool directory, by default \spooldir, and have the names \filename{btmm\_jobs},
+\filename{btmm\_vars} and \filename{btmm\_xfer}.
+
+A set of at least 10 semaphores, with the key \exampletext{0x5869b001} is created to interlock access to the
+shared memory segments, and a further set of 3 semaphores with the key \exampletext{0x5869b003} is created to interlock network
+processes.
+
+The presence or absence of these IPC facilities is used by \progname{btsched} and other programs to determine whether
+a previous copy of itself is running. If \progname{btsched} is abnormally terminated, it may be necessary to delete these IPC
+facilities before \progname{btsched} can be restarted.
+
+The utility \PrXbRipc{} may be used to delete the IPC facilities quickly.
+
+\subsubsection{Internet ports used}
+\progname{btsched} accepts and sends interconnections from other machines on TCP port, passes the contents of batch jobs on a
+further TCP port, and undertakes ``probes'' on a UDP port.
+
+The port numbers are set up in the \filename{/etc/services} file when \ProductName{} is first installed.
+
+\subsection{xbnetserv}
+
+\begin{expara}
+
+\progsdirname/xbnetserv
+
+\end{expara}
+
+\progname{xbnetserv} is the remote server process for the \ProductName{} batch scheduler system.
+
+It serves 3 purposes
+
+\begin{enumerate}
+\item It accepts jobs from other hosts submitted by \PrRbtr{} and queues them on the same server.
+\item It accepts jobs and administration requests from DOS and Windows machines.
+\item It supports API operations.
+\end{enumerate}
+It is normally invoked by the system startup routines, or otherwise by \PrBtstart{}.
+
+It takes no arguments from the command line (and ignores any which are supplied). Information, in respect of other machines to connect to is
+read from the file \hostsfile.
+
+\subsubsection{Internet ports}
+\progname{xbnetserv} uses 2 ports, one to accept incoming jobs on TCP from \PrRbtr{} and one to accept jobs on UDP from MS Windows clients.
+
+\IfXi{Please note that the ports are called \filename{xbnetsrv} (with no second``\exampletext{e}''). This is because some historic
+Unix systems limited hostnames to 8 characters.}
+
+There are also TCP and UDP ports to accept API requests.
+
+The port numbers are set up in the \filename{/etc/services} file when \ProductName{} is first installed.
+
+\subsubsection{Diagnostics}
+\progname{xbnetserv} runs as a ``daemon process'' and diagnostics, apart from those detected when
+it is first started, are not usually written to any terminal but to the file \filename{\spooldirname/btsched\_reps}.
+
+In the event of any problems this file should be examined.
+
+\section{btexec}
+
+\begin{expara}
+
+\progsdirname/btexec options
+
+\end{expara}
+
+\progname{Btexec} runs commands for macros under the identity of the invoking user.
+This is required because \PrBtq{} and \PrXmbtq{} are set-user programs (to other than \filename{root}) and there is an inherent security breach in
+many versions of Unix in that such programs cannot divest themselves of traces of the set-user user id.
+
+This program is only intended for internal use and is not further documented.
+
+\section{Message Handlers}
+\subsection{btmdisp}
+
+\begin{expara}
+
+\progsdirname/btmdisp options
+
+\end{expara}
+
+\progname{btmdisp} generates messages as required by \progname{btsched} in response to the mail or write
+completion options of batch jobs.
+
+By default, it uses the system basic mailer to dispose of mail options, \progname{btwrite} to send messages
+to users' terminals and \progname{dosbtwrite} to send messages to Windows PCs.
+
+The messages are generated by \progname{btmdisp} from the system message file, which by default is
+\filename{\helpdirname/btint-config}.
+
+The program to be used in each case may be overridden by assignments to the environment variables \filename{MAILER},
+\filename{WRITER} and \filename{DOSWRITER}, most conveniently in the master configuration file
+\masterconfig. The program (or shell script) to be run in each case should take data on standard input and the
+relevant user name as the first argument, and will run under the identity \batchuser{}.
+
+These variables may also be set on a per-user basis by assignment in a \homeconfigpath{} file located off a user's
+home directory. The user may also specify an alternative message file by assignment to the variable \filename{SYSMESG}. These
+programs or scripts will be run under the identity of the user, typically the owner of the job to be run.
+
+The interface (options etc) are internal to \ProductName{} and are not documented here.
+
+\IfXi{\subsubsection{Notes}
+\progname{btmdisp} is identical to
+\OtherProductName's \progname{spmdisp},
+apart from using different message and configuration files.}
+\subsection{btwrite}
+
+\begin{expara}
+
+\progsdirname/btwrite user [ ... ]
+
+\end{expara}
+
+\progname{btwrite} sends messages to users' terminals in response to the \exampletext{{}-w} option of
+\PrBtr{} and equivalent. It is used in preference to the \progname{write}(1) command as this picks just one (and
+usually the wrong one!) of the terminals at which the user may be logged in, and does not display a suitable name for the originator of
+messages.
+
+\progname{btwrite} takes a list of one or more users as arguments. It sends the text on standard input to each
+user's terminal. The message is mailed to users who cannot be reached. This facility is available for use in your own
+software if you wish.
+
+\IfXi{\subsubsection{Notes}
+\progname{btwrite} is identical to \OtherProductName's spwrite(8), apart from using a different message file.}
+
+\subsection{dosbtwrite}
+
+\begin{expara}
+
+\progsdirname/dosbtwrite options
+
+\end{expara}
+
+\progname{dosbtwrite} sends messages to Windows PCs similar to \progname{btwrite} does for user's terminals in response to the equivalents of the
+\exampletext{{}-w} options of \PrBtr{} and equivalents. This is only done for jobs which originated on Windows PCs.
+
+The Windows PC must be running \progname{btqw} for this to be effectual.
+
+If the job was submitted by a user working from a client with a DHCP-allocated IP address, a message may be received on all clients
+currently logged-in with that user name.
+
+\IfXi{\subsubsection{Notes}
+\progname{dosbtwrite} is identical to \OtherProductName's \progname{dosspwrite}, apart from using a different message file.}
+
+\subsection{Jobdump}
+
+\begin{expara}
+
+jobdump options
+
+\end{expara}
+
+\progname{jobdump} is invoked by \PrBtq{}, \PrXbtq{}, \PrXmbtq{} and \PrBtjdel{} to unqueue jobs when required.
+
+It is not intended for general use and is not documented further.
+
+\section{File Formats}
+\subsection{\masterconfigname}
+\masterconfig is an optional file for reconfiguring the \ProductName{} batch management system.
+
+This may be useful for relocating standard files and directories, such as \filename{SPOOLDIR} which defaults to \spooldir{} so that a different spool
+directory is used. However completely arbitrary environment variable assignments may be made so as to pass the resulting environment on to
+various subprocesses invoked by the scheduler.
+
+Note that as the environment is assigned early within \PrBtr{}, then any jobs created will have these
+environment variables assigned. However there is an alternative syntax (see below) to avoid this.
+
+The format of the file consists of two different forms of assignment.
+
+\begin{tabular}{l p{12cm}}
+\exampletext{SPOOLDIR=/usr2/spooldir} & Sets up the given environment variable in all programs and jobs invoked by \ProductName{}.\\
+& \\
+\exampletext{SPOOLDIR:/usr2/spooldir} & Denotes environment variables which should not be passed on to subprocesses, or to jobs created by \PrBtr{}.\\
+\end{tabular}
+
+Comment lines may be included, introduced by a \exampletext{\#} sign, and blank lines are ignored.
+
+The latter environment assignment format is used by default in the installation process for \ProductName{}.
+
+Every component program of \ProductName{} examines this file and resets its environment from this file as the first step of execution.
+
+\subsection{\hostsfilename}
+\hostsfile{} is used to inform the \ProductName{} batch scheduling system, and in particular \progname{btsched} and \progname{xbnetserv}, which other host machines are to be attached.
+
+The host machines should in general be provided for in the standard file \filename{/etc/hosts}.
+
+The file consists of comment lines introduced by the \exampletext{\#} character, and of lines consisting of up to 4
+fields, of which only the first is mandatory. These fields are as follows:
+
+\subsubsection{Host name}
+This is the name of the host as given in the \filename{/etc/hosts} file.
+
+Alternatively an internet address of the form \exampletext{193.112.238.10} may be given if necessary and an alias is provided on the next field, but this is not recommended.
+
+\subsubsection{Alias name}
+This is the name of an alias to be used in preference to the host name to refer to the machine. To be particularly beneficial, this should be
+shorter than the host name.
+
+If this field is not required, but subsequent fields are required, then the alias name may be replaced by a single \exampletext{{}-} sign.
+
+\subsubsection{Flags}
+This is a comma-separated list of markers to denote information about the connection. The currently-supported markers are as follows:
+
+\begin{tabular}{lp{12cm}}
+\exampletext{probe} &
+Indicates that a datagram should be sent, and a reply awaited,
+from the host, before a full-blown connection is attempted. This is
+recommended wherever possible, or it is not sure in which order
+machines are booted.\\
+& \\
+\exampletext{manual} &
+indicates that no connection at all is attempted. To connect to the machine in question, then \PrBtconn{} should
+be invoked.\\
+& \\
+\exampletext{trusted} &
+indicates that the host is ``trusted'' by the current machine, which transmits information about Windows clients and their password
+validations, so the other host need not make such enquiries.\newline
+N.B. This option is now deprecated.\\
+& \\
+\exampletext{Client (username)} &
+indicates that no connection is attempted; the current machine is acting as a server for Windows clients. The specified username is to
+be considered as the owner of any jobs submitted, and the user to whom charges should be applied and to which privileges apply; see
+\PrBtuser{}.\newline
+If \genericargs{(username)} is omitted, then the Windows user is assumed, which should correspond to a user name on the host system.\\
+& \\
+\exampletext{Clientuser (machine)} & Indicates that the whole entry identifies a ``roaming user'' who might be using one of
+several Windows clients, possibly with IP addresses assigned via DHCP. The host name in this case is replaced by the Windows user name, and
+the alias gives the Unix user name if different.\newline
+If \genericargs{(machine)} is specified, then a password is demanded at the Windows client if the client's IP
+address does not match that of machine.\\
+& \\
+\exampletext{dos(username)} &
+Is a synonym for \exampletext{client(username)} kept for historical reasons.\\
+& \\
+\exampletext{dosuser(machine)} & Is a synonym for \exampletext{clientuser(machine)} kept for historical reasons.\\
+\exampletext{external} &
+Is a synonym for \exampletext{client} (no username) kept for future extensions.\\
+& \\
+\exampletext{pwchk} &
+Always demand the user's Unix password (or a version of the password specific to \ProductName{} as set using \XipasswdName{}) when first starting up.\\
+\end{tabular}
+\subsubsection{Timeout}
+This gives a timeout value in seconds after which the interface is to be considered closed following a connection or alternatively to await a
+connection after a probe request.
+
+A default of 1000 seconds applies if none is specified.
+
+In the case of Windows clients, the ``login'' is considered to be dropped after this time, and the user may be asked for a password again.
+
+\subsubsection{Local address}
+On some machines, the ``local'' host address may be different from that obtained by looking at the result of \progname{gethostname}(3). To specify a different address for ``this'' machine, a line of the form:
+
+\begin{expara}
+
+localaddress 193.112.238.112
+
+\end{expara}
+
+may be specified,  but this must precede all other host names in the file.
+
+An alternative method of getting the local address is to connect to some other server and obtain the local address by using the
+\progname{getsockname} call to find the address.
+
+To do this use the keyword \filename{GSN} thus
+
+\begin{expara}
+
+localaddress GSN(www.google.com,80)
+
+\end{expara}
+
+In this example the local address is found by attempting to connect to \filename{www.google.com} on port 80 (the \filename{http} port) and
+applying \progname{getsockname} to the resulting connection.
+
+\subsection{User map file}
+The user map file provides a mapping between external names, usually Windows user names, and UNIX names.
+
+The file is in \usermap, and consists (apart from comments introduced by the \filename{\#} character) of lines of the format
+
+\begin{expara}
+
+unix-user:windows-user
+
+\end{expara}
+
+For example:
+
+\begin{expara}
+
+\# User mapping file
+
+jmc:john collins
+
+sec:sue collins
+
+guest:default
+
+\end{expara}
+
+The final entry gives a default user if a named user is not found in the file.
+
+UNIX users not found on the host are silently ignored.
+
+The User Mapping file is used to convert Windows user names to UNIX user names for the Windows clients, or for the API functions.
+

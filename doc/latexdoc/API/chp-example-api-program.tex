@@ -1,0 +1,651 @@
+\chapter{Example API program}
+\label{chp:example-api-program}
+The following program is an example of the use of the Unix API to
+provide a simple read-only screen displaying some jobs and variables
+simultaneously.
+
+\begin{exparasmall}
+
+\#include {\textless}sys/types.h{\textgreater}
+
+\#include {\textless}curses.h{\textgreater}
+
+\#include {\textless}time.h{\textgreater}
+
+\#include {\textless}signal.h{\textgreater}
+
+\#include {\textless}\includefile{\textgreater}
+
+\bigskip
+
+
+\#define \ MAXJOBSATONCE \ \ \ 10
+
+\#define \ MAXVARSATONCE \ \ \ 7
+
+\#define \ V\_START \ \ \ \ \ \ \ \ \ (MAXJOBSATONCE+2)
+
+\bigskip
+
+
+int \ jslotnums = -1, \ \ \ \ \ /* Number we are monitoring */
+
+\ \ \ \ \ jslotlast = -1, \ \ \ \ \ /* Last number of jobs on list */
+
+\ \ \ \ \ vslotnums = -1, \ \ \ \ \ /* Number of variables we are
+monitoring */
+
+\ \ \ \ \ vslotlast = -1, \ \ \ \ \ /* Last number of vars on list */
+
+\ \ \ \ \ jobchanges = 0, \ \ \ \ \ /* Changes noted in jobs */
+
+\ \ \ \ \ varchanges = 0, \ \ \ \ \ /* Changes noted in variables */
+
+\ \ \ \ \ vnamecnt, \ \ \ \ \ \ \ \ \ \ \ /* Number of variables we
+asked about */
+
+\ \ \ \ \ apifd; \ \ \ \ \ \ \ \ \ \ \ \ \ \ /* {\textquotedbl}File
+descriptor{\textquotedbl} for api */
+
+\bigskip
+
+
+slotno\_t jslotno[MAXJOBSATONCE], \ /* Slot numbers of jobs being
+monitored */
+
+\ \ \ \ \ \ \ \ \ vslotno[MAXVARSATONCE]; \ /* Slot numbers of vars
+being monitored */
+
+\bigskip
+
+
+char \ \ \ **vnames, \ \ \ \ \ \ \ /* Names of variables we want */
+
+\ \ \ \ \ \ \ \ *hostname, \ \ \ \ \ \ /* Machine we want to talk to */
+
+\ \ \ \ \ \ \ \ *queuename; \ \ \ \ \ /* Queue name */
+
+\bigskip
+
+
+static \ char \ \ \ *statenames[] = \{
+
+\ \ \ \ \ {\textquotedbl}{\textquotedbl},
+
+\ \ \ \ \ {\textquotedbl}Done{\textquotedbl},
+
+\ \ \ \ \ {\textquotedbl}Error{\textquotedbl},
+
+\ \ \ \ \ {\textquotedbl}Aborted{\textquotedbl},
+
+\ \ \ \ \ {\textquotedbl}Cancelled{\textquotedbl},
+
+\ \ \ \ \ {\textquotedbl}Strt1{\textquotedbl},
+
+\ \ \ \ \ {\textquotedbl}Strt2{\textquotedbl},
+
+\ \ \ \ \ {\textquotedbl}Running{\textquotedbl},
+
+\ \ \ \ \ {\textquotedbl}Finished{\textquotedbl}
+
+\};
+
+\bigskip
+
+
+/* \ Invoked in the event of a signal \ */
+
+\bigskip
+
+
+void \ \ \ quitit()
+
+\{
+
+\ \ \ \ \funcnameXBclose{}(apifd);
+
+\ \ \ \ endwin();
+
+\ \ \ \ exit(0);
+
+\}
+
+\bigskip
+
+
+/* \ Fill up the screen according to jobs and variables. */
+
+\bigskip
+
+
+void \ \ \ fillscreen()
+
+\{
+
+\ \ \ \ intcnt, row;
+
+\ \ \ \ time\_t \ now = time((time\_t *) 0);
+
+\bigskip
+
+
+\ \ \ \ /* \ Clear the existing text on the screen \ */
+
+\bigskip
+
+
+\ \ \ \ erase();
+
+\bigskip
+
+
+\ \ \ \ /* For each job.... \ */
+
+\bigskip
+
+
+\ \ \ \ for \ (cnt = 0; cnt {\textless} jslotnums; \ cnt++) \ \{
+
+\ \ \ \ \ \ \ \ const \ char*tit;
+
+\ \ \ \ \ \ \ \ char \ \ \ tbuf[16];
+
+\ \ \ \ \ \ \ \ apiBtjobjob;
+
+\bigskip
+
+
+\ \ \ \ \ \ \ \ /* Read the job, if it has disappeared, forget it */
+
+\bigskip
+
+
+\ \ \ \ \ \ \ \ if \ (\funcnameXBjobread{}(apifd, \constprefix{}FLAG\_IGNORESEQ,
+jslotno[cnt], \&job) {\textless} 0)
+
+\ \ \ \ \ \ \ \ \ \ \ \ continue;
+
+\bigskip
+
+
+\ \ \ \ \ \ \ \ /* Extract title */
+
+\bigskip
+
+
+\ \ \ \ \ \ \ \ tit = \funcnameXBgettitle{}(apifd, \&job);
+
+\bigskip
+
+
+\ \ \ \ \ \ \ \ /* If time applies, print time, or date if not in 24
+hours */
+
+\bigskip
+
+
+\ \ \ \ \ \ \ \ if \ (job.h.bj\_times.tc\_istime) \ \{
+
+\ \ \ \ \ \ \ \ \ \ \ \ struct \ tm \ *tp =
+localtime(\&job.h.bj\_times.tc\_nexttime);
+
+\ \ \ \ \ \ \ \ \ \ \ \ if \ (job.h.bj\_times.tc\_nexttime {\textless}
+now {\textbar}{\textbar}
+
+\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ job.h.bj\_times.tc\_nexttime
+{\textgreater} now + (24L*60L*60L))
+
+\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ sprintf(tbuf,
+{\textquotedbl}\%.2d/\%.2d{\textquotedbl}, tp-{\textgreater}tm\_mday,
+tp-{\textgreater}tm\_mon+1);
+
+\ \ \ \ \ \ \ \ \ \ \ \ else
+
+\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ sprintf(tbuf,
+{\textquotedbl}\%.2d:\%.2d{\textquotedbl}, tp-{\textgreater}tm\_hour,
+tp-{\textgreater}tm\_min);
+
+\ \ \ \ \ \ \ \ \}
+
+\ \ \ \ \ \ \ \ else
+
+\ \ \ \ \ \ \ \ \ \ \ \ tbuf[0] =
+{\textquotesingle}{\textbackslash}0{\textquotesingle};
+
+\ \ \ \ \ \ \ \ mvprintw(cnt, 0, {\textquotedbl}\%.7d \%-16s \%-5.5s
+\%s{\textquotedbl}, job.h.bj\_job, tit, tbuf,
+
+\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ statenames[job.h.bj\_progress]);
+
+\ \ \ \ \}
+
+\bigskip
+
+
+\ \ \ \ row = V\_START;
+
+\bigskip
+
+
+\ \ \ \ for \ (cnt = 0; cnt {\textless} vslotnums; \ cnt++) \ \{
+
+\ \ \ \ \ \ \ \ apiBtvar var;
+
+\ \ \ \ \ \ \ \ if \ (\funcnameXBvarread{}(apifd, \constprefix{}FLAG\_IGNORESEQ,
+vslotno[cnt], \&var) {\textless} 0)
+
+\ \ \ \ \ \ \ \ \ \ \ \ continue;
+
+\bigskip
+
+
+\ \ \ \ \ \ \ \ /* \ Print variable name, value and comment string */
+
+\bigskip
+
+
+\ \ \ \ \ \ \ \ if \ (var.var\_value.const\_type == CON\_LONG)
+
+\ \ \ \ \ \ \ \ \ \ \ \ mvprintw(row,
+
+\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ 0, {\textquotedbl}\%-15s \%ld
+\%s{\textquotedbl}, var.var\_name,
+
+\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ var.var\_value.con\_un.con\_long,
+var.var\_comment);
+
+\ \ \ \ \ \ \ \ else
+
+\ \ \ \ \ \ \ \ \ \ \ \ mvprintw(row,
+
+\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ 0, {\textquotedbl}\%-15s \%s
+\%s{\textquotedbl}, var.var\_name,
+
+\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ var.var\_value.con\_un.con\_string,
+var.var\_comment);
+
+\ \ \ \ \ \ \ \ row++;
+
+\ \ \ \ \}
+
+\bigskip
+
+
+\ \ \ \ move(LINES-1,COLS-1);
+
+\ \ \ \ refresh();
+
+\}
+
+\bigskip
+
+
+void \ \ \ readjlist()
+
+\{
+
+\ \ \ \ intnjs, cnt;
+
+\ \ \ \ slotno\_t*jsls;
+
+\bigskip
+
+
+\ \ \ \ jobchanges = 0;
+
+\bigskip
+
+
+\ \ \ \ /* \ Read the list of jobs in the queue. \ */
+
+\bigskip
+
+
+\ \ \ \ if \ (\funcnameXBjoblist{}(apifd, \constprefix{}FLAG\_IGNORESEQ, \&njs, \&jsls)
+{\textless} 0)
+
+\ \ \ \ \ \ \ \ return;
+
+\bigskip
+
+
+\ \ \ \ /* \ If the number of jobs is the same as last time,
+
+\ \ \ \ \ \ \ \ we can assume that no new ones have been created. */
+
+\bigskip
+
+
+\ \ \ \ if \ (njs == jslotlast)
+
+\ \ \ \ \ \ \ \ return;
+
+\bigskip
+
+
+\ \ \ \ jslotlast = njs;
+
+\bigskip
+
+
+\ \ \ \ /* If we have more than we can fit on the screen,
+
+\ \ \ \ \ \ \ skip the rest */
+
+\bigskip
+
+
+\ \ \ \ if \ (njs {\textgreater} MAXJOBSATONCE)
+
+\ \ \ \ \ \ \ \ njs = MAXJOBSATONCE;
+
+\bigskip
+
+
+\ \ \ \ jslotnums = njs;
+
+\bigskip
+
+
+\ \ \ \ for \ (cnt = 0; \ cnt {\textless} njs; \ cnt++)
+
+\ \ \ \ \ \ \ \ jslotno[cnt] = jsls[cnt];
+
+\}
+
+\bigskip
+
+
+void \ \ \ readvlist()
+
+\{
+
+\ \ \ \ int \ nvs, cnt, cnt2;
+
+\ \ \ \ slotno\_t *vsls;
+
+\bigskip
+
+
+\ \ \ \ varchanges = 0;
+
+\bigskip
+
+
+\ \ \ \ /* \ Read the list of variables available to us. */
+
+\bigskip
+
+
+\ \ \ \ if \ (\funcnameXBvarlist{}(apifd, \constprefix{}FLAG\_IGNORESEQ, \&nvs, \&vsls)
+{\textless} 0)
+
+\ \ \ \ \ \ \ \ return;
+
+\bigskip
+
+
+\ \ \ \ /* \ If the number of variables is the same, we can assume that
+
+\ \ \ \ \ \ \ \ we haven{\textquotesingle}t created or deleted any. */
+
+\bigskip
+
+
+\ \ \ \ if \ (nvs == vslotlast)
+
+\ \ \ \ \ \ \ \ return;
+
+\bigskip
+
+
+\ \ \ \ /* \ Reset the pointer of slot numbers we are interested in */
+
+\bigskip
+
+
+\ \ \ \ vslotlast = nvs;
+
+\ \ \ \ vslotnums = 0;
+
+\bigskip
+
+
+\ \ \ \ /* \ Look through the list of variables we got back for the
+
+\ \ \ \ \ \ \ \ ones we are interested in. */
+
+\bigskip
+
+
+\ \ \ \ for \ (cnt = 0; cnt {\textless} nvs; \ cnt++) \ \{
+
+\ \ \ \ \ \ \ \ apiBtvar var;
+
+\bigskip
+
+
+\ \ \ \ \ \ \ \ /* Read the variable */
+
+\bigskip
+
+
+\ \ \ \ \ \ \ \ if \ (\funcnameXBvarread{}(apifd, \constprefix{}FLAG\_IGNORESEQ,
+vsls[cnt], \&var) {\textless} 0)
+
+\ \ \ \ \ \ \ \ \ \ \ \ continue;
+
+\bigskip
+
+
+\ \ \ \ \ \ \ \ /* Look through the list of names.
+
+\ \ \ \ \ \ \ \ \ \ \ If we find it, remember the slot number. */
+
+\bigskip
+
+
+\ \ \ \ \ \ \ \ for \ (cnt2 = 0; cnt2 {\textless} vnamecnt; \ cnt2++)
+
+\ \ \ \ \ \ \ \ \ \ \ \ if \ (strcmp(vnames[cnt2], var.var\_name) == 0)
+\ \{
+
+\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ vslotno[vslotnums++] = vsls[cnt];
+
+\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ break;
+
+\ \ \ \ \ \ \ \ \ \ \ \ \}
+
+\ \ \ \ \}
+
+\}
+
+\bigskip
+
+
+void \ \ \ catchjob(const int fd)
+
+\{
+
+\ \ \ \ jobchanges++;
+
+\}
+
+\bigskip
+
+
+void \ \ \ catchvar(const int fd)
+
+\{
+
+\ \ \ \ varchanges++;
+
+\}
+
+\bigskip
+
+
+void \ \ \ process()
+
+\{
+
+\ \ \ \ apifd = \funcnameXBopen{}(hostname, (const char *) 0);
+
+\ \ \ \ if \ (apifd {\textless} 0) \ \{
+
+\ \ \ \ \ \ \ \ fprintf(stderr, {\textquotedbl}Cannot open
+API{\textbackslash}n{\textquotedbl});
+
+\ \ \ \ \ \ \ \ exit(250);
+
+\ \ \ \ \}
+
+\bigskip
+
+
+\ \ \ \ \funcnameXBsetqueue{}(apifd, queuename);
+
+\bigskip
+
+
+\ \ \ \ initscr();
+
+\ \ \ \ noecho();
+
+\ \ \ \ nonl();
+
+\bigskip
+
+
+\ \ \ \ readjlist();
+
+\ \ \ \ readvlist();
+
+\ \ \ \ fillscreen();
+
+\bigskip
+
+
+\ \ \ \ /* Let the user abort the program with quit or interrupt */
+
+\bigskip
+
+
+\ \ \ \ sigset(SIGINT, quitit);
+
+\ \ \ \ sigset(SIGQUIT, quitit);
+
+\bigskip
+
+
+\ \ \ \ /* \ Get signals to detect changes to jobs and variables */
+
+\bigskip
+
+
+\ \ \ \ \funcnameXBjobmon{}(apifd, catchjob);
+
+\ \ \ \ \funcnameXBvarmon{}(apifd, catchvar);
+
+\bigskip
+
+
+\ \ \ \ for \ (;;) \ \{
+
+\bigskip
+
+
+\ \ \ \ \ \ \ \ /* \ Any changes to jobs or variables cause
+
+\ \ \ \ \ \ \ \ \ \ \ \ a reread and refill. */
+
+\bigskip
+
+
+\ \ \ \ \ \ \ \ while \ (jobchanges {\textbar}{\textbar} varchanges)
+\ \{
+
+\ \ \ \ \ \ \ \ \ \ \ \ if \ (jobchanges)
+
+\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ readjlist();
+
+\ \ \ \ \ \ \ \ \ \ \ \ if (varchanges)
+
+\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ readvlist();
+
+\ \ \ \ \ \ \ \ \ \ \ \ fillscreen();
+
+\ \ \ \ \ \ \ \ \}
+
+\bigskip
+
+
+\ \ \ \ \ \ \ \ /* Wait for a signal */
+
+\bigskip
+
+
+\ \ \ \ \ \ \ \ pause();
+
+\ \ \ \ \}
+
+\}
+
+\bigskip
+
+
+main(int argc, char **argv)
+
+\{
+
+\ \ \ \ if \ (argc {\textless} 3) \ \{
+
+\ \ \ \ \ \ \ \ fprintf(stderr,
+
+\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ {\textquotedbl}Usage: \%s hostname
+queuename var1 var2 ....{\textbackslash}n{\textquotedbl}, argv[0]);
+
+\ \ \ \ \ \ \ \ exit(1);
+
+\ \ \ \ \}
+
+\bigskip
+
+
+\ \ \ \ hostname = argv[1];
+
+\ \ \ \ queuename = argv[2];
+
+\bigskip
+
+
+\ \ \ \ vnamecnt = argc - 3;
+
+\bigskip
+
+
+\ \ \ \ if \ (vnamecnt {\textgreater} MAXVARSATONCE) \ \{
+
+\ \ \ \ \ \ \ \ fprintf(stderr, {\textquotedbl}Sorry to many variables
+at once{\textbackslash}n{\textquotedbl});
+
+\ \ \ \ \ \ \ \ exit(2);
+
+\ \ \ \ \}
+
+\bigskip
+
+
+\ \ \ \ vnames = \&argv[3];
+
+\bigskip
+
+
+\ \ \ \ process(); \ \ \ \ \ \ /* Does Not Return */
+
+\ \ \ \ return \ 0; \ \ \ \ \ \ /* Silence compilers */
+
+\}
+
+\end{exparasmall}
+

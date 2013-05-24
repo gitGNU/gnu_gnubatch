@@ -1,0 +1,162 @@
+\subsection{\BtulistName}
+
+\begin{expara}
+
+\BtulistName{} [-options] [user ...]
+
+\end{expara}
+
+\PrBtulist{} lists the permissions of users known to the \ProductName{} batch scheduler system. All users are listed
+if no users are specified, otherwise the named users are listed. The report is similar to the main display of
+\PrBtuser{}.
+
+The invoking user must have \textit{read admin file} permission to use \PrBtulist{}.
+
+\subsubsection{Options}
+The environment variable on which options are supplied is \filename{\BtulistVarname} and the environment variable to specify the
+help file is \filename{BTRESTCONF}.
+
+\setbkmkprefix{btulist}
+\explainopt
+
+\cmdoption{D}{default-format}{}{deffmt}
+
+Cancel the \exampletext{{}-F} option and revert to the default format.
+
+\cmdoption{d}{default-line}{}{defline}
+
+Display an initial line giving the default options (included by default).
+
+\cmdoption{F}{format}{format}{format}
+
+Format the output according to the format string given.
+
+\cmdoption{g}{group-name-sort}{}{grpsort}
+
+Sort the list of users by the group name in ascending order, then by users within that group as primary group.
+
+\cmdoption{H}{header}{}{header}
+
+Generate a header for each column of the output.
+
+\cmdoption{N}{no-header}{}{nohdr}
+
+Cancel the \exampletext{{}-H} option.
+
+\cmdoption{n}{numeric-user-sort}{}{numusort}
+
+Sort the list of users by the numeric user id (default).
+
+\cmdoption{S}{no-user-lines}{}{nousers}
+
+Suppress the user lines. It is an error to invoke this and the \exampletext{{}-s} option as well.
+
+\cmdoption{s}{no-default-line}{}{nodef}
+
+Suppress the initial line giving the default options. It is an error to invoke this and the \exampletext{{}-S} option as well.
+
+\cmdoption{U}{user-lines}{}{ulines}
+
+Display the user lines (default).
+
+\cmdoption{u}{user-name-sort}{}{usort}
+
+Sort the list of users by the user name.
+
+\freezeopts{\filename{\BtulistVarname}}{}
+
+\subsubsection{Format argument}
+
+The format string consists of a string containing the following character sequences, which are replaced by various user permission
+parameters. The string may contain various other printing characters or spaces as required.
+
+Each column is padded on the right to the length of the longest entry.
+
+If a header is requested, the appropriate abbreviation is obtained from
+the message file and inserted.
+
+\begin{center}
+\begin{tabular}{|l|l|}
+\hline
+\exampletext{\%\%} & Insert a single \exampletext{\%} character.\\\hline
+\exampletext{\%d} & Default priority\\\hline
+\exampletext{\%g} & Group name\\\hline
+\exampletext{\%j} & Job mode\\\hline
+\exampletext{\%l} & Minimum priority\\\hline
+\exampletext{\%m} & Maximum priority\\\hline
+\exampletext{\%p} & Privileges\\\hline
+\exampletext{\%s} & Special create load level\\\hline
+\exampletext{\%t} & Total load level\\\hline
+\exampletext{\%u} & User name.\\\hline
+\exampletext{\%v} & Variable mode\\\hline
+\exampletext{\%x} & Maximum load level\\\hline
+\end{tabular}
+\end{center}
+
+The string \exampletext{DEFAULT} replaces the user name in the default values line, or the group name if the user name is not printed.
+If the group name is not printed as well, then this will be omitted and will be indistinguishable from the rest of the output.
+
+Note that the various strings are read from the message file, so it is possible to modify them as required by the user.
+
+The default format is
+
+\begin{expara}
+
+\%u \%g \%d \%l \%m \%x \%t \%s \%p
+
+\end{expara}
+
+\subsubsection{Privileges format}
+The following are output via the \%p format. Note that the actual strings are read from the message file, and are the same ones as are
+used by \PrBtuchange.
+
+\begin{center}
+\begin{tabular}{|l|l|}
+\hline
+\exampletext{RA} & read admin file\\\hline
+\exampletext{WA} & write admin file\\\hline
+\exampletext{CR} & create\\\hline
+\exampletext{SPC} & special create\\\hline
+\exampletext{ST} & stop scheduler\\\hline
+\exampletext{Cdft} & change default\\\hline
+\exampletext{UG} & or user and group modes\\\hline
+\exampletext{UO} & or user and other modes\\\hline
+\exampletext{GO} & or group and other modes.\\\hline
+\end{tabular}
+\end{center}
+
+\exampletext{ALL} is printed if all privileges are set.
+
+\subsubsection{Modes}
+Modes printed by the \%j and \%v options are as follows:
+
+\begin{center}
+\begin{tabular}{|l|l|}
+\hline
+\exampletext{R} & read permission\\\hline
+\exampletext{W} & write permission\\\hline
+\exampletext{S} & reveal permission\\\hline
+\exampletext{M} & read mode\\\hline
+\exampletext{P} & set mode\\\hline
+\exampletext{U} & give away owner\\\hline
+\exampletext{V} & assume owner\\\hline
+\exampletext{G} & give away group\\\hline
+\exampletext{H} & assume group\\\hline
+\exampletext{D} & delete\\\hline
+\exampletext{K} & kill (only valid for jobs)\\\hline
+\end{tabular}
+\end{center}
+
+Each section of the mode (job, group, others) is represented by the prefixes \exampletext{U:}, \exampletext{G:} and
+\exampletext{O:} and separated by commas.
+
+For example:
+
+\begin{expara}
+
+U:RWSMPDK,G:RWSDK,O:RS
+
+\end{expara}
+
+This is exactly the same format as is expected by \PrBtuchange{} etc.
+

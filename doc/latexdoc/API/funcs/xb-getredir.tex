@@ -1,0 +1,107 @@
+\subsection{\funcnameXBgetredir{}}
+
+\begin{expara}
+
+const apiMredir *\funcnameXBgetredir{}(const apiBtjob *jobp,
+
+\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ const unsigned
+indx)
+
+\end{expara}
+
+The function \funcXBgetredir{} is used to extract a
+redirection structure from a job structure.
+
+\exampletext{jobp} is a pointer to a structure containing the
+details of the job. The definition of the job structure is given on
+page \pageref{bkm:Jobstructure} onwards.
+
+\exampletext{indx} is the redirection number required. This
+should be between 0 and 1 less than the number of redirections as given
+by the field \filename{jobp-{\textgreater}h.bj\_nredirs}.
+
+\subsubsection{Redirection structure}
+\label{bkm:redirstruct}The format of the redirection structure is as
+follows:
+
+\begin{expara}
+
+typedef struct \{
+
+\ \ \ \ \ \ \ \ unsigned char fd;
+
+\ \ \ \ \ \ \ \ unsigned char action;
+
+\ \ \ \ \ \ \ \ union \ \{
+
+\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ unsigned short arg;
+
+\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ const char *buffer;
+
+\ \ \ \ \ \ \ \ \} \ un;
+
+\} apiMredir;
+
+\end{expara}
+
+In this structure \exampletext{fd} represents the file
+descriptor, and \exampletext{action} gives the action required
+as follows:
+
+\begin{tabular}{ll}
+\filename{RD\_ACT\_RD} & Open file name given in \filename{un.buffer} for
+reading.\\
+\filename{RD\_ACT\_WRT} & Open file name given in \filename{un.buffer} for
+writing.\\
+\filename{RD\_ACT\_APPEND} & Append to file name given in \filename{un.buffer},
+opened for writing.\\
+\filename{RD\_ACT\_RDWR} & Open file name given in \filename{un.buffer} for
+read/write.\\
+\filename{RD\_ACT\_RDWRAPP} & Open file name given in \filename{un.buffer} for
+read/write and append.\\
+\filename{RD\_ACT\_PIPEO} & Open pipe to shell command given in
+\filename{un.buffer} for output.\\
+\filename{RD\_ACT\_PIPEI} & Open pipe from shell command given in
+\filename{un.buffer} for input.\\
+\filename{RD\_ACT\_CLOSE} & Close file descriptor.\\
+\filename{RD\_ACT\_DUP} & Duplicate file descriptor given in \filename{un.arg}.\\
+\end{tabular}
+
+\subsubsection{Return values}
+The result is a pointer to a static structure containing the required
+redirection of the job NULL if the redirection number is invalid.
+
+Note that the structure used will be overwritten by a further call to
+\funcXBgetredir{} with different arguments, hence it
+should be copied if required.
+
+\subsubsection{\funcnameXBgettitle{}}
+
+\begin{expara}
+
+const char *\funcnameXBgettitle{}(const int fd, const apiBtjob *jobp)
+
+\end{expara}
+
+The function \funcXBgettitle{} may be used to extract
+the title from a job as a character string. Optionally the queue name
+(as set by \funcXBsetqueue{}) may be elided from the
+title.
+
+\exampletext{fd} is a file descriptor which was previously
+returned by a successful call to \funcXBopen{}, or -1
+to disregard the queue name.
+
+jobp is a pointer to a structure containing the details of the job. The
+definition of the job structure is given on page
+\pageref{bkm:Jobstructure} onwards.
+
+\subsubsection{Return values}
+The result is the title of the job as a \filename{const}
+character string.
+
+If a valid file descriptor is provided, and this has a queue name set
+using \funcXBsetqueue{}, and the queue name is the
+same as that in the job title, then the queue name is deleted from the
+title returned to the user.
+
