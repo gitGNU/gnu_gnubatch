@@ -1,6 +1,6 @@
 # $Header: /sources/gnubatch/gnubatch/src/helpmsg/btuser.help,v 1.1 2009/02/18 06:51:33 toadwarble Exp $
 #
-#   Copyright 2009 Free Software Foundation, Inc.
+#   Copyright 2009-2013 Free Software Foundation, Inc.
 #
 #  This program is free software: you can redistribute it and/or modify
 #  it under the terms of the GNU General Public License as published by
@@ -27,7 +27,7 @@ L2:
 L3:DEFAULT
 L4:
 F1:=============================================================================
-F2:GNUBatch R1 %P (c) Free Software Foundation 2009     (? for help)
+F2:GNUBatch R1 %P (c) Free Software Foundation 2013     (? for help)
 
 M1:Default privileges
 M2:

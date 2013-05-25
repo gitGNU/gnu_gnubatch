@@ -37,7 +37,7 @@ manpages:
 
 pdfdocs:
 	# If we have pdflatex run the sub makefile
-	type pdflatex >/dev/null 2>&1 && (cd latexdoc;$(MAKE))
+	-type pdflatex >/dev/null 2>&1 && (cd latexdoc;$(MAKE))
 
 install install-strip: all
 	$(INSTALL) -d $(MANDIR)/man1
