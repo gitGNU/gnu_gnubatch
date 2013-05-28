@@ -222,7 +222,7 @@ MAINFN_TYPE  main(int argc, char **argv)
 
         progname = argv[0];
 
-        versionprint(argv, "$Revision: 1,8 $", 0);
+        versionprint(argv, "$Revision: 1.9 $", 0);
 
         while  ((ch = getopt(argc, argv, "usfe:v:D:")) != EOF)
                 switch  (ch)  {

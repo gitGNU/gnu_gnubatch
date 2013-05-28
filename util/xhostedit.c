@@ -30,7 +30,7 @@
 #include "hostedit.h"
 #include "src/hdrs/files.h"
 
-static	char	rcsid2[] = "@(#) $Revision: 1.8 $";
+static	char	rcsid2[] = "@(#) $Revision: 1.9 $";
 
 #define	DEF_PAD	10
 #define	DEF_PAD_SMALL	5

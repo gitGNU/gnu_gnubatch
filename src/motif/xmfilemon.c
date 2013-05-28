@@ -517,7 +517,7 @@ MAINFN_TYPE  main(int argc, char **argv)
         Dimension       h;
         vrec_t          vrec;
 
-        versionprint(argv, "$Revision: 1,8 $", 0);
+        versionprint(argv, "$Revision: 1.9 $", 0);
         init_mcfile();
         Realuid = getuid();
         Realgid = getgid();

@@ -324,7 +324,7 @@ MAINFN_TYPE  main(int argc, char **argv)
         int_ugid_t      chk_uid;
 #endif
 
-        versionprint(argv, "$Revision: 1,8 $", 1);
+        versionprint(argv, "$Revision: 1.9 $", 1);
 
         if  ((progname = strrchr(argv[0], '/')))
                 progname++;
@@ -405,6 +405,7 @@ MAINFN_TYPE  main(int argc, char **argv)
                         if  (strcmp(argv[1], "-n") == 0)
                                 nodelete++;
                         argv++;
+                        Dirname = argv[2];			/* Reposition */
                 }
                 else  if  (argc != 5)
                         exit(E_USAGE);
