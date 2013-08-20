@@ -85,37 +85,59 @@ void  doinfo(int code)
         gtk_widget_show(ew);
 }
 
+struct  editorws  {
+        GtkWidget  *inteditw, *editorw, *xtermw;
+};
+
+static  void    intedflip(GtkWidget *ww, struct editorws *sp)
+{
+        if  (gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(ww)))  {
+                gtk_widget_set_sensitive(sp->editorw, FALSE);
+                gtk_widget_set_sensitive(sp->xtermw, FALSE);
+        }
+        else  {
+                gtk_widget_set_sensitive(sp->editorw, TRUE);
+                gtk_widget_set_sensitive(sp->xtermw, TRUE);
+        }
+}
+
 void  cb_viewopt()
 {
-        GtkWidget  *dlg, *hbox, *editorw, *xtermw;
+        GtkWidget  *dlg, *hbox, *xmlfmt;
+        struct  editorws  ews;
 
         dlg = gprompt_dialog(toplevel, $P{xbtr view opt dlgtit});
+        xmlfmt = gprompt_checkbutton($P{xbtr prefer XML format});
+        gtk_box_pack_start(GTK_BOX(GTK_DIALOG(dlg)->vbox), xmlfmt, FALSE, FALSE, DEF_DLG_VPAD);
+        if  (xml_format)
+                gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(xmlfmt), TRUE);
+        ews.inteditw = gprompt_checkbutton($P{xbtr use internal editor});
+        gtk_box_pack_start(GTK_BOX(GTK_DIALOG(dlg)->vbox), ews.inteditw, FALSE, FALSE, DEF_DLG_VPAD);
+        if  (internal_edit)
+                gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(ews.inteditw), TRUE);
         hbox = gtk_hbox_new(FALSE, DEF_DLG_HPAD);
         gtk_box_pack_start(GTK_BOX(GTK_DIALOG(dlg)->vbox), hbox, FALSE, FALSE, DEF_DLG_VPAD);
         gtk_box_pack_start(GTK_BOX(hbox), gprompt_label($P{xbtr job script editor lab}), FALSE, FALSE, DEF_DLG_HPAD);
-        editorw = gtk_entry_new();
-        gtk_box_pack_start(GTK_BOX(hbox), editorw, FALSE, FALSE, DEF_DLG_HPAD);
-        gtk_entry_set_text(GTK_ENTRY(editorw), editor_name? editor_name: DEFAULT_EDITOR_NAME);
-        xtermw = gprompt_checkbutton($P{xbtr editor in xterm});
-        gtk_box_pack_start(GTK_BOX(GTK_DIALOG(dlg)->vbox), xtermw, FALSE, FALSE, DEF_DLG_VPAD);
+        ews.editorw = gtk_entry_new();
+        gtk_box_pack_start(GTK_BOX(hbox), ews.editorw, FALSE, FALSE, DEF_DLG_HPAD);
+        gtk_entry_set_text(GTK_ENTRY(ews.editorw), editor_name? editor_name: DEFAULT_EDITOR_NAME);
+        ews.xtermw = gprompt_checkbutton($P{xbtr editor in xterm});
+        gtk_box_pack_start(GTK_BOX(GTK_DIALOG(dlg)->vbox), ews.xtermw, FALSE, FALSE, DEF_DLG_VPAD);
         if  (xterm_edit)
-                gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(xtermw), TRUE);
+                gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(ews.xtermw), TRUE);
 
+        if  (internal_edit)  {
+                gtk_widget_set_sensitive(ews.editorw, FALSE);
+                gtk_widget_set_sensitive(ews.xtermw, FALSE);
+        }
+        g_signal_connect(G_OBJECT(ews.inteditw), "toggled", G_CALLBACK(intedflip), (gpointer) &ews);
         gtk_widget_show_all(dlg);
 
         while  (gtk_dialog_run(GTK_DIALOG(dlg)) == GTK_RESPONSE_OK)  {
-                const  char     *neweditor = gtk_entry_get_text(GTK_ENTRY(editorw));
-                gboolean        newxte = gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(xtermw));
-
-                /* Save checking if editor hasn't changed */
-
-                if  (strcmp(neweditor, editor_name) == 0)  {
-                        if  ((!newxte && xterm_edit) || (newxte && !xterm_edit))  {
-                                xterm_edit = newxte;
-                                Dirty++;
-                        }
-                        break;
-                }
+                const  char     *neweditor = gtk_entry_get_text(GTK_ENTRY(ews.editorw));
+                gboolean        newxte = gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(ews.xtermw));
+                gboolean        newie = gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(ews.inteditw));
+                gboolean        newxmlf = gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(xmlfmt));
 
                 if  (strlen(neweditor) == 0)  {
                         doerror($EH{xbtr editor name null});
@@ -128,6 +150,8 @@ void  cb_viewopt()
                         free(editor_name);
                 editor_name = stracpy(neweditor);
                 xterm_edit = newxte;
+                internal_edit = newie;
+                xml_format = newxmlf;
                 Dirty++;
                 break;
         }
@@ -140,6 +164,26 @@ void  loadopts()
 
         /* Display options */
 
+        if  ((arg = optkeyword("XBTRMWWIDTH")))  {
+                if  (arg[0])
+                        Mwwidth = atoi(arg);
+                free(arg);
+        }
+        if  ((arg = optkeyword("XBTRMWHEIGHT")))  {
+                if  (arg[0])
+                        Mwheight = atoi(arg);
+                free(arg);
+        }
+        if  ((arg = optkeyword("XBTRXMLFMT")))  {
+                if  (arg[0])
+                        xml_format = arg[0] != '0';
+                free(arg);
+        }
+        if  ((arg = optkeyword("XBTRINTERNALEDIT")))  {
+                if  (arg[0])
+                        internal_edit = arg[0] != '0';
+                free(arg);
+        }
         if  ((arg = optkeyword("XBTRXTERMEDIT")))  {
                 if  (arg[0])
                         xterm_edit = arg[0] != '0';
@@ -150,33 +194,24 @@ void  loadopts()
                 editor_name = arg;
         else
                 editor_name = stracpy(DEFAULT_EDITOR_NAME); /* Something VIle I suspect */
+
+        /* Set up list of hosts we know about */
+        arg = optkeyword("XBTRHOSTLIST");
+        init_hosts_known(arg);
+        if  (arg)
+                free(arg);
+        if  ((arg = optkeyword("XBTRDEFHOST")))
+                set_def_host(arg);
         close_optfile();
 }
 
-void  cb_saveopts()
+static  int     state_wait(PIDTYPE pid)
 {
-        PIDTYPE pid;
         int     status;
-
-        if  ((pid = fork()) == 0)  {
-                char    digbuf[2], *argbuf[10]; /* Remember to increase this if we add stuff */
-                char    **ap = argbuf;
-                *ap++ = gtkprog; /* Arg 0 is the program we're running */
-                *ap++ = "XBTRXTERMEDIT";
-                digbuf[0] = xterm_edit? '1': '0';
-                digbuf[1] = '\0';
-                *ap++ = digbuf;
-                *ap++ = "XBTREDITOR";
-                *ap++ = editor_name;
-                *ap = 0;
-                umask(Save_umask);
-                execv(execprog, argbuf);
-                exit(E_SETUP);
-        }
 
         if  (pid < 0)  {
                 doerror($EH{saveopts cannot fork});
-                return;
+                return  0;
         }
 #ifdef  HAVE_WAITPID
         while  (waitpid(pid, &status, 0) < 0)
@@ -186,10 +221,106 @@ void  cb_saveopts()
                 ;
 #endif
         if  (status != 0)  {
-                disp_arg[0] = status >> 8;
-                disp_arg[1] = status & 127;
-                doerror((status >> 8) + $EH{saveopts file error});
-                return;
+                if  ((status & 127) != 0)  {
+                        disp_arg[0] = status & 127;
+                        doerror($EH{saveopts crashed});
+                }
+                else  {
+                        int     msg;
+
+                        disp_arg[0] = status >> 8;
+                        switch  (disp_arg[0])  {
+                        default:
+                                msg = $EH{saveopts unknown exit};
+                                break;
+                        case  E_NOMEM:
+                                msg = $EH{saveopts no memory};
+                                break;
+                        case  E_SETUP:
+                                msg = $EH{saveopts bad setup};
+                                break;
+                        case  E_NOPRIV:
+                                msg = $EH{saveopts no write};
+                                break;
+                        case  E_USAGE:
+                                msg = $EH{saveopts usage};
+                                break;
+                        case  E_BTEXEC2:
+                                msg = $EH{saveopts no exec};
+                                break;
+                        }
+                        doerror(msg);
+                }
+                return  0;
         }
-        Dirty = 0;
+
+        return  1;
+}
+
+void  save_state()
+{
+        PIDTYPE pid;
+
+        gtk_window_get_size(GTK_WINDOW(toplevel), &Mwwidth, &Mwheight);
+
+        if  ((pid = fork()) == 0)  {
+                char    wbuf[20], hbuf[20], *argbuf[12]; /* Remember to increase this if we add stuff */
+                char    **ap = argbuf, *hl;
+                *ap++ = gtkprog; /* Arg 0 is the program we're running */
+                *ap++ = "XBTRMWWIDTH";
+                sprintf(wbuf, "%d", Mwwidth);
+                *ap++ = wbuf;
+                *ap++ = "XBTRMWHEIGHT";
+                sprintf(hbuf, "%d", Mwheight);
+                *ap++ = hbuf;
+                hl = list_hosts_known();
+                if  (hl  &&  strlen(hl) != 0)  {
+                        *ap++ = "XBTRHOSTLIST";
+                        *ap++ = hl;
+                }
+                hl = get_def_host();
+                if  (hl && strlen(hl) != 0)  {
+                        *ap++ = "XBTRDEFHOST";
+                        *ap++ = hl;
+                }
+                *ap = 0;
+                umask(Save_umask);
+                execv(execprog, argbuf);
+                exit(E_SETUP);
+        }
+        state_wait(pid);
+}
+
+void  cb_saveopts()
+{
+        PIDTYPE pid;
+
+        gtk_window_get_size(GTK_WINDOW(toplevel), &Mwwidth, &Mwheight);
+
+        if  ((pid = fork()) == 0)  {
+                char    digbuf1[2], digbuf2[2], digbuf3[2], *argbuf[12]; /* Remember to increase this if we add stuff */
+                char    **ap = argbuf;
+                *ap++ = gtkprog; /* Arg 0 is the program we're running */
+                *ap++ = "XBTRINTERNALEDIT";
+                digbuf1[0] = internal_edit? '1': '0';
+                digbuf1[1]= '\0';
+                *ap++ = digbuf1;
+                *ap++ = "XBTRXTERMEDIT";
+                digbuf2[0] = xterm_edit? '1': '0';
+                digbuf2[1] = '\0';
+                *ap++ = digbuf2;
+                *ap++ = "XBTRXMLFMT";
+                digbuf3[0] = xml_format? '1': '0';
+                digbuf3[1] = '\0';
+                *ap++ = digbuf3;
+                *ap++ = "XBTREDITOR";
+                *ap++ = editor_name;
+                *ap = 0;
+                umask(Save_umask);
+                execv(execprog, argbuf);
+                exit(E_SETUP);
+        }
+
+        if  (state_wait(pid))
+                Dirty = 0;
 }

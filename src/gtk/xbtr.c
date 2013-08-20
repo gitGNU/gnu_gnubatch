@@ -61,11 +61,14 @@ static  char    rcsid2[] = "@(#) $Revision: 1.9 $";
 #include "jvuprocs.h"
 #include "xbr_ext.h"
 #include "gtk_lib.h"
+#include "xmlldsv.h"
 
 #define IPC_MODE        0
 
 #define DEFAULT_WIDTH   400
 #define DEFAULT_HEIGHT  400
+
+gint    Mwwidth = DEFAULT_WIDTH, Mwheight = DEFAULT_HEIGHT;
 
 void  initcifile();
 
@@ -77,8 +80,15 @@ extern  long    mymtype;
 struct  pend_job        default_pend;
 Btjob                   default_job;
 
-char    xterm_edit = 1;         /* Invoke "xterm" to run editor */
-char    *editor_name;   /* Name of favourite editor */
+char    internal_edit = 1;          /* Use internal editor */
+char    xterm_edit = 1;             /* Invoke "xterm" to run editor */
+#ifdef	HAVE_LIBXML2
+char	xml_format = 1;              /* Use XML format on by default */
+#else
+char    xml_format = 0;             /* Use XML format */
+#endif
+char    *editor_name;               /* Name of favourite editor */
+char    *realuname;
 
 /* X Stuff */
 
@@ -99,7 +109,6 @@ extern void  cb_saveopts();
 extern void  cb_direct();
 extern void  cb_loaddefs(GtkAction *);
 extern void  cb_savedefs(GtkAction *);
-extern void  cb_defhost();
 extern void  cb_jqueue(GtkAction *);
 extern void  cb_jstate(GtkAction *);
 extern void  cb_time(GtkAction *);
@@ -115,12 +124,14 @@ extern void  cb_conds(GtkAction *);
 extern void  cb_asses(GtkAction *);
 extern void  cb_jnew();
 extern void  cb_jopen();
+extern void  cb_jlegopen();
 extern void  cb_jclosedel(GtkAction *);
-extern void  cb_jcmdfile(GtkAction *);
 extern void  cb_jsave();
+extern  void  cb_jsaveas();
 extern void  cb_edit();
 extern void  cb_submit();
 extern void  cb_remsubmit();
+extern  void  cb_options();
 
 extern void  initmoremsgs();
 
@@ -131,14 +142,13 @@ static GtkActionEntry entries[] = {
         { "JobMenu", NULL, "_Job"  },
         { "HelpMenu", NULL, "_Help"  },
         { "Viewopts", GTK_STOCK_PREFERENCES, "_View Options", "equal", "Specify program options", G_CALLBACK(cb_viewopt) },
-        { "Saveopts", GTK_STOCK_SAVE, "_Save Options", NULL, "Save program options", G_CALLBACK(cb_saveopts) },
+        { "Saveopts", GTK_STOCK_SAVE, "_Save Options", "dollar", "Save program options", G_CALLBACK(cb_saveopts) },
         { "Selectdir", GTK_STOCK_DIRECTORY, "Select new _directory", NULL, "Select new working directory", G_CALLBACK(cb_direct) },
         { "Loaddefsc", NULL, "_Load defaults current", NULL, "Load defaults from current directory", G_CALLBACK(cb_loaddefs) },
         { "Savedefsc", NULL, "Save defaults _current", NULL, "Save defaults to current directory", G_CALLBACK(cb_savedefs) },
         { "Loaddefsh", NULL, "Load defaults _home", NULL, "Load defaults from home directory", G_CALLBACK(cb_loaddefs) },
         { "Savedefsh", NULL, "Sa_ve defaults home", NULL, "Save defaults to home directory", G_CALLBACK(cb_savedefs) },
         { "Quit", GTK_STOCK_QUIT, "_Quit", "<control>Q", "Quit program", G_CALLBACK(cb_quit)},
-        { "Defhost", GTK_STOCK_NETWORK, "Set default host", NULL, "Set host name for remote submission", G_CALLBACK(cb_defhost) },
         { "Queued", NULL, "Set default _queue", NULL, "Set default queue name prefix", G_CALLBACK(cb_jqueue) },
         { "Setrund", NULL, "Set default _runnable", NULL, "Set runnable by default", G_CALLBACK(cb_jstate) },
         { "Setcancd", NULL, "Set default _cancelled", NULL, "Set cancelled by default", G_CALLBACK(cb_jstate) },
@@ -155,14 +165,15 @@ static GtkActionEntry entries[] = {
         { "Assesd", NULL, "Set default _assignments", NULL, "Set default assignments", G_CALLBACK(cb_asses) },
         { "New", GTK_STOCK_NEW, "New job file", "<control>N", "Create new job file", G_CALLBACK(cb_jnew) },
         { "Open", GTK_STOCK_OPEN, "Open job file", "<control>O", "Open job file", G_CALLBACK(cb_jopen) },
+        { "Legopen", NULL, "_Legacy open job file", NULL, "Open legacy job file", G_CALLBACK(cb_jlegopen), },
         { "Close", GTK_STOCK_CLOSE, "Close job file", NULL, "Close job file", G_CALLBACK(cb_jclosedel) },
-        { "Cmdfile", NULL, "Set command file", NULL, "Set command file name", G_CALLBACK(cb_jcmdfile) },
-        { "Jobfile", NULL, "Set job file", NULL, "Set job file name", G_CALLBACK(cb_jcmdfile) },
-        { "Save", GTK_STOCK_SAVE, "Save job file", "<control>F", "Save job file", G_CALLBACK(cb_jsave) },
+        { "Save", GTK_STOCK_SAVE, "Save job file", "<control>S", "Save job file", G_CALLBACK(cb_jsave) },
+        { "Saveas", GTK_STOCK_SAVE_AS, "Save job file as", "<ctrl><shift>S", "Save job to named file", G_CALLBACK(cb_jsaveas), },
         { "Edit", GTK_STOCK_EDIT, "Edit script", "E", "Edit job script", G_CALLBACK(cb_edit) },
         { "Delete", GTK_STOCK_DELETE, "Delete job file", "Delete", "Close and delete job file", G_CALLBACK(cb_jclosedel) },
         { "Submit", GTK_STOCK_EXECUTE, "_Submit", "exclam", "Submit job", G_CALLBACK(cb_submit) },
         { "Rsubmit", GTK_STOCK_EXECUTE, "_Remote Submit", "at", "Submit job remotely", G_CALLBACK(cb_remsubmit) },
+        { "Options", NULL, "_Options", "<control>O", "Set job options", G_CALLBACK(cb_options) },
         { "Queue", NULL, "Set job _queue", NULL, "Set queue name prefix", G_CALLBACK(cb_jqueue) },
         { "Setrun", NULL, "Set _runnable", NULL, "Set runnable", G_CALLBACK(cb_jstate) },
         { "Setcanc", NULL, "Set _cancelled", NULL, "Set cancelled", G_CALLBACK(cb_jstate) },
@@ -187,18 +198,21 @@ void  nomem(const char *fl, const int ln)
         exit(E_NOMEM);
 }
 
-static void  cb_quit()
-{
-        if  ((Dirty || jlist_dirty())  &&  !Confirm($PH{xbtq changes not saved ok}))
-                return;
-        gtk_main_quit();
-}
-
 gboolean  check_dirty()
 {
-        if  ((Dirty || jlist_dirty())  &&  !Confirm($PH{xbtq changes not saved ok}))
+        save_state();
+        if  (Dirty  &&  !Confirm($PH{xbtq changes not saved ok}))
+                return  TRUE;
+        if  (jlist_dirty() && !Confirm($PH{xbtr job list changes}))
                 return  TRUE;
         return  FALSE;
+}
+
+static void  cb_quit()
+{
+        if  (check_dirty())
+                return;
+        gtk_main_quit();
 }
 
 char    *authlist[] =  { "John M Collins", NULL  };
@@ -250,9 +264,8 @@ gboolean  view_clicked(GtkWidget *treeview, GdkEventButton *event, gpointer user
 
 #define SORTBY_JSEQ     1
 #define SORTBY_TITLE    2
-#define SORTBY_CMDFILE  3
-#define SORTBY_JOBFILE  4
-#define SORTBY_DIRECT   5
+#define SORTBY_JOBFILE  3
+#define SORTBY_DIRECT   4
 
 static gint  sort_uint(GtkTreeModel *model, GtkTreeIter *a, GtkTreeIter *b, gpointer userdata)
 {
@@ -295,9 +308,21 @@ static void  winit()
 {
         GError *err;
         char    *fn;
+#ifdef  STRUCT_SIG
+        struct  sigstruct_name  za;
+#endif
+
+#ifdef  STRUCT_SIG
+        za.sighandler_el = SIG_IGN;
+        sigmask_clear(za);
+        za.sigflags_el = SIGVEC_INTFLAG;
+        sigact_routine(SIGPIPE, &za, (struct sigstruct_name *) 0);
+#else
+        signal(SIGPIPE, SIG_IGN);
+#endif
 
         toplevel = gtk_window_new(GTK_WINDOW_TOPLEVEL);
-        gtk_window_set_default_size(GTK_WINDOW(toplevel), DEFAULT_WIDTH, DEFAULT_HEIGHT);
+        gtk_window_set_default_size(GTK_WINDOW(toplevel), Mwwidth, Mwheight);
         fn = gprompt($P{xbtr app title});
         gtk_window_set_title(GTK_WINDOW(toplevel), fn);
         free(fn);
@@ -310,8 +335,8 @@ static void  winit()
         g_signal_connect(G_OBJECT(toplevel), "destroy", G_CALLBACK(gtk_main_quit), NULL);
 }
 
-static  char    *titles[] = { "State", "Title", "Command", "Jobfile", "Directory"  };
-static  int     sortbys[] = { SORTBY_JSEQ, SORTBY_TITLE, SORTBY_CMDFILE, SORTBY_JOBFILE, SORTBY_DIRECT  };
+static  char    *titles[] = { "State", "Title", "Jobfile", "Directory"  };
+static  int     sortbys[] = { SORTBY_JSEQ, SORTBY_TITLE, SORTBY_JOBFILE, SORTBY_DIRECT  };
 
 static void  wstart()
 {
@@ -338,11 +363,10 @@ static void  wstart()
         gtk_container_add(GTK_CONTAINER(toplevel), vbox);
         gtk_box_pack_start(GTK_BOX(vbox), gtk_ui_manager_get_widget(ui, "/MenuBar"), FALSE, FALSE, 0);
 
-        raw_jlist_store = gtk_list_store_new(7,
+        raw_jlist_store = gtk_list_store_new(6,
                                              G_TYPE_UINT,               /* Index number we don't display */
                                              G_TYPE_STRING,             /* Progress */
                                              G_TYPE_STRING,             /* Job title */
-                                             G_TYPE_STRING,             /* Command file */
                                              G_TYPE_STRING,             /* Job File */
                                              G_TYPE_STRING,             /* Directory */
                                              G_TYPE_BOOLEAN);           /* Unsaved marker */
@@ -350,7 +374,6 @@ static void  wstart()
         gtk_tree_sortable_set_sort_func(GTK_TREE_SORTABLE(sorted_jlist_store), SORTBY_JSEQ, sort_uint, GINT_TO_POINTER(JLIST_SEQ_COL), NULL);
         gtk_tree_sortable_set_sort_func(GTK_TREE_SORTABLE(sorted_jlist_store), SORTBY_JSEQ, sort_uint, GINT_TO_POINTER(JLIST_PROGRESS_COL), NULL);
         gtk_tree_sortable_set_sort_func(GTK_TREE_SORTABLE(sorted_jlist_store), SORTBY_TITLE, sort_string, GINT_TO_POINTER(JLIST_TITLE_COL), NULL);
-        gtk_tree_sortable_set_sort_func(GTK_TREE_SORTABLE(sorted_jlist_store), SORTBY_CMDFILE, sort_string, GINT_TO_POINTER(JLIST_CMDFILE_COL), NULL);
         gtk_tree_sortable_set_sort_func(GTK_TREE_SORTABLE(sorted_jlist_store), SORTBY_JOBFILE, sort_string, GINT_TO_POINTER(JLIST_JOBFILE_COL), NULL);
         gtk_tree_sortable_set_sort_func(GTK_TREE_SORTABLE(sorted_jlist_store), SORTBY_DIRECT, sort_string, GINT_TO_POINTER(JLIST_DIRECT_COL), NULL);
 
@@ -369,6 +392,7 @@ static void  wstart()
                 gtk_tree_view_insert_column_with_attributes(GTK_TREE_VIEW(jwid), -1, titles[cnt], renderer, "text", cnt+1, NULL);
                 col = gtk_tree_view_get_column(GTK_TREE_VIEW(jwid), cnt);
                 gtk_tree_view_column_set_resizable(col, TRUE);
+                gtk_tree_view_column_set_sizing(col, GTK_TREE_VIEW_COLUMN_AUTOSIZE);
                 gtk_tree_view_column_set_sort_column_id(col, sortbys[cnt]);
         }
         renderer = gtk_cell_renderer_toggle_new();
@@ -399,12 +423,14 @@ MAINFN_TYPE  main(int argc, char **argv)
 
         init_mcfile();
         init_xenv();
+        init_xml();
         Realuid = getuid();
         Realgid = getgid();
         Effuid = geteuid();
         Effgid = getegid();
         if  ((LONG) (Daemuid = lookup_uname(BATCHUNAME)) == UNKNOWN_UID)
                 Daemuid = ROOTID;
+        realuname = prin_uname(Realuid);
 
         Cfile = open_cfile("XBTRCONF", "xmbtr.help");
         gtk_chk_uid();
@@ -460,9 +486,9 @@ MAINFN_TYPE  main(int argc, char **argv)
         openjfile(0, 0);
         openvfile(0, 0);
         initxbuffer(0);
+        loadopts();             /* Program options */
         winit();
         wstart();
-        loadopts();             /* Program options */
         load_options();         /* Defaults for jobs */
         gtk_main();
         return  0;              /* Shut up compilers */

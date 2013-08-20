@@ -69,7 +69,7 @@ gbch-xq:	$(XBTQOBJS)
 		$(SHLIBCC) -o gbch-xq $(LDFLAGS) $(XBTQOBJS) $(SHLIB) $(SHLIBCLIENT) $(GTKLIBS)	$(LIBNET) $(LIBS)
 
 gbch-xr:	$(XBTROBJS)
-		$(SHLIBCC) -o gbch-xr $(LDFLAGS) $(XBTROBJS) $(SHLIB) $(SHLIBCLIENT) $(GTKLIBS)	$(LIBNET) $(LIBS)
+		$(SHLIBCC) -o gbch-xr $(LDFLAGS) $(XBTROBJS) $(SHLIB) $(SHLIBCLIENT) $(GTKLIBS)	$(LIBNET) $(LIBS) @xmllib@
 
 gbch-xuser:	$(XBTUSEROBJS)
 		$(SHLIBCC) -o gbch-xuser $(LDFLAGS) $(XBTUSEROBJS) $(SHLIB) $(SHLIBCLIENT) $(GTKLIBS) $(LIBNET)	$(LIBS)

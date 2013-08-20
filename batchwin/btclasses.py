@@ -77,6 +77,33 @@ class btconst:
             xmlutil.save_xml_string(doc, cn, "textval", self.value)
         pnode.appendChild(cn)
 
+def gethostvarname(node):
+    """Extract variable name as host:variable name.
+
+We may vary the format to have host and name separately in some cases"""
+    child = node.firstChild()
+    if  child.isText():
+        return  str(child.toText().data())
+    hostn = vname = ""
+    while not child.isNull():
+        tagn = child.toElement().tagName()
+        if tagn == "host":
+            hostn = xmlutil.getText(child)
+        elif tagn == "name":
+            vname = xmlutil.getText(child)
+        child = child.nextSibling()
+    if len(hostn) == 0: return vname
+    return hostn + ':' + vname
+
+def savehostvarname(doc, node, name, vname):
+    """Save variable name as children with host and variable name"""
+    vn = doc.createElement(name)
+    parts = vname.split(':', 1)
+    if len(parts) > 1:
+        xmlutil.save_xml_string(doc, vn, "host", parts.pop(0))
+    xmlutil.save_xml_string(doc, vn, "name", parts.pop())
+    node.appendChild(vn)
+
 class jcond:
     """Represent condition"""
     C_UNUSED = 0
@@ -135,7 +162,7 @@ class jcond:
         while not child.isNull():
             tagn = child.toElement().tagName()
             if tagn == "vname":
-                self.bjc_varname = xmlutil.getText(child)
+                self.bjc_varname = gethostvarname(child)
             elif tagn == "value":
                 self.bjc_value.load(child)
             elif tagn == "iscrit":
@@ -148,7 +175,7 @@ class jcond:
         cn = doc.createElement(name)
         cn.setAttribute("type", str(self.bjc_compar))
         xmlutil.save_xml_bool(doc, cn, "iscrit", self.bjc_iscrit)
-        xmlutil.save_xml_string(doc, cn, "vname", self.toname())
+        savehostvarname(doc, cn, "vname", self.toname())
         self.bjc_value.save(doc, cn, "value")
         pnode.appendChild(cn)
 
@@ -209,7 +236,7 @@ class jass:
         while not child.isNull():
             tagn = child.toElement().tagName()
             if tagn == "vname":
-                self.bja_varname = xmlutil.getText(child)
+                self.bja_varname = gethostvarname(child)
             elif tagn == "const":
                 self.bja_con.load(child)
             elif tagn == "iscrit":
@@ -224,7 +251,7 @@ class jass:
         an = doc.createElement(name)
         an.setAttribute("type", str(self.bja_op))
         xmlutil.save_xml_bool(doc, an, "iscrit", self.bja_iscrit)
-        xmlutil.save_xml_string(doc, an, "vname", self.toname())
+        savehostvarname(doc, an, "vname", self.toname())
         if self.bja_op < jass.BJA_SEXIT:
             self.bja_con.save(doc, an, "const")
             xmlutil.save_xml_string(doc, an, "flags", self.bja_flags)

@@ -127,6 +127,11 @@ WINDOW  *hjscr,
         *Ew;
 
 char    Win_setup;
+#ifdef	HAVE_LIBXML2
+char	XML_jobdump = 1;
+#else
+char    XML_jobdump;
+#endif
 
 SHORT   wh_jtitline, wh_v1titline, wh_v2titline;
 
@@ -764,6 +769,18 @@ OPTION(o_vfirst)
         return  OPTRESULT_OK;
 }
 
+OPTION(o_xmlfmt)
+{
+        XML_jobdump = 1;
+        return  OPTRESULT_OK;
+}
+
+OPTION(o_noxmlfmt)
+{
+        XML_jobdump = 0;
+        return  OPTRESULT_OK;
+}
+
 DEOPTION(o_incnull);
 DEOPTION(o_noincnull);
 DEOPTION(o_localonly);
@@ -805,6 +822,8 @@ const   Argdefault      Adefs[] = {
         {  'g', $A{btq arg justg} },
         {  'z', $A{btq arg nullqs} },
         {  'Z', $A{btq arg no nullqs} },
+        {  'X', $A{btq arg XML fmt} },
+        {  'D', $A{btq arg no XML fmt} },
         { 0, 0 }
 };
 
@@ -814,6 +833,7 @@ o_noscrkeep,    o_jfirst,       o_vfirst,       o_nohelpclr,
 o_helpclr,      o_helpbox,      o_nohelpbox,    o_errbox,
 o_noerrbox,     o_localonly,    o_nolocalonly,  o_jobqueue,
 o_justu,        o_justg,        o_incnull,      o_noincnull,
+o_xmlfmt,       o_noxmlfmt
 };
 
 char    Cvarname[] = "BTQCONF";
@@ -844,7 +864,7 @@ MAINFN_TYPE  main(int argc, char **argv)
         SCRAMBLID_CHECK
         tzset();
         Dispflags = DF_CONFABORT; /* Set as default */
-        argv = optprocess(argv, Adefs, optprocs, $A{btq arg explain}, $A{btq arg no nullqs}, 1);
+        argv = optprocess(argv, Adefs, optprocs, $A{btq arg explain}, $A{btq arg no XML fmt}, 1);
 
         /* If we haven't got a directory, use the current */
 

@@ -60,6 +60,7 @@
 #include "spitrouts.h"
 #include "optflags.h"
 #include "gtk_lib.h"
+#include "xmlldsv.h"
 
 static  char    Filename[] = __FILE__;
 
@@ -495,7 +496,9 @@ void  job_initialise(struct pend_job *pj, char *dname, char *fname)
         if  (pj->jobqueue)
                 pj->jobqueue = stracpy(pj->jobqueue);   /* Lets have a unique copy. */
         pj->jobfile_name = (char *) 0;
-        pj->cmdfile_name = fname; /* Already stracpyed */
+        pj->cmdfile_name = fname; /* Already stracpyed if it's there at all */
+        pj->xml_jobfile_name = (char *) 0;
+        pj->jobscript = (char *) 0;
 }
 
 static void  cleanupspace(char **envlist)
@@ -544,7 +547,7 @@ int  job_load(struct pend_job *pj)
         int     lng = 0, ret;
         unsigned        envcnt = 0, envmax = 0;
         time_t  now;
-        char    ebuf[2048];
+        char    ebuf[4096];
 
         /* Set current pending job up for all the option routines.
            Initialise system defaults.  */
@@ -567,11 +570,7 @@ int  job_load(struct pend_job *pj)
         JREQ->h.bj_exits.eupper = 255;
         /*JREQ->h.bj_jflags = 0;                The default case */
 
-        /* Open the job file and parse */
-
-        sprintf(ebuf, "%s -r %s/%s", ldsvprog, pj->directory, pj->cmdfile_name);
-
-        fp = popen(ebuf, "r");
+        fp = ldsv_open('r', pj->directory, pj->cmdfile_name);
 
         if  (!fp)
                 return  $EH{xmbtr cannot open cmd file};
@@ -641,11 +640,8 @@ int  job_load(struct pend_job *pj)
                                 ABORT_NOMEM;
                 }
                 envlist[envcnt++] = envp;
+                envlist[envcnt] = (char *) 0;           /* In case we have to clean up */
         }
-
-
-        if  (envlist)
-                envlist[envcnt] = (char *) 0;
 
         /* Done environment variables, now for arguments */
 
@@ -745,6 +741,7 @@ int  job_load(struct pend_job *pj)
         cleanupspace(envlist);
         if  (pj->job->h.bj_times.tc_istime  &&  pj->job->h.bj_times.tc_nexttime < time((time_t *) 0))
                 doinfo($E{xmbtr loaded job not future});
+        pj->scriptinmem = 0;
         return  0;
 
  badfmt:
@@ -759,6 +756,36 @@ int  job_load(struct pend_job *pj)
         if  (pj->job->h.bj_times.tc_istime  &&  pj->job->h.bj_times.tc_nexttime < now)
                 pj->job->h.bj_times.tc_nexttime = now + 60L;
         return  arg_errnum;
+}
+
+int  xml_job_load(struct pend_job *pj)
+{
+        FILE    *fp;
+        int     ret, verb = 0;
+
+        fp = ldsv_open('r', pj->directory, pj->xml_jobfile_name);
+        if  (!fp)
+                return  $EH{xbtq no open job file};
+
+        ret = load_job_xml_fd(fileno(fp), pj->job, &pj->jobscript, &verb);
+        pj->Verbose = verb;
+        if  (pj->jobscript)
+                pj->scriptinmem = 1;
+        pclose(fp);
+        if  (ret == 0)
+                return  0;
+        switch  (ret)  {
+        default:
+                return  $EH{xbtq no open job file};
+        case  XML_INVALID_FORMAT_FILE:
+                return  $EH{xbq invalid format job file};
+        case  XML_INVALID_CONDS:
+                return  $EH{xbq invalid conditions};
+        case  XML_INVALID_ASSES:
+                return  $EH{xbq invalid assignments};
+        case  XML_TOOMANYSTRINGS:
+                return  $EH{xbq too many strings};
+        }
 }
 
 void  dumphdrs(BtjobRef jp, FILE *xfl)
@@ -802,22 +829,13 @@ int  job_save(struct pend_job *pj)
         BtjobRef        jp = pj->job;
         FILE            *xfl;
         unsigned        cnt;
-        char            *path;
         int             um;
 
-        if  (!(path = malloc((unsigned) (strlen(ldsvprog) + strlen(pj->directory) + strlen(pj->cmdfile_name) + 10))))
-                ABORT_NOMEM;
-        sprintf(path, "%s -w %s/%s", ldsvprog, pj->directory, pj->cmdfile_name);
-
         um = umask(Save_umask);
-        xfl = popen(path, "w");
+        xfl = ldsv_open('x', pj->directory, pj->cmdfile_name);
         umask(um);
-
-        if  (!xfl)  {
-                free(path);
+        if  (!xfl)
                 return  $EH{xmbtr cannot write cmd file};
-        }
-        free(path);
 
         /* Put a comment to trigger shell things in.  */
 
@@ -912,6 +930,23 @@ int  job_save(struct pend_job *pj)
 
         fprintf(xfl, "%s/%s\n", pj->directory, pj->jobfile_name);
         pclose(xfl);
+        return  0;
+}
+
+int  job_save_xml(struct pend_job *pj)
+{
+        BtjobRef        jp = pj->job;
+        FILE            *xfl;
+        int             um, ret;
+
+        um = umask(Save_umask);
+        xfl = ldsv_open('w', pj->directory, pj->xml_jobfile_name);
+        umask(um);
+        if  (!xfl)
+               return  $EH{xbq cannot write job file};
+        ret = save_job_xml_file(jp, pj->jobscript, pj->jobscript? strlen(pj->jobscript): 0, xfl, -1, pj->Verbose);
+        if  (pclose(xfl) < 0  ||  ret != 0)
+                return  $EH{xbq cannot write job file};
         return  0;
 }
 

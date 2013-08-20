@@ -48,7 +48,7 @@ Cancel any previous \exampletext{{}-k} option to be the default of deleting jobs
 
 \cmdoption{e}{do-not-unqueue}{}{nounqueue}
 
-Cancel the effect of a previous \exampletext{{}-u} option.
+Cancel the effect of a previous \exampletext{{}-u} or \exampletext{{}-X} option.
 
 \cmdoption{J}{job-prefix}{name}{jprefix}
 
@@ -75,6 +75,10 @@ Monitor process state for \genericargs{seconds} seconds after killing (default 1
 \cmdoption{u}{unqueue}{}{unqueue}
 
 Unqueue job(s) to the current directory (or as specified by the \exampletext{{}-D} option). Do not delete if \exampletext{{}-k} given.
+
+\cmdoption{X}{xml-unqueue}{}{xmlunqueue}
+
+As with \exampletext{{}-u}, but unqueue to just a job file in XML format. Note that the suffix \batchjobsuffix{} will be appended if not specified.
 
 \cmdoption{Y}{force}{}{force}
 

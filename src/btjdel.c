@@ -54,6 +54,7 @@
 #include "shutilmsg.h"
 
 #define DEFSLEEP        4
+#define  MAXFNAME       200
 
 char    *Curr_pwd;
 
@@ -68,10 +69,12 @@ ULONG           indx;
 int     killtype = SIGTERM;
 unsigned        sleeptime = DEFSLEEP;
 
-int     exit_code,
-        force,
+int     exit_code;
+
+char    force,
         nodel,
-        unqueue;
+        unqueue,
+        XML_jobdump;
 
 char    *jobprefix,
         *cmdprefix;
@@ -90,8 +93,12 @@ static void  dounqueue(CBtjobRef jp)
 {
         PIDTYPE pid;
         int     ac;
-        const   char    *argv[7], *udprog;
-        char    cprefbuf[30], jprefbuf[30];
+        char    *argv[12];
+        static  char    *udprog;
+        char    cprefbuf[MAXFNAME + 8], jprefbuf[MAXFNAME + 8 + sizeof(XMLJOBSUFFIX)];
+
+        if  (!udprog)
+                udprog = envprocess(XML_jobdump? XMLDUMPJOB: DUMPJOB);
 
         if  ((pid = fork()))  {
                 int     status;
@@ -137,16 +144,22 @@ static void  dounqueue(CBtjobRef jp)
                 case  E_CANTDEL:
                         print_error($E{Unq cannot del});
                         return;
+                case  E_NOTIMPL:
+                        print_error($E{No XML library});
+                        return;
                 }
         }
 
         /* Child process */
 
-        udprog = envprocess(DUMPJOB);
         setuid(Realuid);
         Ignored_error = chdir(Curr_pwd);        /* So that it picks up config file correctly */
-        sprintf(cprefbuf, "%s%.6ld", cmdprefix, (long) jp->h.bj_job);
-        sprintf(jprefbuf, "%s%.6ld", jobprefix, (long) jp->h.bj_job);
+        if  (XML_jobdump)
+                sprintf(jprefbuf, "%s%.6ld" XMLJOBSUFFIX, jobprefix, (long) jp->h.bj_job);
+        else  {
+                sprintf(cprefbuf, "%s%.6ld", cmdprefix, (long) jp->h.bj_job);
+                sprintf(jprefbuf, "%s%.6ld", jobprefix, (long) jp->h.bj_job);
+        }
         if  (!(argv[0] = strrchr(udprog, '/')))
                 argv[0] = udprog;
         else
@@ -154,12 +167,21 @@ static void  dounqueue(CBtjobRef jp)
         ac = 0;
         if  (nodel)
                 argv[++ac] = "-n";
-        argv[++ac] = host_prefix_long(jp->h.bj_hostid, jp->h.bj_job);
-        argv[++ac] = job_cwd;
-        argv[++ac] = cprefbuf;
+        if  (XML_jobdump)  {
+                argv[++ac] = "-j";
+                argv[++ac] = (char *) JOB_NUMBER(jp);
+                argv[++ac] = "-d";
+                argv[++ac] = job_cwd;
+                argv[++ac] = "-f";
+        }
+        else  {
+                argv[++ac] = (char *) JOB_NUMBER(jp);
+                argv[++ac] = job_cwd;
+                argv[++ac] = cprefbuf;
+        }
         argv[++ac] = jprefbuf;
         argv[++ac] = (char *) 0;
-        execv(udprog, (char **) argv);
+        execv(udprog, argv);
         exit(E_SETUP);
 }
 
@@ -387,13 +409,20 @@ OPTION(o_sleeptime)
 
 OPTION(o_nounqueue)
 {
-        unqueue = 0;
+        unqueue = XML_jobdump = 0;
         return  OPTRESULT_OK;
 }
 
 OPTION(o_unqueue)
 {
         unqueue = 1;
+        XML_jobdump = 0;
+        return  OPTRESULT_OK;
+}
+
+OPTION(o_xmlunqueue)
+{
+        unqueue = XML_jobdump = 1;
         return  OPTRESULT_OK;
 }
 
@@ -401,6 +430,10 @@ OPTION(o_jobprefix)
 {
         if  (!arg)
                 return  OPTRESULT_MISSARG;
+        if  (strlen(arg) > MAXFNAME)  {
+                arg_errnum = $E{btjdel file name too long};
+                return  OPTRESULT_ERROR;
+        }
         free(jobprefix);
         jobprefix = stracpy(arg);
         return  OPTRESULT_ARG_OK;
@@ -410,6 +443,10 @@ OPTION(o_cmdprefix)
 {
         if  (!arg)
                 return  OPTRESULT_MISSARG;
+        if  (strlen(arg) > MAXFNAME)  {
+                arg_errnum = $E{btjdel file name too long};
+                return  OPTRESULT_ERROR;
+        }
         free(cmdprefix);
         cmdprefix = stracpy(arg);
         return  OPTRESULT_ARG_OK;
@@ -436,6 +473,7 @@ const   Argdefault      Adefs[] = {
   { 'J', $A{btjdel arg jobpref} },
   { 'C', $A{btjdel arg cmdpref} },
   { 'D', $A{btjdel arg dir} },
+  { 'X', $A{btjdel arg xml unq} },
   { 0, 0 }
 };
 
@@ -443,7 +481,7 @@ optparam        optprocs[] = {
 o_explain,      o_noforce,      o_force,        o_nodel,
 o_del,          o_signo,        o_sleeptime,    o_unqueue,
 o_nounqueue,    o_jobprefix,    o_cmdprefix,    o_directory,
-o_freezecd,     o_freezehd
+o_xmlunqueue,   o_freezecd,     o_freezehd
 };
 
 void  spit_options(FILE *dest, const char *name)
@@ -452,7 +490,7 @@ void  spit_options(FILE *dest, const char *name)
         fprintf(dest, "%s", name);
         cancont = spitoption(force? $A{btjdel arg force}: $A{btjdel arg noforce}, $A{btjdel arg explain}, dest, '=', 0);
         cancont = spitoption(nodel? $A{btjdel arg nodel}: $A{btjdel arg del}, $A{btjdel arg explain}, dest, ' ', cancont);
-        cancont = spitoption(unqueue? $A{btjdel arg unqueue}: $A{btjdel arg nounqueue}, $A{btjdel arg explain}, dest, ' ', cancont);
+        cancont = spitoption(unqueue? (XML_jobdump? $A{btjdel arg xml unq}: $A{btjdel arg unqueue}): $A{btjdel arg nounqueue}, $A{btjdel arg explain}, dest, ' ', cancont);
         spitoption($A{btjdel arg wsig}, $A{btjdel arg explain}, dest, ' ', 0);
         fprintf(dest, " %d", killtype);
         spitoption($A{btjdel arg sleep}, $A{btjdel arg explain}, dest, ' ', 0);

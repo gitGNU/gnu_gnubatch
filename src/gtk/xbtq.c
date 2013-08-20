@@ -94,7 +94,8 @@ GtkListStore    *jlist_store,
 
 extern  struct  macromenitem    jobmacs[], varmacs[];
 
-int             Dirty;
+char            xml_format;
+char            Dirty;
 
 static void  cb_about();
 static void  cb_quit();

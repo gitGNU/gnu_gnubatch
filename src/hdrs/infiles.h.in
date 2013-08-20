@@ -85,6 +85,7 @@
 #define GTKSAVE         "${SPROGDIR-@pkgexecdir@}/bgtksave"
 #define GTKLDSAV        "${SPROGDIR-@pkgexecdir@}/bgtkldsv"
 #define DUMPJOB         "${SPROGDIR-@pkgexecdir@}/jobdump"
+#define XMLDUMPJOB      "${SPROGDIR-@pkgexecdir@}/xmljobdump"
 #define CFILEDIR        "${SPHELPDIR-@sphelpdir@}/"
 
 #define INT_CONFIG      "${SPHELPDIR-@sphelpdir@}/btint-config"
@@ -94,11 +95,14 @@
 #define XIHTMLINI       "${SPROGDIR-@pkgdatadir@}/gbhtml.ini"
 #define HTML_UFILE      "${SPROGDIR-@pkgdatadir@}/html_ufile"
 #define HTML_TMPFILE    "/tmp/gbcgi%ld.%d"
-#define  WINUSER_MAP    "@sysconfdir@/gbuser.map"
+#define WINUSER_MAP     "@sysconfdir@/gbuser.map"
 #define XIPWFILE        "${SPROGDIR-@pkgexecdir@}/gbpwfile"
 
 #define BTR_PROGRAM     "gbch-r"
 #define XBTR_PROGRAM    "gbch-xr"
+
+#define XMLJOBSUFFIX    ".gbj1"
+#define NSID            "http://www.fsf.org/gnubatch/gbj1"
 
 #define XBTIMEOUTS      "${NETTIMEOUT:1000}"
 

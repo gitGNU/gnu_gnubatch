@@ -109,6 +109,53 @@ void    stringvec_split(struct stringvec *sv, const char *str, const char sep)
         }
 }
 
+/* As above but sort the list */
+
+void    stringvec_split_sorted(struct stringvec *sv, const char *str, const char sep)
+{
+        char    *work = stracpy(str);
+        char    *start = work, *nxt = strchr(work, sep);
+
+        stringvec_init(sv);
+        while  (start)  {
+                if  (nxt)  {
+                        *nxt = '\0';
+                        stringvec_insert_unique(sv, start);
+                        start = nxt + 1;
+                        nxt = strchr(start, sep);
+                }
+                else  {
+                        stringvec_insert_unique(sv, start);
+                        start = nxt;
+                }
+        }
+        free(work);
+}
+
+char    *stringvec_join(struct stringvec *sv, const char sep)
+{
+        char    *result, *rp;
+        unsigned  totlng = 1;
+        int     cnt;
+
+        /* Get total length */
+
+        for  (cnt = 0;  cnt < sv->memb_cnt;  cnt++)
+                totlng += strlen(sv->memb_list[cnt]) + 1;
+
+        if  (!(result = malloc(totlng)))
+                ABORT_NOMEM;
+
+        rp = result;
+        for  (cnt = 0;  cnt < sv->memb_cnt;  cnt++)  {
+                strcpy(rp, sv->memb_list[cnt]);
+                rp += strlen(sv->memb_list[cnt]);
+                *rp++ = sep;
+        }
+        *rp = '\0';
+        return  result;
+}
+
 void  stringvec_insert(struct stringvec *sv, const int which, const char *newitem)
 {
         int     lim = which, cnt;

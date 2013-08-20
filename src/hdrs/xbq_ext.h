@@ -21,7 +21,8 @@ extern  int     Ctrl_chan;
 extern  Shipc   Oreq;
 
 extern  int             Const_val;
-extern  int             Dirty;
+extern  char   xml_format;      /* Use single XML files for unqueue */
+extern  char   Dirty;           /* Unsaved option changes */
 
 /* X stuff */
 

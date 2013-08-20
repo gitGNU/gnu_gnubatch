@@ -49,6 +49,7 @@
 #include "cfile.h"
 #include "files.h"
 #include "jvuprocs.h"
+#include "remsubops.h"
 #include "btrvar.h"
 #include "spitrouts.h"
 #include "optflags.h"
@@ -67,6 +68,8 @@ gid_t   Replgid;                /* Replacement if requested */
 extern  netid_t         Out_host;
 char    *realuname;
 char    realgname[UIDSIZE+1];
+
+char    *repluname, *replgname;
 
 Btjob           Out_job;
 
@@ -407,37 +410,6 @@ static void  convert_envir(char **remenviron)
                 JREQ->h.bj_nenv = (USHORT) envcount;
 }
 
-static void  copyout(FILE *inf, const int outsock)
-{
-        int     outbytes, ch;
-        struct  ni_jobhdr       hd;
-        char    buffer[CL_SV_BUFFSIZE];
-
-        BLOCK_ZERO((char *) &hd, sizeof(hd));
-        hd.code = CL_SV_JOBDATA;
-        outbytes = 0;
-
-        while  ((ch = getc(inf)) != EOF)  {
-                if  (outbytes >= CL_SV_BUFFSIZE)  {
-                        hd.joblength = htons(outbytes);
-                        sock_write(outsock, (char *) &hd, sizeof(hd));
-                        sock_write(outsock, buffer, outbytes);
-                        outbytes = 0;
-                }
-                buffer[outbytes++] = (char) ch;
-        }
-        if  (outbytes > 0)  {
-                hd.joblength = htons(outbytes);
-                sock_write(outsock, (char *) &hd, sizeof(hd));
-                sock_write(outsock, buffer, outbytes);
-        }
-        hd.code = CL_SV_ENDJOB;
-        hd.joblength = htons(sizeof(struct ni_jobhdr));
-        strcpy(hd.uname, realuname);
-        strcpy(hd.gname, realgname);
-        sock_write(outsock, (char *) &hd, sizeof(hd));
-}
-
 /* Ye olde main routine.  */
 
 MAINFN_TYPE  main(int argc, char **argv)
@@ -552,6 +524,8 @@ MAINFN_TYPE  main(int argc, char **argv)
         realuname = prin_uname(Realuid);
         if  (Out_host)
                 mypriv = remgetbtuser(Out_host, realuname, realgname);
+        repluname = realuname;
+        replgname = realgname;
 
         if  ((mypriv->btu_priv & BTM_CREATE) == 0)  {
                 print_error($E{No create perm});
@@ -565,13 +539,19 @@ MAINFN_TYPE  main(int argc, char **argv)
         checksetmode(1, mypriv->btu_jflags, mypriv->btu_jflags[1], &JREQ->h.bj_mode.g_flags);
         checksetmode(2, mypriv->btu_jflags, mypriv->btu_jflags[2], &JREQ->h.bj_mode.o_flags);
 
-        if  (Realuid != Repluid  && (mypriv->btu_priv & BTM_WADMIN) == 0)  {
-                print_error($E{Cannot set owner});
-                exit(E_NOPRIV);
+        if  (Realuid != Repluid)  {
+                if  ((mypriv->btu_priv & BTM_WADMIN) == 0)  {
+                        print_error($E{Cannot set owner});
+                        exit(E_NOPRIV);
+                }
+                repluname = prin_uname(Repluid);
         }
-        if  (Realgid != Replgid  && (mypriv->btu_priv & BTM_WADMIN) == 0)  {
-                print_error($E{Cannot set group});
-                exit(E_NOPRIV);
+        if  (Realgid != Replgid)  {
+                if  ((mypriv->btu_priv & BTM_WADMIN) == 0)  {
+                        print_error($E{Cannot set group});
+                        exit(E_NOPRIV);
+                }
+                replgname = prin_gname(Replgid);
         }
         if  ((Procparchanges & (OF_ULIMIT_CHANGES|OF_UMASK_CHANGES)) != (OF_ULIMIT_CHANGES|OF_UMASK_CHANGES))  {
                 USHORT          remumask = 0;
@@ -661,7 +641,7 @@ MAINFN_TYPE  main(int argc, char **argv)
                         exit(E_SETUP);
 
                 inf = ginfile((char *) 0);
-                copyout(inf, outsock);
+                remsub_copyout(inf, outsock, repluname, replgname);
 
                 jn = remprocreply(outsock);
                 if  (jn != 0  &&  Verbose)  {
@@ -726,7 +706,7 @@ MAINFN_TYPE  main(int argc, char **argv)
 
                 if  (!(outsock = remgoutfile(Out_host, JREQ)))
                         continue;
-                copyout(inf, outsock);
+                remsub_copyout(inf, outsock, realuname, realgname);
                 jn = remprocreply(outsock);
 
                 if  (jn != 0  &&  Verbose)  {

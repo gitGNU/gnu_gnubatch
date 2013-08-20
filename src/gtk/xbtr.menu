@@ -15,8 +15,6 @@
         <menuitem action='Quit'/>
     </menu>
     <menu action='DefsMenu'>
-        <menuitem action='Defhost'/>
-        <separator/>
         <menuitem action='Queued'/>
         <menuitem action='Setrund'/>
         <menuitem action='Setcancd'/>
@@ -37,10 +35,10 @@
     <menu action='FileMenu'>
         <menuitem action='New'/>
         <menuitem action='Open'/>
+        <menuitem action='Legopen'/>
         <menuitem action='Close'/>
-        <menuitem action='Cmdfile'/>
-        <menuitem action='Jobfile'/>
         <menuitem action='Save'/>
+        <menuitem action='Saveas'/>
         <menuitem action='Edit'/>
         <separator/>
         <menuitem action='Delete'/>
@@ -49,6 +47,8 @@
         <menuitem action='Rsubmit'/>
     </menu>
     <menu action='JobMenu'>
+        <menuitem action='Options'/>
+        <separator/>
         <menuitem action='Queue'/>
         <menuitem action='Setrun'/>
         <menuitem action='Setcanc'/>

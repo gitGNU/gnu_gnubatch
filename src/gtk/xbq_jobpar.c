@@ -84,7 +84,8 @@ extern  char    *Curr_pwd;      /* Directory on entry */
 #ifndef IN_XBTR
 static  char    *Last_unqueue_dir;
 extern  char    *execprog;
-char            *udprog;
+char            *udprog, *xmludprog;
+HelpaltRef      cancalts;
 
 /* Default set of conditions/assignments */
 
@@ -2104,112 +2105,243 @@ void  cb_redir()
 }
 
 #ifndef IN_XBTR
-struct  unqueue_data  {
-        GtkWidget       *dirsw;
-        GtkWidget       *cfw;
-        GtkWidget       *jfw;
-};
 
-void  cmd_sel(struct unqueue_data *unqd)
+/* Set up and run a dialog to get a new filename.
+   We don't want to create directories as we'd be doing this as thr wrong user */
+
+static  char    *unqueue_fileselect(char *existing, const int dlgpr, const int errmsg)
 {
-        GtkWidget *fsw;
-        char    *pr = gprompt($P{xbtq unqueue cmd dlg title});
-        GString *labp = g_string_new(NULL);
-        const  char  *dirn, *filen;
+         GtkWidget *fsw;
+         char    *pr = gprompt(dlgpr);
 
-        fsw = gtk_file_selection_new(pr);
-        free(pr);
-
-        dirn = gtk_label_get_text(GTK_LABEL(unqd->dirsw));
-        filen = gtk_label_get_text(GTK_LABEL(unqd->cfw));
-        if  (strlen(dirn) <= 1)
-                g_string_printf(labp, "%s%s", dirn, filen);
-        else
-                g_string_printf(labp, "%s/%s", dirn, filen);
-        gtk_file_selection_set_filename(GTK_FILE_SELECTION(fsw), labp->str);
-        g_string_free(labp, TRUE);
-        gtk_file_selection_hide_fileop_buttons(GTK_FILE_SELECTION(fsw));
-
-        while  (gtk_dialog_run(GTK_DIALOG(fsw)) == GTK_RESPONSE_OK)  {
-                const char *newfile = gtk_file_selection_get_filename(GTK_FILE_SELECTION(fsw));
-                const char *sp = strrchr(newfile, '/');
-                if  (!sp)  {
-                        doerror($EH{xmbtq unqueue no dir});
-                        continue;
-                }
-                if  (strlen(sp) <= 1)  {
-                        doerror($EH{xmbtq no cmd file name});
-                        continue;
-                }
-                if  (newfile == sp)
-                        gtk_label_set_text(GTK_LABEL(unqd->dirsw), "/");
-                else  {
-                        char    *newd = malloc(sp - newfile + 1);
-                        if  (!newd)
-                                ABORT_NOMEM;
-                        strncpy(newd, newfile, sp-newfile);
-                        newd[sp-newfile] = '\0';
-                        gtk_label_set_text(GTK_LABEL(unqd->dirsw), newd);
-                        free(newd);
-                }
-                gtk_label_set_text(GTK_LABEL(unqd->cfw), sp+1);
-                break;
-        }
-        gtk_widget_destroy(fsw);
+         fsw = gtk_file_selection_new(pr);
+         free(pr);
+         gtk_file_selection_set_filename(GTK_FILE_SELECTION(fsw), existing);
+         gtk_file_selection_hide_fileop_buttons(GTK_FILE_SELECTION(fsw));
+         while  (gtk_dialog_run(GTK_DIALOG(fsw)) == GTK_RESPONSE_OK)  {
+                 const char *newfile = gtk_file_selection_get_filename(GTK_FILE_SELECTION(fsw));
+                 const char *sp = strrchr(newfile, '/');
+                 char   *result;
+                 if  (!sp)  {
+                         doerror($EH{xmbtq unqueue no dir});
+                         continue;
+                 }
+                 if  (strlen(sp) <= 1)  {
+                         doerror(errmsg);
+                         continue;
+                 }
+                 result = stracpy(newfile);
+                 gtk_widget_destroy(fsw);
+                 return  result;
+         }
+         gtk_widget_destroy(fsw);
+         return  (char *) 0;
 }
 
-void  job_sel(struct unqueue_data *unqd)
+/* Make ourselves a full filename out of a directory name widget and a file one */
+
+static  char    *get_existing(GtkWidget *dirw, GtkWidget *fw)
 {
-        GtkWidget *fsw;
-        char    *pr = gprompt($P{xbtq unqueue job dlg title});
-        const  char  *dirn, *filen;
+        const  char  *dirn;
+        const  char  *filen = gtk_label_get_text(GTK_LABEL(fw));
+        GString  *fullp;
+        char    *result;
 
-        fsw = gtk_file_selection_new(pr);
-        free(pr);
+        if  (filen[0] == '/')                   /* Cope with it being abs path */
+                return  stracpy(filen);
+        dirn = gtk_label_get_text(GTK_LABEL(dirw));
 
-        dirn = gtk_label_get_text(GTK_LABEL(unqd->dirsw));
-        filen = gtk_label_get_text(GTK_LABEL(unqd->jfw));
+        fullp = g_string_new(NULL);
+        g_string_assign(fullp, dirn);
+        if  (strlen(dirn) > 1)
+                g_string_append_c(fullp, '/');
+        g_string_append(fullp, filen);
+        /* Make our own copy of the string as if we return with fullp->str the blurb says
+           this must be freed with g_free and we want to be consistent */
+        result = stracpy(fullp->str);
+        g_string_free(fullp, TRUE);
+        return  result;
+}
 
-        if  (filen[0] == '/')
-                gtk_file_selection_set_filename(GTK_FILE_SELECTION(fsw), filen);
+struct  unqueue_data  {
+        GtkWidget  *dirsw;
+        GtkWidget  *cfw;
+        GtkWidget  *jfw;
+};
+
+/* Make a label button we can click on */
+
+static  GtkWidget  *clickable_label(GtkWidget *dlg, const int labprompt, GString *initlabel, void (*cbfunc)(struct unqueue_data *), struct unqueue_data *ud)
+{
+        GtkWidget  *hbox, *lab, *button, *result;
+
+        /* Set up hbox to accommodate description and button, add to dlg get label, add that */
+
+        hbox = gtk_hbox_new(FALSE, DEF_DLG_HPAD);
+        gtk_box_pack_start(GTK_BOX(GTK_DIALOG(dlg)->vbox), hbox, FALSE, FALSE, DEF_DLG_VPAD);
+        lab = gprompt_label(labprompt);
+        gtk_box_pack_start(GTK_BOX(hbox), lab, FALSE, FALSE, DEF_DLG_HPAD);
+
+        /* Result is a label which we put in a button, deallocate the initial label */
+
+        result = gtk_label_new(initlabel->str);
+        g_string_free(initlabel, TRUE);
+
+        /* Generate button, add it to the hbox (after the description) */
+
+        button = gtk_button_new();
+        gtk_box_pack_start(GTK_BOX(hbox), button, FALSE, FALSE, 0);
+
+        /* Now we create another hbox to put inside the button and put our label in that */
+
+        hbox = gtk_hbox_new(FALSE, DEF_DLG_HPAD);
+        gtk_container_add(GTK_CONTAINER(button), hbox);
+        gtk_box_pack_start(GTK_BOX(hbox), result, FALSE, FALSE, DEF_BUTTON_PAD);
+
+        g_signal_connect_swapped(G_OBJECT(button), "clicked", G_CALLBACK(cbfunc), (gpointer) ud);
+        return  result;
+}
+
+/* Select XML job file name */
+
+static  void  xml_job_sel(struct unqueue_data *unqd)
+{
+        char    *current_jname = get_existing(unqd->dirsw, unqd->jfw);
+        char    *newname = unqueue_fileselect(current_jname, $P{xbtq unqueue job dlg title}, $EH{xmbtq no job file name});
+        char    *sp, *newd, *newf;
+        int     lng;
+
+        if  (!newname)  {
+                free(current_jname);
+                return;
+        }
+
+        if  (strcmp(current_jname, newname) == 0)  {
+                free(current_jname);
+                free(newname);
+                return;
+        }
+
+        free(current_jname);
+        if  (!(sp = strrchr(newname, '/')))  {
+                newd = Curr_pwd;
+                newf = newname;
+        }
         else  {
-                GString *labp = g_string_new(NULL);
-                if  (strlen(dirn) <= 1)
-                        g_string_printf(labp, "%s%s", dirn, filen);
-                else
-                        g_string_printf(labp, "%s/%s", dirn, filen);
-                gtk_file_selection_set_filename(GTK_FILE_SELECTION(fsw), labp->str);
-                g_string_free(labp, TRUE);
+                newf = sp+1;
+                newd = newname;
+                *sp = '\0';
+                if  (sp == newname)
+                        newd = "/";
         }
 
-        gtk_file_selection_hide_fileop_buttons(GTK_FILE_SELECTION(fsw));
+        gtk_label_set_text(GTK_LABEL(unqd->dirsw), newd);
 
-        while  (gtk_dialog_run(GTK_DIALOG(fsw)) == GTK_RESPONSE_OK)  {
-                const char *newfile = gtk_file_selection_get_filename(GTK_FILE_SELECTION(fsw));
-                const char *sp = strrchr(newfile, '/');
-                if  (!sp)  {
-                        doerror($EH{xmbtq unqueue no dir});
-                        continue;
-                }
-                if  (strlen(sp) <= 1)  {
-                        doerror($EH{xmbtq no job file name});
-                        continue;
-                }
-                if  (strncmp(dirn, newfile, sp-newfile) == 0)
-                        gtk_label_set_text(GTK_LABEL(unqd->jfw), sp+1);
-                else
-                        gtk_label_set_text(GTK_LABEL(unqd->jfw), newfile);
-                break;
+        /* Insist on suffix for XML files */
+
+        lng = strlen(newf);
+        if  (lng < sizeof(XMLJOBSUFFIX)  ||  ncstrcmp(newf + lng - sizeof(XMLJOBSUFFIX) + 1, XMLJOBSUFFIX) == 0)  {
+                GString *nf = g_string_new(newf);
+                g_string_append(nf, XMLJOBSUFFIX);
+                gtk_label_set_text(GTK_LABEL(unqd->jfw), nf->str);
+                g_string_free(nf, TRUE);
         }
-        gtk_widget_destroy(fsw);
+        else
+                gtk_label_set_text(GTK_LABEL(unqd->jfw), newf);
+        free(newname);
+}
+
+static  void  reset_jcmd(struct unqueue_data *unqd, char *cname, char *jname)
+{
+        int     preflen = 1;
+        char    *dir;
+
+        for  (;;)  {
+                char    *cseg = cname + preflen, *jseg = jname + preflen;
+                char    *csp, *jsp;
+                int     csl, jsl;
+                if  (!(csp = strchr(cseg, '/')))
+                        break;
+                if  (!(jsp = strchr(jseg, '/')))
+                        break;
+                csl = csp - cseg;
+                jsl = jsp - jseg;
+                if  (csl != jsl)
+                        break;
+                if  (strncmp(cseg, jseg, csl) != 0)
+                        break;
+                preflen += csl + 1;
+        }
+
+        if  (preflen <= 1)
+                dir = "/";
+        else  {
+                cname[preflen-1] = '\0';
+                dir = cname;
+        }
+        cname += preflen;
+        jname += preflen;
+        gtk_label_set_text(GTK_LABEL(unqd->dirsw), dir);
+        gtk_label_set_text(GTK_LABEL(unqd->cfw), cname);
+        gtk_label_set_text(GTK_LABEL(unqd->jfw), jname);
+}
+
+static  void  cmd_sel(struct unqueue_data *unqd)
+{
+        char    *current_cname = get_existing(unqd->dirsw, unqd->cfw);
+        char    *newname = unqueue_fileselect(current_cname, $P{xbtq unqueue cmd dlg title}, $EH{xmbtq no cmd file name});
+        char    *current_jname;
+
+        if  (!newname)  {
+                free(current_cname);
+                return;
+        }
+
+        if  (strcmp(current_cname, newname) == 0)  {
+                free(current_cname);
+                free(newname);
+                return;
+        }
+
+        free(current_cname);
+        current_jname = get_existing(unqd->dirsw, unqd->jfw);
+
+        reset_jcmd(unqd, newname, current_jname);
+        free(current_jname);
+        free(newname);
+}
+
+static  void  job_sel(struct unqueue_data *unqd)
+{
+        char    *current_jname = get_existing(unqd->dirsw, unqd->jfw);
+        char    *newname = unqueue_fileselect(current_jname, $P{xbtq unqueue job dlg title}, $EH{xmbtq no job file name});
+        char    *current_cname;
+
+        if  (!newname)  {
+                free(current_jname);
+                return;
+        }
+
+        if  (strcmp(current_jname, newname) == 0)  {
+                free(current_jname);
+                free(newname);
+                return;
+        }
+
+        free(current_jname);
+        current_cname = get_existing(unqd->dirsw, unqd->cfw);
+
+        reset_jcmd(unqd, current_cname, newname);
+        free(current_cname);
+        free(newname);
 }
 
 void  cb_unqueue()
 {
-        GtkWidget  *dlg, *hbox, *lab, *copyonly, *button;
+        GtkWidget  *dlg, *hbox, *lab, *copyonly, *verb = 0, *cantype = 0;
         char    *pr;
         GString *labp;
-        BtjobRef  cj = getselectedjob(BTM_READ|BTM_DELETE);
+        BtjobRef  cj = getselectedjob(BTM_READ);                /* Allow selection of jobs for copying only */
         struct  unqueue_data    unqd;
 
         if  (!cj)
@@ -2230,9 +2362,15 @@ void  cb_unqueue()
         g_string_free(labp, TRUE);
         gtk_box_pack_start(GTK_BOX(GTK_DIALOG(dlg)->vbox), lab, FALSE, FALSE, LAB_PADDING);
 
-        /* Checkbox about copy only no delete on separate line */
+        /* Checkbox about copy only no delete on separate line.
+           If user can't delete job force on the setting and don't
+           let it be changed. */
 
         copyonly = gprompt_checkbutton($P{xbtq copy no delete});
+        if  (!mpermitted(&cj->h.bj_mode, BTM_DELETE, mypriv->btu_priv))  {
+                gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(copyonly), TRUE);
+                gtk_widget_set_sensitive(copyonly, FALSE);
+        }
         gtk_box_pack_start(GTK_BOX(GTK_DIALOG(dlg)->vbox), copyonly, FALSE, FALSE, DEF_DLG_VPAD);
 
         /* Display line with directory */
@@ -2244,180 +2382,274 @@ void  cb_unqueue()
         unqd.dirsw = gtk_label_new(Last_unqueue_dir);
         gtk_box_pack_start(GTK_BOX(hbox), unqd.dirsw, FALSE, FALSE, DEF_DLG_HPAD);
 
-        /* Now for shell script file name first label */
+        /* Now it depends if we're just doing one XML file or legacy version */
 
-        hbox = gtk_hbox_new(FALSE, DEF_DLG_HPAD);
-        gtk_box_pack_start(GTK_BOX(GTK_DIALOG(dlg)->vbox), hbox, FALSE, FALSE, DEF_DLG_VPAD);
+        if  (xml_format)  {
+                int     cnt, sel;
 
-        lab = gprompt_label($P{xbtq shell script});
-        gtk_box_pack_start(GTK_BOX(hbox), lab, FALSE, FALSE, DEF_DLG_HPAD);
+                /* Initialise button text with job number, prefix and standard suffix for XML files */
 
-        /* Name for the shell script file */
-
-        labp = g_string_new(NULL);
-        pr = gprompt($P{Default cmd file prefix});
-        g_string_printf(labp, "%s%ld", pr, (long) cj->h.bj_job);
-        free(pr);
-
-        /* Use helpprmpt because that returns null if no suffix */
-
-        pr = helpprmpt($P{Default cmd file suffix});
-        if  (pr)  {
-                g_string_append(labp, pr);
+                pr = gprompt($P{Default job file prefix});
+                labp = g_string_new(NULL);
+                g_string_printf(labp, "%s%ld" XMLJOBSUFFIX, pr, (long) cj->h.bj_job);
                 free(pr);
+
+                unqd.jfw = clickable_label(dlg, $P{xbtq job file name}, labp, xml_job_sel, &unqd);
+
+                /* Checkbox for verbose and combo box for force cancelled/runnable */
+
+                verb = gprompt_checkbutton($P{xbtq unq force verbose});
+                gtk_box_pack_start(GTK_BOX(GTK_DIALOG(dlg)->vbox), verb, FALSE, FALSE, DEF_DLG_VPAD);
+
+                hbox = gtk_hbox_new(FALSE, DEF_DLG_HPAD);
+                gtk_box_pack_start(GTK_BOX(GTK_DIALOG(dlg)->vbox), hbox, FALSE, FALSE, DEF_DLG_VPAD);
+                lab = gprompt_label($P{xbtq unq setcanc lab});
+                gtk_box_pack_start(GTK_BOX(hbox), lab, FALSE, FALSE, DEF_DLG_HPAD);
+
+                if  (!cancalts)  {
+                        cancalts = helprdalt($Q{xbtq unq setcanc});
+                        if  (!cancalts)  {
+                                disp_arg[9] = $Q{xbtq unq setcanc};
+                                doerror($EH{Missing alternative code});
+                                return;
+                        }
+                }
+
+                cantype = gtk_combo_box_new_text();
+                for  (cnt = 0;  cnt < cancalts->numalt;  cnt++)
+                        gtk_combo_box_append_text(GTK_COMBO_BOX(cantype), cancalts->list[cnt]);
+                sel = 0;
+                if  (cancalts->def_alt > 0)                             /* Let user set a default if he wants */
+                        sel = cancalts->def_alt;
+                gtk_combo_box_set_active(GTK_COMBO_BOX(cantype), sel);
+                gtk_box_pack_start(GTK_BOX(hbox), cantype, FALSE, FALSE, DEF_DLG_HPAD);
         }
-        unqd.cfw = gtk_label_new(labp->str);
-        g_string_free(labp, TRUE);
-        button = gtk_button_new();
-        gtk_box_pack_start(GTK_BOX(hbox), button, FALSE, FALSE, 0);
-        hbox = gtk_hbox_new(FALSE, DEF_DLG_HPAD);
-        gtk_container_add(GTK_CONTAINER(button), hbox);
-        gtk_box_pack_start(GTK_BOX(hbox), unqd.cfw, FALSE, FALSE, DEF_BUTTON_PAD);
-        g_signal_connect_swapped(G_OBJECT(button), "clicked", G_CALLBACK(cmd_sel), (gpointer) &unqd);
+        else  {
 
-        /* Now for job file name first label */
+                /* Legacy style with shell script file and job file
+                   Kick off by setting up line with a default shell script file. */
 
-        hbox = gtk_hbox_new(FALSE, DEF_DLG_HPAD);
-        gtk_box_pack_start(GTK_BOX(GTK_DIALOG(dlg)->vbox), hbox, FALSE, FALSE, DEF_DLG_VPAD);
-
-        lab = gprompt_label($P{xbtq job file name});
-        gtk_box_pack_start(GTK_BOX(hbox), lab, FALSE, FALSE, DEF_DLG_HPAD);
-
-        /* Now for job file */
-
-        labp = g_string_new(NULL);
-        pr = gprompt($P{Default job file prefix});
-        g_string_printf(labp, "%s%ld", pr, (long) cj->h.bj_job);
-        free(pr);
-        pr = helpprmpt($P{Default job file suffix});
-        if  (pr)  {
-                g_string_append(labp, pr);
+                labp = g_string_new(NULL);
+                pr = gprompt($P{Default cmd file prefix});
+                g_string_printf(labp, "%s%ld", pr, (long) cj->h.bj_job);
                 free(pr);
+
+                /* Use helpprmpt because that returns null if no suffix */
+
+                pr = helpprmpt($P{Default cmd file suffix});
+                if  (pr)  {
+                        g_string_append(labp, pr);
+                        free(pr);
+                }
+                unqd.cfw = clickable_label(dlg, $P{xbtq shell script}, labp, cmd_sel, &unqd);
+
+                /* Repeat that for job file name first label */
+
+                labp = g_string_new(NULL);
+                pr = gprompt($P{Default job file prefix});
+                g_string_printf(labp, "%s%ld", pr, (long) cj->h.bj_job);
+                free(pr);
+                pr = helpprmpt($P{Default job file suffix});
+                if  (pr)  {
+                        g_string_append(labp, pr);
+                        free(pr);
+                }
+                unqd.jfw = clickable_label(dlg, $P{xbtq job file name}, labp, job_sel, &unqd);
         }
-        unqd.jfw = gtk_label_new(labp->str);
-        g_string_free(labp, TRUE);
-
-        /* Button to change */
-
-        button = gtk_button_new();
-        gtk_box_pack_start(GTK_BOX(hbox), button, FALSE, FALSE, DEF_DLG_HPAD);
-        hbox = gtk_hbox_new(FALSE, DEF_DLG_HPAD);
-        gtk_container_add(GTK_CONTAINER(button), hbox);
-        gtk_box_pack_start(GTK_BOX(hbox), unqd.jfw, FALSE, FALSE, DEF_BUTTON_PAD);
-        g_signal_connect_swapped(G_OBJECT(button), "clicked", G_CALLBACK(job_sel), (gpointer) &unqd);
 
         gtk_widget_show_all(dlg);
+
         while  (gtk_dialog_run(GTK_DIALOG(dlg)) == GTK_RESPONSE_OK)  {
-                const  char  *newdir = gtk_label_get_text(GTK_LABEL(unqd.dirsw));
-                const  char  *newcf = gtk_label_get_text(GTK_LABEL(unqd.cfw));
-                const  char  *newjf = gtk_label_get_text(GTK_LABEL(unqd.jfw));
+                struct  stat  sbuf;
                 PIDTYPE pid;
-                const  char  **ap, *argbuf[8];
-                struct  stat    sbuf;
+                int     status;
+                char    *wprog;
+                int     conly = gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(copyonly));
 
-                if  (!execprog)
-                        execprog = envprocess(EXECPROG);
+                if  (xml_format)  {
+                        const  char  *newdir = gtk_label_get_text(GTK_LABEL(unqd.dirsw));
+                        const  char  *newjf = gtk_label_get_text(GTK_LABEL(unqd.jfw));
+                        int     vv = gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(verb));
+                        int     ccan = gtk_combo_box_get_active(GTK_COMBO_BOX(cantype));
 
-                if  (!udprog)
-                        udprog = envprocess(DUMPJOB);
-
-                if  (newdir[0] == '\0')  {
-                        doerror($EH{xmbtq unqueue no dir});
-                        continue;
-                }
-                if  (newdir[0] != '/')  {
-                        disp_str = newdir;
-                        doerror($EH{xmbtq unqueue dir not abs});
-                        continue;
-                }
-                if  (stat(newdir, &sbuf) < 0  ||  (sbuf.st_mode & S_IFMT) != S_IFDIR)  {
-                        disp_str = newdir;
-                        doerror($EH{xmbtq unq not dir});
-                        continue;
-                }
-                if  (newcf[0] == '\0')  {
-                        doerror($EH{xmbtq no cmd file name});
-                        return;
-                }
-                if  (newjf[0] == '\0')  {
-                        doerror($EH{xmbtq no job file name});
-                        return;
-                }
-                free(Last_unqueue_dir);
-                Last_unqueue_dir = stracpy(newdir);
-
-                if  ((pid = fork()))  {
-                        int     status;
-
-                        if  (pid < 0)  {
-                                doerror($EH{xmbtq unqueue fork failed});
+                        if  (newdir[0] == '\0')  {
+                                doerror($EH{xmbtq unqueue no dir});
                                 continue;
                         }
+                        if  (newdir[0] != '/')  {
+                                disp_str = newdir;
+                                doerror($EH{xmbtq unqueue dir not abs});
+                                continue;
+                        }
+                        if  (stat(newdir, &sbuf) < 0  ||  (sbuf.st_mode & S_IFMT) != S_IFDIR)  {
+                                disp_str = newdir;
+                                doerror($EH{xmbtq unq not dir});
+                                continue;
+                        }
+                        if  (newjf[0] == '\0')  {
+                                doerror($EH{xmbtq no job file name});
+                                continue;
+                        }
+
+                        if  (!execprog)
+                                execprog = envprocess(EXECPROG);
+
+                        if  (!xmludprog)
+                                xmludprog = envprocess(XMLDUMPJOB);
+
+                        wprog = xmludprog;              /* What to moan about if we have an error */
+
+                        /* Remember last unqueue directory for next time */
+
+                        if  (strcmp(newdir, Last_unqueue_dir) != 0)  {
+                                free(Last_unqueue_dir);
+                                Last_unqueue_dir = stracpy(newdir);
+                        }
+
+                        if  ((pid = fork()) == 0)  {
+                                char    *argbuf[12];
+                                char    **ap = argbuf;
+
+                                *ap++ = xmludprog;
+                                 if  (conly)
+                                         *ap++ = "-n";
+                                 if  (vv)
+                                         *ap++ = "-v";
+                                 if  (ccan > 0)
+                                         *ap++ = ccan > 1? "-C": "-N";
+                                 *ap++ = (char *) "-j";
+                                 *ap++ = (char *) JOB_NUMBER(cj);
+                                 *ap++ = (char *) "-d";
+                                 *ap++ = Last_unqueue_dir;
+                                 *ap++ = (char *) "-f";
+                                 *ap++ = (char *) newjf;
+                                 *ap = (char *) 0;
+                                 execv(execprog, (char **) argbuf);
+                                 exit(E_SETUP);
+                        }
+                }
+                else  {
+                        const  char  *newdir = gtk_label_get_text(GTK_LABEL(unqd.dirsw));
+                        const  char  *newcf = gtk_label_get_text(GTK_LABEL(unqd.cfw));
+                        const  char  *newjf = gtk_label_get_text(GTK_LABEL(unqd.jfw));
+                        struct  stat    sbuf;
+
+                        if  (!execprog)
+                                 execprog = envprocess(EXECPROG);
+
+                        if  (!udprog)
+                                 udprog = envprocess(DUMPJOB);
+                        wprog = udprog;                                 /* So we know what to moan about */
+
+                        if  (newdir[0] == '\0')  {
+                                 doerror($EH{xmbtq unqueue no dir});
+                                 continue;
+                        }
+                        if  (newdir[0] != '/')  {
+                                disp_str = newdir;
+                                doerror($EH{xmbtq unqueue dir not abs});
+                                continue;
+                        }
+                        if  (stat(newdir, &sbuf) < 0  ||  (sbuf.st_mode & S_IFMT) != S_IFDIR)  {
+                                disp_str = newdir;
+                                doerror($EH{xmbtq unq not dir});
+                                continue;
+                        }
+                        if  (newcf[0] == '\0')  {
+                                doerror($EH{xmbtq no cmd file name});
+                                return;
+                        }
+
+                        /* Remember last unqueue directory for next time */
+
+                        if  (strcmp(newdir, Last_unqueue_dir) != 0)  {
+                                free(Last_unqueue_dir);
+                                Last_unqueue_dir = stracpy(newdir);
+                        }
+
+                        if  ((pid = fork()) == 0)  {
+                                char    *argbuf[8];
+                                char    **ap = argbuf;
+
+                                /* Child process */
+
+                                Ignored_error = chdir(Curr_pwd);        /* So it picks up the right config file */
+
+                                *ap++ = udprog;
+                                if  (conly)
+                                        *ap++ = "-n";
+                                *ap++ = (char *) JOB_NUMBER(cj);
+                                *ap++ = Last_unqueue_dir;
+                                *ap++ = (char *) newcf;
+                                *ap++ = (char *) newjf;
+                                *ap = (char *) 0;
+                                execv(execprog, (char **) argbuf);
+                                exit(E_SETUP);
+                        }
+                }
+
+                /* Main process ends up here */
+
+                if  (pid < 0)  {
+                        doerror($EH{xmbtq unqueue fork failed});
+                        continue;
+                }
 
 #ifdef  HAVE_WAITPID
-                        while  (waitpid(pid, &status, 0) < 0)
-                                ;
+                while  (waitpid(pid, &status, 0) < 0)
+                        ;
 #else
-                        while  (wait(&status) != pid)
-                                ;
+                while  (wait(&status) != pid)
+                        ;
 #endif
-                        if  (status == 0)       /* All ok */
-                                break;
+                if  (status == 0)       /* All ok */
+                        break;
 
-                        if  (status & 0xff)  {
-                                disp_arg[9] = status & 0xff;
-                                doerror(status & 0x80? $EH{xmbtq unqueue crashed}: $EH{xmbtq unqueue terminated});
-                                continue;
-                        }
-
-                        status = (status >> 8) & 0xff;
-                        disp_arg[0] = cj->h.bj_job;
-                        disp_str = qtitle_of(cj);
-
-                        switch  (status)  {
-                        default:
-                                disp_arg[1] = status;
-                                doerror($EH{xmbtq unqueue misc error});
-                                continue;
-                        case  E_SETUP:
-                                disp_str = udprog;
-                                doerror($EH{xmbtq no unq process});
-                                continue;
-                        case  E_JDFNFND:
-                                doerror($EH{xmbtq unq dir not found});
-                                continue;
-                        case  E_JDNOCHDIR:
-                                doerror($EH{xmbtq cannot chdir});
-                                continue;
-                        case  E_JDFNOCR:
-                                doerror($EH{xmbtq cannot create cmdfile});
-                                continue;
-                        case  E_JDJNFND:
-                                doerror($EH{xmbtq unq job not found});
-                                continue;
-                        case  E_CANTDEL:
-                                doerror($EH{xmbtq unq cannot del});
-                                continue;
-                        }
+                if  (status & 0xff)  {
+                        disp_arg[9] = status & 0xff;
+                        doerror(status & 0x80? $EH{xmbtq unqueue crashed}: $EH{xmbtq unqueue terminated});
+                        continue;
                 }
 
-                /* Child process */
+                status = (status >> 8) & 0xff;
+                disp_arg[0] = cj->h.bj_job;
+                disp_str = qtitle_of(cj);
 
-                Ignored_error = chdir(Curr_pwd);        /* So it picks up the right config file */
-                ap = argbuf;
-                *ap++ = udprog;
-                if  (copyonly)
-                        *ap++ = "-n";
-                *ap++ = JOB_NUMBER(cj);
-                *ap++ = Last_unqueue_dir;
-                *ap++ = (char *) newcf;
-                *ap++ = (char *) newjf;
-                *ap++ = (char *) 0;
-                execv(execprog, (char **) argbuf);
-                exit(E_SETUP);
+                switch  (status)  {
+                default:
+                        disp_arg[1] = status;
+                        doerror($EH{xmbtq unqueue misc error});
+                        continue;
+                case  E_SETUP:
+                        disp_str = wprog;
+                        doerror($EH{xmbtq no unq process});
+                        continue;
+                case  E_JDFNFND:
+                        doerror($EH{xmbtq unq dir not found});
+                        continue;
+                case  E_JDNOCHDIR:
+                        doerror($EH{xmbtq cannot chdir});
+                        continue;
+                case  E_JDFNOCR:
+                        doerror($EH{xmbtq cannot create cmdfile});
+                        continue;
+                case  E_JDJNFND:
+                        doerror($EH{xmbtq unq job not found});
+                        continue;
+                case  E_CANTDEL:
+                        doerror($EH{xmbtq unq cannot del});
+                        continue;
+                case  E_NOTIMPL:
+                        doerror($EH{No XML library});
+                        continue;
+                }
         }
+
+        /* End of dialog */
+
         gtk_widget_destroy(dlg);
 }
+
 
 void  cb_freeze(GtkAction *action)
 {

@@ -28,7 +28,7 @@ PARENT		=	..
 BASE		=	../..
 HDRS		=	$(PARENT)/hdrs
 CCFLAGS		=	-O @gcc_useful_options@	@funny_compiler_options@
-CFLAGS		=	$(CCFLAGS) -I$(HDRS) -I$(BASE)
+CFLAGS		=	$(CCFLAGS) -I$(HDRS) -I$(BASE)  @xmlinclude@
 LIBDIR		=	$(DESTDIR)@libdir@
 RPATH		=	@libdir@
 LDSHARED	=	ld -shared -o
@@ -39,37 +39,39 @@ RM		=	rm -f
 INSTALL		=	@INSTALL@
 INSTALL_DATA	=	@INSTALL_DATA@
 
-OBJECTS=advtime.o	altlen.o	calchash.o	condname.o \
-	disp_alt.o	disperror.o	envgetserv.o	envprocess.o \
-	getbtuser.o	helpprmpt.o	helprdalt.o	helprdn.o \
-	help_readl.o	helpvec.o	look_host.o	mkspid.o \
-	mmangle.o	mpermitted.o	ncstrncmp.o	net_feed.o \
-	open_ci.o	op_icf.o	packjstring.o	prin_gname.o \
-	prin_uname.o	qmatch.o	runpwd.o	spath.o	\
-	stracpy.o	stringsch.o	strread.o	versionprint.o
+OBJECTS=altlen.o	condname.o	getbtuser.o	getscript.o \
+	op_icf.o	runpwd.o	spath.o		stringsch.o \
+	helprdalt.o 	net_feed.o	mkspid.o	helpprmpt.o \
+	open_ci.o 	envgetserv.o	advtime.o	disp_alt.o \
+	packjstring.o 	qmatch.o	mpermitted.o	calchash.o \
+	disperror.o 	helpvec.o	mmangle.o	help_readl.o \
+	helprdn.o 	prin_gname.o	look_host.o	ncstrncmp.o \
+	prin_uname.o 	envprocess.o	strread.o	stracpy.o \
+	versionprint.o
 
 # libgnubatch_client is	for client programs
 
 CLIENTOBJS=\
 	cgifndjb.o	cgiuser.o	cgiutil.o	chkfuture.o \
-	doenv.o		doopts.o	dumpargs.o	dumpconds.o \
-	dumpcon.o	dumpecrun.o	dumpemode.o	dumpmode.o \
-	dumpnstr.o	dumpredirs.o	dumpstr.o	dumptime.o \
-	getxbuf.o	gprompt.o	helpnstate.o	helpargs.o \
-	htmllib.o	lookup_alt.o	makeovec.o	makevec.o \
-	open_cfile.o	optdisp.o	optkeyword.o    optpparm.o \
-	optprocess.o    opttime.o	optvars.o	produser.o \
-	rdoptfile.o     readreply.o	repmnthfix.o	rjfile.o \
-	rvfile.o        saveopts.o	shutilmsg.o	spitbtrstr.o \
-	spit_cond.o     spit_msg.o	spit_pparm.o	spit_redir.o \
-	spit_time.o     stringvec.o
+	dumpargs.o	dumpconds.o	dumpecrun.o	dumpemode.o \
+	dumpmode.o	dumpnstr.o	dumpredirs.o	dumptime.o \
+	getxbuf.o	gprompt.o	helpnstate.o	lookup_alt.o \
+	open_cfile.o	optdisp.o	optkeyword.o	optpparm.o \
+	optprocess.o	opttime.o	optvars.o	produser.o \
+	readreply.o	remsubops.o	repmnthfix.o	shutilmsg.o \
+	spit_cond.o	spit_msg.o	spit_pparm.o	spit_redir.o \
+	spit_time.o	xmlinit.o	xmlload.o	xmlsave.o \
+	rjfile.o	htmllib.o	spitbtrstr.o 	stringvec.o \
+	makeovec.o	helpargs.o	doenv.o 	rdoptfile.o \
+	dumpcon.o	saveopts.o	rvfile.o	makevec.o \
+	doopts.o	dumpstr.o
 
 # libgnubatch_curs is for clients which	use curses routines
 
 CURSOBJS=\
-	galts.o		getkey.o	helphdr.o	make_km.o \
-	setkey.o	wgets.o		whdrstr.o	whexnum.o \
-	wnum.o
+	galts.o		helphdr.o	setkey.o	wgets.o \
+	whdrstr.o	whexnum.o	wnum.o		make_km.o \
+	getkey.o
 
 LIBOBJECTS=$(OBJECTS:.o=.lo)
 LIBCLIENTOBJS=$(CLIENTOBJS:.o=.lo)
@@ -77,7 +79,7 @@ LIBCURSOBJS=$(CURSOBJS:.o=.lo)
 
 all:	$(OBJECTS) $(CLIENTOBJS) $(CURSOBJS)
 	libtool	--mode=link @CC@ $(CCFLAGS) -o $(LIB) $(LIBOBJECTS) -rpath $(RPATH) -version-info 1:0:0
-	libtool	--mode=link @CC@ $(CCFLAGS) -o $(LIBCLIENT) $(LIBCLIENTOBJS) -rpath $(RPATH) -version-info 1:0:0
+	libtool	--mode=link @CC@ $(CCFLAGS) -o $(LIBCLIENT) $(LIBCLIENTOBJS) @xmllib@ -rpath $(RPATH) -version-info 1:0:0
 	libtool	--mode=link @CC@ $(CCFLAGS) -o $(LIBCURS) $(LIBCURSOBJS) -rpath	$(RPATH) -version-info 1:0:0
 
 install: all

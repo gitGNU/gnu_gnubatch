@@ -88,6 +88,9 @@
 /* Define to 1 if you have the `c_s' library (-lc_s). */
 #undef HAVE_LIBC_S
 
+/* Define if XML library libxml2 is available */
+#undef HAVE_LIBXML2
+
 /* Define to 1 if you have the <limits.h> header file. */
 #undef HAVE_LIMITS_H
 

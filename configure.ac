@@ -133,6 +133,8 @@ AC_EGREP_CPP(yes,
 ],[],AC_DEFINE(unix))
 
 AC_SUBST(funny_compiler_options)
+AC_SUBST(xmlinclude)
+AC_SUBST(xmllib)
 AC_SUBST(gcc_useful_options)
 funny_compiler_options=''
 gcc_useful_options=''
@@ -430,7 +432,16 @@ AC_DEFINE(CURSES_OVERLAP_BUG)
 AC_MSG_RESULT(I think it fails))
 LIBS="$ac_save_libs"
 
+dnl Check for libxml2
+xmlinclude=''
+xmllib=''
+AC_CHECK_HEADER(libxml2/libxml/xmlexports.h,
+AC_DEFINE(HAVE_LIBXML2)
+xmlinclude='-I/usr/include/libxml2'
+xmllib='-lxml2')
+
 dnl Find maximum shm size and convert for size of jobs/vars
+
 AC_MSG_CHECKING(maximum shared memory size)
 AC_TRY_RUN([#include <stdio.h>
 #include <sys/types.h>
@@ -734,6 +745,7 @@ AH_TEMPLATE([ENVSIZE], [/Set to number of bytes in environment])
 AH_TEMPLATE([GETGROUPS_SAME_SIZE], [/Set if arg to getgroups is same as gid_t])
 AH_TEMPLATE([HAVE_DIRFD], [Define if directory-reading stuff has dirfd funct/macro])
 AH_TEMPLATE([HAVE_DD_FD], [Define if directory-reading stuff has dd_fd in dir structure])
+AH_TEMPLATE([HAVE_LIBXML2], [Define if XML library libxml2 is available])
 AH_TEMPLATE([HAVE_SIGSET], [Define if you have the sigset function.])
 AH_TEMPLATE([HAVE_TERMINFO], [Define if we are using the terminfo library not termcap])
 AH_TEMPLATE([HAVE_TIGETSTR], [Define if terminfo supports the TIGETSTR call])

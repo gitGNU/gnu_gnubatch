@@ -70,6 +70,9 @@ extern char *gen_vfmts();
 void  cb_viewopt()
 {
         GtkWidget  *dlg, *hbox, *qcomb, *ucomb, *gcomb, *nullq, *remh, *confdel;
+#ifdef  HAVE_LIBXML2
+        GtkWidget  *xmlfmtw;
+#endif
         char    *pr, **uglist, **up;
         int     cnt;
         struct  stringvec  possqs;
@@ -150,6 +153,13 @@ void  cb_viewopt()
         if  (Dispflags & DF_CONFABORT)
                 gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(confdel), TRUE);
 
+#ifdef  HAVE_LIBXML2
+        xmlfmtw = gprompt_checkbutton($P{xbtq viewopt save XML});
+        gtk_box_pack_start(GTK_BOX(GTK_DIALOG(dlg)->vbox), xmlfmtw, FALSE, FALSE, DEF_DLG_VPAD);
+        if  (xml_format)
+                gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(xmlfmtw), TRUE);
+#endif
+
         gtk_widget_show_all(dlg);
 
         if  (gtk_dialog_run(GTK_DIALOG(dlg)) == GTK_RESPONSE_OK)  {
@@ -187,7 +197,13 @@ void  cb_viewopt()
                         Dispflags |= DF_CONFABORT;
                 else
                         Dispflags &= ~DF_CONFABORT;
-                Dirty++;
+#ifdef  HAVE_LIBXML2
+                if  (gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(xmlfmtw)))
+                        xml_format = 1;
+                else
+                        xml_format = 0;
+#endif
+                Dirty = 1;
                 Last_j_ser = Last_v_ser = 0;
                 job_redisplay();
                 var_redisplay();
@@ -214,7 +230,7 @@ void  cb_saveopts()
 
         if  ((pid = fork()) == 0)  {
                 char    *jf = gen_jfmts(), *vf = gen_vfmts();
-                char    digbuf[4], *argbuf[16 + 8 * MAXMACS + 2 * MAXCVARS + 2 * MAXSEVARS];
+                char    digbuf[4], digbuf2[2], *argbuf[18 + 8 * MAXMACS + 2 * MAXCVARS + 2 * MAXSEVARS];
                 char    **ap = argbuf;
                 int     cnt;
                 *ap++ = gtkprog; /* Arg 0 is the program we're running */
@@ -224,6 +240,10 @@ void  cb_saveopts()
                 digbuf[2] = Dispflags & DF_CONFABORT? '1': '0';
                 digbuf[3] = '\0';
                 *ap++ = digbuf;
+                digbuf2[0] = xml_format? '1': '0';
+                digbuf2[1] = '\0';
+                *ap++ = "XBTRXMLFMT";                   /* I did mean that to keep sync with it */
+                *ap++ = digbuf2;
                 *ap++ = "XBTQDISPUSER";
                 *ap++ = Restru? Restru: "-";
                 *ap++ = "XBTQDISPGROUP";
@@ -289,10 +309,38 @@ void  cb_saveopts()
                 ;
 #endif
         if  (status != 0)  {
-                disp_arg[0] = status >> 8;
-                disp_arg[1] = status & 127;
-                doerror((status >> 8) + $EH{saveopts file error});
+                if  ((status & 127) != 0)  {
+                        disp_arg[0] = status & 127;
+                        doerror($EH{saveopts crashed});
+                }
+                else  {
+                        int     msg;
+
+                        disp_arg[0] = status >> 8;
+                        switch  (disp_arg[0])  {
+                        default:
+                                msg = $EH{saveopts unknown exit};
+                                break;
+                        case  E_NOMEM:
+                                msg = $EH{saveopts no memory};
+                                break;
+                        case  E_SETUP:
+                                msg = $EH{saveopts bad setup};
+                                break;
+                        case  E_NOPRIV:
+                                msg = $EH{saveopts no write};
+                                break;
+                        case  E_USAGE:
+                                msg = $EH{saveopts usage};
+                                break;
+                        case  E_BTEXEC2:
+                                msg = $EH{saveopts no exec};
+                                break;
+                        }
+                        doerror(msg);
+                }
                 return;
+
         }
         Dirty = 0;
 }
@@ -372,6 +420,12 @@ void  load_optfile()
                                 }
                         }
                 }
+                free(arg);
+        }
+
+        if  ((arg = optkeyword("XBTRXMLFMT")))  {               /* Use this one to sync with xbtr */
+                if  (arg[0])
+                        xml_format = arg[0] != '0';
                 free(arg);
         }
 
@@ -532,7 +586,7 @@ int  add_macro_to_list(const char *cmdtext, const char jorv, struct macromenitem
                         mlist[cnt].cmd = stracpy(cmdtext);
                         mlist[cnt].descr = descr;
                         setup_macro(jorv, mlist, cnt+1);
-                        Dirty++;
+                        Dirty = 1;
                         return  1;
                 }
         }
@@ -616,7 +670,7 @@ void  editmac(struct macupddata *mdata, const int cnt)
                 mdata->mlist[cnt].descr = stracpy(newd);
                 gtk_list_store_set(mdata->store, &iter, 0, cnt, 1, mdata->mlist[cnt].cmd, 2, mdata->mlist[cnt].descr, -1);
                 setup_macro(mdata->jorv, mdata->mlist, macnum);
-                Dirty++;
+                Dirty = 1;
                 break;
         }
 
@@ -646,7 +700,7 @@ void  delmac_clicked(struct macupddata *mdata)
                 free(mdata->mlist[seq].descr);
                 mdata->mlist[seq].cmd = 0;
                 mdata->mlist[seq].descr = 0;
-                Dirty++;
+                Dirty = 1;
         }
 }
 

@@ -54,7 +54,7 @@ void    versionprint(char **argv, const char *progvers, const int internal)
                                 prog = cp + 1;
                         pv = xlate_vers(progvers, pvers);
                         fprintf(stderr, "This is %s version %s, a component of GNUbatch version %s\n", prog, pv, GNUbatch_version);
-                        fputs("Copyright (C) 2009 Free Software Foundation, Inc.\n"
+                        fputs("Copyright (C) 2009-2013 Free Software Foundation, Inc.\n"
                               "This is free software; see the source for copying conditions.  There is NO\n"
                               "warranty; not even for MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.\n", stderr);
                         exit(0);

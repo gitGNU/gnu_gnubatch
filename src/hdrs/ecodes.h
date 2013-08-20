@@ -49,6 +49,7 @@
 #define E_NOFORK        202
 #define E_JOBQ          203
 #define E_VARL          204
+#define E_NOTIMPL       230
 #define E_SHEDERR       240
 #define E_BTEXEC1       244
 #define E_BTEXEC2       245

@@ -141,3 +141,7 @@ extern  const char *title_of(CBtjobRef);
 
 #define  JOBH_NUMBER(JHP)         host_prefix_long((JHP)->bj_hostid, (LONG) (JHP)->bj_job)
 #define  JOB_NUMBER(JP)         JOBH_NUMBER(&((JP)->h))
+
+extern  char    *getscript(BtjobRef, unsigned *);
+
+

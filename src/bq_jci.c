@@ -73,6 +73,7 @@ extern  LONG    wnum(WINDOW *, const int, struct sctrl *, const LONG);
 extern  const   char *qtitle_of(CBtjobRef);
 extern  char    *wgets(WINDOW *, const int, struct sctrl *, const char *);
 void    mvwhdrstr(WINDOW *, const int, const int, const char *);
+extern  int     askyorn(const int);
 
 static  char    Filename[] = __FILE__;
 
@@ -89,6 +90,8 @@ extern  char    *Curr_pwd,
 #define NULLCP          (char *) 0
 #define HELPLESS        ((char **(*)()) 0)
 
+extern  char    XML_jobdump;
+
 #define CINAME_P        3
 #define CIARGS_P        19
 #define CIPATH_P        6
@@ -104,8 +107,7 @@ static  struct  sctrl
  wns_ll = { $H{btq ci load lev}, HELPLESS, 5, 0, CILL_P, MAG_P, 1L, 0x7fffL, NULLCP },
  wns_nice = { $H{btq ci nice}, HELPLESS, 2, 0, CINICE_P, MAG_P, 0L, 39L, NULLCP },
  ud_dir = { $H{btq unqueue dir}, HELPLESS, 0, 0, 0, MAG_P|MAG_OK, 0L, 0L, NULLCP },
- ud_xf =  { $H{btq unqueue command file}, HELPLESS, CI_MAXNAME, 0, 0, MAG_P|MAG_OK, 0L, 0L, NULLCP },
- ud_jf =  { $H{btq unqueue job file}, HELPLESS, CI_MAXNAME, 0, 0, MAG_P|MAG_OK, 0L, 0L, NULLCP };
+ ud_xf =  { $H{btq unqueue command file}, HELPLESS, CI_MAXNAME, 0, 0, MAG_P|MAG_OK, 0L, 0L, NULLCP };
 
 static  char    *ci_arg0flg,    /* Mark substitute title for arg 0 */
                 *ci_expflag;    /* Mark do expansion of $n args */
@@ -185,6 +187,32 @@ static int  pok(char *name)
         return  1;
 }
 
+static  void    refreshjscrs()
+{
+        if  (hjscr)  {
+                 touchwin(hjscr);
+#ifdef  HAVE_TERMINFO
+                 wnoutrefresh(hjscr);
+#else
+                 wrefresh(hjscr);
+#endif
+         }
+         if  (tjscr)  {
+                 touchwin(tjscr);
+#ifdef  HAVE_TERMINFO
+                 wnoutrefresh(tjscr);
+#else
+                 wrefresh(tjscr);
+#endif
+         }
+         touchwin(jscr);
+#ifdef  HAVE_TERMINFO
+         wnoutrefresh(jscr);
+#else
+         wrefresh(jscr);
+#endif
+}
+
 /* View/edit command interpreters */
 
 int  ciprocess()
@@ -221,22 +249,7 @@ int  ciprocess()
                         goto  Cirefresh;
         }
         if  (srow == 0)  {
-                if  (hjscr)  {
-                        touchwin(hjscr);
-#ifdef  HAVE_TERMINFO
-                        wnoutrefresh(hjscr);
-#else
-                        wrefresh(hjscr);
-#endif
-                }
-                if  (tjscr)  {
-                        touchwin(tjscr);
-#ifdef  HAVE_TERMINFO
-                        wnoutrefresh(tjscr);
-#else
-                        wrefresh(tjscr);
-#endif
-                }
+                refreshjscrs();
                 doerror(jscr, $E{btq no command interps});
 #ifdef  CURSES_MEGA_BUG
                 clear();
@@ -357,22 +370,7 @@ bv:                     err_no = $E{btq ci off beginning};
                 clear();
                 refresh();
 #endif
-                if  (hjscr)  {
-                        touchwin(hjscr);
-#ifdef  HAVE_TERMINFO
-                        wnoutrefresh(hjscr);
-#else
-                        wrefresh(hjscr);
-#endif
-                }
-                if  (tjscr)  {
-                        touchwin(tjscr);
-#ifdef  HAVE_TERMINFO
-                        wnoutrefresh(tjscr);
-#else
-                        wrefresh(tjscr);
-#endif
-                }
+                refreshjscrs();
                 return  -1;
 
         case  $K{btq key add ci}:
@@ -656,8 +654,8 @@ char    **listcis(char *prefix)
 /* Stuff to implement the unqueue command
    First parameter stuff from message file */
 
-static  char    *udprog, *udprompt, *copyprompt, *dirprompt, *xfilep, *jfilep, *udcverb, *udccanc;
-static  HelpaltRef      udopts, verbopts, cancopts;
+static  char    *udprog, *xmludprog, *udprompt, *copyprompt, *dirprompt, *xfilep, *jfilep, *udcverb, *udccanc;
+static  HelpaltRef      udopts, verbopts, cancopts, fvopts, fcopts;
 static  int     maxp;
 
 static  void    loadunqparams()
@@ -666,6 +664,7 @@ static  void    loadunqparams()
                 return;
 
         udprog = envprocess(DUMPJOB);
+        xmludprog = envprocess(XMLDUMPJOB);
         dirprompt = gprompt($P{btq unqueue dir});
         xfilep = gprompt($P{btq unqueue command file});
         jfilep = gprompt($P{btq unqueue job file});
@@ -676,8 +675,10 @@ static  void    loadunqparams()
         udcverb = gprompt($P{btq unq verbose});
         cancopts = galts(jscr, $Q{btq unq jobstate}, 2);
         udccanc = gprompt($P{btq unq jobstate});
+        fvopts = galts(jscr, $Q{btq unq set verbose}, 2);
+        fcopts = galts(jscr, $Q{btq unq set jobstate}, 3);
         maxp = r_max(strlen(dirprompt), r_max(strlen(xfilep), r_max(strlen(jfilep), r_max(strlen(udcverb), strlen(udccanc)))));
-        ud_xf.col = ud_jf.col = ud_dir.col = maxp + BOXWID + 1;
+        ud_xf.col = ud_dir.col = maxp + BOXWID + 1;
         ud_dir.size = COLS - maxp - BOXWID - 2;
 }
 
@@ -716,8 +717,12 @@ static  char    *get_unqueue_dir(WINDOW *cw)
 
         mvwaddstr(cw, 2+BOXWID, BOXWID, dirprompt);
         ws_fill(cw, 2+BOXWID, &ud_dir, Curr_pwd);
-        mvwaddstr(cw, 3+BOXWID, BOXWID, xfilep);
-        mvwaddstr(cw, 4+BOXWID, BOXWID, jfilep);
+        if  (XML_jobdump)
+                mvwaddstr(cw, 3+BOXWID, BOXWID, jfilep);
+        else  {
+                mvwaddstr(cw, 3+BOXWID, BOXWID, xfilep);
+                mvwaddstr(cw, 4+BOXWID, BOXWID, jfilep);
+        }
         reset_state();
         Ew = cw;
         Exist = Curr_pwd;
@@ -759,6 +764,11 @@ static  char    *get_unqueue_dir(WINDOW *cw)
          }
 }
 
+/* Get job or command file name.
+   Note that it is assumed:
+   1. We are "cd-ed" to the directory to be used.
+   2. We are using the Real Uid */
+
 static  char    *get_unqueue_file(WINDOW *cw, const int row)
 {
         char    *resf, *Exist = "";
@@ -769,17 +779,39 @@ static  char    *get_unqueue_file(WINDOW *cw, const int row)
                 if  (!(resf = wgets(cw, row, &ud_xf, Exist)))
                         return  (char *) 0;
 
+                /* If dumping as XML stick the suffix on the end */
+
+                if  (XML_jobdump)  {
+                        int     lng = strlen(resf);
+                        if  (lng < sizeof(XMLJOBSUFFIX)-1  ||  ncstrcmp(resf + lng - sizeof(XMLJOBSUFFIX) + 1, XMLJOBSUFFIX) != 0)
+                                strcat(resf, XMLJOBSUFFIX);
+                }
+
+                /* Check we are using a plain file name */
+
                 disp_str = resf;
                 if  (strchr(resf, '/'))  {
                         doerror(cw, $E{btq unq not a file name});
                         continue;
                 }
 
-                if  (stat(resf, &sbuf) < 0  || (sbuf.st_mode & S_IFMT) == S_IFREG)
+                /* If file doesn't exist, OK otherwise check it isn't a directory or something */
+
+                if  (stat(resf, &sbuf) < 0)
                         return  stracpy(resf);
 
-                doerror(cw, $E{btq unq not a regular file});
                 Exist = resf;
+
+                if  ((sbuf.st_mode & S_IFMT) == S_IFREG)  {
+                        int     ov = askyorn($PH{Confirm overwrite unq});
+                        refreshjscrs();
+                        touchwin(cw);
+                        wrefresh(cw);
+                        if  (ov)
+                                return  stracpy(resf);
+                }
+                else
+                        doerror(cw, $E{btq unq not a regular file});
         }
 }
 
@@ -787,42 +819,76 @@ static  int     do_unqueue_int(BtjobRef jp, const int whichopt)
 {
         PIDTYPE pid;
         WINDOW  *cw;
-        char   *Direc, *Xfname, *Jfname;
+        char   *Direc, *Xfname = (char *) 0, *Jfname = (char *) 0;
+        int     isverb = 0, iscanc = 0;
 
-        if  (!(cw = make_unq_prompt_win(jp, udprompt, 5)))
+        if  (XML_jobdump)  {
+                int     jsy, dummy;
+                getyx(jscr, jsy, dummy);
+                if  ((isverb = rdalts(jscr, jsy, 0, fvopts, -1, $H{btq unq set verbose})) < 0)
+                        return  -1;
+                if  ((iscanc = rdalts(jscr, jsy, 0, fcopts, 0, $H{btq unq set jobstate})) < 0)
+                        return  -1;
+                cw = make_unq_prompt_win(jp, udprompt, 4);
+        }
+        else
+                cw = make_unq_prompt_win(jp, udprompt, 5);
+
+        if  (!cw)
                 return  0;
 
+        /* Need to swap to Realuid to ensure we only mess with directories the user has access to */
+
+        SWAP_TO(Realuid);
         Direc = get_unqueue_dir(cw);
-        Ignored_error = chdir(spdir);
 
         if  (!Direc)  {
+                SWAP_TO(Daemuid);
+                Ignored_error = chdir(spdir);
                 delwin(cw);
                 return  -1;
         }
 
-        if  (!(Xfname = get_unqueue_file(cw, 3 + BOXWID)))  {
-                free(Direc);
-                delwin(cw);
-                return  -1;
+        if  (XML_jobdump)  {
+                if  (!(Jfname = get_unqueue_file(cw, 3 + BOXWID)))  {
+                        SWAP_TO(Daemuid);
+                        Ignored_error = chdir(spdir);
+                        free(Direc);
+                        delwin(cw);
+                        return  -1;
+                }
         }
+        else  {
+                if  (!(Xfname = get_unqueue_file(cw, 3 + BOXWID)))  {
+                        SWAP_TO(Daemuid);
+                        Ignored_error = chdir(spdir);
+                        free(Direc);
+                        delwin(cw);
+                        return  -1;
+                }
 
-        if  (!(Jfname = get_unqueue_file(cw, 4 + BOXWID)))  {
-                free(Xfname);
-                free(Direc);
-                delwin(cw);
-                return  -1;
+                if  (!(Jfname = get_unqueue_file(cw, 4 + BOXWID)))  {
+                        SWAP_TO(Daemuid);
+                        Ignored_error = chdir(spdir);
+                        free(Xfname);
+                        free(Direc);
+                        delwin(cw);
+                        return  -1;
+                }
         }
 
         /* Ok now do the business */
 
-        delwin(cw);
+        SWAP_TO(Daemuid);
         Ignored_error = chdir(spdir);
+        delwin(cw);
 
         if  ((pid = fork()))  {
                 int     status;
 
                 free(Direc);
-                free(Xfname);
+                if  (Xfname)
+                        free(Xfname);
                 free(Jfname);
 
                 if  (pid < 0)  {
@@ -870,29 +936,48 @@ static  int     do_unqueue_int(BtjobRef jp, const int whichopt)
                  case  E_CANTDEL:
                          doerror(jscr, $E{btq unq cannot delete});
                          return  -1;
+                 case  E_NOTIMPL:
+                         doerror(jscr, $E{No XML library});
+                         return  -1;
                  }
         }
         else  {         /* Child process */
-                char    *arg0;
-                const   char    **ap, *arglist[7];
+                char    *prog = udprog, *arg0;
+                const   char    **ap, *arglist[12];
 
+                if  (XML_jobdump)
+                        prog = xmludprog;
                 setuid(Realuid);
                 Ignored_error = chdir(Curr_pwd);        /* So that it picks up config file correctly */
-                if  (!(arg0 = strrchr(udprog, '/')))
-                        arg0 = udprog;
+                if  (!(arg0 = strrchr(prog, '/')))
+                        arg0 = prog;
                 else
                         arg0++;
 
                 ap = arglist;
                 *ap++ = arg0;
-                if  (whichopt > 0)              /* No delete */
+                if  (whichopt > 0)              /* No delete applies to both progs */
                         *ap++ = "-n";
-                *ap++ = JOB_NUMBER(jp);
-                *ap++ = Direc;
-                *ap++ = Xfname;
-                *ap++ = Jfname;
+                if  (XML_jobdump)  {
+                        if  (isverb)
+                                *ap++ = "-v";
+                        if  (iscanc > 0)
+                                *ap++ = iscanc > 1? "-C": "-N";
+                        *ap++ = "-j";
+                        *ap++ = JOB_NUMBER(jp);
+                        *ap++ = "-d";
+                        *ap++ = Direc;
+                        *ap++ = "-f";
+                        *ap++ = Jfname;
+                }
+                else  {
+                        *ap++ = JOB_NUMBER(jp);
+                        *ap++ = Direc;
+                        *ap++ = Xfname;
+                        *ap++ = Jfname;
+                }
                 *ap = (char *) 0;
-                execv(udprog, (char **) arglist);
+                execv(prog, (char **) arglist);
                 _exit(E_SETUP);
         }
 }
@@ -1020,8 +1105,8 @@ int  dounqueue(BtjobRef jp)
 
         if  (whichopt < 2)
                 ret = do_unqueue_int(jp, whichopt);
-
-        ret = do_copyoptsinjob(jp, whichopt);
+        else
+                ret = do_copyoptsinjob(jp, whichopt);
 
  #ifdef  CURSES_MEGA_BUG
         refresh();

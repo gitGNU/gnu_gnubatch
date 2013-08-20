@@ -40,6 +40,8 @@ DEFINE	LIB3 (lib) :
 		envprocess.c ncstrncmp.c prin_gname.c prin_uname.c qmatch.c
 		runpwd.c spath.c stracpy.c strread.c mkspid.c;
 
+DEFINE  REMSUB (lib) :  remsubops.c;
+
 DEFINE	DUMPLIB (lib) :
 		dumpargs.c dumpcon.c dumpconds.c dumpecrun.c dumpemode.c dumpmode.c dumpnstr.c
 		dumpredirs.c dumpstr.c dumptime.c spit_cond.c spit_msg.c spit_pparm.c spit_redir.c
@@ -99,6 +101,7 @@ btrest.help (helpmsg) :
 	btjdel		btjlist		btjstat		btquit
 	btr		btstart		btuchange	btulist
 	btvar		btvlist		jobdump		rbtr
+	bts
 	btjcgi		btjvcgi		btjdcgi		btjccgi
 	btjcrcgi	btvcgi		btvccgi
 	rbtjcgi		rbtjccgi	rbtjdcgi	rbtjvcgi
@@ -176,6 +179,9 @@ MODULES btquit =
 MODULES btr =
 	btr.c LIB0 LIB1 LIB2 LIB3 lib/chkfuture.c BTR_INLINE DISPOPT_LIB JOPTS_LIB FREEZE_INLINE ;
 
+MODULES bts =
+        bts.c LIB1 LIB2 LIB3 REMSUB; 
+
 MODULES btstart =
 	btstart.c LIB0 LIB1 LIB2 LIB3 ;
 
@@ -195,7 +201,7 @@ MODULES jobdump =
 	jobdump.c LIB0 LIB1 LIB2 LIB3 JOBDUMP_INLINE ;
 
 MODULES rbtr =
-	rbtr.c rbt_access.c rbt_job.c lib/chkfuture.c LIB0 LIB1 LIB2 LIB3 BTR_INLINE JOPTS_LIB FREEZE_INLINE ;
+	rbtr.c rbt_access.c rbt_job.c lib/chkfuture.c LIB0 LIB1 LIB2 LIB3 REMSUB BTR_INLINE JOPTS_LIB FREEZE_INLINE ;
 
 MODULES btq =
 	btq.c		bq_jlist.c	bq_jobops.c	bq_viewj.c
@@ -246,11 +252,11 @@ MODULES xbtq (gtk) =
 
 MODULES xmbtr (motif) =
 	xmbtr.c xmbr_jlist.c xmbr_cbs.c xmbr_jcall.c xmbr_jobpar.c xmbr_remsub.c
-	xmbr_vlist.c xmbr_files.c xmbr_jldsv.c xm_commlib.c bqr_common.c LIB0 LIB1 LIB2 LIB3 XMBTR_INLINE DISPOPT_LIB JOPTS_LIB JOBDUMP_INLINE;
+	xmbr_vlist.c xmbr_files.c xmbr_jldsv.c xm_commlib.c bqr_common.c LIB0 LIB1 LIB2 LIB3 XMBTR_INLINE REMSUB DISPOPT_LIB JOPTS_LIB JOBDUMP_INLINE;
 
 MODULES xbtr (gtk) =
 	xbtr.c xbr_jlist.c xbr_cbs.c xbq_jcall.c xbq_jobpar.c xbr_remsub.c xbr_jldsv.c gtk_lib.c
-	gtk_modebits.c LIB0 LIB1 LIB2 LIB3 XMBTR_INLINE DISPOPT_LIB JOPTS_LIB JOBDUMP_INLINE;
+	gtk_modebits.c LIB0 LIB1 LIB2 LIB3 XMBTR_INLINE REMSUB DISPOPT_LIB JOPTS_LIB JOBDUMP_INLINE;
 
 MODULES	btfilemon =
 	btfilemon.c LIB2 LIB3 BTFILEMON_INLINE;
@@ -989,6 +995,8 @@ E,H{No listening port} ++
 "No TCP listening port found",
 "Some problem with your services database - no port for listening"
 
+E{btjdel file name too long} ++         "File name too long in %P argument"
+
 E,H{No xbnetserv TCP service} = 155
 "Cannot find TCP service name. Maybe you need to set up
 the TCP service port gnubatch-netserv in /etc/services.",
@@ -1056,6 +1064,10 @@ E,H{Unknown queue result message} ++
 "Unknown queue result message %d0",
 "Some unexpected message %d0 returned from remote host."
 
+E,H{No XML library} ++
+"Built without XML library",
+"Cannot complete this operation as this version was built without the XML library"
+
 [
 Btstart
 ]
@@ -1119,6 +1131,25 @@ E{btjccrcgi no data} = ROUND(@, 10)	"No job data (script for job) supplied"
 E{btjcrcrgi cant reopen temp file} ++	"Cannot reopen temporary file for create from file"
 
 E{btjcgi no mode perm} = ROUND(@, 10)	"You do not have permission to change modes of job %s"
+
+E{Bts no files} = 280                   "%P: no files to work on"
+E{Bts cannot open file} ++              "%P: Cannot open argument file %s"
+E{Bts no permission on file}++          "%P: No permission to open file %s"
+E{Bts other error file} ++              "%P: Other error (%E) opening %s"
+E{Bts aborting due to arg errors} ++    "%P: Aborting had %d0 error(s) in args"
+E{Bts invalid format file} ++           "%P: Invalid format XML file %s"
+E{Bts invalid conds} ++                 "%P: Invalid conditions in file %s"
+E{Bts invalid asses} ++                 "%P: Invalid assignments in file %s"
+E{Bts too many strings} ++
+"%P: Sorry job in %s has too many strings to pack into currently-compiled version"
+E{Bts unknown error} ++                 "%P: Unknown XML error parsing file %s"
+E{Bts invalid priority} ++              "%P: Invalid priority %d0 in job file %s, should be between %d1 and %d2"
+E{Bts invalid load level} ++            "%P: Load level %d0 in saved job %s is invalid max for user is %d1"
+E{Bts invalid directory} ++             "%P: No directory given for job file %s"
+E{Bts cannot set mode} ++               "%P: Modes in job file %s differ from default for user %R"
+E{Bts write script fail} ++
+"%P: Cannot write script for job file %s to file.
+Error code was %E"
 
 [
 API error codes
@@ -1898,10 +1929,26 @@ A{btr arg freeze home} ++ COPY		"freeze-home"
 S{Largest btr arg} = {btr arg done}
 
 [
+Argument syntax for bts
+]
+
+A{bts arg explain} = 480                "?,explain"
+A{bts arg verbose} ++ COPY              "v,verbose"
+A{bts arg quiet} ++ COPY                "q,quiet"
+A{bts arg verbose as file} ++ COPY      "f,verbose-as-file"
+A{bts arg queuehost} ++ COPY            "Q,host"
+A{bts arg host as file} ++ COPY         "F,host-as-file"
+A{bts arg cancelled} ++ COPY            "C,cancelled"
+A{bts arg normal} ++ COPY               "N,normal"
+A{bts arg state as file} ++ COPY        "S,state-as-file"
+A{bts arg freeze current} ++ COPY       "freeze-current"
+A{bts arg freeze home} ++ COPY          "freeze-home"
+
+[
 Argument syntax for btjchange
 ]
 
-A{btjchange arg explain} = ROUND(@, 20)	"?,explain"
+A{btjchange arg explain} = 160	"?,explain"
 A{btjchange arg mail} ++ COPY		"m,mail-message"
 A{btjchange arg write} ++ COPY		"w,write-message"
 A{btjchange arg title} ++ COPY		"h,title"
@@ -1959,7 +2006,7 @@ A{btjchange arg freeze home} ++ COPY	"freeze-home"
 Argument syntax for btvar
 ]
 
-A{btvar arg explain} = ROUND(@, 20)	"?,explain"
+A{btvar arg explain} = 220	"?,explain"
 A{btvar arg cancel} ++ COPY		"X,cancel"
 A{btvar arg fstring} ++ COPY		"S,force-string"
 A{btvar arg create} ++ COPY		"C,create"
@@ -1989,7 +2036,7 @@ A{btvar arg freeze home} ++ COPY	"freeze-home"
 Argument syntax for btjdel
 ]
 
-A{btjdel arg explain} = ROUND(@, 20)	"?,explain"
+A{btjdel arg explain} = 260	"?,explain"
 A{btjdel arg noforce} ++ COPY		"n,N,no-force"
 A{btjdel arg force} ++ COPY		"y,Y,force"
 A{btjdel arg nodel} ++ COPY		"k,do-not-delete"
@@ -2001,6 +2048,7 @@ A{btjdel arg nounqueue} ++ COPY		"e,do-not-unqueue"
 A{btjdel arg jobpref} ++ COPY		"J,job-prefix"
 A{btjdel arg cmdpref} ++ COPY		"C,command-prefix"
 A{btjdel arg dir} ++ COPY		"D,directory"
+A{btjdel arg xml unq} ++ COPY           "X,xml-unqueue"
 A{btjdel arg freeze current} ++ COPY	"freeze-current"
 A{btjdel arg freeze home} ++ COPY	"freeze-home"
 
@@ -2008,7 +2056,7 @@ A{btjdel arg freeze home} ++ COPY	"freeze-home"
 Argument syntax for btjlist
 ]
 
-A{btjlist arg explain} = ROUND(@, 20)	"?,explain"
+A{btjlist arg explain} = 280	"?,explain"
 A{btjlist arg loco} ++ COPY		"L,local-only"
 A{btjlist arg execrems} ++ COPY		"r,include-exec-remotes"
 A{btjlist arg allrems} ++ COPY		"R,include-all-remotes"
@@ -2035,7 +2083,7 @@ A{btjlist arg freeze home} ++ COPY	"freeze-home"
 Argument syntax for btvlist
 ]
 
-A{btvlist arg explain} = ROUND(@, 20)	"?,explain"
+A{btvlist arg explain} = 320	"?,explain"
 A{btvlist arg loco} ++ COPY		"L,local-only"
 A{btvlist arg inclrems} ++ COPY		"R,include-remotes"
 A{btvlist arg format} ++ COPY		"F,format"
@@ -2052,7 +2100,7 @@ A{btvlist arg freeze home} ++ COPY	"freeze-home"
 Argument syntax for btulist
 ]
 
-A{btulist arg explain} = ROUND(@, 20)	"?,explain"
+A{btulist arg explain} = 340	"?,explain"
 A{btulist arg sort user} ++ COPY	"u,user-name-sort"
 A{btulist arg sort group} ++ COPY	"g,group-name-sort"
 A{btulist arg sort uid} ++ COPY		"n,numeric-user-sort"
@@ -2071,7 +2119,7 @@ A{btulist arg freeze home} ++ COPY	"freeze-home"
 Argument syntax for btuchange
 ]
 
-A{btuchange arg explain} = ROUND(@, 20)		"?,explain"
+A{btuchange arg explain} = 360		"?,explain"
 A{btuchange arg setdefs} ++ COPY		"D,set-defaults"
 A{btuchange arg setusers} ++ COPY		"u,set-users"
 A{btuchange arg copydefs} ++ COPY		"A,copy-defaults"
@@ -2097,7 +2145,7 @@ A{btuchange arg freeze home} ++ COPY		"freeze-home"
 Argument syntax for btcilist
 ]
 
-A{btcilist arg explain} = ROUND(@, 10)		"?,explain"
+A{btcilist arg explain} = 390		"?,explain"
 A{btcilist arg host} ++ COPY			"Q,host"
 A{btcilist arg freeze current} ++ COPY		"freeze-current"
 A{btcilist arg freeze home} ++ COPY		"freeze-home"
@@ -2106,7 +2154,7 @@ A{btcilist arg freeze home} ++ COPY		"freeze-home"
 Argument syntax for btcichange
 ]
 
-A{btcichange arg explain} = ROUND(@, 10)	"?,explain"
+A{btcichange arg explain} = 400         	"?,explain"
 A{btcichange arg add} ++ COPY			"A,add"
 A{btcichange arg delete} ++ COPY		"D,delete"
 A{btcichange arg update} ++ COPY		"U,update"
@@ -2135,7 +2183,7 @@ A{btjstat arg freeze home} ++ COPY	"freeze-home"
 Argument defs for btstart
 ]
 
-A{btstart arg explain} = ROUND(@, 20)	"?,explain"
+A{btstart arg explain} = 460	"?,explain"
 A{btstart arg initll} ++ COPY		"l,initial-load-level"
 A{btstart arg jsize} ++ COPY		"j,initial-job-size"
 A{btstart arg vsize} ++ COPY		"v,initial-var-size"
@@ -2149,7 +2197,7 @@ A{btstart arg freeze home} ++ COPY	"freeze-home"
 Argument syntax for bthols
 ]
 
-A{bthols arg explain} = ROUND(@, 10)	"?,explain"
+A{bthols arg explain} = 470     	"?,explain"
 A{bthols arg clear} ++ COPY		"C,clear"
 A{bthols arg noclear} ++ COPY		"r,no-clear"
 A{bthols arg display} ++ COPY		"d,display"
@@ -2181,6 +2229,8 @@ A{btq arg justu} ++			"u,just-user"
 A{btq arg justg} ++			"g,just-group"
 A{btq arg nullqs} ++			"z,null-queues"
 A{btq arg no nullqs} ++			"Z,no-null-queues"
+A{btq arg XML fmt} ++                   "X,xml-format"
+A{btq arg no XML fmt} ++                "D,no-xml-format"
 
 [
 Argument defs for btuser
@@ -2285,6 +2335,7 @@ Args are:
            -S n    sleep for n seconds waiting for jobs to die
            -u      Unqueue job to current directory
                    (do not delete if -k given)
+           -X      Unqueue as single XML file
            -e      Cancel unqueue
       -J f -C f    Reset job/file prefixes (suffix job number)
            -K n    Send a kill to the job
@@ -2400,6 +2451,22 @@ E{btjstat explain} ++
 "   %P [-d] [-s states] jobnumber
     return exit code of 0 if job is in given state(s), 1 otherwise.
     default state is 'run'."
+
+[
+Usage options - bts
+]
+
+E{bts explain} = 19
+"%P [options] files:
+
+-v verbose (display job numbers)
+-q quiet (do not display)
+-f display job numbers if set in file
+-Q host set host name to queue to - for local host
+-F host as set in file
+-C cancelled
+-N normal
+-S state of job as in file"
 
 [
 Usage options - bthols
@@ -2525,7 +2592,7 @@ E{Bthols cannot write} ++ "Cannot open %s for writing"
 E{Bthols format error} ++ "Input file format error, expecting month: days"
 E{Bthols invalid month} ++  "Unknown month %s"
 E{Bthols invalid day in month} ++ "Invalid day number %d0 in month %s"
-E{Bthols write error} ++ "Holiday write file error %E"
+E{Bthols write error} ++ "Holiday write file error %E" 
 
 ######################################################################
 ######################################################################
@@ -3305,6 +3372,34 @@ P,H{btq unq jobstate}
 "This option determines whether you want jobs to
 start off cancelled or not."
 
+(0)     R               {btq unq set verbose} ++        "Not set"
+(1)     Q               {btq unq set verbose}           "Verbose"
+
+P,H{btq unq set verbose}
+"Set verbose",
+"This option marks the saved job so that without any options a message
+is displayed on successful submission"
+
+(0)     R               {btq unq set jobstate} ++       "Current state"
+(1)     Q               {btq unq set jobstate}          "Force run"
+(2)     Q               {btq unq set jobstate}          "Force canc"
+
+P,H{btq unq set jobstate}
+"Force set canc/run",
+"This option can be used to force the saved state of the job to
+be ready to run or cancelled or as the current state of the job"
+
+P,H{Confirm overwrite unq} ++
+"OK to overwrite",
+"The file %s already exists. Is it OK to overwrite it"
+
+P{xbtq unq force verbose} ++            "Force verbose on requeue"
+P{xbtq unq setcanc lab} ++              "Cancelled setting"
+
+(0)R{xbtq unq setcanc} ++               "As job"
+(1)Q{xbtq unq setcanc} COPY             "Set runnable"
+(2)Q{xbtq unq setcanc} COPY             "Set cancelled"
+
 [
 Variable creation
 ]
@@ -3661,6 +3756,7 @@ P{btq opt helpclr} ++		"Clear help message:"
 P{btq opt helpbox} ++		"Help messages     :"
 P{btq opt errbox} ++		"Error messages    :"
 P{btq opt initscr} ++		"Screen on entry   :"
+P{btq opt xml fmt} ++           "XML unqueue format:"
 
 N{btq opt init cursor} = {btq opt queue} - 2
 N{btq opt start row} = {btq opt queue} - 1
@@ -3687,7 +3783,8 @@ Define order in which prompts appear
 ({btq opt helpclr})	N	{btq opt helpbox}
 ({btq opt helpbox})	N	{btq opt errbox}
 ({btq opt errbox})	N	{btq opt initscr}
-({btq opt initscr})	N	-1
+({btq opt initscr})	N	{btq opt xml fmt}
+({btq opt xml fmt})     N       -1
 
 [
 Help and prompts are generated by multiplying by 10
@@ -3777,6 +3874,14 @@ P{btq opt initscr} * 10 + 1
 
 P{btq opt initscr} * 10 + 2
 "Don't care"
+
+H,P{btq opt xml fmt} * 10
+"Please indicate whether you want job files saved in single-file
+XML files or a separate job file and command file",
+"Separate files"
+
+P{btq opt xml fmt} * 10 + 1
+"Single XML file"
 
 [
 Default format strings
@@ -4974,6 +5079,16 @@ P,H{xmbtr job unchanged confirm} ++
 "You didn't change the job since the last job you submitted.
 I thought I'd ask before you get identical jobs."
 
+P,H{xbtr delete legacy job files} ++
+"Delete legacy job files",
+"This job is being saved in XML format, do you want to
+delete the old legacy format files"
+
+P,H{xbtr delete XML job file} ++
+"Delete XML job file",
+"This job is being saved in legacy format, do you want to
+delete the XML job file"
+
 [
 Error messages for xmbtq/xmbtr etc
 ]
@@ -5541,6 +5656,36 @@ E,H{xbtq no ifnposs selected} ++
 "You didn't specify an action if the job cannot be
 executed - please specify one."
 
+E,H{xbtq no open job file} = 340
+"Could not open job file",
+"Could not open the job file selected"
+
+E,H{xbq invalid format job file} ++
+"Invalid format job file",
+"Job file has invalid format.
+Maybe it is not an XML one?"
+
+E,H{xbq invalid conditions} ++
+"Invalid conditions in job file",
+"The job file has invalid saved conditions"
+
+E,H{xbq invalid assignments} ++
+"Invalid assignments in job file",
+"The job file has invalid assignments"
+
+E,H{xbq too many strings} ++
+"Too many strings in job file",
+"The build job structure size is too small
+to accommodate the strings set in the job file"
+
+E,H{xbq cannot write job file} ++
+"Cannot write job file",
+"Unable to save job file for user %R"
+
+E,H{xbtr no script} ++
+"No script on job",
+"Cannot save job until script has been supplied"
+
 [
 xmbtr help
 ]
@@ -5572,7 +5717,7 @@ H{xmbtr options menu help} ++
 
 H{xmbtr defaults menu help} ++
 "This menu sets up default options
-You can save the defaults to the current or home directories.
+You can save the defaults to the current or home directories. 
     Queue          -  set queue name
     Set runnable   -  jobs should be ready to run when submitted
     Set cancelled  -  jobs should be in cancelled state
@@ -5883,7 +6028,8 @@ E{btq explain} = 80
        -r   display network wide jobs
        -q p only display jobs with the prefix pattern p
        -z -Z include/suppress jobs with null queue name
-       -u user -g group"
+       -u user -g group
+       -X xml format -D separate file format"
 
 [
 Btuser explain
@@ -6145,6 +6291,7 @@ P{xbtq viewopt groups lab} ++		"Group(s) to display"
 P{xbtq viewopt include null} ++		"Include null queue"
 P{xbtq viewopt remote hosts} ++		"Display remote jobs/vars"
 P{xbtq viewopt confirm delete} ++	"Confirm delete jobs/vars"
+P{xbtq viewopt save XML} ++             "Unqueue jobs as XML single files"
 
 P{xbtq macname dlg} = ROUND(@, 5)	"Set macro name"
 P{xbtq macname lab} ++			"Macro name"
@@ -6284,7 +6431,7 @@ P{xbtq del redir} ++			"Delete redir"
 P{xbtq unqueue dialogtit} = ROUND(@, 5)	"Unqueue job"
 P{xbtq unqueue cmd dlg title} ++	"Unqueue shell command"
 P{xbtq unqueue job dlg title} ++	"Unqueue job file"
-P{xbtq unqueuing job} ++		"Unqueeing job number"
+P{xbtq unqueuing job} ++		"Unqueueing job number"
 P{xbtq copy no delete} ++		"Copy only, no delete"
 P{xbtq unqueue directory} ++		"Directory to copy to"
 P{xbtq shell script} ++			"Shell script file"
@@ -6376,43 +6523,57 @@ P{xbtq hols dlgtit} = ROUND(@, 5)	"Holidays"
 XBTR prompts etc
 ]
 
-P{xbtr app title} = ROUND(@, 50)			"GNUbatch Job Submission"
-P{xbtr job queue dlgtit} = ROUND(@, 5)			"Set job queue prefix"
+P{xbtr app title} = 1950        			"GNUbatch Job Submission"
+P{xbtr job queue dlgtit} = 1955		               	"Set job queue prefix"
 P{xbtq job queue lab} ++				"Job queue"
 P{xbtr jqueue queue lab} ++				"Job queue"
 P{xbtr jqueue user grp lab} ++				"User/group"
 P{xbtr jqueue verbose} ++				"Verbose messages"
-P{xbtr default host dlgtit} = ROUND(@, 5)		"Default remote host"
-P{xbtr remote host dlgtit} ++				"Remote host"
-P{xbtr open job dlgtit} = ROUND(@, 5)			"Open job file"
+P{xbtr remote host dlgtit} = 1961			"Remote host"
+P{xbtr open legacy job dlgtit} = 1964                   "Open legacy job file"
+P{xbtr open job dlgtit} = 1965  			"Open job file"
 P{xbtr set cmd file dlgtit} ++				"Set command file name"
 P{xbtr set job file dlgtit} ++				"Set job file name"
 P{xbtr select working dir} ++				"Select working directory"
-P{xbtr view opt dlgtit} = ROUND(@, 5)			"Option setting"
-P{xbtr job script editor lab} ++			"Job script editor"
+P{xbtr view opt dlgtit} = 1970  			"Option setting"
+P{xbtr job script editor lab} ++			"Job script editor" 
 P{xbtr editor in xterm} ++				"Run editor in xterm"
-P{xbtr no title} = ROUND(@, 10)				"(no title)"
+P{xbtr use internal editor} ++                          "Use internal editor"
+P{xbtr prefer XML format} ++                            "Prefer XML (single file) format"
+P{xbtr job opt dlgtit} ++                               "Job options"
+P{xbtr verbose job} ++                                  "Verbose - display job number"
+P{xbtr no title} = 1980 				"(no title)"
 P{xbtr no file name} ++					"(no name)"
 P{xbtr poss job cmd files} ++				"Possible command files"
+P{xbtr poss xml job files} ++                           "Possible XML batch job files"
+P{xbtr job script edit} ++                              "Edit job script"
+P,H{xbtr job list changes} ++
+"Unsaved job list changes - OK?",
+"There are unsaved changes in the job list.
+Are you sure you want to quit before
+saving them?"
 
-E,H{xbtr editor name null} = ROUND(@, 10)
+E,H{xbtr editor name null} = 1990
 "No editor name",
 "You must give a program to run as editor"
 
-E,H{xbtr no job file set up} ++
-"No job file set up",
-"The job file for this job hasn't been created yet.
-Please use the editor to create it."
+E,H{xbtr job cmd file names same} = 1992
+"File names clash",
+"The job file has to have a different name from the command file"
+
+E,H{xbtr could not delete} ++
+"Could not delete",
+"Unable to delete the file %s"
 
 [
 Xfilemon messages
 ]
 
-P{xfilemon app title} = ROUND(@, 20)			"Select files to monitor"
+P{xfilemon app title} = 2000    			"Select files to monitor"
 P{xfilemon directory} ++				"Directory"
 P{xfilemon choose} ++					"Choose dir"
 
-(0)R,P{xfilemon file action} = ROUND(@, 5)		"File created",
+(0)R,P{xfilemon file action} = 2005     		"File created",
 "Select file action"
 (1)Q{xfilemon file action} COPY				"File finishes growing"
 (2)Q{xfilemon file action} COPY				"File modified"
@@ -6699,8 +6860,9 @@ E{btwrite message diverted} ++			"Subject: Message diverted to mail"
 Error messages whilst saving .gnubatch files
 ]
 
-E{saveopts crashed} = ROUND(@, 100)
-"Sorry saveopts crashed with signal 0x%x0"
+E,H{saveopts crashed} = ROUND(@, 100)
+"Sorry saveopts crashed with signal 0x%x0",
+"Save options subprogram crashed with the signal 0x%x0"
 
 {saveopts file error} = @ - 9
 S{saveopts nodel} = 10
@@ -6731,6 +6893,36 @@ E,H{saveopts cannot fork} = {saveopts crashed} + 4
 E,H{saveopts file error} + {saveopts nomem}
 "No memory available creating init file.",
 "Ran out of memory creating .gnubatch file"
+
+[
+Version of messages for use within X programs
+]
+E,H{saveopts no write} = 8440
+"No write permission saving options",
+"Unable to save options to file, no write permission in directory
+or to existing file"
+
+E,H{saveopts bad setup} ++
+"Setup error for saveopts",
+"There is an error in the system setup relating to saveopts.
+Please check your installation"
+
+E,H{saveopts usage} ++
+"Usage error for saveopts",
+"The number arguments to the saveopts program are not correct"
+
+E,H{saveopts no memory} ++
+"No memory running saveopts",
+"Unable to allocate memory during save options."
+
+E,H{saveopts no exec} ++
+"Saveopts bad exec",
+"Unable to execute save options program"
+
+E,H{saveopts unknown exit} ++
+"Saveopts unknown exit %d0",
+"The saveopts subprogram gave exit code %d0
+which is not known"
 
 [
 No permissions
@@ -6823,8 +7015,8 @@ E{Missing prompt code} ++		"Missing prompt message code %d9"
 E,H{Missing error code} ++
 "Missing error message code %d9",
 "The help message file %F is missing an error
-code %d9. Please inform us!"
-E{Missing alternative code} ++		"Missing alternative code for %d9"
+code %d9. Please record a bug!" 
+E,H{Missing alternative code} ++	"Missing alternative code for %d9", "Missing alternative code for %d9"
 E{Missing state code} ++		"Missing state code %d9"
 E{Scrambled state code} ++		"Jumbled state code for %d9"
 E{Wrong number alternatives} ++		"Wrong alternatives state %d9, expected %d8 read %d7"

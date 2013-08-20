@@ -40,7 +40,6 @@
 #include "network.h"
 #include "incl_ugid.h"
 #include "helpalt.h"
-#include "files.h"
 #include "btconst.h"
 #include "timecon.h"
 #include "btmode.h"
@@ -55,63 +54,12 @@
 #include "errnums.h"
 #include "xbr_ext.h"
 #include "gtk_lib.h"
+#include "remsubops.h"
+#include "stringvec.h"
 #include "files.h"
 
-static  char    Filename[] = __FILE__;
-
-#define CLOSESOCKET(X)  close(X)
-static  SHORT   tcpportnum = -1;
-
-/* We currently use the same names for the TCP and UDP versions */
-const   char    TSname[] = "xbnetsrv";
-#define Sname   TSname
-
-/***********************************************************************
-        UDP Access routines
- ***********************************************************************/
-
 #define RTIMEOUT        5
-
-static int  initsock(int *rsock, const netid_t hostid, struct sockaddr_in *saddr)
-{
-        int     sockfd;
-        SHORT   portnum;
-        struct  sockaddr_in     cli_addr;
-        struct  servent *sp;
-
-        /* Get port number for this caper */
-
-        if  (!(sp = env_getserv(Sname, IPPROTO_UDP)))  {
-                endservent();
-                return  $EH{No xbnetserv UDP service};
-        }
-        portnum = sp->s_port;
-        endservent();
-
-        BLOCK_ZERO(saddr, sizeof(struct sockaddr_in));
-        saddr->sin_family = AF_INET;
-        saddr->sin_addr.s_addr = hostid;
-        saddr->sin_port = portnum;
-        BLOCK_ZERO(&cli_addr, sizeof(cli_addr));
-        cli_addr.sin_family = AF_INET;
-        cli_addr.sin_addr.s_addr = htonl(INADDR_ANY);
-        cli_addr.sin_port = 0;
-
-        /* Save now in case of error.  */
-
-        disp_arg[0] = ntohs(portnum);
-        disp_arg[1] = hostid;
-
-        if  ((sockfd = socket(AF_INET, SOCK_DGRAM, IPPROTO_UDP)) < 0)
-                return  $EH{Cannot create UDP access socket};
-
-        if  (bind(sockfd, (struct sockaddr *) &cli_addr, sizeof(cli_addr)) < 0)  {
-                close(sockfd);
-                return  $EH{Cannot bind UDP access socket};
-        }
-        *rsock = sockfd;
-        return  0;
-}
+static  int   tcpportnum = -1;
 
 static  RETSIGTYPE  asig(int n)
 {
@@ -153,287 +101,28 @@ static int  udp_enquire(const int sockfd, struct sockaddr_in *saddr, char *outms
         return  0;
 }
 
-/* Unpack btuser from networked version.  */
-
-static void  unpack_btuser(Btuser *dest, const Btuser *src)
-{
-        dest->btu_isvalid = src->btu_isvalid;
-        dest->btu_minp = src->btu_minp;
-        dest->btu_maxp = src->btu_maxp;
-        dest->btu_defp = src->btu_defp;
-        dest->btu_user = ntohl(src->btu_user);
-        dest->btu_maxll = ntohs(src->btu_maxll);
-        dest->btu_totll = ntohs(src->btu_totll);
-        dest->btu_spec_ll = ntohs(src->btu_spec_ll);
-        dest->btu_priv = ntohl(src->btu_priv);
-        dest->btu_jflags[0] = ntohs(src->btu_jflags[0]);
-        dest->btu_jflags[1] = ntohs(src->btu_jflags[1]);
-        dest->btu_jflags[2] = ntohs(src->btu_jflags[2]);
-        dest->btu_vflags[0] = ntohs(src->btu_vflags[0]);
-        dest->btu_vflags[1] = ntohs(src->btu_vflags[1]);
-        dest->btu_vflags[2] = ntohs(src->btu_vflags[2]);
-}
-
-/***********************************************************************
-        TCP Routines
- ***********************************************************************
-
- Find the port number we want to use for TCP ops
- or return an error code */
-
-static int  inittcp()
-{
-        struct  servent *sp;
-
-        /* Get port number for this caper */
-
-        if  (!(sp = env_getserv(TSname, IPPROTO_TCP)))  {
-                endservent();
-                return  $EH{No xbnetserv TCP service};
-        }
-        tcpportnum = sp->s_port;
-        endservent();
-        return  0;
-}
-
-static int  sock_read(const int sock, char *buffer, int nbytes)
-{
-        while  (nbytes > 0)  {
-                int     rbytes = read(sock, buffer, nbytes);
-                if  (rbytes <= 0)
-                        return  0;
-                buffer += rbytes;
-                nbytes -= rbytes;
-        }
-        return  1;
-}
-
-static int  sock_write(const int sock, char *buffer, int nbytes)
-{
-        while  (nbytes > 0)  {
-                int     rbytes = write(sock, buffer, nbytes);
-                if  (rbytes < 0)
-                        return  0;
-                buffer += rbytes;
-                nbytes -= rbytes;
-        }
-        return  1;
-}
-
-static void  copyout(FILE *inf, const int sockfd)
-{
-        int     outbytes, ch;
-        struct  ni_jobhdr       hd;
-        char    buffer[CL_SV_BUFFSIZE];
-
-        BLOCK_ZERO((char *) &hd, sizeof(hd));
-        hd.code = CL_SV_JOBDATA;
-        outbytes = 0;
-
-        while  ((ch = getc(inf)) != EOF)  {
-                if  (outbytes >= CL_SV_BUFFSIZE)  {
-                        hd.joblength = htons(outbytes);
-                        sock_write(sockfd, (char *) &hd, sizeof(hd));
-                        sock_write(sockfd, buffer, outbytes);
-                        outbytes = 0;
-                }
-                buffer[outbytes++] = (char) ch;
-        }
-        if  (outbytes > 0)  {
-                hd.joblength = htons(outbytes);
-                sock_write(sockfd, (char *) &hd, sizeof(hd));
-                sock_write(sockfd, buffer, outbytes);
-        }
-        hd.code = CL_SV_ENDJOB;
-        hd.joblength = htons(sizeof(struct ni_jobhdr));
-        strncpy(hd.uname, prin_uname(Realuid), UIDSIZE);
-        strncpy(hd.gname, prin_gname(Realgid), UIDSIZE);
-        sock_write(sockfd, (char *) &hd, sizeof(hd));
-}
-
-static unsigned  packjob(struct nijobmsg *dest, CBtjobRef src, const netid_t nhostid)
-{
-        int             cnt;
-        unsigned        ucnt;
-        unsigned        hwm;
-        JargRef         darg;
-        EnvirRef        denv;
-        RedirRef        dred;
-        const   Jarg    *sarg;
-        const   Envir   *senv;
-        const   Redir   *sred;
-
-        BLOCK_ZERO((char *) dest, sizeof(struct nijobmsg));
-
-        dest->ni_hdr.ni_progress = src->h.bj_progress;
-        dest->ni_hdr.ni_pri = src->h.bj_pri;
-        dest->ni_hdr.ni_jflags = src->h.bj_jflags;
-        dest->ni_hdr.ni_istime = src->h.bj_times.tc_istime;
-        dest->ni_hdr.ni_mday = src->h.bj_times.tc_mday;
-        dest->ni_hdr.ni_repeat = src->h.bj_times.tc_repeat;
-        dest->ni_hdr.ni_nposs = src->h.bj_times.tc_nposs;
-
-        /* Do the "easy" bits */
-
-        dest->ni_hdr.ni_ll = htons(src->h.bj_ll);
-        dest->ni_hdr.ni_umask = htons(src->h.bj_umask);
-        dest->ni_hdr.ni_nvaldays = htons(src->h.bj_times.tc_nvaldays);
-        dest->ni_hdr.ni_ulimit = htonl(src->h.bj_ulimit);
-        dest->ni_hdr.ni_nexttime = htonl(src->h.bj_times.tc_nexttime);
-        dest->ni_hdr.ni_rate = htonl(src->h.bj_times.tc_rate);
-        dest->ni_hdr.ni_autoksig = htons(src->h.bj_autoksig);
-        dest->ni_hdr.ni_runon = htons(src->h.bj_runon);
-        dest->ni_hdr.ni_deltime = htons(src->h.bj_deltime);
-        dest->ni_hdr.ni_runtime = htonl(src->h.bj_runtime);
-
-        strncpy(dest->ni_hdr.ni_cmdinterp, src->h.bj_cmdinterp, CI_MAXNAME);
-
-        dest->ni_hdr.ni_exits = src->h.bj_exits;
-
-        dest->ni_hdr.ni_mode.u_flags = htons(src->h.bj_mode.u_flags);
-        dest->ni_hdr.ni_mode.g_flags = htons(src->h.bj_mode.g_flags);
-        dest->ni_hdr.ni_mode.o_flags = htons(src->h.bj_mode.o_flags);
-
-        for  (ucnt = 0, cnt = 0;  cnt < MAXCVARS;  cnt++)  {
-                Nicond          *nic;
-                BtvarRef        vp;
-                CJcondRef       sic = &src->h.bj_conds[cnt];
-                if  (sic->bjc_compar == C_UNUSED)
-                        continue;
-                vp = &Var_seg.vlist[sic->bjc_varind].Vent;
-                nic = &dest->ni_hdr.ni_conds[ucnt];
-                nic->nic_var.ni_varhost = int2ext_netid_t(vp->var_id.hostid);
-                if  (vp->var_id.hostid == 0  &&  vp->var_type == VT_MACHNAME)
-                        nic->nic_var.ni_varhost = nhostid;
-                strncpy(nic->nic_var.ni_varname, vp->var_name, BTV_NAME);
-                nic->nic_compar = sic->bjc_compar;
-                nic->nic_iscrit = sic->bjc_iscrit;
-                nic->nic_type = (unsigned char) sic->bjc_value.const_type;
-                if  (nic->nic_type == CON_STRING)
-                        strncpy(nic->nic_un.nic_string, sic->bjc_value.con_un.con_string, BTC_VALUE);
-                else
-                        nic->nic_un.nic_long = htonl(sic->bjc_value.con_un.con_long);
-                ucnt++;
-        }
-        for  (ucnt = 0, cnt = 0;  cnt < MAXSEVARS;  cnt++)  {
-                Niass           *nia;
-                BtvarRef        vp;
-                CJassRef        sia = &src->h.bj_asses[cnt];
-                if  (sia->bja_op == BJA_NONE)
-                        continue;
-                nia = &dest->ni_hdr.ni_asses[ucnt];
-                vp = &Var_seg.vlist[sia->bja_varind].Vent;
-                nia->nia_var.ni_varhost = int2ext_netid_t(vp->var_id.hostid);
-                strncpy(nia->nia_var.ni_varname, vp->var_name, BTV_NAME);
-                nia->nia_flags = htons(sia->bja_flags);
-                nia->nia_op = sia->bja_op;
-                nia->nia_iscrit = sia->bja_iscrit;
-                nia->nia_type = (unsigned char) sia->bja_con.const_type;
-                if  (nia->nia_type == CON_STRING)
-                        strncpy(nia->nia_un.nia_string, sia->bja_con.con_un.con_string, BTC_VALUE);
-                else
-                        nia->nia_un.nia_long = htonl(sia->bja_con.con_un.con_long);
-                ucnt++;
-        }
-
-        dest->ni_hdr.ni_nredirs = htons(src->h.bj_nredirs);
-        dest->ni_hdr.ni_nargs = htons(src->h.bj_nargs);
-        dest->ni_hdr.ni_nenv = htons(src->h.bj_nenv);
-        dest->ni_hdr.ni_title = htons(src->h.bj_title);
-        dest->ni_hdr.ni_direct = htons(src->h.bj_direct);
-        dest->ni_hdr.ni_arg = htons(src->h.bj_arg);
-        dest->ni_hdr.ni_redirs = htons(src->h.bj_redirs);
-        dest->ni_hdr.ni_env = htons(src->h.bj_env);
-        BLOCK_COPY(dest->ni_space, src->bj_space, JOBSPACE);
-
-        /* Cheat by assuming that packjstring put the directory and
-           title in last and we can use the offset of that as a
-           high water mark.  */
-
-        if  (src->h.bj_title >= 0)  {
-                hwm = src->h.bj_title;
-                hwm += strlen(&src->bj_space[hwm]) + 1;
-        }
-        else  if  (src->h.bj_direct >= 0)  {
-                hwm = src->h.bj_direct;
-                hwm += strlen(&src->bj_space[hwm]) + 1;
-        }
-        else
-                hwm = JOBSPACE;
-
-        hwm += sizeof(struct nijobmsg) - JOBSPACE;
-
-        /* We must swap the argument, environment and redirection
-           variable pointers and the arg field in each redirection.  */
-
-        darg = (JargRef) &dest->ni_space[src->h.bj_arg];        /* I did mean src there */
-        denv = (EnvirRef) &dest->ni_space[src->h.bj_env];       /* and there */
-        dred = (RedirRef) &dest->ni_space[src->h.bj_redirs];    /* and there */
-        sarg = (const Jarg *) &src->bj_space[src->h.bj_arg];
-        senv = (const Envir *) &src->bj_space[src->h.bj_env];
-        sred = (const Redir *) &src->bj_space[src->h.bj_redirs];
-
-        for  (ucnt = 0;  ucnt < src->h.bj_nargs;  ucnt++)  {
-                *darg++ = htons(*sarg);
-                sarg++;         /* Not falling for htons being a macro!!! */
-        }
-        for  (ucnt = 0;  ucnt < src->h.bj_nenv;  ucnt++)  {
-                denv->e_name = htons(senv->e_name);
-                denv->e_value = htons(senv->e_value);
-                denv++;
-                senv++;
-        }
-        for  (ucnt = 0;  ucnt < src->h.bj_nredirs; ucnt++)  {
-                dred->arg = htons(sred->arg);
-                dred++;
-                sred++;
-        }
-        return  hwm;
-}
-
 /* Get ourselves an out socket to the server on the remote machine or
    return a suitable error code */
 
 static int  remgoutfile(const netid_t hostid, CBtjobRef jb, int *rsock)
 {
-        int                     sock;
-        int                     msgsize;
-        struct  sockaddr_in     sin;
-        struct  ni_jobhdr       nih;
+        int     sock, ret, msgsize;
         struct  nijobmsg        outmsg;
 
-        if  (tcpportnum < 0  &&  (sock = inittcp()) != 0)
-                return  sock;
+        if  (tcpportnum < 0  &&  (ret = remsub_inittcp(&tcpportnum)) != 0)
+                return  ret;
 
-        if  ((sock = socket(PF_INET, SOCK_STREAM, 0)) < 0)
-                return  $EH{Cannot open socket for remote job send};
+        if  ((ret = remsub_opentcp(hostid, tcpportnum, &sock)) != 0)
+                return  ret;
 
-        /* Set up bits and pieces The port number is set up in the job
-           shared memory segment.  */
+        msgsize = remsub_packjob(&outmsg, jb);
+        remsub_condasses(&outmsg, jb, hostid);
 
-        sin.sin_family = AF_INET;
-        sin.sin_port = tcpportnum;
-        BLOCK_ZERO(sin.sin_zero, sizeof(sin.sin_zero));
-        sin.sin_addr.s_addr = hostid;
-
-        if  (connect(sock, (struct sockaddr *) &sin, sizeof(sin)) < 0)  {
+        if  ((ret = remsub_startjob(sock, msgsize, prin_uname(Realuid), prin_gname(Realgid))) != 0)  {
                 close(sock);
-                return  $EH{Cannot connect to remote};
+                return  ret;
         }
-
-        msgsize = packjob(&outmsg, jb, hostid);
-        nih.code = CL_SV_STARTJOB;
-        nih.padding = 0;
-        nih.joblength = htons(msgsize);
-        strcpy(nih.uname, prin_uname(Realuid));
-        strcpy(nih.gname, prin_gname(Realgid));
-
-        if  (!sock_write(sock, (char *) &nih, sizeof(nih)))  {
-                close(sock);
-                return  $EH{Trouble with job header};
-        }
-
-        if  (!sock_write(sock, (char *) &outmsg, (int) msgsize))  {
+        if  (!remsub_sock_write(sock, (char *) &outmsg, (int) msgsize))  {
                 close(sock);
                 return  $EH{Trouble with job};
         }
@@ -446,7 +135,7 @@ static int  remprocreply(const int sock, BtjobRef jb)
         int     errcode, which;
         struct  client_if       result;
 
-        if  (!sock_read(sock, (char *) &result, sizeof(result)))
+        if  (!remsub_sock_read(sock, (char *) &result, sizeof(result)))
                 return  $EH{Cant read status result};
 
         errcode = result.code;
@@ -517,245 +206,225 @@ static int  remprocreply(const int sock, BtjobRef jb)
         Here is the stuff for doing the remote submission.
  ***********************************************************************/
 
-#define INIT_HOSTS      20
-#define INC_HOSTS       10
+struct  stringvec  hlist;
 
-static  unsigned        nhosts, maxhosts;
-struct  hmem  {
-        char    *name;
-        netid_t hid;
-} *hlist;
-
-static  netid_t curr_host = 0;
+static  char    *curr_host;
 
 struct  remparams  {            /* Info from remote */
+        netid_t nid;            /* Network id */
         USHORT  umsk;           /* Umask value */
         ULONG   ulmt;           /* Ulimit value */
         char    realgname[UIDSIZE+1];   /* Group name */
         Btuser  uperms;         /* User permissions */
 };
 
-static  struct  remparams  defh_parms;  /* Parameters of default host */
+struct  remparams  curr_host_params;
 
-static void  ahost(const netid_t nid, char *nam)
+/* Get all the information for the specified host.
+   Return 0 if OK otherwise the error code. */
+
+static  int     get_host_data(const char *hostname, struct remparams *rp)
 {
-        if  (nhosts >= maxhosts)  {
-                maxhosts += INC_HOSTS;
-                if  (!(hlist = (struct hmem *) realloc((char *) hlist, maxhosts * sizeof(struct hmem))))
-                        ABORT_NOMEM;
-        }
-        hlist[nhosts].name = stracpy(nam);
-        hlist[nhosts].hid = nid;
-        nhosts++;
-}
-
-/* For sorting host names into alphabetical order */
-static int  s_nh(struct hmem *a, struct hmem *b)
-{
-        return  strcmp(a->name, b->name);
-}
-
-/* Read host file for likely people to speak to */
-static void  ghostlist()
-{
-        struct  remote  *rp;
-        extern  char    hostf_errors;
-
-        if  (hlist)
-                return;
-
-        if  (!(hlist = (struct hmem *) malloc(INIT_HOSTS*sizeof(struct hmem))))
-                ABORT_NOMEM;
-
-        maxhosts = INIT_HOSTS;
-
-        while  ((rp = get_hostfile()))  {
-                if  (rp->ht_flags & (HT_DOS|HT_ROAMUSER))
-                        continue;
-                if  (rp->hostname[0])
-                        ahost(rp->hostid, rp->hostname);
-                if  (rp->alias[0])
-                        ahost(rp->hostid, rp->alias);
-        }
-        end_hostfile();
-        if  (hostf_errors)
-                doerror($EH{Warn errors in host file});
-        if  (nhosts > 1)
-                qsort(QSORTP1 hlist, nhosts, sizeof(struct hmem), QSORTP4 s_nh);
-}
-
-static  char            *nohmsg;
-
-static netid_t  choosehost(const int dlgtitle, struct remparams *rp, const int nullok, const int exist)
-{
-        GtkWidget               *dlg, *hostw;
-        int                     cnt, offset = 0;
-        gint                    sel;
-        netid_t                 result;
-        int                     udpsock, ec;
-        struct  remparams       possn;
+        netid_t  nid;
+        int     udpsock, ret;
         struct  sockaddr_in     serv_addr;
         struct  ni_jobhdr       enq;
         struct  ua_reply        resp1;
         struct  ua_umlreply     resp2;
 
-        ghostlist();
-        if  (nhosts == 0)  {
-                doerror($EH{No hosts found});
-                return  curr_host;
-        }
+        if  ((nid = look_int_hostname(hostname)) == -1)
+                return  $EH{Invalid host name};
 
-        if  (!nullok  &&  (nhosts == 1  || (nhosts == 2 && hlist[0].hid == hlist[1].hid)))  {
-                disp_str = hlist[0].name;
-                if  (!Confirm($PH{OK to use only host}))
-                        return  curr_host;
-                return  hlist[0].hid;
-        }
-
-        dlg = gprompt_dialog(toplevel, dlgtitle);
-        hostw = gtk_combo_box_new_text();
-        gtk_box_pack_start(GTK_BOX(GTK_DIALOG(dlg)->vbox), hostw, FALSE, FALSE, DEF_DLG_VPAD);
-
-        if  (nullok)  {
-                if  (!nohmsg)
-                        nohmsg = gprompt($P{xmbtr none host});
-                gtk_combo_box_append_text(GTK_COMBO_BOX(hostw), nohmsg);
-                if  (curr_host == 0)
-                        gtk_combo_box_set_active(GTK_COMBO_BOX(hostw), 0);
-                offset = 1;
-        }
-        for  (cnt = 0;  cnt < nhosts;  cnt++)  {
-                gtk_combo_box_append_text(GTK_COMBO_BOX(hostw), hlist[cnt].name);
-                if  (curr_host == hlist[cnt].hid)
-                        gtk_combo_box_set_active(GTK_COMBO_BOX(hostw), cnt+offset);
-        }
-
-        gtk_widget_show_all(dlg);
-        if  (gtk_dialog_run(GTK_DIALOG(dlg)) != GTK_RESPONSE_OK  ||  (sel = gtk_combo_box_get_active(GTK_COMBO_BOX(hostw))) < 0)  {
-                gtk_widget_destroy(dlg);
-                return  curr_host;
-        }
-
-        gtk_widget_destroy(dlg);
-
-        if  (sel == 0  &&  nullok)
-                return  0;
-
-        result = hlist[sel-offset].hid;
-
-        if  ((ec = initsock(&udpsock, result, &serv_addr)) != 0)  {
-                doerror(ec);
-                return  0;
-        }
+        if  ((ret = remsub_initsock(&udpsock, nid, &serv_addr)) != 0)
+                return  ret;
 
         BLOCK_ZERO(&enq, sizeof(enq));
         enq.code = CL_SV_UENQUIRY;
         enq.joblength = htons(sizeof(enq));
-        strncpy(enq.uname, prin_uname(Realuid), UIDSIZE);
-        if  ((ec = udp_enquire(udpsock, &serv_addr, (char *) &enq, sizeof(enq), (char *) &resp1, sizeof(resp1))) != 0)  {
-                CLOSESOCKET(udpsock);
-                doerror(ec);
-                return  0;
+        strncpy(enq.uname, realuname, UIDSIZE);
+
+        /* Get group name and permissions */
+
+        if  ((ret = udp_enquire(udpsock, &serv_addr, (char *) &enq, sizeof(enq), (char *) &resp1, sizeof(resp1))) != 0)  {
+                close(udpsock);
+                return  ret;
         }
-        strcpy(possn.realgname, resp1.ua_gname);
-        unpack_btuser(&possn.uperms, &resp1.ua_perm);
-        if  (!possn.uperms.btu_isvalid)  {
-                CLOSESOCKET(udpsock);
-                doerror($EH{No such user on remote});
-                return  0;
+        strcpy(rp->realgname, resp1.ua_gname);
+        remsub_unpack_btuser(&rp->uperms, &resp1.ua_perm);
+        if  (!rp->uperms.btu_isvalid)  {
+                close(udpsock);
+                return  $EH{No such user on remote};
         }
+
+        /* Get umask and limit */
+
         enq.code = CL_SV_UMLPARS;
         enq.joblength = htons(sizeof(enq));
-        if  ((ec = udp_enquire(udpsock, &serv_addr, (char *) &enq, sizeof(enq), (char *) &resp2, sizeof(resp2))) != 0)  {
-                CLOSESOCKET(udpsock);
-                doerror(ec);
-                return  0;
+        if  ((ret = udp_enquire(udpsock, &serv_addr, (char *) &enq, sizeof(enq), (char *) &resp2, sizeof(resp2))) != 0)  {
+                close(udpsock);
+                return  ret;
         }
-        possn.umsk = ntohs(resp2.ua_umask);
-        possn.ulmt = ntohl(resp2.ua_ulimit);
-        CLOSESOCKET(udpsock);
-        *rp = possn;
-        return  result;
+
+        rp->umsk = ntohs(resp2.ua_umask);
+        rp->ulmt = ntohl(resp2.ua_ulimit);
+        rp->nid = nid;
+        close(udpsock);
+        return  0;
 }
 
-void  cb_defhost()
+/* Invoked on startup to set the current host name.
+   Also look up parameters and silently delete it if we can't see it. */
+
+void    set_def_host(char *h)
 {
-        curr_host = choosehost($P{xbtr default host dlgtit}, &defh_parms, 1, curr_host);
+        if  (get_host_data(h, &curr_host_params) == 0)  {
+                curr_host = h;
+                stringvec_insert_unique(&hlist, h);
+        }
+        else
+                free(h);                /* Needed deallocating */
+}
+
+/* Read host file for likely people to speak to (called on startup) */
+
+void  init_hosts_known(char *hl)
+{
+        struct  remote  *rp;
+
+        if  (hl)
+                stringvec_split_sorted(&hlist, hl, ',');
+        else
+                stringvec_init(&hlist);
+
+        while  ((rp = get_hostfile()))  {
+                if  (rp->ht_flags & (HT_DOS|HT_ROAMUSER))
+                        continue;
+                if  (rp->hostname[0])
+                        stringvec_insert_unique(&hlist, rp->hostname);
+                if  (rp->alias[0])
+                        stringvec_insert_unique(&hlist, rp->alias);
+        }
+        end_hostfile();
+}
+
+/* Get list of hosts as comma-separated list */
+
+char    *list_hosts_known()
+{
+        return  stringvec_join(&hlist, ',');
+}
+
+char    *get_def_host()
+{
+        return  curr_host;
 }
 
 void  cb_remsubmit()
 {
-        int                     indx, ec;
-        netid_t                 rhost;
         struct  pend_job        *pj;
-        BtjobRef                jreq;
-        char                    *path;
-        FILE                    *inf;
+        GtkWidget               *dlg, *hostw;
+        int                    cnt, sel;
+        gint                    dlgres;
+        FILE                    *inf = (FILE *) 0;
         int                     outsock = 0;
-        struct  remparams       *hp;
-        struct  remparams       h_parms;
 
-        if  ((indx = getselectedjob(1)) < 0)
-                return;
-        pj = &pend_list[indx];
-        if  (pj->nosubmit == 0  &&  !Confirm($PH{xmbtr job unchanged confirm}))
+        if  (!(pj = sub_check()))
                 return;
 
-        jreq = pj->job;
-        if  (jreq->h.bj_times.tc_istime  &&  jreq->h.bj_times.tc_nexttime < time((time_t *) 0))  {
-                doerror($EH{xmbtr cannot submit not future});
-                return;
-        }
-
-        if  (!pj->jobfile_name)  {
-                doerror($EH{xmbtr no job file name});
-                return;
-        }
-
-        path = gen_path(pj->directory, pj->jobfile_name);
-        if  (!access(path, F_OK))  {
-                free(path);
-                doerror($EH{xmbtr no such file});
-                return;
-        }
-        if  (!(inf = fopen(path, "r")))  {
-                free(path);
+        if  (!pj->jobscript  &&   !(inf = ldsv_open('r', pj->directory, pj->jobfile_name)))  {
                 doerror($EH{xmbtr cannot open job file});
                 return;
         }
-        free(path);
 
-        if  (curr_host == 0)  {
-                hp = &h_parms;
-                if  ((rhost = choosehost($P{xbtr remote host dlgtit}, hp, 0, -1)) == 0)  {
-                        fclose(inf);
-                        return;
+        /* Set up dialog and initialise the entry with the last host used if possible */
+
+        dlg = gprompt_dialog(toplevel, $P{xbtr remote host dlgtit});
+        hostw = gtk_combo_box_text_new_with_entry();
+        gtk_box_pack_start(GTK_BOX(GTK_DIALOG(dlg)->vbox), hostw, FALSE, FALSE, DEF_DLG_VPAD);
+
+        sel = -1;       /* Look for current entry */
+
+        for  (cnt = 0;  cnt < stringvec_count(hlist);  cnt++)  {
+                char    *ent = stringvec_nth(hlist, cnt);
+                if  (curr_host  &&  strcmp(ent, curr_host) == 0)
+                        sel = cnt;
+                gtk_combo_box_append_text(GTK_COMBO_BOX(hostw), ent);
+        }
+        if  (sel >= 0)
+                gtk_combo_box_set_active(GTK_COMBO_BOX(hostw), sel);
+
+        gtk_widget_show_all(dlg);
+
+        /* Get required host from dialog */
+
+        while  ((dlgres = gtk_dialog_run(GTK_DIALOG(dlg))) == GTK_RESPONSE_OK)  {
+                char    *shost = gtk_combo_box_text_get_active_text(GTK_COMBO_BOX_TEXT(hostw));
+                int     ec;
+                struct  remparams       h_parms;
+
+                /* If it's the same one as we had last time, we can drop out */
+
+                if  (curr_host  &&  strcmp(shost, curr_host) == 0)  {
+                        g_free(shost);
+                        break;
                 }
-        }
-        else  {
-                hp = &defh_parms;
-                rhost = curr_host;
+
+                if  ((ec = get_host_data(shost, &h_parms)))  {
+                        g_free(shost);
+                        doerror(ec);
+                        continue;
+                }
+
+                if  (curr_host)
+                        free(curr_host);
+
+                stringvec_insert_unique(&hlist, shost);
+
+                /* Possibly this is unnecessary but the result of gtk_combo_box_get_active_text has to be
+                   freed with g_free, it says which might not be the same as ordinary free */
+
+                curr_host = stracpy(shost);
+                g_free(shost);
+                curr_host_params = h_parms;
+                break;
         }
 
-        if  ((ec = remgoutfile(rhost, jreq, &outsock)) != 0)  {
-                doerror(ec);
-                close(outsock);
-                fclose(inf);
+        gtk_widget_destroy(dlg);
+
+        /* Drop out if user cancelled it */
+
+        if  (dlgres != GTK_RESPONSE_OK)  {
+                if  (inf)
+                        pclose(inf);
                 return;
         }
-        copyout(inf, outsock);
-        fclose(inf);
-        if  ((ec = remprocreply(outsock, jreq)) != 0)  {
-                disp_arg[1] = rhost;
-                doerror(ec);
+
+        if  ((cnt = remgoutfile(curr_host_params.nid, pj->job, &outsock)) != 0)  {
+                doerror(cnt);
+                close(outsock);
+                if  (inf)
+                        fclose(inf);
+                return;
+        }
+
+        if  (inf)  {
+                remsub_copyout(inf, outsock, realuname, curr_host_params.realgname);
+                pclose(inf);
+        }
+        else
+                remsub_copyout_str(pj->jobscript, outsock, realuname, curr_host_params.realgname);
+
+        if  ((cnt = remprocreply(outsock, pj->job)) != 0)  {
+                disp_arg[1] = curr_host_params.nid;
+                doerror(cnt);
                 close(outsock);
                 return;
         }
         close(outsock);
         if  (pj->Verbose)  {
-                disp_arg[0] = jreq->h.bj_job;
-                disp_arg[1] = rhost;
-                disp_str = title_of(jreq);
+                disp_arg[0] = pj->job->h.bj_job;
+                disp_arg[1] = curr_host_params.nid;
+                disp_str = title_of(pj->job);
                 doinfo(disp_str[0]? $E{xmbtr remote job created ok title}: $E{xmbtr remote job created ok no title});
         }
         pj->nosubmit = 0;

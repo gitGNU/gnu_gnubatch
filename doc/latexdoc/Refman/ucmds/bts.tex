@@ -1,0 +1,65 @@
+\subsection{\BtsName}
+
+\begin{expara}
+
+\BtsName{} [-options] [ files ]
+
+\end{expara}
+
+\PrBts{} creates and submits a \ProductName{} batch job from each of the supplied XML files.
+
+XML format job files, usually with suffix \batchjobsuffix, are created when jobs are unqueued with the XML option with \PrBtq{} and similar.
+
+\subsubsection{Options}
+The environment variable on which options are supplied is \filename{\BtsVarname} and the environment variable to specify the help file is
+\filename{BTRESTCONF}.
+\setbkmkprefix{bts}
+\explainopt
+
+\cmdoption{v}{verbose}{~}{verbose}
+
+This option causes a message showing the job number of each successfully submitted job to be displayed, whether or not the job file
+was created with the verbose option.
+
+\cmdoption{q}{quiet}{~}{quiet}
+
+This option turns off the verbose option for each job submitted. No output is displayed for any job.
+
+\cmdoption{f}{verbose-as-file}{~}{verbasfile}
+
+This option resets the ``verbose'' option so that messages are only displayed if the verbose option is given in the file.
+
+\cmdoption{Q}{host}{host}{host}
+
+This option selects the host to which jobs are to be queued, other than from the host on which they were unqueued from. Specify a single ``-'' to
+denote the local host.
+
+\cmdoption{F}{host-as-file}{~}{hostasfile}
+
+Reset the \exampletext{{}-Q} option, so that jobs are queued to the host they originated from.
+
+\cmdoption{C}{cancelled}{~}{cancelled}
+
+This causes the job or jobs to be queued in the ``cancelled'' state rather than whatever state they are set to in the job files.
+
+\cmdoption{N}{normal}{~}{normal}
+
+This causes the job or jobs to be queued in the ``ready to run'' state rather than whatever state they are set to in the job files.
+
+\cmdoption{S}{state-as-file}{~}{stateasfile}
+
+This option resets the \exampletext{{}-C} or \exampletext{{}-N} options so that the jobs are queued in the state that they were set
+to in the saved job files.
+
+This is the default if no arguments are specified.
+
+\freezeopts{\filename{\BtsVarname}}{Stop}
+
+\subsubsection{Error Messages}
+
+Appropriate error messages are displayed if the saved job files do not appear to be in XML format, or if \ProductName{} was not built
+with the XML library.
+
+Note that job files do not have to have the suffix \batchjobsuffix.
+
+

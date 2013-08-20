@@ -26,11 +26,12 @@ CCFLAGS		=	-O @gcc_useful_options@	@funny_compiler_options@
 LDFLAGS		=
 LIBS		=	@LIBS@
 LIBNET		=	@SOCKLIBS@
+XMLLIB          =       @xmllib@
 MYLIBDIR	=	$(PARENT)/lib
 LIB		=	$(MYLIBDIR)/.libs/libgnubatch_int.a
 LIBCLIENT	=	$(MYLIBDIR)/.libs/libgnubatch_client.a
 HDRS		=	$(PARENT)/hdrs
-CFLAGS		=	$(CCFLAGS) -I$(HDRS) -I$(BASE)
+CFLAGS		=	$(CCFLAGS) -I$(HDRS) -I$(BASE) @xmlinclude@
 RM		=	rm -f
 INSTALL		=	@INSTALL@
 INSTALL_DATA	=	@INSTALL_DATA@
@@ -43,7 +44,7 @@ USERPROGS	=	gbch-atcover
 PROGS		=	gbch-btuconv gbch-ciconv gbch-cjlist gbch-cvlist gbch-ripc
 STAGED_INSTALL	=	false
 
-all:	gbch-atcover gbch-btuconv gbch-ciconv gbch-cjlist gbch-cvlist gbch-ripc
+all:	gbch-atcover gbch-btuconv gbch-ciconv gbch-cjlist gbch-cjlistx gbch-cvlist gbch-ripc
 
 gbch-atcover:	atcover.o
 	$(CC) $(LDFLAGS) -o $@ atcover.o $(LIB)	$(LIBS)
@@ -56,6 +57,9 @@ gbch-ciconv:	ciconv.o convcomm.o
 
 gbch-cjlist:	cjlist.o convcomm.o
 	$(CC) $(LDFLAGS) -o $@ cjlist.o	convcomm.o $(LIB) $(LIBCLIENT) $(LIBNET) $(LIBS)
+
+gbch-cjlistx:	cjlistx.o convcomm.o
+	$(CC) $(LDFLAGS) -o $@ cjlistx.o convcomm.o $(LIBCLIENT) $(LIBNET) $(XMLLIB) $(LIB) $(LIBCLIENT) $(LIB) $(LIBS)
 
 gbch-cvlist:	cvlist.o convcomm.o
 	$(CC) $(LDFLAGS) -o $@ cvlist.o	convcomm.o $(LIB) $(LIBCLIENT) $(LIBNET) $(LIBS)

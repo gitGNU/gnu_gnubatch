@@ -1,0 +1,96 @@
+\subsection{\XbCjlistxName}
+
+\begin{expara}
+
+\XbCjlistxName{} [-v] [-u] [-D dir] [-j file] [-t n] [-o dir]
+
+\end{expara}
+
+\PrXbCjlistx{} converts \ProductName{} job files held in the batch spool
+directory to a series of XML job files which may be resubmitted with \PrBts.
+This may be useful for backup purposes or for one stage in upgrading from one release of \ProductName{} to
+another.
+
+\subsubsection{Options}
+
+Note that this program does not provide for saving options in \configurationfile{} or \homeconfigpath{} files.
+
+The default options are set up so that sensible results are achieved by invoking \PrXbCjlistx{} without any options. The jobs are copied to the
+current directory.
+
+\setbkmkprefix{xb-cjlistx}
+
+\cmdoption{v}{}{}{verbose}
+
+Give a blow-by-blow account of actions. Also set the verbose option on the saved jobs.
+
+\cmdoption{u}{}{}{noucheck}
+
+Ignore invalid user names in saved jobs rather than counting them as errors.
+
+\cmdoption{D}{}{directory}{directory}
+
+This option specifies the source directory for the jobs and job file
+rather than the current directory. It can be specified as \exampletext{\$SPOOLDIR} or
+\exampletext{\$\{SPOOLDIR-\spooldirname\}} etc and the environment and/or \linebreak[3]\masterconfig{} will be
+interrogated to interpolate the value of the environment variable given.
+
+If you use this, don't forget to put single quotes around it thus:
+
+\begin{expara}
+
+\XbCjlistxName{} -D
+{\textquotesingle}\$\{SPOOLDIR-\spooldirname\}{\textquotesingle}
+...
+
+\end{expara}
+
+otherwise the shell will try to interpret the \exampletext{\$} construct and not \PrXbCjlistx{}.
+
+As a short cut, you can just use a word without any \exampletext{\$} construct, for example \exampletext{SPOOLDIR} to imply
+\exampletext{\$SPOOLDIR}.
+
+This is the default if no arguments are given, so \PrXbCjlistx{} will by default look for jobs
+in \linebreak[3]\spooldir.
+
+\cmdoption{j}{}{file}{jobfile}
+
+Use the specified file as the job file, which by default is \filename{btsched\_jfile} in the spool directory, either \spooldir{} or as
+specified in the \exampletext{{}-D} option.
+
+If this option is not specified, \filename{btsched\_jfile} is assumed.
+
+If a full path name is given to this option, and no \exampletext{{}-D} option is specified, then the directory part is taken as if it had
+been supplied to \exampletext{{}-D} for example
+
+\begin{expara}
+
+\XbCjlistxName{} -j /var/batch/spool/jobfile
+
+\end{expara}
+
+will have the same effect as
+
+\begin{expara}
+
+\XbCjlistxName{} -D /var/batch/spool -j jobfile
+
+\end{expara}
+
+It is usually safe to omit both this and the \exampletext{{}-D} option to take a copy of the ``live'' files.
+
+\cmdoption{o}{}{directory}{outdir}
+
+Specify the directory to which job files will be copied. The current directory will be used if these are not specified.
+
+\cmdoption{t}{}{n}{usetitle}
+
+Create job file names using the first \textit{n} characters of the job titles of each job, ignoring non-alphanumeric characters and replacing spaces
+with underscore, appending the XML job suffix of \batchjobsuffix.
+
+If the result would clash with an existing file name, then \exampletext{\_nnn} sequences are inserted before the suffix until a unique name is
+created.
+
+If this option is not specified, then the file name is constructed out of the job number and the suffix \batchjobsuffix. This also happens if the
+job does not have a title.
+

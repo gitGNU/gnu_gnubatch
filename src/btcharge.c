@@ -32,8 +32,6 @@
 #include "helpargs.h"
 #include "files.h"
 
-static  char    Filename[] = __FILE__;
-
 void  nomem(const char *fl, const int ln)
 {
         fprintf(stderr, "%s:Mem alloc fault: %s line %d\n", progname, fl, ln);

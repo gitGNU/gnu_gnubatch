@@ -40,11 +40,9 @@
 #include "errnums.h"
 #include "files.h"
 #include "btrvar.h"
-#include "services.h"
+#include "remsubops.h"
 
-static  SHORT   tcpportnum = -1;
-
-const   char    TSname[] = GBNETSERV_PORT;
+static  int     tcpportnum = -1;
 
 extern  uid_t   Repluid;                /* Replacement if requested */
 extern  gid_t   Replgid;                /* Replacement if requested */
@@ -52,91 +50,20 @@ extern  gid_t   Replgid;                /* Replacement if requested */
 extern  netid_t Out_host;
 extern  char    *Out_interp, *realuname;
 extern  char    realgname[];
-
-int  sock_read(const int sock, char *buffer, int nbytes)
-{
-        while  (nbytes > 0)  {
-                int     rbytes = read(sock, buffer, nbytes);
-                if  (rbytes <= 0)
-                        return  0;
-                buffer += rbytes;
-                nbytes -= rbytes;
-        }
-        return  1;
-}
-
-int  sock_write(const int sock, char *buffer, int nbytes)
-{
-        while  (nbytes > 0)  {
-                int     rbytes = write(sock, buffer, nbytes);
-                if  (rbytes < 0)
-                        return  0;
-                buffer += rbytes;
-                nbytes -= rbytes;
-        }
-        return  1;
-}
-
-static void  inittcp()
-{
-        struct  servent *sp;
-        /* Get port number for this caper */
-        if  (!(sp = env_getserv(TSname, IPPROTO_TCP)))  {
-                print_error($E{No xbnetserv TCP service});
-                endservent();
-                exit(E_NETERR);
-        }
-        tcpportnum = sp->s_port;
-        endservent();
-}
+extern  char    *repluname, *replgname;
 
 int  packjob(struct nijobmsg *dest, CBtjobRef src, const netid_t nhostid)
 {
+        unsigned        hwm = remsub_packjob(dest, src);
         int             cnt;
-        unsigned        ucnt;
-        unsigned        hwm;
-        JargRef         darg;
-        EnvirRef        denv;
-        RedirRef        dred;
-        const   Jarg    *sarg;
-        const   Envir   *senv;
-        const   Redir   *sred;
-
-        BLOCK_ZERO((char *) dest, sizeof(struct nijobmsg));
-
-        dest->ni_hdr.ni_progress = src->h.bj_progress;
-        dest->ni_hdr.ni_pri = src->h.bj_pri;
-        dest->ni_hdr.ni_jflags = src->h.bj_jflags;
-        dest->ni_hdr.ni_istime = src->h.bj_times.tc_istime;
-        dest->ni_hdr.ni_mday = src->h.bj_times.tc_mday;
-        dest->ni_hdr.ni_repeat = src->h.bj_times.tc_repeat;
-        dest->ni_hdr.ni_nposs = src->h.bj_times.tc_nposs;
-
-        /* Do the "easy" bits */
-
-        dest->ni_hdr.ni_ll = htons(src->h.bj_ll);
-        dest->ni_hdr.ni_umask = htons(src->h.bj_umask);
-        dest->ni_hdr.ni_nvaldays = htons(src->h.bj_times.tc_nvaldays);
-        dest->ni_hdr.ni_ulimit = htonl(src->h.bj_ulimit);
-        dest->ni_hdr.ni_nexttime = htonl(src->h.bj_times.tc_nexttime);
-        dest->ni_hdr.ni_rate = htonl(src->h.bj_times.tc_rate);
-        dest->ni_hdr.ni_autoksig = htons(src->h.bj_autoksig);
-        dest->ni_hdr.ni_runon = htons(src->h.bj_runon);
-        dest->ni_hdr.ni_deltime = htons(src->h.bj_deltime);
-        dest->ni_hdr.ni_runtime = htonl(src->h.bj_runtime);
 
         strncpy(dest->ni_hdr.ni_cmdinterp, Out_interp && Out_interp[0]? Out_interp: DEF_CI_NAME, CI_MAXNAME);
-
-        dest->ni_hdr.ni_exits = src->h.bj_exits;
-
-        dest->ni_hdr.ni_mode.u_flags = htons(src->h.bj_mode.u_flags);
-        dest->ni_hdr.ni_mode.g_flags = htons(src->h.bj_mode.g_flags);
-        dest->ni_hdr.ni_mode.o_flags = htons(src->h.bj_mode.o_flags);
 
         for  (cnt = 0;  cnt < Condcnt;  cnt++)  {
                 Nicond  *nic = &dest->ni_hdr.ni_conds[cnt];
                 struct  scond   *sic = &Condlist[cnt];
                 nic->nic_var.ni_varhost = int2ext_netid_t(sic->vd.hostid);
+                /* FIXME - refs to MACHINE */
                 strncpy(nic->nic_var.ni_varname, sic->vd.var, BTV_NAME);
                 nic->nic_compar = (unsigned char) sic->compar;
                 nic->nic_iscrit = sic->vd.crit;
@@ -161,111 +88,35 @@ int  packjob(struct nijobmsg *dest, CBtjobRef src, const netid_t nhostid)
                         nia->nia_un.nia_long = htonl(sia->con.con_un.con_long);
         }
 
-        dest->ni_hdr.ni_nredirs = htons(src->h.bj_nredirs);
-        dest->ni_hdr.ni_nargs = htons(src->h.bj_nargs);
-        dest->ni_hdr.ni_nenv = htons(src->h.bj_nenv);
-        dest->ni_hdr.ni_title = htons(src->h.bj_title);
-        dest->ni_hdr.ni_direct = htons(src->h.bj_direct);
-        dest->ni_hdr.ni_arg = htons(src->h.bj_arg);
-        dest->ni_hdr.ni_redirs = htons(src->h.bj_redirs);
-        dest->ni_hdr.ni_env = htons(src->h.bj_env);
-        BLOCK_COPY(dest->ni_space, src->bj_space, JOBSPACE);
-
-        /* Cheat by assuming that packjstring put the directory and
-           title in last and we can use the offset of that as a
-           high water mark.  */
-
-        if  (src->h.bj_title >= 0)  {
-                hwm = src->h.bj_title;
-                hwm += strlen(&src->bj_space[hwm]) + 1;
-        }
-        else  if  (src->h.bj_direct >= 0)  {
-                hwm = src->h.bj_direct;
-                hwm += strlen(&src->bj_space[hwm]) + 1;
-        }
-        else
-                hwm = JOBSPACE;
-
-        hwm += sizeof(struct nijobmsg) - JOBSPACE;
-
-        /* We must swap the argument, environment and redirection
-           variable pointers and the arg field in each redirection.  */
-
-        darg = (JargRef) &dest->ni_space[src->h.bj_arg];        /* I did mean src there */
-        denv = (EnvirRef) &dest->ni_space[src->h.bj_env];       /* and there */
-        dred = (RedirRef) &dest->ni_space[src->h.bj_redirs];    /* and there */
-        sarg = (const Jarg *) &src->bj_space[src->h.bj_arg];
-        senv = (const Envir *) &src->bj_space[src->h.bj_env];
-        sred = (const Redir *) &src->bj_space[src->h.bj_redirs];
-
-        for  (ucnt = 0;  ucnt < src->h.bj_nargs;  ucnt++)  {
-                *darg++ = htons(*sarg);
-                sarg++;         /* Not falling for htons being a macro!!! */
-        }
-        for  (ucnt = 0;  ucnt < src->h.bj_nenv;  ucnt++)  {
-                denv->e_name = htons(senv->e_name);
-                denv->e_value = htons(senv->e_value);
-                denv++;
-                senv++;
-        }
-        for  (ucnt = 0;  ucnt < src->h.bj_nredirs; ucnt++)  {
-                dred->arg = htons(sred->arg);
-                dred++;
-                sred++;
-        }
         return  hwm;
 }
 
 int  remgoutfile(const netid_t hostid, CBtjobRef jb)
 {
-        int                     sock;
-        int                     msgsize;
-        struct  sockaddr_in     sin;
-        struct  ni_jobhdr       nih;
+        int  sock, ret, msgsize;
         struct  nijobmsg        outmsg;
 
-        if  (tcpportnum < 0)
-                inittcp();
-
-        if  ((sock = socket(PF_INET, SOCK_STREAM, 0)) < 0)
-                return  -1;
-
-        /* Set up bits and pieces.
-           The port number is set up in the job shared memory segment.  */
-
-        sin.sin_family = AF_INET;
-        sin.sin_port = tcpportnum;
-        BLOCK_ZERO(sin.sin_zero, sizeof(sin.sin_zero));
-        sin.sin_addr.s_addr = hostid;
-
-        if  (connect(sock, (struct sockaddr *) &sin, sizeof(sin)) < 0)  {
-                close(sock);
+        if  (tcpportnum < 0  &&  (ret = remsub_inittcp(&tcpportnum)) != 0)  {
+                print_error(ret);
                 return  -1;
         }
-
+        if  ((ret = remsub_opentcp(hostid, tcpportnum, &sock)) != 0) {
+                print_error(ret);
+                return  -1;
+        }
         msgsize = packjob(&outmsg, jb, hostid);
-        nih.code = CL_SV_STARTJOB;
-        nih.padding = 0;
-        nih.joblength = htons(msgsize);
-        strcpy(nih.uname, realuname);
-        strcpy(nih.gname, realgname);
-        if  (Realuid != Repluid)
-                strcpy(outmsg.ni_hdr.ni_mode.o_user, prin_uname(Repluid));
-        if  (Realgid != Replgid)
-                strcpy(outmsg.ni_hdr.ni_mode.o_group, prin_gname(Replgid));
 
-        if  (!sock_write(sock, (char *) &nih, sizeof(nih)))  {
-                print_error($E{Trouble with job header});
+        /* Write message header (with size) followed by job descr */
+        if  ((ret = remsub_startjob(sock, msgsize, repluname, replgname)) != 0)  {
+                print_error(ret);
                 close(sock);
                 return  -1;
         }
-
-        if  (!sock_write(sock, (char *) &outmsg, (int) msgsize))  {
+        if  (!remsub_sock_write(sock, (char *) &outmsg, (int) msgsize))  {
                 print_error($E{Trouble with job});
                 close(sock);
                 return  -1;
         }
-
         return  sock;
 }
 
@@ -275,7 +126,7 @@ LONG  remprocreply(const int sock)
         ULONG   which;
         struct  client_if       result;
 
-        if  (!sock_read(sock, (char *) &result, sizeof(result)))  {
+        if  (!remsub_sock_read(sock, (char *) &result, sizeof(result)))  {
                 print_error($E{Cant read status result});
                 return  0;
         }

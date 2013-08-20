@@ -609,6 +609,8 @@ XWIN_LIBS
 XMKMF
 SOCKLIBS
 gcc_useful_options
+xmllib
+xmlinclude
 funny_compiler_options
 EGREP
 GREP
@@ -4361,6 +4363,8 @@ rm -f conftest*
 
 
 
+
+
 funny_compiler_options=''
 gcc_useful_options=''
 
@@ -6840,6 +6844,19 @@ fi
 
 LIBS="$ac_save_libs"
 
+xmlinclude=''
+xmllib=''
+ac_fn_c_check_header_mongrel "$LINENO" "libxml2/libxml/xmlexports.h" "ac_cv_header_libxml2_libxml_xmlexports_h" "$ac_includes_default"
+if test "x$ac_cv_header_libxml2_libxml_xmlexports_h" = xyes; then :
+  $as_echo "#define HAVE_LIBXML2 1" >>confdefs.h
+
+xmlinclude='-I/usr/include/libxml2'
+xmllib='-lxml2'
+fi
+
+
+
+
 { $as_echo "$as_me:${as_lineno-$LINENO}: checking maximum shared memory size" >&5
 $as_echo_n "checking maximum shared memory size... " >&6; }
 if test "$cross_compiling" = yes; then :
@@ -8978,6 +8995,7 @@ if test -n "$ac_unrecognized_opts" && test "$enable_option_checking" != no; then
   { $as_echo "$as_me:${as_lineno-$LINENO}: WARNING: unrecognized options: $ac_unrecognized_opts" >&5
 $as_echo "$as_me: WARNING: unrecognized options: $ac_unrecognized_opts" >&2;}
 fi
+
 
 
 

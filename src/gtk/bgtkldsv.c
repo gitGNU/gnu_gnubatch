@@ -23,16 +23,43 @@
 #include <grp.h>
 #include "defaults.h"
 #include "incl_unix.h"
+#include "incl_sig.h"
 #include "files.h"
 #include "ecodes.h"
 
 #define BUFFSIZE        256
+
+/* On signal just exit. We put this in because
+   it may have been called from an environment which ignores some signals, notably SIGPIPE. */
+
+RETSIGTYPE      catch_sig_read(int n)
+{
+        _exit(E_SIGNAL);
+}
 
 int  readfile(char *fl)
 {
         FILE  *inf = fopen(fl, "r");
         size_t  nb;
         char    buf[1024];
+#ifdef  STRUCT_SIG
+        struct  sigstruct_name  za;
+
+        za.sighandler_el = catch_sig_read;
+        sigmask_clear(za);
+        za.sigflags_el = SIGVEC_INTFLAG;
+        sigact_routine(SIGINT, &za, (struct sigstruct_name *) 0);
+        sigact_routine(SIGQUIT, &za, (struct sigstruct_name *) 0);
+        sigact_routine(SIGTERM, &za, (struct sigstruct_name *) 0);
+        sigact_routine(SIGHUP, &za, (struct sigstruct_name *) 0);
+        sigact_routine(SIGPIPE, &za, (struct sigstruct_name *) 0);
+#else
+        signal(SIGINT, catch_sig);
+        signal(SIGQUIT, catch_sig);
+        signal(SIGTERM, catch_sig);
+        signal(SIGHUP, catch_sig);
+        signal(SIGPIPE, catch_sig);
+#endif
 
         if  (!inf)
                 return  E_NOJOB;
@@ -43,25 +70,61 @@ int  readfile(char *fl)
         return  0;
 }
 
-int     writefile(char *fl)
+/* Fix up for written file to be deleted on premature termination */
+
+static  char    *output_file;
+
+RETSIGTYPE      catch_sig_write(int n)
 {
-        FILE  *outf = fopen(fl, "w");
+        if  (output_file)
+                unlink(output_file);
+        _exit(E_SIGNAL);
+}
+
+int     writefile(char *fl, const int setexec)
+{
+        FILE  *outf;
         size_t  nb;
         char    buf[1024];
-        int     um = umask(0);
+        int     um = umask(0), cmask = 0666;
+#ifdef  STRUCT_SIG
+        struct  sigstruct_name  za;
+
+        za.sighandler_el = catch_sig_write;
+        sigmask_clear(za);
+        za.sigflags_el = SIGVEC_INTFLAG;
+        sigact_routine(SIGINT, &za, (struct sigstruct_name *) 0);
+        sigact_routine(SIGQUIT, &za, (struct sigstruct_name *) 0);
+        sigact_routine(SIGTERM, &za, (struct sigstruct_name *) 0);
+        sigact_routine(SIGHUP, &za, (struct sigstruct_name *) 0);
+        sigact_routine(SIGPIPE, &za, (struct sigstruct_name *) 0);
+#else
+        signal(SIGINT, catch_sig);
+        signal(SIGQUIT, catch_sig);
+        signal(SIGTERM, catch_sig);
+        signal(SIGHUP, catch_sig);
+        signal(SIGPIPE, catch_sig);
+#endif
+
+        output_file = fl;
+
+        outf = fopen(fl, "w");
         umask(um);
 
         if  (!outf)
                 return  E_NOJOB;
         while  ((nb = fread(buf, 1, sizeof(buf), stdin))  !=  0)
                 fwrite(buf, 1, nb, outf);
-        /* This is to try to turn on executable bits */
+
+        if  (setexec)
+                cmask = 0777;
+        cmask &= ~um;
 #ifdef  HAVE_FCHMOD
-        fchmod(fileno(outf), 0777 & ~um);
+        fchmod(fileno(outf), cmask);
 #endif
         fclose(outf);
 #ifndef HAVE_FCHMOD
-        chmod(fl, 0777 & ~um);
+        chmod(fl, cmask);
 #endif
         return  0;
 }
@@ -73,8 +136,12 @@ int     writefile(char *fl)
 
 MAINFN_TYPE  main(int argc, char **argv)
 {
+        int     ch;
+        enum    { ACT_NONE, ACT_READ, ACT_WRITE, ACT_EXECWRITE, ACT_DELETE } act = ACT_NONE;
         struct  passwd  *pw = getpwnam(BATCHUNAME);
         uid_t  duid = ROOTID, myuid = getuid(), mygid = getgid();
+        char    *filename;
+        extern  int     optind;
 
         versionprint(argv, "$Revision: 1.9 $", 1);
 
@@ -108,20 +175,40 @@ MAINFN_TYPE  main(int argc, char **argv)
         setuid(myuid);
 
         /* If we haven't got the right arguments then just quit.
-           This is only meant to be run by xbtr.
-           Maybe one day we'll have a more sophisticated routine. */
+            This is only meant to be run by xbtr. */
 
-        if  (argc != 3  ||  argv[1][0] != '-')
-                return  E_USAGE;
+         while  ((ch = getopt(argc, argv, "rRwWdDxX")) != EOF)
+                 switch  (ch)  {
+                 default:
+                         return  E_USAGE;
+                 case  'r':case  'R':
+                         act = ACT_READ;
+                         break;
+                 case  'w':case  'W':
+                         act = ACT_WRITE;
+                         break;
+                 case  'd':case  'D':
+                         act = ACT_DELETE;
+                         break;
+                 case  'x':case  'X':
+                         act = ACT_EXECWRITE;
+                         break;
+                 }
 
-        switch  (argv[1][1])  {
-        default:
-                return  E_USAGE;
-        case  'r':
-                return  readfile(argv[2]);
-        case  'w':
-                return  writefile(argv[2]);
-        case  'd':
-                return  unlink(argv[2]) >= 0? 0: E_NOJOB;
-        }
+         filename = argv[optind];
+         if  (!filename)
+                 return  E_USAGE;
+
+         switch  (act)  {
+         default:
+                 return  E_USAGE;
+         case  ACT_READ:
+                 return  readfile(filename);
+         case  ACT_WRITE:
+                 return  writefile(filename, 0);
+         case  ACT_DELETE:
+                 return  unlink(filename) >= 0? 0: E_NOJOB;
+         case  ACT_EXECWRITE:
+                 return  writefile(filename, 1);
+         }
 }

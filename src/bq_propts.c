@@ -64,6 +64,7 @@ extern  WINDOW  *escr,
 #define PROC_VARS       1       /* Vars screen NB use ! to switch */
 
 extern  SHORT   initscreen;
+extern  char    XML_jobdump;
 
 extern  char    *Curr_pwd,
                 *spdir;
@@ -137,6 +138,11 @@ static void  prd_errbox(struct ltab *lt)
 static void  prd_incnull(struct ltab *lt)
 {
         mvaddstr(lt->row, lt->col, Dispflags & DF_SUPPNULL? lt->prompts[0]: lt->prompts[1]);
+}
+
+static  void    prd_xmlfmt(struct ltab *lt)
+{
+        mvaddstr(lt->row, lt->col, XML_jobdump? lt->prompts[1]: lt->prompts[0]);
 }
 
 static int  pro_queue(struct ltab *lt)
@@ -331,6 +337,16 @@ static int  pro_incnull(struct ltab *lt)
         return  ch;
 }
 
+static  int  pro_xmlfmt(struct ltab *lt)
+{
+        unsigned  current = XML_jobdump;
+        unsigned  prev = current;
+        int     ch = pro_bool(lt, &current);
+        if  (current != prev)
+                XML_jobdump = current? 1: 0;
+        return  ch;
+}
+
 #define NULLCH  (char *) 0
 
 static  struct  ltab  ltab[] = {
@@ -344,7 +360,8 @@ static  struct  ltab  ltab[] = {
         { $PNH{btq opt helpclr}, NULLCH, { NULLCH, NULLCH, NULLCH }, 0, 0, 0, prd_helpclr, pro_helpclr },
         { $PNH{btq opt helpbox}, NULLCH, { NULLCH, NULLCH, NULLCH }, 0, 0, 0, prd_helpbox, pro_helpbox },
         { $PNH{btq opt errbox}, NULLCH, { NULLCH, NULLCH, NULLCH }, 0, 0, 0, prd_errbox, pro_errbox },
-        { $PNH{btq opt initscr}, NULLCH, { NULLCH, NULLCH, NULLCH }, 0, 0, 0, prd_jfirst, pro_jfirst }
+        { $PNH{btq opt initscr}, NULLCH, { NULLCH, NULLCH, NULLCH }, 0, 0, 0, prd_jfirst, pro_jfirst },
+        { $PNH{btq opt xml fmt}, NULLCH, { NULLCH, NULLCH, NULLCH }, 0, 0, 0, prd_xmlfmt, pro_xmlfmt }
 };
 
 #define TABNUM  (sizeof(ltab)/sizeof(struct ltab))
@@ -431,7 +448,7 @@ static void  initnames()
         }
 }
 
-static int  askyorn(int code)
+int  askyorn(const int code)
 {
         char    *prompt = gprompt(code);
         int     ch;
@@ -504,6 +521,7 @@ void  spit_options(FILE *dest, const char *name)
         cancont = spitoption(Dispflags & DF_SCRKEEP? $A{btq arg cursor keep}: $A{btq arg cursor follow}, $A{btq arg explain}, dest, ' ', cancont);
         cancont = spitoption(Dispflags & DF_LOCALONLY? $A{btq arg local}: $A{btq arg network}, $A{btq arg explain}, dest, ' ', cancont);
         cancont = spitoption(Dispflags & DF_SUPPNULL? $A{btq arg no nullqs}: $A{btq arg nullqs}, $A{btq arg explain}, dest, ' ', cancont);
+        cancont = spitoption(XML_jobdump? $A{btq arg XML fmt}: $A{btq arg no XML fmt}, $A{btq arg explain}, dest, ' ', cancont);
         if  (initscreen != PROC_DONT_CARE)
                 cancont = spitoption(initscreen == PROC_VARS? $A{btq arg vars screen}: $A{btq arg jobs screen}, $A{btq arg explain}, dest, ' ', cancont);
         spitoption($A{btq arg jobqueue}, $A{btq arg explain}, dest, ' ', 0);

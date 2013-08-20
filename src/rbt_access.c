@@ -34,17 +34,19 @@
 #include "btconst.h"
 #include "btvar.h"
 #include "bjparam.h"
+#include "btjob.h"
 #include "xbnetq.h"
 #include "ecodes.h"
 #include "errnums.h"
 #include "services.h"
+#include "remsubops.h"
 
 static  char    Filename[] = __FILE__;
 
 const   char    Sname[] = GBNETSERV_PORT;
 
 static  int     udpsock = -1;
-static  struct  sockaddr_in     serv_addr, cli_addr;
+static  struct  sockaddr_in     serv_addr;
 
 #define INITENV 30
 #define INCENV  20
@@ -53,64 +55,14 @@ static  struct  sockaddr_in     serv_addr, cli_addr;
 
 static int  initsock(const netid_t hostid)
 {
-        int     sockfd;
-        SHORT   portnum;
-        struct  servent *sp;
+        int     sockfd, ret;
 
-        /* Get port number for this caper */
-
-        if  (!(sp = env_getserv(Sname, IPPROTO_UDP)))  {
-                print_error($E{No xbnetserv UDP service});
-                endservent();
+        if  ((ret = remsub_initsock(&sockfd, hostid, &serv_addr)))  {
+                print_error(ret);
                 exit(E_NETERR);
         }
-        portnum = sp->s_port;
-        endservent();
 
-        BLOCK_ZERO(&serv_addr, sizeof(serv_addr));
-        BLOCK_ZERO(&cli_addr, sizeof(cli_addr));
-        serv_addr.sin_family = cli_addr.sin_family = AF_INET;
-        serv_addr.sin_addr.s_addr = hostid;
-        cli_addr.sin_addr.s_addr = htonl(INADDR_ANY);
-        serv_addr.sin_port = portnum;
-        cli_addr.sin_port = 0;
-
-        /* Save now in case of error.  */
-
-        disp_arg[0] = ntohs(portnum);
-        disp_arg[1] = hostid;
-
-        if  ((sockfd = socket(AF_INET, SOCK_DGRAM, IPPROTO_UDP)) < 0)  {
-                print_error($E{Cannot create UDP access socket});
-                exit(E_NETERR);
-        }
-        if  (bind(sockfd, (struct sockaddr *) &cli_addr, sizeof(cli_addr)) < 0)  {
-                print_error($E{Cannot bind UDP access socket});
-                close(sockfd);
-                exit(E_NETERR);
-        }
         return  sockfd;
-}
-
-/* Unpack btuser from networked version.  */
-
-static void  unpack_btuser(Btuser *dest, const Btuser *src)
-{
-        dest->btu_isvalid = src->btu_isvalid;
-        dest->btu_minp = src->btu_minp;
-        dest->btu_maxp = src->btu_maxp;
-        dest->btu_defp = src->btu_defp;
-        dest->btu_user = ntohl(src->btu_user);
-        dest->btu_maxll = ntohs(src->btu_maxll);
-        dest->btu_totll = ntohs(src->btu_totll);
-        dest->btu_spec_ll = ntohs(src->btu_spec_ll);
-        dest->btu_priv = ntohl(src->btu_priv);
-        dest->btu_jflags[0] = ntohs(src->btu_jflags[0]);
-        dest->btu_jflags[1] = ntohs(src->btu_jflags[1]);
-        dest->btu_jflags[2] = ntohs(src->btu_jflags[2]);
-        dest->btu_vflags[0] = ntohs(src->btu_vflags[0]);
-        dest->btu_vflags[1] = ntohs(src->btu_vflags[1]);
-        dest->btu_vflags[2] = ntohs(src->btu_vflags[2]);
 }
 
 static  RETSIGTYPE  asig(int n)
@@ -172,7 +124,7 @@ BtuserRef  remgetbtuser(const netid_t hostid, char *realuname, char *realgname)
         strncpy(enq.uname, realuname, UIDSIZE);
         udp_enquire((char *) &enq, sizeof(enq), (char *) &resp, sizeof(resp));
         strcpy(realgname, resp.ua_gname);
-        unpack_btuser(&result, &resp.ua_perm);
+        remsub_unpack_btuser(&result, &resp.ua_perm);
         if  (!result.btu_isvalid)  {
                 print_error($E{No such user on remote});
                 exit(E_NETERR);
