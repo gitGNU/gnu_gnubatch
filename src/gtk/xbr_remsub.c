@@ -339,7 +339,11 @@ void  cb_remsubmit()
         /* Set up dialog and initialise the entry with the last host used if possible */
 
         dlg = gprompt_dialog(toplevel, $P{xbtr remote host dlgtit});
+#ifdef  HAVE_NEW_STYLE_COMBO_BOX_TEXT
         hostw = gtk_combo_box_text_new_with_entry();
+#else
+        hostw = gtk_combo_box_entry_new_text();
+#endif
         gtk_box_pack_start(GTK_BOX(GTK_DIALOG(dlg)->vbox), hostw, FALSE, FALSE, DEF_DLG_VPAD);
 
         sel = -1;       /* Look for current entry */
@@ -348,7 +352,11 @@ void  cb_remsubmit()
                 char    *ent = stringvec_nth(hlist, cnt);
                 if  (curr_host  &&  strcmp(ent, curr_host) == 0)
                         sel = cnt;
+#ifdef  HAVE_NEW_STYLE_COMBO_BOX_TEXT
+                gtk_combo_box_text_append_text(GTK_COMBO_BOX_TEXT(hostw), ent);
+#else
                 gtk_combo_box_append_text(GTK_COMBO_BOX(hostw), ent);
+#endif
         }
         if  (sel >= 0)
                 gtk_combo_box_set_active(GTK_COMBO_BOX(hostw), sel);
@@ -358,19 +366,16 @@ void  cb_remsubmit()
         /* Get required host from dialog */
 
         while  ((dlgres = gtk_dialog_run(GTK_DIALOG(dlg))) == GTK_RESPONSE_OK)  {
-                char    *shost = gtk_combo_box_text_get_active_text(GTK_COMBO_BOX_TEXT(hostw));
+                const  char  *shost = gtk_entry_get_text(GTK_ENTRY(gtk_bin_get_child(GTK_BIN(hostw))));
                 int     ec;
                 struct  remparams       h_parms;
 
                 /* If it's the same one as we had last time, we can drop out */
 
-                if  (curr_host  &&  strcmp(shost, curr_host) == 0)  {
-                        g_free(shost);
+                if  (curr_host  &&  strcmp(shost, curr_host) == 0)
                         break;
-                }
 
                 if  ((ec = get_host_data(shost, &h_parms)))  {
-                        g_free(shost);
                         doerror(ec);
                         continue;
                 }
@@ -379,12 +384,7 @@ void  cb_remsubmit()
                         free(curr_host);
 
                 stringvec_insert_unique(&hlist, shost);
-
-                /* Possibly this is unnecessary but the result of gtk_combo_box_get_active_text has to be
-                   freed with g_free, it says which might not be the same as ordinary free */
-
                 curr_host = stracpy(shost);
-                g_free(shost);
                 curr_host_params = h_parms;
                 break;
         }

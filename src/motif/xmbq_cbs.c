@@ -99,6 +99,7 @@ static Widget  CreateQselDialog(Widget mainform, Widget prevabove, char *existin
 #if  !defined(HAVE_XM_COMBOBOX_H) || defined(BROKEN_COMBOBOX)
         Widget  qselb;
 #else
+        extern  char    **gen_qlist(char *);
         char    **qlist = gen_qlist((char *) 0);
         int     nrows, ncols, cnt;
         XmStringTable   st;

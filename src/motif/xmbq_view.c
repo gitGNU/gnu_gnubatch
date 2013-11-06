@@ -224,7 +224,7 @@ static void  scanfile(FILE *fp)
 /* Get line number lnum
    I never said this was brilliantly efficient.  */
 
-static void  getline(const unsigned lnum)
+static void  my_getline(const unsigned lnum)
 {
         static  unsigned        lastlin = 0x7fff;
         int             ch, lng;
@@ -316,7 +316,7 @@ static void  redraw(Boolean doclear)
         XClearArea(dpy, XtWindow(drawing_a), 0, yloc, view_width, endy, False);
         while  (yloc < endy  &&  yindx < linecount)  {
                 yloc += font->ascent;
-                getline(yindx++);
+                my_getline(yindx++);
                 lng = strlen(buffer);
                 if  (lng > xindx)  {
                         lng -= xindx;
@@ -497,14 +497,14 @@ static void  execute_search()
 
         if  (sbackward)  {
                 while  (cline != 0)  {
-                        getline(--cline);
+                        my_getline(--cline);
                         if  ((mpos = foundmatch()) >= 0)
                                 goto  foundit;
                 }
                 if  (wraparound)  {
                         cline = linecount - 1;
                         while  (cline > last_matchline)  {
-                                getline(cline);
+                                my_getline(cline);
                                 if  ((mpos = foundmatch()) >= 0)
                                         goto  foundit;
                                 cline--;
@@ -514,14 +514,14 @@ static void  execute_search()
         }
         else  {
                 while  (++cline < linecount)  {
-                        getline(cline);
+                        my_getline(cline);
                         if  ((mpos = foundmatch()) >= 0)
                                 goto  foundit;
                 }
                 if  (wraparound)  {
                         cline = 0;
                         while  (cline < last_matchline)  {
-                                getline(cline);
+                                my_getline(cline);
                                 if  ((mpos = foundmatch()) >= 0)
                                         goto  foundit;
                                 cline++;

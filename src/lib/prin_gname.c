@@ -53,6 +53,9 @@ static  struct  ghash   *gnhash[UG_HASHMOD];
 
 gid_t   Realgid, Effgid, Daemgid;
 
+extern struct group *my_getgrent();
+extern void  my_endgrent();
+
 /* Read group file to build up hash table of group ids.  This is
    usually done once only at the start of the program, however if
    done again it must be to re-read supp groups only.  */
@@ -70,15 +73,15 @@ void  rgrpfile()
         if  (doneit)  {
 #ifdef  HAVE_GETGROUPS
                 if  (Requires_suppgrps)  {
-                        while  ((ugrp = getgrent()) != (struct group *) 0)
+                        while  ((ugrp = my_getgrent()))
                                 for  (gp = ugrp->gr_mem;  *gp;  gp++)
                                         add_suppgrp(*gp, ugrp->gr_gid);
-                        endgrent();
+                        my_endgrent();
                 }
 #endif
                 return;
         }
-        while  ((ugrp = getgrent()) != (struct group *) 0)  {
+        while  ((ugrp = my_getgrent()) != (struct group *) 0)  {
                 pn = ugrp->gr_name;
                 sum = 0;
                 while  (*pn)
@@ -102,7 +105,7 @@ void  rgrpfile()
                                 add_suppgrp(*gp, ugrp->gr_gid);
 #endif
         }
-        endgrent();
+        my_endgrent();
         doneit = 1;
 }
 

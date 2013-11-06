@@ -67,6 +67,7 @@
 #include "jvuprocs.h"
 #include "xm_commlib.h"
 #include "xmbr_ext.h"
+#include "stringvec.h"
 
 #if  defined(HAVE_XM_COMBOBOX_H) && !defined(BROKEN_COMBOBOX)
 static  char    Filename[] = __FILE__;
@@ -104,17 +105,20 @@ Widget  CreateQselDialog(Widget mainform, Widget prevabove, char *existing, int 
 #if  !defined(HAVE_XM_COMBOBOX_H) || defined(BROKEN_COMBOBOX)
         Widget  qselb;
 #else
-        char    **qlist = gen_qlist((char *) 0);
-        int     nrows, ncols, cnt;
+        struct  stringvec  qlist;
+        int     nrows, cnt;
         XmStringTable   st;
+        extern  void    gen_qlist_sv(struct stringvec *);
 
-        count_hv(qlist, &nrows, &ncols);
-        qsort(QSORTP1 qlist, nrows, sizeof(char *), QSORTP4 sort_qug);
+        gen_qlist_sv(&qlist);
+        nrows = stringvec_count(qlist);
         if  (!(st = (XmStringTable) XtMalloc((unsigned) ((nrows+1) * sizeof(XmString *)))))
                 ABORT_NOMEM;
-        for  (cnt = 0;  cnt < nrows;  cnt++)
-                st[cnt] = XmStringCreateLocalized(qlist[cnt][0]? qlist[cnt]: "-");
-        freehelp(qlist);
+        for  (cnt = 0;  cnt < nrows;  cnt++)  {
+                char  *svn = stringvec_nth(qlist, cnt);
+                st[cnt] = XmStringCreateLocalized(svn[0]? svn: "-");
+        }
+        stringvec_free(&qlist);
 #endif
 
         qtitw = place_label_left(mainform, prevabove, "queuename");
@@ -404,6 +408,7 @@ static void  endviewopt(Widget w, int data)
                         free(editor_name);
                         editor_name = stracpy(txt);
                         xterm_edit = XmToggleButtonGadgetGetState(workw[WORKW_XTERMW])? 1: 0;
+                        xml_format = XmToggleButtonGadgetGetState(workw[WORKW_XMLW])? 1: 0;
                 }
                 XtFree(txt);
         }
@@ -412,7 +417,7 @@ static void  endviewopt(Widget w, int data)
 
 void  cb_viewopt(Widget parent, int notused)
 {
-        Widget  view_shell, paneview, mainform, prevabove, etit, ewid, xtermw;
+        Widget  view_shell, paneview, mainform, prevabove, xmlwid, etit, ewid, xtermw;
 
         CreateEditDlg(parent, "Viewopts", &view_shell, &paneview, &mainform, 3);
         prevabove = XtVaCreateManagedWidget("viewtitle",
@@ -421,6 +426,17 @@ void  cb_viewopt(Widget parent, int notused)
                                             XmNleftAttachment,          XmATTACH_FORM,
                                             XmNborderWidth,             0,
                                             NULL);
+
+        prevabove = xmlwid = workw[WORKW_XMLW] =
+                  XtVaCreateManagedWidget("xmlfmt",
+                                  xmToggleButtonGadgetClass,      mainform,
+                                  XmNtopAttachment,               XmATTACH_WIDGET,
+                                  XmNtopWidget,                   prevabove,
+                                  XmNleftAttachment,              XmATTACH_FORM,
+                                  NULL);
+
+        if  (xml_format)
+                 XmToggleButtonGadgetSetState(xmlwid, True, False);
 
         etit = place_label_left(mainform, prevabove, "editor");
         ewid = workw[WORKW_EDITORW] =

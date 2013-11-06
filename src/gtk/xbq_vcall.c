@@ -782,9 +782,15 @@ void  cb_vmac()
 
         if  (oldmac)  {
                 unsigned  cnt;
+#ifdef  HAVE_NEW_STYLE_COMBO_BOX_TEXT
+                cmdentry = gtk_combo_box_text_new_with_entry();
+                for  (cnt = 0;  cnt < stringvec_count(previous_commands);  cnt++)
+                        gtk_combo_box_text_append_text(GTK_COMBO_BOX_TEXT(cmdentry), stringvec_nth(previous_commands, cnt));
+#else
                 cmdentry = gtk_combo_box_entry_new_text();
                 for  (cnt = 0;  cnt < stringvec_count(previous_commands);  cnt++)
                         gtk_combo_box_append_text(GTK_COMBO_BOX(cmdentry), stringvec_nth(previous_commands, cnt));
+#endif
         }
         else
                 cmdentry = gtk_entry_new();

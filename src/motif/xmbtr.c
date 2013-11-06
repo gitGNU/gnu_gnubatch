@@ -16,8 +16,8 @@
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
 #include "config.h"
-static  char    rcsid1[] = "@(#) $Id: xmbtr.c,v 1.9 2009/02/18 06:51:32 toadwarble Exp $";              /* We use these in the about message */
-static  char    rcsid2[] = "@(#) $Revision: 1.9 $";
+static  char    rcsid1[] = "@(#) $Id: xmbtr.c,v 1.10 2009/02/18 06:51:32 toadwarble Exp $";              /* We use these in the about message */
+static  char    rcsid2[] = "@(#) $Revision: 1.10 $";
 #include <stdio.h>
 #include <sys/types.h>
 #include <sys/stat.h>
@@ -91,9 +91,15 @@ extern  long    mymtype;
 struct  pend_job        default_pend;
 Btjob   default_job;
 
-char    xterm_edit;             /* Invoke "xterm" to run editor */
+#ifdef  HAVE_LIBXML2
+char    xml_format = 1;
+#else
+char    xml_format = 0;
+#endif
+char    xterm_edit = 1; /* Invoke "xterm" to run editor */
 
 char    *editor_name;   /* Name of favourite editor */
+char    *realuname;
 
 /* X Stuff */
 
@@ -169,10 +175,10 @@ defs_casc[] = {
 file_casc[] = {
         {       ITEM,   "New",          cb_jnew,        0       },
         {       ITEM,   "Open",         cb_jopen,       0       },
+        {       ITEM,   "Legopen",      cb_jlegopen,    0       },
         {       ITEM,   "Close",        cb_jclosedel,   0       },
-        {       ITEM,   "Jobfile",      cb_jcmdfile,    JCMDFILE_JOB    },
-        {       ITEM,   "Cmdfile",      cb_jcmdfile,    JCMDFILE_CMD    },
         {       ITEM,   "Save",         cb_jsave,       0       },
+        {       ITEM,   "SaveAs",       cb_jsaveas,     0       },
         {       ITEM,   "Edit",         cb_edit,        0       },
         {       SEP     },
         {       ITEM,   "Delete",       cb_jclosedel,   1       },
@@ -236,8 +242,8 @@ static  tool_button
         {       "Time",         cb_stime,       1,              $H{xmbtr set time button help}  },
         {       "Cond",         cb_jconds,      1,              $H{xmbtr set conds button help} },
         {       "Ass",          cb_jass,        1,              $H{xmbtr set asses button help} },
-        {       "Submit",       cb_submit,      0,              $H{xmbtr submit button help}    }
-        ,{      "Rsubmit",      cb_remsubmit,   0,              $H{xmbtr remote submit button help}     }
+        {       "Submit",       cb_submit,      0,              $H{xmbtr submit button help}    },
+        {      "Rsubmit",      cb_remsubmit,   0,              $H{xmbtr remote submit button help}     }
         };
 
 #if     defined(HAVE_MEMCPY) && !defined(HAVE_BCOPY)
@@ -300,6 +306,8 @@ static void  cb_saveopts(Widget w)
            NB No error check second and subsequent as we assume that they will work if the
            first one does. */
 
+        digbuf[0] = xml_format? '1': '0';       /* Got a null char in from last time and confline_arg set */
+        proc_save_opts((const char *) 0, "XMBTRXMLFMT", save_confline_opt);
         confline_arg = editor_name;
         proc_save_opts((const char *) 0, "XMBTREDITOR", save_confline_opt);
         XtVaGetValues(jwid, XmNwidth, &wid, XmNvisibleItemCount, &items, NULL);
@@ -464,6 +472,12 @@ static void  wstart(int argc, char **argv)
                  free(arg);
         }
 
+        if  ((arg = optkeyword("XMBTRXMLFMT")))  {
+                if  (arg[0])
+                        xml_format = arg[0] != '0';
+                free(arg);
+        }
+
         if  ((arg = optkeyword("XMBTREDITOR")))
                 editor_name = arg;
         else
@@ -518,7 +532,7 @@ MAINFN_TYPE  main(int argc, char **argv)
         struct  sigstruct_name  z;
 #endif
 
-        versionprint(argv, "$Revision: 1.9 $", 0);
+        versionprint(argv, "$Revision: 1.10 $", 0);
 
         if  ((progname = strrchr(argv[0], '/')))
                 progname++;
@@ -532,6 +546,7 @@ MAINFN_TYPE  main(int argc, char **argv)
         Effuid = geteuid();
         Effgid = getegid();
         INIT_DAEMUID
+        realuname = prin_uname(Realuid);
         Cfile = open_cfile(Confvarname, "xmbtr.help");
         SCRAMBLID_CHECK
         tzset();

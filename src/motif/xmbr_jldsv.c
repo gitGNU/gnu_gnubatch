@@ -23,6 +23,7 @@
 #include <sys/ipc.h>
 #include <sys/sem.h>
 #include <sys/shm.h>
+#include <fcntl.h>
 #ifdef  TIME_WITH_SYS_TIME
 #include <sys/time.h>
 #include <time.h>
@@ -62,6 +63,7 @@
 #include "xmbr_ext.h"
 #include "spitrouts.h"
 #include "optflags.h"
+#include "xmlldsv.h"
 
 static  char    Filename[] = __FILE__;
 
@@ -493,6 +495,9 @@ void  job_initialise(struct pend_job *pj, char *dname, char *fname)
                 pj->jobqueue = stracpy(pj->jobqueue);   /* Lets have a unique copy. */
         pj->jobfile_name = (char *) 0;
         pj->cmdfile_name = fname; /* Already stracpyed */
+        pj->xml_jobfile_name = (char *) 0;
+        pj->jobscript = (char *) 0;
+        pj->scriptinmem = 0;
 }
 
 static void  cleanupspace(char **envlist)
@@ -743,6 +748,7 @@ int  job_load(struct pend_job *pj)
         cleanupspace(envlist);
         if  (pj->job->h.bj_times.tc_istime  &&  pj->job->h.bj_times.tc_nexttime < time((time_t *) 0))
                 doinfo(jwid, $E{xmbtr loaded job not future});
+        pj->scriptinmem = 0;
         return  0;
 
  badfmt:
@@ -757,6 +763,41 @@ int  job_load(struct pend_job *pj)
         if  (pj->job->h.bj_times.tc_istime  &&  pj->job->h.bj_times.tc_nexttime < now)
                 pj->job->h.bj_times.tc_nexttime = now + 60L;
         return  arg_errnum;
+}
+
+/* XML version of job load. NB we keep script in memory */
+
+int     xml_job_load(struct pend_job *pj)
+{
+        char    *fname;
+        int     ret, fp, verb = 0;
+
+        fname = gen_path(pj->directory, pj->xml_jobfile_name);
+        SWAP_TO(Realuid);
+        fp = open(fname, O_RDONLY);
+        SWAP_TO(Daemuid);
+        free(fname);
+        if  (fp < 0)
+                return  $EH{xbtq no open job file};
+        ret = load_job_xml_fd(fp, pj->job, &pj->jobscript, &verb);
+        if  (pj->jobscript)
+                pj->scriptinmem = 1;
+        pj->Verbose = verb? 1: 0;
+        close(fp);
+        if  (ret == 0)
+                return  0;
+        switch  (ret)  {
+        default:
+                return  $EH{xbtq no open job file};
+        case  XML_INVALID_FORMAT_FILE:
+                return  $EH{xbq invalid format job file};
+        case  XML_INVALID_CONDS:
+                return  $EH{xbq invalid conditions};
+        case  XML_INVALID_ASSES:
+                return  $EH{xbq invalid assignments};
+        case  XML_TOOMANYSTRINGS:
+                return  $EH{xbq too many strings};
+        }
 }
 
 void  dumphdrs(BtjobRef jp, FILE *xfl)
@@ -915,6 +956,28 @@ int  job_save(struct pend_job *pj)
 
         fprintf(xfl, "%s/%s\n", pj->directory, pj->jobfile_name);
         fclose(xfl);
+        return  0;
+}
+
+int  job_save_xml(struct pend_job *pj)
+{
+        BtjobRef        jp = pj->job;
+        FILE            *xfl;
+        char            *fname;
+        int             um, ret;
+
+        fname = gen_path(pj->directory, pj->xml_jobfile_name);
+        um = umask(Save_umask);
+        SWAP_TO(Realuid);
+        xfl = fopen(fname, "w");
+        SWAP_TO(Daemuid);
+        umask(um);
+        free(fname);
+        if  (!xfl)
+               return  $EH{xbq cannot write job file};
+        ret = save_job_xml_file(jp, pj->jobscript, pj->jobscript? strlen(pj->jobscript): 0, xfl, -1, pj->Verbose);
+        if  (fclose(xfl) < 0  ||  ret != 0)
+                return  $EH{xbq cannot write job file};
         return  0;
 }
 

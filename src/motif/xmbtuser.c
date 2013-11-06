@@ -17,7 +17,7 @@
 
 #include "config.h"
 static  char    rcsid1[] = "@(#) $Id: xmbtuser.c,v 1.6 2009/02/18 06:51:32 toadwarble Exp $";           /* We use these in the about message */
-static  char    rcsid2[] = "@(#) $Revision: 1.9 $";
+static  char    rcsid2[] = "@(#) $Revision: 1.10 $";
 #include <stdio.h>
 #include <sys/types.h>
 #include <sys/stat.h>
@@ -626,7 +626,7 @@ MAINFN_TYPE  main(int argc, char **argv)
 #endif
         BtuserRef       mypriv;
 
-        versionprint(argv, "$Revision: 1.9 $", 0);
+        versionprint(argv, "$Revision: 1.10 $", 0);
 
         if  ((progname = strrchr(argv[0], '/')))
                 progname++;

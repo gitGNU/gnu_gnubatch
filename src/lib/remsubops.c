@@ -29,7 +29,6 @@
 #include "incl_sig.h"
 #include "incl_net.h"
 #include "network.h"
-#include "defaults.h"
 #include "files.h"
 #include "btmode.h"
 #include "btuser.h"

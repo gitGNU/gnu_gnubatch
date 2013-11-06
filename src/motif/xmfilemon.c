@@ -56,7 +56,8 @@ static  char    Filename[] = __FILE__;
 char    *Curr_pwd;
 char    Confvarname[] = "FILEMONCONF";
 
-uid_t           Daemuid;
+uid_t           Daemuid, Realuid, Effuid;
+gid_t		Daemgid, Realgid, Effgid;
 
 enum  wot_mode  wotact = WM_STOP_FOUND;
 enum  wot_form  wotf = WF_APPEARS;
@@ -517,7 +518,7 @@ MAINFN_TYPE  main(int argc, char **argv)
         Dimension       h;
         vrec_t          vrec;
 
-        versionprint(argv, "$Revision: 1.9 $", 0);
+        versionprint(argv, "$Revision: 1.10 $", 0);
         init_mcfile();
         Realuid = getuid();
         Realgid = getgid();

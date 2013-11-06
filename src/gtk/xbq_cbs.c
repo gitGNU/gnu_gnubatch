@@ -94,11 +94,19 @@ void  cb_viewopt()
         gtk_box_pack_start(GTK_BOX(GTK_DIALOG(dlg)->vbox), hbox, FALSE, FALSE, DEF_DLG_VPAD);
         gtk_box_pack_start(GTK_BOX(hbox), gprompt_label($P{xbtq viewopt queue lab}), FALSE, FALSE, DEF_DLG_HPAD);
         gen_qlist(&possqs);
+#ifdef  HAVE_NEW_STYLE_COMBO_BOX_TEXT
+        qcomb = gtk_combo_box_text_new_with_entry();
+#else
         qcomb = gtk_combo_box_entry_new_text();
+#endif
         if  (jobqueue  &&  strlen(jobqueue) != 0)
                 gtk_entry_set_text(GTK_ENTRY(gtk_bin_get_child(GTK_BIN(qcomb))), jobqueue);
         for  (cnt = 0;  cnt < stringvec_count(possqs);  cnt++)
+#ifdef  HAVE_NEW_STYLE_COMBO_BOX_TEXT
+                gtk_combo_box_text_append_text(GTK_COMBO_BOX_TEXT(qcomb), stringvec_nth(possqs, cnt));
+#else
                 gtk_combo_box_append_text(GTK_COMBO_BOX(qcomb), stringvec_nth(possqs, cnt));
+#endif
         stringvec_free(&possqs);
         gtk_box_pack_start(GTK_BOX(hbox), qcomb, FALSE, FALSE, DEF_DLG_HPAD);
 
@@ -108,12 +116,22 @@ void  cb_viewopt()
         gtk_box_pack_start(GTK_BOX(GTK_DIALOG(dlg)->vbox), hbox, FALSE, FALSE, DEF_DLG_VPAD);
         gtk_box_pack_start(GTK_BOX(hbox), gprompt_label($P{xbtq viewopt users lab}), FALSE, FALSE, DEF_DLG_HPAD);
         uglist = gen_ulist((char *) 0);
+#ifdef  HAVE_NEW_STYLE_COMBO_BOX_TEXT
+        ucomb = gtk_combo_box_text_new_with_entry();
+#else
         ucomb = gtk_combo_box_entry_new_text();
+#endif
         if  (Restru  &&  strlen(Restru) != 0)
                 gtk_entry_set_text(GTK_ENTRY(gtk_bin_get_child(GTK_BIN(ucomb))), Restru);
-        gtk_combo_box_append_text(GTK_COMBO_BOX(ucomb), "");
+#ifdef  HAVE_NEW_STYLE_COMBO_BOX_TEXT
+        gtk_combo_box_text_append_text(GTK_COMBO_BOX_TEXT(ucomb), "");
+        for  (up = uglist;  *up;  up++)
+                gtk_combo_box_text_append_text(GTK_COMBO_BOX_TEXT(ucomb), *up);
+#else
+        gtk_combo_box_append_text(GTK_COMBO_BOX(qcomb), "");
         for  (up = uglist;  *up;  up++)
                 gtk_combo_box_append_text(GTK_COMBO_BOX(ucomb), *up);
+#endif
         freehelp(uglist);
         gtk_box_pack_start(GTK_BOX(hbox), ucomb, FALSE, FALSE, DEF_DLG_HPAD);
 
@@ -123,12 +141,22 @@ void  cb_viewopt()
         gtk_box_pack_start(GTK_BOX(GTK_DIALOG(dlg)->vbox), hbox, FALSE, FALSE, DEF_DLG_VPAD);
         gtk_box_pack_start(GTK_BOX(hbox), gprompt_label($P{xbtq viewopt groups lab}), FALSE, FALSE, DEF_DLG_HPAD);
         uglist = gen_glist((char *) 0);
+#ifdef  HAVE_NEW_STYLE_COMBO_BOX_TEXT
+        gcomb = gtk_combo_box_text_new_with_entry();
+#else
         gcomb = gtk_combo_box_entry_new_text();
+#endif
         if  (Restrg  &&  strlen(Restrg) != 0)
                 gtk_entry_set_text(GTK_ENTRY(gtk_bin_get_child(GTK_BIN(gcomb))), Restrg);
+#ifdef  HAVE_NEW_STYLE_COMBO_BOX_TEXT
+        gtk_combo_box_text_append_text(GTK_COMBO_BOX_TEXT(gcomb), "");
+        for  (up = uglist;  *up;  up++)
+                gtk_combo_box_text_append_text(GTK_COMBO_BOX_TEXT(gcomb), *up);
+#else
         gtk_combo_box_append_text(GTK_COMBO_BOX(gcomb), "");
         for  (up = uglist;  *up;  up++)
                 gtk_combo_box_append_text(GTK_COMBO_BOX(gcomb), *up);
+#endif
         freehelp(uglist);
         gtk_box_pack_start(GTK_BOX(hbox), gcomb, FALSE, FALSE, DEF_DLG_HPAD);
 
@@ -163,9 +191,15 @@ void  cb_viewopt()
         gtk_widget_show_all(dlg);
 
         if  (gtk_dialog_run(GTK_DIALOG(dlg)) == GTK_RESPONSE_OK)  {
+#ifdef  HAVE_NEW_STYLE_COMBO_BOX_TEXT
+                const  char  *newq = gtk_combo_box_text_get_active_text(GTK_COMBO_BOX_TEXT(qcomb));
+                const  char  *newu = gtk_combo_box_text_get_active_text(GTK_COMBO_BOX_TEXT(ucomb));
+                const  char  *newg = gtk_combo_box_text_get_active_text(GTK_COMBO_BOX_TEXT(gcomb));
+#else
                 const  char  *newq = gtk_entry_get_text(GTK_ENTRY(gtk_bin_get_child(GTK_BIN(qcomb))));
                 const  char  *newu = gtk_entry_get_text(GTK_ENTRY(gtk_bin_get_child(GTK_BIN(ucomb))));
                 const  char  *newg = gtk_entry_get_text(GTK_ENTRY(gtk_bin_get_child(GTK_BIN(gcomb))));
+#endif
                 if  (jobqueue)  {
                         free(jobqueue);
                         jobqueue = 0;

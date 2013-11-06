@@ -499,6 +499,7 @@ void  job_initialise(struct pend_job *pj, char *dname, char *fname)
         pj->cmdfile_name = fname; /* Already stracpyed if it's there at all */
         pj->xml_jobfile_name = (char *) 0;
         pj->jobscript = (char *) 0;
+        pj->scriptinmem = 0;
 }
 
 static void  cleanupspace(char **envlist)

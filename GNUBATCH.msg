@@ -512,8 +512,7 @@ Assignment strings exit and signal
 
 P{Assign exit code} = ROUND({Repeat unit full}, 20)	"exitcode"
 P{Assign signal} ++		"signal"
-P{xmbtr file sep} ++		"->"
-P{xmbtr default job} ++		"(default job)"
+P{xmbtr default job} = @ + 2	"(default job)"
 P{xmbtr none host} ++		"(none)"
 
 [
@@ -5064,12 +5063,7 @@ P,H{xmbtr confirm delete} ++
 "Please confirm that you really want to delete this
 job which has unsaved changes."
 
-P,H{xmbtr file exists confirm} ++
-"File exists - are you sure?",
-"Your proposed new file name clashes with an existing
-file. This operation may overwrite it."
-
-P,H{xmbtr file save confirm} ++
+P,H{xmbtr file save confirm} = @ + 2
 "No changes - are you sure?",
 "The job has not changed since you last saved it.
 This question is in case you selected the wrong job."
@@ -5548,6 +5542,10 @@ E,H{xmbtq var macro exit code} ++
 "Your variable macro failed, giving an exit code
 of %d0. I don't know what this means!"
 
+E,H{xmbtr cannot create temp file} ++
+"Cannot create temporary file",
+"I cannot create the temporary file to run the editor on"
+
 E,H{xmbtr cannot fork for editor} = 302
 "Cannot fork",
 "Sorry, but I cannot fork to create your editor process."
@@ -5593,12 +5591,7 @@ E,H{xmbtr no job file name} ++
 "Before you can do this operation you need to give
 a file name to the job. Select from the file menu"
 
-E,H{xmbtr no cmd file name} ++
-"No command file name.",
-"Before you can do this operation you need to give
-a file name to the command options. Select from the file menu."
-
-E,H{xmbtr no such file} ++
+E,H{xmbtr no such file} = @ + 2
 "File does not exist.",
 "Your file name has not been created yet."
 

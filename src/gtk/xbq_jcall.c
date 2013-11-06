@@ -240,11 +240,19 @@ void  cb_jqueue(GtkAction *action)
         hbox = gtk_hbox_new(FALSE, DEF_DLG_HPAD);
         gtk_box_pack_start(GTK_BOX(GTK_DIALOG(dlg)->vbox), hbox, FALSE, FALSE, DEF_DLG_VPAD);
         gtk_box_pack_start(GTK_BOX(hbox), gprompt_label($P{xbtr jqueue queue lab}), FALSE, FALSE, DEF_DLG_HPAD);
+#ifdef  HAVE_NEW_STYLE_COMBO_BOX_TEXT
+        qwid = gtk_combo_box_text_new_with_entry();
+#else
         qwid = gtk_combo_box_entry_new_text();
+#endif
         if  (cj->jobqueue  &&  strlen(cj->jobqueue) != 0)
                 gtk_entry_set_text(GTK_ENTRY(gtk_bin_get_child(GTK_BIN(qwid))), cj->jobqueue);
         for  (cnt = 0;  cnt < stringvec_count(possqs);  cnt++)
+#ifdef  HAVE_NEW_STYLE_COMBO_BOX_TEXT
+                gtk_combo_box_text_append_text(GTK_COMBO_BOX_TEXT(qwid), stringvec_nth(possqs, cnt));
+#else
                 gtk_combo_box_append_text(GTK_COMBO_BOX(qwid), stringvec_nth(possqs, cnt));
+#endif
         stringvec_free(&possqs);
         gtk_box_pack_start(GTK_BOX(hbox), qwid, FALSE, FALSE, DEF_DLG_HPAD);
 
@@ -296,7 +304,11 @@ void  cb_jqueue(GtkAction *action)
 
         gtk_widget_show_all(dlg);
         while  (gtk_dialog_run(GTK_DIALOG(dlg)) == GTK_RESPONSE_OK)  {
+#ifdef  HAVE_NEW_STYLE_COMBO_BOX_TEXT
+                const  char  *newq = gtk_combo_box_text_get_active_text(GTK_COMBO_BOX_TEXT(qwid));
+#else
                 const  char  *newq = gtk_entry_get_text(GTK_ENTRY(gtk_bin_get_child(GTK_BIN(qwid))));
+#endif
                 char    *ntit;
                 const   char    *cp, *tit;
                 BtjobRef        bjp = cj->job;
@@ -2128,9 +2140,15 @@ void  cb_jmac()
 
         if  (oldmac)  {
                 unsigned  cnt;
+#ifdef  HAVE_NEW_STYLE_COMBO_BOX_TEXT
+                cmdentry = gtk_combo_box_text_new_with_entry();
+                for  (cnt = 0;  cnt < stringvec_count(previous_commands);  cnt++)
+                        gtk_combo_box_text_append_text(GTK_COMBO_BOX_TEXT(cmdentry), stringvec_nth(previous_commands, cnt));
+#else
                 cmdentry = gtk_combo_box_entry_new_text();
                 for  (cnt = 0;  cnt < stringvec_count(previous_commands);  cnt++)
                         gtk_combo_box_append_text(GTK_COMBO_BOX(cmdentry), stringvec_nth(previous_commands, cnt));
+#endif
         }
         else
                 cmdentry = gtk_entry_new();

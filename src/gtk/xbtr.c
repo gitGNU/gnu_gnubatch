@@ -16,7 +16,7 @@
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
 #include "config.h"
-static  char    rcsid2[] = "@(#) $Revision: 1.9 $";
+static  char    rcsid2[] = "@(#) $Revision: 1.10 $";
 #include <stdio.h>
 #include <sys/types.h>
 #include <sys/stat.h>
@@ -82,8 +82,8 @@ Btjob                   default_job;
 
 char    internal_edit = 1;          /* Use internal editor */
 char    xterm_edit = 1;             /* Invoke "xterm" to run editor */
-#ifdef	HAVE_LIBXML2
-char	xml_format = 1;              /* Use XML format on by default */
+#ifdef  HAVE_LIBXML2
+char    xml_format = 1;              /* Use XML format on by default */
 #else
 char    xml_format = 0;             /* Use XML format */
 #endif
@@ -149,20 +149,20 @@ static GtkActionEntry entries[] = {
         { "Loaddefsh", NULL, "Load defaults _home", NULL, "Load defaults from home directory", G_CALLBACK(cb_loaddefs) },
         { "Savedefsh", NULL, "Sa_ve defaults home", NULL, "Save defaults to home directory", G_CALLBACK(cb_savedefs) },
         { "Quit", GTK_STOCK_QUIT, "_Quit", "<control>Q", "Quit program", G_CALLBACK(cb_quit)},
-        { "Queued", NULL, "Set default _queue", NULL, "Set default queue name prefix", G_CALLBACK(cb_jqueue) },
-        { "Setrund", NULL, "Set default _runnable", NULL, "Set runnable by default", G_CALLBACK(cb_jstate) },
-        { "Setcancd", NULL, "Set default _cancelled", NULL, "Set cancelled by default", G_CALLBACK(cb_jstate) },
-        { "Timed", NULL, "Set default _time", NULL, "Set default time parameters", G_CALLBACK(cb_time) },
-        { "Titled", NULL, "Set default title,pri,_ll", NULL, "Set default job title, priority, load level", G_CALLBACK(cb_titprill) },
-        { "Processd", NULL, "Set default _process params", NULL, "Set default process parameters", G_CALLBACK(cb_procpar) },
-        { "Runtimed", NULL, "Set default _run times", NULL, "Set default run time", G_CALLBACK(cb_timelim) },
+        { "Queued", NULL, "Set default _queue", "<shift>Q", "Set default queue name prefix", G_CALLBACK(cb_jqueue) },
+        { "Setrund", NULL, "Set default _runnable", "<shift>R", "Set runnable by default", G_CALLBACK(cb_jstate) },
+        { "Setcancd", NULL, "Set default _cancelled", "<shift>Z", "Set cancelled by default", G_CALLBACK(cb_jstate) },
+        { "Timed", NULL, "Set default _time", "<shift>T", "Set default time parameters", G_CALLBACK(cb_time) },
+        { "Titled", NULL, "Set default title,pri,_ll", "<shift>P", "Set default job title, priority, load level", G_CALLBACK(cb_titprill) },
+        { "Processd", NULL, "Set default _process params", "<shift>U", "Set default process parameters", G_CALLBACK(cb_procpar) },
+        { "Runtimed", NULL, "Set default _run times", "<shift>L", "Set default run time", G_CALLBACK(cb_timelim) },
         { "Maild", NULL, "Set default _mail/write", NULL, "Set default mail/write flags", G_CALLBACK(cb_mailwrt) },
-        { "Permjd", NULL, "Set default _permissions", NULL, "Set default permissions", G_CALLBACK(cb_jperm) },
-        { "Argsd", NULL, "Set default _arguments", NULL, "Set default job arguments", G_CALLBACK(cb_args) },
-        { "Envd", NULL, "Set default _environment", NULL, "Set default environment", G_CALLBACK(cb_env) },
-        { "Redirsd", NULL, "Set default _redirections", NULL, "Set default redirections", G_CALLBACK(cb_redir) },
-        { "Condsd", NULL, "Set default _conditions", NULL, "Set default conditions", G_CALLBACK(cb_conds) },
-        { "Assesd", NULL, "Set default _assignments", NULL, "Set default assignments", G_CALLBACK(cb_asses) },
+        { "Permjd", NULL, "Set default _permissions", "<shift>M", "Set default permissions", G_CALLBACK(cb_jperm) },
+        { "Argsd", NULL, "Set default _arguments", "<shift>A", "Set default job arguments", G_CALLBACK(cb_args) },
+        { "Envd", NULL, "Set default _environment", "<shift>V", "Set default environment", G_CALLBACK(cb_env) },
+        { "Redirsd", NULL, "Set default _redirections", "<shift>I", "Set default redirections", G_CALLBACK(cb_redir) },
+        { "Condsd", NULL, "Set default _conditions", "<shift>C", "Set default conditions", G_CALLBACK(cb_conds) },
+        { "Assesd", NULL, "Set default _assignments", "<shift>S", "Set default assignments", G_CALLBACK(cb_asses) },
         { "New", GTK_STOCK_NEW, "New job file", "<control>N", "Create new job file", G_CALLBACK(cb_jnew) },
         { "Open", GTK_STOCK_OPEN, "Open job file", "<control>O", "Open job file", G_CALLBACK(cb_jopen) },
         { "Legopen", NULL, "_Legacy open job file", NULL, "Open legacy job file", G_CALLBACK(cb_jlegopen), },
@@ -174,20 +174,20 @@ static GtkActionEntry entries[] = {
         { "Submit", GTK_STOCK_EXECUTE, "_Submit", "exclam", "Submit job", G_CALLBACK(cb_submit) },
         { "Rsubmit", GTK_STOCK_EXECUTE, "_Remote Submit", "at", "Submit job remotely", G_CALLBACK(cb_remsubmit) },
         { "Options", NULL, "_Options", "<control>O", "Set job options", G_CALLBACK(cb_options) },
-        { "Queue", NULL, "Set job _queue", NULL, "Set queue name prefix", G_CALLBACK(cb_jqueue) },
-        { "Setrun", NULL, "Set _runnable", NULL, "Set runnable", G_CALLBACK(cb_jstate) },
-        { "Setcanc", NULL, "Set _cancelled", NULL, "Set cancelled", G_CALLBACK(cb_jstate) },
-        { "Time", NULL, "Set _time", NULL, "Set time parameters", G_CALLBACK(cb_time) },
-        { "Title", NULL, "Set title,pri,_ll", NULL, "Set job title, priority, load level", G_CALLBACK(cb_titprill) },
-        { "Process", NULL, "Set _process params", NULL, "Set process parameters", G_CALLBACK(cb_procpar) },
-        { "Runtime", NULL, "Set _run times", NULL, "Set run time", G_CALLBACK(cb_timelim) },
+        { "Queue", NULL, "Set job _queue", "Q", "Set queue name prefix", G_CALLBACK(cb_jqueue) },
+        { "Setrun", NULL, "Set _runnable", "R", "Set runnable", G_CALLBACK(cb_jstate) },
+        { "Setcanc", NULL, "Set _cancelled", "Z", "Set cancelled", G_CALLBACK(cb_jstate) },
+        { "Time", NULL, "Set _time", "T", "Set time parameters", G_CALLBACK(cb_time) },
+        { "Title", NULL, "Set title,pri,_ll", "P", "Set job title, priority, load level", G_CALLBACK(cb_titprill) },
+        { "Process", NULL, "Set _process params", "U", "Set process parameters", G_CALLBACK(cb_procpar) },
+        { "Runtime", NULL, "Set _run times", "L", "Set run time", G_CALLBACK(cb_timelim) },
         { "Mail", NULL, "Set _mail/write", NULL, "Set mail/write flags", G_CALLBACK(cb_mailwrt) },
-        { "Permj", NULL, "Set _permissions", NULL, "Set permissions", G_CALLBACK(cb_jperm) },
-        { "Args", NULL, "Set _arguments", NULL, "Set job arguments", G_CALLBACK(cb_args) },
-        { "Env", NULL, "Set _environment", NULL, "Set environment", G_CALLBACK(cb_env) },
-        { "Redirs", NULL, "Set _redirections", NULL, "Set redirections", G_CALLBACK(cb_redir) },
-        { "Conds", NULL, "Set _conditions", NULL, "Set conditions", G_CALLBACK(cb_conds) },
-        { "Asses", NULL, "Set _assignments", NULL, "Set assignments", G_CALLBACK(cb_asses) },
+        { "Permj", NULL, "Set _permissions", "M", "Set permissions", G_CALLBACK(cb_jperm) },
+        { "Args", NULL, "Set _arguments", "A", "Set job arguments", G_CALLBACK(cb_args) },
+        { "Env", NULL, "Set _environment", "V", "Set environment", G_CALLBACK(cb_env) },
+        { "Redirs", NULL, "Set _redirections", "I", "Set redirections", G_CALLBACK(cb_redir) },
+        { "Conds", NULL, "Set _conditions", "C", "Set conditions", G_CALLBACK(cb_conds) },
+        { "Asses", NULL, "Set _assignments", "S", "Set assignments", G_CALLBACK(cb_asses) },
         { "About", NULL, "About xbtr", NULL, "About xbtr", G_CALLBACK(cb_about)}  };
 
 /* For when we run out of memory.....  */
@@ -221,7 +221,7 @@ static void  cb_about()
 {
         GtkWidget  *dlg = gtk_about_dialog_new();
         char    *cp = strchr(rcsid2, ':');
-        char    vbuf[20];
+        char    vbuf[100];
 
         if  (!cp)
                 strcpy(vbuf, "Initial version");
@@ -414,7 +414,7 @@ static void  wstart()
 
 MAINFN_TYPE  main(int argc, char **argv)
 {
-        versionprint(argv, "$Revision: 1.9 $", 0);
+        versionprint(argv, "$Revision: 1.10 $", 0);
 
         if  ((progname = strrchr(argv[0], '/')))
                 progname++;

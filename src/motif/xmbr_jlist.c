@@ -64,6 +64,9 @@
 #include "jvuprocs.h"
 #include "xm_commlib.h"
 #include "xmbr_ext.h"
+#include "optflags.h"
+#include "shutilmsg.h"
+#include "stringvec.h"
 
 static  char    Filename[] = __FILE__;
 
@@ -81,6 +84,8 @@ HelpaltRef      daynames_full, monnames;
 XmStringTable   timezerof, stdaynames, stmonnames;
 #endif
 
+char    *no_name;
+
 int     longest_day,
         longest_mon;
 
@@ -92,34 +97,49 @@ USHORT          defavoid, def_assflags;
 #define ppermitted(flg) (mypriv->btu_priv & flg)
 
 char            *ccritmark,
-                *scritmark,
-                *file_sep;
+                *scritmark;
 
 static  HelpaltRef      progresslist;
 extern  HelpaltRef      assnames, actnames, stdinnames;
 extern  int             redir_actlen, redir_stdinlen;
 
-#define MALLINIT        10
-#define MALLINC         5
+#ifndef PATH_MAX
+#define PATH_MAX        2048
+#endif
 
-char **gen_qlist(char *unused)
+extern  char    *getscript_file(FILE *, unsigned *);
+
+static  int     has_xml_suffix(const char *name)
 {
-        int             jcnt, rt;
-        unsigned        rcnt, rmax;
-        char            **result;
-        const   char    *ip;
+        int  lng = strlen(name);
+
+        return  lng >= sizeof(XMLJOBSUFFIX)  &&  ncstrcmp(name + lng - sizeof(XMLJOBSUFFIX) + 1, XMLJOBSUFFIX) == 0;
+}
+
+int  jlist_dirty()
+{
+        int     cnt;
+
+        for  (cnt = 0;  cnt < pend_njobs;  cnt++)
+                if  (pend_list[cnt].changes != 0)
+                        return  1;
+        return  0;
+}
+
+/* Generate list of queue names in ql */
+
+void  gen_qlist_sv(struct stringvec *ql)
+{
+        int     jcnt;
 
         rjobfile(1);
 
-        if  ((result = (char **) malloc((unsigned) ((MALLINIT + 1) * sizeof(char *)))) == (char **) 0)
-                ABORT_NOMEM;
-
-        result[0] = stracpy("");
-        rcnt = 1;
-        rmax = MALLINIT;
+        stringvec_init(ql);
+        stringvec_append(ql, "");
 
         for  (jcnt = 0;  jcnt < Job_seg.njobs;  jcnt++)  {
                 const   char    *tit = title_of(jj_ptrs[jcnt]);
+                const   char    *ip;
                 char    *it;
                 unsigned        lng;
                 if  (!(ip = strchr(tit, ':')))
@@ -129,22 +149,13 @@ char **gen_qlist(char *unused)
                         ABORT_NOMEM;
                 strncpy(it, tit, lng-1);
                 it[lng-1] = '\0';
-                for  (rt = 0;  rt < rcnt;  rt++)
-                        if  (strcmp(it, result[rt]) == 0)  {
-                                free(it);
-                                goto  clash;
-                        }
-                if  (rcnt >= rmax)  {
-                        rmax += MALLINC;
-                        if  ((result = (char **) realloc((char *) result, (rmax+1) * sizeof(char *))) == 0)
-                                ABORT_NOMEM;
-                }
-                result[rcnt++] = it;
-        clash:
-                ;
+                stringvec_insert_unique(ql, it);
+                free(it);
         }
-        result[rcnt] = (char *) 0;
-        return  result;
+
+        for  (jcnt = 0;  jcnt < pend_njobs;  jcnt++)
+                if  (pend_list[jcnt].jobqueue)
+                        stringvec_insert_unique(ql, pend_list[jcnt].jobqueue);
 }
 
 /* Allocate various messages.  */
@@ -179,7 +190,6 @@ void  initmoremsgs()
         }
         ccritmark = gprompt($P{Critical condition marker});
         scritmark = gprompt($P{Assignment critical});
-        file_sep = gprompt($P{xmbtr file sep});
         def_assflags = 0;
         for  (cnt = 0;  cnt < XtNumber(flagctrl);  cnt++)  {
                 int     nn = helpnstate(flagctrl[cnt].defcode);
@@ -188,6 +198,7 @@ void  initmoremsgs()
         }
         exitcodename = gprompt($P{Assign exit code});
         signalname = gprompt($P{Assign signal});
+        no_name = gprompt($P{xbtr no file name});
         if  (!(actnames = helprdalt($Q{Redirection type names})))  {
                 disp_arg[9] = $Q{Redirection type names};
                 print_error($E{Missing alternative code});
@@ -255,8 +266,9 @@ XmString  jdisplay(struct pend_job *pj)
 {
         int     bpos = 0;
         const   char    *ip;
-        char    *cp, resbuf[256];
+        char    *cp, resbuf[PATH_MAX];
 
+        /* Progress, then title, tabs between */
         cp = resbuf;
         ip = disp_alt(pj->job->h.bj_progress, progresslist);
         while  (*ip)  {
@@ -276,22 +288,47 @@ XmString  jdisplay(struct pend_job *pj)
                 *cp++ = ' ';
                 bpos++;
         }  while  (bpos & 7);
-        if  ((ip = pj->cmdfile_name))  {
+
+        /* Now diverge a bit according to whether we're using single file or not.
+           Render XML job files as without the suffix and legacy ones as cmdfile (jobfile) */
+
+        if  ((ip = pj->xml_jobfile_name))  {
+                int  lng = strlen((const char *) pj->xml_jobfile_name);
+                if  (has_xml_suffix((const char *) pj->xml_jobfile_name))
+                        lng -= sizeof(XMLJOBSUFFIX) - 1;
+                while  (lng > 0)  {
+                        *cp++ = *ip++;
+                        bpos++;
+                        lng--;
+                }
+        }
+        else  if  ((ip = pj->cmdfile_name))  {          /* Have cmdfile name */
                 while  (*ip)  {
                         *cp++ = *ip++;
                         bpos++;
                 }
-        }
-        for  (ip = file_sep; *ip;  ip++)  {
-                *cp++ = *ip;
+                *cp++ = ' ';
+                *cp++ = '(';
+                bpos += 2;
+                if  (!(ip = pj->jobfile_name))
+                        ip = no_name;
+                while  (*ip)  {
+                        *cp++ = *ip++;
+                        bpos++;
+                }
+                *cp++ = ')';
                 bpos++;
         }
-        if  ((ip = pj->jobfile_name))  {
+        else  {                                 /* Just put in no name, we can't have just jobfile name any more */
+                ip = no_name;
                 while  (*ip)  {
                         *cp++ = *ip++;
                         bpos++;
                 }
         }
+
+        /* Space out and put in directory */
+
         do  {
                 *cp++ = ' ';
                 bpos++;
@@ -334,8 +371,10 @@ struct pend_job *job_or_deflt(const int isjob)
 #define INIT_PEND       20
 #define INC_PEND        5
 
-static void  chkalloc()
+static  int     movedown_select()
 {
+        int     indx, cnt;
+
         if  (pend_njobs >= pend_max)  {
                 if  (pend_max == 0)  {
                         pend_max = INIT_PEND;
@@ -348,23 +387,21 @@ static void  chkalloc()
                 if  (!pend_list)
                         ABORT_NOMEM;
         }
+
+
+        if  ((indx = getselectedjob(0)) < 0)
+                return  pend_njobs;
+
+        for  (cnt = pend_njobs;  cnt > (unsigned) indx;  cnt--)
+                pend_list[cnt] = pend_list[cnt-1];
+
+        return  indx;
 }
 
-void  cb_jnew(Widget w, int notused)
+static  void    redisp_onopen(const int indx)
 {
-        int     indx;
-        unsigned        cnt;
-        XmString        str;
-
-        chkalloc();
-
-        if  ((indx = getselectedjob(0)) >= 0)
-                for  (cnt = pend_njobs;  cnt > (unsigned) indx;  cnt--)
-                        pend_list[cnt] = pend_list[cnt-1];
-        else
-                indx = pend_njobs;
-
-        job_initialise(&pend_list[indx], stracpy(Curr_pwd), (char *) 0);
+        int     cnt;
+        XmString  str;
 
         for  (cnt = indx;  cnt < pend_njobs;  cnt++)  {
                 str = jdisplay(&pend_list[cnt]);
@@ -378,103 +415,117 @@ void  cb_jnew(Widget w, int notused)
         pend_njobs++;
 }
 
+void  cb_jnew(Widget w, int notused)
+{
+        int     indx = movedown_select();
+        job_initialise(&pend_list[indx], stracpy(Curr_pwd), (char *) 0);
+        redisp_onopen(indx);
+}
+
 static int  get_dir_file(char **dname, char **fname, XmFileSelectionBoxCallbackStruct *cbs)
 {
-        char    *fl;
+        char    *filepath, *dirpath = (char *) 0, *dirname, *filename, *sp;
 
-        if  (!XmStringGetLtoR(cbs->value, XmSTRING_DEFAULT_CHARSET, &fl) || !fl)
+        if  (!XmStringGetLtoR(cbs->value, XmSTRING_DEFAULT_CHARSET, &filepath) || !filepath)
                 return  0;
 
-        if  (fl[0] == '\0')  {
-                XtFree(fl);
+        if  (filepath[0] == '\0')  {
+                XtFree(filepath);
                 return  0;
         }
-        if  (fl[0] == '/')  {
-                char    *sp = strrchr(fl, '/');
-                if  (sp[1] == '\0')  { /* 'Twas a directory */
-                        XtFree(fl);
+
+        sp = strrchr(filepath, '/');
+        dirname = filepath;
+
+        if  (sp)  {                             /* Not just a filename */
+                if  (sp == filepath)            /* I.e. in root directory */
+                        dirname = "/";
+                else
+                        *sp = '\0';
+                filename = sp + 1;
+                if  (filename[0] == '\0')  {    /* Just a directory, no file */
+                        XtFree(filepath);
                         return  0;
                 }
-                *fname = stracpy(&sp[1]);
-                *sp = '\0';
-                *dname = stracpy(fl);
         }
         else  {
-                char    *dl;
                 int     nn;
-                if  (!XmStringGetLtoR(cbs->dir, XmSTRING_DEFAULT_CHARSET, &dl) || !dl)  {
-                        XtFree(fl);
+
+                /* No slash, need to get directory separately */
+
+                filename = filepath;
+                if  (!XmStringGetLtoR(cbs->dir, XmSTRING_DEFAULT_CHARSET, &dirpath) || !dirpath)  {
+                        XtFree(filepath);
                         return  0;
                 }
-                if  (dl[0] != '/')  {
-                        XtFree(dl);
-                        XtFree(fl);
+                if  (dirpath[0] != '/')  {
+                        XtFree(dirpath);
+                        XtFree(filepath);
                         return  0;
                 }
-                nn = strlen(dl) - 1;
-                if  (nn > 0  &&  dl[nn] == '/')
-                        dl[nn] = '\0';
-                *dname = stracpy(dl);
-                XtFree(dl);
-                *fname = stracpy(fl);
+
+                /* Trim off trailing / unless it's root dir */
+
+                nn = strlen(dirpath) - 1;
+                if  (nn > 0  &&  dirpath[nn] == '/')
+                        dirpath[nn] = '\0';
+
+                dirname = dirpath;
         }
-        XtFree(fl);
+
+        *dname = stracpy(dirname);
+        *fname = stracpy(filename);
+        if  (dirpath)
+                XtFree(dirpath);
+        XtFree(filepath);
         return  1;
 }
 
 char *gen_path(char *dir, char *fil)
 {
         char    *result;
-        if  (!(result = malloc((unsigned) (strlen(dir) + strlen(fil) + 2))))
+        int     ld = strlen(dir);
+        if  (!(result = malloc((unsigned) (ld + strlen(fil) + 2))))
                 ABORT_NOMEM;
-        sprintf(result, "%s/%s", dir, fil);
+        if  (dir[ld-1] == '/')          /* NB assume at least one char */
+                sprintf(result, "%s%s", dir, fil);
+        else
+                sprintf(result, "%s/%s", dir, fil);
         return  result;
 }
 
 static void  endjopen(Widget w, int data, XmFileSelectionBoxCallbackStruct *cbs)
 {
-        if  (data)  {
-                char    *fname, *dname;
-                int     indx, ret;
-                unsigned        cnt;
-                XmString        str;
+        char    *dirname, *filename;
 
-                if  (!get_dir_file(&dname, &fname, cbs))
-                        return;
+restart:
 
-                for  (cnt = 0;  cnt < pend_njobs;  cnt++)
-                        if  (pend_list[cnt].directory  &&  strcmp(dname, pend_list[cnt].directory) == 0  &&
-                             pend_list[cnt].cmdfile_name  &&  strcmp(fname, pend_list[cnt].cmdfile_name) == 0)  {
+        if  (data  &&  get_dir_file(&dirname, &filename, cbs))  {
+                int     cnt, ret, indx;
+                struct  pend_job  *pj;
+
+                for  (cnt = 0;  cnt < pend_njobs;  cnt++)  {
+                        pj = &pend_list[cnt];
+                        if  (pj->directory  &&  strcmp(dirname, pj->directory) == 0  &&
+                             pj->xml_jobfile_name  &&  strcmp(filename, pj->xml_jobfile_name) == 0)  {
                                 doerror(jwid, $EH{xmbtr file already loaded});
-                                free(dname);
-                                free(fname);
-                                return;
+                                free(dirname);
+                                free(filename);
+                                goto  restart;
                         }
+                }
 
-                chkalloc();
-
-                if  ((indx = getselectedjob(0)) >= 0)
-                        for  (cnt = pend_njobs;  cnt > (unsigned) indx;  cnt--)
-                                pend_list[cnt] = pend_list[cnt-1];
-                else
-                        indx = pend_njobs;
-                job_initialise(&pend_list[indx], dname, fname);
+                indx = movedown_select();
+                pj = &pend_list[indx];
+                job_initialise(pj, dirname, (char *) 0);
+                pj->xml_jobfile_name = filename;
 
                 /* Carry on even if we have an error.  We may as well include the thing.  */
 
-                if  ((ret = job_load(&pend_list[indx])))
+                if  ((ret = xml_job_load(pj)))
                         doerror(jwid, ret);
 
-                for  (cnt = indx;  cnt < pend_njobs;  cnt++)  {
-                        str = jdisplay(&pend_list[cnt]);
-                        XmListReplaceItemsPos(jwid, &str, 1, cnt+1);
-                        XmStringFree(str);
-                }
-                str = jdisplay(&pend_list[pend_njobs]);
-                XmListAddItem(jwid, str, 0);
-                XmStringFree(str);
-                XmListSelectPos(jwid, indx+1, False);
-                pend_njobs++;
+                redisp_onopen(indx);
         }
         XtDestroyWidget(w);
 }
@@ -486,12 +537,61 @@ void  cb_jopen(Widget w, int notused)
         str = XmStringCreateSimple(Curr_pwd);
         fsb = XmCreateFileSelectionDialog(FindWidget(w), "openj", NULL, 0);
         XtVaSetValues(fsb,
-                      XmNfileSearchProc,        isit_cmdfile,
+                      XmNfileSearchProc,        isit_xmlfile,
                       XmNdirectory,             str,
                       NULL);
         XmStringFree(str);
         XtAddCallback(fsb, XmNcancelCallback, (XtCallbackProc) endjopen, (XtPointer) 0);
         XtAddCallback(fsb, XmNokCallback, (XtCallbackProc) endjopen, (XtPointer) 1);
+        XtAddCallback(fsb, XmNhelpCallback, (XtCallbackProc) dohelp, (XtPointer) $H{xmbtr open dialog help});
+        XtManageChild(fsb);
+}
+
+static void  endjlegopen(Widget w, int data, XmFileSelectionBoxCallbackStruct *cbs)
+{
+        char    *dname, *fname;
+
+        if  (data  &&  get_dir_file(&dname, &fname, cbs))  {
+                int     cnt, ret, indx;
+
+                for  (cnt = 0;  cnt < pend_njobs;  cnt++)  {
+                        struct  pend_job  *pj = &pend_list[cnt];
+
+                        if  (pj->directory  &&  strcmp(dname, pj->directory) == 0  &&
+                             pj->cmdfile_name  &&  strcmp(fname, pj->cmdfile_name) == 0)  {
+                                doerror(jwid, $EH{xmbtr file already loaded});
+                                free(dname);
+                                free(fname);
+                                return;
+                        }
+                }
+
+                indx = movedown_select();
+                job_initialise(&pend_list[indx], dname, fname);
+
+                /* Carry on even if we have an error.  We may as well include the thing.  */
+
+                if  ((ret = job_load(&pend_list[indx])))
+                        doerror(jwid, ret);
+
+                redisp_onopen(indx);
+        }
+        XtDestroyWidget(w);
+}
+
+void  cb_jlegopen(Widget w, int notused)
+{
+        Widget  fsb;
+        XmString        str;
+        str = XmStringCreateSimple(Curr_pwd);
+        fsb = XmCreateFileSelectionDialog(FindWidget(w), "openj", NULL, 0);
+        XtVaSetValues(fsb,
+                      XmNfileSearchProc,        isit_cmdfile,
+                      XmNdirectory,             str,
+                      NULL);
+        XmStringFree(str);
+        XtAddCallback(fsb, XmNcancelCallback, (XtCallbackProc) endjlegopen, (XtPointer) 0);
+        XtAddCallback(fsb, XmNokCallback, (XtCallbackProc) endjlegopen, (XtPointer) 1);
         XtAddCallback(fsb, XmNhelpCallback, (XtCallbackProc) dohelp, (XtPointer) $H{xmbtr open dialog help});
         XtManageChild(fsb);
 }
@@ -505,22 +605,15 @@ void  cb_jclosedel(Widget w, int isdel)
         if  ((indx = getselectedjob(1)) < 0)
                 return;
         pj = &pend_list[indx];
-        if  (pj->changes > 0  &&  !Confirm(w, isdel? $PH{xmbtr confirm delete}: $PH{xmbtr confirm close}))
+        if  (pj->changes > 0  &&  !Confirm(w, $PH{xmbtr confirm close}))
                 return;
 
         if  (isdel)  {
-                if  (pj->jobfile_name)  {
-                        char    *path = gen_path(pj->directory, pj->jobfile_name);
-                        if  (unlink(path) < 0  &&  errno != ENOENT)
-                                doerror(w, $EH{xmbtr cannot delete job file});
-                        free(path);
-                }
-                if  (pj->cmdfile_name)  {
-                        char    *path = gen_path(pj->directory, pj->cmdfile_name);
-                        if  (unlink(path) < 0  &&  errno != ENOENT)
-                                doerror(w, $EH{xmbtr cannot delete cmd file});
-                        free(path);
-                }
+                if  (!Confirm(w, $PH{xmbtr confirm delete}))
+                        return;
+                jobfile_delete(pj, pj->jobfile_name, $EH{xmbtr cannot delete job file});
+                jobfile_delete(pj, pj->cmdfile_name, $EH{xmbtr cannot delete cmd file});
+                jobfile_delete(pj, pj->xml_jobfile_name, $EH{xmbtr cannot delete job file});
         }
 
         XmListDeletePos(jwid, indx+1);
@@ -531,111 +624,423 @@ void  cb_jclosedel(Widget w, int isdel)
                 free(pj->jobfile_name);
         if  (pj->cmdfile_name)
                 free(pj->cmdfile_name);
+        if  (pj->xml_jobfile_name)
+                free(pj->xml_jobfile_name);
+        if  (pj->jobscript)
+                free(pj->jobscript);
+        if  (pj->jobqueue)
+                free(pj->jobqueue);
         pend_njobs--;
         for  (cnt = indx;  cnt < pend_njobs;  cnt++)
                 pend_list[cnt] = pend_list[cnt+1];
 }
 
-static void  endwfile(Widget w, int data, XmFileSelectionBoxCallbackStruct *cbs)
+struct  legfileres  {
+        int     result_found;
+        char    *jobf_dir, *jobf_file;
+        char    *cmdf_dir, *cmdf_file;
+};
+
+static  void    fileselcanccb(Widget w, struct legfileres *data, XmFileSelectionBoxCallbackStruct *cbs)
 {
-        if  (data)  {
-                char            *fname, *dname, **wot;
-                int             indx;
-                XmString        str;
-                struct  pend_job        *pj;
-
-                if  ((indx = getselectedjob(0)) < 0)
-                        return;
-                pj = &pend_list[indx];
-
-                if  (!get_dir_file(&dname, &fname, cbs))
-                        return;
-
-                if  (strcmp(pj->directory, dname) != 0)  {
-                        free(pj->directory);
-                        pj->directory = stracpy(dname);
-                }
-                wot = data == JCMDFILE_JOB? &pj->jobfile_name: &pj->cmdfile_name;
-                if  (!*wot  ||  strcmp(*wot, fname) != 0)  {
-                        char    *path = gen_path(dname, fname);
-                        int     fexists;
-                        disp_str = path;
-                        fexists = f_exists(path);
-                        if  (!fexists || Confirm(w, $PH{xmbtr file exists confirm}))  {
-                                if  (*wot)
-                                        free(*wot);
-                                *wot = stracpy(fname);
-                                if  (data == JCMDFILE_JOB  &&  !fexists)  {
-                                        int     fd;
-                                        SWAP_TO(Realuid);
-                                        fd = open(path, O_CREAT|O_WRONLY|O_TRUNC, 0666);
-                                        if  (fd >= 0)  {
-#ifdef  HAVE_FCHMOD
-                                                fchmod(fd, (int) (0666 & ~Save_umask));
-                                                close(fd);
-#else
-                                                close(fd);
-                                                chmod(path, (int) (0666 & ~Save_umask));
-#endif
-                                        }
-                                        SWAP_TO(Daemuid);
-                                }
-                        }
-                        free(path);
-                }
-                free(dname);
-                free(fname);
-                str = jdisplay(pj);
-                XmListReplaceItemsPos(jwid, &str, 1, indx+1);
-                XmStringFree(str);
-                XmListSelectPos(jwid, indx+1, False);
-        }
+        data->result_found = 0;
         XtDestroyWidget(w);
 }
 
-void  cb_jcmdfile(Widget w, int which)
+static void  endgetlegjobfile(Widget w, struct legfileres *data, XmFileSelectionBoxCallbackStruct *cbs)
 {
-        int     indx;
+        data->result_found = get_dir_file(&data->jobf_dir, &data->jobf_file, cbs);
+        XtDestroyWidget(w);
+}
+
+static void  endgetlegcmdfile(Widget w, struct legfileres *data, XmFileSelectionBoxCallbackStruct *cbs)
+{
+        data->result_found = get_dir_file(&data->cmdf_dir, &data->cmdf_file, cbs);
+        XtDestroyWidget(w);
+}
+
+static  void    initfsbdirname(Widget fsb, struct pend_job *pj, char *fname)
+{
+        XmString  str;
+        if  (fname)  {
+                char  *fpath = gen_path(pj->directory, fname);
+                str = XmStringCreateLocalized(fpath);
+                free(fpath);
+                XtVaSetValues(fsb, XmNdirSpec, str, NULL);
+        }
+        else  {
+                char    *d = pj->directory;
+                if  (!d)
+                        d = Curr_pwd;
+                str = XmStringCreateLocalized(d);
+                XtVaSetValues(fsb, XmNdirectory, str, NULL);
+        }
+        XmStringFree(str);
+}
+
+/* Set up legacy-style file name returning 1 if OK 0 if nothing done */
+
+static  int     getlegfilenames(Widget w, struct pend_job *pj)
+{
         Widget  fsb;
+        struct  legfileres  answers;
+        int     preflen = 1;
+        char    *dir;
+
+        fsb = XmCreateFileSelectionDialog(FindWidget(w), "jobfile", NULL, 0);
+        initfsbdirname(fsb, pj, pj->jobfile_name);
+
+        answers.result_found = -1;
+        XtAddCallback(fsb, XmNcancelCallback, (XtCallbackProc) fileselcanccb, (XtPointer) &answers);
+        XtAddCallback(fsb, XmNokCallback, (XtCallbackProc) endgetlegjobfile, (XtPointer) &answers);
+        XtAddCallback(fsb, XmNhelpCallback, (XtCallbackProc) dohelp, INT_TO_XTPOINTER($H{xmbtr job file dialog help}));
+        XtManageChild(fsb);
+        while  (answers.result_found < 0)
+                XtAppProcessEvent(app, XtIMAll);
+        if  (answers.result_found == 0)
+                return  0;
+
+        /* Repeat all that for the command file */
+
+        fsb = XmCreateFileSelectionDialog(FindWidget(w), "cmdfile", NULL, 0);
+        initfsbdirname(fsb, pj, pj->cmdfile_name);
+        answers.result_found = -1;
+        XtAddCallback(fsb, XmNcancelCallback, (XtCallbackProc) fileselcanccb, (XtPointer) &answers);
+        XtAddCallback(fsb, XmNokCallback, (XtCallbackProc) endgetlegcmdfile, (XtPointer) &answers);
+        XtAddCallback(fsb, XmNhelpCallback, (XtCallbackProc) dohelp, INT_TO_XTPOINTER($H{xmbtr cmd file dialog help}));
+        XtManageChild(fsb);
+        while  (answers.result_found < 0)
+                XtAppProcessEvent(app, XtIMAll);
+
+        /* If that failed, undo what we did */
+
+        if  (answers.result_found == 0)  {
+                free(answers.jobf_dir);
+                free(answers.jobf_file);
+                return  0;
+        }
+
+        /* Check we haven't got the same file */
+
+        if  (strcmp(answers.jobf_dir, answers.cmdf_dir) == 0  &&  strcmp(answers.jobf_file, answers.cmdf_file) == 0)  {
+                free(answers.jobf_dir);
+                free(answers.jobf_file);
+                free(answers.cmdf_dir);
+                free(answers.cmdf_file);
+                doerror(w, $EH{xbtr job cmd file names same});
+                return  0;
+        }
+
+        /* Free up existing ones */
+        free(pj->directory);
+        if  (pj->jobfile_name)
+                free(pj->jobfile_name);
+        if  (pj->cmdfile_name)
+                free(pj->cmdfile_name);
+
+        /* If it's the same directory for each, all is easy */
+
+        if  (strcmp(answers.jobf_dir, answers.cmdf_dir) == 0)  {
+                pj->directory = answers.jobf_dir;
+                free(answers.cmdf_dir);
+                pj->jobfile_name = answers.jobf_file;
+                pj->cmdfile_name = answers.cmdf_file;
+                return  1;
+        }
+
+        /* Try to find the longest common prefix (it can't be the whole lot we just checked) */
+
+        for  (;;)  {
+                char    *csp, *jsp;
+                int     csl, jsl;
+                if  (!(csp = strchr(answers.cmdf_dir + preflen, '/')))
+                        break;
+                if  (!(jsp = strchr(answers.jobf_dir + preflen, '/')))
+                        break;
+                csl = (csp - answers.cmdf_dir) - preflen;
+                jsl = (jsp - answers.jobf_dir) - preflen;
+                if  (csl != jsl)
+                        break;
+                if  (strncmp(answers.cmdf_dir + preflen, answers.jobf_dir + preflen, csl) != 0)
+                        break;
+                preflen += csl + 1;
+        }
+
+        if  (preflen == 1)
+                dir = "/";
+        else  {
+                answers.cmdf_dir[preflen-1] = '\0';
+                dir = answers.cmdf_dir;
+        }
+
+        pj->jobfile_name = gen_path(answers.jobf_dir+preflen, answers.jobf_file);
+        pj->cmdfile_name = gen_path(answers.cmdf_dir+preflen, answers.cmdf_file);
+        pj->directory = stracpy(dir);
+        free(answers.jobf_dir);
+        free(answers.jobf_file);
+        free(answers.cmdf_dir);
+        free(answers.cmdf_file);
+        return  1;
+}
+
+static void  endgetxmlfile(Widget w, struct     legfileres *data, XmFileSelectionBoxCallbackStruct *cbs)
+{
+        data->result_found = get_dir_file(&data->jobf_dir, &data->jobf_file, cbs);
+        XtDestroyWidget(w);
+        if  (!has_xml_suffix(data->jobf_file))  {
+                char  *rfile = malloc((unsigned) (strlen(data->jobf_file) + sizeof(XMLJOBSUFFIX)));
+                if  (!rfile)
+                        ABORT_NOMEM;
+                strcpy(rfile, data->jobf_file);
+                strcat(rfile, XMLJOBSUFFIX);
+                free(data->jobf_file);
+                data->jobf_file = rfile;
+        }
+}
+
+/* Get save file name for XML files, returning 1 if OK 0 if unchanged */
+
+static  int     getxmlfilename(Widget w, struct pend_job *pj)
+{
+        Widget  fsb;
+        XmString  str;
+        struct  legfileres  answers;
+
+        fsb = XmCreateFileSelectionDialog(FindWidget(w), "jobfile", NULL, 0);
+        initfsbdirname(fsb, pj, pj->xml_jobfile_name);
+        str = XmStringCreateLocalized("*" XMLJOBSUFFIX);
+        XtVaSetValues(fsb, XmNpattern, str, NULL);
+        XmStringFree(str);
+        XtAddCallback(fsb, XmNcancelCallback, (XtCallbackProc) fileselcanccb, (XtPointer) &answers);
+        XtAddCallback(fsb, XmNokCallback, (XtCallbackProc) endgetxmlfile, (XtPointer) &answers);
+        XtAddCallback(fsb, XmNhelpCallback, (XtCallbackProc) dohelp, INT_TO_XTPOINTER($H{xmbtr job file dialog help}));
+        XtManageChild(fsb);
+        answers.result_found = -1;
+        while  (answers.result_found < 0)
+                XtAppProcessEvent(app, XtIMAll);
+        if  (answers.result_found == 0)
+                return  0;
+        free(pj->directory);
+        if  (pj->xml_jobfile_name)
+                free(pj->xml_jobfile_name);
+        pj->directory = answers.jobf_dir;
+        pj->xml_jobfile_name = answers.jobf_file;
+        return  1;
+}
+
+/* Check to see if we're converting from legacy format job files
+   to XML and do the conversions required. */
+
+static  int     check_to_xml(Widget w, struct pend_job *pj)
+{
+        char    *fpath;
+        FILE    *inf;
+        unsigned  fsize;
+
+        /* If we've got a script, there is nothing to do */
+
+        if  (pj->jobscript)
+                return  1;
+
+        /* We shouldn't get in here without a jobfile name so we assume it's there */
+
+        fpath = gen_path(pj->directory, pj->jobfile_name);
+        SWAP_TO(Realuid);
+        inf = fopen(fpath, "r");
+        SWAP_TO(Daemuid);
+        free(fpath);
+
+        if  (!inf)  {
+                doerror(w, $EH{xmbtr cannot open job file});
+                return  0;
+        }
+
+        /* Load up the job script file. */
+
+        pj->jobscript = getscript_file(inf, &fsize);
+        fclose(inf);
+
+        /* If we didn't read anything from the file but didn't actually have an error, allocate a null string */
+
+        if  (!pj->jobscript)
+                pj->jobscript = stracpy("");
+
+        /* Ask about deleting the original job files */
+
+        if  (Confirm(w, $PH{xbtr delete legacy job files}))  {
+                jobfile_delete(pj, pj->jobfile_name, $EH{xmbtr cannot delete job file});
+                jobfile_delete(pj, pj->cmdfile_name, $EH{xmbtr cannot delete cmd file});
+        }
+        free(pj->jobfile_name);
+        pj->jobfile_name = (char *) 0;
+        if  (pj->cmdfile_name)  {
+                free(pj->cmdfile_name);
+                pj->cmdfile_name = (char *) 0;
+        }
+        pj->scriptinmem = 1;
+        return  1;
+}
+
+/* Check to see if we're converting from XML format to legacy format */
+
+static  int     check_from_xml(Widget w, struct pend_job *pj)
+{
+        char    *fpath;
+        FILE    *outf;
+        unsigned  len, nb;
+        int     ret;
+
+        /* If we didn't actually have a script, we are all OK */
+
+        if  (!pj->jobscript)
+                return  1;
+
+        fpath = gen_path(pj->directory, pj->jobfile_name);
+        SWAP_TO(Realuid);
+        outf = fopen(fpath, "w");
+        SWAP_TO(Daemuid);
+        free(fpath);
+        if  (!outf)  {
+                doerror(w, $EH{xbq cannot write job file});
+                return  0;
+        }
+
+        /* Write out script to job file.
+           Script might be zero length. */
+
+        nb = len = strlen(pj->jobscript);
+        if  (len > 0)
+                nb = fwrite(pj->jobscript, sizeof(char), len, outf);
+
+        /* Might detect error writing or on closing */
+
+        ret = fclose(outf);
+        if  (len != nb  ||  ret < 0)  {
+                doerror(w, $EH{xbq cannot write job file});
+                return  0;
+        }
+
+        /* Possibly delete XML file, but deallocate name and pointer */
+
+        if  (pj->xml_jobfile_name)  {
+                if  (Confirm(w, $PH{xbtr delete XML job file}))
+                        jobfile_delete(pj, pj->xml_jobfile_name, $EH{xmbtr cannot delete job file});
+                free(pj->xml_jobfile_name);
+                pj->xml_jobfile_name = (char *) 0;
+        }
+        free(pj->jobscript);
+        pj->jobscript = (char *) 0;
+        pj->scriptinmem = 0;
+        return  1;
+}
+
+void    cb_jsaveas(Widget w, int notused)
+{
+        int     indx, ret;
+        struct  pend_job  *pj;
         XmString        str;
 
         if  ((indx = getselectedjob(1)) < 0)
                 return;
 
-        str = XmStringCreateSimple(pend_list[indx].directory);
-        fsb = XmCreateFileSelectionDialog(FindWidget(w), which == JCMDFILE_JOB? "jobfile": "cmdfile", NULL, 0);
-        XtVaSetValues(fsb,
-                      XmNdirectory,             str,
-                      NULL);
+        pj = &pend_list[indx];
+
+        if  (pj->changes == 0  &&  !Confirm(w, $PH{xmbtr file save confirm}))
+                return;
+
+        /* Need a script before we can save */
+
+        if  (!pj->jobscript  &&  !pj->jobfile_name)  {
+                 doerror(w, $EH{xbtr no script});
+                 return;
+        }
+
+        /* Get the file name or names to be used */
+
+        if  (xml_format)
+                ret = getxmlfilename(w, pj);
+        else
+                ret = getlegfilenames(w, pj);
+
+        if  (ret == 0)
+                return;
+
+        str = jdisplay(pj);
+        XmListReplaceItemsPos(jwid, &str, 1, indx+1);
         XmStringFree(str);
-        XtAddCallback(fsb, XmNcancelCallback, (XtCallbackProc) endwfile, (XtPointer) 0);
-        XtAddCallback(fsb, XmNokCallback, (XtCallbackProc) endwfile, INT_TO_XTPOINTER(which));
-        XtAddCallback(fsb, XmNhelpCallback, (XtCallbackProc) dohelp, INT_TO_XTPOINTER((which == JCMDFILE_JOB? $H{xmbtr job file dialog help}: $H{xmbtr cmd file dialog help})));
-        XtManageChild(fsb);
+        XmListSelectPos(jwid, indx+1, False);
+
+        if  (xml_format)  {
+                if  (!(check_to_xml(w, pj)))
+                        return;
+                ret = job_save_xml(pj);
+        }
+        else  {
+                if  (!(check_from_xml(w, pj)))
+                        return;
+                ret = job_save(pj);
+        }
+
+        if  (ret)
+                doerror(w, ret);
+        else
+                pj->changes = 0;
+
+        str = jdisplay(pj);
+        XmListReplaceItemsPos(jwid, &str, 1, indx+1);
+        XmStringFree(str);
+        XmListSelectPos(jwid, indx+1, False);
 }
 
 void  cb_jsave(Widget w, int notused)
 {
         int     indx, ret;
         struct  pend_job        *pj;
+        XmString        str;
 
         if  ((indx = getselectedjob(1)) < 0)
                 return;
         pj = &pend_list[indx];
+
+        /* Jump into save as if we haven't got the relevant file names.
+           This also does the check we've got the script. */
+
+        if  (xml_format)  {
+                if  (!pj->xml_jobfile_name)  {
+                        cb_jsaveas(w, notused);
+                        return;
+                }
+        }
+        else  if  (!pj->cmdfile_name  ||  !pj->jobfile_name)  {
+                cb_jsaveas(w, notused);
+                return;
+        }
+
+        /* Query if not changed since last save */
+
         if  (pj->changes <= 0  &&  !Confirm(w, $PH{xmbtr file save confirm}))
                 return;
-        if  (!pj->jobfile_name)  {
-                doerror(w, $EH{xmbtr no job file name});
-                return;
+
+        if  (xml_format)  {
+                if  (!(check_to_xml(w, pj)))
+                        return;
+                ret = job_save_xml(pj);
         }
-        if  (!pj->cmdfile_name)  {
-                doerror(w, $EH{xmbtr no cmd file name});
-                return;
+        else  {
+                if  (!(check_from_xml(w, pj)))
+                        return;
+                ret = job_save(pj);
         }
-        if  ((ret = job_save(pj)))
+
+        if  (ret)
                 doerror(w, ret);
         else
                 pj->changes = 0;
+
+        str = jdisplay(pj);
+        XmListReplaceItemsPos(jwid, &str, 1, indx+1);
+        XmStringFree(str);
+        XmListSelectPos(jwid, indx+1, False);
 }
 
 void  displaybusy(const int on)
@@ -649,35 +1054,23 @@ void  displaybusy(const int on)
         XFlush(dpy);
 }
 
-void  cb_edit(Widget w, int notused)
+/* Run external editor.
+   fname is the file to be edited. */
+
+static  int     run_external_editor(Widget w, char *fname)
 {
-        int     indx;
-        struct  pend_job        *pj;
-        char    *path;
         PIDTYPE pid;
 
-        if  ((indx = getselectedjob(1)) < 0)
-                return;
-        pj = &pend_list[indx];
-        if  (!pj->directory || !pj->jobfile_name)  {
-                doerror(w, $EH{xmbtr no job file name});
-                return;
-        }
-        path = gen_path(pj->directory, pj->jobfile_name);
-        if  (!f_exists(path))  {
-                free(path);
-                doerror(w, $EH{xmbtr no such file});
-                return;
-        }
-
-        if  ((pid = fork()) != 0)  {
+        if  ((pid = fork()) != 0)  {            /* Main path */
                 int     status;
-                free(path);
+
                 if  (pid < 0)  {
                         doerror(w, $EH{xmbtr cannot fork for editor});
-                        return;
+                        return  0;
                 }
-                displaybusy(1);
+
+                displaybusy(1);         /* Try to display busy cursor sometimes works */
+
 #ifdef  HAVE_WAITPID
                 while  (waitpid(pid, &status, 0) < 0)
                         ;
@@ -685,25 +1078,114 @@ void  cb_edit(Widget w, int notused)
                 while  (wait(&status) != pid)
                         ;
 #endif
+                displaybusy(0);         /* Undisplay cursor */
+
                 if  (status != 0)  {
                         disp_str = editor_name;
                         doerror(w, $EH{xmbtr cannot execute editor});
+                        return  0;
                 }
-                displaybusy(0);
-                return;
+
+                return  1;
         }
+
+        /* Go back to invoking environment */
 
         umask((int) Save_umask);
         setuid(Realuid);
-        chdir(pj->directory);
+
         if  (xterm_edit)  {
                 char    *termname = envprocess("${XTERM:-xterm}");
-                execlp(termname, editor_name, "-e", editor_name, path, (char *) 0);
+                execlp(termname, editor_name, "-e", editor_name, fname, (char *) 0);
         }
         else
-                execlp(editor_name, editor_name, path, (char *) 0);
-        exit(255);
+                execlp(editor_name, editor_name, fname, (char *) 0);
+        _exit(255);
 }
+
+static  void    inmem_edit_external_editor(Widget w, struct pend_job *pj)
+{
+        char    *tmp_file = tempnam((const char *) 0, "XMBTR");
+        FILE    *tfl;
+        int     um = umask(0);
+
+        /* Open temp file for writing - should be world writable */
+
+        tfl = fopen(tmp_file, "w+");
+        umask(um);
+
+        if  (!tfl)  {
+                doerror(w, $EH{xmbtr cannot create temp file});
+                free(tempnam);
+                return;
+        }
+
+        /* If we have an existing script, write it out */
+
+        if  (pj->jobscript)  {
+                int  len = strlen(pj->jobscript);
+                if  (len > 0)  {
+                        fwrite(pj->jobscript, sizeof(char), len, tfl);
+                        fflush(tfl);
+                }
+        }
+
+        if  (run_external_editor(w, tmp_file))  {       /* If OK replace script */
+                char    *newsc;
+                unsigned        fsize = 0;
+                rewind(tfl);
+                newsc = getscript_file(tfl, &fsize);
+                if  (pj->jobscript)
+                        free(pj->jobscript);
+                if  (!newsc)  /* Didn't actually read anything */
+                        newsc = stracpy("");
+                pj->jobscript = newsc;
+        }
+
+        fclose(tfl);
+        unlink(tmp_file);
+        free(tmp_file);
+}
+
+static  void    file_edit_external_editor(Widget w, struct pend_job *pj)
+{
+        char    *path = gen_path(pj->directory, pj->jobfile_name);
+
+        if  (!f_exists(path))  {
+                free(path);
+                doerror(w, $EH{xmbtr no such file});
+                return;
+        }
+
+        run_external_editor(w, path);
+        free(path);
+}
+
+/* Editing - note that we don't bother with Internal editing in the Motif case, we prefer
+   to use an external editor.
+   It is possible to do it but I'm not sure if it is worth the trouble as we move to toolkits
+   other than Motif. */
+
+void  cb_edit(Widget w, int notused)
+{
+        int     indx;
+        struct  pend_job        *pj;
+
+        if  ((indx = getselectedjob(1)) < 0)
+                return;
+        pj = &pend_list[indx];
+
+        if  (pj->jobscript || !pj->jobfile_name)
+                /* Already got in-memory script or no script. */
+                inmem_edit_external_editor(w, pj);
+        else  {
+                if  (!pj->directory)  {
+                        doerror(w, $EH{xmbtr no job file name});
+                        return;
+                }
+                file_edit_external_editor(w, pj);
+        }
+ }
 
 static void  enddsel(Widget w, int data, XmFileSelectionBoxCallbackStruct *cbs)
 {
@@ -769,68 +1251,17 @@ static FILE *goutfile(jobno_t *jn)
         return  res;
 }
 
-void  cb_submit(Widget w, int notused)
+/* Use a static location for the job number which we increment each time */
+
+static  jobno_t         jn;
+
+static  int     submit_core(Widget w, struct pend_job *pj)
 {
-        int                     indx, ch;
-        ULONG                   jindx;
-        struct  pend_job        *pj;
         BtjobRef                jreq;
-        char                    *path;
-        FILE                    *outf, *inf;
-        static  jobno_t         jn;
+        ULONG                   jindx;
         Shipc                   Oreq;
         Repmess                 rr;
-
-        if  ((indx = getselectedjob(1)) < 0)
-                return;
-        pj = &pend_list[indx];
-        if  (pj->nosubmit == 0  &&  !Confirm(w, $PH{xmbtr job unchanged confirm}))
-                return;
-        if  (pj->job->h.bj_times.tc_istime  &&  pj->job->h.bj_times.tc_nexttime < time((time_t *) 0))  {
-                doerror(jwid, $EH{xmbtr cannot submit not future});
-                return;
-        }
-        if  (!pj->jobfile_name)  {
-                doerror(w, $EH{xmbtr no job file name});
-                return;
-        }
-        path = gen_path(pj->directory, pj->jobfile_name);
-        if  (!f_exists(path))  {
-                free(path);
-                doerror(w, $EH{xmbtr no such file});
-                return;
-        }
-
-        if  (!(inf = fopen(path, "r")))  {
-                free(path);
-                doerror(w, $EH{xmbtr cannot open job file});
-                return;
-        }
-        free(path);
-
-        jn = jn? jn+1: getpid();
-        outf = goutfile(&jn);
-
-        while  ((ch = getc(inf)) != EOF)  {
-                if  (putc(ch, outf) == EOF)  {
-                        unlink(tmpfl);
-                        fclose(inf);
-                        fclose(outf);
-                        doerror(w, $EH{No room for job});
-                        return;
-                }
-        }
-
-        fclose(inf);
-        fclose(outf);
-
-#ifdef  NHONSUID
-        if  (Daemuid != ROOTID  && (Realuid == ROOTID || Effuid == ROOTID))
-                chown(tmpfl, Daemuid, Realgid);
-#elif   !defined(HAVE_SETEUID)  &&  defined(ID_SWAP)
-        if  (Daemuid != ROOTID  &&  Realuid == ROOTID)
-                chown(tmpfl, Daemuid, Realgid);
-#endif
+        extern  long            mymtype;
 
         jreq = &Xbuffer->Ring[jindx = getxbuf()];
         BLOCK_COPY(jreq, pj->job, sizeof(Btjob));
@@ -854,16 +1285,16 @@ void  cb_submit(Widget w, int notused)
                 unlink(tmpfl);
                 freexbuf(jindx);
                 errno = savee;
-                doerror(jwid, savee == EAGAIN? $EH{IPC msg q full}: $EH{IPC msg q error});
-                return;
+                doerror(w, savee == EAGAIN? $EH{IPC msg q full}: $EH{IPC msg q error});
+                return  0;
         }
 
         while  (msgrcv(Ctrl_chan, (struct msgbuf *) &rr, sizeof(Shreq), mymtype, 0) < 0)  {
                 if  (errno == EINTR)
                         continue;
                 freexbuf(jindx);
-                doerror(jwid, $E{Error on IPC});
-                return;
+                doerror(w, $E{Error on IPC});
+                return  0;
         }
 
         freexbuf(jindx);
@@ -872,19 +1303,121 @@ void  cb_submit(Widget w, int notused)
                 unlink(tmpfl);
                 if  ((rr.outmsg.mcode & REQ_TYPE) != JOB_REPLY)  { /* Not expecting net errors */
                         disp_arg[0] = rr.outmsg.mcode;
-                        doerror(jwid, $EH{Unexpected sched message});
+                        doerror(w, $EH{Unexpected sched message});
                 }
                 else  {
                         disp_str = title_of(pj->job);
-                        doerror(jwid, (int) ((rr.outmsg.mcode & ~REQ_TYPE) + $EH{Base for scheduler job errors}));
+                        doerror(w, (int) ((rr.outmsg.mcode & ~REQ_TYPE) + $EH{Base for scheduler job errors}));
                 }
+                return  0;
+        }
+
+        return  1;
+}
+
+/* Check currently-selected job OK to submit */
+
+struct  pend_job        *sub_check(Widget w)
+{
+        int     indx;
+        struct  pend_job  *pj;
+
+        if  ((indx = getselectedjob(1)) < 0)
+                return  (struct pend_job *) 0;
+
+        /* Protest if job unchanged since last time */
+
+        pj = &pend_list[indx];
+        if  (pj->nosubmit == 0  &&  !Confirm(w, $PH{xmbtr job unchanged confirm}))
+                return  (struct pend_job *) 0;
+
+        /* Check in future */
+
+        if  (pj->job->h.bj_times.tc_istime  &&  pj->job->h.bj_times.tc_nexttime < time((time_t *) 0))  {
+                doerror(w, $EH{xmbtr cannot submit not future});
+                return  (struct pend_job *) 0;
+        }
+
+        if  (!pj->jobscript  &&  !pj->jobfile_name)  {
+                doerror(w, $EH{xmbtr no job file name});
+                return  (struct pend_job *) 0;
+        }
+
+        return  pj;
+}
+
+void  cb_submit(Widget w, int notused)
+{
+        struct  pend_job        *pj;
+        FILE                    *outf;
+
+        if  (!(pj = sub_check(w)))
+                return;
+
+        jn = jn? jn+1: getpid();
+
+        if  (pj->jobscript)  {
+                outf = goutfile(&jn);
+                unsigned  len = strlen(pj->jobscript);
+                unsigned  nb = 0;
+                if  (len != 0)
+                        nb = fwrite(pj->jobscript, sizeof(char), len, outf);
+                if  (nb != len)  {
+                        fclose(outf);
+                        unlink(tmpfl);
+                        doerror(w, $EH{No room for job});
+                        return;
+                }
+        }
+        else  {
+                FILE    *inf;
+                char    *path;
+                unsigned  inlng, outlng;
+                char    inbuf[1024];
+
+                /* We checked jobfile_name was set in sub_check */
+
+                path = gen_path(pj->directory, pj->jobfile_name);
+                SWAP_TO(Realuid);
+                inf = fopen(path, "r");
+                SWAP_TO(Daemuid);
+                free(path);
+
+                if  (!inf)  {
+                        doerror(w, $EH{xmbtr cannot open job file});
+                        return;
+                }
+
+                outf = goutfile(&jn);
+
+                while  ((inlng = fread(inbuf, sizeof(char), sizeof(inbuf), inf)) != 0)  {
+                        outlng = fwrite(inbuf, sizeof(char), inlng, outf);
+                        if  (outlng != inlng)  {
+                                fclose(inf);
+                                fclose(outf);
+                                unlink(tmpfl);
+                                doerror(w, $EH{No room for job});
+                                return;
+                        }
+                }
+
+                fclose(inf);
+        }
+
+        if  (fclose(outf) != 0)  {
+                unlink(tmpfl);
+                doerror(w, $EH{No room for job});
                 return;
         }
 
+        if  (!submit_core(w, pj))
+                 return;
+
         if  (pj->Verbose)  {
-                disp_arg[0] = jn;
-                disp_str = title_of(pj->job);
-                doinfo(jwid, disp_str[0]? $E{xmbtr job created ok title}: $E{xmbtr job created ok no title});
+                 disp_arg[0] = jn;
+                 disp_str = title_of(pj->job);
+                 doinfo(w, disp_str[0]? $E{xmbtr job created ok title}: $E{xmbtr job created ok no title});
         }
+
         pj->nosubmit = 0;
 }

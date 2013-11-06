@@ -38,6 +38,7 @@ extern  unsigned        arrow_min,
 
 #define WORKW_EDITORW   0
 #define WORKW_XTERMW    1
+#define WORKW_XMLW      2
 
 #define WORKW_QTXTW     0       /* Queue text window */
 #define WORKW_UTXTW     1       /* User text window */
@@ -161,7 +162,6 @@ extern int  Confirm(Widget, int);
 extern int  get_textbox_int(Widget);
 extern int  sort_qug(char **, char **);
 
-extern char **gen_qlist(char *);
 extern char **listcis(char *);
 extern char *makebigvec(char **);
 

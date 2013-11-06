@@ -1921,7 +1921,7 @@ MAINFN_TYPE  main(int argc, char **argv)
         double  daemtime = 0.0;
         extern  char    *optarg;
 
-        versionprint(argv, "$Revision: 1.9 $", 0);
+        versionprint(argv, "$Revision: 1.10 $", 0);
 
         while  ((c = getopt(argc, argv, "rdFAD:P:o:nxabB:N:S:Gl:L:X:")) != EOF)
                 switch  (c)  {

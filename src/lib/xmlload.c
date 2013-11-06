@@ -508,7 +508,7 @@ static  int     load_jobdescr(xmlNodePtr dnode, BtjobRef jp)
                 case  't':
                         if  (strcmp(nname, "times") == 0)
                                 load_times(cnode, &jh->bj_times);
-                        else  if  (strcmp(nname, "title") == 0)
+                        else  if  (strcmp(nname, "title") == 0  &&  cnode->children)
                                 title = CCHARP cnode->children->content;
                         continue;
                 case  'n':

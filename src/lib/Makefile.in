@@ -1,5 +1,5 @@
 #
-#   Copyright 2009 Free	Software Foundation, Inc.
+#   Copyright 2009-2013 Free Software Foundation, Inc.
 #
 #  This	program	is free	software: you can redistribute it and/or modify
 #  it under the	terms of the GNU General Public	License	as published by
@@ -46,8 +46,8 @@ OBJECTS=altlen.o	condname.o	getbtuser.o	getscript.o \
 	packjstring.o 	qmatch.o	mpermitted.o	calchash.o \
 	disperror.o 	helpvec.o	mmangle.o	help_readl.o \
 	helprdn.o 	prin_gname.o	look_host.o	ncstrncmp.o \
-	prin_uname.o 	envprocess.o	strread.o	stracpy.o \
-	versionprint.o
+	prin_uname.o 	getpwgrpents.o	envprocess.o	strread.o \
+	stracpy.o	versionprint.o
 
 # libgnubatch_client is	for client programs
 

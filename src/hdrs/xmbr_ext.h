@@ -19,17 +19,17 @@ struct  pend_job        {
         char            *directory;
         char            *cmdfile_name;
         char            *jobfile_name;
+        char            *xml_jobfile_name;              /* File name when XML */
+        char            *jobscript;                     /* Job script if held in mem */
         char            *jobqueue;
-        int             changes;
-        int             nosubmit;
+        char            changes;                        /* Unsaved changes */
+        char            nosubmit;
         char            Verbose;
+        char            scriptinmem;
         int_ugid_t      userid;
         int_ugid_t      grpid;
         Btjob           *job;
 };
-
-#define JCMDFILE_JOB    1
-#define JCMDFILE_CMD    2
 
 extern  unsigned                pend_njobs, pend_max;
 extern  struct  pend_job        *pend_list;
@@ -37,8 +37,10 @@ extern  struct  pend_job        default_pend, *cjob;
 extern  Btjob                   default_job;
 extern  USHORT                  def_assflags, defavoid;
 
+extern  char    xml_format;     /* Select XML single file format */
 extern  char    xterm_edit;     /* Invoke "xterm" to run editor */
 extern  char    *editor_name;   /* Name of favourite editor */
+extern  char    *realuname;	 /* Name corresponding to real user id */
 
 extern  char    *spdir;         /* Spool directory, typically /usr/spool/batch */
 
@@ -57,7 +59,6 @@ extern void  cb_djstate(Widget, int);
 extern void  cb_jargs(Widget, int);
 extern void  cb_jass(Widget, int);
 extern void  cb_jclosedel(Widget, int);
-extern void  cb_jcmdfile(Widget, int);
 extern void  cb_jconds(Widget, int);
 extern void  cb_jdstate(Widget, int);
 extern void  cb_edit(Widget, int);
@@ -65,10 +66,12 @@ extern void  cb_jenv(Widget, int);
 extern void  cb_jmail(Widget, int);
 extern void  cb_jnew(Widget, int);
 extern void  cb_jopen(Widget, int);
+extern void  cb_jlegopen(Widget, int);
 extern void  cb_jperm(Widget, int);
 extern void  cb_jqueue(Widget, int);
 extern void  cb_jredirs(Widget, int);
 extern void  cb_jsave(Widget, int);
+extern void  cb_jsaveas(Widget, int);
 extern void  cb_jstate(Widget, int);
 extern void  cb_loaddefs(Widget, int);
 extern void  cb_procpar(Widget, int);
@@ -84,14 +87,19 @@ extern void  CreateEditDlg(Widget, char *, Widget *, Widget *, Widget *, const i
 extern void  doinfo(Widget, int);
 extern void  init_defaults();
 extern void  isit_cmdfile(Widget, XtPointer);
+extern	void  isit_xmlfile(Widget, XtPointer);
 extern void  job_initialise(struct pend_job *, char *, char *);
 extern void  load_options();
 
+extern void jobfile_delete(struct pend_job *, char *, const int);
 extern int  f_exists(const char *);
 extern int  getselectedjob(const int);
 extern int  job_load(struct pend_job *);
+extern int  xml_job_load(struct pend_job *);
 extern int  job_save(struct pend_job *);
+extern int  job_save_xml(struct pend_job *);
 
+extern char *gen_path(char *, char *);
 extern char **gen_rvars(char *);
 extern char **gen_wvars(char *);
 extern char **gen_rvarse(char *);
@@ -101,6 +109,8 @@ extern char **gen_wvarsa(char *);
 extern char **listcis(char *);
 
 extern XmString  jdisplay(struct pend_job *);
+
+extern	struct  pend_job *sub_check(Widget);
 
 extern Widget  CreateIselDialog(Widget, Widget, char *);
 extern Widget  CreateQselDialog(Widget, Widget, char *, int);

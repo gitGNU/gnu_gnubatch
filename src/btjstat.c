@@ -174,7 +174,7 @@ MAINFN_TYPE  main(int argc, char **argv)
 #endif
         char    *whichj;
 
-        versionprint(argv, "$Revision: 1.9 $", 0);
+        versionprint(argv, "$Revision: 1.10 $", 0);
 
         if  ((progname = strrchr(argv[0], '/')))
                 progname++;

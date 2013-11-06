@@ -546,6 +546,7 @@ void  cb_jopen()
 
                 job_initialise(pj, stracpy(dirname), (char *) 0);
                 pj->xml_jobfile_name = stracpy(filename);
+                g_free(pathname);
 
                 /* Carry on even if we have an error.  We may as well include the thing.  */
 
@@ -620,6 +621,7 @@ void  cb_jlegopen()
                 chkalloc();
                 pj = &pend_list[pend_njobs];
                 job_initialise(pj, stracpy(dirname), stracpy(filename));
+                g_free(pathname);
 
                 /* Carry on even if we have an error.  We may as well include the thing.  */
 

@@ -73,6 +73,9 @@ static  struct  uhash   *unhash[UG_HASHMOD];
 
 unsigned  Npwusers;
 
+extern struct group *my_getpwent();
+extern void  my_endpwent();
+
 /* "unread" password file to order */
 
 void  un_rpwfile()
@@ -114,7 +117,7 @@ void  rpwfile()
 
         Npwusers = 0;                   /* This is the number of unique IDs */
 
-        while  ((upw = getpwent()))  {
+        while  ((upw = my_getpwent()))  {
                 int     haduid = 0;
                 pn = upw->pw_name;
                 sum = 0;
@@ -156,7 +159,7 @@ void  rpwfile()
                 hp->pwhuname_next = *hnpp;
                 *hnpp = hp;
         }
-        endpwent();
+        my_endpwent();
         doneit = 1;
 }
 

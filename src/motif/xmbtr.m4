@@ -75,10 +75,10 @@ XRES_SPACE
 
 XRES_MENUITEM(New, New job file, N, C-n)
 XRES_MENUITEM(Open, Open job file, O, C-o)
+XRES_MENUITEM(Legopen, Legacy open file, L, C-l)
 XRES_MENUITEM(Close, Close job file, C)
-XRES_MENUITEM(Jobfile, Set job file name, j, j)
-XRES_MENUITEM(Cmdfile, Set command file name, c, c)
 XRES_MENUITEM(Save, Save job, S, C-s)
+XRES_MENUITEM(SaveAs, Save As..., A)
 XRES_MENUITEM(Edit, Edit job file, e, e)
 XRES_MENUITEM(Delete, Delete job file, D)
 XRES_MENUITEM(Submit, Submit job, S, S-1, !)
@@ -114,6 +114,7 @@ XRES_TOOLBARITEM(Time, Set time)
 XRES_TOOLBARITEM(Cond, Condits)
 XRES_TOOLBARITEM(Ass, Ass'mnts)
 XRES_TOOLBARITEM(Submit, Submit job)
+XRES_TOOLBARITEM(Rsubmit, Remote submit)
 
 XRES_COMMENT(Dialog titles etc for help/error/info/confirm)
 XRES_STDDIALOG(help, {On line help.....})
@@ -152,6 +153,7 @@ XRES_GENERALLABEL(Catchup, Catch up delayed jobs)
 XRES_SPACE
 
 XRES_DIALOG(Viewopts, Display options)
+XRES_DLGLABEL(xmlfmt, Prefer XML single file format)
 XRES_DLGLABEL(viewtitle, Selecting view options)
 XRES_DLGLABEL(editor, Editor to modify job scripts)
 XRES_DLGLABEL(xtermedit, Run editor in xterm)

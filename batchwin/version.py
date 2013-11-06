@@ -17,5 +17,5 @@
 
 """Gives us the version information for this release of batchwin."""
 
-VERSION = "1.9"
+VERSION = "1.10"
 

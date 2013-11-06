@@ -49,7 +49,7 @@
 #include "incl_dir.h"
 
 #ifndef PATH_MAX
-#define PATH_MAX        1024
+#define PATH_MAX        2048
 #endif
 
 #ifndef HAVE_LONG_FILE_NAMES
@@ -124,6 +124,8 @@ DIR     *dirp;
 }
 #endif  /*  !HAVE_LONG_FILE_NAMES  */
 
+/* Routine to decide if file might be job file as shell script */
+
 static int  checkit(char *dirname, char *fname)
 {
         FILE    *fp;
@@ -157,13 +159,22 @@ static int  checkit(char *dirname, char *fname)
         return  0;
 }
 
-/* Have a look at files in the given directory to see if they are
-   tolerable as command files.  */
+/* Routine to decide if file might be XML saved job file.
+   Currently we only go by name. */
+
+static  int  xml_checkit(char *dirname, char *fname)
+{
+        int     flng = strlen(fname);
+
+        if  (flng < sizeof(XMLJOBSUFFIX))
+                return  0;
+        return  ncstrcmp(fname + flng - sizeof(XMLJOBSUFFIX) + 1, XMLJOBSUFFIX) == 0;
+}
 
 #define INIT_NAMES      20
 #define INC_NAMES       10
 
-void  isit_cmdfile(Widget w, XtPointer searchdata)
+static  void  isit_file(Widget w, XtPointer searchdata, int (*checkfn)(char *, char *))
 {
         XmFileSelectionBoxCallbackStruct *cbs = (XmFileSelectionBoxCallbackStruct *) searchdata;
         char    *dirname;
@@ -182,7 +193,7 @@ void  isit_cmdfile(Widget w, XtPointer searchdata)
                 if  (dp->d_name[0] == '.') /* Skip over .files (including .xibatch!) */
                         continue;
 
-                if  (!checkit(dirname, dp->d_name))
+                if  (!(*checkfn)(dirname, dp->d_name))
                         continue;
 
                 if  (namecount >= namemax)  {
@@ -226,9 +237,43 @@ void  isit_cmdfile(Widget w, XtPointer searchdata)
                               NULL);
 }
 
+/* Have a look at files in the given directory to see if they are
+   tolerable as command files.  */
+
+void  isit_cmdfile(Widget w, XtPointer searchdata)
+{
+        isit_file(w, searchdata, checkit);
+}
+
+/* Have a look at files in the given directory to see if they are XML saved job files.  */
+
+void  isit_xmlfile(Widget w, XtPointer searchdata)
+{
+        isit_file(w, searchdata, xml_checkit);
+}
+
 int  f_exists(const char *path)
 {
         struct  stat    sbuf;
 
         return  stat(path, &sbuf) >= 0;
+}
+
+void    jobfile_delete(struct pend_job *pj, char *fname, const int errnum)
+{
+        int     ret, err;
+        char    Pbuf[PATH_MAX];
+
+        if  (!fname)
+                return;
+
+        sprintf(Pbuf, "%s/%s", pj->directory, fname);
+        SWAP_TO(Realuid);
+        ret = unlink(Pbuf);
+        err = errno;
+        SWAP_TO(Daemuid);
+        if  (ret < 0)  {
+                errno = err;
+                doerror(jwid, errnum);
+        }
 }

@@ -59,64 +59,18 @@
 #include "errnums.h"
 #include "xm_commlib.h"
 #include "xmbr_ext.h"
+#include "remsubops.h"
 #include "files.h"
-#include "services.h"
 
 static  char    Filename[] = __FILE__;
 
-#define CLOSESOCKET(X)  close(X)
-static  SHORT   tcpportnum = -1;
-
-/* We currently use the same names for the TCP and UDP versions */
-const   char    TSname[] = GBNETSERV_PORT;
-#define Sname   TSname
+static  int   tcpportnum = -1;
 
 /***********************************************************************
         UDP Access routines
  ***********************************************************************/
 
 #define RTIMEOUT        5
-
-static int  initsock(int *rsock, const netid_t hostid, struct sockaddr_in *saddr)
-{
-        int     sockfd;
-        SHORT   portnum;
-        struct  sockaddr_in     cli_addr;
-        struct  servent *sp;
-
-        /* Get port number for this caper */
-
-        if  (!(sp = env_getserv(Sname, IPPROTO_UDP)))  {
-                endservent();
-                return  $EH{No xbnetserv UDP service};
-        }
-        portnum = sp->s_port;
-        endservent();
-
-        BLOCK_ZERO(saddr, sizeof(struct sockaddr_in));
-        saddr->sin_family = AF_INET;
-        saddr->sin_addr.s_addr = hostid;
-        saddr->sin_port = portnum;
-        BLOCK_ZERO(&cli_addr, sizeof(cli_addr));
-        cli_addr.sin_family = AF_INET;
-        cli_addr.sin_addr.s_addr = htonl(INADDR_ANY);
-        cli_addr.sin_port = 0;
-
-        /* Save now in case of error.  */
-
-        disp_arg[0] = ntohs(portnum);
-        disp_arg[1] = hostid;
-
-        if  ((sockfd = socket(AF_INET, SOCK_DGRAM, IPPROTO_UDP)) < 0)
-                return  $EH{Cannot create UDP access socket};
-
-        if  (bind(sockfd, (struct sockaddr *) &cli_addr, sizeof(cli_addr)) < 0)  {
-                close(sockfd);
-                return  $EH{Cannot bind UDP access socket};
-        }
-        *rsock = sockfd;
-        return  0;
-}
 
 static  RETSIGTYPE  asig(int n)
 {
@@ -158,285 +112,28 @@ static int  udp_enquire(const int sockfd, struct sockaddr_in *saddr, char *outms
         return  0;
 }
 
-/* Unpack btuser from networked version.  */
-
-static void  unpack_btuser(Btuser *dest, const Btuser *src)
-{
-        dest->btu_isvalid = src->btu_isvalid;
-        dest->btu_minp = src->btu_minp;
-        dest->btu_maxp = src->btu_maxp;
-        dest->btu_defp = src->btu_defp;
-        dest->btu_user = ntohl(src->btu_user);
-        dest->btu_maxll = ntohs(src->btu_maxll);
-        dest->btu_totll = ntohs(src->btu_totll);
-        dest->btu_spec_ll = ntohs(src->btu_spec_ll);
-        dest->btu_priv = ntohl(src->btu_priv);
-        dest->btu_jflags[0] = ntohs(src->btu_jflags[0]);
-        dest->btu_jflags[1] = ntohs(src->btu_jflags[1]);
-        dest->btu_jflags[2] = ntohs(src->btu_jflags[2]);
-        dest->btu_vflags[0] = ntohs(src->btu_vflags[0]);
-        dest->btu_vflags[1] = ntohs(src->btu_vflags[1]);
-        dest->btu_vflags[2] = ntohs(src->btu_vflags[2]);
-}
-
-/***********************************************************************
-        TCP Routines
- ***********************************************************************
-
- Find the port number we want to use for TCP ops
- or return an error code */
-
-static int  inittcp()
-{
-        struct  servent *sp;
-        /* Get port number for this caper */
-        if  (!(sp = env_getserv(TSname, IPPROTO_TCP)))  {
-                endservent();
-                return  $EH{No xbnetserv TCP service};
-        }
-        tcpportnum = sp->s_port;
-        endservent();
-        return  0;
-}
-
-static int  sock_read(const int sock, char *buffer, int nbytes)
-{
-        while  (nbytes > 0)  {
-                int     rbytes = read(sock, buffer, nbytes);
-                if  (rbytes <= 0)
-                        return  0;
-                buffer += rbytes;
-                nbytes -= rbytes;
-        }
-        return  1;
-}
-
-static int  sock_write(const int sock, char *buffer, int nbytes)
-{
-        while  (nbytes > 0)  {
-                int     rbytes = write(sock, buffer, nbytes);
-                if  (rbytes < 0)
-                        return  0;
-                buffer += rbytes;
-                nbytes -= rbytes;
-        }
-        return  1;
-}
-
-static void  copyout(FILE *inf, const int sockfd)
-{
-        int     outbytes, ch;
-        struct  ni_jobhdr       hd;
-        char    buffer[CL_SV_BUFFSIZE];
-
-        BLOCK_ZERO((char *) &hd, sizeof(hd));
-        hd.code = CL_SV_JOBDATA;
-        outbytes = 0;
-
-        while  ((ch = getc(inf)) != EOF)  {
-                if  (outbytes >= CL_SV_BUFFSIZE)  {
-                        hd.joblength = htons(outbytes);
-                        sock_write(sockfd, (char *) &hd, sizeof(hd));
-                        sock_write(sockfd, buffer, outbytes);
-                        outbytes = 0;
-                }
-                buffer[outbytes++] = (char) ch;
-        }
-        if  (outbytes > 0)  {
-                hd.joblength = htons(outbytes);
-                sock_write(sockfd, (char *) &hd, sizeof(hd));
-                sock_write(sockfd, buffer, outbytes);
-        }
-        hd.code = CL_SV_ENDJOB;
-        hd.joblength = htons(sizeof(struct ni_jobhdr));
-        strncpy(hd.uname, prin_uname(Realuid), UIDSIZE);
-        strncpy(hd.gname, prin_gname(Realgid), UIDSIZE);
-        sock_write(sockfd, (char *) &hd, sizeof(hd));
-}
-
-static unsigned  packjob(struct nijobmsg *dest, CBtjobRef src, const netid_t nhostid)
-{
-        int             cnt;
-        unsigned        ucnt;
-        unsigned        hwm;
-        JargRef         darg;
-        EnvirRef        denv;
-        RedirRef        dred;
-        const   Jarg    *sarg;
-        const   Envir   *senv;
-        const   Redir   *sred;
-
-        BLOCK_ZERO((char *) dest, sizeof(struct nijobmsg));
-
-        dest->ni_hdr.ni_progress = src->h.bj_progress;
-        dest->ni_hdr.ni_pri = src->h.bj_pri;
-        dest->ni_hdr.ni_jflags = src->h.bj_jflags;
-        dest->ni_hdr.ni_istime = src->h.bj_times.tc_istime;
-        dest->ni_hdr.ni_mday = src->h.bj_times.tc_mday;
-        dest->ni_hdr.ni_repeat = src->h.bj_times.tc_repeat;
-        dest->ni_hdr.ni_nposs = src->h.bj_times.tc_nposs;
-
-        /* Do the "easy" bits */
-
-        dest->ni_hdr.ni_ll = htons(src->h.bj_ll);
-        dest->ni_hdr.ni_umask = htons(src->h.bj_umask);
-        dest->ni_hdr.ni_nvaldays = htons(src->h.bj_times.tc_nvaldays);
-        dest->ni_hdr.ni_ulimit = htonl(src->h.bj_ulimit);
-        dest->ni_hdr.ni_nexttime = htonl(src->h.bj_times.tc_nexttime);
-        dest->ni_hdr.ni_rate = htonl(src->h.bj_times.tc_rate);
-        dest->ni_hdr.ni_autoksig = htons(src->h.bj_autoksig);
-        dest->ni_hdr.ni_runon = htons(src->h.bj_runon);
-        dest->ni_hdr.ni_deltime = htons(src->h.bj_deltime);
-        dest->ni_hdr.ni_runtime = htonl(src->h.bj_runtime);
-
-        strncpy(dest->ni_hdr.ni_cmdinterp, src->h.bj_cmdinterp, CI_MAXNAME);
-
-        dest->ni_hdr.ni_exits = src->h.bj_exits;
-
-        dest->ni_hdr.ni_mode.u_flags = htons(src->h.bj_mode.u_flags);
-        dest->ni_hdr.ni_mode.g_flags = htons(src->h.bj_mode.g_flags);
-        dest->ni_hdr.ni_mode.o_flags = htons(src->h.bj_mode.o_flags);
-
-        for  (ucnt = 0, cnt = 0;  cnt < MAXCVARS;  cnt++)  {
-                Nicond          *nic;
-                BtvarRef        vp;
-                CJcondRef       sic = &src->h.bj_conds[cnt];
-                if  (sic->bjc_compar == C_UNUSED)
-                        continue;
-                vp = &Var_seg.vlist[sic->bjc_varind].Vent;
-                nic = &dest->ni_hdr.ni_conds[ucnt];
-                nic->nic_var.ni_varhost = int2ext_netid_t(vp->var_id.hostid);
-                if  (vp->var_id.hostid == 0  &&  vp->var_type == VT_MACHNAME)
-                        nic->nic_var.ni_varhost = nhostid;
-                strncpy(nic->nic_var.ni_varname, vp->var_name, BTV_NAME);
-                nic->nic_compar = sic->bjc_compar;
-                nic->nic_iscrit = sic->bjc_iscrit;
-                nic->nic_type = (unsigned char) sic->bjc_value.const_type;
-                if  (nic->nic_type == CON_STRING)
-                        strncpy(nic->nic_un.nic_string, sic->bjc_value.con_un.con_string, BTC_VALUE);
-                else
-                        nic->nic_un.nic_long = htonl(sic->bjc_value.con_un.con_long);
-                ucnt++;
-        }
-        for  (ucnt = 0, cnt = 0;  cnt < MAXSEVARS;  cnt++)  {
-                Niass           *nia;
-                BtvarRef        vp;
-                CJassRef        sia = &src->h.bj_asses[cnt];
-                if  (sia->bja_op == BJA_NONE)
-                        continue;
-                nia = &dest->ni_hdr.ni_asses[ucnt];
-                vp = &Var_seg.vlist[sia->bja_varind].Vent;
-                nia->nia_var.ni_varhost = int2ext_netid_t(vp->var_id.hostid);
-                strncpy(nia->nia_var.ni_varname, vp->var_name, BTV_NAME);
-                nia->nia_flags = htons(sia->bja_flags);
-                nia->nia_op = sia->bja_op;
-                nia->nia_iscrit = sia->bja_iscrit;
-                nia->nia_type = (unsigned char) sia->bja_con.const_type;
-                if  (nia->nia_type == CON_STRING)
-                        strncpy(nia->nia_un.nia_string, sia->bja_con.con_un.con_string, BTC_VALUE);
-                else
-                        nia->nia_un.nia_long = htonl(sia->bja_con.con_un.con_long);
-                ucnt++;
-        }
-
-        dest->ni_hdr.ni_nredirs = htons(src->h.bj_nredirs);
-        dest->ni_hdr.ni_nargs = htons(src->h.bj_nargs);
-        dest->ni_hdr.ni_nenv = htons(src->h.bj_nenv);
-        dest->ni_hdr.ni_title = htons(src->h.bj_title);
-        dest->ni_hdr.ni_direct = htons(src->h.bj_direct);
-        dest->ni_hdr.ni_arg = htons(src->h.bj_arg);
-        dest->ni_hdr.ni_redirs = htons(src->h.bj_redirs);
-        dest->ni_hdr.ni_env = htons(src->h.bj_env);
-        BLOCK_COPY(dest->ni_space, src->bj_space, JOBSPACE);
-
-        /* Cheat by assuming that packjstring put the directory and
-           title in last and we can use the offset of that as a
-           high water mark.  */
-
-        if  (src->h.bj_title >= 0)  {
-                hwm = src->h.bj_title;
-                hwm += strlen(&src->bj_space[hwm]) + 1;
-        }
-        else  if  (src->h.bj_direct >= 0)  {
-                hwm = src->h.bj_direct;
-                hwm += strlen(&src->bj_space[hwm]) + 1;
-        }
-        else
-                hwm = JOBSPACE;
-
-        hwm += sizeof(struct nijobmsg) - JOBSPACE;
-
-        /* We must swap the argument, environment and redirection
-           variable pointers and the arg field in each redirection.  */
-
-        darg = (JargRef) &dest->ni_space[src->h.bj_arg];        /* I did mean src there */
-        denv = (EnvirRef) &dest->ni_space[src->h.bj_env];       /* and there */
-        dred = (RedirRef) &dest->ni_space[src->h.bj_redirs];    /* and there */
-        sarg = (const Jarg *) &src->bj_space[src->h.bj_arg];
-        senv = (const Envir *) &src->bj_space[src->h.bj_env];
-        sred = (const Redir *) &src->bj_space[src->h.bj_redirs];
-
-        for  (ucnt = 0;  ucnt < src->h.bj_nargs;  ucnt++)  {
-                *darg++ = htons(*sarg);
-                sarg++;         /* Not falling for htons being a macro!!! */
-        }
-        for  (ucnt = 0;  ucnt < src->h.bj_nenv;  ucnt++)  {
-                denv->e_name = htons(senv->e_name);
-                denv->e_value = htons(senv->e_value);
-                denv++;
-                senv++;
-        }
-        for  (ucnt = 0;  ucnt < src->h.bj_nredirs; ucnt++)  {
-                dred->arg = htons(sred->arg);
-                dred++;
-                sred++;
-        }
-        return  hwm;
-}
-
 /* Get ourselves an out socket to the server on the remote machine or
    return a suitable error code */
 
 static int  remgoutfile(const netid_t hostid, CBtjobRef jb, int *rsock)
 {
-        int                     sock;
-        int                     msgsize;
-        struct  sockaddr_in     sin;
-        struct  ni_jobhdr       nih;
+        int     sock, ret, msgsize;
         struct  nijobmsg        outmsg;
 
-        if  (tcpportnum < 0  &&  (sock = inittcp()) != 0)
-                return  sock;
+        if  (tcpportnum < 0  &&  (ret = remsub_inittcp(&tcpportnum)) != 0)
+                return  ret;
 
-        if  ((sock = socket(PF_INET, SOCK_STREAM, 0)) < 0)
-                return  $EH{Cannot open socket for remote job send};
+        if  ((ret = remsub_opentcp(hostid, tcpportnum, &sock)) != 0)
+                return  ret;
 
-        /* Set up bits and pieces The port number is set up in the job
-           shared memory segment.  */
+        msgsize = remsub_packjob(&outmsg, jb);
+        remsub_condasses(&outmsg, jb, hostid);
 
-        sin.sin_family = AF_INET;
-        sin.sin_port = tcpportnum;
-        BLOCK_ZERO(sin.sin_zero, sizeof(sin.sin_zero));
-        sin.sin_addr.s_addr = hostid;
-
-        if  (connect(sock, (struct sockaddr *) &sin, sizeof(sin)) < 0)  {
+        if  ((ret = remsub_startjob(sock, msgsize, prin_uname(Realuid), prin_gname(Realgid))) != 0)  {
                 close(sock);
-                return  $EH{Cannot connect to remote};
+                return  ret;
         }
-
-        msgsize = packjob(&outmsg, jb, hostid);
-        nih.code = CL_SV_STARTJOB;
-        nih.padding = 0;
-        nih.joblength = htons(msgsize);
-        strcpy(nih.uname, prin_uname(Realuid));
-        strcpy(nih.gname, prin_gname(Realgid));
-
-        if  (!sock_write(sock, (char *) &nih, sizeof(nih)))  {
-                close(sock);
-                return  $EH{Trouble with job header};
-        }
-
-        if  (!sock_write(sock, (char *) &outmsg, (int) msgsize))  {
+        if  (!remsub_sock_write(sock, (char *) &outmsg, (int) msgsize))  {
                 close(sock);
                 return  $EH{Trouble with job};
         }
@@ -449,7 +146,7 @@ static int  remprocreply(const int sock, BtjobRef jb)
         int     errcode, which;
         struct  client_if       result;
 
-        if  (!sock_read(sock, (char *) &result, sizeof(result)))
+        if  (!remsub_sock_read(sock, (char *) &result, sizeof(result)))
                 return  $EH{Cant read status result};
 
         errcode = result.code;
@@ -586,7 +283,6 @@ static void  ghostlist()
         if  (nhosts > 1)
                 qsort(QSORTP1 hlist, nhosts, sizeof(struct hmem), QSORTP4 s_nh);
 }
-
 
 static  char            *nohmsg;
 
@@ -728,7 +424,7 @@ static int  choosehost(char *dlgtitle, struct remparams *rp, const int nullok, c
 
  gotit:
 
-        if  ((ec = initsock(&udpsock, hlist[new_host].hid, &serv_addr)) != 0)  {
+        if  ((ec = remsub_initsock(&udpsock, hlist[new_host].hid, &serv_addr)) != 0)  {
                 doerror(jwid, ec);
                 return  CANCELLED;
         }
@@ -738,27 +434,27 @@ static int  choosehost(char *dlgtitle, struct remparams *rp, const int nullok, c
         enq.joblength = htons(sizeof(enq));
         strncpy(enq.uname, prin_uname(Realuid), UIDSIZE);
         if  ((ec = udp_enquire(udpsock, &serv_addr, (char *) &enq, sizeof(enq), (char *) &resp1, sizeof(resp1))) != 0)  {
-                CLOSESOCKET(udpsock);
+                close(udpsock);
                 doerror(jwid, ec);
                 return  CANCELLED;
         }
         strcpy(possn.realgname, resp1.ua_gname);
-        unpack_btuser(&possn.uperms, &resp1.ua_perm);
+        remsub_unpack_btuser(&possn.uperms, &resp1.ua_perm);
         if  (!possn.uperms.btu_isvalid)  {
-                CLOSESOCKET(udpsock);
+                close(udpsock);
                 doerror(jwid, $EH{No such user on remote});
                 return  CANCELLED;
         }
         enq.code = CL_SV_UMLPARS;
         enq.joblength = htons(sizeof(enq));
         if  ((ec = udp_enquire(udpsock, &serv_addr, (char *) &enq, sizeof(enq), (char *) &resp2, sizeof(resp2))) != 0)  {
-                CLOSESOCKET(udpsock);
+                close(udpsock);
                 doerror(jwid, ec);
                 return  CANCELLED;
         }
         possn.umsk = ntohs(resp2.ua_umask);
         possn.ulmt = ntohl(resp2.ua_ulimit);
-        CLOSESOCKET(udpsock);
+        close(udpsock);
         *rp = possn;
         return  new_host;
 }
@@ -776,50 +472,36 @@ void  cb_defhost(Widget w, int notused)
 
 void  cb_remsubmit(Widget w, int notused)
 {
-        int                     indx, ec;
         struct  pend_job        *pj;
         BtjobRef                jreq;
-        char                    *path;
-        FILE                    *inf;
-        int                     outsock = 0;
+        FILE                    *inf = (FILE *) 0;
+        int                     ec, indx, outsock = 0;
         struct  remparams       *hp;
         struct  remparams       h_parms;
         extern  char *gen_path(char *, char *);
 
-        if  ((indx = getselectedjob(1)) < 0)
-                return;
-        pj = &pend_list[indx];
-        if  (pj->nosubmit == 0  &&  !Confirm(w, $PH{xmbtr job unchanged confirm}))
+        if  (!(pj = sub_check(w)))
                 return;
 
         jreq = pj->job;
-        if  (jreq->h.bj_times.tc_istime  &&  jreq->h.bj_times.tc_nexttime < time((time_t *) 0))  {
-                doerror(jwid, $EH{xmbtr cannot submit not future});
-                return;
-        }
 
-        if  (!pj->jobfile_name)  {
-                doerror(w, $EH{xmbtr no job file name});
-                return;
-        }
-
-        path = gen_path(pj->directory, pj->jobfile_name);
-        if  (!f_exists(path))  {
+        if  (!pj->jobscript)  {
+                char  *path = gen_path(pj->directory, pj->jobfile_name);
+                SWAP_TO(Realuid);
+                inf = fopen(path, "r");
+                SWAP_TO(Daemuid);
                 free(path);
-                doerror(w, $EH{xmbtr no such file});
-                return;
+                if  (!inf)  {
+                        doerror(w, $EH{xmbtr cannot open job file});
+                        return;
+                }
         }
-        if  (!(inf = fopen(path, "r")))  {
-                free(path);
-                doerror(w, $EH{xmbtr cannot open job file});
-                return;
-        }
-        free(path);
 
         if  (curr_host < 0)  {
                 hp = &h_parms;
                 if  ((indx = choosehost("whichhost", hp, 0, -1)) < 0)  {
-                        fclose(inf);
+                        if  (inf)
+                                fclose(inf);
                         return;
                 }
         }
@@ -831,11 +513,17 @@ void  cb_remsubmit(Widget w, int notused)
         if  ((ec = remgoutfile(hlist[indx].hid, jreq, &outsock)) != 0)  {
                 doerror(w, ec);
                 close(outsock);
-                fclose(inf);
+                if  (inf)
+                        fclose(inf);
                 return;
         }
-        copyout(inf, outsock);
-        fclose(inf);
+        if  (inf)  {
+                remsub_copyout(inf, outsock, prin_uname(Realuid), hp->realgname);
+                fclose(inf);
+        }
+        else
+                remsub_copyout_str(pj->jobscript, outsock, realuname, hp->realgname);
+
         if  ((ec = remprocreply(outsock, jreq)) != 0)  {
                 disp_arg[1] = hlist[indx].hid;
                 doerror(w, ec);
@@ -847,7 +535,7 @@ void  cb_remsubmit(Widget w, int notused)
                 disp_arg[0] = jreq->h.bj_job;
                 disp_arg[1] = hlist[indx].hid;
                 disp_str = title_of(jreq);
-                doinfo(jwid, disp_str[0]? $E{xmbtr remote job created ok title}: $E{xmbtr remote job created ok no title});
+                doinfo(w, disp_str[0]? $E{xmbtr remote job created ok title}: $E{xmbtr remote job created ok no title});
         }
         pj->nosubmit = 0;
 }
