@@ -81,7 +81,7 @@ MAINFN_TYPE  main(int argc, char **argv)
         struct  passwd  *pwe;
 #endif
 
-        versionprint(argv, "$Revision: 1.10 $", 1);
+        versionprint(argv, "$Revision: 1.11 $", 1);
 
         init_mcfile();
 

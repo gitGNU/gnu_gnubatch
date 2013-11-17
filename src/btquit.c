@@ -61,7 +61,7 @@ MAINFN_TYPE  main(int argc, char **argv)
         Shipc   oreq;
         Repmess rep;
 
-        versionprint(argv, "$Revision: 1.10 $", 0);
+        versionprint(argv, "$Revision: 1.11 $", 0);
 
         if  ((progname = strrchr(argv[0], '/')))
                 progname++;

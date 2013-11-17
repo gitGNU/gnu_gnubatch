@@ -658,7 +658,7 @@ MAINFN_TYPE main(int argc, char **argv)
         extern  int     optind;
         extern  char    *optarg;
 
-        versionprint(argv, "$Revision: 1.10 $", 0);
+        versionprint(argv, "$Revision: 1.11 $", 0);
         progname = argv[0];
 
         while  ((ch = getopt(argc, argv, "vut:D:o:O:f:j:")) != EOF)
@@ -773,7 +773,7 @@ MAINFN_TYPE main(int argc, char **argv)
 #else
 MAINFN_TYPE main(int argc, char **argv)
 {
-	versionprint(argv, "$Revision: 1.10 $", 0);
+	versionprint(argv, "$Revision: 1.11 $", 0);
         fprintf(stderr, "This is not implemented as no XML library was available on build\n");
         return  E_NOTIMPL;
 }

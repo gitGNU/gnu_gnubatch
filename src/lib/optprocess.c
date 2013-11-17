@@ -59,7 +59,7 @@ char    *make_varname()
         return  varname;
 }
 
-char   **optprocess(char **argv, const Argdefault *defaultopts, optparam * const optlist, const int minstate, const int maxstate, const int keepargs)
+char   **optprocess(char **argv, const Argdefault *defaultopts, optparam *const optlist, const int minstate, const int maxstate, const int keepargs)
 {
 	char    *Varname = make_varname();
         HelpargRef      avec = helpargs(defaultopts, minstate, maxstate);
@@ -143,5 +143,6 @@ char   **optprocess(char **argv, const Argdefault *defaultopts, optparam * const
         freehelpargs(avec);
         if  (!hadargv)
                 argv++;
+        free(Varname);
         return  argv;
 }

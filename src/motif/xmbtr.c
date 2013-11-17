@@ -16,8 +16,8 @@
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
 #include "config.h"
-static  char    rcsid1[] = "@(#) $Id: xmbtr.c,v 1.10 2009/02/18 06:51:32 toadwarble Exp $";              /* We use these in the about message */
-static  char    rcsid2[] = "@(#) $Revision: 1.10 $";
+static  char    rcsid1[] = "@(#) $Id: xmbtr.c,v 1.11 2009/02/18 06:51:32 toadwarble Exp $";              /* We use these in the about message */
+static  char    rcsid2[] = "@(#) $Revision: 1.11 $";
 #include <stdio.h>
 #include <sys/types.h>
 #include <sys/stat.h>
@@ -532,7 +532,7 @@ MAINFN_TYPE  main(int argc, char **argv)
         struct  sigstruct_name  z;
 #endif
 
-        versionprint(argv, "$Revision: 1.10 $", 0);
+        versionprint(argv, "$Revision: 1.11 $", 0);
 
         if  ((progname = strrchr(argv[0], '/')))
                 progname++;

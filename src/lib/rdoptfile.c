@@ -16,12 +16,12 @@
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
 #include "config.h"
+#include <sys/types.h>
 #ifdef  HAVE_FCNTL_H
 #include <fcntl.h>
 #endif
 #include <stdio.h>
 #include <errno.h>
-#include <sys/types.h>
 #include "incl_unix.h"
 #include "defaults.h"
 #include "errnums.h"

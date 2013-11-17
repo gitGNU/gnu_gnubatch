@@ -143,7 +143,7 @@ MAINFN_TYPE  main(int argc, char **argv)
         char    *filename;
         extern  int     optind;
 
-        versionprint(argv, "$Revision: 1.10 $", 1);
+        versionprint(argv, "$Revision: 1.11 $", 1);
 
         /* Get batch uid */
 

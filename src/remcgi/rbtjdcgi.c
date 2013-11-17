@@ -184,7 +184,7 @@ MAINFN_TYPE  main(int argc, char **argv)
         char    **newargs;
         int_ugid_t      chku;
 
-        versionprint(argv, "$Revision: 1.10 $", 0);
+        versionprint(argv, "$Revision: 1.11 $", 0);
 
         if  ((progname = strrchr(argv[0], '/')))
                 progname++;

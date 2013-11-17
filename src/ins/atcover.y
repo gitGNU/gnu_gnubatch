@@ -770,7 +770,7 @@ MAINFN_TYPE  main(int argc, char **argv)
         int     ch;
         int     catjobs = 0, isdel = 0, islist = 0, isbatch = 0, listq = 0;
 
-        versionprint(argv, "$Revision: 1.10 $", 0);
+        versionprint(argv, "$Revision: 1.11 $", 0);
 
         if  ((progname = strrchr(argv[0], '/')))
                 progname++;

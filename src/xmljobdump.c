@@ -196,7 +196,7 @@ MAINFN_TYPE  main(int argc, char **argv)
 #endif
         extern  int     optind;
 
-        versionprint(argv, "$Revision: 1.10 $", 1);
+        versionprint(argv, "$Revision: 1.11 $", 1);
 
         if  ((progname = strrchr(argv[0], '/')))
                 progname++;
@@ -287,7 +287,7 @@ MAINFN_TYPE  main(int argc, char **argv)
 #else
 MAINFN_TYPE  main(int argc, char **argv)
 {
-        versionprint(argv, "$Revision: 1.10 $", 1);
+        versionprint(argv, "$Revision: 1.11 $", 1);
         return  E_NOTIMPL;
 }
 #endif

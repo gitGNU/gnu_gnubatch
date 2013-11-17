@@ -214,7 +214,7 @@ MAINFN_TYPE  main(int argc, char **argv)
         int     roamuser = 0, obp = 0, ch;
         char    obuf[512];      /* Make me CL_SV_BUFFSIZE sometime */
 
-        versionprint(argv, "$Revision: 1.10 $", 1);
+        versionprint(argv, "$Revision: 1.11 $", 1);
 
         if  ((progname = strrchr(argv[0], '/')))
                 progname++;

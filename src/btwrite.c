@@ -179,7 +179,7 @@ MAINFN_TYPE  main(int argc, char **argv)
         int     i;
         char    **hv, *inb;
 
-        versionprint(argv, "$Revision: 1.10 $", 1);
+        versionprint(argv, "$Revision: 1.11 $", 1);
 
         if  ((progname = strrchr(argv[0], '/')))
                 progname++;

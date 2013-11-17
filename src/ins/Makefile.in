@@ -41,7 +41,7 @@ BINDIR		=	$(DESTDIR)@bindir@
 SBINDIR		=	$(DESTDIR)@sbindir@
 INTBINDIR	=	$(DESTDIR)@pkgexecdir@
 USERPROGS	=	gbch-atcover
-PROGS		=	gbch-btuconv gbch-ciconv gbch-cjlist gbch-cvlist gbch-ripc
+PROGS		=	gbch-btuconv gbch-ciconv gbch-cjlist gbch-cjlistx gbch-cvlist gbch-ripc
 STAGED_INSTALL	=	false
 
 all:	gbch-atcover gbch-btuconv gbch-ciconv gbch-cjlist gbch-cjlistx gbch-cvlist gbch-ripc
