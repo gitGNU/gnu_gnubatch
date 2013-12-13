@@ -116,6 +116,8 @@ static int  doconnop(const unsigned cmd, const char *hostn)
         Repmess         rr;
         int     blkcount = MSGQ_BLOCKS, ret;
 
+        BLOCK_ZERO(&oreq, sizeof(oreq));
+
         if  ((ret = get_conn_host(hostn, &oreq.sh_un.sh_n)) != 0)
                 return  ret;
 
@@ -129,7 +131,6 @@ static int  doconnop(const unsigned cmd, const char *hostn)
                 return  E_NOPRIV;
         }
 
-        BLOCK_ZERO(&oreq, sizeof(oreq));
         oreq.sh_mtype = TO_SCHED;
         oreq.sh_params.mcode = cmd;
         oreq.sh_params.uuid = Realuid;
@@ -278,7 +279,7 @@ static time_t  g_time(const char *arg)
 
 static LONG  g_adj(const char *arg)
 {
-        while  (isspace(*arg))
+        while  (isspace(*arg)  ||  *arg == '+')
                 arg++;
         if  (!isdigit(*arg)  &&  *arg != '-')  {
                 print_error($E{Bad dst adjustment});

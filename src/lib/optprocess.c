@@ -61,7 +61,7 @@ char    *make_varname()
 
 char   **optprocess(char **argv, const Argdefault *defaultopts, optparam *const optlist, const int minstate, const int maxstate, const int keepargs)
 {
-	char    *Varname = make_varname();
+        char    *Varname = make_varname();
         HelpargRef      avec = helpargs(defaultopts, minstate, maxstate);
         char    *loclist, *cfilename, *dirname, *name;
         int     hadargv = 0, part;

@@ -270,10 +270,30 @@ char **squash_envir(char **senv, char **denv)
 
         rp = result;
 
+        /* New feature Dec 2013, delete variables from environment if they're empty
+           in replacement environment, e.g. TERMCAP= */
+
         for  (ep = denv;  *ep;  ep++)  {
-                for  (xp = senv;  *xp;  xp++)
-                        if  (strcmp(*ep, *xp) == 0)
-                                goto  gotit;
+                char  *ditem = *ep;
+                const  char  *deq = strchr(ditem, '=');
+                unsigned  dl = deq - ditem;
+                if  (deq)  {    /* Don't understand no = just copy it */
+                        for  (xp = senv;  *xp;  xp++)  {
+                                char    *sitem = *xp;
+                                const char  *sp;
+                                /* Just compare and delete if exactly the same */
+                                if  (strcmp(ditem, sitem) == 0)
+                                        goto  gotit;
+                                if  (!(sp = strchr(sitem, '=')))        /* Forget this one if no = */
+                                        continue;
+                                if  (sp[1])                             /* Has stuff in so don't consider as delete */
+                                        continue;
+                                if  (sp - sitem  !=  dl)                /* Skip if not exactly same name */
+                                        continue;
+                                if  (strncmp(ditem, sitem, dl) == 0)
+                                        goto  gotit;
+                        }
+                }
                 *rp++ = *ep;
         gotit:
                 ;

@@ -862,6 +862,7 @@ static void  n_reqs(ShipcRef rq, int bytes)
 {
         unsigned  ret = 0;
         struct  remote  *rp;
+        netid_t nid;
 
         switch  (rq->sh_params.mcode)  {
         default:
@@ -888,7 +889,8 @@ static void  n_reqs(ShipcRef rq, int bytes)
         case  N_CONNECT:
                 if  (bytes != sizeof(Shreq) + sizeof(struct remote))
                         goto  badlen;
-                if  (find_connected(rq->sh_un.sh_n.hostid))  {
+                nid = rq->sh_un.sh_n.hostid;
+                if  (nid == 0  ||  find_connected(nid))  {
                         ret = N_CONNOK;
                         break;
                 }
@@ -904,10 +906,13 @@ static void  n_reqs(ShipcRef rq, int bytes)
         case  N_DISCONNECT:
                 if  (bytes != sizeof(Shreq) + sizeof(struct remote))
                         goto  badlen;
-                shut_host(rq->sh_un.sh_n.hostid);
-                clearhost(rq->sh_un.sh_n.hostid, -1);
-                if  (Netm_pid)
-                        kill(Netm_pid, NETSHUTSIG);
+                nid = rq->sh_un.sh_n.hostid;
+                if  (nid)  {
+                        shut_host(nid);
+                        clearhost(nid, -1);
+                        if  (Netm_pid)
+                                kill(Netm_pid, NETSHUTSIG);
+                }
                 ret = N_CONNOK;
                 break;
 

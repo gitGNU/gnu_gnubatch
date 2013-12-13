@@ -73,7 +73,7 @@ static  struct  uhash   *unhash[UG_HASHMOD];
 
 unsigned  Npwusers;
 
-extern struct group *my_getpwent();
+extern struct passwd *my_getpwent();
 extern void  my_endpwent();
 
 /* "unread" password file to order */
