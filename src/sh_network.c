@@ -338,10 +338,19 @@ static void  clientonly(const struct remote *crp)
         rp->stat_flags = SF_NOTSERVER;
 }
 
-/*  Called from outside, find a connection (for manual connect).
-    If we have been told it is a client, skip it and find another */
+/* Find connection from a server */
 
-struct  remote *find_connected(const netid_t netid)
+struct  remote *find_srv_connected(const netid_t netid)
+{
+        struct  remote  *rp = inl_find_connected(netid);
+        while  (rp  &&  rp->stat_flags & SF_NOTSERVER)
+                rp = next_connected(rp);
+        return  rp;
+}
+
+/* Find connection from a client */
+
+struct  remote *find_cli_connected(const netid_t netid)
 {
         struct  remote  *rp = inl_find_connected(netid);
         while  (rp  &&  !(rp->stat_flags & SF_NOTSERVER))
@@ -1009,7 +1018,7 @@ void  net_recvlockreq(struct remote *rp, msghdr *hdr)
                         onm.hdr.code = htons((USHORT) ret);
                         chk_write(rp, (char *) &onm, sizeof(onm));
                 }
-                exit(0);
+                _exit(0);
         }
         else
                 net_unlockreq(rp);
@@ -1175,8 +1184,7 @@ void  job_rrchstat(BtjobhRef jp)
         struct  remote  *rp;
         struct  jobstatmsg  jsm;
 
-        /* Use the external version we only want servers */
-        if  (!(rp = find_connected(jp->bj_hostid)))
+        if  (!(rp = find_srv_connected(jp->bj_hostid)))
                 return;
 
         BLOCK_ZERO(&jsm, sizeof(jsm));
@@ -1309,7 +1317,7 @@ void  job_hrecvbcast(struct remote *rp, msghdr *hdr)
         msgsnd(Ctrl_chan, (struct msgbuf *) &omsg, sizeof(Shreq) + sizeof(ULONG), 0);
         msgrcv(Ctrl_chan, (struct msgbuf *) &rep, sizeof(Shreq), mymtype + MTOFFSET, 0);
         freexbuf(indx);
-        exit(0);
+        _exit(0);
 }
 
 /* Broadcast information about changes to jobs including strings */
@@ -1366,7 +1374,7 @@ void  job_recvbcast(struct remote *rp, msghdr *hdr)
         msgsnd(Ctrl_chan, (struct msgbuf *) &omsg, sizeof(Shreq) + sizeof(ULONG), 0);
         msgrcv(Ctrl_chan, (struct msgbuf *) &rr, sizeof(Shreq), mymtype + MTOFFSET, 0);
         freexbuf(indx);
-        exit(0);
+        _exit(0);
 }
 
 /* Send out messages to perform the assignments on the list of jobs */
@@ -1453,8 +1461,8 @@ static unsigned  ureply(struct remote *rp, CShreqRef sr)
         alarm(rp->ht_timeout);
         if  (msgrcv(Ctrl_chan, (struct msgbuf *) &rep, sizeof(rep) - sizeof(long), sr->upid + NTOFFSET, 0) < 0)  {
                 if  (errno != EINTR)
-                        return  N_NBADMSGQ;
-                return  N_NTIMEOUT;
+                        return  N_NBADMSGQ | SHREQ_CHILD;
+                return  N_NTIMEOUT | SHREQ_CHILD;
         }
         alarm(0);       /* Doesn't really matter */
         return  (unsigned) rep.outmsg.param | SHREQ_CHILD;
@@ -1489,7 +1497,7 @@ unsigned  job_sendupdate(BtjobRef oldjob, BtjobRef newjob, ShreqRef sr, const un
         newjob->h.bj_hostid = oldjob->h.bj_hostid;
         newjob->h.bj_slotno = oldjob->h.bj_slotno;
 
-        if  (!(rp = inl_find_connected(newjob->h.bj_hostid)))
+        if  (!(rp = find_srv_connected(newjob->h.bj_hostid)))
                 return  N_HOSTOFFLINE;
 
         if  (code == J_HCHANGED)  {
@@ -1571,7 +1579,7 @@ void  job_recvhupdate(struct remote *rp, msghdr *hdr)
         msgrcv(Ctrl_chan, (struct msgbuf *) &rr, sizeof(Shreq), mymtype + MTOFFSET, 0);
         freexbuf(indx);
         mreply(rp, jhnm.hdr.pid, rr.outmsg.mcode);
-        exit(0);
+        _exit(0);
 }
 
 /* Other end of send update routine w.s.m. version */
@@ -1621,7 +1629,7 @@ void  job_recvupdate(struct remote *rp, msghdr *hdr)
         msgrcv(Ctrl_chan, (struct msgbuf *) &rep, sizeof(Shreq), mymtype + MTOFFSET, 0);
         freexbuf(indx);
         mreply(rp, jnm.hdr.hdr.pid, rep.outmsg.mcode);
-        exit(0);
+        _exit(0);
 }
 
 /* Send update of modes only.
@@ -1632,7 +1640,7 @@ unsigned  job_sendmdupdate(BtjobRef oldjob, BtjobRef newjob, ShreqRef sr)
         struct  remote  *rp;
         struct  jobhnetmsg      jhm;
 
-        if  (!(rp = inl_find_connected(oldjob->h.bj_hostid)))
+        if  (!(rp = find_srv_connected(oldjob->h.bj_hostid)))
                 return  N_HOSTOFFLINE;
 
         /* There's a certain amount of duplication, especially of
@@ -1658,7 +1666,7 @@ unsigned  job_sendugupdate(BtjobRef oldjob, ShreqRef sr)
         struct  remote  *rp;
         struct  jugmsg  jm;
 
-        if  (!(rp = inl_find_connected(oldjob->h.bj_hostid)))
+        if  (!(rp = find_srv_connected(oldjob->h.bj_hostid)))
                 return  N_HOSTOFFLINE;
 
         jm.hdr.code = htons((USHORT) sr->mcode);
@@ -1717,7 +1725,7 @@ void  job_recvugupdate(struct remote *rp, msghdr *hdr)
         msgsnd(Ctrl_chan, (struct msgbuf *) &omsg, sizeof(Shreq) + sizeof(jident), 0);
         msgrcv(Ctrl_chan, (struct msgbuf *) &rep, sizeof(Shreq), mymtype + MTOFFSET, 0);
         mreply(rp, jugm.hdr.pid, rep.outmsg.mcode);
-        exit(0);
+        _exit(0);
 }
 
 /* Transmit a message about a job to a specific machine.  This is
@@ -1729,7 +1737,7 @@ unsigned  job_message(const netid_t hostid, CBtjobhRef jp, CShreqRef sr)
         struct  remote          *rp;
         struct  jobcmsg         jcm;
 
-        if  (!(rp = find_connected(hostid)))
+        if  (!(rp = find_srv_connected(hostid)))
                 return  N_HOSTOFFLINE;
         jcm.hdr.code = htons((USHORT) sr->mcode);
         jcm.hdr.length = htons(sizeof(jcm));
@@ -1750,7 +1758,7 @@ void  job_imessage(const netid_t hostid, CBtjobhRef jp, const unsigned mcode, co
         struct  remote          *rp;
         struct  jobcmsg         jcm;
 
-        if  (!(rp = find_connected(hostid)))
+        if  (!(rp = find_srv_connected(hostid)))
                 return;
         BLOCK_ZERO(&jcm, sizeof(jcm));
         jcm.hdr.code = htons((USHORT) mcode);
@@ -1803,7 +1811,7 @@ void  job_recvmessage(struct remote *rp, msghdr *hdr)
                 Repmess rr;
                 msgrcv(Ctrl_chan, (struct msgbuf *) &rr, sizeof(Shreq), mymtype + MTOFFSET, 0);
                 mreply(rp, jcm.hdr.pid, rr.outmsg.mcode);
-                exit(0);
+                _exit(0);
         }
 }
 
@@ -1812,7 +1820,7 @@ void  job_sendnote(CBtjobRef jp, const int mcode, const jobno_t sout, const jobn
         struct  remote          *rp;
         struct  jobnotmsg       jnm;
 
-        if  (!(rp = find_connected(jp->h.bj_hostid)))
+        if  (!(rp =find_srv_connected(jp->h.bj_hostid)))
                 return;
         BLOCK_ZERO(&jnm, sizeof(jnm));
         jnm.hdr.code = htons((USHORT) J_RNOTIFY);
@@ -1855,7 +1863,7 @@ void  job_recvnote(struct remote *rp, msghdr *hdr)
 void  sync_single(const netid_t hostid, const slotno_t slot)
 {
         struct  remote  *rp;
-        if  ((rp = find_connected(hostid)))  {
+        if  ((rp = find_srv_connected(hostid)))  {
                 struct  netmsg  rq;
                 BLOCK_ZERO(&rq, sizeof(rq));
                 rq.hdr.code = htons(N_SYNCSINGLE);
@@ -1877,7 +1885,7 @@ void  send_single_jobhdr(const netid_t hostid, const slotno_t slot)
         jp = &Job_seg.jlist[slot].j.h;
         if  (jp->bj_job == 0)
                 return;
-        if  (!(rp = find_connected(hostid)))
+        if  (!(rp = find_srv_connected(hostid)))
                 return;
         jobh_pack(&jhm, jp);
         jhm.hdr.code = htons(J_HCHANGED);
@@ -1950,7 +1958,7 @@ unsigned  var_sendupdate(BtvarRef oldvar, BtvarRef newvar, ShreqRef sr)
                 break;
         }
 
-        if  (!(rp = find_connected(oldvar->var_id.hostid)))
+        if  (!(rp = find_srv_connected(oldvar->var_id.hostid)))
                 return  N_HOSTOFFLINE;
 
         vm.hdr.pid = htonl(sr->upid);
@@ -1997,7 +2005,7 @@ void  var_recvupdate(struct remote *rp, msghdr *hdr)
         msgsnd(Ctrl_chan, (struct msgbuf *) &omsg, sizeof(Shreq) + sizeof(Btvar), 0);
         msgrcv(Ctrl_chan, (struct msgbuf *) &rr, sizeof(Shreq), mymtype + MTOFFSET, 0);
         mreply(rp, vnm.hdr.pid, rr.outmsg.mcode);
-        exit(0);
+        _exit(0);
 }
 
 /* Send update of user or group only */
@@ -2007,7 +2015,7 @@ unsigned  var_sendugupdate(BtvarRef oldvar, ShreqRef sr)
         struct  remote  *rp;
         struct  vugmsg  vm;
 
-        if  (!(rp = find_connected(oldvar->var_id.hostid)))
+        if  (!(rp = find_srv_connected(oldvar->var_id.hostid)))
                 return  N_HOSTOFFLINE;
 
         vm.hdr.code = htons((USHORT) sr->mcode);
@@ -2065,7 +2073,7 @@ void  var_recvugupdate(struct remote *rp, msghdr *hdr)
                 msgrcv(Ctrl_chan, (struct msgbuf *) &rr, sizeof(Shreq), mymtype + MTOFFSET, 0);
                 mreply(rp, vnm.hdr.pid, rr.outmsg.mcode);
         }
-        exit(0);
+        _exit(0);
 }
 
 /* Look around for remote machines we haven't got details of jobs or variables of.  */
@@ -2172,7 +2180,7 @@ void  endsync(const netid_t netid)
 {
         struct  remote  *rp;
 
-        if  ((rp = find_connected(netid))  &&  rp->is_sync != NSYNC_OK)  {
+        if  ((rp = inl_find_connected(netid))  &&  rp->is_sync != NSYNC_OK)  {
                 rp->is_sync = NSYNC_OK;
                 Netsync_req--;
         }

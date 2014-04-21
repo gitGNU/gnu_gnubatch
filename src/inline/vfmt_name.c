@@ -19,4 +19,3 @@ VFORMAT(fmt_name)
 {
         return  (fmt_t) strlen(strcpy(bigbuff, VAR_NAME(vp)));
 }
-

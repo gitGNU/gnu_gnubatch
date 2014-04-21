@@ -557,6 +557,11 @@ void  hash_hostfile()
                         addtable(lhost->hostid, lhost->alias, 1);
         }
         end_hostfile();
+
+        /* Warn if we ended up with a 127.x.x.x address as my host id as things will get confused */
+
+        if  ((myhostid >> 24) == IN_LOOPBACKNET)
+        	hostf_errors = 1;
 }
 
 char *look_hostid(const netid_t netid)

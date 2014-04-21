@@ -890,7 +890,7 @@ static void  n_reqs(ShipcRef rq, int bytes)
                 if  (bytes != sizeof(Shreq) + sizeof(struct remote))
                         goto  badlen;
                 nid = rq->sh_un.sh_n.hostid;
-                if  (nid == 0  ||  find_connected(nid))  {
+                if  (nid == 0  ||  find_srv_connected(nid))  {
                         ret = N_CONNOK;
                         break;
                 }

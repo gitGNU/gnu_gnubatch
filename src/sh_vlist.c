@@ -895,7 +895,7 @@ vhash_t  lookvar(Vref *vrr)
                    want to be caught out if some turkey shuffles
                    round the /etc/hosts file.  */
 
-                if  (!find_connected(vrr->sv_hostid)  &&  !look_hostid(vrr->sv_hostid))
+                if  (!find_srv_connected(vrr->sv_hostid)  &&  !look_hostid(vrr->sv_hostid))
                         return  -1;
 
                 for  (hp = Var_seg.vhash[calchash(vrr->sv_name)];  hp >= 0;  hp = fp->Vnext)  {

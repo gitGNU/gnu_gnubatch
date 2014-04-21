@@ -1444,7 +1444,7 @@ int  chjob(ShreqRef sr, BtjobRef jb)
                 BLOCK_COPY(ojb->bj_space, jb->bj_space, JOBSPACE);
         }
 
-       /* Avoid sending the whole caboodle if we can.  */
+        /* Avoid sending the whole caboodle if we can.  */
 
         switch  (remreq)  {
         case  J_BCHANGED:
@@ -1920,6 +1920,7 @@ void  setasses(BtjobRef jp, unsigned flag, unsigned source, unsigned status, con
                                 goto  contupd;
                 }
                 vp = (BtvarRef) 0;      /* Don't need broadcast */
+
         contupd:
                 switch  (op)  {
                 case  BJA_SSIG:
@@ -2031,7 +2032,7 @@ int  doabort(ShreqRef sr, jident *jid)
         }
 
         if  (nrems > 0)
-                exit(0);
+                _exit(0);
         return  J_OK;
 }
 
@@ -2266,7 +2267,7 @@ void  startup_job(const unsigned jind)
                                 Job_seg.dptr->js_serial++;
                                 tellchild(J_START, jind);
                         }
-                        exit(0);
+                        _exit(0);
                 }
         }
 
@@ -2322,7 +2323,7 @@ void  startup_job(const unsigned jind)
                 tellchild(J_START, jind);
                 notify_stat_change(jh);
         }
-        exit(0);
+        _exit(0);
 }
 
 /* Propose to a remote machine that we'll run one of its jobs Thinks:
@@ -2486,7 +2487,6 @@ unsigned  resched()
                         if  (validate_ci(jp->bj_cmdinterp) < 0)
                                 continue;
                 }
-
                 if  (jp->bj_times.tc_istime  &&  !(jp->bj_jrunflags & BJ_FORCE))  {
                         if  (now > jp->bj_times.tc_nexttime)  {
                                 LONG    slack = jp->bj_times.tc_rate;
@@ -2707,7 +2707,7 @@ skipit:
                 dequeue(slotno);
                 if  (nrems > 0)  {
                         tellsched(J_RESCHED, 0L);
-                        exit(0);
+                        _exit(0);
                 }
                 return;
         }
@@ -2724,7 +2724,7 @@ skipit:
                         dequeue(slotno);
                 if  (nrems > 0)  {
                         tellsched(J_RESCHED, 0L);
-                        exit(0);
+                        _exit(0);
                 }
                 return;
         }
@@ -2736,7 +2736,7 @@ skipit:
                 notify_stat_change((BtjobhRef) jh);
                 if  (nrems > 0)  {
                         tellsched(J_RESCHED, 0L);
-                        exit(0);
+                        _exit(0);
                 }
                 return;
         }
@@ -2755,7 +2755,7 @@ skipit:
         notify_stat_change((BtjobhRef) jh);
         if  (nrems > 0)  {
                 tellsched(J_RESCHED, 0L);
-                exit(0);
+                _exit(0);
         }
 }
 
@@ -2787,7 +2787,7 @@ void  cannot_start(const unsigned slotno)
         jh->bj_runhostid = jh->bj_hostid;
         notify_stat_change(jh);
         if  (nrems > 0)
-                exit(0);
+                _exit(0);
 }
 
 void  haltall()

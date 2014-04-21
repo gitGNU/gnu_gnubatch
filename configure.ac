@@ -170,7 +170,7 @@ case "$target" in
 	AC_DEFINE(OS_DPX_2)
 	AC_DEFINE(BUGGY_DELCURTERM)
 	;;
-*aix5*)
+*aix5*|*aix6*|*aix7*)
 	AC_DEFINE(OS_AIX)
 	AC_DEFINE(OS_AIX_5_0)
 	AC_DEFINE(BROKEN_TERM_READ)

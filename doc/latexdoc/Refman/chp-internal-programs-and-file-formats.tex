@@ -336,6 +336,42 @@ localaddress GSN(www.google.com,80)
 In this example the local address is found by attempting to connect to \filename{www.google.com} on port 80 (the \filename{http} port) and
 applying \progname{getsockname} to the resulting connection.
 
+\subsection{Static environment file}
+\label{Staticenv}
+Carrying all the environment around in every job can consume a lot of shared memory space and fill up the available space, often with variables
+such as \filename{TERMCAP} etc which are irrelevant to batch jobs.
+
+Common environment variables can be saved in the file \batchenv. When jobs are submitted by \PrBtr{} and similar, environment variables in the job are
+compared with those specified in \batchenv{} and if they are the same, they are deleted from the environment.
+
+A further feature introduced from \ProductName{} version \IfXi{6.437} \IfGNU{1.11} is that an empty assignment will cause the variable to be deleted.
+
+For example \batchenv{} might contain the following:
+
+\begin{expara}
+
+\# Specify PATH
+
+PATH=/bin:/usr/bin:/usr/local/bin
+
+\# Remove irrelevant variables
+
+TERMCAP=
+
+LS\_COLORS=
+
+\end{expara}
+
+In this case \filename{PATH} would be deleted from the job environment if it contained exactly the value given and \filename{TERMCAP} and
+\filename{LS\_COLORS} would be deleted from the job environment in every case.
+
+Note that the deletions are from the environment of the job files actually created, the variables are still put into the environment of the jobs from
+\batchenv{} when the jobs are actually run (with empty values for the variables such as \filename{TERMCAP} above.
+
+The format of the file is of assignments with an \filename{=} sign, all other lines and lines starting with \filename{\#} are ignored.
+
+Note that alternative file names to \batchenv{} or several files may be specified to provide the environment, see page \pageref{SEfiles}.
+
 \subsection{User map file}
 The user map file provides a mapping between external names, usually Windows user names, and UNIX names.
 

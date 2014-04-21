@@ -39,7 +39,7 @@ struct  remote  {
 #define SF_ISCLIENT     (1 << 0)        /* Set to indicate "I" am client */
 #define SF_PROBED       (1 << 1)        /* Set to indicate probe sent */
 #define SF_CONNECTED    (1 << 2)        /* Connection complete */
-#define SF_NOTSERVER    (1 << 3)        /* Not a server so don't expect printers etc */
+#define SF_NOTSERVER    (1 << 3)        /* Not a server so don't expect jobs etc */
         enum  sync_state { NSYNC_NONE = 0, NSYNC_REQ = 1, NSYNC_OK = 2 } is_sync;
         USHORT          ht_timeout;     /* Timeout value (seconds) */
         time_t          lastwrite;      /* When last done */
