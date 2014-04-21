@@ -158,6 +158,7 @@ class gbclient(QObject):
         if self.state != gbclient.STATE_CONNRQ: return
         if self.socket.state() != QAbstractSocket.ConnectedState: return
         # Request sync with host
+        self.send_netmsg(reqmess.N_SETNOTSERVER)
         self.send_netmsg(reqmess.N_REQSYNC)
         self.state = gbclient.STATE_SYNCRQ
         self.host.connected = True

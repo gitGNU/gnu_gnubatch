@@ -158,6 +158,8 @@ N_SYNCSINGLE=   (NET_REQ|13)    # Sync a single job
 N_RJASSIGN  =   (NET_REQ|15)    # Network message - given job remote assigns
 N_XBNATT    =   (NET_REQ|17)    # Request to attach xbnetserv process
 N_ROAMUSER  =   (NET_REQ|18)    # Note user logged in to xbnetserv
+N_SETNOTSERVER= (NET_REQ|19)    # Network message - set not server
+N_SETISSERVER = (NET_REQ|20)    # Network message - unset not server
 
 N_CONNOK    =   (NET_REPLY|0)   # Connection ok
 N_REMLOCK_NONE= (NET_REPLY|1)   # Lock - no reply
